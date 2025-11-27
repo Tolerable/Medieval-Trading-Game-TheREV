@@ -659,7 +659,7 @@ const WeatherSystem = {
                 width: 100%;
                 height: 100%;
                 pointer-events: none;
-                z-index: 9000;
+                z-index: 50; /* Below panels (100+) so weather doesn't cover UI */
                 transition: background 2s ease, opacity 2s ease;
             }
             .weather-particles {
