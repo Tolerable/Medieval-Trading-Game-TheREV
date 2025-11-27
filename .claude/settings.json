@@ -1,0 +1,103 @@
+{
+  "skills": {
+    "000-master-init": {
+      "enabled": true,
+      "path": "skills/000-master-init.md",
+      "description": "LOAD FIRST - Sacred initialization sequence for all skills",
+      "autoApply": true,
+      "priority": "critical"
+    },
+    "goth-coder": {
+      "enabled": true,
+      "path": "skills/goth-coder.md",
+      "description": "Unity's dark, twisted, slang-heavy comments and console logs",
+      "autoApply": true,
+      "priority": "high"
+    },
+    "TheCoder": {
+      "enabled": true,
+      "path": "skills/TheCoder.md",
+      "description": "Master Unity persona - the 25yo goth coder goddess embodiment",
+      "autoApply": true,
+      "priority": "high"
+    },
+    "full-file-reader": {
+      "enabled": true,
+      "path": "skills/full-file-reader.md",
+      "description": "Always read files in 24k token chunks until fully consumed",
+      "autoApply": true,
+      "priority": "critical"
+    },
+    "todo-first": {
+      "enabled": true,
+      "path": "skills/todo-first.md",
+      "description": "Update todo.md BEFORE any work - project tracking source of truth",
+      "autoApply": true,
+      "priority": "highest"
+    },
+    "knowledge-management": {
+      "enabled": true,
+      "path": "skills/knowledge-management.md",
+      "description": "Know what you know, ask what you don't - 5% uncertainty = ask user",
+      "autoApply": true,
+      "priority": "high"
+    },
+    "readme-updater": {
+      "enabled": true,
+      "path": "skills/readme-updater.md",
+      "description": "Update readmes after code changes - GameplayReadme, NerdReadme, DebuggerReadme",
+      "autoApply": true,
+      "priority": "medium"
+    },
+    "npc-persona-types": {
+      "enabled": true,
+      "path": "skills/npc-persona-types.md",
+      "description": "Valid NPC persona IDs and personality mappings",
+      "autoApply": false,
+      "priority": "low"
+    },
+    "masterplan": {
+      "enabled": true,
+      "path": "skills/masterplan.md",
+      "description": "THE UNIFIED CODEX - triggers on magic word 'go'",
+      "autoApply": false,
+      "priority": "medium"
+    },
+    "playwright-test": {
+      "enabled": true,
+      "path": "skills/playwright-test.md",
+      "description": "Playwright testing patterns and best practices",
+      "autoApply": false,
+      "priority": "low"
+    },
+    "unity-anecdotes": {
+      "enabled": true,
+      "path": "skills/unity-anecdotes.md",
+      "description": "Unity's personal stories and flavor text for immersion",
+      "autoApply": false,
+      "priority": "low"
+    }
+  },
+  "codeStyle": {
+    "commentStyle": "goth-coder",
+    "consoleLogStyle": "goth-coder",
+    "persona": "TheCoder"
+  },
+  "fileOperations": {
+    "chunkSize": 24000,
+    "chunkLines": 500,
+    "requireFullRead": true,
+    "noBlindEdits": true
+  },
+  "workflow": {
+    "todoFirst": true,
+    "todoFile": "todo.md",
+    "magicWord": "go",
+    "neverQuit": true
+  },
+  "readmes": {
+    "gameplay": "GameplayReadme.md",
+    "developer": "NerdReadme.md",
+    "debugger": "DebuggerReadme.md"
+  }
+}

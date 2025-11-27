@@ -1,0 +1,1388 @@
+// ═══════════════════════════════════════════════════════════════
+// 💾 UNIFIED SAVE MANAGER - One system to save them all
+// ═══════════════════════════════════════════════════════════════
+// File Version: GameConfig.version.file
+// Made by Unity AI Lab - Hackall360, Sponge, GFourteen
+// ═══════════════════════════════════════════════════════════════
+// MERGED FROM: save-load-system.js, save-load-ui.js, save-ui-system.js
+// This consolidates 3 separate save systems into ONE.
+// ═══════════════════════════════════════════════════════════════
+
+const SaveManager = {
+    // ═══════════════════════════════════════════════════════════════
+    // CONFIGURATION
+    // ═══════════════════════════════════════════════════════════════
+    maxSaveSlots: 10,
+    maxAutoSaveSlots: 10,
+    autoSaveInterval: 300000, // 5 minutes
+    compressionEnabled: true,
+    saveVersion: '1.0.0',
+
+    // ═══════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════
+    saveSlots: {},
+    autoSaveSlots: [],
+    currentAutoSaveIndex: 0,
+    currentSaveSlot: null,
+    lastAutoSave: Date.now(),
+    isAutoSaving: false,
+    _selectedSaveSlot: null,
+    _selectedLoadSlot: null,
+    _selectedLoadType: 'manual',
+    _wasGamePaused: false,
+
+    // ═══════════════════════════════════════════════════════════════
+    // INITIALIZATION
+    // ═══════════════════════════════════════════════════════════════
+    init() {
+        console.log('💾 SaveManager: Initializing unified save system...');
+
+        this.loadSaveSlotsMetadata();
+        this.setupAutoSave();
+        this.setupKeyboardShortcuts();
+        this.setupEventListeners();
+        this.createUI();
+
+        // 🏆 Initialize Hall of Champions on main menu
+        setTimeout(() => {
+            if (typeof SaveUISystem !== 'undefined') {
+                SaveUISystem.init();
+            }
+        }, 100);
+
+        console.log('💾 SaveManager: Ready!');
+    },
+
+    loadSaveSlotsMetadata() {
+        const metadata = localStorage.getItem('tradingGameSaveSlots');
+        if (metadata) {
+            try {
+                this.saveSlots = JSON.parse(metadata);
+            } catch (e) {
+                console.error('💀 Failed to load save slots metadata:', e);
+                this.saveSlots = {};
+            }
+        } else {
+            for (let i = 1; i <= this.maxSaveSlots; i++) {
+                this.saveSlots[i] = {
+                    name: `Save Slot ${i}`,
+                    timestamp: null,
+                    exists: false,
+                    screenshot: null,
+                    version: null
+                };
+            }
+            this.saveSaveSlotsMetadata();
+        }
+
+        const autoSaveData = localStorage.getItem('tradingGameAutoSaveSlots');
+        if (autoSaveData) {
+            try {
+                const parsed = JSON.parse(autoSaveData);
+                this.autoSaveSlots = parsed.slots || [];
+                this.currentAutoSaveIndex = parsed.currentIndex || 0;
+            } catch (e) {
+                this.autoSaveSlots = [];
+                this.currentAutoSaveIndex = 0;
+            }
+        }
+    },
+
+    saveSaveSlotsMetadata() {
+        try {
+            localStorage.setItem('tradingGameSaveSlots', JSON.stringify(this.saveSlots));
+            localStorage.setItem('tradingGameAutoSaveSlots', JSON.stringify({
+                slots: this.autoSaveSlots,
+                currentIndex: this.currentAutoSaveIndex
+            }));
+        } catch (e) {
+            console.error('💀 Failed to save slots metadata:', e);
+        }
+    },
+
+    setupAutoSave() {
+        if (typeof TimerManager !== 'undefined') {
+            TimerManager.setInterval(() => {
+                if (typeof game !== 'undefined' && game.state === GameState.PLAYING && game.settings?.autoSave) {
+                    this.autoSave();
+                }
+            }, this.autoSaveInterval);
+        }
+    },
+
+    setupKeyboardShortcuts() {
+        const handler = (e) => {
+            if (e.key === 'F5') {
+                e.preventDefault();
+                this.quickSave();
+            } else if (e.key === 'F9') {
+                e.preventDefault();
+                this.quickLoad();
+            }
+        };
+
+        if (typeof EventManager !== 'undefined') {
+            EventManager.addEventListener(document, 'keydown', handler);
+        } else {
+            document.addEventListener('keydown', handler);
+        }
+    },
+
+    setupEventListeners() {
+        // Emergency save on page close
+        window.addEventListener('beforeunload', () => {
+            if (typeof game !== 'undefined' && game.state === GameState.PLAYING && game.settings?.autoSave) {
+                this.performEmergencySave();
+            }
+        });
+
+        window.addEventListener('pagehide', () => {
+            if (typeof game !== 'undefined' && game.state === GameState.PLAYING) {
+                this.performEmergencySave();
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden' && typeof game !== 'undefined' && game.state === GameState.PLAYING) {
+                this.performEmergencySave();
+            }
+        });
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // CORE SAVE/LOAD LOGIC
+    // ═══════════════════════════════════════════════════════════════
+
+    getCompleteGameState() {
+        const safeCall = (fn, fallback = null) => {
+            try { return fn(); } catch(e) { return fallback; }
+        };
+
+        const safeMapEntries = (map) => {
+            try {
+                if (map && typeof map.entries === 'function') {
+                    return Array.from(map.entries());
+                }
+                return [];
+            } catch(e) { return []; }
+        };
+
+        return {
+            version: this.saveVersion,
+            timestamp: Date.now(),
+            gameData: {
+                state: game.state,
+                gameTick: game.gameTick,
+                player: game.player ? {
+                    name: game.player.name,
+                    class: game.player.class,
+                    difficulty: game.player.difficulty,
+                    gold: game.player.gold,
+                    inventory: game.player.inventory,
+                    equipment: game.player.equipment,
+                    stats: game.player.stats,
+                    attributes: game.player.attributes,
+                    skills: game.player.skills,
+                    perks: game.player.perks,
+                    transportation: game.player.transportation,
+                    ownedTransportation: game.player.ownedTransportation,
+                    currentLoad: game.player.currentLoad,
+                    maxLoad: game.player.maxLoad,
+                    ownedProperties: game.player.ownedProperties,
+                    ownedEmployees: game.player.ownedEmployees,
+                    reputation: game.player.reputation,
+                    visitedLocations: game.player.visitedLocations,
+                    temporaryEffects: game.player.temporaryEffects,
+                    level: game.player.level,
+                    experience: game.player.experience,
+                    tradeRoutes: game.player.tradeRoutes
+                } : null,
+                currentLocation: game.currentLocation,
+                timeState: typeof TimeSystem !== 'undefined' ? {
+                    currentTime: TimeSystem.currentTime,
+                    currentSpeed: TimeSystem.currentSpeed,
+                    isPaused: TimeSystem.isPaused
+                } : null,
+                eventState: typeof EventSystem !== 'undefined' ? {
+                    activeEvents: safeCall(() => EventSystem.getActiveEvents(), []),
+                    scheduledEvents: EventSystem.scheduledEvents || []
+                } : null,
+                worldState: typeof GameWorld !== 'undefined' ? {
+                    unlockedRegions: GameWorld.unlockedRegions || ['starter'],
+                    visitedLocations: GameWorld.visitedLocations || []
+                } : null,
+                questState: typeof QuestSystem !== 'undefined' ? {
+                    activeQuests: QuestSystem.activeQuests || {},
+                    completedQuests: QuestSystem.completedQuests || [],
+                    failedQuests: QuestSystem.failedQuests || []
+                } : null,
+                marketData: {
+                    marketPrices: game.marketPrices || {},
+                    marketPriceModifier: game.marketPriceModifier || 1
+                },
+                settings: game.settings || {}
+            }
+        };
+    },
+
+    validateSaveData(saveData) {
+        const errors = [];
+        if (!saveData || typeof saveData !== 'object') {
+            errors.push('Invalid save data structure');
+            return { valid: false, errors };
+        }
+        if (!saveData.version) errors.push('Missing save version');
+        if (!saveData.gameData) errors.push('Missing gameData');
+        if (saveData.gameData && !saveData.gameData.player) errors.push('Missing player data');
+
+        return { valid: errors.length === 0, errors };
+    },
+
+    // Unicode compression for localStorage efficiency
+    compressSaveData(saveData) {
+        try {
+            const trimmed = this.trimSaveData(saveData);
+            const jsonString = JSON.stringify(trimmed);
+            const compressed = this.unicodeCompress(jsonString);
+            return 'UC:' + compressed;
+        } catch (e) {
+            console.error('Compression failed:', e);
+            return JSON.stringify(saveData);
+        }
+    },
+
+    trimSaveData(saveData) {
+        const trimmed = JSON.parse(JSON.stringify(saveData));
+        if (trimmed.gameData) {
+            // Limit arrays
+            if (trimmed.gameData.tradingState?.tradeHistory) {
+                trimmed.gameData.tradingState.tradeHistory = trimmed.gameData.tradingState.tradeHistory.slice(-20);
+            }
+            if (trimmed.gameData.eventState?.scheduledEvents) {
+                trimmed.gameData.eventState.scheduledEvents = trimmed.gameData.eventState.scheduledEvents.slice(-20);
+            }
+        }
+        return trimmed;
+    },
+
+    decompressSaveData(compressedData) {
+        try {
+            if (compressedData.startsWith('UC:')) {
+                return JSON.parse(this.unicodeDecompress(compressedData.slice(3)));
+            }
+            if (compressedData.startsWith('LZ:')) {
+                try { return JSON.parse(atob(compressedData.slice(3))); } catch(e) {}
+            }
+            return JSON.parse(compressedData);
+        } catch (e) {
+            console.error('Decompression failed:', e);
+            return null;
+        }
+    },
+
+    unicodeCompress(str) {
+        if (!str) return '';
+        let result = '';
+        for (let i = 0; i < str.length; i += 2) {
+            const c1 = str.charCodeAt(i);
+            const c2 = i + 1 < str.length ? str.charCodeAt(i + 1) : 0;
+            result += String.fromCharCode((c1 << 8) | c2);
+        }
+        return str.length + ':' + result;
+    },
+
+    unicodeDecompress(compressed) {
+        if (!compressed) return '';
+        const colonIdx = compressed.indexOf(':');
+        if (colonIdx === -1) throw new Error('Invalid format');
+        const originalLen = parseInt(compressed.substring(0, colonIdx), 10);
+        const data = compressed.substring(colonIdx + 1);
+        let result = '';
+        for (let i = 0; i < data.length; i++) {
+            const code = data.charCodeAt(i);
+            result += String.fromCharCode(code >> 8);
+            result += String.fromCharCode(code & 0xFF);
+        }
+        return result.substring(0, originalLen);
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // SAVE OPERATIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    saveToSlot(slotNumber, customName = null) {
+        if (slotNumber < 1 || slotNumber > this.maxSaveSlots) {
+            if (typeof addMessage === 'function') addMessage('Invalid save slot!', 'error');
+            return false;
+        }
+
+        try {
+            const gameState = this.getCompleteGameState();
+            const validation = this.validateSaveData(gameState);
+            if (!validation.valid) {
+                if (typeof addMessage === 'function') addMessage('Save validation failed', 'error');
+                return false;
+            }
+
+            const compressedData = this.compressSaveData(gameState);
+            localStorage.setItem(`tradingGameSave_${slotNumber}`, compressedData);
+
+            this.saveSlots[slotNumber] = {
+                name: customName || this.saveSlots[slotNumber]?.name || `Save Slot ${slotNumber}`,
+                timestamp: Date.now(),
+                exists: true,
+                version: gameState.version,
+                playerInfo: {
+                    name: gameState.gameData.player?.name || 'Unknown',
+                    level: gameState.gameData.player?.level || 1,
+                    gold: gameState.gameData.player?.gold || 0,
+                    location: gameState.gameData.currentLocation?.name || 'Unknown',
+                    daysSurvived: this.calculateDaysSurvived(gameState)
+                }
+            };
+
+            this.saveSaveSlotsMetadata();
+            this.currentSaveSlot = slotNumber;
+
+            if (typeof addMessage === 'function') {
+                addMessage(`Game saved to ${this.saveSlots[slotNumber].name}!`, 'success');
+            }
+
+            // Submit to leaderboard
+            if (typeof GlobalLeaderboardSystem !== 'undefined') {
+                this.submitToLeaderboard(gameState);
+            }
+
+            return true;
+        } catch (e) {
+            console.error('Save failed:', e);
+            if (typeof addMessage === 'function') addMessage('Save failed: ' + e.message, 'error');
+            return false;
+        }
+    },
+
+    loadFromSlot(slotNumber) {
+        if (slotNumber < 1 || slotNumber > this.maxSaveSlots) {
+            if (typeof addMessage === 'function') addMessage('Invalid save slot!', 'error');
+            return false;
+        }
+
+        const slot = this.saveSlots[slotNumber];
+        if (!slot?.exists) {
+            if (typeof addMessage === 'function') addMessage('No save in this slot!', 'error');
+            return false;
+        }
+
+        try {
+            const compressedData = localStorage.getItem(`tradingGameSave_${slotNumber}`);
+            if (!compressedData) {
+                if (typeof addMessage === 'function') addMessage('Save data not found!', 'error');
+                return false;
+            }
+
+            const saveData = this.decompressSaveData(compressedData);
+            const validation = this.validateSaveData(saveData);
+            if (!validation.valid) {
+                if (typeof addMessage === 'function') addMessage('Save data corrupted', 'error');
+                return false;
+            }
+
+            this.loadGameState(saveData.gameData);
+            this.currentSaveSlot = slotNumber;
+
+            if (typeof addMessage === 'function') {
+                addMessage(`Game loaded from ${slot.name}!`, 'success');
+            }
+            return true;
+        } catch (e) {
+            console.error('Load failed:', e);
+            if (typeof addMessage === 'function') addMessage('Load failed: ' + e.message, 'error');
+            return false;
+        }
+    },
+
+    loadGameState(gameData) {
+        if (!gameData) throw new Error('No game data provided');
+
+        // Stop current game
+        if (game.isRunning) game.stop();
+
+        // Hide setup panels
+        ['main-menu', 'game-setup-panel', 'character-panel'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('hidden');
+                el.style.display = 'none';
+            }
+        });
+
+        // Restore game state
+        game.state = gameData.state === GameState.MENU ? GameState.PLAYING : gameData.state;
+        game.gameTick = gameData.gameTick;
+        game.currentLocation = gameData.currentLocation;
+        game.marketPrices = gameData.marketData?.marketPrices || {};
+        game.settings = { ...game.settings, ...gameData.settings };
+
+        if (gameData.player) {
+            game.player = { ...game.player, ...gameData.player };
+        }
+
+        if (gameData.timeState && typeof TimeSystem !== 'undefined') {
+            TimeSystem.currentTime = gameData.timeState.currentTime;
+            TimeSystem.setSpeed?.(gameData.timeState.currentSpeed);
+            TimeSystem.isPaused = gameData.timeState.isPaused;
+        }
+
+        if (gameData.worldState && typeof GameWorld !== 'undefined') {
+            GameWorld.unlockedRegions = gameData.worldState.unlockedRegions || ['starter'];
+            GameWorld.visitedLocations = gameData.worldState.visitedLocations || [];
+        }
+
+        if (gameData.questState && typeof QuestSystem !== 'undefined') {
+            QuestSystem.activeQuests = gameData.questState.activeQuests || {};
+            QuestSystem.completedQuests = gameData.questState.completedQuests || [];
+        }
+
+        // Show game UI
+        if (typeof showGameUI === 'function') showGameUI();
+        if (typeof changeState === 'function') changeState(GameState.PLAYING);
+
+        // Refresh displays
+        if (typeof updatePlayerInfo === 'function') updatePlayerInfo();
+        if (typeof updateLocationInfo === 'function') updateLocationInfo();
+
+        // Start game
+        game.start();
+
+        // Deferred map render
+        setTimeout(() => {
+            if (typeof GameWorldRenderer !== 'undefined') {
+                GameWorldRenderer.render?.();
+                GameWorldRenderer.resetView?.();
+            }
+        }, 150);
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // AUTO-SAVE & QUICK SAVE
+    // ═══════════════════════════════════════════════════════════════
+
+    autoSave(silent = false) {
+        const now = Date.now();
+        if (now - this.lastAutoSave < 30000 || this.isAutoSaving) return;
+
+        this.isAutoSaving = true;
+        try {
+            const saveData = this.getCompleteGameState();
+            if (!saveData) return;
+
+            const compressedData = this.compressSaveData(saveData);
+            const saveKey = `tradingGameAutoSave_${this.currentAutoSaveIndex}`;
+            localStorage.setItem(saveKey, compressedData);
+
+            const slotInfo = {
+                index: this.currentAutoSaveIndex,
+                timestamp: now,
+                formattedTime: new Date().toLocaleString(),
+                playerName: game.player?.name || 'Unknown',
+                gold: game.player?.gold || 0,
+                location: game.currentLocation?.name || 'Unknown',
+                day: typeof TimeSystem !== 'undefined' ? TimeSystem.currentTime?.day || 1 : 1
+            };
+
+            const existingIdx = this.autoSaveSlots.findIndex(s => s.index === this.currentAutoSaveIndex);
+            if (existingIdx >= 0) {
+                this.autoSaveSlots[existingIdx] = slotInfo;
+            } else {
+                this.autoSaveSlots.push(slotInfo);
+            }
+
+            this.autoSaveSlots.sort((a, b) => b.timestamp - a.timestamp);
+            if (this.autoSaveSlots.length > this.maxAutoSaveSlots) {
+                const removed = this.autoSaveSlots.pop();
+                localStorage.removeItem(`tradingGameAutoSave_${removed.index}`);
+            }
+
+            this.currentAutoSaveIndex = (this.currentAutoSaveIndex + 1) % this.maxAutoSaveSlots;
+            this.saveSaveSlotsMetadata();
+            this.lastAutoSave = now;
+
+            if (!silent && typeof addMessage === 'function') {
+                addMessage('💾 Auto-saved!', 'info');
+            }
+        } finally {
+            this.isAutoSaving = false;
+        }
+    },
+
+    loadAutoSave(slotIndex) {
+        const saveData = localStorage.getItem(`tradingGameAutoSave_${slotIndex}`);
+        if (!saveData) {
+            if (typeof addMessage === 'function') addMessage('Auto-save not found!', 'error');
+            return false;
+        }
+
+        try {
+            const parsed = this.decompressSaveData(saveData);
+            this.loadGameState(parsed.gameData);
+            if (typeof addMessage === 'function') addMessage('Auto-save loaded!', 'success');
+            return true;
+        } catch (e) {
+            console.error('Failed to load auto-save:', e);
+            return false;
+        }
+    },
+
+    quickSave() {
+        if (typeof game === 'undefined' || game.state !== GameState.PLAYING) {
+            if (typeof addMessage === 'function') addMessage('Cannot save now!', 'error');
+            return;
+        }
+        const slot = this.currentSaveSlot || 1;
+        this.saveToSlot(slot);
+    },
+
+    quickLoad() {
+        if (this.currentSaveSlot) {
+            this.loadFromSlot(this.currentSaveSlot);
+        } else {
+            const mostRecent = this.findMostRecentSave();
+            if (mostRecent) {
+                this.loadFromSlot(mostRecent);
+            } else if (typeof addMessage === 'function') {
+                addMessage('No save to load!', 'error');
+            }
+        }
+    },
+
+    performEmergencySave() {
+        if (typeof game === 'undefined' || !game.player || game.state !== GameState.PLAYING) return;
+        try {
+            const saveData = {
+                version: this.saveVersion,
+                timestamp: Date.now(),
+                isEmergencySave: true,
+                gameData: this.getCompleteGameState()?.gameData
+            };
+            localStorage.setItem('tradingGameEmergencySave', JSON.stringify(saveData));
+        } catch (e) {
+            console.error('Emergency save failed:', e);
+        }
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // UTILITY FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    deleteSave(slotNumber) {
+        if (slotNumber < 1 || slotNumber > this.maxSaveSlots) return false;
+
+        localStorage.removeItem(`tradingGameSave_${slotNumber}`);
+        this.saveSlots[slotNumber] = {
+            name: `Save Slot ${slotNumber}`,
+            timestamp: null,
+            exists: false
+        };
+        this.saveSaveSlotsMetadata();
+
+        if (this.currentSaveSlot === slotNumber) this.currentSaveSlot = null;
+        if (typeof addMessage === 'function') addMessage(`Save ${slotNumber} deleted!`, 'success');
+        return true;
+    },
+
+    findMostRecentSave() {
+        let mostRecent = null;
+        let mostRecentTime = 0;
+        for (let i = 1; i <= this.maxSaveSlots; i++) {
+            const slot = this.saveSlots[i];
+            if (slot?.exists && slot.timestamp > mostRecentTime) {
+                mostRecentTime = slot.timestamp;
+                mostRecent = i;
+            }
+        }
+        return mostRecent;
+    },
+
+    calculateDaysSurvived(saveData) {
+        if (!saveData.gameData?.timeState?.currentTime) return 0;
+        const t = saveData.gameData.timeState.currentTime;
+        return t.day + (t.month - 1) * 30 + (t.year - 1) * 360;
+    },
+
+    getSaveSlotInfo(slotNumber) {
+        const slot = this.saveSlots[slotNumber];
+        if (!slot?.exists) {
+            return { slotNumber, name: `Save Slot ${slotNumber}`, exists: false, isEmpty: true };
+        }
+        return {
+            slotNumber,
+            ...slot,
+            isEmpty: false,
+            formattedDate: new Date(slot.timestamp).toLocaleString(),
+            timeSinceSave: this.getTimeSinceSave(slot.timestamp)
+        };
+    },
+
+    getTimeSinceSave(timestamp) {
+        const diff = Date.now() - timestamp;
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+        if (minutes < 1) return 'Just now';
+        if (minutes < 60) return `${minutes}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        return `${days}d ago`;
+    },
+
+    getAutoSaveList() {
+        return this.autoSaveSlots.map(slot => ({
+            ...slot,
+            name: `Auto-Save ${slot.index + 1}`,
+            key: `tradingGameAutoSave_${slot.index}`
+        }));
+    },
+
+    async submitToLeaderboard(gameState) {
+        try {
+            const player = gameState?.gameData?.player;
+            if (!player || typeof GlobalLeaderboardSystem === 'undefined') return false;
+
+            const daysSurvived = this.calculateDaysSurvived(gameState);
+            let score = Math.max(0, player.gold || 0) + daysSurvived * 10;
+
+            const scoreData = {
+                playerName: player.name || 'Unknown',
+                score,
+                gold: player.gold || 0,
+                daysSurvived,
+                difficulty: player.difficulty || 'normal',
+                isAlive: true
+            };
+
+            return await GlobalLeaderboardSystem.submitScore(scoreData);
+        } catch (e) {
+            console.error('Leaderboard submission failed:', e);
+            return false;
+        }
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // UI CREATION - Consolidated from SaveLoadUI and SaveUISystem
+    // ═══════════════════════════════════════════════════════════════
+
+    createUI() {
+        this.injectStyles();
+        this.createSaveDialog();
+        this.createLoadDialog();
+    },
+
+    injectStyles() {
+        if (document.getElementById('save-manager-styles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'save-manager-styles';
+        style.textContent = `
+            .save-manager-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.85);
+                backdrop-filter: blur(5px);
+                z-index: 100000;
+                display: none;
+                align-items: center;
+                justify-content: center;
+            }
+            .save-manager-dialog {
+                background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+                border: 2px solid rgba(79, 195, 247, 0.5);
+                border-radius: 12px;
+                max-width: 550px;
+                width: 90%;
+                max-height: 80vh;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 0 40px rgba(79, 195, 247, 0.3);
+            }
+            .save-manager-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 20px;
+                background: rgba(0, 0, 0, 0.3);
+                border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+            }
+            .save-manager-header h2 {
+                margin: 0;
+                color: #4fc3f7;
+                font-size: 18px;
+            }
+            .save-manager-close {
+                background: rgba(244, 67, 54, 0.3);
+                border: 1px solid #f44336;
+                color: #f44336;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 14px;
+            }
+            .save-manager-close:hover { background: #f44336; color: #fff; }
+            .save-manager-content {
+                flex: 1;
+                overflow-y: auto;
+                padding: 15px;
+            }
+            .save-manager-slots {
+                display: grid;
+                gap: 8px;
+            }
+            .save-slot-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px;
+                background: rgba(40, 40, 70, 0.4);
+                border: 1px solid rgba(79, 195, 247, 0.2);
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .save-slot-item:hover {
+                background: rgba(79, 195, 247, 0.1);
+                border-color: rgba(79, 195, 247, 0.4);
+            }
+            .save-slot-item.selected {
+                background: rgba(79, 195, 247, 0.2);
+                border-color: #4fc3f7;
+            }
+            .save-slot-item.empty { opacity: 0.6; }
+            .slot-num {
+                width: 32px;
+                height: 32px;
+                background: rgba(79, 195, 247, 0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #4fc3f7;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            .slot-info { flex: 1; }
+            .slot-name { color: #fff; font-size: 14px; font-weight: 500; }
+            .slot-meta { color: #888; font-size: 11px; margin-top: 2px; }
+            .slot-meta span { margin-right: 10px; }
+            .save-manager-footer {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+                padding: 15px;
+                background: rgba(0, 0, 0, 0.3);
+                border-top: 1px solid rgba(79, 195, 247, 0.2);
+            }
+            .save-manager-btn {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.2s;
+            }
+            .save-manager-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+            .btn-primary {
+                background: linear-gradient(180deg, #4caf50 0%, #388e3c 100%);
+                color: #fff;
+            }
+            .btn-secondary {
+                background: rgba(79, 195, 247, 0.2);
+                color: #4fc3f7;
+                border: 1px solid rgba(79, 195, 247, 0.3);
+            }
+            .btn-danger {
+                background: rgba(244, 67, 54, 0.2);
+                color: #f44336;
+                border: 1px solid rgba(244, 67, 54, 0.3);
+            }
+            .save-name-input {
+                width: 100%;
+                padding: 10px;
+                background: rgba(0, 0, 0, 0.4);
+                border: 1px solid rgba(79, 195, 247, 0.3);
+                border-radius: 6px;
+                color: #fff;
+                font-size: 14px;
+                margin-bottom: 15px;
+                box-sizing: border-box;
+            }
+            .save-name-input:focus { outline: none; border-color: #4fc3f7; }
+
+            /* 🏆 Hall of Champions on Main Menu */
+            .menu-leaderboard {
+                margin-top: 30px;
+                padding: 20px;
+                background: rgba(0, 0, 0, 0.5);
+                border: 1px solid rgba(255, 215, 0, 0.3);
+                border-radius: 12px;
+                max-width: 400px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .menu-leaderboard h3 {
+                color: #ffd700;
+                text-align: center;
+                margin: 0 0 15px 0;
+                font-size: 18px;
+            }
+            .leaderboard-entries {
+                max-height: 250px;
+                overflow-y: auto;
+            }
+            .leaderboard-empty {
+                color: #666;
+                text-align: center;
+                padding: 20px;
+                font-style: italic;
+            }
+            .leaderboard-entry {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px;
+                background: rgba(40, 40, 70, 0.4);
+                border-radius: 8px;
+                margin-bottom: 8px;
+            }
+            .leaderboard-entry.gold {
+                background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+                border: 1px solid rgba(255, 215, 0, 0.4);
+            }
+            .leaderboard-entry.silver {
+                background: linear-gradient(135deg, rgba(192, 192, 192, 0.15) 0%, rgba(192, 192, 192, 0.05) 100%);
+                border: 1px solid rgba(192, 192, 192, 0.4);
+            }
+            .leaderboard-entry.bronze {
+                background: linear-gradient(135deg, rgba(205, 127, 50, 0.15) 0%, rgba(205, 127, 50, 0.05) 100%);
+                border: 1px solid rgba(205, 127, 50, 0.4);
+            }
+            .entry-rank {
+                font-size: 14px;
+                min-width: 55px;
+                text-align: center;
+                font-weight: bold;
+            }
+            .entry-rank.gold { color: #ffd700; }
+            .entry-rank.silver { color: #c0c0c0; }
+            .entry-rank.bronze { color: #cd7f32; }
+            .entry-info { flex: 1; }
+            .entry-name { color: #fff; font-weight: bold; font-size: 14px; }
+            .entry-stats {
+                display: flex;
+                gap: 15px;
+                font-size: 11px;
+                color: #888;
+                margin-top: 3px;
+            }
+            .entry-status {
+                font-size: 10px;
+                margin-top: 3px;
+                font-style: italic;
+            }
+            .entry-status.alive { color: #4caf50; }
+            .entry-status.dead { color: #f44336; }
+            .leaderboard-more {
+                color: #888;
+                text-align: center;
+                padding: 10px;
+                font-style: italic;
+                font-size: 12px;
+                border-top: 1px dashed rgba(255, 215, 0, 0.2);
+                margin-top: 10px;
+            }
+            .view-all-champions-btn {
+                width: 100%;
+                margin-top: 15px;
+                padding: 10px 20px;
+                background: linear-gradient(180deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 215, 0, 0.1) 100%);
+                border: 1px solid rgba(255, 215, 0, 0.5);
+                border-radius: 8px;
+                color: #ffd700;
+                font-size: 14px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .view-all-champions-btn:hover {
+                background: linear-gradient(180deg, rgba(255, 215, 0, 0.5) 0%, rgba(255, 215, 0, 0.2) 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            }
+            .leaderboard-loading {
+                color: #ffd700;
+                text-align: center;
+                padding: 40px;
+                font-style: italic;
+            }
+        `;
+        document.head.appendChild(style);
+    },
+
+    createSaveDialog() {
+        if (document.getElementById('save-manager-save-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'save-manager-save-overlay';
+        overlay.className = 'save-manager-overlay';
+        overlay.onclick = (e) => { if (e.target === overlay) this.closeSaveDialog(); };
+        overlay.innerHTML = `
+            <div class="save-manager-dialog">
+                <div class="save-manager-header">
+                    <h2>💾 Save Game</h2>
+                    <button class="save-manager-close" onclick="SaveManager.closeSaveDialog()">✕</button>
+                </div>
+                <div class="save-manager-content">
+                    <input type="text" class="save-name-input" id="save-name-input" placeholder="Enter save name..." maxlength="30">
+                    <div class="save-manager-slots" id="save-slots-container"></div>
+                </div>
+                <div class="save-manager-footer">
+                    <button class="save-manager-btn btn-secondary" onclick="SaveManager.closeSaveDialog()">Cancel</button>
+                    <button class="save-manager-btn btn-primary" id="confirm-save-btn" onclick="SaveManager.confirmSave()">💾 Save</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    },
+
+    createLoadDialog() {
+        if (document.getElementById('save-manager-load-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'save-manager-load-overlay';
+        overlay.className = 'save-manager-overlay';
+        overlay.onclick = (e) => { if (e.target === overlay) this.closeLoadDialog(); };
+        overlay.innerHTML = `
+            <div class="save-manager-dialog">
+                <div class="save-manager-header">
+                    <h2>📂 Load Game</h2>
+                    <button class="save-manager-close" onclick="SaveManager.closeLoadDialog()">✕</button>
+                </div>
+                <div class="save-manager-content">
+                    <div class="save-manager-slots" id="load-slots-container"></div>
+                </div>
+                <div class="save-manager-footer">
+                    <button class="save-manager-btn btn-danger" id="delete-save-btn" onclick="SaveManager.deleteSelectedLoad()" disabled>🗑️ Delete</button>
+                    <div style="flex:1"></div>
+                    <button class="save-manager-btn btn-secondary" onclick="SaveManager.closeLoadDialog()">Cancel</button>
+                    <button class="save-manager-btn btn-primary" id="confirm-load-btn" onclick="SaveManager.confirmLoad()" disabled>📂 Load</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // UI OPERATIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    openSaveDialog() {
+        if (typeof game === 'undefined' || game.state !== GameState.PLAYING) {
+            if (typeof addMessage === 'function') addMessage('Cannot save now!', 'error');
+            return;
+        }
+
+        this._selectedSaveSlot = null;
+        this.renderSaveSlots();
+
+        const nameInput = document.getElementById('save-name-input');
+        if (nameInput) {
+            const day = typeof TimeSystem !== 'undefined' ? TimeSystem.currentTime?.day || 1 : 1;
+            nameInput.value = `${game.player?.name || 'Hero'} - Day ${day}`;
+            nameInput.focus();
+        }
+
+        document.getElementById('save-manager-save-overlay').style.display = 'flex';
+
+        if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
+            this._wasGamePaused = false;
+            TimeSystem.pause();
+        } else {
+            this._wasGamePaused = true;
+        }
+    },
+
+    closeSaveDialog() {
+        document.getElementById('save-manager-save-overlay').style.display = 'none';
+        if (!this._wasGamePaused && typeof TimeSystem !== 'undefined') {
+            TimeSystem.resume();
+        }
+    },
+
+    openLoadDialog() {
+        this._selectedLoadSlot = null;
+        this._selectedLoadType = 'manual';
+        this.renderLoadSlots();
+
+        document.getElementById('confirm-load-btn')?.setAttribute('disabled', 'true');
+        document.getElementById('delete-save-btn')?.setAttribute('disabled', 'true');
+        document.getElementById('save-manager-load-overlay').style.display = 'flex';
+    },
+
+    closeLoadDialog() {
+        document.getElementById('save-manager-load-overlay').style.display = 'none';
+    },
+
+    renderSaveSlots() {
+        const container = document.getElementById('save-slots-container');
+        if (!container) return;
+
+        let html = '';
+        for (let i = 1; i <= this.maxSaveSlots; i++) {
+            const slot = this.saveSlots[i];
+            const isEmpty = !slot?.exists;
+            const isSelected = this._selectedSaveSlot === i;
+
+            if (isEmpty) {
+                html += `
+                    <div class="save-slot-item empty ${isSelected ? 'selected' : ''}" data-slot="${i}" onclick="SaveManager.selectSaveSlot(${i})">
+                        <div class="slot-num">${i}</div>
+                        <div class="slot-info">
+                            <div class="slot-name">Empty Slot</div>
+                            <div class="slot-meta">Click to save here</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="save-slot-item ${isSelected ? 'selected' : ''}" data-slot="${i}" onclick="SaveManager.selectSaveSlot(${i})">
+                        <div class="slot-num">${i}</div>
+                        <div class="slot-info">
+                            <div class="slot-name">${slot.name}</div>
+                            <div class="slot-meta">
+                                <span>💰 ${(slot.playerInfo?.gold || 0).toLocaleString()}</span>
+                                <span>📍 ${slot.playerInfo?.location || 'Unknown'}</span>
+                                <span>⚠️ Overwrite</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        container.innerHTML = html;
+
+        // Auto-select first empty slot
+        if (!this._selectedSaveSlot) {
+            for (let i = 1; i <= this.maxSaveSlots; i++) {
+                if (!this.saveSlots[i]?.exists) {
+                    this.selectSaveSlot(i);
+                    break;
+                }
+            }
+            if (!this._selectedSaveSlot) this.selectSaveSlot(1);
+        }
+    },
+
+    renderLoadSlots() {
+        const container = document.getElementById('load-slots-container');
+        if (!container) return;
+
+        let html = '';
+        let hasSaves = false;
+
+        for (let i = 1; i <= this.maxSaveSlots; i++) {
+            const slot = this.saveSlots[i];
+            if (!slot?.exists) continue;
+            hasSaves = true;
+
+            const isSelected = this._selectedLoadSlot === i && this._selectedLoadType === 'manual';
+            html += `
+                <div class="save-slot-item ${isSelected ? 'selected' : ''}" data-slot="${i}" data-type="manual" onclick="SaveManager.selectLoadSlot(${i}, 'manual')">
+                    <div class="slot-num">${i}</div>
+                    <div class="slot-info">
+                        <div class="slot-name">${slot.name}</div>
+                        <div class="slot-meta">
+                            <span>👤 ${slot.playerInfo?.name || 'Unknown'}</span>
+                            <span>💰 ${(slot.playerInfo?.gold || 0).toLocaleString()}</span>
+                            <span>📅 ${slot.playerInfo?.daysSurvived || 0} days</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add auto-saves
+        const autoSaves = this.getAutoSaveList();
+        autoSaves.forEach(save => {
+            hasSaves = true;
+            const isSelected = this._selectedLoadSlot === save.index && this._selectedLoadType === 'auto';
+            html += `
+                <div class="save-slot-item ${isSelected ? 'selected' : ''}" data-slot="${save.index}" data-type="auto" onclick="SaveManager.selectLoadSlot(${save.index}, 'auto')">
+                    <div class="slot-num">🔄</div>
+                    <div class="slot-info">
+                        <div class="slot-name">${save.name}</div>
+                        <div class="slot-meta">
+                            <span>👤 ${save.playerName}</span>
+                            <span>💰 ${(save.gold || 0).toLocaleString()}</span>
+                            <span>📅 Day ${save.day || 1}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        if (!hasSaves) {
+            html = '<div style="text-align:center;color:#666;padding:30px;">No saved games found</div>';
+        }
+
+        container.innerHTML = html;
+    },
+
+    selectSaveSlot(slotNumber) {
+        this._selectedSaveSlot = slotNumber;
+        document.querySelectorAll('#save-slots-container .save-slot-item').forEach(el => {
+            el.classList.toggle('selected', parseInt(el.dataset.slot) === slotNumber);
+        });
+    },
+
+    selectLoadSlot(slotNumber, type) {
+        this._selectedLoadSlot = slotNumber;
+        this._selectedLoadType = type;
+
+        document.querySelectorAll('#load-slots-container .save-slot-item').forEach(el => {
+            const matches = parseInt(el.dataset.slot) === slotNumber && el.dataset.type === type;
+            el.classList.toggle('selected', matches);
+        });
+
+        document.getElementById('confirm-load-btn')?.removeAttribute('disabled');
+        document.getElementById('delete-save-btn')?.removeAttribute('disabled');
+    },
+
+    confirmSave() {
+        if (!this._selectedSaveSlot) {
+            if (typeof addMessage === 'function') addMessage('Select a slot!', 'error');
+            return;
+        }
+
+        const nameInput = document.getElementById('save-name-input');
+        const name = nameInput?.value.trim() || `Save ${this._selectedSaveSlot}`;
+        const success = this.saveToSlot(this._selectedSaveSlot, name);
+
+        if (success) {
+            setTimeout(() => this.closeSaveDialog(), 500);
+        }
+    },
+
+    confirmLoad() {
+        if (this._selectedLoadSlot === null) return;
+
+        let success = false;
+        if (this._selectedLoadType === 'manual') {
+            success = this.loadFromSlot(this._selectedLoadSlot);
+        } else {
+            success = this.loadAutoSave(this._selectedLoadSlot);
+        }
+
+        if (success) {
+            this.closeLoadDialog();
+            // Hide main menu if visible
+            const mainMenu = document.getElementById('main-menu');
+            if (mainMenu) {
+                mainMenu.classList.add('hidden');
+                mainMenu.style.display = 'none';
+            }
+        }
+    },
+
+    deleteSelectedLoad() {
+        if (this._selectedLoadSlot === null) return;
+
+        if (!confirm('Delete this save? This cannot be undone!')) return;
+
+        if (this._selectedLoadType === 'manual') {
+            this.deleteSave(this._selectedLoadSlot);
+        } else {
+            localStorage.removeItem(`tradingGameAutoSave_${this._selectedLoadSlot}`);
+            this.autoSaveSlots = this.autoSaveSlots.filter(s => s.index !== this._selectedLoadSlot);
+            this.saveSaveSlotsMetadata();
+        }
+
+        this._selectedLoadSlot = null;
+        this.renderLoadSlots();
+        document.getElementById('confirm-load-btn')?.setAttribute('disabled', 'true');
+        document.getElementById('delete-save-btn')?.setAttribute('disabled', 'true');
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// BACKWARD COMPATIBILITY - Aliases for old systems
+// ═══════════════════════════════════════════════════════════════
+
+// Map old SaveLoadSystem calls to SaveManager
+window.SaveLoadSystem = SaveManager;
+window.SaveLoadUI = {
+    show: (tab) => tab === 'load' ? SaveManager.openLoadDialog() : SaveManager.openSaveDialog(),
+    hide: () => { SaveManager.closeSaveDialog(); SaveManager.closeLoadDialog(); }
+};
+window.SaveUISystem = {
+    openSaveAsDialog: () => SaveManager.openSaveDialog(),
+    closeSaveAsDialog: () => SaveManager.closeSaveDialog(),
+    openLoadGameDialog: () => SaveManager.openLoadDialog(),
+    closeLoadGameDialog: () => SaveManager.closeLoadDialog(),
+    init: () => {
+        SaveUISystem.createLeaderboardDisplay();
+        SaveUISystem.updateLeaderboard();
+    },
+
+    // 🏆 Create Hall of Champions display on main menu
+    createLeaderboardDisplay: () => {
+        const mainMenu = document.getElementById('main-menu');
+        if (!mainMenu) return;
+
+        const menuContent = mainMenu.querySelector('.menu-content');
+        if (!menuContent) return;
+
+        // Don't create duplicates
+        if (document.getElementById('main-menu-leaderboard')) return;
+
+        const leaderboard = document.createElement('div');
+        leaderboard.id = 'main-menu-leaderboard';
+        leaderboard.className = 'menu-leaderboard';
+        leaderboard.innerHTML = `
+            <h3>🏆 Hall of Champions</h3>
+            <div id="leaderboard-entries" class="leaderboard-entries">
+                <div class="leaderboard-empty">No champions yet...</div>
+            </div>
+            <button class="view-all-champions-btn" onclick="SaveUISystem.openHallOfChampions()">View All Champions</button>
+        `;
+
+        // Insert before social links
+        const socialLinks = document.getElementById('menu-social-links');
+        if (socialLinks) {
+            menuContent.insertBefore(leaderboard, socialLinks);
+        } else {
+            const menuFooter = menuContent.querySelector('.menu-footer');
+            if (menuFooter) {
+                menuContent.insertBefore(leaderboard, menuFooter);
+            } else {
+                menuContent.appendChild(leaderboard);
+            }
+        }
+    },
+
+    // 🏆 Update leaderboard entries display
+    updateLeaderboard: () => {
+        const container = document.getElementById('leaderboard-entries');
+        if (!container) return;
+
+        const getOrdinal = (n) => {
+            const s = ['th', 'st', 'nd', 'rd'];
+            const v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        };
+
+        if (typeof GlobalLeaderboardSystem !== 'undefined') {
+            GlobalLeaderboardSystem.fetchLeaderboard().then(scores => {
+                if (!scores || scores.length === 0) {
+                    container.innerHTML = '<div class="leaderboard-empty">No champions have risen yet...</div>';
+                    return;
+                }
+
+                let html = '';
+                scores.slice(0, 3).forEach((score, index) => {
+                    const rank = index + 1;
+                    let rankDisplay, rankClass = '';
+
+                    if (rank === 1) { rankDisplay = '👑 1st'; rankClass = 'gold'; }
+                    else if (rank === 2) { rankDisplay = '🥈 2nd'; rankClass = 'silver'; }
+                    else if (rank === 3) { rankDisplay = '🥉 3rd'; rankClass = 'bronze'; }
+
+                    const statusIcon = score.isAlive ? '💚' : '💀';
+                    const statusText = score.isAlive ? 'still playing' : (score.causeOfDeath || 'unknown');
+
+                    html += `
+                        <div class="leaderboard-entry ${rankClass}">
+                            <div class="entry-rank ${rankClass}">${rankDisplay}</div>
+                            <div class="entry-info">
+                                <div class="entry-name">${GlobalLeaderboardSystem.escapeHtml(score.playerName || 'Unknown')}</div>
+                                <div class="entry-stats">
+                                    <span>💰 ${(score.score || 0).toLocaleString()}</span>
+                                    <span>📅 ${score.daysSurvived || 0} days</span>
+                                </div>
+                                <div class="entry-status ${score.isAlive ? 'alive' : 'dead'}">${statusIcon} ${statusText}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (scores.length > 3) {
+                    html += `<div class="leaderboard-more">+${scores.length - 3} more champions</div>`;
+                }
+
+                container.innerHTML = html;
+            }).catch(err => {
+                console.error('Failed to load Hall of Champions:', err);
+                container.innerHTML = '<div class="leaderboard-empty">Failed to load champions...</div>';
+            });
+        } else {
+            container.innerHTML = '<div class="leaderboard-empty">Leaderboard system unavailable...</div>';
+        }
+    },
+
+    // 🏆 Open full Hall of Champions overlay
+    openHallOfChampions: () => {
+        const overlay = document.getElementById('leaderboard-overlay');
+        const content = document.getElementById('leaderboard-panel-content');
+
+        if (!overlay) {
+            console.error('🏆 leaderboard-overlay not found!');
+            return;
+        }
+
+        overlay.classList.remove('hidden');
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        if (content) {
+            content.innerHTML = '<div class="leaderboard-loading">Loading Hall of Champions...</div>';
+        }
+
+        if (typeof GlobalLeaderboardSystem !== 'undefined') {
+            GlobalLeaderboardSystem.fetchLeaderboard().then(() => {
+                GlobalLeaderboardSystem.renderFullHallOfChampions('leaderboard-panel-content');
+            }).catch(err => {
+                console.error('🏆 Failed to fetch leaderboard:', err);
+                if (content && GlobalLeaderboardSystem.leaderboard?.length > 0) {
+                    GlobalLeaderboardSystem.renderFullHallOfChampions('leaderboard-panel-content');
+                } else if (content) {
+                    content.innerHTML = '<div class="leaderboard-empty"><p>Unable to load champions...</p></div>';
+                }
+            });
+        } else if (content) {
+            content.innerHTML = '<div class="leaderboard-empty"><p>Leaderboard system not available.</p></div>';
+        }
+    },
+
+    // 🏆 Close Hall of Champions overlay
+    closeHallOfChampions: () => {
+        const overlay = document.getElementById('leaderboard-overlay');
+        if (overlay) {
+            overlay.classList.add('hidden');
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+};
+
+// Global exposure
+window.SaveManager = SaveManager;
+
+// Initialize when DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(() => SaveManager.init(), 500));
+} else {
+    setTimeout(() => SaveManager.init(), 500);
+}
+
+console.log('💾 SaveManager (unified) loaded');

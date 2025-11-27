@@ -1,0 +1,18 @@
+{
+  "name": "medieval-trading-game",
+  "version": "0.6.0",
+  "description": "Medieval Trading Game - where capitalism meets darkness",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "serve": "npx serve -l 3000"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "serve": "^14.2.0"
+  },
+  "author": "Unity AI Lab",
+  "license": "MIT"
+}
