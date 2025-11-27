@@ -501,11 +501,7 @@ const WeatherSystem = {
         particles.className = 'weather-particles';
         overlay.appendChild(particles);
 
-        // Create weather indicator
-        const indicator = document.createElement('div');
-        indicator.id = 'weather-indicator';
-        indicator.className = 'weather-indicator';
-        document.body.appendChild(indicator);
+        // Weather indicator is now in top-bar, no need to create separate element
     },
 
     updateVisuals() {
@@ -513,7 +509,8 @@ const WeatherSystem = {
         if (!weather) return;
 
         const overlay = document.getElementById('weather-overlay');
-        const indicator = document.getElementById('weather-indicator');
+        const weatherIcon = document.getElementById('weather-icon');
+        const weatherDisplay = document.getElementById('weather-display');
         const particles = document.getElementById('weather-particles');
 
         if (overlay) {
@@ -530,11 +527,12 @@ const WeatherSystem = {
             overlay.style.opacity = this.currentIntensity;
         }
 
-        if (indicator) {
-            indicator.innerHTML = `
-                <span class="weather-icon">${weather.icon}</span>
-                <span class="weather-name">${weather.name}</span>
-            `;
+        // Update top-bar weather widget
+        if (weatherIcon) {
+            weatherIcon.textContent = weather.icon;
+        }
+        if (weatherDisplay) {
+            weatherDisplay.textContent = weather.name;
         }
 
         // Handle particles
@@ -668,27 +666,7 @@ const WeatherSystem = {
                 background: rgba(255, 255, 255, 0.8) !important;
                 transition: none !important;
             }
-            .weather-indicator {
-                position: fixed;
-                top: 50px;
-                right: 10px;
-                background: rgba(0, 0, 0, 0.7);
-                padding: 8px 12px;
-                border-radius: 20px;
-                color: #fff;
-                font-size: 13px;
-                z-index: 9500;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                border: 1px solid rgba(79, 195, 247, 0.3);
-            }
-            .weather-icon {
-                font-size: 18px;
-            }
-            .weather-name {
-                opacity: 0.9;
-            }
+            /* Weather indicator is now in top-bar widget - see styles.css */
 
             /* Weather-specific overlay styles */
             .weather-fog {
