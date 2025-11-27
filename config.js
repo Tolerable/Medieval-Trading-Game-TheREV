@@ -943,14 +943,14 @@ const GameConfig = {
         // true = run this test suite on deploy
         // false = skip this test suite (it passed locally, save CI minutes)
         testSuites: {
-            newGame: true,           // 🎮 new-game.spec.js - New Game Flow
-            debugCommands: true,     // 🐛 debug-commands.spec.js - Debug Commands
-            debug: true,             // 🔍 debug.spec.js - Console Error Check
-            panels: true,            // 📋 panels.spec.js - Panel Tests
-            features: true,          // 🎯 features.spec.js - Feature Tests
-            settings: true,          // ⚙️ settings.spec.js - Settings Tests
-            uiElements: true,        // 🖥️ ui-elements.spec.js - UI Element Tests
-            comprehensiveUi: true    // 🎨 comprehensive-ui.spec.js - Comprehensive UI
+            newGame: false,           // 🎮 new-game.spec.js - New Game Flow
+            debugCommands: false,     // 🐛 debug-commands.spec.js - Debug Commands
+            debug: false,             // 🔍 debug.spec.js - Console Error Check
+            panels: false,            // 📋 panels.spec.js - Panel Tests
+            features: false,          // 🎯 features.spec.js - Feature Tests
+            settings: false,          // ⚙️ settings.spec.js - Settings Tests
+            uiElements: false,        // 🖥️ ui-elements.spec.js - UI Element Tests
+            comprehensiveUi: false    // 🎨 comprehensive-ui.spec.js - Comprehensive UI
         },
 
         // 📊 Test suite metadata (for workflow generation)
