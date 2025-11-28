@@ -24,7 +24,8 @@ setTimeout(() => {
 // Removed duplicate declaration to prevent "Identifier already declared" error
 
 // 🖤 Debug-only logging helper - only logs warnings in debug mode, silent in production
-const debugWarn = (msg) => {
+// Note: Using gameDebugWarn to avoid conflict with button-fix.js debugWarn
+const gameDebugWarn = (msg) => {
     if (typeof GameConfig !== 'undefined' && GameConfig.debug?.enabled) {
         console.warn(msg);
     }
@@ -1030,7 +1031,7 @@ const KeyBindings = {
             if (container) {
                 container.appendChild(overlay);
             } else {
-                debugWarn('🖤 overlay-container NOT FOUND - appending to body');
+                gameDebugWarn('🖤 overlay-container NOT FOUND - appending to body');
                 document.body.appendChild(overlay);
             }
 
@@ -1354,7 +1355,7 @@ window.testDifficulty = (difficulty = 'easy') => {
         if (typeof onDifficultyChange === 'function') {
             onDifficultyChange();
         } else {
-            debugWarn('🖤 onDifficultyChange function not found');
+            gameDebugWarn('🖤 onDifficultyChange function not found');
         }
 
         // Check the gold display
@@ -1362,7 +1363,7 @@ window.testDifficulty = (difficulty = 'easy') => {
         console.log('Gold display element:', goldEl);
         console.log('Gold display text:', goldEl ? goldEl.textContent : 'NOT FOUND');
     } else {
-        debugWarn(`🖤 Radio button not found for difficulty: ${difficulty}`);
+        gameDebugWarn(`🖤 Radio button not found for difficulty: ${difficulty}`);
     }
 
     console.log('GameLogger entries:', GameLogger.logs.length);
@@ -4515,7 +4516,7 @@ const GoldManager = {
         // Register setup gold display (character creation panel)
         const setupRegistered = this.registerDisplay('setup-gold-amount');
         if (!setupRegistered) {
-            debugWarn('🖤 setup-gold-amount element not found in DOM');
+            gameDebugWarn('🖤 setup-gold-amount element not found in DOM');
         }
 
         // Register player gold display (side panel - just the number)
@@ -4779,7 +4780,7 @@ function setupEventListeners() {
             randomizeCharacter();
         });
     } else {
-        debugWarn('🖤 randomize-character-btn element not found');
+        gameDebugWarn('🖤 randomize-character-btn element not found');
     }
     // 🖤 Guard character name input - may not exist on all pages
     if (elements.characterNameInput) {
@@ -4887,7 +4888,7 @@ function setupEventListeners() {
             createCharacter(e);
         });
     } else {
-        debugWarn('🖤 start-game-btn element not found');
+        gameDebugWarn('🖤 start-game-btn element not found');
     }
     if (cancelSetupBtn) {
         EventManager.addEventListener(cancelSetupBtn, 'click', cancelGameSetup);
@@ -5099,7 +5100,7 @@ function changeState(newState) {
                 GameWorldRenderer.init();
                 console.log('GameWorldRenderer initialized - the void now has pretty dots');
             } else {
-                debugWarn('🖤 GameWorldRenderer not found');
+                gameDebugWarn('🖤 GameWorldRenderer not found');
             }
             // 🎮 Start the GameEngine for time and travel management
             if (typeof GameEngine !== 'undefined') {
@@ -5239,12 +5240,12 @@ function setupDifficultyListeners() {
     console.log('  - Radio buttons found:', difficultyRadios.length);
 
     if (!difficultyContainer) {
-        debugWarn('🖤 difficulty-selection container not found');
+        gameDebugWarn('🖤 difficulty-selection container not found');
         return;
     }
 
     if (difficultyRadios.length === 0) {
-        debugWarn('🖤 No difficulty radio buttons found');
+        gameDebugWarn('🖤 No difficulty radio buttons found');
         return;
     }
 
@@ -5731,7 +5732,7 @@ function updatePerkSelection() {
             console.log('Initialized elements.selectedPerksCount');
         }
     } else {
-        debugWarn('🖤 Counter element not found');
+        gameDebugWarn('🖤 Counter element not found');
         console.log('Looking for element with id: selected-perks-count');
         const debugElement = document.getElementById('selected-perks-count');
         console.log('Direct getElementById result:', debugElement);
@@ -5784,7 +5785,7 @@ function openPerkModal() {
     // Get modal element
     const modal = document.getElementById('perk-selection-modal');
     if (!modal) {
-        debugWarn('🖤 Perk modal not found');
+        gameDebugWarn('🖤 Perk modal not found');
         alert('Error: Perk selection modal not found!');
         return;
     }
@@ -5795,7 +5796,7 @@ function openPerkModal() {
     }
 
     if (!elements.perksContainer) {
-        debugWarn('🖤 Perks container not found');
+        gameDebugWarn('🖤 Perks container not found');
         alert('Error: Perks container not found!');
         return;
     }
@@ -5844,7 +5845,7 @@ function confirmPerkSelection() {
 function displaySelectedPerks() {
     const container = document.getElementById('selected-perks-display');
     if (!container) {
-        debugWarn('🖤 Selected perks display container not found');
+        gameDebugWarn('🖤 Selected perks display container not found');
         return;
     }
 
@@ -6078,7 +6079,7 @@ function setupAttributeButtons() {
     // Find the attributes grid container
     const attributesGrid = document.querySelector('.attributes-grid');
     if (!attributesGrid) {
-        debugWarn('🖤 attributes-grid container not found');
+        gameDebugWarn('🖤 attributes-grid container not found');
         return;
     }
 
@@ -6189,7 +6190,7 @@ function increaseAttribute(attrName) {
             attrElement.innerHTML = `<strong>${newValue}</strong>`;
             console.log(`💥 FORCED UI UPDATE: #attr-${attrName} = ${newValue}`);
         } else {
-            debugWarn(`🖤 Element #attr-${attrName} not found`);
+            gameDebugWarn(`🖤 Element #attr-${attrName} not found`);
         }
 
         if (pointsElement) {
@@ -6199,7 +6200,7 @@ function increaseAttribute(attrName) {
             pointsElement.innerHTML = `<strong style="color: red; font-size: 24px;">${newPoints}</strong>`;
             console.log(`💥 FORCED UI UPDATE: Points = ${newPoints}`);
         } else {
-            debugWarn('🖤 Element #attr-points-remaining not found');
+            gameDebugWarn('🖤 Element #attr-points-remaining not found');
         }
 
         calculateCharacterStats(); // Recalculate final attributes with perks
@@ -6241,7 +6242,7 @@ function decreaseAttribute(attrName) {
             attrElement.innerHTML = `<strong>${newValue}</strong>`;
             console.log(`💥 FORCED UI UPDATE: #attr-${attrName} = ${newValue}`);
         } else {
-            debugWarn(`🖤 Element #attr-${attrName} not found`);
+            gameDebugWarn(`🖤 Element #attr-${attrName} not found`);
         }
 
         if (pointsElement) {
@@ -6251,7 +6252,7 @@ function decreaseAttribute(attrName) {
             pointsElement.innerHTML = `<strong style="color: red; font-size: 24px;">${newPoints}</strong>`;
             console.log(`💥 FORCED UI UPDATE: Points = ${newPoints}`);
         } else {
-            debugWarn('🖤 Element #attr-points-remaining not found');
+            gameDebugWarn('🖤 Element #attr-points-remaining not found');
         }
 
         calculateCharacterStats(); // Recalculate final attributes with perks
@@ -6302,7 +6303,7 @@ function updateAttributeDisplay() {
                 attrElement.style.fontWeight = '';
             }, 300);
         } else {
-            debugWarn(`🖤 Element #attr-${attr} not found`);
+            gameDebugWarn(`🖤 Element #attr-${attr} not found`);
         }
     }
 
@@ -6339,7 +6340,7 @@ function updateAttributeDisplay() {
             pointsElement.style.color = '';
         }, 300);
     } else {
-        debugWarn('🖤 Points element not found');
+        gameDebugWarn('🖤 Points element not found');
     }
 
     // Update button states (based on MANUAL values, not final)
@@ -6671,7 +6672,7 @@ function onDifficultyChange() {
 
     // Update character creation state
     if (!characterCreationState) {
-        debugWarn('🖤 characterCreationState is undefined');
+        gameDebugWarn('🖤 characterCreationState is undefined');
         return;
     }
 
@@ -6690,7 +6691,7 @@ function onDifficultyChange() {
         setupGoldElement.textContent = characterCreationState.currentGold;
         console.log('💰 FORCED setup-gold-amount to:', characterCreationState.currentGold);
     } else {
-        debugWarn('🖤 setup-gold-amount element not found');
+        gameDebugWarn('🖤 setup-gold-amount element not found');
     }
 
     // FORCE GoldManager to update all displays
@@ -6708,7 +6709,7 @@ window.onDifficultyChange = onDifficultyChange;
 window.setDifficulty = function(difficulty) {
     const validDifficulties = ['easy', 'normal', 'hard'];
     if (!validDifficulties.includes(difficulty)) {
-        debugWarn('🖤 Invalid difficulty - use: easy, normal, or hard');
+        gameDebugWarn('🖤 Invalid difficulty - use: easy, normal, or hard');
         return;
     }
 
@@ -6731,7 +6732,7 @@ window.setDifficulty = function(difficulty) {
         // Also call directly
         onDifficultyChange();
     } else {
-        debugWarn('🖤 Radio button not found');
+        gameDebugWarn('🖤 Radio button not found');
     }
 };
 
@@ -8981,7 +8982,7 @@ function showSettings() {
         }
         SettingsPanel.show();
     } else {
-        debugWarn('🖤 SettingsPanel not loaded');
+        gameDebugWarn('🖤 SettingsPanel not loaded');
     }
 }
 
