@@ -6,107 +6,106 @@
 // ═══════════════════════════════════════════════════════════════
 
 const LoadingManager = {
-    // 📊 Systems to track - more systems = smoother progress
-    // Order roughly matches script loading order for accurate progress
-    systems: [
-        // Early systems (config, utils)
-        { name: 'GameConfig', check: () => typeof GameConfig !== 'undefined' },
-        { name: 'EventManager', check: () => typeof EventManager !== 'undefined' },
-        { name: 'TimerManager', check: () => typeof TimerManager !== 'undefined' },
-
-        // Core data systems
-        { name: 'GameWorld', check: () => typeof GameWorld !== 'undefined' },
-        { name: 'ItemDatabase', check: () => typeof ItemDatabase !== 'undefined' },
-        { name: 'UnifiedItemSystem', check: () => typeof UnifiedItemSystem !== 'undefined' },
-
-        // Game systems
-        { name: 'TimeSystem', check: () => typeof TimeSystem !== 'undefined' },
-        { name: 'TradingSystem', check: () => typeof TradingSystem !== 'undefined' },
-        { name: 'TravelSystem', check: () => typeof TravelSystem !== 'undefined' },
-        { name: 'QuestSystem', check: () => typeof QuestSystem !== 'undefined' },
-
-        // UI systems
-        { name: 'AchievementSystem', check: () => typeof AchievementSystem !== 'undefined' },
-        { name: 'TooltipSystem', check: () => typeof TooltipSystem !== 'undefined' },
-        { name: 'ModalSystem', check: () => typeof ModalSystem !== 'undefined' },
-
-        // Late systems (panels, save)
-        { name: 'SaveManager', check: () => typeof SaveManager !== 'undefined' },
-        { name: 'SettingsPanel', check: () => typeof SettingsPanel !== 'undefined' },
-        { name: 'GlobalLeaderboardSystem', check: () => typeof GlobalLeaderboardSystem !== 'undefined' },
-
-        // Final check - game.js fully loaded
-        { name: 'GameReady', check: () => typeof startNewGame === 'function' || typeof window.startNewGame === 'function' }
-    ],
+    // 📊 Final system check - everything else loads too fast to track individually
+    finalCheck: () => typeof startNewGame === 'function' || typeof window.startNewGame === 'function',
 
     // 📊 Status messages based on progress
     statusMessages: [
         { threshold: 0, title: 'Awakening the void...', status: 'Initializing...' },
-        { threshold: 10, title: 'Loading core systems...', status: 'Loading configuration...' },
-        { threshold: 20, title: 'Generating world...', status: 'Creating locations...' },
-        { threshold: 35, title: 'Loading items...', status: 'Filling warehouses...' },
-        { threshold: 50, title: 'Setting up markets...', status: 'Hiring merchants...' },
-        { threshold: 65, title: 'Preparing quests...', status: 'Writing adventures...' },
-        { threshold: 80, title: 'Almost there...', status: 'Final preparations...' },
-        { threshold: 95, title: 'Ready to trade!', status: 'Welcome, merchant...' }
+        { threshold: 15, title: 'Loading core systems...', status: 'Loading configuration...' },
+        { threshold: 30, title: 'Generating world...', status: 'Creating locations...' },
+        { threshold: 45, title: 'Loading items...', status: 'Filling warehouses...' },
+        { threshold: 60, title: 'Setting up markets...', status: 'Hiring merchants...' },
+        { threshold: 75, title: 'Preparing quests...', status: 'Writing adventures...' },
+        { threshold: 90, title: 'Almost there...', status: 'Final preparations...' },
+        { threshold: 100, title: 'Ready to trade!', status: 'Welcome, merchant...' }
     ],
 
     // 📊 State
     progress: 0,
+    targetProgress: 0,
     isComplete: false,
-    checkInterval: null,
+    isReady: false,
+    animationFrame: null,
     startTime: 0,
-    maxWaitTime: 25000,  // 🖤 Max 25 seconds before force-completing
+    expectedLoadTime: 8000,  // 🖤 Expected ~8 seconds to load
+    maxWaitTime: 20000,      // 🖤 Max 20 seconds before force-completing
 
     // 🚀 Start monitoring loading progress
     init() {
         console.log('🖤 LoadingManager: Starting to watch the void fill up...');
         this.startTime = Date.now();
         this.progress = 0;
+        this.targetProgress = 0;
         this.updateUI(0);
 
-        // 🖤 Check systems frequently for smooth progress
-        this.checkInterval = setInterval(() => this.checkProgress(), 50);
+        // 🎨 Start smooth animation loop
+        this.animate();
+
+        // 🖤 Check for completion periodically
+        this.checkInterval = setInterval(() => this.checkReady(), 100);
     },
 
-    // 📊 Check how many systems are loaded
-    checkProgress() {
-        let loaded = 0;
+    // 🎨 Smooth animation - progress bar fills based on time until ready
+    animate() {
+        if (this.isComplete) return;
 
-        for (let i = 0; i < this.systems.length; i++) {
-            try {
-                if (this.systems[i].check()) {
-                    loaded++;
-                }
-            } catch (e) {
-                // System check failed, not loaded yet
-            }
+        const elapsed = Date.now() - this.startTime;
+
+        if (this.isReady) {
+            // 🎯 Systems ready - quickly complete to 100%
+            this.targetProgress = 100;
+        } else {
+            // 🕐 Time-based progress: smoothly go from 0% to 95% over expectedLoadTime
+            // Uses easeOutQuad for natural deceleration
+            const timeRatio = Math.min(elapsed / this.expectedLoadTime, 1);
+            const easedRatio = 1 - Math.pow(1 - timeRatio, 2);
+            this.targetProgress = Math.min(easedRatio * 95, 95);
         }
 
-        // 🖤 Calculate progress percentage
-        const newProgress = Math.round((loaded / this.systems.length) * 100);
+        // 🖤 Smoothly interpolate current progress toward target
+        const diff = this.targetProgress - this.progress;
+        const speed = this.isReady ? 0.2 : 0.1;
+        this.progress += diff * speed;
 
-        // 🖤 Only update if progress increased (never go backwards)
-        if (newProgress > this.progress) {
-            this.progress = newProgress;
-            this.updateUI(this.progress);
-        }
-
-        // 💀 All systems loaded?
-        if (loaded === this.systems.length && !this.isComplete) {
+        // 🖤 Snap to 100 when close enough
+        if (this.isReady && this.progress > 99.5) {
             this.progress = 100;
-            this.updateUI(100);
-            // 🖤 Brief pause at 100% so user sees it
-            setTimeout(() => this.complete(), 600);
+        }
+
+        // 🖤 Update UI
+        this.updateUI(Math.round(this.progress));
+
+        // 🖤 Complete when we hit 100%
+        if (this.progress >= 100 && !this.isComplete) {
+            setTimeout(() => this.complete(), 400);
+            return;
+        }
+
+        // 🔄 Continue animation
+        this.animationFrame = requestAnimationFrame(() => this.animate());
+    },
+
+    // 📊 Check if game is ready
+    checkReady() {
+        if (this.isReady) return;
+
+        try {
+            if (this.finalCheck()) {
+                console.log('🖤 LoadingManager: All systems ready!');
+                this.isReady = true;
+                clearInterval(this.checkInterval);
+            }
+        } catch (e) {
+            // Not ready yet
         }
 
         // 🖤 Timeout fallback
         const elapsed = Date.now() - this.startTime;
-        if (elapsed > this.maxWaitTime && !this.isComplete) {
+        if (elapsed > this.maxWaitTime && !this.isReady) {
             console.warn(`🖤 LoadingManager: Timeout after ${elapsed}ms. Force-completing...`);
-            this.progress = 100;
-            this.updateUI(100);
-            setTimeout(() => this.complete(), 300);
+            this.isReady = true;
+            clearInterval(this.checkInterval);
         }
     },
 
@@ -116,7 +115,7 @@ const LoadingManager = {
         const titleEl = document.getElementById('loading-title');
         const statusEl = document.getElementById('loading-status');
 
-        // 🖤 Update progress bar (CSS transition handles smoothness)
+        // 🖤 Update progress bar
         if (fill) {
             fill.style.width = progress + '%';
         }
@@ -139,12 +138,18 @@ const LoadingManager = {
         if (this.isComplete) return;
         this.isComplete = true;
 
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+        }
         clearInterval(this.checkInterval);
 
         const elapsed = Date.now() - this.startTime;
-        console.log(`🖤 LoadingManager: Everything loaded in ${elapsed}ms! Time to suffer in the medieval economy.`);
+        console.log(`🖤 LoadingManager: Everything loaded in ${elapsed}ms!`);
 
-        // 🌙 Transition to menu
+        // 🖤 Ensure UI shows 100%
+        this.updateUI(100);
+
+        // 🌙 Brief pause at 100%, then transition to menu
         setTimeout(() => {
             const loadingScreen = document.getElementById('loading-screen');
             const mainMenu = document.getElementById('main-menu');
@@ -158,23 +163,18 @@ const LoadingManager = {
             }
 
             console.log('🖤 LoadingManager: Main menu revealed. Let the games begin.');
-        }, 400);
+        }, 500);
     },
 
-    // 🔧 Debug helper - check what's missing
+    // 🔧 Debug helper
     debugStatus() {
         console.log('🖤 LoadingManager Debug:');
-        console.log(`  Progress: ${this.progress}%`);
+        console.log(`  Progress: ${this.progress.toFixed(1)}%`);
+        console.log(`  Target: ${this.targetProgress.toFixed(1)}%`);
+        console.log(`  Ready: ${this.isReady}`);
         console.log(`  Elapsed: ${Date.now() - this.startTime}ms`);
-        this.systems.forEach(sys => {
-            let status = '❌';
-            try {
-                status = sys.check() ? '✅' : '❌';
-            } catch (e) {
-                status = '💥';
-            }
-            console.log(`  ${sys.name}: ${status}`);
-        });
+        console.log(`  startNewGame: ${typeof startNewGame}`);
+        console.log(`  window.startNewGame: ${typeof window.startNewGame}`);
     }
 };
 
