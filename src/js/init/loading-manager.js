@@ -6,8 +6,18 @@
 // ═══════════════════════════════════════════════════════════════
 
 const LoadingManager = {
-    // 📊 Final system check - everything else loads too fast to track individually
-    finalCheck: () => typeof startNewGame === 'function' || typeof window.startNewGame === 'function',
+    // 📊 Final system check - game.js sets window.startNewGame at the very end (line 9626)
+    finalCheck: () => {
+        // Check window.startNewGame - this is set at the end of game.js
+        if (typeof window.startNewGame === 'function') {
+            return true;
+        }
+        // Fallback: check if game object exists (defined earlier in game.js)
+        if (typeof game !== 'undefined' && typeof GameWorld !== 'undefined') {
+            return true;
+        }
+        return false;
+    },
 
     // 📊 Status messages based on progress
     statusMessages: [
@@ -97,13 +107,28 @@ const LoadingManager = {
                 clearInterval(this.checkInterval);
             }
         } catch (e) {
-            // Not ready yet
+            console.warn('🖤 LoadingManager: Check error:', e.message);
+        }
+
+        // 🖤 Debug logging every 5 seconds
+        const elapsed = Date.now() - this.startTime;
+        if (elapsed > 5000 && elapsed % 5000 < 100) {
+            console.log('🖤 LoadingManager: Still waiting...', {
+                elapsed: Math.round(elapsed / 1000) + 's',
+                'window.startNewGame': typeof window.startNewGame,
+                'game': typeof game,
+                'GameWorld': typeof GameWorld
+            });
         }
 
         // 🖤 Timeout fallback
-        const elapsed = Date.now() - this.startTime;
         if (elapsed > this.maxWaitTime && !this.isReady) {
             console.warn(`🖤 LoadingManager: Timeout after ${elapsed}ms. Force-completing...`);
+            console.warn('🖤 Final state:', {
+                'window.startNewGame': typeof window.startNewGame,
+                'game': typeof game,
+                'GameWorld': typeof GameWorld
+            });
             this.isReady = true;
             clearInterval(this.checkInterval);
         }
