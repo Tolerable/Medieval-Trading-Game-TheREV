@@ -2,8 +2,9 @@
 ## Medieval Trading Game - Debug Console Documentation
 
 **Version:** 0.7
-**Last Updated:** 2025-11-27
+**Last Updated:** 2025-11-28
 **Access:** Unlocked via "Super Hacker" achievement OR backtick key (`)
+**Total Commands:** 30
 
 ---
 
@@ -11,16 +12,56 @@
 
 ---
 
+## COMPLETE COMMAND LIST (A-Z)
+
+All 30 debug commands in alphabetical order:
+
+| # | Command | Description |
+|---|---------|-------------|
+| 1 | `advancetime <hours>` | Advance time by hours |
+| 2 | `clear` | Clear the debug console |
+| 3 | `clearinventory` | Clear player inventory |
+| 4 | `clearleaderboard` | Clear all entries from the Hall of Champions |
+| 5 | `encounter [type]` | Spawn random encounter |
+| 6 | `gamestate` | Show current game state |
+| 7 | `geecashnow` | Add 1000 gold (respects carry weight) |
+| 8 | `givegold <amount>` | Add gold to player |
+| 9 | `giveitem <itemId> [qty]` | Add item to inventory |
+| 10 | `giveproperty <type>` | Give property to player |
+| 11 | `heal` | Fully heal player |
+| 12 | `help` | Show all available commands |
+| 13 | `listachievements` | List all achievements |
+| 14 | `listitems` | List all item IDs |
+| 15 | `listlocations` | List all locations |
+| 16 | `listnpctypes` | List all NPC encounter types |
+| 17 | `merchant` | Spawn merchant encounter |
+| 18 | `refreshleaderboard` | Force refresh Hall of Champions display |
+| 19 | `reload` | Reload the game |
+| 20 | `resetachievements` | Reset all achievements |
+| 21 | `setgold <amount>` | Set gold to exact amount |
+| 22 | `setstat <stat> <value>` | Set player stat value |
+| 23 | `showgold` | Show gold from all sources |
+| 24 | `showleaderboard` | Show all leaderboard entries in console |
+| 25 | `smuggler` | Spawn smuggler encounter (rare items) |
+| 26 | `teleport <locationId>` | Teleport to location |
+| 27 | `testachievement` | Test achievement popup (unlocks 3 random) |
+| 28 | `trader` | Spawn random trader encounter |
+| 29 | `unlockachievement <id>` | Unlock specific achievement |
+| 30 | `unlockall` | Unlock ALL achievements (triggers Super Hacker!) |
+| 31 | `verifyeconomy` | Verify circular economy chains |
+
+---
+
 ## TABLE OF CONTENTS
 
-1. [Unlocking the Debug Console](#unlocking-the-debug-console)
-2. [Opening the Console](#opening-the-console)
-3. [Command Reference](#command-reference)
+1. [Complete Command List](#complete-command-list-a-z)
+2. [Unlocking the Debug Console](#unlocking-the-debug-console)
+3. [Opening the Console](#opening-the-console)
 4. [Gold & Economy Commands](#gold--economy-commands)
 5. [Travel & Location Commands](#travel--location-commands)
-6. [Time & Weather Commands](#time--weather-commands)
+6. [Time Commands](#time-commands)
 7. [Achievement Commands](#achievement-commands)
-8. [Quest Commands](#quest-commands)
+8. [Leaderboard Commands](#leaderboard-commands)
 9. [Item & Inventory Commands](#item--inventory-commands)
 10. [NPC & Encounter Commands](#npc--encounter-commands)
 11. [Player Stats Commands](#player-stats-commands)
@@ -57,29 +98,6 @@ The console appears as a dark overlay with:
 
 ---
 
-## COMMAND REFERENCE
-
-### Quick Reference Table
-
-| Command | Description | Example |
-|---------|-------------|---------|
-| `help` | Show all commands | `help` |
-| `geecashnow` | Add 1000 gold | `geecashnow` |
-| `gold <amount>` | Set gold to amount | `gold 5000` |
-| `addgold <amount>` | Add gold | `addgold 500` |
-| `teleport <location>` | Instant travel | `teleport capital` |
-| `time <hours>` | Advance time | `time 24` |
-| `weather <type>` | Change weather | `weather storm` |
-| `unlock <achievement>` | Unlock achievement | `unlock first_steps` |
-| `quest <action> <id>` | Quest manipulation | `quest complete main_prologue` |
-| `spawn <item> <qty>` | Add items | `spawn iron_sword 1` |
-| `encounter` | Trigger encounter | `encounter` |
-| `heal` | Full heal | `heal` |
-| `god` | Toggle god mode | `god` |
-| `clear` | Clear console | `clear` |
-
----
-
 ## GOLD & ECONOMY COMMANDS
 
 ### geecashnow
@@ -89,35 +107,42 @@ The classic cheat code. Adds 1000 gold (respects carry weight).
 💰 Added 1000 gold! Total: 1100
 ```
 
-### gold <amount>
+### givegold <amount>
+Adds gold to player inventory.
+```
+> givegold 500
+💰 Added 500 gold! Total: 1500
+```
+
+### setgold <amount>
 Sets your gold to an exact amount.
 ```
-> gold 10000
+> setgold 10000
 💰 Gold set to 10000
 ```
 
-### addgold <amount>
-Adds (or removes with negative) gold from your inventory.
+### showgold
+Shows gold from all sources (inventory, bank, properties).
 ```
-> addgold 500
-💰 Added 500 gold! Total: 1500
-
-> addgold -200
-💰 Removed 200 gold! Total: 1300
-```
-
-### bankrupt
-Sets gold to -999 (one step from game over).
-```
-> bankrupt
-💀 You're now at -999 gold. One more misstep and it's jail time...
+> showgold
+💰 Gold Summary:
+  Inventory: 1,500
+  Bank: 5,000
+  Total: 6,500
 ```
 
-### richbitch
-Sets gold to 1,000,000 (instant Royal Merchant status).
+### giveproperty <type>
+Gives a property to the player.
 ```
-> richbitch
-👑 1,000,000 gold! You're basically royalty now.
+> giveproperty warehouse
+🏠 Property added: Warehouse
+```
+
+### verifyeconomy
+Verifies circular economy chains are functioning.
+```
+> verifyeconomy
+✅ Economy verification complete
 ```
 
 ---
@@ -142,12 +167,12 @@ Instantly travel to any location without time passing or stamina cost.
 - `mistwood` - Mistwood Forest
 - `dragons_peak` - Dragon's Peak
 - `frozen_north` - Frozen North
-- And 20+ more (use `locations` to see all)
+- And 20+ more (use `listlocations` to see all)
 
-### locations
+### listlocations
 Lists all available location IDs.
 ```
-> locations
+> listlocations
 📍 Available locations:
   - capital (The Royal Capital)
   - greendale (Greendale Village)
@@ -155,105 +180,49 @@ Lists all available location IDs.
   ...
 ```
 
-### unlock_gates
-Unlocks all gatehouses without paying fees.
-```
-> unlock_gates
-🚪 All gatehouses unlocked! Travel freely, you magnificent bastard.
-```
-
-### explore_all
-Marks all locations as discovered on the map.
-```
-> explore_all
-🗺️ All locations revealed! The map holds no more secrets.
-```
-
 ---
 
-## TIME & WEATHER COMMANDS
+## TIME COMMANDS
 
-### time <hours>
+### advancetime <hours>
 Advances game time by specified hours.
 ```
-> time 24
+> advancetime 24
 ⏰ Advanced time by 24 hours. It's now Day 2, 08:00
 
-> time 168
+> advancetime 168
 ⏰ Advanced time by 168 hours. It's now Day 8, 08:00
-```
-
-### settime <hour>
-Sets the current hour (0-23).
-```
-> settime 12
-⏰ Time set to 12:00 (Noon)
-
-> settime 0
-⏰ Time set to 00:00 (Midnight)
-```
-
-### weather <type>
-Changes the current weather immediately.
-```
-> weather storm
-🌧️ Weather changed to: Thunderstorm
-
-> weather clear
-☀️ Weather changed to: Clear Skies
-
-> weather snow
-❄️ Weather changed to: Heavy Snow
-```
-
-**Valid Weather Types:**
-- `clear` - Clear skies
-- `cloudy` - Overcast
-- `rain` - Light rain
-- `storm` - Thunderstorm
-- `snow` - Snowfall
-- `blizzard` - Heavy blizzard
-- `fog` - Dense fog
-
-### season <name>
-Changes the current season (affects weather probabilities).
-```
-> season winter
-❄️ Season changed to Winter
-
-> season summer
-☀️ Season changed to Summer
 ```
 
 ---
 
 ## ACHIEVEMENT COMMANDS
 
-### unlock <achievement_id>
+### unlockachievement <achievement_id>
 Unlocks a specific achievement.
 ```
-> unlock first_steps
+> unlockachievement first_steps
 🏆 Unlocked: First Steps - Begin your trading journey
 ```
 
-### unlock_all
-Unlocks ALL achievements (including hidden ones).
+### unlockall
+Unlocks ALL achievements (including hidden ones). Triggers Super Hacker!
 ```
-> unlock_all
+> unlockall
 🏆 All 72 achievements unlocked! You absolute legend.
 ```
 
-### reset_achievements
+### resetachievements
 Resets all achievement progress (cannot be undone!).
 ```
-> reset_achievements
+> resetachievements
 ⚠️ All achievements reset. Starting fresh...
 ```
 
-### achievements
+### listachievements
 Lists all achievements and their status.
 ```
-> achievements
+> listachievements
 🏆 Achievements: 45/72 unlocked
   [x] First Steps
   [x] Pocket Change
@@ -261,72 +230,62 @@ Lists all achievements and their status.
   ...
 ```
 
+### testachievement
+Tests achievement popup by unlocking 3 random locked achievements.
+```
+> testachievement
+🏆 Testing achievement popups... Unlocking 3 random achievements!
+```
+
 ---
 
-## QUEST COMMANDS
+## LEADERBOARD COMMANDS
 
-### quest list
-Shows all quests and their status.
+### clearleaderboard
+Clears all entries from the Hall of Champions.
 ```
-> quest list
-📜 Active Quests:
-  - main_prologue: A New Beginning (In Progress)
-  - greendale_herbs: Herb Gathering (Ready to Complete)
-
-📜 Completed Quests:
-  - tutorial_welcome: Welcome to the Game
+> clearleaderboard
+🏆 Hall of Champions cleared!
 ```
 
-### quest start <quest_id>
-Starts a specific quest.
+### refreshleaderboard
+Force refresh the Hall of Champions display.
 ```
-> quest start main_prologue
-📜 Quest started: A New Beginning
-```
-
-### quest complete <quest_id>
-Instantly completes a quest (grants rewards).
-```
-> quest complete greendale_herbs
-📜 Quest completed: Herb Gathering
-💰 Reward: 150 gold, 50 XP
+> refreshleaderboard
+🔄 Leaderboard refreshed!
 ```
 
-### quest fail <quest_id>
-Marks a quest as failed.
+### showleaderboard
+Show all leaderboard entries in the debug console.
 ```
-> quest fail main_shadow_key
-📜 Quest failed: The Shadow Key
-```
-
-### quest reset
-Resets ALL quest progress (dangerous!).
-```
-> quest reset
-⚠️ All quest progress reset!
+> showleaderboard
+🏆 Leaderboard entries:
+  1. Merchant King - 1,500,000 gold
+  2. Trade Master - 1,200,000 gold
+  ...
 ```
 
 ---
 
 ## ITEM & INVENTORY COMMANDS
 
-### spawn <item_id> [quantity]
+### giveitem <item_id> [quantity]
 Adds items to your inventory.
 ```
-> spawn iron_sword 1
+> giveitem iron_sword 1
 📦 Added 1x Iron Sword to inventory
 
-> spawn bread 50
+> giveitem bread 50
 📦 Added 50x Bread to inventory
 
-> spawn gold_bar 10
+> giveitem gold_bar 10
 📦 Added 10x Gold Bar to inventory
 ```
 
-### items
+### listitems
 Lists all valid item IDs.
 ```
-> items
+> listitems
 📦 Available items (177 total):
   Resources: wood, stone, iron_ore, copper_ore, coal...
   Food: bread, meat, cheese, fish, vegetables...
@@ -334,31 +293,27 @@ Lists all valid item IDs.
   ...
 ```
 
-### clear_inventory
+### clearinventory
 Removes ALL items from inventory (keeps gold).
 ```
-> clear_inventory
+> clearinventory
 📦 Inventory cleared! Hope you didn't need that stuff.
-```
-
-### fill_inventory
-Fills inventory with one of each item type.
-```
-> fill_inventory
-📦 Inventory filled with sample items!
 ```
 
 ---
 
 ## NPC & ENCOUNTER COMMANDS
 
-### encounter
-Triggers a random encounter immediately.
+### encounter [type]
+Triggers a random encounter immediately, optionally of a specific type.
 ```
 > encounter
 🎭 Random encounter triggered!
   Type: Wandering Merchant
   Name: Marcus the Trader
+
+> encounter bandit
+🎭 Spawned bandit encounter!
 ```
 
 ### trader
@@ -368,20 +323,29 @@ Spawns a random trader encounter.
 🎭 Spawned trader encounter: Elena the Peddler
 ```
 
-### spawn_npc <type>
-Spawns a specific NPC type at current location.
+### merchant
+Spawns a merchant encounter.
 ```
-> spawn_npc merchant
-👤 Spawned: Merchant NPC
-
-> spawn_npc bandit
-👤 Spawned: Bandit NPC (hostile)
+> merchant
+🎭 Spawned merchant encounter: Thomas the Trader
 ```
 
-**Valid NPC Types:**
-- `merchant`, `blacksmith`, `innkeeper`, `guard`
-- `bandit`, `thief`, `traveler`, `pilgrim`
-- `noble`, `peasant`, `courier`, `smuggler`
+### smuggler
+Spawns a smuggler encounter (rare items).
+```
+> smuggler
+🎭 Spawned smuggler encounter: Shadow Dealer
+```
+
+### listnpctypes
+Lists all available NPC encounter types.
+```
+> listnpctypes
+👤 NPC Types:
+  merchant, blacksmith, innkeeper, guard
+  bandit, thief, traveler, pilgrim
+  noble, peasant, courier, smuggler
+```
 
 ---
 
@@ -394,44 +358,14 @@ Fully restores health, hunger, thirst, and energy.
 💚 Fully healed! Health, hunger, thirst, energy all maxed.
 ```
 
-### god
-Toggles god mode (invincibility, infinite stamina).
-```
-> god
-⚡ God mode ENABLED - You are immortal!
-
-> god
-⚡ God mode DISABLED - Back to being mortal.
-```
-
-### stats
-Shows current player stats.
-```
-> stats
-📊 Player Stats:
-  Health: 85/100
-  Hunger: 60/100
-  Thirst: 45/100
-  Energy: 70/100
-  Gold: 1,500
-  Carry Weight: 45/100
-```
-
-### setstats <stat> <value>
+### setstat <stat> <value>
 Sets a specific stat value.
 ```
-> setstats health 100
+> setstat health 100
 💚 Health set to 100
 
-> setstats strength 10
+> setstat strength 10
 💪 Strength set to 10
-```
-
-### level <amount>
-Adds experience/levels.
-```
-> level 5
-⬆️ Added 5 levels! Now level 6.
 ```
 
 ---
@@ -444,7 +378,7 @@ Shows all available commands.
 > help
 📋 Debug Commands:
   geecashnow - Add 1000 gold
-  gold <amount> - Set gold
+  givegold <amount> - Add gold
   ...
 ```
 
@@ -455,35 +389,16 @@ Clears the debug console output.
 (Console cleared)
 ```
 
-### save
-Forces an immediate save.
+### gamestate
+Shows current game state information.
 ```
-> save
-💾 Game saved!
-```
-
-### load
-Opens the load game dialog.
-```
-> load
-💾 Opening load dialog...
-```
-
-### reset
-Resets the ENTIRE game to fresh state (DANGEROUS!).
-```
-> reset
-⚠️ Are you sure? Type 'reset confirm' to proceed.
-
-> reset confirm
-💀 Game reset to initial state.
-```
-
-### fps
-Shows current FPS and performance stats.
-```
-> fps
-📊 FPS: 60 | Memory: 45MB | Listeners: 234
+> gamestate
+📊 Game State:
+  Location: The Royal Capital
+  Gold: 1,500
+  Day: 5
+  Time: 14:30
+  ...
 ```
 
 ### reload
