@@ -51,6 +51,13 @@ STEP 6: ADD DISCOVERED TODOS
        - Document what still needs to be done
        - Update todo.md with session summary
        ↓
+STEP 7: GIT PUSH CHANGES
+       - Stage changes: git add .
+       - Commit with descriptive message
+       - Push to origin main: git push origin main
+       - If push is rejected, use: git push --force origin main
+       - NEVER git pull to this directory
+       ↓
 DONE 🖤
 ```
 
@@ -63,6 +70,22 @@ DONE 🖤
 3. **Finish what you start** - complete current task before moving on
 4. **Document as you go** - update readmes after code changes
 5. **Track with TodoWrite** - use the tool, mark items in_progress/completed
+
+---
+
+## GIT RULES (CRITICAL)
+
+**NEVER git pull to this directory** - the local folder is the source of truth.
+
+When pushing:
+1. `git add .` - stage all changes
+2. `git commit -m "descriptive message"` - commit with proper message
+3. `git push origin main` - push to remote
+
+If push is rejected (remote has changes):
+- Use `git push --force origin main`
+- DO NOT use `git pull` - this will overwrite local changes
+- The local folder is always authoritative
 
 ---
 

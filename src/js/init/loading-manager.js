@@ -6,13 +6,17 @@
 // ═══════════════════════════════════════════════════════════════
 
 const LoadingManager = {
-    // 📊 Final system check - game.js sets window.startNewGame at the very end (line 9626)
+    // 📊 Final system check - multiple indicators that game is ready
     finalCheck: () => {
-        // Check window.startNewGame - this is set at the end of game.js
+        // Primary: window.startNewGame is set at end of game.js (line 9626)
         if (typeof window.startNewGame === 'function') {
             return true;
         }
-        // Fallback: check if game object exists (defined earlier in game.js)
+        // Secondary: Bootstrap.initialized is set after all systems init
+        if (typeof Bootstrap !== 'undefined' && Bootstrap.initialized === true) {
+            return true;
+        }
+        // Tertiary: game object + GameWorld both exist (earlier in load)
         if (typeof game !== 'undefined' && typeof GameWorld !== 'undefined') {
             return true;
         }
@@ -116,6 +120,7 @@ const LoadingManager = {
             console.log('🖤 LoadingManager: Still waiting...', {
                 elapsed: Math.round(elapsed / 1000) + 's',
                 'window.startNewGame': typeof window.startNewGame,
+                'Bootstrap.initialized': typeof Bootstrap !== 'undefined' ? Bootstrap.initialized : 'undefined',
                 'game': typeof game,
                 'GameWorld': typeof GameWorld
             });
@@ -126,6 +131,7 @@ const LoadingManager = {
             console.warn(`🖤 LoadingManager: Timeout after ${elapsed}ms. Force-completing...`);
             console.warn('🖤 Final state:', {
                 'window.startNewGame': typeof window.startNewGame,
+                'Bootstrap.initialized': typeof Bootstrap !== 'undefined' ? Bootstrap.initialized : 'undefined',
                 'game': typeof game,
                 'GameWorld': typeof GameWorld
             });
