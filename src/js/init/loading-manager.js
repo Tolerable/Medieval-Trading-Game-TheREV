@@ -6,93 +6,98 @@
 // ═══════════════════════════════════════════════════════════════
 
 const LoadingManager = {
-    // 📊 Systems to track - order matters for progress bar
+    // 📊 Systems to track - more systems = smoother progress
+    // Order roughly matches script loading order for accurate progress
     systems: [
-        { name: 'GameConfig', check: () => typeof GameConfig !== 'undefined', label: 'Loading configuration...' },
-        { name: 'GameWorld', check: () => typeof GameWorld !== 'undefined', label: 'Generating world...' },
-        { name: 'ItemDatabase', check: () => typeof ItemDatabase !== 'undefined', label: 'Loading items...' },
-        { name: 'TradingSystem', check: () => typeof TradingSystem !== 'undefined', label: 'Setting up markets...' },
-        { name: 'QuestSystem', check: () => typeof QuestSystem !== 'undefined', label: 'Preparing quests...' },
-        { name: 'AchievementSystem', check: () => typeof AchievementSystem !== 'undefined', label: 'Loading achievements...' },
-        { name: 'TravelSystem', check: () => typeof TravelSystem !== 'undefined', label: 'Mapping routes...' },
-        { name: 'SaveManager', check: () => typeof SaveManager !== 'undefined', label: 'Checking saves...' },
-        { name: 'GameReady', check: () => typeof startNewGame === 'function' || typeof window.startNewGame === 'function', label: 'Finalizing...' }
+        // Early systems (config, utils)
+        { name: 'GameConfig', check: () => typeof GameConfig !== 'undefined' },
+        { name: 'EventManager', check: () => typeof EventManager !== 'undefined' },
+        { name: 'TimerManager', check: () => typeof TimerManager !== 'undefined' },
+
+        // Core data systems
+        { name: 'GameWorld', check: () => typeof GameWorld !== 'undefined' },
+        { name: 'ItemDatabase', check: () => typeof ItemDatabase !== 'undefined' },
+        { name: 'UnifiedItemSystem', check: () => typeof UnifiedItemSystem !== 'undefined' },
+
+        // Game systems
+        { name: 'TimeSystem', check: () => typeof TimeSystem !== 'undefined' },
+        { name: 'TradingSystem', check: () => typeof TradingSystem !== 'undefined' },
+        { name: 'TravelSystem', check: () => typeof TravelSystem !== 'undefined' },
+        { name: 'QuestSystem', check: () => typeof QuestSystem !== 'undefined' },
+
+        // UI systems
+        { name: 'AchievementSystem', check: () => typeof AchievementSystem !== 'undefined' },
+        { name: 'TooltipSystem', check: () => typeof TooltipSystem !== 'undefined' },
+        { name: 'ModalSystem', check: () => typeof ModalSystem !== 'undefined' },
+
+        // Late systems (panels, save)
+        { name: 'SaveManager', check: () => typeof SaveManager !== 'undefined' },
+        { name: 'SettingsPanel', check: () => typeof SettingsPanel !== 'undefined' },
+        { name: 'GlobalLeaderboardSystem', check: () => typeof GlobalLeaderboardSystem !== 'undefined' },
+
+        // Final check - game.js fully loaded
+        { name: 'GameReady', check: () => typeof startNewGame === 'function' || typeof window.startNewGame === 'function' }
+    ],
+
+    // 📊 Status messages based on progress
+    statusMessages: [
+        { threshold: 0, title: 'Awakening the void...', status: 'Initializing...' },
+        { threshold: 10, title: 'Loading core systems...', status: 'Loading configuration...' },
+        { threshold: 20, title: 'Generating world...', status: 'Creating locations...' },
+        { threshold: 35, title: 'Loading items...', status: 'Filling warehouses...' },
+        { threshold: 50, title: 'Setting up markets...', status: 'Hiring merchants...' },
+        { threshold: 65, title: 'Preparing quests...', status: 'Writing adventures...' },
+        { threshold: 80, title: 'Almost there...', status: 'Final preparations...' },
+        { threshold: 95, title: 'Ready to trade!', status: 'Welcome, merchant...' }
     ],
 
     // 📊 State
-    progress: 0,              // 🖤 Actual system progress (0-100)
-    displayProgress: 0,       // 🖤 Smooth visual progress (animated)
+    progress: 0,
     isComplete: false,
     checkInterval: null,
-    animationFrame: null,
     startTime: 0,
-    maxWaitTime: 20000,       // 🖤 Max 20 seconds before force-completing
+    maxWaitTime: 25000,  // 🖤 Max 25 seconds before force-completing
 
     // 🚀 Start monitoring loading progress
     init() {
         console.log('🖤 LoadingManager: Starting to watch the void fill up...');
         this.startTime = Date.now();
-        this.displayProgress = 0;
         this.progress = 0;
-        this.updateUI(0, 'Summoning medieval times...');
+        this.updateUI(0);
 
-        // 🖤 Check systems every 100ms
-        this.checkInterval = setInterval(() => this.checkSystems(), 100);
-
-        // 🎨 Smooth animation loop for progress bar (60fps)
-        this.animateProgress();
-    },
-
-    // 🎨 Smooth progress bar animation - interpolates to actual progress
-    animateProgress() {
-        if (this.isComplete) return;
-
-        // 🖤 Smoothly interpolate display progress toward actual progress
-        // Faster lerp when catching up, slower when close
-        const diff = Math.abs(this.progress - this.displayProgress);
-        const lerpSpeed = diff > 20 ? 0.12 : diff > 10 ? 0.08 : 0.05;
-
-        this.displayProgress += (this.progress - this.displayProgress) * lerpSpeed;
-
-        // 🖤 Ensure we reach 100% exactly when complete
-        if (this.progress >= 100 && this.displayProgress > 99) {
-            this.displayProgress = 100;
-        }
-
-        // 🖤 Update UI with smooth progress
-        this.updateUISmooth(Math.round(this.displayProgress));
-
-        // 🔄 Continue animation
-        this.animationFrame = requestAnimationFrame(() => this.animateProgress());
+        // 🖤 Check systems frequently for smooth progress
+        this.checkInterval = setInterval(() => this.checkProgress(), 50);
     },
 
     // 📊 Check how many systems are loaded
-    checkSystems() {
+    checkProgress() {
         let loaded = 0;
-        let currentLabel = 'Loading...';
 
         for (let i = 0; i < this.systems.length; i++) {
-            const sys = this.systems[i];
-            if (sys.check()) {
-                loaded++;
-            } else {
-                currentLabel = sys.label;
-                break; // 🖤 stop at first unloaded system
+            try {
+                if (this.systems[i].check()) {
+                    loaded++;
+                }
+            } catch (e) {
+                // System check failed, not loaded yet
             }
         }
 
-        // 🖤 Calculate actual progress
-        this.progress = Math.round((loaded / this.systems.length) * 100);
+        // 🖤 Calculate progress percentage
+        const newProgress = Math.round((loaded / this.systems.length) * 100);
 
-        // 🖤 Update status text
-        const statusEl = document.getElementById('loading-status');
-        if (statusEl) statusEl.textContent = currentLabel;
+        // 🖤 Only update if progress increased (never go backwards)
+        if (newProgress > this.progress) {
+            this.progress = newProgress;
+            this.updateUI(this.progress);
+        }
 
         // 💀 All systems loaded?
         if (loaded === this.systems.length && !this.isComplete) {
             this.progress = 100;
-            // 🖤 Small delay to show 100% before completing
-            setTimeout(() => this.complete(), 800);
+            this.updateUI(100);
+            // 🖤 Brief pause at 100% so user sees it
+            setTimeout(() => this.complete(), 600);
         }
 
         // 🖤 Timeout fallback
@@ -100,39 +105,33 @@ const LoadingManager = {
         if (elapsed > this.maxWaitTime && !this.isComplete) {
             console.warn(`🖤 LoadingManager: Timeout after ${elapsed}ms. Force-completing...`);
             this.progress = 100;
-            setTimeout(() => this.complete(), 500);
+            this.updateUI(100);
+            setTimeout(() => this.complete(), 300);
         }
     },
 
-    // 🎨 Update UI with smooth progress value
-    updateUISmooth(progress) {
+    // 🎨 Update the loading UI
+    updateUI(progress) {
         const fill = document.getElementById('loading-progress-fill');
         const titleEl = document.getElementById('loading-title');
-
-        if (fill) fill.style.width = progress + '%';
-
-        // 🖤 Fun loading messages based on progress
-        if (titleEl) {
-            if (progress < 15) titleEl.textContent = 'Awakening the void...';
-            else if (progress < 30) titleEl.textContent = 'Summoning merchants...';
-            else if (progress < 50) titleEl.textContent = 'Forging trade routes...';
-            else if (progress < 70) titleEl.textContent = 'Polishing gold coins...';
-            else if (progress < 90) titleEl.textContent = 'Almost there...';
-            else titleEl.textContent = 'Ready to trade!';
-        }
-    },
-
-    // 🎨 Update the loading UI (legacy, used for initial state)
-    updateUI(progress, status) {
-        const fill = document.getElementById('loading-progress-fill');
         const statusEl = document.getElementById('loading-status');
-        const titleEl = document.getElementById('loading-title');
 
-        if (fill) fill.style.width = progress + '%';
-        if (statusEl) statusEl.textContent = status;
-        if (titleEl && progress === 0) titleEl.textContent = 'Awakening the void...';
+        // 🖤 Update progress bar (CSS transition handles smoothness)
+        if (fill) {
+            fill.style.width = progress + '%';
+        }
 
-        this.displayProgress = progress;
+        // 🖤 Find appropriate status message
+        let message = this.statusMessages[0];
+        for (let i = this.statusMessages.length - 1; i >= 0; i--) {
+            if (progress >= this.statusMessages[i].threshold) {
+                message = this.statusMessages[i];
+                break;
+            }
+        }
+
+        if (titleEl) titleEl.textContent = message.title;
+        if (statusEl) statusEl.textContent = message.status;
     },
 
     // ✅ Loading complete - show the menu
@@ -141,22 +140,11 @@ const LoadingManager = {
         this.isComplete = true;
 
         clearInterval(this.checkInterval);
-        if (this.animationFrame) {
-            cancelAnimationFrame(this.animationFrame);
-        }
 
-        console.log('🖤 LoadingManager: Everything loaded! Time to suffer in the medieval economy.');
+        const elapsed = Date.now() - this.startTime;
+        console.log(`🖤 LoadingManager: Everything loaded in ${elapsed}ms! Time to suffer in the medieval economy.`);
 
-        // 🖤 Force 100% and final message
-        const fill = document.getElementById('loading-progress-fill');
-        const titleEl = document.getElementById('loading-title');
-        const statusEl = document.getElementById('loading-status');
-
-        if (fill) fill.style.width = '100%';
-        if (titleEl) titleEl.textContent = 'Ready to trade!';
-        if (statusEl) statusEl.textContent = 'Welcome, merchant...';
-
-        // 🌙 Small delay to show 100%, then transition to menu
+        // 🌙 Transition to menu
         setTimeout(() => {
             const loadingScreen = document.getElementById('loading-screen');
             const mainMenu = document.getElementById('main-menu');
@@ -170,16 +158,22 @@ const LoadingManager = {
             }
 
             console.log('🖤 LoadingManager: Main menu revealed. Let the games begin.');
-        }, 500);
+        }, 400);
     },
 
     // 🔧 Debug helper - check what's missing
     debugStatus() {
         console.log('🖤 LoadingManager Debug:');
-        console.log(`  Actual Progress: ${this.progress}%`);
-        console.log(`  Display Progress: ${this.displayProgress}%`);
+        console.log(`  Progress: ${this.progress}%`);
+        console.log(`  Elapsed: ${Date.now() - this.startTime}ms`);
         this.systems.forEach(sys => {
-            console.log(`  ${sys.name}: ${sys.check() ? '✅' : '❌'}`);
+            let status = '❌';
+            try {
+                status = sys.check() ? '✅' : '❌';
+            } catch (e) {
+                status = '💥';
+            }
+            console.log(`  ${sys.name}: ${status}`);
         });
     }
 };
