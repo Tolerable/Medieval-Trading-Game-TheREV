@@ -20,6 +20,9 @@ module.exports = {
   // Test main menu buttons and navigation
   mainMenuTests: false,
 
+  // 🖤 GAME FLOW TESTS - Complete game lifecycle (Unity Agent F)
+  gameFlowTests: true,
+
   // ═══════════════════════════════════════════════════════════════
   // 🐛 DEBUG & CHEAT COMMAND TESTS
   // ═══════════════════════════════════════════════════════════════

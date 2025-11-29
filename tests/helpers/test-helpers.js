@@ -43,34 +43,26 @@ async function startNewGame(page) {
     return panel && !panel.classList.contains('hidden');
   }, { timeout: 10000 });
 
-  // Fill name, spend points, and start game all in one evaluate call (faster)
+  // Fill name and spend attribute points
   await page.evaluate(() => {
     // Fill character name
     const nameInput = document.getElementById('character-name-input');
     if (nameInput) nameInput.value = 'TestCharacter';
 
-    // Spend all attribute points
-    if (typeof characterCreationState !== 'undefined') {
-      const attrs = ['strength', 'intelligence', 'charisma', 'endurance', 'luck'];
-      let pointsToSpend = characterCreationState.availableAttributePoints || 5;
-      let i = 0;
-      while (pointsToSpend > 0 && i < 20) {
-        const attr = attrs[i % attrs.length];
-        if (typeof increaseAttribute === 'function') {
-          increaseAttribute(attr);
-        }
-        pointsToSpend = characterCreationState.availableAttributePoints || 0;
-        i++;
-      }
-    }
-
-    // Enable and click start button
-    const btn = document.getElementById('start-game-btn');
-    if (btn) {
-      btn.disabled = false;
-      btn.click();
+    // Spend all attribute points by clicking increase buttons
+    const attrs = ['strength', 'intelligence', 'charisma', 'endurance', 'luck'];
+    for (let i = 0; i < 5; i++) {
+      const attr = attrs[i % attrs.length];
+      const btn = document.querySelector(`button[data-attr="${attr}"].attr-up`);
+      if (btn) btn.click();
     }
   });
+
+  await page.waitForTimeout(500);
+
+  // Click start button (should be enabled now)
+  await page.click('#start-game-btn');
+  await page.waitForTimeout(config.actionDelay);
 
   await page.waitForTimeout(config.actionDelay);
 
