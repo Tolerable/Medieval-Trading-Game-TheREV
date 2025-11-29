@@ -6869,6 +6869,63 @@ function cancelGameSetup() {
 // Expose globally for inline onclick handlers
 window.cancelGameSetup = cancelGameSetup;
 
+// 🏠 Quit from in-game menu back to main menu
+function quitToMainMenu() {
+    console.log('🏠 Quitting to main menu...');
+
+    // Hide game container
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+        gameContainer.classList.add('hidden');
+    }
+
+    // Hide all panels
+    document.querySelectorAll('.panel').forEach(panel => {
+        panel.classList.add('hidden');
+    });
+
+    // 🌦️ Stop game weather and restore menu weather
+    if (typeof WeatherSystem !== 'undefined') {
+        WeatherSystem.stopParticles();
+    }
+
+    // Get main menu elements
+    const mainMenu = document.getElementById('main-menu');
+    const menuContent = mainMenu?.querySelector('.menu-content');
+    const weatherContainer = document.getElementById('menu-weather-container');
+
+    // 🖤 Restore menu content visibility
+    if (menuContent) {
+        menuContent.style.display = '';
+        console.log('🖤 Menu content visibility restored');
+    }
+
+    // 🌦️ Move weather container back to main menu if it was moved
+    if (weatherContainer && mainMenu && weatherContainer.parentElement !== mainMenu) {
+        mainMenu.insertBefore(weatherContainer, mainMenu.firstChild);
+        console.log('🌦️ Weather container restored to main menu');
+    }
+
+    // 🖤 Make sure main menu is visible
+    if (mainMenu) {
+        mainMenu.classList.remove('hidden');
+    }
+
+    // Show main menu screen
+    showScreen('main-menu');
+    changeState(GameState.MENU);
+
+    // 🌦️ Restart menu weather system
+    if (typeof MenuWeatherSystem !== 'undefined') {
+        MenuWeatherSystem.stop(); // Stop any existing
+        setTimeout(() => MenuWeatherSystem.init(), 100); // Restart fresh
+        console.log('🌦️ Menu weather system restarted');
+    }
+
+    console.log('🏠 Returned to main menu');
+}
+window.quitToMainMenu = quitToMainMenu;
+
 function initializeGameWorld() {
     // Initialize GameWorld system
     GameWorld.init();
@@ -8851,9 +8908,7 @@ function toggleMenu() {
             if (confirm('Are you sure you want to quit? Unsaved progress will be lost.')) {
                 menuOverlay.classList.remove('active');
                 menuOverlay.style.display = 'none';
-                showScreen('main-menu');
-                changeState(GameState.MENU);
-                addMessage('Returned to main menu');
+                quitToMainMenu();
             }
         });
 
