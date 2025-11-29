@@ -1068,10 +1068,35 @@ const WeatherSystem = {
         const overlay = document.getElementById('game-weather-overlay');
         if (!overlay) return;
 
-        overlay.classList.add('lightning-flash');
+        // 🖤 Create a SEPARATE flash element so it doesn't interfere with weather overlay
+        // This prevents the flash from blanking out other weather effects
+        let flashEl = document.getElementById('lightning-flash-effect');
+        if (!flashEl) {
+            flashEl = document.createElement('div');
+            flashEl.id = 'lightning-flash-effect';
+            flashEl.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 16;
+                border-radius: inherit;
+                opacity: 0;
+                transition: opacity 0.05s ease-out;
+            `;
+            overlay.appendChild(flashEl);
+        }
+
+        // 🦇 Flash effect - subtle white/blue glow that fades quickly
+        flashEl.style.background = 'rgba(200, 220, 255, 0.15)';
+        flashEl.style.boxShadow = 'inset 0 0 60px rgba(150, 200, 255, 0.2)';
+        flashEl.style.opacity = '1';
+
         setTimeout(() => {
-            overlay.classList.remove('lightning-flash');
-        }, 150); // 🖤 Longer flash to match bolt animation
+            flashEl.style.opacity = '0';
+        }, 150); // 🖤 Flash duration to match bolt animation
 
         // ⚡ Create lightning bolt that strikes the ground at random position
         const particles = document.getElementById('weather-particles');
@@ -1508,11 +1533,8 @@ const WeatherSystem = {
                 animation: rain-splash 0.3s ease-out forwards;
                 pointer-events: none;
             }
-            .lightning-flash {
-                background: rgba(255, 255, 255, 0.9) !important;
-                transition: none !important;
-                box-shadow: inset 0 0 100px rgba(150, 200, 255, 0.5) !important;
-            }
+            /* 🖤 Lightning flash is now a separate element to prevent blanking other effects */
+            /* See flashLightning() - creates #lightning-flash-effect dynamically */
 
             /* ⚡ Lightning bolt column - strikes DOWN from top to landing point */
             @keyframes bolt-strike-down {

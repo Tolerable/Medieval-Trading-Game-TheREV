@@ -30,6 +30,17 @@ const PanelManager = {
         'quest-tracker': { name: 'Quest Tracker', icon: '📋', shortcut: '', customToggle: 'QuestSystem.toggleQuestTracker()' }
     },
 
+    // 🖤 Panels that should NOT get close buttons (they have their own or are special)
+    noCloseButtonPanels: [
+        'panel-toolbar',      // The Panels panel itself
+        'game-setup-panel',   // Has cancel button
+        'location-panel',     // Core UI
+        'side-panel',         // Core UI - player info
+        'message-log',        // Core UI - can minimize
+        'people-panel',       // Has its own controls
+        'quest-tracker'       // Has its own minimize
+    ],
+
     // Initialize panel manager
     init() {
         console.log('🪟 PanelManager: Initializing...');
@@ -46,8 +57,77 @@ const PanelManager = {
         // 🔮 Hijack the old panel functions - we run this show now
         this.patchPanelFunctions();
 
+        // 🖤 Add close buttons to all appropriate panels
+        this.addCloseButtonsToAllPanels();
+
         console.log('🪟 PanelManager: Ready');
     },
+
+    // 🖤 Add close buttons (red X top-right, blue close bottom-right) to all panels
+    addCloseButtonsToAllPanels() {
+        // Get all panels
+        const panels = document.querySelectorAll('.panel, .overlay');
+
+        panels.forEach(panel => {
+            const panelId = panel.id;
+
+            // Skip panels that shouldn't have close buttons
+            if (this.noCloseButtonPanels.includes(panelId)) return;
+
+            // Skip if already has close buttons
+            if (panel.querySelector('.panel-close-x')) return;
+
+            // Make panel position relative for absolute positioning of buttons
+            const computedStyle = window.getComputedStyle(panel);
+            if (computedStyle.position === 'static') {
+                panel.style.position = 'relative';
+            }
+
+            // 🔴 Add red X button (top-right)
+            const closeX = document.createElement('button');
+            closeX.className = 'panel-close-x';
+            closeX.innerHTML = '×';
+            closeX.title = 'Close';
+            closeX.onclick = (e) => {
+                e.stopPropagation();
+                this.closePanel(panelId);
+            };
+            panel.appendChild(closeX);
+
+            // 🔵 Add blue Close button (bottom-right) - check if panel has a footer
+            let footer = panel.querySelector('.panel-footer, .modal-footer, footer');
+            if (!footer) {
+                // Create a footer if needed
+                footer = document.createElement('div');
+                footer.className = 'panel-footer';
+                footer.style.cssText = `
+                    display: flex;
+                    justify-content: flex-end;
+                    padding: 10px;
+                    border-top: 1px solid rgba(79, 195, 247, 0.2);
+                    margin-top: auto;
+                `;
+                panel.appendChild(footer);
+            }
+
+            // Only add if footer doesn't already have a close button
+            if (!footer.querySelector('.panel-close-btn-footer')) {
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'panel-close-btn-footer';
+                closeBtn.textContent = 'Close';
+                closeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.closePanel(panelId);
+                };
+                footer.appendChild(closeBtn);
+            }
+
+            console.log('🖤 Added close buttons to:', panelId);
+        });
+    },
+
+    // 🖤 Track toolbar orientation state
+    isHorizontal: false,
 
     // 🖤 Create a toolbar with buttons to reopen panels - because you'll fucking close them all
     createPanelToolbar() {
@@ -60,6 +140,7 @@ const PanelManager = {
             <div class="panel-toolbar-header">
                 <span class="toolbar-grip">⋮⋮</span>
                 <span class="toolbar-title">Panels</span>
+                <button class="toolbar-rotate" title="Toggle Horizontal/Vertical">🔄</button>
                 <button class="toolbar-collapse" title="Collapse">−</button>
             </div>
             <div class="panel-toolbar-buttons"></div>
@@ -95,6 +176,19 @@ const PanelManager = {
             user-select: none;
         `;
 
+        // Style rotate button 🔄
+        const rotateBtn = toolbar.querySelector('.toolbar-rotate');
+        rotateBtn.style.cssText = `
+            background: none;
+            border: none;
+            color: #4fc3f7;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+            transition: transform 0.3s ease;
+        `;
+
         // Style collapse button
         const collapseBtn = toolbar.querySelector('.toolbar-collapse');
         collapseBtn.style.cssText = `
@@ -114,6 +208,63 @@ const PanelManager = {
             collapsed = !collapsed;
             buttonsContainer.style.display = collapsed ? 'none' : 'flex';
             collapseBtn.textContent = collapsed ? '+' : '−';
+        };
+
+        // 🔄 Toggle horizontal/vertical orientation
+        const titleSpan = toolbar.querySelector('.toolbar-title');
+        rotateBtn.onclick = () => {
+            this.isHorizontal = !this.isHorizontal;
+            rotateBtn.style.transform = this.isHorizontal ? 'rotate(90deg)' : 'rotate(0deg)';
+
+            if (this.isHorizontal) {
+                // 🦇 Horizontal compact mode - thin bar across screen
+                toolbar.style.top = '60px';
+                toolbar.style.left = '50%';
+                toolbar.style.right = 'auto';
+                toolbar.style.transform = 'translateX(-50%)';
+                toolbar.style.maxWidth = '95vw';
+
+                header.style.borderRadius = '8px 8px 0 0';
+                titleSpan.style.display = 'none'; // Hide title in compact
+
+                buttonsContainer.style.flexDirection = 'row';
+                buttonsContainer.style.flexWrap = 'wrap';
+                buttonsContainer.style.justifyContent = 'center';
+                buttonsContainer.style.padding = '4px';
+                buttonsContainer.style.gap = '2px';
+
+                // Make buttons icon-only in horizontal
+                const btns = buttonsContainer.querySelectorAll('.panel-toolbar-btn');
+                btns.forEach(btn => {
+                    btn.style.padding = '6px 8px';
+                    btn.style.minWidth = 'auto';
+                    const label = btn.querySelector('.btn-label');
+                    if (label) label.style.display = 'none';
+                });
+            } else {
+                // 💀 Vertical mode - restore normal
+                toolbar.style.top = '70px';
+                toolbar.style.left = 'auto';
+                toolbar.style.right = '10px';
+                toolbar.style.transform = 'none';
+                toolbar.style.maxWidth = 'none';
+
+                titleSpan.style.display = '';
+
+                buttonsContainer.style.flexDirection = 'column';
+                buttonsContainer.style.flexWrap = 'nowrap';
+                buttonsContainer.style.justifyContent = 'flex-start';
+                buttonsContainer.style.padding = '8px';
+                buttonsContainer.style.gap = '4px';
+
+                // Restore button labels
+                const btns = buttonsContainer.querySelectorAll('.panel-toolbar-btn');
+                btns.forEach(btn => {
+                    btn.style.padding = '6px 10px';
+                    const label = btn.querySelector('.btn-label');
+                    if (label) label.style.display = '';
+                });
+            }
         };
 
         // Make toolbar draggable

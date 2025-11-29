@@ -651,6 +651,41 @@ const TravelPanelMap = {
         this.constrainToBounds();
         const transform = `translate(${this.mapState.offsetX}px, ${this.mapState.offsetY}px) scale(${this.mapState.zoom})`;
         this.mapElement.style.transform = transform;
+
+        // 🖤 Update marker/label scaling based on zoom
+        this.updateMarkerScaling();
+    },
+
+    // 🖤 Scale markers inversely to zoom with caps to prevent overlap
+    updateMarkerScaling() {
+        if (!this.mapElement) return;
+
+        const zoom = this.mapState.zoom;
+
+        // 🦇 Calculate inverse scale with CAPS
+        const rawInverseScale = 1 / Math.sqrt(zoom);
+        const markerScale = Math.max(0.6, Math.min(1.4, rawInverseScale));
+        const labelScale = Math.max(0.7, Math.min(1.2, rawInverseScale));
+        const labelOpacity = zoom < 0.35 ? Math.max(0, (zoom - 0.2) / 0.15) : 1;
+
+        // Apply to all location markers
+        const markers = this.mapElement.querySelectorAll('.mini-map-location');
+        markers.forEach(marker => {
+            marker.style.transform = `translate(-50%, -50%) scale(${markerScale})`;
+        });
+
+        // Apply to labels with opacity fade
+        const labels = this.mapElement.querySelectorAll('.mini-map-label');
+        labels.forEach(label => {
+            label.style.transform = `translateX(-50%) scale(${labelScale})`;
+            label.style.opacity = labelOpacity;
+        });
+
+        // Player marker always visible
+        const playerMarker = this.mapElement.querySelector('.mini-map-player');
+        if (playerMarker) {
+            playerMarker.style.transform = `translate(-50%, -50%) scale(${markerScale})`;
+        }
     },
 
     // 🚧 Constrain map position
@@ -714,23 +749,32 @@ const TravelPanelMap = {
     },
 
     // 🔍 Zoom handlers
+    // 💀 Uses MULTIPLICATIVE zoom for smooth, proportional increments at every level
     onWheel(e) {
         e.preventDefault();
 
-        const delta = e.deltaY > 0 ? -0.08 : 0.08;
-        const newZoom = Math.max(this.mapState.minZoom, Math.min(this.mapState.maxZoom, this.mapState.zoom + delta));
+        // 🦇 10% zoom per scroll tick - multiplicative for smooth scaling
+        const zoomFactor = e.deltaY > 0 ? (1 / 1.1) : 1.1;
+        const newZoom = Math.max(this.mapState.minZoom, Math.min(this.mapState.maxZoom, this.mapState.zoom * zoomFactor));
 
+        if (Math.abs(newZoom - this.mapState.zoom) < 0.001) return;
         this.mapState.zoom = newZoom;
         this.updateTransform();
     },
 
     zoomIn() {
-        this.mapState.zoom = Math.min(this.mapState.maxZoom, this.mapState.zoom + 0.15);
+        // 🖤 15% zoom in - multiplicative
+        const newZoom = Math.min(this.mapState.maxZoom, this.mapState.zoom * 1.15);
+        if (Math.abs(newZoom - this.mapState.zoom) < 0.001) return;
+        this.mapState.zoom = newZoom;
         this.updateTransform();
     },
 
     zoomOut() {
-        this.mapState.zoom = Math.max(this.mapState.minZoom, this.mapState.zoom - 0.15);
+        // 🖤 15% zoom out - multiplicative (divide by 1.15)
+        const newZoom = Math.max(this.mapState.minZoom, this.mapState.zoom / 1.15);
+        if (Math.abs(newZoom - this.mapState.zoom) < 0.001) return;
+        this.mapState.zoom = newZoom;
         this.updateTransform();
     },
 
@@ -1029,23 +1073,37 @@ const TravelPanelMap = {
                 }
             }
 
+            // Check if destination was reached (grayed out state)
+            const isReached = dest.reached === true;
+            const reachedClass = isReached ? 'destination-reached' : '';
+            const statusBadge = isReached
+                ? '<span class="arrived-badge">✅ Arrived</span>'
+                : '';
+
             displayEl.innerHTML = `
-                <div class="destination-info">
+                <div class="destination-info ${reachedClass}">
                     <div class="dest-header">
                         <span class="dest-icon">${dest.icon}</span>
                         <div class="dest-name-type">
-                            <h3>${dest.name}</h3>
+                            <h3>${dest.name} ${statusBadge}</h3>
                             <span class="dest-type">${dest.type.charAt(0).toUpperCase() + dest.type.slice(1)} • ${dest.region}</span>
                         </div>
                     </div>
                     <div class="dest-description">
                         ${dest.description || 'No description available.'}
                     </div>
-                    ${travelInfoHtml}
-                    ${routeInfoHtml}
+                    ${isReached ? '' : travelInfoHtml}
+                    ${isReached ? '' : routeInfoHtml}
                 </div>
             `;
-            if (actionsEl) actionsEl.classList.remove('hidden');
+            // Hide action buttons if destination already reached
+            if (actionsEl) {
+                if (isReached) {
+                    actionsEl.classList.add('hidden');
+                } else {
+                    actionsEl.classList.remove('hidden');
+                }
+            }
         }
     },
 
@@ -1280,8 +1338,11 @@ const TravelPanelMap = {
         this.travelState.startTime = null;
         this.travelState.duration = null;
 
-        // Clear the destination
-        this.currentDestination = null;
+        // Mark destination as reached instead of clearing
+        // This keeps it visible (grayed out) so players can retrace their paths
+        if (this.currentDestination) {
+            this.currentDestination.reached = true;
+        }
 
         // Update display back to normal
         this.updateDestinationDisplay();
@@ -1317,6 +1378,9 @@ const TravelPanelMap = {
         return ColorUtils.lightenColor(hex, percent);
     }
 };
+
+// 🖤 Global export so other systems can access TravelPanelMap
+window.TravelPanelMap = TravelPanelMap;
 
 // Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
@@ -1469,6 +1533,19 @@ if (document.readyState === 'loading') {
             background: rgba(40, 40, 70, 0.6);
             border-radius: 8px;
             border-left: 4px solid #ff9800;
+        }
+
+        /* 🎯 Reached destination - grayed out */
+        .destination-info.destination-reached {
+            opacity: 0.6;
+            border-left-color: #4caf50;
+        }
+        .destination-info.destination-reached h3 {
+            color: #888;
+        }
+        .arrived-badge {
+            font-size: 14px;
+            margin-left: 8px;
         }
 
         .dest-header {

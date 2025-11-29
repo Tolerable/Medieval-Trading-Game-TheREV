@@ -1186,11 +1186,12 @@ const GameWorldRenderer = {
         el.dataset.locationId = location.id;
         el.dataset.visibility = visibility;
 
-        // For discovered (unexplored) locations, use greyed out styling
-        const bgColor = isDiscovered ? '#555555' : style.color;
-        const borderColor = isDiscovered ? '#777777' : this.lightenColor(style.color, 20);
-        const opacity = isDiscovered ? '0.6' : '1';
-        const iconFilter = isDiscovered ? 'grayscale(100%) opacity(0.5)' : 'none';
+        // For discovered (unexplored) locations - make them VISIBLE but mysterious
+        // 🖤 Grey but solid, not translucent - players need to SEE where they can go!
+        const bgColor = isDiscovered ? '#4a4a5a' : style.color;
+        const borderColor = isDiscovered ? '#8888aa' : this.lightenColor(style.color, 20);
+        const opacity = isDiscovered ? '0.9' : '1';
+        const iconFilter = isDiscovered ? 'grayscale(80%)' : 'none';
 
         el.style.cssText = `
             position: absolute;
@@ -1229,7 +1230,7 @@ const GameWorldRenderer = {
         label.className = 'map-location-label' + (isDiscovered ? ' discovered' : '');
         // Show "Unknown" or "???" for discovered but unexplored locations
         label.textContent = isDiscovered ? '???' : location.name;
-        const labelColor = isDiscovered ? '#888' : '#fff';
+        const labelColor = isDiscovered ? '#aabbcc' : '#fff'; // 🖤 Lighter grey-blue for unexplored - actually visible!
         label.style.cssText = `
             position: absolute;
             left: ${scaledPos.x}px;
@@ -1650,6 +1651,121 @@ const GameWorldRenderer = {
 
         const transform = `translate(${this.mapState.offsetX}px, ${this.mapState.offsetY}px) scale(${this.mapState.zoom})`;
         this.mapElement.style.transform = transform;
+
+        // 🖤 Counter-scale location markers and labels so they stay readable when zoomed out
+        // When zoomed out to 0.3, we want markers to be ~2x bigger than they'd naturally be
+        // This keeps them visible and clickable even at max zoom out
+        this.updateMarkerScaling();
+    },
+
+    // 🖤 Scale markers inversely to zoom - bigger when zoomed out, normal when zoomed in
+    // 💀 With smart collision avoidance and capped sizes to prevent overlap chaos
+    updateMarkerScaling() {
+        if (!this.mapElement) return;
+
+        const zoom = this.mapState.zoom;
+
+        // 🦇 Calculate inverse scale with CAPS to prevent icons from overwhelming roads
+        // At zoom 2.0 = scale 0.6 (smaller, lots of detail visible)
+        // At zoom 1.0 = scale 1.0 (normal)
+        // At zoom 0.5 = scale 1.3 (slightly bigger)
+        // At zoom 0.3 = scale 1.5 (capped - don't go crazy)
+        const rawInverseScale = 1 / Math.sqrt(zoom);
+        const markerScale = Math.max(0.6, Math.min(1.5, rawInverseScale));
+
+        // 🖤 Labels need slightly different scaling - hide when too zoomed out
+        // to prevent text overlap nightmare
+        const labelScale = Math.max(0.7, Math.min(1.3, rawInverseScale));
+        const labelOpacity = zoom < 0.4 ? Math.max(0, (zoom - 0.25) / 0.15) : 1; // Fade out below 0.4 zoom
+
+        // Apply to all location markers
+        const markers = this.mapElement.querySelectorAll('.map-location');
+        markers.forEach(marker => {
+            marker.style.transform = `translate(-50%, -50%) scale(${markerScale})`;
+        });
+
+        // Apply to all location labels with opacity fade for zoom-out
+        const labels = this.mapElement.querySelectorAll('.map-location-label');
+        labels.forEach(label => {
+            label.style.transform = `translateX(-50%) scale(${labelScale})`;
+            label.style.opacity = labelOpacity;
+        });
+
+        // Apply to player marker too - player always visible!
+        const playerMarker = this.mapElement.querySelector('.player-marker');
+        if (playerMarker) {
+            playerMarker.style.transform = `translate(-50%, -50%) scale(${markerScale})`;
+        }
+
+        // Apply to property markers
+        const propMarkers = this.mapElement.querySelectorAll('.property-marker');
+        propMarkers.forEach(marker => {
+            marker.style.transform = `translate(-50%, -50%) scale(${markerScale})`;
+        });
+
+        // 🦇 Update label positions based on zoom level to avoid overlaps
+        this.updateLabelPositions(zoom, markerScale);
+    },
+
+    // 🖤 Dynamically reposition labels based on zoom to avoid icon/label collisions
+    updateLabelPositions(zoom, markerScale) {
+        if (!this.mapElement) return;
+
+        const labels = this.mapElement.querySelectorAll('.map-location-label');
+        const markers = this.mapElement.querySelectorAll('.map-location');
+
+        // Build a map of marker positions for collision detection
+        const markerPositions = [];
+        markers.forEach(marker => {
+            const rect = marker.getBoundingClientRect();
+            const left = parseFloat(marker.style.left);
+            const top = parseFloat(marker.style.top);
+            // Estimate scaled size (base ~40px icons)
+            const scaledSize = 40 * markerScale;
+            markerPositions.push({
+                id: marker.dataset.locationId,
+                x: left,
+                y: top,
+                size: scaledSize
+            });
+        });
+
+        // Check each label for collisions with OTHER markers
+        labels.forEach(label => {
+            const left = parseFloat(label.style.left);
+            const baseTop = parseFloat(label.style.top);
+
+            // Find this label's associated marker
+            const associatedMarker = markerPositions.find(m => {
+                return Math.abs(m.x - left) < 5; // Same x position = same location
+            });
+            if (!associatedMarker) return;
+
+            // Check if label position would collide with nearby markers (not its own)
+            let shouldMoveAbove = false;
+            const labelWidth = label.textContent.length * 7 * (zoom < 0.6 ? 0.8 : 1); // Estimate text width
+            const labelHeight = 14;
+
+            for (const marker of markerPositions) {
+                if (marker.id === associatedMarker.id) continue; // Skip own marker
+
+                // Check if label rectangle overlaps marker circle
+                const xDist = Math.abs(marker.x - left);
+                const yDist = Math.abs(marker.y - baseTop);
+
+                // If horizontally overlapping and vertically close
+                if (xDist < (labelWidth / 2 + marker.size / 2) && yDist < (labelHeight + marker.size / 2)) {
+                    shouldMoveAbove = true;
+                    break;
+                }
+            }
+
+            // 🦇 Move label ABOVE the icon if it would collide with another marker
+            if (shouldMoveAbove && associatedMarker) {
+                const aboveOffset = -(associatedMarker.size / 2 + 20); // Above the icon
+                label.style.top = `${associatedMarker.y + aboveOffset}px`;
+            }
+        });
     },
 
     // 🚧 don't let the map escape the container (we've all wanted to escape)
@@ -1728,14 +1844,17 @@ const GameWorldRenderer = {
 
     // 🔍 zoom handlers - for when you need to see your problems closer or further away
     // 🖤 Zoom towards cursor position, not the corner like some amateur hour nonsense
+    // 💀 Uses MULTIPLICATIVE zoom (10% per scroll) for smooth, proportional increments
     onWheel(e) {
         e.preventDefault();
 
-        const delta = e.deltaY > 0 ? -0.15 : 0.15;
+        // 🦇 Multiplicative zoom factor: 10% per scroll tick
+        // Scroll up = zoom in (multiply by 1.1), scroll down = zoom out (divide by 1.1)
+        const zoomFactor = e.deltaY > 0 ? (1 / 1.1) : 1.1;
         const oldZoom = this.mapState.zoom;
-        const newZoom = Math.max(this.mapState.minZoom, Math.min(this.mapState.maxZoom, oldZoom + delta));
+        const newZoom = Math.max(this.mapState.minZoom, Math.min(this.mapState.maxZoom, oldZoom * zoomFactor));
 
-        if (newZoom === oldZoom) return; // No change, bail
+        if (Math.abs(newZoom - oldZoom) < 0.001) return; // 🖤 No meaningful change, bail
 
         // Get cursor position relative to the container
         const containerRect = this.container.getBoundingClientRect();
@@ -1760,19 +1879,22 @@ const GameWorldRenderer = {
     },
 
     // 🖤 Zoom in/out buttons zoom towards center of viewport
+    // 💀 Uses MULTIPLICATIVE zoom (15% per step) for smooth, proportional increments
+    // This means each step feels the same regardless of current zoom level
     zoomIn() {
-        this.zoomToCenter(0.2);
+        this.zoomToCenter(1.15); // 15% zoom in
     },
 
     zoomOut() {
-        this.zoomToCenter(-0.2);
+        this.zoomToCenter(1 / 1.15); // 15% zoom out (inverse)
     },
 
-    zoomToCenter(delta) {
+    // 🦇 zoomFactor is a multiplier: >1 zooms in, <1 zooms out
+    zoomToCenter(zoomFactor) {
         const oldZoom = this.mapState.zoom;
-        const newZoom = Math.max(this.mapState.minZoom, Math.min(this.mapState.maxZoom, oldZoom + delta));
+        const newZoom = Math.max(this.mapState.minZoom, Math.min(this.mapState.maxZoom, oldZoom * zoomFactor));
 
-        if (newZoom === oldZoom) return;
+        if (Math.abs(newZoom - oldZoom) < 0.001) return; // 🖤 Prevent micro-adjustments
 
         const containerRect = this.container.getBoundingClientRect();
         const centerX = containerRect.width / 2;
@@ -2124,6 +2246,9 @@ const GameWorldRenderer = {
         this.saveLocationHistory();
     },
 
+    // 📜 Destination history - track where the player has traveled
+    destinationHistory: [],
+
     // Set current destination
     setDestination(locationId) {
         const locations = typeof GameWorld !== 'undefined' ? GameWorld.locations : {};
@@ -2135,7 +2260,9 @@ const GameWorldRenderer = {
                 id: locationId,
                 name: location.name,
                 type: location.type,
-                icon: style.icon
+                icon: style.icon,
+                reached: false,
+                setTime: Date.now()
             };
         } else {
             this.currentDestination = null;
@@ -2144,8 +2271,29 @@ const GameWorldRenderer = {
         this.updateHistoryPanel();
     },
 
-    // Clear destination
+    // Mark destination as reached (grayed out) instead of clearing
+    markDestinationReached() {
+        if (this.currentDestination && !this.currentDestination.reached) {
+            this.currentDestination.reached = true;
+            this.currentDestination.reachedTime = Date.now();
+
+            // Add to destination history
+            this.destinationHistory.push({ ...this.currentDestination });
+
+            // Keep only last 20 destinations in history
+            if (this.destinationHistory.length > 20) {
+                this.destinationHistory.shift();
+            }
+        }
+        this.updateHistoryPanel();
+    },
+
+    // Clear destination (only used for explicit user action)
     clearDestination() {
+        // Mark as reached first if not already
+        if (this.currentDestination && !this.currentDestination.reached) {
+            this.markDestinationReached();
+        }
         this.currentDestination = null;
         this.updateHistoryPanel();
     },
@@ -2200,17 +2348,36 @@ const GameWorldRenderer = {
             <div class="destination-card">`;
 
         if (this.currentDestination) {
+            const isReached = this.currentDestination.reached;
             html += `
-                <div class="location-header">
+                <div class="location-header ${isReached ? 'destination-reached' : ''}">
                     <span class="location-icon">${this.currentDestination.icon}</span>
                     <span class="location-name">${this.currentDestination.name}</span>
                 </div>
-                <div class="traveling-indicator">🚶 Traveling...</div>`;
+                <div class="traveling-indicator">${isReached ? '✅ Arrived!' : '🚶 Traveling...'}</div>`;
         } else {
             html += `<div class="no-destination">No destination set</div>`;
         }
 
-        html += `</div></div>`;
+        html += `</div>`;
+
+        // 📜 Previous destinations (grayed out history)
+        if (this.destinationHistory.length > 0) {
+            html += `<div class="destination-history">
+                <div class="history-label">Previous Destinations:</div>`;
+            // Show last 5 destinations, most recent first
+            const recentDests = [...this.destinationHistory].reverse().slice(0, 5);
+            recentDests.forEach(dest => {
+                html += `
+                    <div class="past-destination">
+                        <span class="location-icon">${dest.icon}</span>
+                        <span class="location-name">${dest.name}</span>
+                    </div>`;
+            });
+            html += `</div>`;
+        }
+
+        html += `</div>`;
 
         // Visit History Section
         html += `<div class="history-section visit-history-section">
@@ -2334,6 +2501,46 @@ const GameWorldRenderer = {
                 font-size: 12px;
                 margin-top: 5px;
                 animation: pulse 1.5s ease-in-out infinite;
+            }
+
+            /* 🎯 Reached destination - grayed out */
+            .destination-reached {
+                opacity: 0.6;
+            }
+            .destination-reached .location-name {
+                color: #888;
+                text-decoration: line-through;
+            }
+
+            /* 📜 Previous destinations history */
+            .destination-history {
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid rgba(79, 195, 247, 0.2);
+            }
+            .destination-history .history-label {
+                font-size: 11px;
+                color: #666;
+                margin-bottom: 6px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .past-destination {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 4px 8px;
+                margin-bottom: 4px;
+                background: rgba(30, 30, 50, 0.5);
+                border-radius: 4px;
+                opacity: 0.5;
+            }
+            .past-destination .location-icon {
+                font-size: 14px;
+            }
+            .past-destination .location-name {
+                font-size: 12px;
+                color: #666;
             }
 
             @keyframes pulse {

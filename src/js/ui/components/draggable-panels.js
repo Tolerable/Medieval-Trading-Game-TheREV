@@ -4,40 +4,49 @@
 // File Version: GameConfig.version.file
 // conjured by Unity AI Lab - Hackall360, Sponge, GFourteen
 // ═══════════════════════════════════════════════════════════════
+// 💀 SIMPLIFIED: No auto-generated headers or buttons!
+// Close buttons are added via CSS/HTML directly on panels.
+// This system ONLY handles drag functionality.
+// ═══════════════════════════════════════════════════════════════
 
 const DraggablePanels = {
     dragState: null,
     STORAGE_KEY: 'trader-claude-panel-positions',
     eventsSetup: false,
-    // Panels that should NOT have a close button from drag handle (they have their own or should only minimize)
-    noCloseButtonPanels: ['location-panel', 'side-panel', 'message-log', 'people-panel', 'panel-toolbar', 'quest-tracker'],
 
-    // 🖤 Panels with special close behavior (call a function instead of just hiding)
-    specialClosePanels: {
-        'game-setup-panel': () => {
-            if (typeof window.cancelGameSetup === 'function') {
-                window.cancelGameSetup();
-            }
-        }
+    // 🖤 Map of panel IDs to their drag handle selectors
+    // If not listed, will try common header selectors
+    panelDragHandles: {
+        'market-panel': '.market-header',
+        'travel-panel': '.travel-header',
+        'game-setup-panel': '.setup-header',
+        'inventory-panel': '.inventory-header, h2, h3',
+        'side-panel': 'h3',
+        'message-log': 'h3',
+        'character-sheet-overlay': '.character-header, h2',
+        'quest-overlay': '.quest-header, h2',
+        'achievement-overlay': '.achievement-header, h2',
+        'financial-sheet-overlay': '.financial-header, h2',
+        'property-employee-panel': '.property-header, h2',
+        'people-panel': '.people-header, h2, h3',
+        'transportation-panel': '.transportation-header, h2',
+        'settings-panel': '.settings-header, h2'
     },
 
     init() {
-        console.log('🖤 DraggablePanels: Initializing...');
+        console.log('🖤 DraggablePanels: Initializing (drag-only mode)...');
 
-        // Setup global drag events FIRST
+        // Setup global drag events
         this.setupGlobalEvents();
 
-        // Setup draggables
+        // Setup draggables on all panels
         this.setupAllDraggables();
 
-        // Observe for panel visibility changes
+        // Observe for new panels
         this.observePanelChanges();
 
         // Load saved positions
         this.loadPositions();
-
-        // Override showPanel to handle dragged panels
-        this.patchShowPanel();
 
         console.log('🖤 DraggablePanels: Ready');
     },
@@ -54,319 +63,126 @@ const DraggablePanels = {
     },
 
     setupAllDraggables() {
-        // Setup all panels
+        // Setup all panels with .panel class
         document.querySelectorAll('.panel').forEach(panel => {
             this.makeDraggable(panel);
         });
 
-        // Setup side panel
-        const sidePanel = document.getElementById('side-panel');
-        if (sidePanel) this.makeDraggable(sidePanel, 'Player Info');
+        // Setup overlays
+        document.querySelectorAll('.overlay').forEach(overlay => {
+            this.makeDraggable(overlay);
+        });
 
-        // Setup message log with special handling
-        this.setupMessageLog();
+        // Setup specific elements
+        const specificElements = [
+            'side-panel',
+            'message-log',
+            'panel-toolbar'
+        ];
 
-        // 🖤 Setup quest tracker with special handling (like message log)
+        specificElements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) this.makeDraggable(el);
+        });
+
+        // Setup quest tracker separately (may load late)
         this.setupQuestTracker();
     },
 
-    // 🦇 Setup quest tracker for dragging - this brooding little panel needs love too
     setupQuestTracker() {
         const questTracker = document.querySelector('.quest-tracker');
         if (!questTracker) {
-            console.log('🖤 Quest tracker not found yet, will try again later');
-            // Try again after a delay (quest system may not have created it yet)
             setTimeout(() => this.setupQuestTracker(), 1000);
             return;
         }
 
-        // Check if already setup
-        if (questTracker.dataset.draggable === 'true') {
-            console.log('🖤 Quest tracker already setup for dragging');
-            return;
-        }
-
+        if (questTracker.dataset.draggable === 'true') return;
         questTracker.dataset.draggable = 'true';
 
-        // Get the tracker header
-        let header = questTracker.querySelector('.tracker-header');
+        const header = questTracker.querySelector('.tracker-header');
         if (header) {
-            // Header already has cursor: move in CSS, just add events
-            const self = this;
-
-            // Remove any existing handlers by cloning
-            const newHeader = header.cloneNode(true);
-            header.parentNode.replaceChild(newHeader, header);
-            header = newHeader;
-
-            // Add drag events
-            header.addEventListener('mousedown', function(e) {
-                // Don't drag if clicking a button inside the header
-                if (e.target.closest('button')) return;
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🖤 Quest tracker header mousedown');
-                self.startDrag(e, questTracker);
-            }, true);
-
-            header.addEventListener('touchstart', function(e) {
-                if (e.target.closest('button')) return;
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🖤 Quest tracker header touchstart');
-                self.startDrag(e, questTracker);
-            }, { passive: false, capture: true });
-
-            console.log('🖤 Quest tracker drag setup complete - this dark soul can now be moved');
-        } else {
-            console.warn('🖤 Quest tracker header (.tracker-header) not found');
+            this.attachDragEvents(header, questTracker);
+            console.log('🖤 Quest tracker drag enabled');
         }
     },
 
-    setupMessageLog() {
-        const messageLog = document.getElementById('message-log');
-        if (!messageLog) return;
-
-        // Check if already setup
-        if (messageLog.dataset.draggable === 'true') {
-            console.log('🖤 Message log already setup for dragging');
-            return;
-        }
-
-        messageLog.dataset.draggable = 'true';
-
-        // Get or style the h3
-        let h3 = messageLog.querySelector('h3');
-        if (h3) {
-            // Style as drag handle - use cssText to override all
-            h3.style.cssText = `
-                padding: 8px 12px !important;
-                margin: 0 !important;
-                background: linear-gradient(180deg, rgba(79, 195, 247, 0.2) 0%, rgba(79, 195, 247, 0.05) 100%) !important;
-                border-bottom: 1px solid rgba(79, 195, 247, 0.3) !important;
-                cursor: move !important;
-                user-select: none !important;
-                font-size: 14px !important;
-                border-radius: 12px 12px 0 0 !important;
-                pointer-events: auto !important;
-                position: relative !important;
-                z-index: 10 !important;
-            `;
-
-            // Add grip if not present
-            if (!h3.innerHTML.includes('⋮⋮')) {
-                const text = h3.textContent.replace('⋮⋮', '').trim();
-                h3.innerHTML = `<span class="drag-grip" style="opacity:0.5;margin-right:8px;pointer-events:none;">⋮⋮</span><span style="pointer-events:none;">${text}</span>`;
-            }
-
-            // Remove any existing handlers by cloning
-            const newH3 = h3.cloneNode(true);
-            h3.parentNode.replaceChild(newH3, h3);
-            h3 = newH3;
-
-            // Add drag events to the fresh h3
-            const self = this;
-
-            h3.addEventListener('mousedown', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🖤 Message log h3 mousedown');
-                self.startDrag(e, messageLog);
-            }, true);
-
-            h3.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🖤 Message log h3 touchstart');
-                self.startDrag(e, messageLog);
-            }, { passive: false, capture: true });
-
-            console.log('🖤 Message log drag setup complete');
-        } else {
-            console.warn('🖤 Message log h3 not found');
-        }
-    },
-
-    // 🖤 Panels with existing headers that should be used as drag handles
-    // These get the close button added to their existing header instead of a new drag-handle
-    panelsWithExistingHeaders: {
-        'market-panel': '.market-header',
-        'travel-panel': '.travel-header',
-        'game-setup-panel': '.setup-header'
-    },
-
-    makeDraggable(element, customTitle = null) {
-        if (element.dataset.draggable === 'true') return;
+    // 🖤 Main function - makes a panel draggable by its header
+    // NO auto-generated headers or buttons!
+    makeDraggable(element) {
+        if (!element || element.dataset.draggable === 'true') return;
         element.dataset.draggable = 'true';
 
-        // Skip if already has a drag handle
-        if (element.querySelector('.drag-handle')) return;
-
-        // 🖤 Check if this panel has an existing header we should use
-        const existingHeaderSelector = this.panelsWithExistingHeaders[element.id];
-        if (existingHeaderSelector) {
-            this.setupExistingHeaderAsDragHandle(element, existingHeaderSelector);
+        // Find the drag handle (header element)
+        const handle = this.findDragHandle(element);
+        if (!handle) {
+            console.log('🖤 No drag handle found for:', element.id || element.className);
             return;
         }
 
-        // Get title
-        let title = customTitle;
-        if (!title) {
-            const h2 = element.querySelector('h2');
-            const h3 = element.querySelector('h3');
-            const headerH2 = element.querySelector('.setup-header h2, .market-header h2, .travel-header h2');
-            title = headerH2?.textContent || h2?.textContent || h3?.textContent || 'Panel';
-        }
+        // Style the handle as draggable
+        handle.style.cursor = 'move';
+        handle.style.userSelect = 'none';
 
-        // Check if this panel should have a close button
-        const showCloseButton = !this.noCloseButtonPanels.includes(element.id);
+        // Attach drag events
+        this.attachDragEvents(handle, element);
 
-        // Create drag handle
-        const dragHandle = document.createElement('div');
-        dragHandle.className = 'drag-handle';
-        dragHandle.innerHTML = `
-            <span class="drag-grip" style="opacity:0.5;font-size:14px;">⋮⋮</span>
-            <span class="drag-title" style="flex:1;font-weight:500;font-size:14px;">${title}</span>
-            ${showCloseButton ? `<button class="drag-close" title="Close" style="
-                background:rgba(244,67,54,0.8);
-                border:none;
-                border-radius:50%;
-                width:24px;
-                height:24px;
-                color:white;
-                font-size:16px;
-                cursor:pointer;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-            ">×</button>` : ''}
-        `;
-
-        dragHandle.style.cssText = `
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: linear-gradient(180deg, rgba(79, 195, 247, 0.2) 0%, rgba(79, 195, 247, 0.05) 100%);
-            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
-            cursor: move;
-            user-select: none;
-            border-radius: 12px 12px 0 0;
-        `;
-
-        // Insert drag handle
-        element.insertBefore(dragHandle, element.firstChild);
-
-        // Close button - check for special close behavior first
-        const closeBtn = dragHandle.querySelector('.drag-close');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                // 🖤 Check for special close behavior
-                if (this.specialClosePanels[element.id]) {
-                    this.specialClosePanels[element.id]();
-                } else {
-                    element.classList.add('hidden');
-                }
-            });
-        }
-
-        // Drag events on handle only
-        dragHandle.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('drag-close')) return;
-            e.preventDefault();
-            this.startDrag(e, element);
-        });
-
-        dragHandle.addEventListener('touchstart', (e) => {
-            if (e.target.classList.contains('drag-close')) return;
-            e.preventDefault();
-            this.startDrag(e, element);
-        }, { passive: false });
+        console.log('🖤 Drag enabled for:', element.id || element.className);
     },
 
-    // 🖤 Setup an existing header element as the drag handle (keeps the detailed header info)
-    setupExistingHeaderAsDragHandle(element, headerSelector) {
-        const header = element.querySelector(headerSelector);
-        if (!header) {
-            console.warn('🖤 DraggablePanels: Expected header not found:', headerSelector);
-            return;
+    // 🦇 Find the appropriate drag handle for a panel
+    findDragHandle(element) {
+        // Check specific mapping first
+        const selectorList = this.panelDragHandles[element.id];
+        if (selectorList) {
+            const selectors = selectorList.split(',').map(s => s.trim());
+            for (const selector of selectors) {
+                const handle = element.querySelector(selector);
+                if (handle) return handle;
+            }
         }
 
-        // 💀 Remove any existing panel-close-x buttons (we'll add one to the header)
-        const oldCloseBtn = element.querySelector('.panel-close-x');
-        if (oldCloseBtn) {
-            oldCloseBtn.remove();
+        // Try common header patterns
+        const commonSelectors = [
+            '.panel-header',
+            '.modal-header',
+            '.overlay-header',
+            'header',
+            'h2',
+            'h3'
+        ];
+
+        for (const selector of commonSelectors) {
+            const handle = element.querySelector(selector);
+            if (handle) return handle;
         }
 
-        // 🖤 Make header draggable
-        header.style.cursor = 'move';
-        header.style.userSelect = 'none';
-        header.style.position = 'relative';
+        return null;
+    },
 
-        // 🦇 Add drag grip to the left of the header if not present
-        if (!header.querySelector('.drag-grip')) {
-            const grip = document.createElement('span');
-            grip.className = 'drag-grip';
-            grip.style.cssText = 'opacity:0.5;font-size:14px;margin-right:8px;pointer-events:none;';
-            grip.textContent = '⋮⋮';
-            header.insertBefore(grip, header.firstChild);
-        }
-
-        // 🖤 Add close button to the right of the header if panel needs one
-        const showCloseButton = !this.noCloseButtonPanels.includes(element.id);
-        if (showCloseButton && !header.querySelector('.drag-close')) {
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'drag-close';
-            closeBtn.title = 'Close';
-            closeBtn.innerHTML = '×';
-            closeBtn.style.cssText = `
-                position: absolute;
-                top: 50%;
-                right: 10px;
-                transform: translateY(-50%);
-                background: rgba(244,67,54,0.8);
-                border: none;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                color: white;
-                font-size: 16px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 10;
-            `;
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                // 🖤 Check for special close behavior
-                if (this.specialClosePanels[element.id]) {
-                    this.specialClosePanels[element.id]();
-                } else {
-                    element.classList.add('hidden');
-                }
-            });
-            header.appendChild(closeBtn);
-        }
-
-        // 🦇 Attach drag events to the existing header
+    // 🖤 Attach drag events to a handle
+    attachDragEvents(handle, element) {
         const self = this;
-        header.addEventListener('mousedown', function(e) {
-            if (e.target.classList.contains('drag-close')) return;
-            if (e.target.closest('button')) return;
-            e.preventDefault();
-            self.startDrag(e, element);
-        });
 
-        header.addEventListener('touchstart', function(e) {
-            if (e.target.classList.contains('drag-close')) return;
-            if (e.target.closest('button')) return;
-            e.preventDefault();
-            self.startDrag(e, element);
-        }, { passive: false });
+        // Remove old handlers by cloning (prevents duplicates)
+        const newHandle = handle.cloneNode(true);
+        if (handle.parentNode) {
+            handle.parentNode.replaceChild(newHandle, handle);
+        }
 
-        console.log('🖤 DraggablePanels: Using existing header as drag handle for', element.id);
+        newHandle.addEventListener('mousedown', function(e) {
+            // Don't drag if clicking buttons or inputs
+            if (e.target.closest('button, input, select, .panel-close-x, .panel-close-btn')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            self.startDrag(e, element);
+        }, true);
+
+        newHandle.addEventListener('touchstart', function(e) {
+            if (e.target.closest('button, input, select, .panel-close-x, .panel-close-btn')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            self.startDrag(e, element);
+        }, { passive: false, capture: true });
     },
 
     startDrag(e, element) {
@@ -375,7 +191,7 @@ const DraggablePanels = {
 
         const rect = element.getBoundingClientRect();
 
-        // Move to body if in ui-panels (for proper fixed positioning)
+        // Move to body if needed for proper fixed positioning
         if (element.parentElement?.id === 'ui-panels') {
             element.dataset.originalParent = 'ui-panels';
             document.body.appendChild(element);
@@ -398,7 +214,6 @@ const DraggablePanels = {
         };
 
         element.classList.add('dragging');
-        console.log('🖤 Dragging:', element.id || 'element');
     },
 
     onDrag(e) {
@@ -431,34 +246,7 @@ const DraggablePanels = {
         element.style.zIndex = '100';
 
         this.savePosition(element);
-        console.log('🖤 Drag ended:', element.style.left, element.style.top);
-
         this.dragState = null;
-    },
-
-    // Patch showPanel to handle panels that were moved to body
-    patchShowPanel() {
-        const originalShowPanel = window.showPanel;
-        if (typeof originalShowPanel === 'function') {
-            window.showPanel = (panelId) => {
-                const panel = document.getElementById(panelId);
-                if (panel) {
-                    panel.classList.remove('hidden');
-                    panel.style.display = ''; // Clear any inline display:none
-
-                    // If panel was dragged to body, make sure it's visible
-                    if (panel.parentElement === document.body) {
-                        // Already positioned, just show it
-                    } else {
-                        // Call original if not moved
-                        originalShowPanel(panelId);
-                    }
-                } else {
-                    originalShowPanel(panelId);
-                }
-            };
-            console.log('🖤 Patched showPanel');
-        }
     },
 
     observePanelChanges() {
@@ -466,8 +254,10 @@ const DraggablePanels = {
             mutations.forEach((mutation) => {
                 if (mutation.type === 'childList') {
                     mutation.addedNodes.forEach(node => {
-                        if (node.nodeType === 1 && node.classList?.contains('panel')) {
-                            setTimeout(() => this.makeDraggable(node), 100);
+                        if (node.nodeType === 1) {
+                            if (node.classList?.contains('panel') || node.classList?.contains('overlay')) {
+                                setTimeout(() => this.makeDraggable(node), 100);
+                            }
                         }
                     });
                 }
