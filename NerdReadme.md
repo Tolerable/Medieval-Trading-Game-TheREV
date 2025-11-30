@@ -73,7 +73,7 @@ This game follows a loosely-coupled module architecture where each system is its
 ## 📁 FILE STRUCTURE
 
 ```
-Trader 71/
+Trader 83/
 ├── index.html                    # The summoning circle (entry point)
 ├── config.js                     # Game configuration (GameConfig)
 ├── GameplayReadme.md             # For players who read documentation

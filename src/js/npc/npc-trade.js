@@ -474,9 +474,9 @@ const NPCTradeWindow = {
                 Math.ceil(price * (1 - this.currentDiscount / 100)) :
                 Math.floor(price * 0.5); // Sell at half price
 
+            // 🖤 Using data attributes for safety - no eval injection today, Satan
             return `
-                <div class="inventory-item" data-item="${itemId}" data-side="${side}"
-                     onclick="NPCTradeWindow.addToOffer('${itemId}', '${side}')">
+                <div class="inventory-item" data-item="${this.escapeHtml(itemId)}" data-side="${this.escapeHtml(side)}">
                     <span class="item-icon">${this.getItemIcon(itemId)}</span>
                     <span class="item-name">${this.formatItemName(itemId)}</span>
                     <span class="item-qty">x${qty}</span>
@@ -539,18 +539,17 @@ const NPCTradeWindow = {
                 <h3>Available Tasks</h3>
                 <div class="quest-list">
                     ${availableQuests.map(quest => `
-                        <div class="quest-offer" data-quest="${quest.id}">
+                        <div class="quest-offer" data-quest="${this.escapeHtml(quest.id)}">
                             <div class="quest-offer-header">
-                                <span class="quest-name">${quest.name}</span>
-                                <span class="quest-difficulty ${quest.difficulty}">${quest.difficulty}</span>
+                                <span class="quest-name">${this.escapeHtml(quest.name)}</span>
+                                <span class="quest-difficulty ${this.escapeHtml(quest.difficulty)}">${this.escapeHtml(quest.difficulty)}</span>
                             </div>
-                            <p class="quest-desc">${quest.description}</p>
+                            <p class="quest-desc">${this.escapeHtml(quest.description)}</p>
                             <div class="quest-rewards-preview">
                                 ${quest.rewards.gold ? `<span>💰 ${quest.rewards.gold}g</span>` : ''}
                                 ${quest.rewards.experience ? `<span>⭐ ${quest.rewards.experience} XP</span>` : ''}
                             </div>
-                            <button class="accept-quest-btn"
-                                    onclick="NPCTradeWindow.acceptQuest('${quest.id}')">
+                            <button class="accept-quest-btn" data-quest-id="${this.escapeHtml(quest.id)}">
                                 Accept Quest
                             </button>
                         </div>
@@ -583,17 +582,18 @@ const NPCTradeWindow = {
             { id: 'leave', label: 'Leave', icon: '🚶' }
         ];
 
+        // 🖤 Data attributes only - no onclick string injection in my domain
         return options.map(opt => `
-            <button class="event-option-btn" onclick="NPCTradeWindow.handleEventOption('${opt.id}')">
-                <span class="option-icon">${opt.icon}</span>
-                <span class="option-label">${opt.label}</span>
+            <button class="event-option-btn" data-event-option="${this.escapeHtml(opt.id)}">
+                <span class="option-icon">${this.escapeHtml(opt.icon || '')}</span>
+                <span class="option-label">${this.escapeHtml(opt.label || '')}</span>
             </button>
         `).join('');
     },
 
     renderRobberyContent(npcData) {
         const demandedGold = npcData.demandedGold || Math.floor((game?.player?.gold || 100) * 0.3);
-
+        // 🖤 Escaping all the things - robbery doesn't mean we tolerate XSS
         return `
             <div class="robbery-content">
                 <div class="robbery-warning">
@@ -601,19 +601,19 @@ const NPCTradeWindow = {
                     <h3>You're Being Robbed!</h3>
                 </div>
                 <p class="robbery-demand">
-                    "${npcData.name}" demands <strong>${demandedGold} gold</strong>!
+                    "${this.escapeHtml(npcData.name || 'A stranger')}" demands <strong>${demandedGold} gold</strong>!
                 </p>
                 <div class="robbery-options">
-                    <button class="robbery-btn fight" onclick="NPCTradeWindow.handleRobbery('fight')">
+                    <button class="robbery-btn fight" data-robbery-action="fight">
                         ⚔️ Fight Back
                     </button>
-                    <button class="robbery-btn pay" onclick="NPCTradeWindow.handleRobbery('pay', ${demandedGold})">
+                    <button class="robbery-btn pay" data-robbery-action="pay" data-robbery-amount="${demandedGold}">
                         💰 Pay Up (${demandedGold}g)
                     </button>
-                    <button class="robbery-btn negotiate" onclick="NPCTradeWindow.handleRobbery('negotiate')">
+                    <button class="robbery-btn negotiate" data-robbery-action="negotiate">
                         🗣️ Negotiate
                     </button>
-                    <button class="robbery-btn flee" onclick="NPCTradeWindow.handleRobbery('flee')">
+                    <button class="robbery-btn flee" data-robbery-action="flee">
                         🏃 Try to Flee
                     </button>
                 </div>
@@ -1244,6 +1244,48 @@ const NPCTradeWindow = {
                 this.close();
             }
         });
+
+        // 🖤 Event delegation for all trade window interactions
+        // No inline onclick handlers = no XSS vulnerabilities = happy Unity 💀
+        const tradeWindow = document.getElementById('npc-trade-window');
+        if (tradeWindow) {
+            tradeWindow.addEventListener('click', (e) => {
+                const target = e.target;
+
+                // 📦 Inventory item click - add to offer
+                const inventoryItem = target.closest('.inventory-item');
+                if (inventoryItem) {
+                    const itemId = inventoryItem.dataset.item;
+                    const side = inventoryItem.dataset.side;
+                    if (itemId && side) this.addToOffer(itemId, side);
+                    return;
+                }
+
+                // 📜 Quest accept button
+                const questBtn = target.closest('.accept-quest-btn');
+                if (questBtn && questBtn.dataset.questId) {
+                    this.acceptQuest(questBtn.dataset.questId);
+                    return;
+                }
+
+                // ⚡ Event option button
+                const eventBtn = target.closest('.event-option-btn');
+                if (eventBtn && eventBtn.dataset.eventOption) {
+                    this.handleEventOption(eventBtn.dataset.eventOption);
+                    return;
+                }
+
+                // 🗡️ Robbery action button
+                const robberyBtn = target.closest('.robbery-btn');
+                if (robberyBtn && robberyBtn.dataset.robberyAction) {
+                    const action = robberyBtn.dataset.robberyAction;
+                    const amount = robberyBtn.dataset.robberyAmount ?
+                        parseInt(robberyBtn.dataset.robberyAmount, 10) : undefined;
+                    this.handleRobbery(action, amount);
+                    return;
+                }
+            });
+        }
     },
 
     // ═══════════════════════════════════════════════════════════════

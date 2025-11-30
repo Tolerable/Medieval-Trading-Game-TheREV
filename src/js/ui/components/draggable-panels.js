@@ -207,10 +207,16 @@ const DraggablePanels = {
         element.style.margin = '0';
         element.style.zIndex = '1000';
 
+        // 🖤 Cache width/height here - no getBoundingClientRect() spam in onDrag()
+        // This prevents layout thrashing during drag operations 💀
         this.dragState = {
             element,
             offsetX: clientX - rect.left,
-            offsetY: clientY - rect.top
+            offsetY: clientY - rect.top,
+            width: rect.width,    // Cached for onDrag()
+            height: rect.height,  // Cached for onDrag()
+            maxX: window.innerWidth,
+            maxY: window.innerHeight
         };
 
         element.classList.add('dragging');
@@ -224,15 +230,15 @@ const DraggablePanels = {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-        const { element, offsetX, offsetY } = this.dragState;
+        // 🖤 Use cached values - no reflow spam in this realm
+        const { element, offsetX, offsetY, width, height, maxX, maxY } = this.dragState;
 
         let newX = clientX - offsetX;
         let newY = clientY - offsetY;
 
-        // Keep within viewport
-        const rect = element.getBoundingClientRect();
-        newX = Math.max(0, Math.min(newX, window.innerWidth - rect.width));
-        newY = Math.max(0, Math.min(newY, window.innerHeight - rect.height));
+        // Keep within viewport using CACHED dimensions - no getBoundingClientRect() 💀
+        newX = Math.max(0, Math.min(newX, maxX - width));
+        newY = Math.max(0, Math.min(newY, maxY - height));
 
         element.style.left = newX + 'px';
         element.style.top = newY + 'px';

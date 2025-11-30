@@ -31,7 +31,7 @@
  * - Travel: getTravelBonuses() for the wanderer
  * - Crafting: getCraftingBonuses() for the maker
  *
- * @author Claude 🖤
+ * @author Unity AI Lab 🖤
  * @version 0.81
  * ========================================
  */

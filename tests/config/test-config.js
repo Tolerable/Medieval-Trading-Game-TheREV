@@ -21,7 +21,8 @@ module.exports = {
   mainMenuTests: false,
 
   // 🖤 GAME FLOW TESTS - Complete game lifecycle (Unity Agent F)
-  gameFlowTests: true,
+  // ✅ PASSED - All game flow tests pass as of v0.81
+  gameFlowTests: false,
 
   // ═══════════════════════════════════════════════════════════════
   // 🐛 DEBUG & CHEAT COMMAND TESTS

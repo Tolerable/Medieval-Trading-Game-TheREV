@@ -51,6 +51,9 @@ const MenuWeatherSystem = {
             return;
         }
 
+        // 🖤 Inject keyframe animations if not already done
+        this.injectKeyframes();
+
         // 🖤 Clear any existing content
         this.container.innerHTML = '';
 
@@ -68,6 +71,32 @@ const MenuWeatherSystem = {
 
         // Start the appropriate effect
         this.startEffect();
+    },
+
+    // ⚡ Inject keyframe animations for lightning effects
+    injectKeyframes() {
+        if (document.getElementById('menu-weather-keyframes')) return;
+
+        const style = document.createElement('style');
+        style.id = 'menu-weather-keyframes';
+        style.textContent = `
+            /* ⚡ Menu lightning bolt strike animation */
+            @keyframes menu-bolt-strike {
+                0% { height: 0; opacity: 1; }
+                100% { height: var(--bolt-height, 60%); opacity: 1; }
+            }
+            /* 🔥 Menu fire flicker animation */
+            @keyframes menu-fire-flicker {
+                0% { transform: scale(1); opacity: 0.9; }
+                100% { transform: scale(1.15); opacity: 1; }
+            }
+            /* ✦ Menu spark pulse animation */
+            @keyframes menu-spark-pulse {
+                0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.7; }
+                100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
     },
 
     // 🎬 Start the weather effect for current season
@@ -129,11 +158,36 @@ const MenuWeatherSystem = {
                 }
                 @keyframes meteorFall {
                     0% { transform: translateX(0) translateY(0) rotate(-45deg); opacity: 1; }
-                    100% { transform: translateX(300px) translateY(100vh) rotate(-45deg); opacity: 0; }
+                    100% { transform: translateX(var(--meteor-x, 200px)) translateY(var(--meteor-y, 60vh)) rotate(-45deg); opacity: 0; }
                 }
                 @keyframes emberFloat {
                     0% { transform: translateY(0) scale(1); opacity: 0.8; }
                     100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+                }
+                /* ⚡ Menu lightning bolt strike animation */
+                @keyframes menu-bolt-strike {
+                    0% { height: 0; opacity: 1; }
+                    100% { height: var(--bolt-height, 60%); opacity: 1; }
+                }
+                /* 🔥 Menu fire flicker animation */
+                @keyframes menu-fire-flicker {
+                    0% { transform: scale(1); opacity: 0.9; }
+                    100% { transform: scale(1.15); opacity: 1; }
+                }
+                /* ✦ Menu spark pulse animation */
+                @keyframes menu-spark-pulse {
+                    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.7; }
+                    100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                }
+                /* ☄️ Menu meteor fire flicker animation */
+                @keyframes menu-meteor-fire-flicker {
+                    0% { transform: scale(1) rotate(0deg); opacity: 0.85; }
+                    100% { transform: scale(1.15) rotate(5deg); opacity: 1; }
+                }
+                /* ☄️ Menu meteor spark pulse animation */
+                @keyframes menu-meteor-spark-pulse {
+                    0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; }
+                    100% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
                 }
             `;
             document.head.appendChild(style);
@@ -176,28 +230,43 @@ const MenuWeatherSystem = {
         const spawnMeteor = () => {
             if (!this.isActive) return;
 
+            const startX = Math.random() * 80;
+
+            // 🔥 80% land on screen, 20% go off screen (like game weather)
+            const goesOffScreen = Math.random() < 0.2;
+            const landX = 150 + Math.random() * 150; // 150-300px horizontal travel
+            const landY = goesOffScreen ? (100 + Math.random() * 20) : (40 + Math.random() * 50); // 40-90vh on screen, 100-120vh off
+
+            const duration = 1.5 + Math.random();
             const meteor = document.createElement('div');
             meteor.style.cssText = `
                 position: absolute;
                 top: -50px;
-                left: ${Math.random() * 80}%;
+                left: ${startX}%;
                 font-size: ${20 + Math.random() * 30}px;
-                animation: meteorFall ${1.5 + Math.random()}s linear forwards;
+                animation: meteorFall ${duration}s linear forwards;
                 pointer-events: none;
                 z-index: 10;
                 filter: drop-shadow(0 0 10px #ff4400) drop-shadow(0 0 20px #ff0000);
+                --meteor-x: ${landX}px;
+                --meteor-y: ${landY}vh;
             `;
             meteor.textContent = '☄️';
             this.container.appendChild(meteor);
 
-            // Create impact flash
+            // Create impact flash and fire (only for on-screen impacts)
+            const impactX = startX + (landX / 20); // Approximate landing X
+            const impactDelay = duration * 0.85 * 1000;
             setTimeout(() => {
                 if (!this.isActive) return;
+
+                // Brief flash at impact point
                 const flash = document.createElement('div');
+                const flashY = goesOffScreen ? 0 : (100 - landY); // Position from bottom
                 flash.style.cssText = `
                     position: absolute;
-                    bottom: 0;
-                    left: ${parseFloat(meteor.style.left) + 15}%;
+                    bottom: ${goesOffScreen ? 0 : flashY}%;
+                    left: ${impactX}%;
                     width: 100px;
                     height: 50px;
                     background: radial-gradient(ellipse at bottom, rgba(255, 100, 0, 0.8), transparent);
@@ -207,9 +276,14 @@ const MenuWeatherSystem = {
                 `;
                 this.container.appendChild(flash);
                 setTimeout(() => flash.remove(), 500);
-            }, 1200 + Math.random() * 500);
 
-            setTimeout(() => meteor.remove(), 3000);
+                // Only create persistent fire for ON-SCREEN impacts (80%)
+                if (!goesOffScreen) {
+                    this.createMenuMeteorFire(impactX, landY);
+                }
+            }, impactDelay);
+
+            setTimeout(() => meteor.remove(), duration * 1000 + 500);
 
             // Next meteor in 3-10 seconds
             this.meteorInterval = setTimeout(spawnMeteor, 3000 + Math.random() * 7000);
@@ -217,6 +291,65 @@ const MenuWeatherSystem = {
 
         // First meteor immediately
         spawnMeteor();
+    },
+
+    // 🔥 Create persistent meteor fire effect at impact location
+    createMenuMeteorFire(x, landY) {
+        if (!this.container) return;
+
+        const fire = document.createElement('div');
+        fire.className = 'menu-meteor-fire';
+        // Position fire at the landing point (convert vh to % from top)
+        fire.style.cssText = `
+            position: absolute;
+            left: ${x}%;
+            top: ${landY}%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            pointer-events: none;
+            z-index: 15;
+        `;
+
+        // Create the fire glow - orange/red core with flickering flames
+        fire.innerHTML = `
+            <div style="
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background: radial-gradient(circle,
+                    rgba(255,200,100,1) 0%,
+                    rgba(255,120,30,0.8) 30%,
+                    rgba(255,60,0,0.5) 60%,
+                    rgba(180,0,0,0.3) 80%,
+                    transparent 100%);
+                box-shadow: 0 0 25px rgba(255,150,50,0.9),
+                            0 0 50px rgba(255,80,0,0.6),
+                            0 0 80px rgba(200,0,0,0.4);
+                animation: menu-meteor-fire-flicker 0.12s ease-in-out infinite alternate;
+            "></div>
+            <div style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 24px;
+                color: #ffcc00;
+                text-shadow: 0 0 10px #ff6600, 0 0 20px #ff3300, 0 0 30px #ff0000;
+                animation: menu-meteor-spark-pulse 0.25s ease-in-out infinite alternate;
+            ">✦</div>
+        `;
+
+        this.container.appendChild(fire);
+
+        // Fire burns for 3-6 seconds then fades out
+        const burnDuration = 3000 + Math.random() * 3000;
+        setTimeout(() => {
+            fire.style.transition = 'opacity 1s ease-out';
+            fire.style.opacity = '0';
+            setTimeout(() => fire.remove(), 1000);
+        }, burnDuration);
     },
 
     // ⛈️ STORM - Rain with lightning
@@ -256,58 +389,60 @@ const MenuWeatherSystem = {
 
             // Random position for lightning
             const x = 10 + Math.random() * 80; // 10-90% from left
+            const strikeY = 40 + Math.random() * 50; // 40-90% down screen
 
-            // Create main bolt
+            // Create vertical bolt column
             const bolt = document.createElement('div');
-            bolt.className = 'lightning-bolt';
-            bolt.style.left = `${x}%`;
-            bolt.style.top = '0';
-            bolt.style.height = `${40 + Math.random() * 30}%`;
+            bolt.className = 'lightning-bolt-column';
+            bolt.style.cssText = `
+                position: absolute;
+                left: ${x}%;
+                top: 0;
+                width: 4px;
+                height: 0;
+                background: linear-gradient(to bottom,
+                    rgba(255,255,255,0.9) 0%,
+                    rgba(200,220,255,1) 50%,
+                    rgba(100,150,255,1) 100%);
+                box-shadow: 0 0 10px #fff, 0 0 20px #88ccff, 0 0 40px #4488ff;
+                z-index: 100;
+                animation: menu-bolt-strike 0.15s ease-out forwards;
+            `;
+            bolt.style.setProperty('--bolt-height', `${strikeY}%`);
             this.container.appendChild(bolt);
-
-            // Create glow
-            const glow = document.createElement('div');
-            glow.className = 'lightning-glow';
-            glow.style.left = `${x - 10}%`;
-            glow.style.top = '-50px';
-            this.container.appendChild(glow);
 
             // Create branching segments
             const branchCount = 2 + Math.floor(Math.random() * 3);
             for (let i = 0; i < branchCount; i++) {
                 const branch = document.createElement('div');
-                branch.className = 'lightning-segment';
-                branch.style.left = `${x}%`;
-                branch.style.top = `${10 + Math.random() * 30}%`;
-                branch.style.width = `${30 + Math.random() * 50}px`;
-                branch.style.transform = `rotate(${30 + Math.random() * 60}deg)`;
-                branch.style.opacity = '0';
-                this.container.appendChild(branch);
-
-                // Animate branch
-                setTimeout(() => {
-                    branch.style.transition = 'opacity 0.1s';
-                    branch.style.opacity = '0.8';
-                    setTimeout(() => {
-                        branch.style.opacity = '0';
-                        setTimeout(() => branch.remove(), 500);
-                    }, 100);
-                }, 50 + i * 30);
+                branch.className = 'lightning-branch';
+                const branchY = 20 + Math.random() * 60;
+                const branchDir = Math.random() > 0.5 ? 1 : -1;
+                const branchLen = 15 + Math.random() * 25;
+                branch.style.cssText = `
+                    position: absolute;
+                    top: ${branchY}%;
+                    left: 50%;
+                    width: ${branchLen}px;
+                    height: 2px;
+                    background: linear-gradient(to ${branchDir > 0 ? 'right' : 'left'}, rgba(200,220,255,1), transparent);
+                    box-shadow: 0 0 5px #88ccff;
+                    transform: rotate(${branchDir * (30 + Math.random() * 30)}deg);
+                `;
+                bolt.appendChild(branch);
             }
 
-            // Trigger animations
-            requestAnimationFrame(() => {
-                bolt.classList.add('flash');
-                glow.classList.add('flash');
-                afterglow.classList.add('flash');
-            });
+            // Flash effect
+            afterglow.classList.add('flash');
 
-            // Cleanup
+            // After bolt strikes, create fire effect
             setTimeout(() => {
                 bolt.remove();
-                glow.remove();
                 afterglow.classList.remove('flash');
-            }, 1500);
+
+                // Create the small fire/spark that persists
+                this.createMenuLightningFire(x, strikeY);
+            }, 150);
 
             // Schedule next lightning (random interval 4-12 seconds)
             this.lightningInterval = setTimeout(triggerLightning, 4000 + Math.random() * 8000);
@@ -315,6 +450,59 @@ const MenuWeatherSystem = {
 
         // First lightning after 2-5 seconds
         this.lightningInterval = setTimeout(triggerLightning, 2000 + Math.random() * 3000);
+    },
+
+    // 🔥 Create fire effect for menu lightning
+    createMenuLightningFire(x, y) {
+        if (!this.container) return;
+
+        const fire = document.createElement('div');
+        fire.className = 'menu-lightning-fire';
+        fire.style.cssText = `
+            position: absolute;
+            left: ${x}%;
+            top: ${y}%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            width: 30px;
+            height: 30px;
+        `;
+        fire.innerHTML = `
+            <div class="fire-glow" style="
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background: radial-gradient(circle,
+                    rgba(255,255,255,0.9) 0%,
+                    rgba(200,220,255,0.7) 30%,
+                    rgba(100,150,255,0.4) 60%,
+                    rgba(255,150,50,0.2) 80%,
+                    transparent 100%);
+                box-shadow: 0 0 15px rgba(200,220,255,0.8),
+                            0 0 30px rgba(100,150,255,0.5);
+                animation: menu-fire-flicker 0.15s ease-in-out infinite alternate;
+            "></div>
+            <div class="fire-sparks" style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 14px;
+                color: #fff;
+                text-shadow: 0 0 8px #88ccff;
+                animation: menu-spark-pulse 0.3s ease-in-out infinite alternate;
+            ">✦</div>
+        `;
+        this.container.appendChild(fire);
+
+        // Fire burns for 2-4 seconds then fades
+        const burnDuration = 2000 + Math.random() * 2000;
+        setTimeout(() => {
+            fire.style.transition = 'opacity 1s ease-out';
+            fire.style.opacity = '0';
+            setTimeout(() => fire.remove(), 1000);
+        }, burnDuration);
     },
 
     // ⚡❄️ THUNDERSNOW - Lightning Blizzard (rare and terrifying!)
@@ -354,61 +542,119 @@ const MenuWeatherSystem = {
             if (!this.isActive) return;
 
             const x = 10 + Math.random() * 80;
+            const strikeY = 40 + Math.random() * 50; // 40-90% down screen
 
-            // Create main bolt with blue-white tint
+            // Create vertical bolt column with blue-white tint
             const bolt = document.createElement('div');
-            bolt.className = 'lightning-bolt thundersnow-bolt';
-            bolt.style.left = `${x}%`;
-            bolt.style.top = '0';
-            bolt.style.height = `${50 + Math.random() * 40}%`;
+            bolt.className = 'lightning-bolt-column thundersnow-bolt';
+            bolt.style.cssText = `
+                position: absolute;
+                left: ${x}%;
+                top: 0;
+                width: 5px;
+                height: 0;
+                background: linear-gradient(to bottom,
+                    rgba(255,255,255,1) 0%,
+                    rgba(180,200,255,1) 50%,
+                    rgba(100,140,255,1) 100%);
+                box-shadow: 0 0 15px #fff, 0 0 30px #aaccff, 0 0 50px #6699ff;
+                z-index: 100;
+                animation: menu-bolt-strike 0.15s ease-out forwards;
+            `;
+            bolt.style.setProperty('--bolt-height', `${strikeY}%`);
             this.container.appendChild(bolt);
-
-            // Create cold glow
-            const glow = document.createElement('div');
-            glow.className = 'lightning-glow thundersnow-light';
-            glow.style.left = `${x - 15}%`;
-            glow.style.top = '-50px';
-            this.container.appendChild(glow);
 
             // Create branching segments
             const branchCount = 3 + Math.floor(Math.random() * 4);
             for (let i = 0; i < branchCount; i++) {
                 const branch = document.createElement('div');
-                branch.className = 'lightning-segment thundersnow-branch';
-                branch.style.left = `${x}%`;
-                branch.style.top = `${10 + Math.random() * 40}%`;
-                branch.style.width = `${40 + Math.random() * 60}px`;
-                branch.style.transform = `rotate(${20 + Math.random() * 70}deg)`;
-                branch.style.opacity = '0';
-                this.container.appendChild(branch);
-
-                setTimeout(() => {
-                    branch.style.transition = 'opacity 0.1s';
-                    branch.style.opacity = '0.9';
-                    setTimeout(() => {
-                        branch.style.opacity = '0';
-                        setTimeout(() => branch.remove(), 500);
-                    }, 150);
-                }, 30 + i * 25);
+                branch.className = 'lightning-branch thundersnow-branch';
+                const branchY = 20 + Math.random() * 60;
+                const branchDir = Math.random() > 0.5 ? 1 : -1;
+                const branchLen = 20 + Math.random() * 35;
+                branch.style.cssText = `
+                    position: absolute;
+                    top: ${branchY}%;
+                    left: 50%;
+                    width: ${branchLen}px;
+                    height: 2px;
+                    background: linear-gradient(to ${branchDir > 0 ? 'right' : 'left'}, rgba(180,200,255,1), transparent);
+                    box-shadow: 0 0 8px #aaccff;
+                    transform: rotate(${branchDir * (20 + Math.random() * 40)}deg);
+                `;
+                bolt.appendChild(branch);
             }
 
-            requestAnimationFrame(() => {
-                bolt.classList.add('flash');
-                glow.classList.add('flash');
-                afterglow.classList.add('flash');
-            });
+            // Flash effect
+            afterglow.classList.add('flash');
 
+            // After bolt strikes, create ice-fire effect
             setTimeout(() => {
                 bolt.remove();
-                glow.remove();
                 afterglow.classList.remove('flash');
-            }, 1500);
+
+                // Create the small fire/spark that persists (blue-ish for thundersnow)
+                this.createMenuThundersnowFire(x, strikeY);
+            }, 150);
 
             // More frequent lightning for thundersnow (3-8 seconds)
             this.lightningInterval = setTimeout(triggerLightning, 3000 + Math.random() * 5000);
         };
 
         this.lightningInterval = setTimeout(triggerLightning, 1500 + Math.random() * 2000);
+    },
+
+    // 🔥❄️ Create ice-fire effect for thundersnow lightning
+    createMenuThundersnowFire(x, y) {
+        if (!this.container) return;
+
+        const fire = document.createElement('div');
+        fire.className = 'menu-lightning-fire thundersnow-fire';
+        fire.style.cssText = `
+            position: absolute;
+            left: ${x}%;
+            top: ${y}%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            width: 35px;
+            height: 35px;
+        `;
+        fire.innerHTML = `
+            <div class="fire-glow" style="
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background: radial-gradient(circle,
+                    rgba(255,255,255,1) 0%,
+                    rgba(180,200,255,0.8) 30%,
+                    rgba(100,140,255,0.5) 60%,
+                    rgba(150,180,255,0.2) 80%,
+                    transparent 100%);
+                box-shadow: 0 0 20px rgba(180,200,255,0.9),
+                            0 0 40px rgba(100,140,255,0.6);
+                animation: menu-fire-flicker 0.12s ease-in-out infinite alternate;
+            "></div>
+            <div class="fire-sparks" style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 16px;
+                color: #fff;
+                text-shadow: 0 0 10px #aaccff, 0 0 20px #6699ff;
+                animation: menu-spark-pulse 0.25s ease-in-out infinite alternate;
+            ">❄</div>
+        `;
+        this.container.appendChild(fire);
+
+        // Ice-fire burns for 2-4 seconds then fades
+        const burnDuration = 2000 + Math.random() * 2000;
+        setTimeout(() => {
+            fire.style.transition = 'opacity 1s ease-out';
+            fire.style.opacity = '0';
+            setTimeout(() => fire.remove(), 1000);
+        }, burnDuration);
     },
 
     // ❄️ WINTER - Gentle snowfall

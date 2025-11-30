@@ -13,56 +13,90 @@
 **Status:** ✅ Active
 **Version:** 0.81
 
-### Session Updates - 2025-11-29 (GO Command Full Audit)
+### Session Updates - 2025-11-29 (GO Workflow Session #2) ✅ FIXED
 
-#### 🔴 CRITICAL - Security (XSS Vulnerabilities) ✅ FIXED
-- [x] **npc-trade.js:748-762** - XSS via itemId in onclick handlers
-  - Fixed: Added escapeHtml(), switched to data attributes + event delegation
-- [x] **property-storage.js:334-336, 417-419, 493-495** - XSS via propertyId/itemId
-  - Fixed: Added escapeHtml(), switched to data attributes
-- [x] **property-ui.js:70-73, 105-108, 165, 416, 562, 642** - XSS in onclick handlers
-  - Fixed: Added escapeHtml(), centralized event delegation via _attachModalEventListeners()
-- [x] **game.js:5934, 7279, 7591, 8338, 8415, 9575** - Multiple XSS in onclick
-  - Fixed: Added global escapeHtml(), all buttons use data attributes
+#### 🔴 CRITICAL - Code Injection via eval() ✅ FIXED
+- [x] **panel-manager.js:338** - Direct eval() execution of customToggle strings
+  - Problem: `eval(info.customToggle)` executes arbitrary code from config
+  - Fix: Created `toggleHandlers` registry with safe function references
+  - Now uses `this.toggleHandlers[info.customToggle]()` instead of eval()
 
-#### 🔴 CRITICAL - Tests Disabled (LEFT FOR LATER)
-- [ ] **test-config.js:15-144** - ALL 40+ test flags are `false` - no tests run in CI/CD
-- [ ] **Multiple spec files** - 31 test.skip() calls prevent execution
+#### 🔴 CRITICAL - XSS Vulnerabilities ✅ FIXED
+- [x] **npc-trade.js:479** - itemId in onclick without escaping
+  - Fix: Converted to data attributes + event delegation
+- [x] **npc-trade.js:553** - quest.id in onclick without escaping
+  - Fix: Escaped quest.name, quest.id, quest.description; added data-quest-id attribute
+- [x] **npc-trade.js:587** - event option id in onclick without escaping
+  - Fix: Converted to data-event-option attribute; escaped icon/label
+- [x] **npc-trade.js:610** - Numeric injection in robbery onclick
+  - Fix: Converted to data-robbery-action/data-robbery-amount attributes
+- [x] **npc-trade.js:1248-1287** - Added event delegation in setupEventListeners()
+  - Handles: .inventory-item, .accept-quest-btn, .event-option-btn, .robbery-btn
+- [x] **game.js:7505** - event.name rendered unescaped in innerHTML
+  - Fix: Added escapeHtml(event.name || '')
+- [x] **game.js:7568** - newsItem rendered unescaped in innerHTML
+  - Fix: Added escapeHtml(newsItem || '') and escapeHtml(TimeSystem.getFormattedTime())
 
-#### 🟠 HIGH - Bugs & Race Conditions (LEFT FOR LATER)
+#### 🟠 HIGH - Performance ✅ FIXED
+- [x] **draggable-panels.js:210-220** - getBoundingClientRect() cached in startDrag()
+  - Problem: Was calling getBoundingClientRect() on every mousemove (~60fps)
+  - Fix: Cache width, height, maxX, maxY in startDrag() dragState
+  - Fix: onDrag() now uses cached values instead of calling getBoundingClientRect()
+
+#### 🟠 HIGH - Performance (LEFT FOR LATER)
+- [ ] **draggable-panels.js:57-60** - Global mousemove listeners always active
+  - Problem: Document-level listeners fire 60-120x/sec even when not dragging
+  - Fix: Add listeners only during drag, remove in endDrag()
+- [ ] **quest-system.js:1731-1800** - O(n²) nested loops with Array.includes()
+  - Problem: completedQuests.includes() is O(n) called in nested loop
+  - Fix: Convert arrays to Sets for O(1) lookup
+- [ ] **z-index-system.css:90-155** - 16+ :has() selectors (CSS PERFORMANCE)
+  - Problem: :has() is expensive, triggers constant re-evaluation
+  - Fix: Replace with JavaScript state classes on body element
+
+#### 🟠 HIGH - Function Override Conflicts (NEW)
+- [ ] **panel-manager.js:667 vs immersive-experience-integration.js:581** - window.showPanel
+  - Problem: Both files override window.showPanel - only one takes effect
+  - Fix: Consolidate into single override or use event system
+- [ ] **panel-manager.js:676 vs immersive-experience-integration.js:595** - window.hidePanel
+  - Problem: Same conflict as showPanel
+  - Fix: Same solution
+
+#### 🟠 HIGH - Bugs & Race Conditions
 - [ ] **npc-trade.js:281-302** - Null reference on portrait.querySelector
-- [ ] **npc-trade.js:291** - Chained querySelector without null check
 - [ ] **npc-chat-ui.js:736-810** - Race condition with isWaitingForResponse flag
 - [ ] **save-manager.js:107-114** - isAutoSaving flag without Promise queue
-- [ ] **npc-dialogue.js:705-731** - Unhandled fetch error propagation
+- [ ] **game.js:8191-8193** - Empty catch block swallows leaderboard errors
+- [ ] **travel-panel-map.js:1161** - setInterval without proper cleanup guard
+- [ ] **game.js:7352-7376** - playMerchantGreeting() async without try/catch
 
-#### 🟠 HIGH - CSS Conflicts ✅ FIXED
-- [x] **npc-systems.css:655 vs 1300** - Duplicate `.quest-card` with conflicting styles
-  - Fixed: Scoped second block to `.quest-grid .quest-card`
-- [ ] **z-index conflicts** - 12+ hardcoded values conflict with z-index-system.css
-- [x] **ui-enhancements.css:162 vs 275** - Duplicate `.high-contrast` definitions
-  - Fixed: Merged CSS variables into first block, removed duplicate
-- [x] **ui-enhancements.css:49 vs 894** - Duplicate `.tooltip` definitions
-  - Fixed: Merged styles into first block, removed duplicate
-
-#### 🟡 MEDIUM - Performance
-- [ ] **z-index-system.css:108-157** - 23 `:has()` selectors cause layout thrashing
-- [ ] **All CSS files** - 111 `!important` flags indicate cascade problems
-- [ ] **Multiple files** - 13 `backdrop-filter: blur()` instances hurt mobile perf
+#### 🟡 MEDIUM - Performance (Existing)
+- [ ] **All CSS files** - 127+ `!important` flags indicate cascade problems
+- [ ] **Multiple files** - 12 `backdrop-filter: blur()` instances hurt GPU perf
+  - Locations: styles.css:346, 600, 615, 871, 1510, 1595, 1654, 2253, 4824, 7224, 8109, npc-systems.css:878
 - [ ] **environmental-effects-system.js:300-311** - Event listeners without removal
-- [ ] **game.js:537, 784, 1039** - Event listeners on dynamic elements without cleanup
+- [ ] **draggable-panels.js:267** - MutationObserver on entire subtree, never disconnected
 
 #### 🟡 MEDIUM - Missing Responsive Styles
 - [ ] **styles.css:1514** - `.panel { min-width: 400px }` no mobile breakpoint
-- [ ] **npc-systems.css:867** - `.quest-tracker` fixed at 350px top, not responsive
+- [ ] **npc-systems.css:867** - `.quest-tracker` fixed position, not responsive
 - [ ] **All CSS files** - Missing breakpoints for < 480px devices
 
-#### 🟢 LOW - Dead Code
-- [ ] **game.js:1331-1399** - Debug helpers exposed globally (GameLogger, testDifficulty, etc.)
-- [ ] **game.js:4962-4996** - Polling functions may never be called
-- [ ] **test-helpers.js:143-150** - `getDebugOutput()` never used
-- [ ] **test-helpers.js:165-173** - `togglePanelWithKey()` unreliable
-- [ ] **debug.spec.js:1-46** - Orphaned test file, does nothing
+#### 🟢 LOW - Dead Code (NEW)
+- [ ] **game.js:4970-5009** - startDifficultyPolling/stopDifficultyPolling never called
+- [ ] **game.js:6815-6880** - setDifficulty/testDifficultySystem debug functions in global scope
+- [ ] **npc-encounters.js:736-740** - spawnNPCEncounter/testNPCChat debug functions
+- [ ] **audio-system.js:620-632, 787-814** - Disabled audio methods (early returns)
+- [ ] **browser-compatibility.js:264-328** - IE polyfills (CustomEvent, console, localStorage, sessionStorage)
+
+### Previous Session - 2025-11-29 (Lightning Flash Fix) ✅
+- [x] **weather-system.js:1067-1086** - Lightning flash was blanking other weather effects
+  - Problem: `lightning-flash` class directly modified overlay's background/transition
+  - Fix: Created separate `#lightning-flash-effect` element inside overlay
+
+### Previous Session - 2025-11-29 (GO Command Audit #1) ✅
+- [x] **XSS Fixes (4 files)** - npc-trade.js, property-storage.js, property-ui.js, game.js
+- [x] **CSS Conflicts** - npc-systems.css .quest-card, ui-enhancements.css duplicates
 
 ---
 

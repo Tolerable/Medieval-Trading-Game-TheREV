@@ -2,14 +2,20 @@
 
 Place your AI-generated world map images here. The game supports seasonal backdrops with crossfade transitions!
 
-## Seasonal Backdrops (Recommended)
-Create 4 versions of your map, one for each season:
+## Current Version: v0.81 - Unity's Dark Awakening 🖤💀🦇
+
+## Seasonal Backdrops (Required)
+5 versions of the map, one for each season + dungeon:
 - `world-map-spring.png` - Blooming flowers, green fields
 - `world-map-summer.png` - Lush green, bright sun
 - `world-map-autumn.png` - Orange/red leaves, harvest colors
 - `world-map-winter.png` - Snow covered, frozen lakes
+- `world-map-dungeon.png` - Dark, apocalyptic dungeon mode
 
-When the in-game season changes, the backdrop will smoothly crossfade (2 second transition).
+When the in-game season changes, the backdrop will smoothly crossfade (60 second transition).
+
+## Archived Versions
+- `*-v7.9.png` - Previous version backdrops (archived 2025-11-29)
 
 ## Single Backdrop (Fallback)
 If you only want one image:
@@ -28,4 +34,6 @@ Use browser console to manually change seasons:
 ```javascript
 GameWorldRenderer.setSeason('winter');
 GameWorldRenderer.setSeason('spring');
+GameWorldRenderer.enterDungeonMode(); // For dungeon backdrop
+GameWorldRenderer.exitDungeonMode();  // Return to seasonal
 ```

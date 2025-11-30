@@ -18,6 +18,50 @@ Each entry follows this format:
 
 ## Current Session
 
+### 2025-11-29 - GO Workflow Session #2
+
+**Request:** GO - Full workflow triggered (user command)
+
+**Context:** Previous session fixed lightning flash. Now running fresh full codebase audit to find bugs, missing features, dead code, performance issues, security concerns.
+
+**Status:** Completed ✅
+
+**Fixed This Session:**
+1. **CRITICAL: eval() removal** - panel-manager.js:338
+   - Replaced `eval(info.customToggle)` with safe `toggleHandlers` registry
+   - No more arbitrary code execution from config strings
+
+2. **CRITICAL: XSS vulnerabilities** - npc-trade.js (5 locations)
+   - Converted all inline onclick handlers to data attributes
+   - Added event delegation in setupEventListeners()
+   - Escaped all user-facing data (quest names, NPC names, event options)
+
+3. **CRITICAL: XSS vulnerabilities** - game.js:7505, 7568
+   - Added escapeHtml() to market event names
+   - Added escapeHtml() to market news content
+
+4. **HIGH: Performance** - draggable-panels.js
+   - Cached getBoundingClientRect() values in startDrag()
+   - onDrag() now uses cached width/height instead of re-querying DOM
+
+**Left for Later:**
+- :has() CSS selectors (16+ instances)
+- backdrop-filter:blur() optimization
+- Quest system Set conversion
+- Global mousemove listener optimization
+
+---
+
+### 2025-11-29 - Lightning Flash Blanking Weather Effects
+
+**Request:** Lightning strikes are still flashing the screen - other weather effects go blank every time a bolt strikes
+
+**Context:** The lightning flash effect is somehow clearing/blanking other weather visuals when it triggers
+
+**Status:** Completed ✅
+
+---
+
 ### 2025-11-29 - Full Codebase Audit (GO Command)
 
 **Request:** GO - Full workflow triggered

@@ -2637,9 +2637,9 @@ button.secondary:hover {
 
 @keyframes afterglow {
     0% { opacity: 0; }
-    10% { opacity: 1; }
-    30% { opacity: 0.6; }
-    60% { opacity: 0.3; }
+    10% { opacity: 0.4; }
+    30% { opacity: 0.25; }
+    60% { opacity: 0.1; }
     100% { opacity: 0; }
 }
 

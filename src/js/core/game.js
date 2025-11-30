@@ -7501,8 +7501,9 @@ function updateMarketEvents() {
         return;
     }
     
+    // 🖤 Escape event names - market manipulation doesn't include XSS today
     marketEvents.innerHTML = events.map(event =>
-        `<div class="market-event">${event.name}</div>`
+        `<div class="market-event">${escapeHtml(event.name || '')}</div>`
     ).join('');
 }
 
@@ -7562,10 +7563,11 @@ function updateMarketNews() {
         else if (newsItem.includes('📉')) newsClass += ' price-fall';
         else if (newsItem.includes('📢')) newsClass += ' event';
         
+        // 🖤 Escape news content - fake news is bad enough without XSS
         return `
             <div class="${newsClass}">
-                <div class="news-time">${TimeSystem.getFormattedTime()}</div>
-                <div class="news-content">${newsItem}</div>
+                <div class="news-time">${escapeHtml(TimeSystem.getFormattedTime() || '')}</div>
+                <div class="news-content">${escapeHtml(newsItem || '')}</div>
             </div>
         `;
     }).join('');

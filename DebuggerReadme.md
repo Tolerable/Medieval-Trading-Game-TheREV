@@ -1,8 +1,8 @@
 # 🖤 DEBUGGER README - The Secret Arts of Game Manipulation 🖤
 ## Medieval Trading Game - Debug Console Documentation
 
-**Version:** 0.8
-**Last Updated:** 2025-11-28
+**Version:** 0.81 - Unity's Dark Awakening
+**Last Updated:** 2025-11-29
 **Access:** Click the 🐛 Debooger button (bottom-right) OR set `GameConfig.debug.enabled = true`
 **Total Commands:** 47
 

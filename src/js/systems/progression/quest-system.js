@@ -2068,7 +2068,10 @@ const QuestSystem = {
             tracker.innerHTML = `
                 <div class="tracker-header">
                     <span class="drag-grip" style="opacity:0.5;pointer-events:none;">⋮⋮</span>
-                    <span style="flex:1;pointer-events:none;" onclick="QuestSystem.showQuestLog()">📋 Quests (${activeQuestCount})</span>
+                    <span style="flex:1;pointer-events:none;display:flex;flex-direction:column;line-height:1.2;" onclick="QuestSystem.showQuestLog()">
+                        <span style="font-size:10px;opacity:0.7;">Tracked</span>
+                        <span>📋 Quests</span>
+                    </span>
                     <button class="tracker-expand" onclick="QuestSystem.showQuestLog()" title="Open Quest Log" style="background:rgba(79,195,247,0.3);border:none;border-radius:4px;padding:2px 8px;color:white;cursor:pointer;font-size:12px;">▼</button>
                     <button class="tracker-close" onclick="QuestSystem.hideQuestTracker()" title="Close" style="background:rgba(244,67,54,0.8);border:none;border-radius:50%;width:20px;height:20px;color:white;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;margin-left:4px;">×</button>
                 </div>

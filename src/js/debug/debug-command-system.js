@@ -653,21 +653,76 @@ const DebugCommandSystem = {
         // 🌦️ WEATHER & SEASON CHEATS
         // ═══════════════════════════════════════════════════════════════
 
-        // weather <type> - Set weather instantly
-        this.registerCommand('weather', 'Set weather: weather <clear|rain|storm|snow|blizzard|fog|apocalypse|etc>', (args) => {
+        // weather <type> - Set weather instantly (works on menu AND in-game)
+        this.registerCommand('weather', 'Set weather: weather <storm|winter|thundersnow|autumn|spring|summer|clear|rain|snow|blizzard|fog|apocalypse|etc>', (args) => {
             const type = (args[0] || 'clear').toLowerCase();
+            let results = [];
+
+            // Map between game weather types and menu seasons
+            const gameToMenuMap = {
+                'storm': 'storm',
+                'rain': 'storm',
+                'snow': 'winter',
+                'blizzard': 'winter',
+                'thundersnow': 'thundersnow',
+                'apocalypse': 'apocalypse',
+                'clear': 'summer',
+                'fog': 'autumn',
+                'cloudy': 'autumn',
+                'windy': 'autumn',
+                'heatwave': 'summer'
+            };
+
+            // Try MenuWeatherSystem first (main menu)
+            if (typeof MenuWeatherSystem !== 'undefined' && MenuWeatherSystem.isActive) {
+                // Check if it's a direct menu season
+                if (MenuWeatherSystem.seasons[type]) {
+                    MenuWeatherSystem.changeSeason(type);
+                    console.log(`🌦️ Menu weather set to: ${MenuWeatherSystem.seasons[type].name}`);
+                    results.push(`Menu: ${MenuWeatherSystem.seasons[type].name}`);
+                } else if (gameToMenuMap[type]) {
+                    // Map game weather to menu season
+                    const menuSeason = gameToMenuMap[type];
+                    MenuWeatherSystem.changeSeason(menuSeason);
+                    console.log(`🌦️ Menu weather set to: ${MenuWeatherSystem.seasons[menuSeason].name}`);
+                    results.push(`Menu: ${MenuWeatherSystem.seasons[menuSeason].name}`);
+                }
+            }
+
+            // Also try in-game WeatherSystem
             if (typeof WeatherSystem !== 'undefined') {
-                if (WeatherSystem.weatherTypes[type]) {
-                    WeatherSystem.changeWeather(type);
-                    const weather = WeatherSystem.weatherTypes[type];
-                    console.log(`🌦️ Weather set to: ${weather.icon} ${weather.name}`);
-                    return `${weather.icon} ${weather.name}`;
-                } else {
-                    console.log('🌦️ Valid types: ' + Object.keys(WeatherSystem.weatherTypes).join(', '));
+                // Map menu seasons to game weather
+                const menuToGameMap = {
+                    'storm': 'storm',
+                    'winter': 'snow',
+                    'thundersnow': 'thundersnow',
+                    'autumn': 'windy',
+                    'spring': 'clear',
+                    'summer': 'clear'
+                };
+
+                let gameType = type;
+                // If type is a menu season, map it to game weather
+                if (menuToGameMap[type]) {
+                    gameType = menuToGameMap[type];
+                }
+
+                if (WeatherSystem.weatherTypes[gameType]) {
+                    WeatherSystem.changeWeather(gameType);
+                    const weather = WeatherSystem.weatherTypes[gameType];
+                    console.log(`🌦️ Game weather set to: ${weather.icon} ${weather.name}`);
+                    results.push(`Game: ${weather.icon} ${weather.name}`);
+                } else if (results.length === 0) {
+                    // Only show error if menu also failed
+                    console.log('🌦️ Valid types: storm, winter, thundersnow, autumn, spring, summer, clear, rain, snow, blizzard, fog, apocalypse');
                     return 'Invalid weather type';
                 }
             }
-            return 'WeatherSystem not found';
+
+            if (results.length === 0) {
+                return 'No weather system found';
+            }
+            return results.join(' | ');
         });
 
         // doom - Instant apocalypse weather + dungeon bonanza for one day

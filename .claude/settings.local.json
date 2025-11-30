@@ -30,7 +30,10 @@
       "Bash(npm test:*)",
       "Bash(rm:*)",
       "Bash(ren:*)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(git ls-tree:*)",
+      "Bash(findstr:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []

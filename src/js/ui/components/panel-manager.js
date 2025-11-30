@@ -11,6 +11,13 @@ const PanelManager = {
     // Stack of currently open panels (most recent last)
     openPanels: [],
 
+    // 🖤 Safe toggle handlers registry - NO EVAL ALLOWED IN THIS REALM
+    // Maps customToggle string names to actual functions
+    toggleHandlers: {
+        'KeyBindings.openMenu()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openMenu?.(),
+        'QuestSystem.toggleQuestTracker()': () => typeof QuestSystem !== 'undefined' && QuestSystem.toggleQuestTracker?.()
+    },
+
     // All managed panel IDs and their info
     panelInfo: {
         'market-panel': { name: 'Market', icon: '🏪', shortcut: 'M' },
@@ -332,14 +339,19 @@ const PanelManager = {
             };
 
             // 🖤 Handle custom toggle functions (like QuestSystem.toggleQuestTracker)
-            if (info.customToggle) {
+            // Uses safe registry lookup instead of eval() - no code injection here! 💀
+            if (info.customToggle && this.toggleHandlers[info.customToggle]) {
                 btn.onclick = () => {
                     try {
-                        eval(info.customToggle);
+                        this.toggleHandlers[info.customToggle]();
                     } catch (e) {
                         console.warn('🖤 Custom toggle failed:', e);
                     }
                 };
+            } else if (info.customToggle) {
+                // Unknown customToggle - warn but don't crash
+                console.warn(`🖤 Unknown customToggle: ${info.customToggle} - add it to toggleHandlers registry`);
+                btn.onclick = () => this.togglePanel(panelId);
             } else {
                 btn.onclick = () => this.togglePanel(panelId);
             }

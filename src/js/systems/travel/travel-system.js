@@ -1927,7 +1927,9 @@ const TravelSystem = {
             GameWorldRenderer.recordLocationVisit(destination.id, {
                 isFirstVisit: isFirstVisit
             });
-            GameWorldRenderer.clearDestination();
+            // Mark destination as reached (grayed out) instead of clearing
+            // This keeps a log so players can retrace their paths
+            GameWorldRenderer.markDestinationReached();
             GameWorldRenderer.updateHistoryPanel();
 
             // Ensure the player marker is positioned exactly at the destination
