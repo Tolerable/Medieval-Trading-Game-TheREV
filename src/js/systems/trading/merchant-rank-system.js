@@ -306,18 +306,9 @@ const MerchantRankSystem = {
     // 👑 RANK MANAGEMENT
     // ═══════════════════════════════════════════════════════════════
     getRankForWealth(wealth) {
-        let currentRank = this.ranks.vagrant;
-
-        for (const rankId of this.rankOrder) {
-            const rank = this.ranks[rankId];
-            if (wealth >= rank.minWealth) {
-                currentRank = rank;
-            } else {
-                break;
-            }
-        }
-
-        return currentRank;
+        // 🖤 Use findLast for cleaner reverse lookup - finds highest qualifying rank 💀
+        const qualifyingRankId = this.rankOrder.findLast(rankId => wealth >= this.ranks[rankId].minWealth);
+        return qualifyingRankId ? this.ranks[qualifyingRankId] : this.ranks.vagrant;
     },
 
     updateRank() {
@@ -520,6 +511,9 @@ const MerchantRankSystem = {
     getNextRank() {
         const rank = this.getCurrentRank();
         const currentIndex = this.rankOrder.indexOf(rank.id);
+
+        // 🖤 Guard against indexOf returning -1 (not found) 💀
+        if (currentIndex === -1) return null;
 
         if (currentIndex < this.rankOrder.length - 1) {
             return this.ranks[this.rankOrder[currentIndex + 1]];

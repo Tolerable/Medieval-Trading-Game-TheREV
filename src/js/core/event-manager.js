@@ -13,6 +13,16 @@ const EventManager = {
     // 📋 Store all event listeners - tracking our emotional attachments to the DOM
     listeners: new Map(),
 
+    // 🖤 O(1) lookup map for element+eventType duplicate detection 💀
+    elementEventMap: new Map(),
+
+    // 🖤 Generate a stable key for element+eventType pair 💀
+    _getElementEventKey(element, eventType) {
+        // Use a WeakMap-style approach with element reference + eventType
+        const elementId = element._eventManagerId ??= `em_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        return `${elementId}::${eventType}`;
+    },
+
     // 🖤 Add event listener with tracking - prevents duplicates, prevents obsession
     addListener(element, eventType, handler, options = {}) {
         // silently skip if element doesn't exist - ghosts can't listen
@@ -21,22 +31,15 @@ const EventManager = {
             return null;
         }
 
-        // check if this element already has a listener for this event type
-        // prevents duplicate listeners from multiple initialization paths
-        // no obsessive behavior allowed, we're not THAT clingy
-        const elementKey = element.id || element.className || 'unnamed';
-
-        // 🖤 O(n) → O(1) early exit - find() stops at first match, forEach doesn't 💀
-        const existingListener = Array.from(this.listeners.values()).find(
-            listener => listener.element === element && listener.eventType === eventType
-        );
-
-        if (existingListener) {
+        // 🖤 O(1) duplicate check using computed key 💀
+        const elementEventKey = this._getElementEventKey(element, eventType);
+        if (this.elementEventMap.has(elementEventKey)) {
             // 🗡️ Already has a listener for this event type, skip - no double attachments
             return null;
         }
 
         // 🔮 Create unique key for this listener - every bond needs a name
+        const elementKey = element.id || element.className || 'unnamed';
         const key = `${elementKey}_${eventType}_${Date.now()}_${Math.random()}`;
 
         // 💾 Store listener info - documenting the relationship
@@ -45,8 +48,12 @@ const EventManager = {
             eventType,
             handler,
             options,
-            active: true
+            active: true,
+            elementEventKey // 🖤 Store for O(1) cleanup 💀
         });
+
+        // 🖤 Track in O(1) lookup map 💀
+        this.elementEventMap.set(elementEventKey, key);
 
         // ⚡ Add the actual event listener - forming the bond
         element.addEventListener(eventType, handler, options);
@@ -60,11 +67,15 @@ const EventManager = {
             console.warn(`⚠️ EventManager: No listener found for key ${key}`);
             return false;
         }
-        
+
         const listener = this.listeners.get(key);
-        
+
         try {
             listener.element.removeEventListener(listener.eventType, listener.handler, listener.options);
+            // 🖤 Clean up both maps for O(1) consistency 💀
+            if (listener.elementEventKey) {
+                this.elementEventMap.delete(listener.elementEventKey);
+            }
             this.listeners.delete(key);
             return true;
         } catch (error) {
@@ -112,6 +123,8 @@ const EventManager = {
             }
         });
         this.listeners.clear();
+        // 🖤 Also clear O(1) lookup map 💀
+        this.elementEventMap.clear();
         return count;
     },
     

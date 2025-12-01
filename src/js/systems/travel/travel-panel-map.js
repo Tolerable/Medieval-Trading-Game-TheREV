@@ -1558,7 +1558,8 @@ const TravelPanelMap = {
             if (!dest) return;
 
             const progress = TravelSystem.playerPosition.travelProgress || 0;
-            const progressPercent = Math.round(progress * 100);
+            // 🖤 Cap progress at 99% until actually complete to avoid visual glitch 💀
+            const progressPercent = Math.min(99, Math.round(progress * 100));
 
             // Calculate remaining time
             const duration = TravelSystem.playerPosition.travelDuration || 1;

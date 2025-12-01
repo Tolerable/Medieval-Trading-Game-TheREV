@@ -19,7 +19,8 @@ const PropertyPurchase = {
         let price = propertyType.basePrice;
 
         // 🌙 Location type modifier 🦇
-        const locationModifiers = { village: 0.8, town: 1.0, city: 1.3 };
+        // 🖤 Added capital and port modifiers - prime real estate costs more 💀
+        const locationModifiers = { village: 0.8, town: 1.0, city: 1.3, capital: 1.5, port: 1.2 };
         price *= locationModifiers[location.type] || 1.0;
 
         // 🔑 Acquisition type modifier 🗡️

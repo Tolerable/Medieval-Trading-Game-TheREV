@@ -2256,6 +2256,19 @@ const TravelSystem = {
             type: destination.type
         };
 
+        // 🖤 CRITICAL: Mark location as VISITED/EXPLORED so tooltips and panels update 💀
+        // This was missing - locations weren't being added to visitedLocations on arrival!
+        // Check first visit BEFORE adding to array so we know if this is discovery
+        const wasFirstVisit = typeof GameWorld !== 'undefined' &&
+            Array.isArray(GameWorld.visitedLocations) &&
+            !GameWorld.visitedLocations.includes(destination.id);
+
+        if (wasFirstVisit) {
+            GameWorld.visitedLocations.push(destination.id);
+            addMessage(`📍 First time exploring ${destination.name}!`);
+            console.log('🖤 Location discovered:', destination.id, '- Total visited:', GameWorld.visitedLocations.length);
+        }
+
         // 🔔 RING THE BELL OF ARRIVAL - let the realm know we survived
         this.showArrivalNotification(destination);
 
@@ -2277,11 +2290,10 @@ const TravelSystem = {
         try {
             // Record arrival in location history and update player marker
             if (typeof GameWorldRenderer !== 'undefined') {
-                const isFirstVisit = typeof GameWorld !== 'undefined' &&
-                    !GameWorld.visitedLocations?.includes(destination.id);
+                // 🖤 Use wasFirstVisit from earlier check (we already added to visitedLocations) 💀
                 if (GameWorldRenderer.recordLocationVisit) {
                     GameWorldRenderer.recordLocationVisit(destination.id, {
-                        isFirstVisit: isFirstVisit
+                        isFirstVisit: wasFirstVisit
                     });
                 }
                 // Mark destination as reached (grayed out) instead of clearing

@@ -588,8 +588,15 @@ const PanelManager = {
         }
     },
 
+    // 🖤 Guard flag for ESC handler - prevent duplicate listeners 💀
+    _escHandlerAttached: false,
+
     // Setup ESC key handler to close panels in order
     setupEscHandler() {
+        // 🖤 Prevent duplicate ESC handlers 💀
+        if (this._escHandlerAttached) return;
+        this._escHandlerAttached = true;
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 // 🖤 Check if any panels are open BEFORE deciding to handle

@@ -20,6 +20,9 @@ const NPCManager = {
     // 🔄 Update interval ID 🌙
     _updateInterval: null,
 
+    // 🖤 Debug mode flag for extra logging 💀
+    _deboogMode: false,
+
     // 🖤 Initialize the NPC Manager ⚰️
     init() {
         console.log('👤 NPCManager awakening from the digital void...');
@@ -85,7 +88,16 @@ const NPCManager = {
         const npcIds = this.npcsByLocation.get(locationId);
         if (!npcIds) return [];
 
-        return Array.from(npcIds).map(id => this.npcs.get(id)).filter(npc => npc);
+        // 🖤 Map IDs to NPCs, warn about missing ones in deboog mode 💀
+        const npcs = Array.from(npcIds).map(id => {
+            const npc = this.npcs.get(id);
+            if (!npc && this._deboogMode) {
+                console.warn(`🦇 NPC ${id} referenced at ${locationId} but not found in registry`);
+            }
+            return npc;
+        }).filter(npc => npc);
+
+        return npcs;
     },
 
     // 🎭 Get available NPCs for interaction 🗡️

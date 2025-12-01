@@ -32,6 +32,7 @@ const GlobalLeaderboardSystem = {
     lastFetch: null,
     autoRefreshInterval: null,
     // cacheTimeout now comes from config
+    _isFetching: false, // 🖤 Guard flag to prevent concurrent fetches 💀
 
     // 🎮 Initialize the system
     init() {
@@ -183,11 +184,17 @@ const GlobalLeaderboardSystem = {
 
     // 📥 Fetch leaderboard from backend
     async fetchLeaderboard() {
+        // 🖤 Prevent concurrent fetches - return cached if already fetching 💀
+        if (this._isFetching) {
+            return this.leaderboard;
+        }
+
         // Check cache
         if (this.lastFetch && Date.now() - this.lastFetch < this.config.cacheTimeout) {
             return this.leaderboard;
         }
 
+        this._isFetching = true;
         try {
             switch (this.config.backend) {
                 case 'jsonbin':
@@ -201,6 +208,9 @@ const GlobalLeaderboardSystem = {
         } catch (error) {
             // 🦇 Network issue - silently fall back to local, no console spam
             return this.fetchFromLocal();
+        } finally {
+            // 🖤 Always reset flag when done 💀
+            this._isFetching = false;
         }
     },
 

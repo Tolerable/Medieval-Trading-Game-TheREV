@@ -177,8 +177,14 @@ const BrowserCompatibility = {
     testCanvas() {
         try {
             const canvas = document.createElement('canvas');
-            return !!(canvas.getContext && canvas.getContext('2d'));
+            const hasContext = !!(canvas.getContext && canvas.getContext('2d'));
+            // 🖤 Log failure for deboogering - canvas is critical for rendering 💀
+            if (!hasContext) {
+                console.warn('⚠️ Canvas 2D context not available - rendering may be limited');
+            }
+            return hasContext;
         } catch (e) {
+            console.warn('⚠️ Canvas detection failed:', e.message);
             return false;
         }
     },
@@ -357,8 +363,9 @@ const BrowserCompatibility = {
             };
         }
         
-        // Fix for iOS Safari scroll behavior
-        if (this.browser.isSafari && this.browser.isMobile) {
+        // 🖤 Fix for iOS Safari scroll behavior - guard against duplicate listeners 💀
+        if (this.browser.isSafari && this.browser.isMobile && !this._iOSTouchGuard) {
+            this._iOSTouchGuard = true;
             document.addEventListener('touchmove', function(e) {
                 if (e.scale !== 1) {
                     e.preventDefault();

@@ -39,6 +39,11 @@ const DeboogerSystem = {
             console.warn = this._originalWarn;
             console.error = this._originalError;
         }
+        // 🖤 Clear console content to free memory 💀
+        const contentEl = document.getElementById('debooger-console-content');
+        if (contentEl) {
+            contentEl.innerHTML = '';
+        }
         console.log('🐛 Debooger system disabled');
     },
 

@@ -18,7 +18,9 @@ const ColorUtils = {
         const rgb = this.hexToRgb(color);
         if (!rgb) return color;
 
-        const factor = 1 - (percent / 100);
+        // 🖤 Clamp percent to valid range 0-100 💀
+        const clampedPercent = Math.max(0, Math.min(100, percent));
+        const factor = 1 - (clampedPercent / 100);
         const r = Math.max(0, Math.round(rgb.r * factor));
         const g = Math.max(0, Math.round(rgb.g * factor));
         const b = Math.max(0, Math.round(rgb.b * factor));
@@ -36,7 +38,9 @@ const ColorUtils = {
         const rgb = this.hexToRgb(color);
         if (!rgb) return color;
 
-        const factor = percent / 100;
+        // 🖤 Clamp percent to valid range 0-100 💀
+        const clampedPercent = Math.max(0, Math.min(100, percent));
+        const factor = clampedPercent / 100;
         const r = Math.min(255, Math.round(rgb.r + (255 - rgb.r) * factor));
         const g = Math.min(255, Math.round(rgb.g + (255 - rgb.g) * factor));
         const b = Math.min(255, Math.round(rgb.b + (255 - rgb.b) * factor));
@@ -127,6 +131,11 @@ const ColorUtils = {
      * @returns {{ r: number, g: number, b: number }}
      */
     hslToRgb(h, s, l) {
+        // 🖤 Clamp HSL values to valid ranges 💀
+        h = ((h % 360) + 360) % 360; // Wrap hue to 0-360
+        s = Math.max(0, Math.min(100, s));
+        l = Math.max(0, Math.min(100, l));
+
         h /= 360;
         s /= 100;
         l /= 100;

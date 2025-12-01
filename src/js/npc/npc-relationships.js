@@ -16,6 +16,7 @@ const NPCRelationshipSystem = {
     factionReputation: {}, // Faction-wide reputation
     playerTitle: null,     // Earned title based on reputation
     unlockedBenefits: {},  // 🖤 Track which faction benefits have been unlocked 💀
+    _saveTimeout: null,    // 🖤 Debounce timer for saveRelationships 💀
 
     // ═══════════════════════════════════════════════════════════════
     // 🎭 RELATIONSHIP LEVELS
@@ -118,17 +119,24 @@ const NPCRelationshipSystem = {
     // ═══════════════════════════════════════════════════════════════
 
     saveRelationships() {
-        const saveData = {
-            relationships: this.relationships,
-            factionReputation: this.factionReputation,
-            playerTitle: this.playerTitle
-        };
-        try {
-            localStorage.setItem('medievalTradingGameRelationships', JSON.stringify(saveData));
-        } catch (e) {
-            // 🦇 Storage full - relationships live in memory only
-            console.warn('💕 Relationships not persisted - storage full');
+        // 🖤 Debounce saves - batch rapid changes into single write 💀
+        if (this._saveTimeout) {
+            clearTimeout(this._saveTimeout);
         }
+        this._saveTimeout = setTimeout(() => {
+            const saveData = {
+                relationships: this.relationships,
+                factionReputation: this.factionReputation,
+                playerTitle: this.playerTitle
+            };
+            try {
+                localStorage.setItem('medievalTradingGameRelationships', JSON.stringify(saveData));
+            } catch (e) {
+                // 🦇 Storage full - relationships live in memory only
+                console.warn('💕 Relationships not persisted - storage full');
+            }
+            this._saveTimeout = null;
+        }, 500); // 🖤 500ms debounce - batches rapid reputation changes 💀
     },
 
     loadRelationships() {

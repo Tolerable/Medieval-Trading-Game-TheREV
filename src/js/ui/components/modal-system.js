@@ -160,6 +160,8 @@ const ModalSystem = {
         if (this._escHandler) {
             document.removeEventListener('keydown', this._escHandler);
             this._escHandler = null;
+            // 🖤 Reset flag so next modal can add ESC listener 💀
+            this._escHandlerAttached = false;
         }
         this.dragState = null;
     },

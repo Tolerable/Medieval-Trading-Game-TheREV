@@ -154,6 +154,9 @@ class VirtualList {
      * @param {string} [align='start'] - 'start', 'center', or 'end'
      */
     scrollToIndex(index, align = 'start') {
+        // 🖤 Bounds validation - bail if no items 💀
+        if (!this.items || this.items.length === 0) return;
+
         const clampedIndex = Math.max(0, Math.min(index, this.items.length - 1));
         let targetScroll;
 

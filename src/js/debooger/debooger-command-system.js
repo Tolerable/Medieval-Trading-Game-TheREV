@@ -763,93 +763,39 @@ const DeboogerCommandSystem = {
             return 'No systems found';
         });
 
-        // spring/summer/autumn/winter - Jump to season start (always forward, preserves stats)
-        this.registerCommand('spring', 'Jump to start of Spring (March 1)', () => {
-            if (typeof TimeMachine !== 'undefined') {
-                const currentMonth = TimeMachine.currentTime.month;
-                const targetMonth = 3; // March
-                // Calculate months to skip (always forward)
-                let monthsToSkip = targetMonth - currentMonth;
-                if (monthsToSkip <= 0) monthsToSkip += 12; // Wrap to next year
+        // 🖤 DRY season jump commands - one helper to rule them all 💀
+        const seasonData = {
+            spring: { month: 3, icon: '🌸', name: 'Spring', start: 'March 1' },
+            summer: { month: 6, icon: '☀️', name: 'Summer', start: 'June 1' },
+            autumn: { month: 9, icon: '🍂', name: 'Autumn', start: 'September 1' },
+            winter: { month: 12, icon: '❄️', name: 'Winter', start: 'December 1' }
+        };
 
-                // Use skipMonths to preserve stats and advance properly
-                TimeMachine.skipMonths(monthsToSkip, true);
+        const jumpToSeason = (season) => {
+            if (typeof TimeMachine === 'undefined') return 'TimeMachine not found';
 
-                // Force backdrop reload
-                if (typeof GameWorldRenderer !== 'undefined') {
-                    GameWorldRenderer.currentSeason = null;
-                    GameWorldRenderer.loadSeasonalBackdrop('spring');
-                }
-                console.log('🌸 Jumped to Spring! March 1');
-                return 'March 1 - Spring begins';
+            const { month: targetMonth, icon, name, start } = seasonData[season];
+            const currentMonth = TimeMachine.currentTime.month;
+
+            // Calculate months to skip (always forward)
+            let monthsToSkip = targetMonth - currentMonth;
+            if (monthsToSkip <= 0) monthsToSkip += 12; // Wrap to next year
+
+            // Use skipMonths to preserve stats and advance properly
+            TimeMachine.skipMonths(monthsToSkip, true);
+
+            // Force backdrop reload
+            if (typeof GameWorldRenderer !== 'undefined') {
+                GameWorldRenderer.currentSeason = null;
+                GameWorldRenderer.loadSeasonalBackdrop(season);
             }
-            return 'TimeMachine not found';
-        });
+            console.log(`${icon} Jumped to ${name}! ${start}`);
+            return `${start} - ${name} begins`;
+        };
 
-        this.registerCommand('summer', 'Jump to start of Summer (June 1)', () => {
-            if (typeof TimeMachine !== 'undefined') {
-                const currentMonth = TimeMachine.currentTime.month;
-                const targetMonth = 6; // June
-                // Calculate months to skip (always forward)
-                let monthsToSkip = targetMonth - currentMonth;
-                if (monthsToSkip <= 0) monthsToSkip += 12; // Wrap to next year
-
-                // Use skipMonths to preserve stats and advance properly
-                TimeMachine.skipMonths(monthsToSkip, true);
-
-                // Force backdrop reload
-                if (typeof GameWorldRenderer !== 'undefined') {
-                    GameWorldRenderer.currentSeason = null;
-                    GameWorldRenderer.loadSeasonalBackdrop('summer');
-                }
-                console.log('☀️ Jumped to Summer! June 1');
-                return 'June 1 - Summer begins';
-            }
-            return 'TimeMachine not found';
-        });
-
-        this.registerCommand('autumn', 'Jump to start of Autumn (September 1)', () => {
-            if (typeof TimeMachine !== 'undefined') {
-                const currentMonth = TimeMachine.currentTime.month;
-                const targetMonth = 9; // September
-                // Calculate months to skip (always forward)
-                let monthsToSkip = targetMonth - currentMonth;
-                if (monthsToSkip <= 0) monthsToSkip += 12; // Wrap to next year
-
-                // Use skipMonths to preserve stats and advance properly
-                TimeMachine.skipMonths(monthsToSkip, true);
-
-                // Force backdrop reload
-                if (typeof GameWorldRenderer !== 'undefined') {
-                    GameWorldRenderer.currentSeason = null;
-                    GameWorldRenderer.loadSeasonalBackdrop('autumn');
-                }
-                console.log('🍂 Jumped to Autumn! September 1');
-                return 'September 1 - Autumn begins';
-            }
-            return 'TimeMachine not found';
-        });
-
-        this.registerCommand('winter', 'Jump to start of Winter (December 1)', () => {
-            if (typeof TimeMachine !== 'undefined') {
-                const currentMonth = TimeMachine.currentTime.month;
-                const targetMonth = 12; // December
-                // Calculate months to skip (always forward)
-                let monthsToSkip = targetMonth - currentMonth;
-                if (monthsToSkip <= 0) monthsToSkip += 12; // Wrap to next year
-
-                // Use skipMonths to preserve stats and advance properly
-                TimeMachine.skipMonths(monthsToSkip, true);
-
-                // Force backdrop reload
-                if (typeof GameWorldRenderer !== 'undefined') {
-                    GameWorldRenderer.currentSeason = null;
-                    GameWorldRenderer.loadSeasonalBackdrop('winter');
-                }
-                console.log('❄️ Jumped to Winter! December 1');
-                return 'December 1 - Winter begins';
-            }
-            return 'TimeMachine not found';
+        // Register all season commands using the DRY helper
+        Object.entries(seasonData).forEach(([season, data]) => {
+            this.registerCommand(season, `Jump to start of ${data.name} (${data.start})`, () => jumpToSeason(season));
         });
 
         // ═══════════════════════════════════════════════════════════════
@@ -889,16 +835,21 @@ const DeboogerCommandSystem = {
         // gamestate - Show current game state
         this.registerCommand('gamestate', 'Show current game state', () => {
             if (typeof game !== 'undefined') {
-                console.log('🎮 Game State:', JSON.stringify({
-                    location: game.currentLocation,
-                    day: game.day,
-                    hour: game.hour,
-                    player: game.player ? {
-                        name: game.player.name,
-                        gold: game.player.gold,
-                        health: game.player.health
-                    } : null
-                }, null, 2));
+                // 🖤 Wrap JSON.stringify in try-catch for circular reference safety 💀
+                try {
+                    console.log('🎮 Game State:', JSON.stringify({
+                        location: game.currentLocation,
+                        day: game.day,
+                        hour: game.hour,
+                        player: game.player ? {
+                            name: game.player.name,
+                            gold: game.player.gold,
+                            health: game.player.health
+                        } : null
+                    }, null, 2));
+                } catch (e) {
+                    console.log('🎮 Game State: [Error serializing - circular reference?]');
+                }
             }
             return 'See console';
         });

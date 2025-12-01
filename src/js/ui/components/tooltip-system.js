@@ -711,8 +711,10 @@ const TooltipSystem = {
 
         descEl.textContent = tooltipData.desc || '';
 
+        // 🖤 Sanitize shortcut to prevent XSS - the darkness protects us 💀
         if (tooltipData.shortcut) {
-            shortcutEl.innerHTML = `Shortcut: <kbd>${tooltipData.shortcut}</kbd>`;
+            const safeShortcut = typeof escapeHtml === 'function' ? escapeHtml(tooltipData.shortcut) : tooltipData.shortcut;
+            shortcutEl.innerHTML = `Shortcut: <kbd>${safeShortcut}</kbd>`;
         } else {
             shortcutEl.innerHTML = '';
         }

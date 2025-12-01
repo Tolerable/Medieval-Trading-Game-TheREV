@@ -13,6 +13,7 @@ const DayNightCycle = {
     // ═══════════════════════════════════════════════════════════════
     currentPhase: 'day',
     transitionProgress: 0,
+    _updateIntervalId: null, // 🖤 Store interval ID for cleanup 💀
 
     // Time phases (24-hour format)
     phases: {
@@ -145,12 +146,21 @@ const DayNightCycle = {
         }
 
         // Also use interval as backup
+        // 🖤 Store interval ID for proper cleanup 💀
         if (typeof TimerManager !== 'undefined') {
-            TimerManager.setInterval(() => {
+            this._updateIntervalId = TimerManager.setInterval(() => {
                 if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
                     this.updatePhase();
                 }
             }, 10000); // Every 10 seconds real-time
+        }
+    },
+
+    // 🖤 Cleanup method for proper resource management 💀
+    cleanup() {
+        if (this._updateIntervalId && typeof TimerManager !== 'undefined') {
+            TimerManager.clearInterval(this._updateIntervalId);
+            this._updateIntervalId = null;
         }
     },
 
