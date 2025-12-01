@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // NPC TRADE WINDOW - portable capitalism in a popup storefront
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -1191,16 +1191,229 @@ const NPCTradeWindow = {
         return typeof data === 'number' ? data : (data?.quantity || 0);
     },
 
+    // 🏪 PROFESSION-BASED INVENTORY SYSTEM 💀
+    // Each NPC type has inventory based on who they are and what they do
+    // Innkeepers sell food/drinks, blacksmiths sell weapons, etc.
+    // Everyone has a SMALL amount of personal food/water based on their location
     generateNPCInventory(npcType) {
+        // 🖤 Comprehensive profession-based inventories 🛒
         const inventories = {
-            merchant: { food: 10, water: 10, bread: 5, ale: 3, cloth: 5 },
-            blacksmith: { sword: 2, iron_ore: 5, hammer: 1, axe: 2 },
-            apothecary: { potion: 5, herb: 10, antidote: 3 },
-            innkeeper: { food: 15, water: 20, ale: 10, bread: 8 },
-            peddler: { trinket: 5, cloth: 3, herb: 3 },
-            traveling_merchant: { silk: 2, spice: 3, exotic_goods: 1 }
+            // === HOSPITALITY / FOOD SERVICE ===
+            innkeeper: {
+                // Primary: food and drinks
+                bread: 15, ale: 20, wine: 8, water: 25,
+                cooked_meat: 10, cheese: 12, soup: 8,
+                dried_meat: 6, fruit: 8, vegetables: 10,
+                // Small personal items
+                candle: 3, lantern_oil: 2
+            },
+            tavernkeeper: {
+                ale: 25, wine: 15, water: 20, bread: 10,
+                cooked_meat: 8, cheese: 8, dried_fish: 5,
+                candle: 2
+            },
+            baker: {
+                bread: 30, pastry: 15, flour: 20,
+                cake: 5, biscuits: 12, pie: 8,
+                water: 5, dried_fruit: 6
+            },
+            cook: {
+                cooked_meat: 20, soup: 15, stew: 12,
+                bread: 10, vegetables: 15, spices: 5,
+                water: 8
+            },
+
+            // === WEAPONS / ARMOR ===
+            blacksmith: {
+                // Primary: weapons, armor, metal goods
+                iron_sword: 3, steel_sword: 2, dagger: 5, axe: 4,
+                iron_armor: 2, chainmail: 2, helmet: 4, shield: 3,
+                iron_bar: 10, steel_bar: 5, nails: 20,
+                hammer: 3, tongs: 2,
+                // Small personal supplies
+                water: 3, bread: 2
+            },
+            weaponsmith: {
+                iron_sword: 5, steel_sword: 3, longsword: 2,
+                dagger: 8, battle_axe: 2, mace: 3, spear: 4,
+                whetstone: 10, sword_oil: 5,
+                water: 2, bread: 1
+            },
+            armorsmith: {
+                iron_armor: 4, chainmail: 3, plate_armor: 1,
+                helmet: 6, shield: 5, gauntlets: 4, boots: 5,
+                leather_strips: 10, iron_bar: 8,
+                water: 2, bread: 1
+            },
+
+            // === HEALING / MEDICINE ===
+            apothecary: {
+                health_potion: 10, stamina_potion: 8, antidote: 6,
+                poison_cure: 4, medicinal_herbs: 20, bandage: 15,
+                salve: 8, tonic: 5, healing_salve: 6,
+                water: 5, dried_herbs: 10
+            },
+            healer: {
+                health_potion: 15, bandage: 20, medicinal_herbs: 25,
+                antidote: 8, healing_salve: 10, blessed_water: 5,
+                clean_water: 15, herbs: 12
+            },
+            herbalist: {
+                medicinal_herbs: 30, herbs: 25, dried_herbs: 20,
+                roots: 15, flowers: 12, moss: 10,
+                healing_salve: 5, tonic: 3,
+                water: 5, bread: 2
+            },
+
+            // === GENERAL MERCHANTS ===
+            merchant: {
+                // Varied stock - a bit of everything
+                bread: 8, water: 10, dried_meat: 5, ale: 5,
+                cloth: 8, rope: 5, candle: 10, lantern: 3,
+                soap: 5, salt: 8, spices: 3,
+                dagger: 2, leather_armor: 1
+            },
+            peddler: {
+                trinket: 8, cloth: 5, ribbon: 10,
+                candle: 6, soap: 4, comb: 5, mirror: 2,
+                dried_fruit: 4, candy: 6, herbs: 3,
+                bread: 2, water: 3
+            },
+            traveling_merchant: {
+                silk: 3, spices: 5, exotic_goods: 2,
+                perfume: 3, jewelry: 2, rare_herbs: 4,
+                fine_wine: 3, tea: 5, incense: 4,
+                dried_meat: 3, water: 3
+            },
+            general_store: {
+                bread: 12, water: 15, dried_meat: 8, ale: 8,
+                rope: 10, torch: 15, lantern: 5, lantern_oil: 10,
+                candle: 20, soap: 8, cloth: 10, leather: 5,
+                dagger: 3, hammer: 2, axe: 2
+            },
+
+            // === LUXURY / SPECIALTY ===
+            jeweler: {
+                gold_ring: 5, silver_ring: 8, necklace: 4,
+                bracelet: 6, gems: 3, diamond: 1, ruby: 2,
+                gold_chain: 3, pearl: 4, amulet: 2,
+                water: 2, bread: 1
+            },
+            clothier: {
+                cloth: 20, silk: 5, wool: 15, linen: 12,
+                fine_clothes: 3, noble_attire: 1, cloak: 5,
+                hat: 6, gloves: 8, boots: 4,
+                thread: 15, needle: 10,
+                water: 2, bread: 2
+            },
+            furrier: {
+                fur: 15, wolf_pelt: 10, bear_pelt: 3,
+                rabbit_fur: 20, fox_pelt: 5,
+                fur_cloak: 3, fur_hat: 5, fur_gloves: 8,
+                leather: 8, water: 3, dried_meat: 4
+            },
+
+            // === RESOURCES / CRAFTING ===
+            miner: {
+                iron_ore: 20, coal: 15, copper_ore: 12,
+                gold_ore: 3, silver_ore: 5, stone: 25,
+                pickaxe: 2, lantern: 3, rope: 5,
+                water: 8, bread: 5, dried_meat: 3
+            },
+            lumberjack: {
+                wood: 30, timber: 20, firewood: 25,
+                planks: 15, oak_wood: 10, pine_wood: 12,
+                axe: 3, saw: 2, rope: 5,
+                water: 8, bread: 5, dried_meat: 4
+            },
+            farmer: {
+                wheat: 25, vegetables: 20, fruit: 15,
+                eggs: 12, milk: 8, cheese: 5,
+                hay: 20, seeds: 15, chicken: 3,
+                bread: 10, water: 12
+            },
+            fisherman: {
+                fish: 25, dried_fish: 15, salted_fish: 10,
+                crab: 5, oyster: 8, seaweed: 6,
+                fishing_rod: 2, net: 3, rope: 5, bait: 15,
+                water: 10, bread: 5
+            },
+
+            // === SERVICES ===
+            stablemaster: {
+                hay: 30, oats: 20, apple: 15, carrot: 12,
+                horseshoe: 10, saddle: 3, bridle: 4, reins: 5,
+                rope: 8, brush: 5,
+                water: 10, bread: 3, dried_meat: 2
+            },
+            ferryman: {
+                rope: 10, oar: 3, sail_cloth: 2, tar: 5,
+                fish: 8, dried_fish: 5, water: 15,
+                lantern: 3, oil: 5, bread: 4
+            },
+
+            // === KNOWLEDGE / SCHOLARLY ===
+            scholar: {
+                book: 5, scroll: 10, ink: 8, quill: 12,
+                parchment: 15, map: 3, compass: 2,
+                candle: 10, lantern: 2,
+                water: 3, bread: 2
+            },
+            scribe: {
+                parchment: 25, ink: 15, quill: 20,
+                scroll: 12, wax_seal: 8, ribbon: 6,
+                candle: 8, water: 3, bread: 2
+            },
+
+            // === RELIGIOUS ===
+            priest: {
+                holy_water: 10, incense: 8, candle: 15,
+                prayer_beads: 5, holy_symbol: 3, scripture: 2,
+                blessed_bandage: 5, healing_salve: 3,
+                bread: 5, wine: 3, water: 5
+            },
+
+            // === AUTHORITY / GUARDS ===
+            guard: {
+                // Guards don't sell much, but might have some spare gear
+                dagger: 1, torch: 3, rope: 2, bandage: 3,
+                water: 5, bread: 3, ale: 2
+            },
+
+            // === SHADY / UNDERGROUND ===
+            smuggler: {
+                lockpick: 10, poison: 5, smoke_bomb: 4,
+                dark_cloak: 3, rope: 8, grappling_hook: 2,
+                contraband: 3, stolen_goods: 5,
+                dried_meat: 4, water: 5, ale: 3
+            },
+            thief: {
+                lockpick: 8, dagger: 3, dark_cloak: 2,
+                rope: 5, smoke_bomb: 2, stolen_jewelry: 3,
+                bread: 2, water: 3
+            },
+
+            // 🏰 GRAND MARKET MERCHANT - Royal Capital only 👑
+            // Has access to ALL goods from across the realm
+            grand_market_merchant: {
+                // Food & Drink
+                bread: 20, cooked_meat: 15, dried_meat: 10, cheese: 12,
+                ale: 15, wine: 10, fine_wine: 5, water: 25,
+                // Weapons & Armor
+                iron_sword: 5, steel_sword: 3, dagger: 8,
+                iron_armor: 3, chainmail: 2, shield: 4, helmet: 5,
+                // Medicine
+                health_potion: 12, antidote: 8, bandage: 20, healing_salve: 10,
+                // Resources
+                iron_bar: 15, wood: 20, cloth: 15, leather: 10,
+                // Luxury
+                silk: 5, spices: 8, jewelry: 3, perfume: 4,
+                // Tools & Supplies
+                rope: 15, torch: 20, lantern: 8, candle: 25
+            }
         };
-        return inventories[npcType] || { food: 3, water: 3 };
+
+        return inventories[npcType] || { bread: 3, water: 5 };
     },
 
     getItemPrice(itemId) {

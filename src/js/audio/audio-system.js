@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // AUDIO SYSTEM - sounds echoing through the darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -197,16 +197,39 @@ const AudioSystem = {
     },
     
     // Stop all ambient sounds
+    // 🖤 Fixed: ambient nodes are objects like { oscillator, gainNode } or { noise, gainNode } 💀
     stopAmbient() {
         this.ambientNodes.forEach(node => {
             try {
-                node.stop();
-                node.disconnect();
+                // 🦇 Stop oscillator if present (mines, cities)
+                if (node.oscillator) {
+                    node.oscillator.stop();
+                    node.oscillator.disconnect();
+                }
+                // 🦇 Stop noise source if present (forests)
+                if (node.noise) {
+                    node.noise.stop();
+                    node.noise.disconnect();
+                }
+                // 🗡️ Disconnect gain node
+                if (node.gainNode) {
+                    node.gainNode.disconnect();
+                }
+                // ⚰️ Disconnect filter if present
+                if (node.filter) {
+                    node.filter.disconnect();
+                }
             } catch (e) {
                 // Ignore errors when stopping already stopped nodes
             }
         });
         this.ambientNodes = [];
+
+        // 🖤 Clear ambient interval if running 💀
+        if (this.ambientInterval) {
+            TimerManager.clearInterval(this.ambientInterval);
+            this.ambientInterval = null;
+        }
     },
     
     // Sound generation methods

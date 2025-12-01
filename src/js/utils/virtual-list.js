@@ -1,11 +1,22 @@
 // ═══════════════════════════════════════════════════════════════
 // VIRTUAL LIST - rendering only what darkness reveals
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
 // ═══════════════════════════════════════════════════════════════
+
+// 🖤 XSS protection helper - sanitize all user content 💀
+function escapeHtmlVirtual(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 class VirtualList {
     // ═══════════════════════════════════════════════════════════════════════
@@ -308,9 +319,9 @@ const VirtualListFactory = {
             overscan: 5,
             itemClass: 'virtual-inventory-item',
             renderItem: customRenderer || ((item, index) => {
-                // 🗡️ Default inventory item renderer
-                const emoji = item.emoji || '📦';
-                const name = item.name || 'Unknown Item';
+                // 🗡️ Default inventory item renderer - 🖤 XSS protected 💀
+                const emoji = escapeHtmlVirtual(item.emoji || '📦');
+                const name = escapeHtmlVirtual(item.name || 'Unknown Item');
                 const quantity = item.quantity || 1;
                 return `
                     <div class="inventory-item-content">
@@ -336,13 +347,16 @@ const VirtualListFactory = {
             overscan: 3,
             itemClass: 'virtual-leaderboard-entry',
             renderItem: (entry, index) => {
+                // 🖤 XSS protected leaderboard renderer 💀
                 const rank = index + 1;
                 const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+                const name = escapeHtmlVirtual(entry.name || 'Unknown');
+                const score = Number(entry.score) || 0;
                 return `
                     <div class="leaderboard-entry-content">
                         <span class="entry-rank">${medal}</span>
-                        <span class="entry-name">${entry.name || 'Unknown'}</span>
-                        <span class="entry-score">${entry.score || 0} gold</span>
+                        <span class="entry-name">${name}</span>
+                        <span class="entry-score">${score} gold</span>
                     </div>
                 `;
             },
@@ -362,12 +376,15 @@ const VirtualListFactory = {
             overscan: 10,
             itemClass: 'virtual-chat-message',
             renderItem: (msg, index) => {
+                // 🖤 XSS protected chat renderer 💀
                 const isPlayer = msg.sender === 'player';
                 const senderClass = isPlayer ? 'chat-player' : 'chat-npc';
+                const sender = escapeHtmlVirtual(msg.sender);
+                const text = escapeHtmlVirtual(msg.text);
                 return `
                     <div class="chat-message ${senderClass}">
-                        <span class="chat-sender">${msg.sender}:</span>
-                        <span class="chat-text">${msg.text}</span>
+                        <span class="chat-sender">${sender}:</span>
+                        <span class="chat-text">${text}</span>
                     </div>
                 `;
             },

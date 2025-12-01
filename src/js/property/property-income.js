@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // PROPERTY INCOME - making money while you sleep in darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -15,8 +15,12 @@ const PropertyIncome = {
 
         let income = propertyType.baseIncome;
 
+        // 🖤 Default level to 1 and condition to 100 to prevent NaN 💀
+        const level = property.level ?? 1;
+        const condition = property.condition ?? 100;
+
         // 📈 Level multiplier (20% per level) 🦇
-        income *= (1 + (property.level - 1) * 0.2);
+        income *= (1 + (level - 1) * 0.2);
 
         // 🔧 Upgrade bonuses 🗡️ - 🖤 with null guard 💀
         const upgrades = property.upgrades || [];
@@ -28,7 +32,7 @@ const PropertyIncome = {
         });
 
         // 🔨 Condition modifier 🌙
-        income *= (property.condition / 100);
+        income *= (condition / 100);
 
         // 🛠️ Calculate maintenance 🔮 - 🖤 with null guard 💀
         let maintenance = propertyType.maintenanceCost;
@@ -72,7 +76,12 @@ const PropertyIncome = {
 
             // 💵 Calculate income 🌙
             let income = propertyType.baseIncome;
-            income *= (1 + (property.level - 1) * 0.2);
+
+            // 🖤 Default level to 1 and condition to 100 to prevent NaN 💀
+            const level = property.level ?? 1;
+            const condition = property.condition ?? 100;
+
+            income *= (1 + (level - 1) * 0.2);
 
             // 🔧 Upgrade bonuses 🔮 - 🖤 with null guard 💀
             const propUpgrades = property.upgrades || [];
@@ -84,7 +93,7 @@ const PropertyIncome = {
             });
 
             // 🔨 Condition modifier 💀
-            income *= (property.condition / 100);
+            income *= (condition / 100);
 
             // 👥 Employee bonuses 🖤 - 🖤 with null guard 💀
             const propEmployees = property.employees || [];
@@ -113,8 +122,8 @@ const PropertyIncome = {
             });
 
             // 🔨 Poor condition increases maintenance 🦇
-            if (property.condition < 50) {
-                maintenance *= (2 - property.condition / 50);
+            if (condition < 50) {
+                maintenance *= (2 - condition / 50);
             }
 
             // 💀 Tax 🗡️

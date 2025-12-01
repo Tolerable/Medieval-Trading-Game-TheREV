@@ -37,7 +37,10 @@
       "Bash(temp_old.txt)",
       "Bash(del temp_old.txt)",
       "Bash(cd:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"Checking $f...\")",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

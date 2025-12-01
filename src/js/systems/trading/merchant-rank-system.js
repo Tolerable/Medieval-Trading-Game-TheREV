@@ -425,7 +425,8 @@ const MerchantRankSystem = {
         const rank = this.getCurrentRank();
         const name = game.player.name || 'Adventurer';
 
-        return `${name}, ${rank.title}`;
+        // 🖤 Format: "Riley a Vagrant" (no comma) 💀
+        return `${name} ${rank.title}`;
     },
 
     getPlayerNameShort() {

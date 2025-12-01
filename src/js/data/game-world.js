@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME WORLD SYSTEM - where dreams die and gold lives in darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -922,7 +922,8 @@ const GameWorld = {
     init() {
         console.log('🌍 GameWorld awakens from the void...');
         this.unlockedRegions = ['starter', 'capital', 'northern', 'eastern', 'western', 'southern'];
-        this.visitedLocations = ['greendale']; // 🖤 Start at Greendale (starter city)
+        // 🖤 Start with Greendale + nearby locations already explored 💀
+        this.visitedLocations = ['greendale', 'southern_outpost', 'royal_capital'];
         this.currentRegion = 'starter';
 
         // 🦇 Try to setup market prices (may fail if ItemDatabase not loaded)

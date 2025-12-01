@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // TRAVEL PANEL MAP - choosing your next destination
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -142,6 +142,16 @@ const TravelPanelMap = {
         this.mapElement.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
         document.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
         document.addEventListener('touchend', (e) => this.onTouchEnd(e));
+
+        // 🖤 Listen for location changes to update map (tooltips, explored status) 💀
+        document.addEventListener('player-location-changed', () => {
+            console.log('🗺️ TravelPanelMap: Location changed, re-rendering map...');
+            this.render();
+        });
+        document.addEventListener('location-changed', () => {
+            console.log('🗺️ TravelPanelMap: Location changed (legacy event), re-rendering map...');
+            this.render();
+        });
 
         console.log('🗺️ TravelPanelMap: Event listeners attached');
     },
@@ -1504,7 +1514,8 @@ const TravelPanelMap = {
         }
 
         // Get travel info from TravelSystem
-        if (typeof TravelSystem !== 'undefined') {
+        // 🖤 Null check for playerPosition to prevent crash 💀
+        if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition) {
             this.travelState.startTime = TravelSystem.playerPosition.travelStartTime;
             this.travelState.duration = TravelSystem.playerPosition.travelDuration;
         }
@@ -1515,7 +1526,8 @@ const TravelPanelMap = {
         // and immediately calls onTravelComplete() - which is the bug that caused instant travel!
         setTimeout(() => {
             // Verify travel actually started
-            if (typeof TravelSystem !== 'undefined' && !TravelSystem.playerPosition.isTraveling) {
+            // 🖤 Null check for playerPosition 💀
+            if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition && !TravelSystem.playerPosition.isTraveling) {
                 console.warn('🖤 Travel countdown started but TravelSystem.isTraveling is false - aborting');
                 this.travelState.isActive = false;
                 return;

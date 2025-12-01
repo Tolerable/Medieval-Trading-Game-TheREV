@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // NPC VOICE CHAT SYSTEM - digital souls learn to speak
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com

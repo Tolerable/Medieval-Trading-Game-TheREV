@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME OVER SYSTEM - every story ends in the void
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -401,55 +401,7 @@ const GameOverSystem = {
             overlay.classList.add('hidden');
         }
 
-        // Show credits before returning to menu
-        this.showCreditsSequence();
-    },
-
-    // 🎬 Show credits sequence
-    showCreditsSequence() {
-        // Create credits overlay
-        const creditsOverlay = document.createElement('div');
-        creditsOverlay.id = 'credits-sequence-overlay';
-        creditsOverlay.className = 'credits-sequence-overlay';
-
-        // Get config data
-        const config = typeof GameConfig !== 'undefined' ? GameConfig : null;
-        const gameName = config?.game?.name || 'Medieval Trading Game';
-        const tagline = config?.game?.tagline || 'where capitalism meets the dark ages';
-        const studio = config?.credits?.studio || 'Unity AI Lab';
-        const developers = config?.credits?.developers || [
-            { name: 'Hackall360', role: 'Lead Code Necromancer' },
-            { name: 'Sponge', role: 'Chaos Engineer' },
-            { name: 'GFourteen', role: 'Digital Alchemist' }
-        ];
-        const copyright = config?.credits?.copyright || '© 2025 Unity AI Lab by Hackall360 Sponge GFourteen www.unityailab.com';
-        const version = config?.version?.game || '0.81';
-
-        // Get social links
-        const links = config?.links || {};
-
-        // Build social links HTML
-        let socialLinksHTML = '';
-        if (links.website || links.github || links.discord || links.support) {
-            socialLinksHTML = `
-                <div class="credits-social-links">
-                    ${links.website ? `<a href="${links.website}" target="_blank" class="social-link website" title="Website"><span class="social-icon">🌐</span><span class="social-label">Website</span></a>` : ''}
-                    ${links.github ? `<a href="${links.github}" target="_blank" class="social-link github" title="GitHub"><span class="social-icon">💻</span><span class="social-label">GitHub</span></a>` : ''}
-                    ${links.discord ? `<a href="${links.discord}" target="_blank" class="social-link discord" title="Discord"><span class="social-icon">💬</span><span class="social-label">Discord</span></a>` : ''}
-                    ${links.support ? `<a href="mailto:${links.support}" class="social-link support" title="Contact Us"><span class="social-icon">✉️</span><span class="social-label">Contact Us</span></a>` : ''}
-                </div>
-            `;
-        }
-
-        // Build developers HTML
-        const devsHTML = developers.map(dev => `
-            <div class="credits-dev">
-                <span class="dev-name">${dev.name}</span>
-                <span class="dev-role">${dev.role}</span>
-            </div>
-        `).join('');
-
-        // Special ending message based on cause of death
+        // 🖤 Determine ending message based on cause of death
         let endingMessage = 'Your journey has ended...';
         if (this.finalStats) {
             if (this.finalStats.causeOfDeath.includes('retired')) {
@@ -463,103 +415,24 @@ const GameOverSystem = {
             }
         }
 
-        creditsOverlay.innerHTML = `
-            <div class="credits-content">
-                <div class="credits-scroll">
-                    <div class="credits-ending-message">${endingMessage}</div>
-
-                    <div class="credits-spacer"></div>
-
-                    <div class="credits-title">${gameName}</div>
-                    <div class="credits-tagline">${tagline}</div>
-                    <div class="credits-version">Version ${version}</div>
-
-                    <div class="credits-spacer"></div>
-
-                    <div class="credits-section">
-                        <div class="credits-section-title">Conjured By</div>
-                        <div class="credits-studio">${studio}</div>
-                    </div>
-
-                    <div class="credits-spacer"></div>
-
-                    <div class="credits-section">
-                        <div class="credits-section-title">The Fucking Legends</div>
-                        <div class="credits-developers">
-                            ${devsHTML}
-                        </div>
-                    </div>
-
-                    <div class="credits-spacer"></div>
-
-                    ${socialLinksHTML}
-
-                    <div class="credits-spacer"></div>
-
-                    <div class="credits-section">
-                        <div class="credits-thanks">Thank you for playing</div>
-                        <div class="credits-copyright">${copyright}</div>
-                    </div>
-
-                    <div class="credits-spacer-large"></div>
-                </div>
-            </div>
-            <div class="credits-skip">
-                <button class="skip-credits-btn" onclick="GameOverSystem.skipCredits()">Skip Credits ▶</button>
-            </div>
-        `;
-
-        document.body.appendChild(creditsOverlay);
-
-        // Start the credits scroll animation
-        requestAnimationFrame(() => {
-            creditsOverlay.classList.add('active');
-            const scrollContent = creditsOverlay.querySelector('.credits-scroll');
-            if (scrollContent) {
-                scrollContent.classList.add('scrolling');
-            }
-        });
-
-        // Auto-transition to menu after credits (about 20 seconds)
-        this.creditsTimeout = setTimeout(() => {
-            this.finishCredits();
-        }, 22000);
-    },
-
-    // ⏭️ Skip credits
-    skipCredits() {
-        if (this.creditsTimeout) {
-            clearTimeout(this.creditsTimeout);
-            this.creditsTimeout = null;
-        }
-        this.finishCredits();
-    },
-
-    // ✅ Finish credits and go to menu
-    finishCredits() {
-        const creditsOverlay = document.getElementById('credits-sequence-overlay');
-        if (creditsOverlay) {
-            creditsOverlay.classList.add('fading');
-
-            setTimeout(() => {
-                creditsOverlay.remove();
-
-                // Reset game state
-                this.isProcessingGameOver = false;
-                this.finalStats = null;
-                this.rankingResult = null;
-
-                // Go to main menu
-                if (typeof changeState === 'function') {
-                    changeState(GameState.MENU);
+        // 🎬 Use unified CreditsSystem to show credits, then return to menu
+        if (typeof CreditsSystem !== 'undefined') {
+            CreditsSystem.showCredits({
+                endingMessage: endingMessage,
+                returnToMenu: true,
+                onFinish: () => {
+                    // 🖤 Reset game over state after credits
+                    this.isProcessingGameOver = false;
+                    this.finalStats = null;
+                    this.rankingResult = null;
                 }
-            }, 1000);
+            });
         } else {
-            // Fallback if no credits overlay
+            // 🖤 Fallback if CreditsSystem not loaded - go straight to menu
+            console.warn('CreditsSystem not loaded, going straight to menu');
             this.isProcessingGameOver = false;
             this.finalStats = null;
             this.rankingResult = null;
-
             if (typeof changeState === 'function') {
                 changeState(GameState.MENU);
             }

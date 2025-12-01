@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // SAVE MANAGER - preserving your descent into capitalism
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -281,6 +281,10 @@ const SaveManager = {
                         totalQuestsCompleted: QuestSystem.completedQuests?.length || 0
                     }
                 } : null,
+                // 🖤 Faction reputation - the void remembers who you served 💀
+                factionState: typeof FactionSystem !== 'undefined' && FactionSystem.getState
+                    ? FactionSystem.getState()
+                    : null,
                 marketData: {
                     marketPrices: game.marketPrices || {},
                     marketPriceModifier: game.marketPriceModifier || 1
@@ -517,6 +521,19 @@ const SaveManager = {
             QuestSystem.completedQuests = gameData.questState.completedQuests || [];
             // 🖤 Restore failed quests too - the void remembers ALL your failures 💀
             QuestSystem.failedQuests = gameData.questState.failedQuests || [];
+            // 🖤 Restore quest completion times for cooldowns 💀
+            QuestSystem.questCompletionTimes = gameData.questState.questCompletionTimes || {};
+            QuestSystem.discoveredQuests = gameData.questState.discoveredQuests || [];
+            QuestSystem.trackedQuestId = gameData.questState.trackedQuestId || null;
+            // 🦇 Restore quest metrics for leaderboard
+            if (gameData.questState.questMetrics) {
+                QuestSystem.questMetrics = gameData.questState.questMetrics;
+            }
+        }
+
+        // 🖤 Restore faction reputation - alliances from the darkness 💀
+        if (gameData.factionState && typeof FactionSystem !== 'undefined' && FactionSystem.loadState) {
+            FactionSystem.loadState(gameData.factionState);
         }
 
         // Show game UI (wrap in try-catch for robustness)

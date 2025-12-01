@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // PANEL MANAGER - window state orchestration
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -577,6 +577,15 @@ const PanelManager = {
                 btn.style.borderColor = 'rgba(79, 195, 247, 0.2)';
             }
         });
+    },
+
+    // 🏪 Update market button visibility in the Panels toolbar 💀
+    // Only show market button when at Royal Capital
+    updateMarketButtonVisibility(hasMarket) {
+        const marketBtn = document.querySelector('.panel-toolbar-btn[data-panel-id="market-panel"]');
+        if (marketBtn) {
+            marketBtn.style.display = hasMarket ? 'flex' : 'none';
+        }
     },
 
     // Setup ESC key handler to close panels in order

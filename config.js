@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME CONFIG - the dark heart of all settings
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -12,9 +12,9 @@ const GameConfig = {
     // 📋 VERSION INFO - tracking our descent into madness
     // ═══════════════════════════════════════════════════════════════
     version: {
-        game: '0.88',          // the great reorganization update 🖤
-        file: '0.88',          // keeping pace with the darkness
-        build: '2025.11',      // born in the depths of 2025
+        game: '0.89.5',        // the credits & about update 🖤
+        file: '0.89.5',        // keeping pace with the darkness
+        build: '2025.12',      // born in the depths of 2025
         releaseDate: '2025'    // the year we unleashed this beast
     },
 
@@ -847,30 +847,73 @@ const GameConfig = {
             // basic NPCs - just conversation
             villager: ['basic'],
 
-            // merchants - can trade items but also give collection quests
-            merchant: ['basic', 'merchant', 'questGiver'],
-            blacksmith: ['basic', 'merchant', 'questGiver'],
-            apothecary: ['basic', 'merchant', 'questGiver'],
+            // === HOSPITALITY / FOOD SERVICE ===
             innkeeper: ['basic', 'merchant', 'questGiver'],
+            tavernkeeper: ['basic', 'merchant', 'questGiver'],
+            baker: ['basic', 'merchant'],
+            cook: ['basic', 'merchant'],
 
-            // authority figures - full quest powers
+            // === WEAPONS / ARMOR ===
+            blacksmith: ['basic', 'merchant', 'questGiver'],
+            weaponsmith: ['basic', 'merchant', 'questGiver'],
+            armorsmith: ['basic', 'merchant', 'questGiver'],
+
+            // === HEALING / MEDICINE ===
+            apothecary: ['basic', 'merchant', 'questGiver'],
+            healer: ['basic', 'merchant', 'questGiver'],
+            herbalist: ['basic', 'merchant'],
+
+            // === GENERAL MERCHANTS ===
+            merchant: ['basic', 'merchant', 'questGiver'],
+            peddler: ['basic', 'merchant'],
+            traveling_merchant: ['basic', 'merchant'],
+            general_store: ['basic', 'merchant', 'questGiver'],
+
+            // === LUXURY / SPECIALTY ===
+            jeweler: ['basic', 'merchant'],
+            clothier: ['basic', 'merchant'],
+            furrier: ['basic', 'merchant', 'questGiver'],
+
+            // === RESOURCES / CRAFTING ===
+            miner: ['basic', 'merchant', 'questGiver'],
+            lumberjack: ['basic', 'merchant', 'questGiver'],
+            farmer: ['basic', 'merchant', 'questGiver'],
+            fisherman: ['basic', 'merchant', 'questGiver'],
+
+            // === SERVICES ===
+            stablemaster: ['basic', 'merchant', 'questGiver'],
+            ferryman: ['basic', 'merchant'],
+
+            // === KNOWLEDGE / SCHOLARLY ===
+            scholar: ['basic', 'questGiver'],
+            scribe: ['basic', 'merchant'],
+
+            // === RELIGIOUS ===
+            priest: ['basic', 'merchant', 'questGiver'],
+
+            // === AUTHORITY / GUARDS ===
             guard: ['basic', 'questGiver'],
+            captain: ['basic', 'questGiver'],
+            sergeant: ['basic', 'questGiver'],
+
+            // === SHADY / UNDERGROUND ===
+            smuggler: ['basic', 'merchant'],
+            thief: ['basic'],
+
+            // === QUEST GIVERS ===
             questGiver: ['basic', 'questGiver'],
             elder: ['basic', 'questGiver'],
-
-            // special quest NPCs
-            scholar: ['basic', 'questGiver'],
-            captain: ['basic', 'questGiver'],
             huntmaster: ['basic', 'questGiver'],
             sage: ['basic', 'questGiver'],
             herald: ['basic', 'questGiver'],
             steward: ['basic', 'questGiver'],
             vintner: ['basic', 'merchant', 'questGiver'],
-            furrier: ['basic', 'merchant', 'questGiver'],
             mason: ['basic', 'merchant', 'questGiver'],
-            sergeant: ['basic', 'questGiver'],
             harbormaster: ['basic', 'questGiver'],
             miller: ['basic', 'merchant', 'questGiver'],
+
+            // 🏰 GRAND MARKET MERCHANT - Royal Capital only 👑
+            grand_market_merchant: ['basic', 'merchant', 'questGiver'],
 
             // bosses - combat and loot powers
             boss: ['basic', 'boss', 'questGiver'],
@@ -1015,13 +1058,16 @@ const GameConfig = {
     },
 
     // get social links HTML - escape routes from the void (styled as buttons)
-    getSocialLinksHTML() {
+    // 🖤 includeAbout parameter controls whether About button is shown (default true for main menu)
+    getSocialLinksHTML(includeAbout = true) {
         const links = this.links;
-        if (!links.website && !links.github && !links.discord && !links.support) {
-            return '';
-        }
 
         let linksHTML = '<div class="about-social-links">';
+
+        // 🖤 About button - triggers rolling credits 💀
+        if (includeAbout) {
+            linksHTML += `<button class="about-link-btn" onclick="if(typeof CreditsSystem !== 'undefined') CreditsSystem.showCredits(); else console.error('CreditsSystem not loaded');" title="View credits and about info">ℹ️ About</button>`;
+        }
 
         if (links.website) {
             linksHTML += `<a href="${links.website}" target="_blank" class="about-link-btn" title="Visit our website">🌐 Website</a>`;

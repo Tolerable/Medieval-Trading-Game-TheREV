@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    MEDIEVAL TRADING GAME - main stylesheet of darkness
    ═══════════════════════════════════════════════════════════════
-   Version: 0.88 | Unity AI Lab
+   Version: 0.89.5 | Unity AI Lab
    Creators: Hackall360, Sponge, GFourteen
    www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
    unityailabcontact@gmail.com
@@ -3026,6 +3026,18 @@ button.secondary:hover {
 .menu-social-link[title="Support Us"]:hover {
     border-color: #ff6b6b;
     box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+}
+
+/* 🖤 About button style */
+.menu-social-link[title="About"]:hover {
+    border-color: #ffd700;
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+}
+
+/* 🖤 Button reset for social link buttons */
+button.menu-social-link {
+    cursor: pointer;
+    font-family: inherit;
 }
 
 .menu-footer {

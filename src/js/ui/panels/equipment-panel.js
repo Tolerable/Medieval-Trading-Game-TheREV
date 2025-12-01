@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // EQUIPMENT PANEL - gear and equipment management
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -594,6 +594,9 @@ const EquipmentSystem = {
         }
     }
 };
+
+// 🖤 Expose to window for onclick handlers 💀
+window.EquipmentSystem = EquipmentSystem;
 
 // 🌙 Auto-init when the page awakens from its digital slumber
 document.addEventListener('DOMContentLoaded', () => {

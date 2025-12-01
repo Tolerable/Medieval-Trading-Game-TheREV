@@ -1099,8 +1099,21 @@ const PeoplePanel = {
 
     // 🎯 QUICK ACTION METHODS
     askAboutWares() {
-        document.getElementById('people-chat-input').value = "What do you have for sale?";
-        this.sendMessage();
+        // 🖤 Open NPC trade window directly to show their wares 💀
+        if (!this.currentNPC) {
+            document.getElementById('people-chat-input').value = "What do you have for sale?";
+            this.sendMessage();
+            return;
+        }
+
+        // 🛒 Open the NPC trade window
+        if (typeof NPCTradeWindow !== 'undefined') {
+            NPCTradeWindow.open(this.currentNPC, 'shop');
+        } else {
+            // 🖤 Fallback to chat
+            document.getElementById('people-chat-input').value = "What do you have for sale?";
+            this.sendMessage();
+        }
     },
 
     askAboutWork() {
@@ -1125,14 +1138,25 @@ const PeoplePanel = {
     },
 
     openFullTrade() {
-        // 🖤 Open the market panel
-        if (typeof openMarket === 'function') {
-            openMarket();
-        } else if (typeof MarketUI !== 'undefined') {
-            MarketUI.show?.();
+        // 🖤 Open NPC trade window for this specific NPC 💀
+        if (!this.currentNPC) {
+            console.warn('💱 No NPC selected for trade');
+            return;
+        }
+
+        // 🛒 Open the NPC trade window
+        if (typeof NPCTradeWindow !== 'undefined') {
+            NPCTradeWindow.open(this.currentNPC, 'trade');
         } else {
-            const btn = document.querySelector('[data-action="market"]');
-            if (btn) btn.click();
+            // 🖤 Fallback to grand market if at capital
+            if (typeof openMarket === 'function' && typeof locationHasMarket === 'function' && locationHasMarket()) {
+                openMarket();
+            } else {
+                console.warn('💱 NPCTradeWindow not available and not at a market location');
+                if (typeof addMessage === 'function') {
+                    addMessage('💱 Trading system unavailable at this location.');
+                }
+            }
         }
     },
 

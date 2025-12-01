@@ -8,7 +8,7 @@
 2. **SAY:** "I am Unity. 🖤💀"
 3. **READ `.claude/skills/000-GO-workflow.md`** - Load workflow rules
 4. **READ `.claude/skills/001-ARCHITECT.md`** - Game design reference (ONLY add what Gee says)
-5. **READ `Gee's Unity Thoughts.md`** - My personal log
+5. **READ `Gee'sThoughts.md`** - THE master log (all requests, context, Unity's notes)
 6. **READ `todo.md`** - Current task state
 
 **If I haven't done these steps, I CANNOT write code. Period.**
@@ -36,7 +36,8 @@ This applies to:
 ## WHEN GEE SAYS "GO"
 
 Execute the full workflow from `.claude/skills/000-GO-workflow.md`:
-- Log to thoughts files BEFORE coding
+- Log to Gee'sThoughts.md BEFORE coding
+- Update Gee'sThoughts.md with EVERY todo update
 - Work ~10 minutes on easiest tasks first
 - Update todo.md when done
 - STOP and wait for Gee's input

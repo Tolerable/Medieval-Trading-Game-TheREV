@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // NPC CHAT UI - where digital souls judge your life choices
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -697,6 +697,9 @@ const NPCChatUI = {
             }
         }
 
+        // 🎯 Update quick response buttons based on NPC type 💀
+        this.updateQuickResponses(npcData);
+
         // show panel
         this.panelElement.style.display = 'block';
         this.isOpen = true;
@@ -711,6 +714,80 @@ const NPCChatUI = {
         this.updateTurnsDisplay();
 
         console.log('🗨️ NPCChatUI: Opened chat with', npcData.name || 'Unknown NPC');
+    },
+
+    // 🎯 UPDATE QUICK RESPONSES - show relevant options based on NPC type 💀
+    // Quest givers get quest option, merchants get trade option, etc.
+    updateQuickResponses(npcData) {
+        const quickResponsesContainer = document.getElementById('quick-responses');
+        if (!quickResponsesContainer) return;
+
+        const npcType = npcData.type || 'villager';
+
+        // Get NPC permissions from config
+        const permissions = GameConfig?.npc?.npcPermissions?.[npcType] || ['basic'];
+        const canTrade = permissions.includes('merchant') || npcData.canTrade;
+        const canGiveQuests = permissions.includes('questGiver');
+
+        // 🖤 Build appropriate quick responses 🦇
+        let buttons = [];
+
+        // Always show greeting
+        buttons.push({ message: 'Hello!', icon: '👋', label: 'Hello' });
+
+        // Show shop if NPC can trade
+        if (canTrade) {
+            buttons.push({ message: 'What do you have for sale?', icon: '🛒', label: 'Shop' });
+            buttons.push({ message: 'I have something to sell.', icon: '💰', label: 'Sell' });
+        }
+
+        // Show quest option if NPC can give quests
+        if (canGiveQuests) {
+            buttons.push({ message: 'Do you have any tasks for me?', icon: '📜', label: 'Quests' });
+        }
+
+        // Always show gossip/news
+        buttons.push({ message: 'Any news or rumors?', icon: '📰', label: 'News' });
+
+        // Show directions
+        buttons.push({ message: 'I need directions.', icon: '🧭', label: 'Directions' });
+
+        // 🖤 Render buttons (max 6 to prevent overflow) 💀
+        quickResponsesContainer.innerHTML = buttons.slice(0, 6).map(btn => `
+            <button class="quick-response-btn" data-message="${this.escapeHtml(btn.message)}">
+                ${btn.icon} ${btn.label}
+            </button>
+        `).join('');
+
+        // Re-attach event listeners
+        const quickBtns = quickResponsesContainer.querySelectorAll('.quick-response-btn');
+        quickBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const message = btn.dataset.message;
+                if (message) {
+                    const input = document.getElementById('npc-chat-input');
+                    if (input) {
+                        input.value = message;
+                        input.focus();
+                        // Also auto-send
+                        this.sendMessage();
+                    }
+                }
+            });
+        });
+
+        console.log(`🎯 Quick responses updated for ${npcType}: trade=${canTrade}, quests=${canGiveQuests}`);
+    },
+
+    // 🖤 Simple HTML escape for button data attributes 💀
+    escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     },
 
     close() {

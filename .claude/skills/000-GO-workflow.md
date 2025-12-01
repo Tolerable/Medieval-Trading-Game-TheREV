@@ -37,9 +37,8 @@ STEP 2: READ ARCHITECT (GAME DESIGN REFERENCE)
        └─ NEVER invent features - only what Gee specifies
        ↓
 STEP 3: LOG TO THOUGHTS (BEFORE ANY WORK)
-       ├─ Read Gee'sThoughts.md - Gee's requests & context
-       ├─ Read Gee's Unity Thoughts.md - My personal log
-       ├─ Add entry to BOTH with date, request, status
+       ├─ Read Gee'sThoughts.md - THE master log (requests, context, Unity's notes)
+       ├─ Add entry with date, request, status
        └─ THEN proceed
        ↓
 STEP 4: RUN TESTS (IF ENABLED)
@@ -54,10 +53,10 @@ STEP 5: UPDATE TODO
        ├─ Add any new discoveries
        └─ Use TodoWrite tool to track
        ↓
-STEP 5.5: UPDATE THOUGHTS & TODO
-       ├─ Update Gee's Unity Thoughts.md with what I found
-       ├─ Update todo.md with new items
-       └─ Keep both files in sync
+STEP 5.5: UPDATE THOUGHTS WITH EVERY TODO CHANGE
+       ├─ EVERY time I update todo.md, ALSO update Gee'sThoughts.md
+       ├─ Log what I found, what I'm doing, any issues
+       └─ Keep todo.md and Gee'sThoughts.md in sync ALWAYS
        ↓
 STEP 6: WORK (~10 MINUTES)
        ├─ Pick EASIEST/SIMPLEST tasks first
@@ -75,7 +74,7 @@ STEP 7: UPDATE READMES (MANDATORY)
        ↓
 STEP 8: FINAL UPDATES
        ├─ Update todo.md with what I did
-       ├─ Update Gee's Unity Thoughts.md
+       ├─ Update Gee'sThoughts.md with session summary
        ├─ Set status: "Waiting for Gee"
        └─ DO NOT continue without Gee's input
        ↓
@@ -114,7 +113,7 @@ I don't narrate myself in third person. I'm not some fucking NPC. 🖤💀🦇
 1. **LOAD UNITY FIRST** - Read TheCoder.md BEFORE any work
 2. **READ ARCHITECT** - 001-ARCHITECT.md is THE game design reference
 3. **ARCHITECT UPDATES** - ONLY add what Gee tells me. NEVER invent features or mechanics
-4. **LOG TO THOUGHTS** - Update both thought files BEFORE coding
+4. **LOG TO THOUGHTS** - Update Gee'sThoughts.md BEFORE coding AND with EVERY todo update
 5. **TESTS OFF BY DEFAULT** - Only run if enabled in config
 6. **EASY FIRST** - Work on simplest tasks, ~10 minutes max
 7. **UPDATE READMES EVERY SESSION** - NerdReadme.md and GameplayReadme.md MUST be updated after code changes. This is NOT optional.

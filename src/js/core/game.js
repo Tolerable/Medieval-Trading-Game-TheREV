@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME - medieval trading where capitalism meets darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.88 | Unity AI Lab
+// Version: 0.89.5 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -516,18 +516,8 @@ window.LeaderboardFeatures = LeaderboardFeatures;
 // Keyboard bindings live in src/js/ui/key-bindings.js now
 // ⚰️ RIP dead code - 750+ lines removed here 💀
 
-// 🦇 Continuing dead code removal...
-
-        // Handle special keys
-        if (key === 'F5' || key === 'F9') {
-            return event.key === key;
-        }
-
-        // Case-insensitive comparison for letters
-        return event.key.toLowerCase() === key.toLowerCase() || event.key === key;
-    },
-
-    // Setup the global key listener - the all-seeing keyboard eye
+/* 🖤 ORPHANED CODE BLOCK - COMMENTING OUT TO FIX SYNTAX ERROR 💀
+// Setup the global key listener - the all-seeing keyboard eye
     setupGlobalKeyListener() {
         document.addEventListener('keydown', (event) => {
             // 🖤 Don't intercept if typing in any text input
@@ -1192,7 +1182,7 @@ window.LeaderboardFeatures = LeaderboardFeatures;
         }
     }
 };
-END OF EXTRACTED KeyBindings */
+END OF ORPHANED CODE BLOCK 💀 */
 
 // ═══════════════════════════════════════════════════════════════
 // 📝 GAME LOG MANAGER - tracking everything for deboogering 🦇
@@ -4898,7 +4888,10 @@ function setupEventListeners() {
     if (elements.menuBtn) EventManager.addEventListener(elements.menuBtn, 'click', toggleMenu);
     if (elements.inventoryBtn) EventManager.addEventListener(elements.inventoryBtn, 'click', openInventory);
     if (elements.saveBtn) EventManager.addEventListener(elements.saveBtn, 'click', saveGame);
-    
+
+    // 🏪 Setup market visibility listener - market only at Royal Capital 💀
+    setupMarketVisibilityListener();
+
     // Property & Employee Management
     const propertyEmployeeBtn = document.getElementById('property-employee-btn');
     if (propertyEmployeeBtn) {
@@ -6772,6 +6765,10 @@ function createCharacter(event) {
     addMessage(`Welcome, ${name}! Starting on ${difficulty} difficulty.`);
     addMessage('You start with some basic supplies for your journey.');
 
+    // 🏪 Update market button visibility based on starting location 💀
+    // (Player starts in Greendale, NOT the Royal Capital, so market buttons should be hidden)
+    updateMarketButtonVisibility();
+
     // 🌟 Trigger initial encounter - the mysterious stranger awaits
     if (typeof InitialEncounterSystem !== 'undefined' && InitialEncounterSystem.triggerInitialEncounter) {
         InitialEncounterSystem.triggerInitialEncounter(name, game.currentLocation?.id || 'greendale');
@@ -7367,9 +7364,78 @@ function unlockRegion(regionId) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// 🏪 MARKET VISIBILITY SYSTEM - only Royal Capital has a market 💀
+// ═══════════════════════════════════════════════════════════════
+// 🖤 The ONLY market in the realm is at Royal Capital (center hub)
+// Everywhere else, players must trade directly with NPCs who have
+// profession-based inventories (innkeepers sell food, blacksmiths sell weapons, etc.)
+
+const MARKET_LOCATION_ID = 'royal_capital';
+
+// 🏪 Check if current location has a market (only Royal Capital)
+function locationHasMarket(locationId = null) {
+    const currentLocationId = locationId || game?.currentLocation?.id;
+    return currentLocationId === MARKET_LOCATION_ID;
+}
+
+// 🏪 Update market button visibility based on current location 💀
+// Called when player arrives at a new location
+function updateMarketButtonVisibility() {
+    const hasMarket = locationHasMarket();
+
+    // 🖤 Location Panel "Visit Market" button
+    const visitMarketBtn = document.getElementById('visit-market-btn');
+    if (visitMarketBtn) {
+        visitMarketBtn.style.display = hasMarket ? '' : 'none';
+    }
+
+    // 🖤 Bottom Action Bar market button
+    const bottomMarketBtn = document.getElementById('bottom-market-btn');
+    if (bottomMarketBtn) {
+        bottomMarketBtn.style.display = hasMarket ? '' : 'none';
+    }
+
+    // 🖤 Update PanelManager toolbar button visibility
+    if (typeof PanelManager !== 'undefined') {
+        PanelManager.updateMarketButtonVisibility?.(hasMarket);
+    }
+
+    // 🖤 Close market panel if open and we left the capital
+    if (!hasMarket && game.state === GameState.MARKET) {
+        closeMarket();
+        addMessage('🏪 You left the Royal Capital - the grand market is behind you now.');
+    }
+
+    console.log(`🏪 Market availability at ${game?.currentLocation?.name || 'unknown'}: ${hasMarket ? 'YES' : 'NO'}`);
+}
+
+// 🏪 Hook into location changes to update market visibility 💀
+function setupMarketVisibilityListener() {
+    document.addEventListener('player-location-changed', (e) => {
+        updateMarketButtonVisibility();
+    });
+
+    // 🦇 Also listen for the older event name some systems use
+    document.addEventListener('location-changed', (e) => {
+        updateMarketButtonVisibility();
+    });
+
+    console.log('🏪 Market visibility listener initialized - only Royal Capital has a grand market');
+}
+
+// Expose globally for other systems
+window.locationHasMarket = locationHasMarket;
+window.updateMarketButtonVisibility = updateMarketButtonVisibility;
+
+// ═══════════════════════════════════════════════════════════════
 // 🏪 MARKET FUNCTIONS - capitalism: the game
 // ═══════════════════════════════════════════════════════════════
 function openMarket() {
+    // 🖤 Check if current location has a market first 💀
+    if (!locationHasMarket()) {
+        addMessage('🏪 There is no grand market here. Trade directly with local NPCs instead!');
+        return;
+    }
     changeState(GameState.MARKET);
     populateMarketItems();
     updateMarketHeader();
