@@ -14,7 +14,41 @@
 | 🟠 HIGH | 19+ | 28 |
 | 🟡 MEDIUM | 11 | 45 |
 | 🟢 LOW | 18 | 26 |
-| **TOTAL** | **54+** | **107** |
+| 🆕 FEATURES | 2 | - |
+| **TOTAL** | **55+** | **107** |
+
+---
+
+## 🆕 NEW FEATURES - COMPLETED ✅
+
+### Quest Markers on Map (2025-12-01)
+- [x] **Golden quest marker** - Shows 🎯 marker at quest target location
+- [x] **Golden glow effect** - Location pulses with golden hue
+- [x] **Main world map support** - Works on full world map (game-world-renderer.js)
+- [x] **Travel panel mini-map support** - Works on travel panel mini-map (travel-panel-map.js)
+- [x] **Floating markers** - Shows marker even for unexplored/hidden locations
+- [x] **Quest tracking events** - Updates when quest is tracked/untracked
+- [x] **Non-intrusive** - Doesn't interfere with existing location icons
+
+**Files Modified:**
+- `src/js/systems/progression/quest-system.js` - Updated updateQuestMapMarker(), added addQuestMarkerToElement(), createFloatingQuestMarker() with mapType support, updated removeQuestMapMarker()
+- `src/js/systems/travel/travel-panel-map.js` - Added updateQuestMarker() method, added quest-tracked/quest-untracked event listeners, calls updateQuestMarker() after render()
+
+---
+
+### Bulk Trading Shortcuts (2025-12-01)
+- [x] **Shift+Click = ×5** - Add/remove 5 items at a time
+- [x] **Ctrl+Click = ×25** - Add/remove 25 items at a time
+- [x] Works for NPC trade panel
+- [x] Works for Market buy panel
+- [x] Works for Market sell panel
+- [x] Works on cart +/- buttons
+- [x] Added tooltips showing shortcut hints
+
+**Files Modified:**
+- `src/js/ui/panels/trade-cart-panel.js` - Added bulk methods + modifier key detection
+- `src/js/npc/npc-trade.js` - Added bulk quantity to clickable items
+- `src/js/core/game.js` - Added bulk quantity to market buy/sell items
 
 ---
 

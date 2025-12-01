@@ -18,6 +18,60 @@ Each entry follows this format:
 
 ## 2025-12-01 - Current Session
 
+### Quest Marker on Map Feature 🖤💀
+
+**Request:** Add golden hue quest marker to tracked quest location on:
+1. Main game world map (GameWorldRenderer)
+2. Travel panel mini-map (TravelPanelMap)
+**Context:**
+- Player tracks a quest but no visual marker shows where to go
+- Marker should NOT interfere with existing location icons
+- Golden hue / glow effect to stand out
+**Status:** IN PROGRESS 🔄
+
+---
+
+### Bulk Trading Shortcuts Feature 🖤💀
+
+**Request:** Add Shift+Click (5x) and Ctrl+Click (25x) bulk trading to NPC and Market trade windows
+**Context:**
+- Shift+Click = add/remove 5 items at a time
+- Ctrl+Click = add/remove 25 items at a time
+- Works for both adding TO cart and removing FROM cart
+- Applies to both NPC trade panel and Market trade panel
+**Status:** COMPLETE ✅
+
+**Implementation:**
+
+1. **TradeCartPanel (trade-cart-panel.js)**
+   - Modified `addItem()` to accept `itemData.quantity` for bulk adds
+   - Modified `incrementItem()` and `decrementItem()` to accept `amount` parameter
+   - Added `getBulkAmount(event)` - returns 1, 5 (shift), or 25 (ctrl)
+   - Added `handleIncrement(event, itemId)` and `handleDecrement(event, itemId)`
+   - Updated cart item buttons to use event handlers with modifier detection
+   - Added tooltips: "−1 (Shift: −5, Ctrl: −25)" and "+1 (Shift: +5, Ctrl: +25)"
+
+2. **NPC Trade (npc-trade.js:1515-1553)**
+   - Added bulk quantity detection on clickable item clicks
+   - `bulkQty = e.ctrlKey ? 25 : e.shiftKey ? 5 : 1`
+   - Passes `quantity: bulkQty` to TradeCartPanel.addItem()
+
+3. **Market Panel (game.js:7727-7766 and 8618-8657)**
+   - Added bulk quantity detection to both buy and sell handlers
+   - Added title tooltips: "Click to buy (Shift: ×5, Ctrl: ×25)"
+   - Same modifier key detection pattern
+
+**Files Changed:**
+- `src/js/ui/panels/trade-cart-panel.js`
+- `src/js/npc/npc-trade.js`
+- `src/js/core/game.js`
+
+**Potential Risks:**
+- Ctrl+Click may conflict with browser context menu on some systems (unlikely)
+- metaKey added for Mac users (Cmd+Click)
+
+---
+
 ### Location Discovery Bug Fix 🖤💀
 
 **Request:** Fix location not becoming visible/explored when arriving at new unexplored location. Tooltips and travel panel locations tab need to update correctly as game state updates during travel.

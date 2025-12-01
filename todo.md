@@ -3,7 +3,7 @@
 **Purpose:** ONLY unfinished items. Completed items move to `finished.md`.
 
 **Last Updated:** 2025-12-01
-**Total Remaining:** 75 issues (68 + 7 from agent audit)
+**Total Remaining:** 107 issues (79 bugs + 28 test failures)
 
 ---
 
@@ -174,6 +174,60 @@
 
 ---
 
+## 🧪 PLAYWRIGHT TEST FAILURES (2025-12-01)
+
+**Test Run Summary:** 340 passed, 32 failed, 4 skipped
+
+### comprehensive-ui.spec.js (5 failures)
+- [ ] **:156** - Save button exists and SaveManager has save functionality
+  - Investigation: Save button selector may be wrong or button not rendered
+- [ ] **:489** - Inventory has filter button and category filtering
+  - Investigation: Filter UI may have changed or not implemented
+- [ ] **:587** - Market tabs exist and can switch between buy/sell
+  - Investigation: Market tab switching may have timing issues
+- [ ] **:1102** - M key opens market and shows market content
+  - Investigation: Keybinding or market panel rendering issue
+- [ ] **:1165** - H key opens achievements panel
+  - Investigation: H key may not be mapped to achievements
+
+### debooger-commands.spec.js (3 failures)
+- [ ] **:64** - givegold defaults to 100 when no amount specified
+  - Investigation: Check default value in debooger-command-system.js
+- [ ] **:387** - listlocations shows all 30+ locations
+  - Investigation: Location count may have changed or output format
+- [ ] **:734** - gamestate displays current game state in console
+  - Investigation: gamestate command output format may have changed
+
+### features.spec.js (1 failure)
+- [ ] **:321** - Achievements display progress
+  - Investigation: Achievement progress UI rendering issue
+
+### game-flow.spec.js (23 failures) - DISABLED IN CI/CD
+- [ ] **:29** - loads game successfully from initial page load
+- [ ] **:303** - attribute points limit is enforced
+- [ ] **:381** - game object is initialized correctly
+- [ ] **:411** - player starts at default location
+- [ ] **:421** - player vitals are initialized correctly
+- [ ] **:450** - all core game systems are initialized
+- [ ] **:494** - can save game successfully
+- [ ] **:511** - saved game persists in localStorage
+- [ ] **:528** - can load saved game
+- [ ] **:560** - F5 quick save works
+- [ ] **:574** - save includes player state correctly
+- [ ] **:618** - can quit to main menu from game
+- [ ] **:635** - main menu buttons are functional after quit
+- [ ] **:653** - game state is cleaned up on quit
+- [ ] **:708** - death by starvation triggers game over
+- [ ] **:731** - game over screen displays final stats
+- [ ] **:746** - game over screen has action buttons
+- [ ] **:803** - death cause is tracked correctly
+
+**Root Cause (game-flow.spec.js):** These tests require full game initialization which may have race conditions or timing issues. Console errors detected:
+- "PAGE ERROR: Unexpected token '*'" - Syntax error somewhere
+- "PAGE ERROR: Cannot read properties of null (reading 'ownedProperties')" - PropertySystem null access
+
+---
+
 ## 📋 TEST NOTES (Tests to add when ready)
 
 ### High Priority Tests Needed:
@@ -200,7 +254,14 @@
 | 🟠 HIGH | 26 | 19+ |
 | 🟡 MEDIUM | 41 | 11 |
 | 🟢 LOW | 8 | 18 |
-| **TOTAL** | **79** | **54+** |
+| 🧪 TESTS | 28 | 340 |
+| **TOTAL** | **107** | **394+** |
+
+### 🆕 Playwright Test Run (2025-12-01)
+**340 passed, 32 failed, 4 skipped**
+- gameFlowTests DISABLED for CI/CD (23 failures)
+- 9 other test failures need investigation
+- Console errors: "Unexpected token '*'" + "null ownedProperties"
 
 ### 🆕 Agent Audit Summary (2025-12-01)
 **7 new issues discovered** verifying finished.md fixes:

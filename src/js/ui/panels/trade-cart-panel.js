@@ -576,27 +576,32 @@ const TradeCartPanel = {
      * @param {string} itemId - The item ID
      * @param {number} unitPrice - Price per unit
      * @param {number} maxStock - Maximum available
-     * @param {object} itemData - Optional item data
+     * @param {object} itemData - Optional item data (can include 'quantity' for bulk adds)
      */
     addItem(itemId, unitPrice, maxStock, itemData = {}) {
+        // 🖤 Support bulk quantity via itemData.quantity (for Shift/Ctrl+Click) 💀
+        const addQty = itemData.quantity || 1;
+
         // Check if already in cart
         const existing = this.cart.find(i => i.itemId === itemId);
         if (existing) {
-            // Increment quantity if possible
-            if (existing.quantity < maxStock) {
-                existing.quantity++;
+            // Increment quantity if possible (clamped to maxStock)
+            const newQty = Math.min(existing.quantity + addQty, maxStock);
+            if (newQty > existing.quantity) {
+                existing.quantity = newQty;
                 existing.totalPrice = existing.quantity * existing.unitPrice;
             }
         } else {
-            // Add new item
+            // Add new item (clamped to maxStock)
+            const initialQty = Math.min(addQty, maxStock);
             this.cart.push({
                 itemId,
                 name: itemData.name || this.formatItemName(itemId),
                 icon: itemData.icon || this.getItemIcon(itemId),
                 unitPrice,
                 maxStock,
-                quantity: 1,
-                totalPrice: unitPrice,
+                quantity: initialQty,
+                totalPrice: unitPrice * initialQty,
                 weight: itemData.weight || 1
             });
         }
@@ -641,11 +646,14 @@ const TradeCartPanel = {
 
     /**
      * Increment item quantity
+     * @param {string} itemId - The item ID
+     * @param {number} amount - Amount to add (default 1, use 5 for Shift, 25 for Ctrl)
      */
-    incrementItem(itemId) {
+    incrementItem(itemId, amount = 1) {
         const item = this.cart.find(i => i.itemId === itemId);
         if (item && item.quantity < item.maxStock) {
-            item.quantity++;
+            // 🖤 Clamp to maxStock - no overfilling the cart 💀
+            item.quantity = Math.min(item.quantity + amount, item.maxStock);
             item.totalPrice = item.quantity * item.unitPrice;
             this.updateDisplay();
         }
@@ -653,18 +661,56 @@ const TradeCartPanel = {
 
     /**
      * Decrement item quantity
+     * @param {string} itemId - The item ID
+     * @param {number} amount - Amount to remove (default 1, use 5 for Shift, 25 for Ctrl)
      */
-    decrementItem(itemId) {
+    decrementItem(itemId, amount = 1) {
         const item = this.cart.find(i => i.itemId === itemId);
         if (item) {
-            if (item.quantity > 1) {
-                item.quantity--;
+            // 🖤 Bulk removal - if amount >= quantity, remove entirely 💀
+            if (item.quantity <= amount) {
+                this.removeItem(itemId);
+            } else {
+                item.quantity -= amount;
                 item.totalPrice = item.quantity * item.unitPrice;
                 this.updateDisplay();
-            } else {
-                this.removeItem(itemId);
             }
         }
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🖤 BULK TRADING SHORTCUTS - Shift = 5, Ctrl = 25 💀
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * Get bulk amount from modifier keys
+     * @param {Event} event - The click event
+     * @returns {number} - 1 (normal), 5 (shift), or 25 (ctrl)
+     */
+    getBulkAmount(event) {
+        if (event.ctrlKey || event.metaKey) return 25; // 🖤 Ctrl/Cmd = 25x bulk
+        if (event.shiftKey) return 5; // 💀 Shift = 5x bulk
+        return 1; // 🦇 Normal click = 1x
+    },
+
+    /**
+     * Handle increment with modifier key support
+     * @param {Event} event - The click event
+     * @param {string} itemId - The item ID
+     */
+    handleIncrement(event, itemId) {
+        const amount = this.getBulkAmount(event);
+        this.incrementItem(itemId, amount);
+    },
+
+    /**
+     * Handle decrement with modifier key support
+     * @param {Event} event - The click event
+     * @param {string} itemId - The item ID
+     */
+    handleDecrement(event, itemId) {
+        const amount = this.getBulkAmount(event);
+        this.decrementItem(itemId, amount);
     },
 
     // ═══════════════════════════════════════════════════════════════
@@ -691,6 +737,7 @@ const TradeCartPanel = {
             return;
         }
 
+        // 🖤 Bulk trading shortcuts: Shift+Click = 5, Ctrl+Click = 25 💀
         container.innerHTML = this.cart.map(item => `
             <div class="cart-item" data-item-id="${this.escapeHtml(item.itemId)}">
                 <span class="cart-item-icon">${item.icon}</span>
@@ -700,12 +747,14 @@ const TradeCartPanel = {
                     <span class="cart-item-stock">Stock: ${item.maxStock}</span>
                 </div>
                 <div class="cart-item-quantity">
-                    <button class="qty-btn" onclick="TradeCartPanel.decrementItem('${this.escapeHtml(item.itemId)}')"
+                    <button class="qty-btn" onclick="TradeCartPanel.handleDecrement(event, '${this.escapeHtml(item.itemId)}')"
+                            title="−1 (Shift: −5, Ctrl: −25)"
                             ${item.quantity <= 1 ? 'disabled' : ''}>−</button>
                     <input type="number" class="qty-input" value="${item.quantity}"
                            min="1" max="${item.maxStock}"
                            data-item-id="${this.escapeHtml(item.itemId)}">
-                    <button class="qty-btn" onclick="TradeCartPanel.incrementItem('${this.escapeHtml(item.itemId)}')"
+                    <button class="qty-btn" onclick="TradeCartPanel.handleIncrement(event, '${this.escapeHtml(item.itemId)}')"
+                            title="+1 (Shift: +5, Ctrl: +25)"
                             ${item.quantity >= item.maxStock ? 'disabled' : ''}>+</button>
                 </div>
                 <span class="cart-item-total">${item.totalPrice}g</span>

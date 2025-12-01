@@ -2546,48 +2546,73 @@ const QuestSystem = {
         const targetLocation = this.getTrackedQuestLocation();
         if (!targetLocation) return;
 
-        // 🦇 Get the location element on the map (if it exists/is visible)
-        const locationEl = document.querySelector(`.map-location[data-location-id="${targetLocation}"]`);
-
         // 🖤 Add animation styles first - needed either way 💀
         this.addQuestMarkerStyles();
 
-        if (locationEl) {
-            // 🖤 Location is visible - attach marker to it
-            this.questMarkerElement = document.createElement('div');
-            this.questMarkerElement.className = 'quest-target-marker';
-            this.questMarkerElement.innerHTML = '🎯';
-            this.questMarkerElement.style.cssText = `
-                position: absolute;
-                top: -15px;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 20px;
-                filter: drop-shadow(0 0 8px gold) drop-shadow(0 0 15px gold);
-                animation: quest-marker-bounce 1s ease-in-out infinite;
-                pointer-events: none;
-                z-index: 100;
-            `;
+        // 🦇 Get the location element on BOTH maps (main world map AND travel panel mini-map)
+        // Main map uses .map-location, travel panel uses .mini-map-location
+        const mainMapLocationEl = document.querySelector(`.map-location[data-location-id="${targetLocation}"]`);
+        const miniMapLocationEl = document.querySelector(`.mini-map-location[data-location-id="${targetLocation}"]`);
 
-            // 🦇 Add glow effect to the location itself
-            locationEl.classList.add('quest-target-glow');
-            locationEl.style.boxShadow = '0 0 20px 10px rgba(255, 215, 0, 0.6), 0 0 40px 20px rgba(255, 215, 0, 0.3)';
-            locationEl.style.animation = 'quest-location-pulse 2s ease-in-out infinite';
-
-            // 💀 Append marker to the location
-            locationEl.style.position = 'absolute';
-            locationEl.appendChild(this.questMarkerElement);
-
-            console.log(`🎯 Quest marker attached to visible location: ${targetLocation}`);
+        // 🖤 Add marker to MAIN WORLD MAP if location is visible 💀
+        if (mainMapLocationEl) {
+            this.addQuestMarkerToElement(mainMapLocationEl, 'main');
+            console.log(`🎯 Quest marker attached to main map location: ${targetLocation}`);
         } else {
-            // 🖤 Location is HIDDEN/UNEXPLORED - create floating marker at map coordinates 💀
-            // The player MUST be able to see where their quest leads, even into the unknown!
-            this.createFloatingQuestMarker(targetLocation);
+            // Location is HIDDEN/UNEXPLORED on main map - create floating marker
+            this.createFloatingQuestMarker(targetLocation, 'main');
+        }
+
+        // 🖤 Add marker to TRAVEL PANEL MINI-MAP if location is visible 💀
+        if (miniMapLocationEl) {
+            this.addQuestMarkerToElement(miniMapLocationEl, 'mini');
+            console.log(`🎯 Quest marker attached to mini map location: ${targetLocation}`);
+        } else {
+            // Location is HIDDEN/UNEXPLORED on mini map - create floating marker
+            this.createFloatingQuestMarker(targetLocation, 'mini');
+        }
+    },
+
+    // 🖤 Add golden quest marker to a specific location element 💀
+    addQuestMarkerToElement(locationEl, mapType = 'main') {
+        const marker = document.createElement('div');
+        marker.className = `quest-target-marker quest-marker-${mapType}`;
+        marker.innerHTML = '🎯';
+
+        const fontSize = mapType === 'mini' ? '16px' : '20px';
+        const topOffset = mapType === 'mini' ? '-12px' : '-15px';
+
+        marker.style.cssText = `
+            position: absolute;
+            top: ${topOffset};
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: ${fontSize};
+            filter: drop-shadow(0 0 8px gold) drop-shadow(0 0 15px gold);
+            animation: quest-marker-bounce 1s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 100;
+        `;
+
+        // 🦇 Add glow effect to the location itself
+        locationEl.classList.add('quest-target-glow');
+        locationEl.style.boxShadow = '0 0 20px 10px rgba(255, 215, 0, 0.6), 0 0 40px 20px rgba(255, 215, 0, 0.3)';
+        locationEl.style.animation = 'quest-location-pulse 2s ease-in-out infinite';
+
+        // 💀 Append marker to the location
+        locationEl.style.position = 'absolute';
+        locationEl.appendChild(marker);
+
+        // Store reference for cleanup
+        if (mapType === 'main') {
+            this.questMarkerElement = marker;
+        } else {
+            this.questMiniMarkerElement = marker;
         }
     },
 
     // 🖤 Create a floating quest marker for unexplored locations 💀
-    createFloatingQuestMarker(locationId) {
+    createFloatingQuestMarker(locationId, mapType = 'main') {
         // Get location data from GameWorld
         const location = typeof GameWorld !== 'undefined' ? GameWorld.locations?.[locationId] : null;
         if (!location || !location.mapPosition) {
@@ -2595,45 +2620,73 @@ const QuestSystem = {
             return;
         }
 
-        // 🦇 Find the map container - try both main map and travel panel map
-        const mapContainer = document.getElementById('world-map') ||
-                            document.querySelector('.travel-mini-map') ||
-                            document.getElementById('travel-mini-map');
+        // 🦇 Find the correct map container based on mapType
+        let mapContainer;
+        if (mapType === 'mini') {
+            mapContainer = document.getElementById('travel-mini-map') ||
+                          document.querySelector('.travel-mini-map');
+        } else {
+            mapContainer = document.getElementById('world-map');
+        }
+
         if (!mapContainer) {
-            console.log(`🎯 No map container found for floating quest marker`);
+            console.log(`🎯 No ${mapType} map container found for floating quest marker`);
             return;
         }
 
-        // 🖤 Scale position using GameWorldRenderer if available 💀
-        let scaledPos = location.mapPosition;
-        if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.scalePosition) {
-            scaledPos = GameWorldRenderer.scalePosition(location.mapPosition);
+        // 🖤 Scale position based on map type 💀
+        let scaledPos = { ...location.mapPosition };
+
+        if (mapType === 'main') {
+            // Main map uses GameWorldRenderer scaling
+            if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.scalePosition) {
+                scaledPos = GameWorldRenderer.scalePosition(location.mapPosition);
+            }
+        } else {
+            // Mini map needs different scaling - uses percentage-based positioning
+            // The mini map is smaller, so we need to scale coordinates differently
+            const mapRect = mapContainer.getBoundingClientRect();
+            // TravelPanelMap uses a 1600x1200 base coordinate system
+            const baseWidth = 1600;
+            const baseHeight = 1200;
+            scaledPos = {
+                x: (location.mapPosition.x / baseWidth) * mapRect.width,
+                y: (location.mapPosition.y / baseHeight) * mapRect.height
+            };
         }
+
         if (!scaledPos) return;
 
+        // 🦇 Determine sizes based on map type
+        const fontSize = mapType === 'mini' ? '18px' : '28px';
+        const glowSize = mapType === 'mini' ? '25px' : '40px';
+
         // 🦇 Create floating marker element
-        this.questMarkerElement = document.createElement('div');
-        this.questMarkerElement.className = 'quest-target-marker floating-quest-marker';
-        this.questMarkerElement.innerHTML = '🎯';
-        this.questMarkerElement.style.cssText = `
+        const marker = document.createElement('div');
+        marker.className = `quest-target-marker floating-quest-marker floating-quest-marker-${mapType}`;
+        marker.innerHTML = '🎯';
+        marker.style.cssText = `
             position: absolute;
             left: ${scaledPos.x}px;
             top: ${scaledPos.y}px;
-            font-size: 28px;
+            transform: translate(-50%, -50%);
+            font-size: ${fontSize};
+            filter: drop-shadow(0 0 8px gold) drop-shadow(0 0 15px gold);
+            animation: quest-marker-float-bounce 1s ease-in-out infinite;
             pointer-events: none;
             z-index: 150;
         `;
 
         // 🖤 Create a glowing circle underneath to show the unexplored destination 💀
-        this.questGlowElement = document.createElement('div');
-        this.questGlowElement.className = 'quest-target-glow-circle';
-        this.questGlowElement.style.cssText = `
+        const glow = document.createElement('div');
+        glow.className = `quest-target-glow-circle quest-glow-${mapType}`;
+        glow.style.cssText = `
             position: absolute;
             left: ${scaledPos.x}px;
             top: ${scaledPos.y}px;
             transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
+            width: ${glowSize};
+            height: ${glowSize};
             border-radius: 50%;
             background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, rgba(255, 215, 0, 0.1) 50%, transparent 70%);
             box-shadow: 0 0 30px 15px rgba(255, 215, 0, 0.4), 0 0 60px 30px rgba(255, 215, 0, 0.2);
@@ -2642,30 +2695,51 @@ const QuestSystem = {
             z-index: 140;
         `;
 
-        mapContainer.appendChild(this.questGlowElement);
-        mapContainer.appendChild(this.questMarkerElement);
+        mapContainer.appendChild(glow);
+        mapContainer.appendChild(marker);
 
-        console.log(`🎯 Floating quest marker created at unexplored location: ${locationId} (${scaledPos.x}, ${scaledPos.y})`);
+        // Store references for cleanup based on map type
+        if (mapType === 'main') {
+            this.questMarkerElement = marker;
+            this.questGlowElement = glow;
+        } else {
+            this.questMiniMarkerElement = marker;
+            this.questMiniGlowElement = glow;
+        }
+
+        console.log(`🎯 Floating quest marker (${mapType}) created at unexplored location: ${locationId} (${scaledPos.x}, ${scaledPos.y})`);
     },
 
-    // 💀 Remove the quest map marker
+    // 💀 Remove the quest map marker from BOTH maps
     removeQuestMapMarker() {
-        // 🦇 Remove the marker element
+        // 🦇 Remove the MAIN map marker element
         if (this.questMarkerElement && this.questMarkerElement.parentNode) {
             this.questMarkerElement.remove();
         }
         this.questMarkerElement = null;
 
-        // 🖤 Remove floating glow circle (for unexplored locations) 💀
+        // 🖤 Remove MAIN map floating glow circle (for unexplored locations) 💀
         if (this.questGlowElement && this.questGlowElement.parentNode) {
             this.questGlowElement.remove();
         }
         this.questGlowElement = null;
 
-        // 🦇 Also clean up any orphaned floating markers
-        document.querySelectorAll('.floating-quest-marker, .quest-target-glow-circle').forEach(el => el.remove());
+        // 🦇 Remove the MINI map marker element
+        if (this.questMiniMarkerElement && this.questMiniMarkerElement.parentNode) {
+            this.questMiniMarkerElement.remove();
+        }
+        this.questMiniMarkerElement = null;
 
-        // 🖤 Remove glow from all location elements
+        // 🖤 Remove MINI map floating glow circle 💀
+        if (this.questMiniGlowElement && this.questMiniGlowElement.parentNode) {
+            this.questMiniGlowElement.remove();
+        }
+        this.questMiniGlowElement = null;
+
+        // 🦇 Also clean up any orphaned floating markers from BOTH maps
+        document.querySelectorAll('.floating-quest-marker, .quest-target-glow-circle, .quest-target-marker').forEach(el => el.remove());
+
+        // 🖤 Remove glow from all location elements (both .map-location and .mini-map-location)
         document.querySelectorAll('.quest-target-glow').forEach(el => {
             el.classList.remove('quest-target-glow');
             el.style.boxShadow = '';

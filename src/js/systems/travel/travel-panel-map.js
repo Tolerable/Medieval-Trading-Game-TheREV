@@ -153,6 +153,22 @@ const TravelPanelMap = {
             this.render();
         });
 
+        // 🎯 Listen for quest tracking events to update quest marker on mini map 💀
+        document.addEventListener('quest-tracked', () => {
+            console.log('🗺️ TravelPanelMap: Quest tracked, updating quest marker...');
+            this.updateQuestMarker();
+        });
+        document.addEventListener('quest-untracked', () => {
+            console.log('🗺️ TravelPanelMap: Quest untracked, removing quest marker...');
+            // Clean up mini-map quest markers
+            document.querySelectorAll('.floating-quest-marker-mini, .quest-glow-mini, .quest-marker-mini').forEach(el => el.remove());
+            document.querySelectorAll('.mini-map-location.quest-target-glow').forEach(el => {
+                el.classList.remove('quest-target-glow');
+                el.style.boxShadow = '';
+                el.style.animation = '';
+            });
+        });
+
         console.log('🗺️ TravelPanelMap: Event listeners attached');
     },
 
@@ -258,6 +274,9 @@ const TravelPanelMap = {
         // Mark current location and destination
         this.highlightCurrentLocation();
         this.highlightDestination();
+
+        // 🎯 Update quest marker on mini map after render
+        this.updateQuestMarker();
     },
 
     // 🔍 Calculate visibility for all locations (borrowed from GameWorldRenderer)
@@ -1819,6 +1838,51 @@ const TravelPanelMap = {
 
     lightenColor(hex, percent) {
         return ColorUtils.lightenColor(hex, percent);
+    },
+
+    // 🎯 Update quest marker on mini map - calls QuestSystem's marker logic
+    updateQuestMarker() {
+        // 🖤 Only update if QuestSystem is available and has a tracked quest 💀
+        if (typeof QuestSystem === 'undefined' || !QuestSystem.trackedQuestId) {
+            return;
+        }
+
+        // 🦇 Get the tracked quest's target location
+        const targetLocation = QuestSystem.getTrackedQuestLocation ? QuestSystem.getTrackedQuestLocation() : null;
+        if (!targetLocation) {
+            return;
+        }
+
+        // 🖤 Add animation styles if not already present 💀
+        if (QuestSystem.addQuestMarkerStyles) {
+            QuestSystem.addQuestMarkerStyles();
+        }
+
+        // 🦇 Clean up existing mini-map markers first
+        if (QuestSystem.questMiniMarkerElement && QuestSystem.questMiniMarkerElement.parentNode) {
+            QuestSystem.questMiniMarkerElement.remove();
+        }
+        if (QuestSystem.questMiniGlowElement && QuestSystem.questMiniGlowElement.parentNode) {
+            QuestSystem.questMiniGlowElement.remove();
+        }
+        // Also clean up any orphaned mini-map markers
+        document.querySelectorAll('.floating-quest-marker-mini, .quest-glow-mini, .quest-marker-mini').forEach(el => el.remove());
+
+        // 🖤 Check if mini map location element exists
+        const miniMapLocationEl = document.querySelector(`.mini-map-location[data-location-id="${targetLocation}"]`);
+
+        if (miniMapLocationEl) {
+            // Location is visible - add marker directly to element
+            if (QuestSystem.addQuestMarkerToElement) {
+                QuestSystem.addQuestMarkerToElement(miniMapLocationEl, 'mini');
+                console.log(`🎯 Mini map quest marker attached to: ${targetLocation}`);
+            }
+        } else {
+            // Location is hidden - create floating marker
+            if (QuestSystem.createFloatingQuestMarker) {
+                QuestSystem.createFloatingQuestMarker(targetLocation, 'mini');
+            }
+        }
     },
 
     // 🖤 Cleanup method - clear intervals to prevent memory leaks 💀

@@ -7725,7 +7725,9 @@ function populateMarketItems() {
         itemElement.dataset.itemWeight = item.weight;
 
         // 💀 Click anywhere on the item box to add to sell cart
+        // 🖤 BULK SHORTCUTS: Shift+Click = 5, Ctrl+Click = 25 💀
         itemElement.style.cursor = 'pointer';
+        itemElement.title = 'Click to sell (Shift: ×5, Ctrl: ×25)';
         itemElement.onclick = (e) => {
             // Don't interfere with bulk mode selection
             if (TradingSystem.tradeMode === 'bulk' && (e.shiftKey || e.ctrlKey || e.altKey)) return;
@@ -7737,6 +7739,11 @@ function populateMarketItems() {
                 const itemName = itemElement.dataset.itemName || itemId;
                 const itemIcon = itemElement.dataset.itemIcon || '📦';
                 const itemWeight = parseFloat(itemElement.dataset.itemWeight) || 1;
+
+                // 🖤 Bulk quantity from modifier keys: Ctrl = 25, Shift = 5, Normal = 1 💀
+                let bulkQty = 1;
+                if (e.ctrlKey || e.metaKey) bulkQty = 25;
+                else if (e.shiftKey) bulkQty = 5;
 
                 // Create merchant data from current location
                 const merchantData = {
@@ -7750,11 +7757,12 @@ function populateMarketItems() {
                 if (!TradeCartPanel.isOpen) {
                     TradeCartPanel.open(merchantData, 'sell');
                 }
-                // Add item to cart
+                // Add item to cart (with bulk quantity support)
                 TradeCartPanel.addItem(itemId, price, stock, {
                     name: itemName,
                     icon: itemIcon,
-                    weight: itemWeight
+                    weight: itemWeight,
+                    quantity: bulkQty // 🖤 Bulk sell support 💀
                 });
 
                 // Visual feedback - flash the item
@@ -8608,7 +8616,9 @@ function updateMarketDisplay() {
         itemElement.dataset.itemWeight = item.weight;
 
         // 💀 Click anywhere on the item box to add to cart
+        // 🖤 BULK SHORTCUTS: Shift+Click = 5, Ctrl+Click = 25 💀
         itemElement.style.cursor = 'pointer';
+        itemElement.title = 'Click to buy (Shift: ×5, Ctrl: ×25)';
         itemElement.onclick = (e) => {
             // Don't interfere with bulk mode selection
             if (TradingSystem.tradeMode === 'bulk' && (e.shiftKey || e.ctrlKey || e.altKey)) return;
@@ -8620,6 +8630,11 @@ function updateMarketDisplay() {
                 const itemName = itemElement.dataset.itemName || itemId;
                 const itemIcon = itemElement.dataset.itemIcon || '📦';
                 const itemWeight = parseFloat(itemElement.dataset.itemWeight) || 1;
+
+                // 🖤 Bulk quantity from modifier keys: Ctrl = 25, Shift = 5, Normal = 1 💀
+                let bulkQty = 1;
+                if (e.ctrlKey || e.metaKey) bulkQty = 25;
+                else if (e.shiftKey) bulkQty = 5;
 
                 // Create merchant data from current location
                 const merchantData = {
@@ -8633,11 +8648,12 @@ function updateMarketDisplay() {
                 if (!TradeCartPanel.isOpen) {
                     TradeCartPanel.open(merchantData, 'buy');
                 }
-                // Add item to cart
+                // Add item to cart (with bulk quantity support)
                 TradeCartPanel.addItem(itemId, price, stock, {
                     name: itemName,
                     icon: itemIcon,
-                    weight: itemWeight
+                    weight: itemWeight,
+                    quantity: bulkQty // 🖤 Bulk buy support 💀
                 });
 
                 // Visual feedback - flash the item

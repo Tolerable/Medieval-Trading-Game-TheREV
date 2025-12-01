@@ -1513,6 +1513,7 @@ const NPCTradeWindow = {
                 }
 
                 // 🛒 Click on inventory item - opens TradeCartPanel
+                // 🖤 BULK SHORTCUTS: Shift+Click = 5, Ctrl+Click = 25 💀
                 const clickableItem = target.closest('.clickable-item');
                 if (clickableItem) {
                     const action = clickableItem.dataset.action;
@@ -1523,17 +1524,23 @@ const NPCTradeWindow = {
                     const itemIcon = clickableItem.dataset.itemIcon || '📦';
                     const itemWeight = parseFloat(clickableItem.dataset.itemWeight) || 1;
 
+                    // 🖤 Bulk quantity from modifier keys: Ctrl = 25, Shift = 5, Normal = 1 💀
+                    let bulkQty = 1;
+                    if (e.ctrlKey || e.metaKey) bulkQty = 25;
+                    else if (e.shiftKey) bulkQty = 5;
+
                     // 🛒 Open TradeCartPanel and add item
                     if (typeof TradeCartPanel !== 'undefined') {
                         // Ensure cart is open with current merchant
                         if (!TradeCartPanel.isOpen) {
                             TradeCartPanel.open(this.currentNPC, action);
                         }
-                        // Add item to cart
+                        // Add item to cart (with bulk quantity support)
                         TradeCartPanel.addItem(itemId, price, stock, {
                             name: itemName,
                             icon: itemIcon,
-                            weight: itemWeight
+                            weight: itemWeight,
+                            quantity: bulkQty // 🖤 Bulk add support 💀
                         });
                         // Visual feedback
                         clickableItem.classList.add('added-to-cart');
