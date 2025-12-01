@@ -111,12 +111,16 @@ const ModalSystem = {
             });
 
             // ⚰️ ESC - the universal "fuck this" button
-            this._escHandler = (e) => {
-                if (e.key === 'Escape') {
-                    this.hide();
-                }
-            };
-            document.addEventListener('keydown', this._escHandler);
+            // 🖤 Only add if not already attached to prevent listener pile-up 💀
+            if (!this._escHandlerAttached) {
+                this._escHandler = (e) => {
+                    if (e.key === 'Escape') {
+                        this.hide();
+                    }
+                };
+                document.addEventListener('keydown', this._escHandler);
+                this._escHandlerAttached = true;
+            }
         }
 
         // 🦇 Let control freaks drag this shit around
@@ -367,13 +371,13 @@ const ModalSystem = {
                 }
 
                 .modal-close-x {
-                    background: rgba(244, 67, 54, 0.8);
-                    color: white;
+                    background: transparent;
+                    color: #888;
                     border: none;
-                    border-radius: 50%;
+                    border-radius: 4px;
                     width: 28px;
                     height: 28px;
-                    font-size: 18px;
+                    font-size: 1.4rem;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
@@ -383,8 +387,8 @@ const ModalSystem = {
                 }
 
                 .modal-close-x:hover {
-                    background: rgba(244, 67, 54, 1);
-                    transform: scale(1.1);
+                    background: rgba(255, 255, 255, 0.1);
+                    color: #fff;
                 }
 
                 .modal-content {

@@ -346,8 +346,9 @@ const PropertyPurchase = {
         const isUnderConstruction = constructionTime > 0;
 
         // 🏠 Create new property object 🖤
+        // 💀 Use timestamp + random suffix to prevent ID collision
         const newProperty = {
-            id: Date.now().toString(),
+            id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: propertyId,
             location: game.currentLocation.id,
             locationName: game.currentLocation.name,

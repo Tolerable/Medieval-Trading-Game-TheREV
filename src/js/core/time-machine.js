@@ -199,27 +199,33 @@ const TimeMachine = {
             return;
         }
 
-        // 🦇 Calculate delta time
-        const deltaTime = currentFrameTime - this.lastFrameTime;
-        this.lastFrameTime = currentFrameTime;
+        // 🦇 FIX: Wrap in try-catch to prevent silent loop death
+        try {
+            // 🦇 Calculate delta time
+            const deltaTime = currentFrameTime - this.lastFrameTime;
+            this.lastFrameTime = currentFrameTime;
 
-        // 💀 Cap delta to prevent spiral of death
-        const cappedDelta = Math.min(deltaTime, 100);
+            // 💀 Cap delta to prevent spiral of death
+            const cappedDelta = Math.min(deltaTime, 100);
 
-        // 🖤 Update time if not paused
-        if (!this.isPaused && this.currentSpeed !== 'PAUSED') {
-            const timeAdvanced = this.update(cappedDelta);
+            // 🖤 Update time if not paused
+            if (!this.isPaused && this.currentSpeed !== 'PAUSED') {
+                const timeAdvanced = this.update(cappedDelta);
 
-            if (timeAdvanced) {
-                // 🔮 Trigger all time-dependent updates
-                this.onTimeAdvance();
+                if (timeAdvanced) {
+                    // 🔮 Trigger all time-dependent updates
+                    this.onTimeAdvance();
+                }
             }
+
+            // 🎨 Update UI every frame
+            this.updateUI();
+        } catch (err) {
+            // 💀 Log error but DON'T let it kill the loop
+            console.error('⏰ TIME MACHINE tick error:', err);
         }
 
-        // 🎨 Update UI every frame
-        this.updateUI();
-
-        // 🔄 Continue the loop
+        // 🔄 Continue the loop - ALWAYS schedule next frame even if error occurred
         this.animationFrameId = requestAnimationFrame((t) => this.tick(t));
     },
 
@@ -416,9 +422,24 @@ const TimeMachine = {
         this.currentSpeed = speed;
         this.isPaused = (speed === 'PAUSED');
 
-        // 🚶 Start engine if unpausing
-        if (speed !== 'PAUSED' && !this.isRunning) {
-            this.start();
+        // 🚶 Start engine if unpausing - FORCE RESTART to prevent stuck state
+        // 🦇 FIX: Always ensure tick loop is running when speed !== PAUSED
+        // This handles edge case where isRunning=true but the animation frame died
+        if (speed !== 'PAUSED') {
+            if (!this.isRunning) {
+                // Normal case: engine wasn't running, start it
+                this.start();
+            } else if (!this.animationFrameId) {
+                // 🖤 BUG FIX: isRunning=true but no animation frame scheduled!
+                // This can happen if tick() crashed or the loop got stuck
+                console.warn('⏰ TIME MACHINE: Detected stale isRunning state, forcing restart...');
+                this.isRunning = false;
+                this.start();
+            } else {
+                // Engine is running with valid animation frame - just reset accumulated time
+                // to ensure immediate response after unpause
+                this.lastFrameTime = performance.now();
+            }
         }
 
         // 🗺️ Auto-travel: start pending travel when unpausing
@@ -428,6 +449,8 @@ const TimeMachine = {
 
         // 🎨 Update UI
         this.updateTimeControlButtons();
+
+        console.log(`⏰ TIME MACHINE setSpeed: ${speed} | isPaused: ${this.isPaused} | isRunning: ${this.isRunning} | animFrameId: ${this.animationFrameId}`);
 
         return true;
     },
@@ -500,6 +523,10 @@ const TimeMachine = {
         // 🏪 Update market prices
         if (typeof DynamicMarketSystem !== 'undefined') {
             DynamicMarketSystem.updateMarketPrices();
+            // 🦇 FIX: Check for 8am daily market refresh
+            if (DynamicMarketSystem.checkDailyRefresh) {
+                DynamicMarketSystem.checkDailyRefresh();
+            }
         }
 
         // 🏙️ City events
@@ -530,73 +557,19 @@ const TimeMachine = {
         }
     },
 
-    // 🍖 STAT DECAY - Process hunger, thirst, stamina drain
-    // 🦇 Called every time tick - drains stats based on seasonal effects
+    // 🍖 STAT DECAY - DISABLED - game.js processPlayerStatsOverTime() handles this via GameConfig
+    // 🦇 FIX: Removed duplicate stat decay that was stacking with game.js version
+    // The actual decay rates are in config.js:
+    //   - Hunger: 5 days (100→0), decayPerUpdate: 0.0694 every 5 game minutes
+    //   - Thirst: 3 days (100→0), decayPerUpdate: 0.1157 every 5 game minutes
+    // Seasonal effects are now applied in game.js processPlayerStatsOverTime()
     lastStatDecayMinute: 0,
-    STAT_DECAY_INTERVAL: 30, // 🖤 Decay every 30 game minutes
+    STAT_DECAY_INTERVAL: 30, // 🖤 Legacy - kept for compatibility
 
     processStatDecay() {
-        // 💀 Only decay every STAT_DECAY_INTERVAL minutes
-        const totalMinutes = this.getTotalMinutes();
-        if (totalMinutes - this.lastStatDecayMinute < this.STAT_DECAY_INTERVAL) {
-            return;
-        }
-        this.lastStatDecayMinute = totalMinutes;
-
-        // 🦇 Get player stats
-        if (typeof game === 'undefined' || !game.player || !game.player.stats) {
-            return;
-        }
-
-        const stats = game.player.stats;
-        const season = this.getSeasonData();
-
-        // 🍖 Hunger decay - affected by season
-        const hungerDrain = 1 * (season.effects.hungerDrain || 1.0);
-        stats.hunger = Math.max(0, stats.hunger - hungerDrain);
-
-        // 💧 Thirst decay - affected by season
-        const thirstDrain = 1.2 * (season.effects.thirstDrain || 1.0);
-        stats.thirst = Math.max(0, stats.thirst - thirstDrain);
-
-        // ⚡ Stamina recovery when resting, drain when active
-        const isTraveling = typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling;
-        if (isTraveling) {
-            // 🚶 Traveling drains stamina
-            const staminaDrain = 2 * (season.effects.staminaDrain || 1.0);
-            stats.stamina = Math.max(0, stats.stamina - staminaDrain);
-        } else {
-            // 🛋️ Resting slowly recovers stamina
-            stats.stamina = Math.min(stats.maxStamina, stats.stamina + 0.5);
-        }
-
-        // 💀 Low stats cause health damage
-        if (stats.hunger <= 0 || stats.thirst <= 0) {
-            const damage = (stats.hunger <= 0 ? 1 : 0) + (stats.thirst <= 0 ? 1.5 : 0);
-            stats.health = Math.max(0, stats.health - damage);
-
-            // ⚰️ Warning messages
-            if (stats.hunger <= 0 && Math.random() < 0.1) {
-                if (typeof addMessage === 'function') {
-                    addMessage('💀 You are starving! Find food immediately!', 'danger');
-                }
-            }
-            if (stats.thirst <= 0 && Math.random() < 0.1) {
-                if (typeof addMessage === 'function') {
-                    addMessage('💀 You are dying of thirst! Find water immediately!', 'danger');
-                }
-            }
-        }
-
-        // 😊 Happiness affected by other stats
-        if (stats.hunger < 30 || stats.thirst < 30 || stats.stamina < 20) {
-            stats.happiness = Math.max(0, stats.happiness - 0.5);
-        }
-
-        // 🎨 Update UI
-        if (typeof updatePlayerStats === 'function') {
-            updatePlayerStats();
-        }
+        // 🦇 FIX: Do nothing - stat decay is handled by game.js processPlayerStatsOverTime()
+        // This function was causing DOUBLE decay when combined with game.js
+        // Keeping empty function to avoid breaking any calls to it
     },
 
     // 🌙 Daily events at midnight
@@ -846,7 +819,8 @@ const TimeMachine = {
             cache.speedDisplay.textContent = speedLabels[timeInfo.speed] || timeInfo.speed;
         }
 
-        if (cache.seasonDisplay) {
+        // 🖤 Guard against missing seasonData - the void protects 💀
+        if (cache.seasonDisplay && timeInfo.seasonData) {
             cache.seasonDisplay.textContent = `${timeInfo.seasonData.icon} ${timeInfo.seasonData.name}`;
         }
     },

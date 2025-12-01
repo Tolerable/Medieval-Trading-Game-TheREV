@@ -14,13 +14,13 @@ const AchievementSystem = {
         first_gold: {
             id: 'first_gold',
             name: 'First Coin',
-            description: 'Earn your first gold coin',
+            description: 'Earn your first gold coin through trading',
             icon: '💰',
             category: 'wealth',
             rarity: 'common',
             unlocked: false,
             unlockedAt: null,
-            condition: () => game.player && game.player.gold >= 1
+            condition: () => AchievementSystem.stats.totalGoldEarned >= 1 // 🖤 FIX: Track EARNED gold, not starting gold 💀
         },
         merchant_apprentice: {
             id: 'merchant_apprentice',
@@ -914,14 +914,31 @@ const AchievementSystem = {
         ghost_trader: {
             id: 'ghost_trader',
             name: 'Ghost Trader',
-            description: 'Visit every location without being spotted by bandits',
+            description: 'Visit all dungeons without being attacked by bandits',
             icon: '👻',
             category: 'hidden',
             rarity: 'legendary',
             unlocked: false,
             unlockedAt: null,
             hidden: true,
-            condition: () => AchievementSystem.stats.stealthyExplorer
+            // 🖤 FIX: Must visit ALL dungeons (caves, ruins, dungeons) AND have 0 bandit encounters 💀
+            // Main dungeons have bosses, caves/ruins have quest NPCs - but they're ALL dungeons
+            condition: () => {
+                // All dungeon types (caves, ruins, dungeons - NOT mines)
+                const dungeonTypes = ['dungeon', 'cave', 'ruins'];
+                const allDungeons = typeof GameWorld !== 'undefined' && GameWorld.locations
+                    ? Object.entries(GameWorld.locations)
+                        .filter(([id, loc]) => dungeonTypes.includes(loc.type))
+                        .map(([id]) => id)
+                    : ['shadow_dungeon', 'forest_dungeon', 'ancient_ruins', 'coastal_cave', 'crystal_cave', 'mountain_cave', 'hidden_cave', 'smugglers_cove', 'ice_cave'];
+
+                // Check if player visited ALL dungeons
+                const visitedAll = allDungeons.every(id =>
+                    AchievementSystem.stats.uniqueLocationsVisited.has(id)
+                );
+                const noBandits = AchievementSystem.stats.banditEncounters === 0;
+                return visitedAll && noBandits;
+            }
         },
         sunrise_sunset: {
             id: 'sunrise_sunset',
@@ -1095,6 +1112,7 @@ const AchievementSystem = {
         // trading stats - receipts of your capitalism addiction
         tradesCompleted: 0,
         highestProfit: 0,
+        totalGoldEarned: 0, // 🖤 Track EARNED gold, not starting gold 💀
         nightTrades: 0,
         maxMerchantTrades: 0,
         merchantTradeCount: {},
@@ -1114,7 +1132,7 @@ const AchievementSystem = {
         banditsDefeated: 0,
         narrowEscapes: 0,
         banditEncounters: 0,
-        stealthyExplorer: true,
+        stealthyExplorer: false, // 🖤 FIX: Must EARN this by visiting all locations without bandits 💀
 
         // collection stats - hoarding is self care actually
         rareItemsOwned: 0,
@@ -1745,6 +1763,10 @@ const AchievementSystem = {
     // Track trade completion
     trackTrade(profit) {
         AchievementSystem.stats.tradesCompleted++;
+        // 🖤 Track total gold EARNED through trades (only positive profit counts) 💀
+        if (profit > 0) {
+            AchievementSystem.stats.totalGoldEarned += profit;
+        }
         if (profit > AchievementSystem.stats.highestProfit) {
             AchievementSystem.stats.highestProfit = profit;
         }
@@ -1899,6 +1921,7 @@ const AchievementSystem = {
             // Trading stats
             tradesCompleted: 0,
             highestProfit: 0,
+            totalGoldEarned: 0, // 🖤 Track EARNED gold, not starting gold 💀
             nightTrades: 0,
             maxMerchantTrades: 0,
             merchantTradeCount: {},
@@ -1918,7 +1941,7 @@ const AchievementSystem = {
             banditsDefeated: 0,
             narrowEscapes: 0,
             banditEncounters: 0,
-            stealthyExplorer: true,
+            stealthyExplorer: false, // 🖤 FIX: Must EARN this by visiting all locations without bandits 💀
 
             // Collection stats
             rareItemsOwned: 0,

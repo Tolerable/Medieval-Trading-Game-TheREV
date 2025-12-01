@@ -642,8 +642,8 @@ Be sympathetic, desperate but not pathetic.`
                 isBoss: isBoss
             };
         } catch (error) {
-            // 🦇 API failed - use fallback dialogue gracefully
-            console.warn('🎭 Dialogue generation using fallback');
+            // 🦇 API failed - log details and use fallback gracefully 💀
+            console.warn('🎭 Dialogue API error:', error?.message || error, error?.response?.status || '');
             // Return a fallback based on type
             const fallbackText = isBoss
                 ? this.getBossFallback(npcType, context)

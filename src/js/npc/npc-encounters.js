@@ -326,10 +326,12 @@ const NPCEncounterSystem = {
     },
 
     // ⏸️ Halt the march of time - give this encounter your full attention 💀
+    // 🦇 FIX: Use setSpeed() instead of direct isPaused assignment to maintain state consistency
     pauseTimeForEncounter() {
         if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
             this.wasTimePaused = false;
-            TimeSystem.isPaused = true;
+            this.previousSpeed = TimeSystem.currentSpeed; // Save speed to restore later
+            TimeSystem.setSpeed('PAUSED');
             console.log('🎭 Time paused for encounter');
         } else {
             this.wasTimePaused = true;
@@ -337,10 +339,13 @@ const NPCEncounterSystem = {
     },
 
     // ▶️ Release time from its cage - the encounter has ended 🕰️
+    // 🦇 FIX: Use setSpeed() to properly resume time with correct engine state
     resumeTimeAfterEncounter() {
         if (typeof TimeSystem !== 'undefined' && !this.wasTimePaused) {
-            TimeSystem.isPaused = false;
-            console.log('🎭 Time resumed after encounter');
+            // Restore previous speed, default to NORMAL if not saved
+            const speedToRestore = this.previousSpeed || 'NORMAL';
+            TimeSystem.setSpeed(speedToRestore);
+            console.log('🎭 Time resumed after encounter, speed:', speedToRestore);
         }
     },
 
@@ -726,6 +731,36 @@ const NPCEncounterSystem = {
     // spawn specific NPC type for testing
     testEncounter(type) {
         return this.spawnRandomEncounter('road', type);
+    },
+
+    // 🦇 FIX: Refresh trader inventories at 8am daily
+    // Called by DynamicMarketSystem.performDailyRefresh()
+    refreshTraderInventories() {
+        // 🖤 First, clean up stale encounters older than 1 hour 💀
+        const ONE_HOUR = 60 * 60 * 1000;
+        this.activeEncounters = this.activeEncounters.filter(e => Date.now() - e.timestamp < ONE_HOUR);
+
+        // Essential survival items all traders should have
+        const ESSENTIAL_ITEMS = ['water', 'bread', 'food', 'meat', 'ale'];
+
+        // Refresh any active encounters that are merchants/traders
+        for (const encounter of this.activeEncounters) {
+            // 🦇 Check npc.type not encounter.type - data is nested
+            const npcType = encounter.npc?.type || encounter.type;
+            if (encounter.inventory || npcType === 'merchant' || npcType === 'smuggler') {
+                // Reset inventory with fresh survival items
+                encounter.inventory = encounter.inventory || {};
+
+                for (const itemId of ESSENTIAL_ITEMS) {
+                    encounter.inventory[itemId] = 3 + Math.floor(Math.random() * 7); // 3-10 items
+                }
+
+                // Reset gold
+                encounter.gold = encounter.maxGold || 200 + Math.floor(Math.random() * 300);
+            }
+        }
+
+        console.log('🎭 NPCEncounterSystem: Trader inventories refreshed for new day');
     }
 };
 

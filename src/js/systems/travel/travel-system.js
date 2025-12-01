@@ -920,46 +920,48 @@ const TravelSystem = {
         ];
     },
 
-    // path types - because not all roads lead to the same level of suffering
+    // 🦇 FIX: Path types with improved speed multipliers for reasonable travel times
+    // Base walking speed is 3 mph, these multipliers adjust effective speed
+    // Starting area paths should be ~30min-2hrs, max any path is 6hrs
     PATH_TYPES: {
         city_street: {
             name: 'City Street',
-            speedMultiplier: 1.5,    // fast because civilization pretends to care
+            speedMultiplier: 2.0,    // fast because civilization pretends to care
             staminaDrain: 0.3,       // barely draining, like small talk
             safety: 0.9,
             description: 'well-paved city streets where dreams go to die'
         },
         main_road: {
             name: 'Main Road',
-            speedMultiplier: 1.3,    // decent roads for those who still have hope
+            speedMultiplier: 1.8,    // decent roads for those who still have hope
             staminaDrain: 0.5,
             safety: 0.7,
             description: 'major trade roads connecting pockets of despair'
         },
         road: {
             name: 'Road',
-            speedMultiplier: 1.0,    // standard mediocrity
+            speedMultiplier: 1.5,    // standard maintained roads
             staminaDrain: 0.7,
             safety: 0.6,
             description: 'maintained road between settlements (barely)'
         },
         path: {
             name: 'Path',
-            speedMultiplier: 0.8,    // slower because nature fights back
+            speedMultiplier: 1.2,    // slower because nature fights back
             staminaDrain: 0.9,
             safety: 0.5,
             description: 'worn path through nowhere special'
         },
         trail: {
             name: 'Trail',
-            speedMultiplier: 0.6,    // dragging through the wilderness
+            speedMultiplier: 1.0,    // dragging through the wilderness
             staminaDrain: 1.2,
             safety: 0.4,
             description: 'rough trail where civilization gave up'
         },
         wilderness: {
             name: 'Wilderness',
-            speedMultiplier: 0.4,    // no path, just vibes and regret
+            speedMultiplier: 0.6,    // no path, just vibes and regret
             staminaDrain: 1.5,
             safety: 0.3,
             description: 'untamed wilderness where you question your choices'
@@ -1024,10 +1026,10 @@ const TravelSystem = {
                 const pathInfo = this.PATH_TYPES[pathType] || this.PATH_TYPES.trail;
 
                 // math out how far we need to suffer
-                // Note: coordinates are 10x scaled, so divide by 100 to get miles
+                // 🦇 FIX: coordinates are 10x scaled, divide by 500 for reasonable mile distances
                 const dx = targetLocation.x - location.x;
                 const dy = targetLocation.y - location.y;
-                const distance = Math.sqrt(dx * dx + dy * dy) / 100; // scaled coords to miles
+                const distance = Math.sqrt(dx * dx + dy * dy) / 500; // scaled coords to miles
 
                 // manifest the path into reality
                 const path = {
@@ -1408,20 +1410,18 @@ const TravelSystem = {
                 // Calculate time for this segment (no cap - real journeys take real time)
                 const segmentTime = segmentDistance / effectiveSpeed;
 
-                // Add some variance to make travel times feel more realistic (±15%)
-                const variance = 0.85 + (Math.random() * 0.3);
-                const adjustedTime = segmentTime * variance;
-
-                totalTimeHours += adjustedTime;
+                // 🦇 FIX: Removed random variance - it caused displayed time to differ from actual travel time
+                // because calculateTravelInfo() was called separately for display and for startTravel()
+                totalTimeHours += segmentTime;
                 totalDistance += segmentDistance;
-                totalStaminaCost += Math.round(segmentInfo.staminaDrain * adjustedTime * 10);
+                totalStaminaCost += Math.round(segmentInfo.staminaDrain * segmentTime * 10);
 
                 segmentTimes.push({
                     from: segment.from,
                     to: segment.to,
                     type: segmentType,
                     distance: segmentDistance,
-                    time: adjustedTime
+                    time: segmentTime
                 });
             }
         } else {
@@ -1442,9 +1442,9 @@ const TravelSystem = {
             }
         }
 
-        // Add rest stops for very long journeys (every ~4 hours adds 30 min rest)
-        const restStops = Math.floor(totalTimeHours / 4);
-        totalTimeHours += restStops * 0.5;
+        // 🦇 FIX: Cap max travel time at 6 hours - no path should take longer
+        const MAX_TRAVEL_HOURS = 6;
+        totalTimeHours = Math.min(totalTimeHours, MAX_TRAVEL_HOURS);
 
         // Generate route description for multi-hop journeys
         let routeDescription = '';
@@ -1480,10 +1480,14 @@ const TravelSystem = {
     // Calculate distance between locations
     // Note: TravelSystem coordinates are 10x scaled from mapPosition, so we divide by 100
     // to get the same miles value as GameWorldRenderer (which uses mapPosition / 10)
+    // 🦇 FIX: Distance calculation - coordinates are 10x scaled from GameWorld
+    // With 10x scale, adjacent locations are ~1000-2000 units apart
+    // Divide by 500 to get reasonable mile distances (2-4 miles between nearby locations)
+    // This ensures starting area paths take ~30min-2hrs and max travel is ~6hrs
     calculateDistance(from, to) {
         const dx = to.x - from.x;
         const dy = to.y - from.y;
-        return Math.sqrt(dx * dx + dy * dy) / 100; // Convert scaled coords to miles
+        return Math.sqrt(dx * dx + dy * dy) / 500; // Convert scaled coords to miles
     },
 
     // Find path between locations using A* pathfinding
@@ -1946,11 +1950,14 @@ const TravelSystem = {
             }
         }
         
-        // Apply stat drain every 10 minutes of travel
-        if (elapsedMinutes % 10 === 0 && elapsedMinutes > 0) {
-            const hungerDrain = Math.round(3 * drainMultiplier);
-            const thirstDrain = Math.round(5 * drainMultiplier);
-            const fatigueDrain = Math.round(2 * drainMultiplier);
+        // 🦇 FIX: Reduced travel stat drain - these are ADDITIONAL to normal decay
+        // Only apply small extra drain during travel, not massive amounts
+        // Apply stat drain every 30 minutes of travel (not every 10)
+        if (elapsedMinutes % 30 === 0 && elapsedMinutes > 0) {
+            // Small additional drain during travel (on top of normal game.js decay)
+            const hungerDrain = 0.5 * drainMultiplier;  // Was 3, now 0.5
+            const thirstDrain = 0.8 * drainMultiplier;  // Was 5, now 0.8
+            const fatigueDrain = 1.0 * drainMultiplier; // Was 2, now 1.0
             
             // Apply stat changes
             game.player.stats.hunger = Math.max(0, game.player.stats.hunger - hungerDrain);

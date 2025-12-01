@@ -18,8 +18,9 @@ const PropertyIncome = {
         // 📈 Level multiplier (20% per level) 🦇
         income *= (1 + (property.level - 1) * 0.2);
 
-        // 🔧 Upgrade bonuses 🗡️
-        property.upgrades.forEach(upgradeId => {
+        // 🔧 Upgrade bonuses 🗡️ - 🖤 with null guard 💀
+        const upgrades = property.upgrades || [];
+        upgrades.forEach(upgradeId => {
             const upgrade = PropertyTypes.getUpgrade(upgradeId);
             if (upgrade && upgrade.effects.incomeBonus) {
                 income *= upgrade.effects.incomeBonus;
@@ -29,9 +30,9 @@ const PropertyIncome = {
         // 🔨 Condition modifier 🌙
         income *= (property.condition / 100);
 
-        // 🛠️ Calculate maintenance 🔮
+        // 🛠️ Calculate maintenance 🔮 - 🖤 with null guard 💀
         let maintenance = propertyType.maintenanceCost;
-        property.upgrades.forEach(upgradeId => {
+        upgrades.forEach(upgradeId => {
             const upgrade = PropertyTypes.getUpgrade(upgradeId);
             if (upgrade && upgrade.effects.maintenanceReduction) {
                 maintenance *= upgrade.effects.maintenanceReduction;
@@ -73,8 +74,9 @@ const PropertyIncome = {
             let income = propertyType.baseIncome;
             income *= (1 + (property.level - 1) * 0.2);
 
-            // 🔧 Upgrade bonuses 🔮
-            property.upgrades.forEach(upgradeId => {
+            // 🔧 Upgrade bonuses 🔮 - 🖤 with null guard 💀
+            const propUpgrades = property.upgrades || [];
+            propUpgrades.forEach(upgradeId => {
                 const upgrade = PropertyTypes.getUpgrade(upgradeId);
                 if (upgrade && upgrade.effects.incomeBonus) {
                     income *= upgrade.effects.incomeBonus;
@@ -84,9 +86,10 @@ const PropertyIncome = {
             // 🔨 Condition modifier 💀
             income *= (property.condition / 100);
 
-            // 👥 Employee bonuses 🖤
-            const assignedEmployees = property.employees.map(empId =>
-                PropertyEmployeeBridge.getEmployee(empId)
+            // 👥 Employee bonuses 🖤 - 🖤 with null guard 💀
+            const propEmployees = property.employees || [];
+            const assignedEmployees = propEmployees.map(empId =>
+                PropertyEmployeeBridge?.getEmployee?.(empId)
             ).filter(emp => emp && emp.assignedProperty === property.id);
 
             let employeeBonus = 1;
@@ -100,9 +103,9 @@ const PropertyIncome = {
             });
             income *= employeeBonus;
 
-            // 🛠️ Calculate maintenance ⚰️
+            // 🛠️ Calculate maintenance ⚰️ - 🖤 with null guard 💀
             let maintenance = propertyType.maintenanceCost;
-            property.upgrades.forEach(upgradeId => {
+            propUpgrades.forEach(upgradeId => {
                 const upgrade = PropertyTypes.getUpgrade(upgradeId);
                 if (upgrade && upgrade.effects.maintenanceReduction) {
                     maintenance *= upgrade.effects.maintenanceReduction;

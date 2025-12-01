@@ -56,8 +56,9 @@ const InitialEncounterSystem = {
     // 📖 INTRODUCTION SEQUENCE - the story begins
     showIntroductionSequence(playerName, startLocation) {
         // Pause time during this sequence
+        // 🦇 FIX: Use setSpeed() instead of direct isPaused assignment for state consistency
         if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
-            TimeSystem.isPaused = true;
+            TimeSystem.setSpeed('PAUSED');
             this.timePausedByUs = true;
         }
 
@@ -258,8 +259,9 @@ const InitialEncounterSystem = {
         this.unlockMainQuest();
 
         // 🖤 Resume time if we paused it
+        // 🦇 FIX: Use setSpeed() instead of direct isPaused assignment for state consistency
         if (this.timePausedByUs && typeof TimeSystem !== 'undefined') {
-            TimeSystem.isPaused = false;
+            TimeSystem.setSpeed('NORMAL');
             this.timePausedByUs = false;
         }
 

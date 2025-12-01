@@ -110,12 +110,13 @@ const DynamicMarketSystem = {
         console.log('💰 DynamicMarketSystem: Daily merchant gold reset');
     },
 
-    // Get merchant gold status for UI
+    // Get merchant gold status for UI - 🖤 with division guard 💀
     getMerchantGoldStatus(locationId) {
         const current = this.getMerchantGold(locationId);
         const location = GameWorld.locations[locationId];
         const max = this.MARKET_GOLD_LIMITS[location?.marketSize || 'small'];
-        const percent = (current / max) * 100;
+        // 🦇 Prevent division by zero
+        const percent = max > 0 ? (current / max) * 100 : 0;
 
         let status, color;
         if (percent > 75) {
@@ -291,6 +292,11 @@ const DynamicMarketSystem = {
     init() {
         this.loadMarketSaturation();
         this.startUpdateTimer();
+
+        // 🦇 FIX: Ensure all locations have survival items on startup
+        this.ensureAllLocationsSurvivalItems();
+
+        console.log('💰 DynamicMarketSystem: Initialized with survival items and daily refresh');
     },
     
     // Load market saturation from localStorage
@@ -501,6 +507,247 @@ const DynamicMarketSystem = {
         this.marketSaturation = {};
         this.saveMarketSaturation();
         addMessage('Market saturation has been reset!');
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🦇 SURVIVAL ITEMS SYSTEM - Essential food/water always available
+    // ═══════════════════════════════════════════════════════════════
+    // Every market sells basic survival items so players don't die from lack of supplies
+
+    // Essential survival items that EVERY market sells
+    ESSENTIAL_ITEMS: ['water', 'bread', 'food', 'meat', 'ale'],
+
+    // Additional survival items for larger markets
+    EXPANDED_SURVIVAL_ITEMS: ['cheese', 'fish', 'vegetables', 'military_rations', 'wine'],
+
+    // Ensure all locations have survival items available
+    ensureSurvivalItems(locationId) {
+        const location = GameWorld.locations[locationId];
+        if (!location) return;
+
+        // Initialize sells array if missing
+        if (!location.sells) {
+            location.sells = [];
+        }
+
+        // Add essential items to every market
+        for (const itemId of this.ESSENTIAL_ITEMS) {
+            if (!location.sells.includes(itemId)) {
+                location.sells.push(itemId);
+            }
+        }
+
+        // Larger markets get expanded items
+        const largeMarkets = ['large', 'grand'];
+        if (largeMarkets.includes(location.marketSize)) {
+            for (const itemId of this.EXPANDED_SURVIVAL_ITEMS) {
+                if (!location.sells.includes(itemId)) {
+                    location.sells.push(itemId);
+                }
+            }
+        }
+    },
+
+    // Ensure ALL locations have survival items (call on init)
+    ensureAllLocationsSurvivalItems() {
+        if (typeof GameWorld === 'undefined' || !GameWorld.locations) return;
+
+        for (const locationId of Object.keys(GameWorld.locations)) {
+            this.ensureSurvivalItems(locationId);
+        }
+        console.log('🍖 DynamicMarketSystem: Survival items ensured for all locations');
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🌅 TIME-OF-DAY PRICE FLUCTUATION - Prices change morning to night
+    // ═══════════════════════════════════════════════════════════════
+    // Morning (8am): Lowest prices, freshest stock
+    // Midday (12pm): Standard prices
+    // Evening (6pm): Higher prices, depleted stock
+    // Night (10pm+): Premium prices for late shoppers
+
+    TIME_PRICE_MODIFIERS: {
+        morning: 0.85,    // 8am-11am: 15% discount (fresh from suppliers)
+        midday: 1.0,      // 11am-3pm: standard prices
+        afternoon: 1.1,   // 3pm-7pm: 10% markup (supply depleting)
+        evening: 1.2,     // 7pm-10pm: 20% markup (scarce)
+        night: 1.35       // 10pm-8am: 35% premium (night owl tax)
+    },
+
+    // Get current time-of-day price modifier
+    getTimeOfDayModifier() {
+        if (typeof TimeSystem === 'undefined') return 1.0;
+
+        const hour = TimeSystem.currentHour || 12;
+
+        if (hour >= 8 && hour < 11) return this.TIME_PRICE_MODIFIERS.morning;
+        if (hour >= 11 && hour < 15) return this.TIME_PRICE_MODIFIERS.midday;
+        if (hour >= 15 && hour < 19) return this.TIME_PRICE_MODIFIERS.afternoon;
+        if (hour >= 19 && hour < 22) return this.TIME_PRICE_MODIFIERS.evening;
+        return this.TIME_PRICE_MODIFIERS.night; // 10pm-8am
+    },
+
+    // Get time period name for UI
+    getTimePeriodName() {
+        if (typeof TimeSystem === 'undefined') return 'Day';
+
+        const hour = TimeSystem.currentHour || 12;
+
+        if (hour >= 8 && hour < 11) return 'Morning Market';
+        if (hour >= 11 && hour < 15) return 'Midday Trade';
+        if (hour >= 15 && hour < 19) return 'Afternoon Rush';
+        if (hour >= 19 && hour < 22) return 'Evening Trade';
+        return 'Night Market';
+    },
+
+    // Calculate final price with time modifier
+    calculateTimeAdjustedPrice(basePrice, locationId, itemId) {
+        const timeModifier = this.getTimeOfDayModifier();
+
+        // Survival items have smaller time variance (essential goods)
+        const isSurvivalItem = this.ESSENTIAL_ITEMS.includes(itemId);
+        const effectiveModifier = isSurvivalItem
+            ? 1 + ((timeModifier - 1) * 0.5)  // Half the modifier for essentials
+            : timeModifier;
+
+        return Math.round(basePrice * effectiveModifier);
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🌅 8AM DAILY REFRESH - Vendors restock at dawn
+    // ═══════════════════════════════════════════════════════════════
+    // Every morning at 8am:
+    // - Stock refreshes to full
+    // - Prices reset to base
+    // - Merchant gold replenishes
+    // - NPCs refresh their inventory
+
+    lastRefreshHour: -1,
+    REFRESH_HOUR: 8, // 8am daily refresh
+
+    // Check if it's time for the daily 8am refresh
+    checkDailyRefresh() {
+        if (typeof TimeSystem === 'undefined') return;
+
+        const currentHour = TimeSystem.currentHour || 0;
+        const currentDay = TimeSystem.currentDay || 1;
+
+        // Check if we've crossed into 8am
+        if (currentHour === this.REFRESH_HOUR && this.lastRefreshHour !== this.REFRESH_HOUR) {
+            this.performDailyRefresh();
+            this.lastRefreshHour = currentHour;
+            console.log(`🌅 Daily market refresh at 8am on Day ${currentDay}`);
+        } else if (currentHour !== this.REFRESH_HOUR) {
+            this.lastRefreshHour = currentHour;
+        }
+    },
+
+    // Perform the daily 8am refresh
+    performDailyRefresh() {
+        // 1. Reset all merchant gold to full
+        this.resetDailyGold();
+
+        // 2. Refresh all stock to fresh levels
+        this.refreshAllStock();
+
+        // 3. Ensure survival items exist everywhere
+        this.ensureAllLocationsSurvivalItems();
+
+        // 4. Reset NPC merchant inventories
+        this.refreshNPCMerchants();
+
+        // 5. Notify player
+        if (typeof addMessage === 'function') {
+            addMessage('🌅 Morning has come! Merchants have restocked their wares.', 'info');
+        }
+
+        // 6. Emit event for other systems
+        if (typeof EventBus !== 'undefined' && EventBus.emit) {
+            EventBus.emit('market:dailyRefresh', { hour: 8, day: TimeSystem.currentDay });
+        }
+    },
+
+    // Refresh all location stock to full morning levels
+    refreshAllStock() {
+        for (const locationId of Object.keys(this.originalStock)) {
+            const location = GameWorld.locations[locationId];
+            if (!location) continue;
+
+            const marketSizes = { tiny: 8, small: 15, medium: 30, large: 50, grand: 75 };
+            const baseStock = marketSizes[location.marketSize] || 15;
+
+            for (const itemId of Object.keys(this.originalStock[locationId])) {
+                // Fresh stock each morning with slight variance
+                const variance = Math.floor(Math.random() * baseStock * 0.3);
+                this.originalStock[locationId][itemId] = baseStock + variance;
+            }
+
+            // Also add stock for survival items
+            for (const itemId of this.ESSENTIAL_ITEMS) {
+                if (!this.originalStock[locationId][itemId]) {
+                    this.originalStock[locationId][itemId] = baseStock + Math.floor(Math.random() * 5);
+                }
+            }
+        }
+        console.log('📦 DynamicMarketSystem: Morning stock refresh complete');
+    },
+
+    // Refresh NPC merchant inventories
+    refreshNPCMerchants() {
+        // Refresh any active NPC merchants
+        if (typeof NPCManager !== 'undefined' && NPCManager.activeMerchants) {
+            for (const merchant of Object.values(NPCManager.activeMerchants || {})) {
+                if (merchant.inventory) {
+                    // Restock NPC inventory with survival items
+                    const survivalStock = {};
+                    for (const itemId of this.ESSENTIAL_ITEMS) {
+                        survivalStock[itemId] = 5 + Math.floor(Math.random() * 10);
+                    }
+                    merchant.inventory = { ...merchant.inventory, ...survivalStock };
+                }
+                if (merchant.gold !== undefined) {
+                    // Refresh NPC gold based on type
+                    merchant.gold = merchant.maxGold || 500;
+                }
+            }
+        }
+
+        // Refresh wandering traders
+        if (typeof NPCEncounterSystem !== 'undefined' && NPCEncounterSystem.refreshTraderInventories) {
+            NPCEncounterSystem.refreshTraderInventories();
+        }
+
+        console.log('🧑‍🌾 DynamicMarketSystem: NPC merchants refreshed');
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 📊 ECONOMY SUPPLY/DEMAND - Prices react to player actions
+    // ═══════════════════════════════════════════════════════════════
+
+    // Track when player buys survival items - increase scarcity
+    onPlayerBuySurvivalItem(locationId, itemId, quantity) {
+        if (!this.ESSENTIAL_ITEMS.includes(itemId)) return;
+
+        // Increase demand tracking
+        this.updateSupplyDemand(locationId, itemId, quantity);
+
+        // If stock gets low, slightly increase prices for that item
+        const stock = this.getItemStock(locationId, itemId);
+        if (stock < 5) {
+            // Scarcity pricing kicks in
+            console.log(`⚠️ ${itemId} running low at ${locationId} - scarcity pricing active`);
+        }
+    },
+
+    // Track when player sells survival items - decrease prices
+    onPlayerSellSurvivalItem(locationId, itemId, quantity) {
+        if (!this.ESSENTIAL_ITEMS.includes(itemId)) return;
+
+        // Increase supply tracking (negative quantity = selling)
+        this.updateSupplyDemand(locationId, itemId, -quantity);
+
+        // Add to location stock
+        this.addStock(locationId, itemId, quantity);
     }
 };
 

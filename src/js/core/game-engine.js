@@ -141,13 +141,16 @@ const GameEngine = {
             }
         }
 
-        // 🌙 Daily processing at midnight - the witching hour
+        // 🌙 Daily processing at midnight - the witching hour 🖤
         if (TimeSystem.currentTime.hour === 0 && TimeSystem.currentTime.minute === 0) {
+            // 💀 Wrapped in try-catch so one system crash doesn't kill them all
             if (typeof PropertySystem !== 'undefined') {
-                PropertySystem.processDailyIncome();
+                try { PropertySystem.processDailyIncome(); }
+                catch (e) { console.warn('🏠 Daily income error:', e.message); }
             }
             if (typeof TradeRouteSystem !== 'undefined') {
-                TradeRouteSystem.processDailyTrade();
+                try { TradeRouteSystem.processDailyTrade(); }
+                catch (e) { console.warn('🛒 Daily trade error:', e.message); }
             }
         }
 

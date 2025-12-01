@@ -995,11 +995,13 @@ const GameWorldRenderer = {
 
     // 🛤️ Get path information for tooltip
     getPathInfo(fromLocation, toLocation) {
-        // Calculate distance in miles
+        // 🦇 FIX: Calculate distance in miles - divide by 50 for reasonable distances
+        // Adjacent locations (~100-200 pixels) become ~2-4 miles
+        // This matches TravelSystem's calculation (10x scaled coords / 500 = mapPosition / 50)
         const dx = toLocation.mapPosition.x - fromLocation.mapPosition.x;
         const dy = toLocation.mapPosition.y - fromLocation.mapPosition.y;
         const pixelDistance = Math.sqrt(dx * dx + dy * dy);
-        const distanceMiles = Math.round(pixelDistance / 10 * 10) / 10; // ~10 pixels per mile
+        const distanceMiles = Math.round(pixelDistance / 50 * 10) / 10; // ~50 pixels per mile
 
         // Determine path type based on location types
         const pathType = this.determinePathType(fromLocation, toLocation);
@@ -1008,7 +1010,9 @@ const GameWorldRenderer = {
         // Calculate travel time (base walking speed ~3 mph)
         const baseSpeed = 3;
         const effectiveSpeed = baseSpeed * pathData.speedMultiplier;
-        const travelTimeHours = distanceMiles / effectiveSpeed;
+        let travelTimeHours = distanceMiles / effectiveSpeed;
+        // 🦇 FIX: Cap max travel time at 6 hours
+        travelTimeHours = Math.min(travelTimeHours, 6);
         const travelTimeMinutes = Math.round(travelTimeHours * 60);
 
         // Calculate stamina drain
@@ -1060,45 +1064,46 @@ const GameWorldRenderer = {
     },
 
     // 🛤️ Path type definitions
+    // 🦇 FIX: PATH_TYPES with updated speed multipliers - must match TravelSystem
     PATH_TYPES: {
         city_street: {
             name: 'City Street',
-            speedMultiplier: 1.5,
+            speedMultiplier: 2.0,
             staminaDrain: 0.3,
             safety: 0.9,
             description: 'Well-paved city streets'
         },
         main_road: {
             name: 'Main Road',
-            speedMultiplier: 1.3,
+            speedMultiplier: 1.8,
             staminaDrain: 0.5,
             safety: 0.7,
             description: 'Major trade road'
         },
         road: {
             name: 'Road',
-            speedMultiplier: 1.0,
+            speedMultiplier: 1.5,
             staminaDrain: 0.7,
             safety: 0.6,
             description: 'Maintained road'
         },
         path: {
             name: 'Path',
-            speedMultiplier: 0.8,
+            speedMultiplier: 1.2,
             staminaDrain: 0.9,
             safety: 0.5,
             description: 'Worn dirt path'
         },
         trail: {
             name: 'Trail',
-            speedMultiplier: 0.6,
+            speedMultiplier: 1.0,
             staminaDrain: 1.2,
             safety: 0.4,
             description: 'Rough wilderness trail'
         },
         wilderness: {
             name: 'Wilderness',
-            speedMultiplier: 0.4,
+            speedMultiplier: 0.6,
             staminaDrain: 1.5,
             safety: 0.3,
             description: 'Untamed wilderness'
@@ -1186,12 +1191,22 @@ const GameWorldRenderer = {
         el.dataset.locationId = location.id;
         el.dataset.visibility = visibility;
 
+        // 💀 Check if July 18th Dungeon Bonanza is active AND this is a dungeon type
+        const dungeonTypes = ['dungeon', 'cave', 'ruins'];
+        const isDungeonType = dungeonTypes.includes(location.type);
+        const isBonanzaActive = typeof DungeonBonanzaSystem !== 'undefined' && DungeonBonanzaSystem.isDungeonBonanzaDay();
+        const hasBonanzaEffect = isDungeonType && isBonanzaActive && !isDiscovered;
+
         // For discovered (unexplored) locations - make them VISIBLE but mysterious
         // 🖤 Grey but solid, not translucent - players need to SEE where they can go!
         const bgColor = isDiscovered ? '#4a4a5a' : style.color;
-        const borderColor = isDiscovered ? '#8888aa' : this.lightenColor(style.color, 20);
+        const borderColor = isDiscovered ? '#8888aa' : (hasBonanzaEffect ? '#a855f7' : this.lightenColor(style.color, 20));
         const opacity = isDiscovered ? '0.9' : '1';
         const iconFilter = isDiscovered ? 'grayscale(80%)' : 'none';
+        // 💀 Purple glow for dungeons during bonanza
+        const boxShadowStyle = hasBonanzaEffect
+            ? '0 0 20px 8px rgba(168, 85, 247, 0.7), 0 0 40px 15px rgba(168, 85, 247, 0.4)'
+            : '0 2px 10px rgba(0, 0, 0, 0.5)';
 
         el.style.cssText = `
             position: absolute;
@@ -1209,14 +1224,38 @@ const GameWorldRenderer = {
             font-size: ${style.size * 0.5}px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            box-shadow: ${boxShadowStyle};
             z-index: 10;
             opacity: ${opacity};
             filter: ${iconFilter};
+            ${hasBonanzaEffect ? 'animation: bonanza-pulse 1.5s ease-in-out infinite;' : ''}
         `;
 
         // Show question mark for undiscovered, icon for explored
         el.innerHTML = isDiscovered ? '❓' : style.icon;
+
+        // 💀 Add "⚡30m" badge for dungeons during bonanza
+        if (hasBonanzaEffect) {
+            const bonanzaBadge = document.createElement('div');
+            bonanzaBadge.className = 'bonanza-badge';
+            bonanzaBadge.innerHTML = '⚡30m';
+            bonanzaBadge.style.cssText = `
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+                color: #fff;
+                font-size: 9px;
+                font-weight: bold;
+                padding: 2px 4px;
+                border-radius: 8px;
+                border: 1px solid #c084fc;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+                z-index: 15;
+                pointer-events: none;
+            `;
+            el.appendChild(bonanzaBadge);
+        }
 
         // Hover effects
         el.addEventListener('mouseenter', (e) => this.onLocationHover(e, location, isDiscovered));
@@ -1456,6 +1495,17 @@ const GameWorldRenderer = {
                     @keyframes tack-walk {
                         0%, 100% { transform: translateY(-8px) rotate(-5deg); }
                         50% { transform: translateY(-12px) rotate(5deg); }
+                    }
+                    /* 💀 July 18th Dungeon Bonanza pulse effect */
+                    @keyframes bonanza-pulse {
+                        0%, 100% {
+                            box-shadow: 0 0 20px 8px rgba(168, 85, 247, 0.7), 0 0 40px 15px rgba(168, 85, 247, 0.4);
+                            transform: translate(-50%, -50%) scale(1);
+                        }
+                        50% {
+                            box-shadow: 0 0 30px 12px rgba(168, 85, 247, 0.9), 0 0 60px 25px rgba(168, 85, 247, 0.5);
+                            transform: translate(-50%, -50%) scale(1.05);
+                        }
                     }
                 `;
                 document.head.appendChild(styleSheet);

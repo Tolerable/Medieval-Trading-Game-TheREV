@@ -909,20 +909,20 @@ body:has(#main-menu:not(.hidden)) #game-container {
 }
 
 .modal-close-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    color: #fff;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    color: #888;
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     transition: all 0.2s ease;
 }
 
 .modal-close-btn:hover {
-    background: rgba(255, 0, 0, 0.3);
-    border-color: #ff4444;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
 }
 
 .leaderboard-modal-body {
@@ -1534,31 +1534,30 @@ body:has(#main-menu:not(.hidden)) #game-container {
     display: block !important;
 }
 
-/* 🖤 Panel close button - float in the corner like my soul */
+/* 🖤 Panel close button - minimal X style 💀 */
 .panel-close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: linear-gradient(135deg, rgba(244, 67, 54, 0.8) 0%, rgba(200, 50, 50, 0.8) 100%);
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    font-size: 1.2rem;
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    left: auto !important;
+    background: transparent !important;
+    color: #888;
+    border: none !important;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    font-size: 1.4rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
     z-index: 100;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .panel-close-btn:hover {
-    background: linear-gradient(135deg, rgba(244, 67, 54, 1) 0%, rgba(220, 60, 60, 1) 100%);
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
 }
 
 /* Make panels position relative for close button positioning */
@@ -1616,30 +1615,32 @@ body:has(#main-menu:not(.hidden)) #game-container {
     animation: slideUp 0.3s ease-out;
 }
 
+/* 🖤 Overlay X Close Button - Top Right (no red circle, matches panel-close-x) 💀 */
 .overlay-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: linear-gradient(135deg, rgba(244, 67, 54, 0.9) 0%, rgba(220, 53, 69, 0.9) 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 1.5rem;
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    left: auto !important;
+    background: transparent !important;
+    color: #888;
+    border: none !important;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    font-size: 1.4rem;
+    font-weight: normal;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     z-index: 2001;
-    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+    line-height: 1;
 }
 
 .overlay-close:hover {
-    background: linear-gradient(135deg, rgba(220, 53, 69, 1) 0%, rgba(200, 40, 50, 1) 100%);
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
 }
 
 /* World Map Overlay */
@@ -2326,33 +2327,32 @@ body:has(#main-menu:not(.hidden)) #game-container {
    - Blue Close button: bottom-right in footer (.panel-close-btn-footer)
    ═══════════════════════════════════════════════════════════ */
 
-/* 🔴 Red X Close Button - Top Right Corner */
+/* 🖤 Panel X Close Button - Top Right Corner (no red circle) 💀 */
 .panel-close-x {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: linear-gradient(135deg, rgba(244, 67, 54, 0.9) 0%, rgba(220, 53, 69, 0.9) 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    font-size: 1.2rem;
-    font-weight: bold;
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    left: auto !important;
+    background: transparent !important;
+    color: #888;
+    border: none !important;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    font-size: 1.4rem;
+    font-weight: normal;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     z-index: 10;
-    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
     line-height: 1;
 }
 
 .panel-close-x:hover {
-    background: linear-gradient(135deg, rgba(220, 53, 69, 1) 0%, rgba(200, 40, 50, 1) 100%);
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
 }
 
 /* 🔵 Blue Close Button - Bottom Right in Footer */
@@ -4608,21 +4608,23 @@ button.secondary:hover {
 }
 
 .close-btn {
-    background: none;
+    background: transparent;
     border: none;
-    color: #e0e0e0;
-    font-size: 1.5rem;
+    color: #888;
+    font-size: 1.4rem;
     cursor: pointer;
     padding: 0;
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 4px;
 }
 
 .close-btn:hover {
-    color: #e57373;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
 }
 
 .item-details-content {

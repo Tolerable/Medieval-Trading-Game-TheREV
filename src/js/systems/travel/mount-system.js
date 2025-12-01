@@ -754,13 +754,13 @@ const MountSystem = {
                         <span>Experience:</span><span>${stats.experience}/${stats.level * 100}</span>
                     </div>
                     <div class="stat-row">
-                        <span>Health:</span><span>${stats.health}%</span>
+                        <span>Health:</span><span>${Math.round(stats.health)}%</span>
                     </div>
                     <div class="stat-row">
-                        <span>Stamina:</span><span>${stats.stamina}/${stats.maxStamina}</span>
+                        <span>Stamina:</span><span>${Math.round(stats.stamina)}/${Math.round(stats.maxStamina)}</span>
                     </div>
                     <div class="stat-row">
-                        <span>Happiness:</span><span>${stats.happiness}%</span>
+                        <span>Happiness:</span><span>${Math.round(stats.happiness)}%</span>
                     </div>
                     <div class="stat-row">
                         <span>Daily Cost:</span><span>${mount.maintenance.feedCost + mount.maintenance.stableCost}g</span>

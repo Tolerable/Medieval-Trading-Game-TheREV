@@ -741,10 +741,7 @@ const WeatherSystem = {
              Math.random() * (this.MAX_WEATHER_DURATION_SECONDS - this.MIN_WEATHER_DURATION_SECONDS));
         this.weatherEndTime = Date.now() + (durationSeconds * 1000);
 
-        // Announce weather change
-        if (oldWeather !== newWeather && typeof addMessage === 'function') {
-            addMessage(`${weather.icon} Weather changed to ${weather.name}. ${weather.description}`, 'info');
-        }
+        // 🖤 Weather changes silently - the sky speaks for itself 💀
 
         // Fire event
         if (typeof EventBus !== 'undefined') {

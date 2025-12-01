@@ -579,7 +579,7 @@ input:focus, textarea:focus, select:focus {
     background: var(--accent-dark, #1976d2);
 }
 
-/* Settings panel */
+/* Settings panel - needs to show ABOVE main menu (z: 3001) on start screen */
 #settings-panel {
     position: fixed;
     top: 0;
@@ -590,7 +590,7 @@ input:focus, textarea:focus, select:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1500;
+    /* z-index set in z-index-system.css via --z-settings-panel (3100) */
 }
 
 .settings-content {
@@ -981,17 +981,18 @@ input:focus, textarea:focus, select:focus {
 }
 
 .close-btn {
-    background: var(--error, #f44336);
-    color: var(--text-primary, #fff);
+    background: transparent;
+    color: #888;
     border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
+    border-radius: 4px;
+    padding: 4px 8px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 1.2rem;
 }
 
 .close-btn:hover {
-    background: var(--error-dark, #d32f2f);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
 }
 
 .tutorial-steps {

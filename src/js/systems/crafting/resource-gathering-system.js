@@ -405,14 +405,15 @@ const ResourceGatheringSystem = {
     // 🎒 CARRY WEIGHT SYSTEM - your back can only take so much
     // ═══════════════════════════════════════════════════════════════
 
-    // Get player's current carry weight
+    // Get player's current carry weight - 🖤 fixed: inventory is object not array 💀
     getCurrentCarryWeight() {
         if (typeof game === 'undefined' || !game.player?.inventory) return 0;
 
         let totalWeight = 0;
-        game.player.inventory.forEach(item => {
-            const weight = this.getResourceWeight(item.id) || 1;
-            totalWeight += weight * (item.quantity || 1);
+        // 🦇 inventory is { itemId: quantity }, not an array of objects
+        Object.entries(game.player.inventory).forEach(([itemId, quantity]) => {
+            const weight = this.getResourceWeight(itemId) || 1;
+            totalWeight += weight * (quantity || 1);
         });
 
         return totalWeight;
@@ -668,19 +669,10 @@ const ResourceGatheringSystem = {
             addMessage(`🎒 only grabbed ${totalYield} - bags are almost full!`, 'warning');
         }
 
-        // Add resources to inventory
+        // Add resources to inventory - 🖤 inventory is object {itemId: quantity} not array 💀
         if (typeof game !== 'undefined' && game.player && game.player.inventory) {
-            const existingItem = game.player.inventory.find(i => i.id === resourceId);
-            if (existingItem) {
-                existingItem.quantity += totalYield;
-            } else {
-                game.player.inventory.push({
-                    id: resourceId,
-                    name: this.getResourceName(resourceId),
-                    quantity: totalYield,
-                    type: 'resource'
-                });
-            }
+            // 🦇 Fixed: inventory is { itemId: quantity }, not array of objects
+            game.player.inventory[resourceId] = (game.player.inventory[resourceId] || 0) + totalYield;
         }
 
         // DRAIN STAMINA

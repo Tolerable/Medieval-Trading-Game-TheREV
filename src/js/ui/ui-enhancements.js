@@ -531,11 +531,13 @@ const KeyboardShortcuts = {
         document.body.appendChild(notificationContainer);
     },
     
-    // Show notification
+    // Show notification - 🖤 with null guards 💀
     showNotification(message, type = 'info') {
         const notificationContainer = document.getElementById('notification-container');
+        if (!notificationContainer) return; // 🦇 container not ready yet
         const notificationList = notificationContainer.querySelector('.notification-list');
-        
+        if (!notificationList) return; // 🦇 list not ready yet
+
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.innerHTML = `
@@ -882,23 +884,29 @@ const KeyboardShortcuts = {
         container.appendChild(confirmationOverlay);
     },
 
-    // Show confirmation dialog
+    // Show confirmation dialog - 🖤 with null guards 💀
     showConfirmationDialog(title, message, onConfirm, onCancel = null) {
         const overlay = document.getElementById('confirmation-overlay');
         const titleElement = document.getElementById('confirmation-title');
         const messageElement = document.getElementById('confirmation-message');
         const yesBtn = document.getElementById('confirm-yes-btn');
         const noBtn = document.getElementById('confirm-no-btn');
-        
+
+        // 🦇 Guard against missing elements
+        if (!overlay || !titleElement || !messageElement || !yesBtn || !noBtn) {
+            console.warn('⚠️ Confirmation dialog elements not found');
+            return;
+        }
+
         titleElement.textContent = title;
         messageElement.textContent = message;
-        
-        // Remove existing listeners
+
+        // Remove existing listeners - 🖤 with null guards
         const newYesBtn = yesBtn.cloneNode(true);
         const newNoBtn = noBtn.cloneNode(true);
-        
-        yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
-        noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+
+        if (yesBtn.parentNode) yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+        if (noBtn.parentNode) noBtn.parentNode.replaceChild(newNoBtn, noBtn);
         
         // Add new listeners
         newYesBtn.addEventListener('click', () => {
@@ -1274,9 +1282,10 @@ const KeyboardShortcuts = {
         }, 10);
     },
     
-    // Hide tooltip
+    // Hide tooltip - 🖤 with null guard 💀
     hideTooltip() {
         const tooltipContainer = document.getElementById('tooltip-container');
+        if (!tooltipContainer) return; // 🦇 container doesn't exist yet
         const tooltips = tooltipContainer.querySelectorAll('.tooltip');
         tooltips.forEach(tooltip => {
             tooltip.classList.remove('visible');

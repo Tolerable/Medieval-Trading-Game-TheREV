@@ -165,12 +165,15 @@ const TradeRouteSystem = {
             return;
         }
         
-        // Execute trade
-        const totalProfit = profitPerItem * route.amount;
-        
+        // Execute trade - 🖤 with profit cap to prevent exploit 💀
+        let totalProfit = profitPerItem * route.amount;
+        // 🦇 Cap daily profit per route to prevent infinite gold exploit
+        const MAX_DAILY_PROFIT = 10000;
+        totalProfit = Math.min(totalProfit, MAX_DAILY_PROFIT);
+
         // Remove items from warehouse
         this.removeFromWarehouseInventory(warehouse, route.itemId, route.amount);
-        
+
         // Add gold to player
         game.player.gold += totalProfit;
         

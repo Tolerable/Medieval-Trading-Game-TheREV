@@ -219,14 +219,12 @@ const KeyBindings = {
         }
         if (this.matches(event, 'market')) {
             event.preventDefault();
-            if (typeof openMarket === 'function') openMarket();
-            if (typeof addMessage === 'function') addMessage('🏪 Market opened [M]');
+            this.openMarket(); // 🖤 Use toggle-aware method 💀
             return;
         }
         if (this.matches(event, 'travel')) {
             event.preventDefault();
-            if (typeof openTravel === 'function') openTravel();
-            if (typeof addMessage === 'function') addMessage('🗺️ Travel panel opened [T]');
+            this.openTravel(); // 🖤 Use toggle-aware method 💀
             return;
         }
         if (this.matches(event, 'map')) {
@@ -345,8 +343,14 @@ const KeyBindings = {
         }
     },
 
-    // 👤 Open character sheet ⚰️
+    // 👤 Toggle character sheet ⚰️
     openCharacterSheet() {
+        const overlay = document.getElementById('character-sheet-overlay');
+        if (overlay && (overlay.classList.contains('active') || overlay.style.display === 'flex')) {
+            overlay.classList.remove('active');
+            overlay.style.display = 'none';
+            return;
+        }
         if (typeof showCharacterSheet === 'function') {
             showCharacterSheet();
         } else {
@@ -420,11 +424,11 @@ const KeyBindings = {
             <div class="char-sheet-section">
                 <h3>❤️ Vitals</h3>
                 <div class="char-vitals">
-                    <div class="char-vital"><span>Health</span><div class="vital-bar-inline"><div style="width: ${(stats.health / stats.maxHealth) * 100}%; background: #e53935;"></div></div><span>${stats.health}/${stats.maxHealth}</span></div>
-                    <div class="char-vital"><span>Hunger</span><div class="vital-bar-inline"><div style="width: ${(stats.hunger / stats.maxHunger) * 100}%; background: #ff9800;"></div></div><span>${stats.hunger}/${stats.maxHunger}</span></div>
-                    <div class="char-vital"><span>Thirst</span><div class="vital-bar-inline"><div style="width: ${(stats.thirst / stats.maxThirst) * 100}%; background: #2196f3;"></div></div><span>${stats.thirst}/${stats.maxThirst}</span></div>
-                    <div class="char-vital"><span>Stamina</span><div class="vital-bar-inline"><div style="width: ${(stats.stamina / stats.maxStamina) * 100}%; background: #9c27b0;"></div></div><span>${stats.stamina}/${stats.maxStamina}</span></div>
-                    <div class="char-vital"><span>Happiness</span><div class="vital-bar-inline"><div style="width: ${(stats.happiness / stats.maxHappiness) * 100}%; background: #4caf50;"></div></div><span>${stats.happiness}/${stats.maxHappiness}</span></div>
+                    <div class="char-vital"><span>Health</span><div class="vital-bar-inline"><div style="width: ${(stats.health / stats.maxHealth) * 100}%; background: #e53935;"></div></div><span>${Math.round(stats.health)}/${Math.round(stats.maxHealth)}</span></div>
+                    <div class="char-vital"><span>Hunger</span><div class="vital-bar-inline"><div style="width: ${(stats.hunger / stats.maxHunger) * 100}%; background: #ff9800;"></div></div><span>${Math.round(stats.hunger)}/${Math.round(stats.maxHunger)}</span></div>
+                    <div class="char-vital"><span>Thirst</span><div class="vital-bar-inline"><div style="width: ${(stats.thirst / stats.maxThirst) * 100}%; background: #2196f3;"></div></div><span>${Math.round(stats.thirst)}/${Math.round(stats.maxThirst)}</span></div>
+                    <div class="char-vital"><span>Stamina</span><div class="vital-bar-inline"><div style="width: ${(stats.stamina / stats.maxStamina) * 100}%; background: #9c27b0;"></div></div><span>${Math.round(stats.stamina)}/${Math.round(stats.maxStamina)}</span></div>
+                    <div class="char-vital"><span>Happiness</span><div class="vital-bar-inline"><div style="width: ${(stats.happiness / stats.maxHappiness) * 100}%; background: #4caf50;"></div></div><span>${Math.round(stats.happiness)}/${Math.round(stats.maxHappiness)}</span></div>
                 </div>
             </div>
 
@@ -586,28 +590,56 @@ const KeyBindings = {
         else console.warn('toggleMenu function not found');
     },
 
-    // 🏪 Open market panel
+    // 🏪 Toggle market panel - 🖤 proper toggle logic 💀
     openMarket() {
-        if (typeof openMarket === 'function') openMarket();
-        else console.warn('openMarket function not found');
+        const panel = document.getElementById('market-panel');
+        if (panel && !panel.classList.contains('hidden')) {
+            // Panel is open - close it
+            panel.classList.add('hidden');
+            if (typeof PanelManager !== 'undefined') PanelManager.updateToolbarButtons();
+            if (typeof addMessage === 'function') addMessage('🏪 Market closed [M]');
+        } else {
+            // Panel is closed - open it
+            if (typeof openMarket === 'function') openMarket();
+            else console.warn('openMarket function not found');
+            if (typeof addMessage === 'function') addMessage('🏪 Market opened [M]');
+        }
     },
 
-    // 🗺️ Open travel panel
+    // 🗺️ Toggle travel panel - 🖤 proper toggle logic 💀
     openTravel() {
-        if (typeof openTravel === 'function') openTravel();
-        else console.warn('openTravel function not found');
+        const panel = document.getElementById('travel-panel');
+        if (panel && !panel.classList.contains('hidden')) {
+            // Panel is open - close it
+            panel.classList.add('hidden');
+            if (typeof PanelManager !== 'undefined') PanelManager.updateToolbarButtons();
+            if (typeof addMessage === 'function') addMessage('🗺️ Travel closed [T]');
+        } else {
+            // Panel is closed - open it
+            if (typeof openTravel === 'function') openTravel();
+            else console.warn('openTravel function not found');
+            if (typeof addMessage === 'function') addMessage('🗺️ Travel opened [T]');
+        }
     },
 
-    // 🚗 Open transportation panel
+    // 🚗 Toggle transportation panel
     openTransportation() {
-        if (typeof openTravel === 'function') openTravel();
-        else console.warn('openTravel function not found');
+        if (typeof game !== 'undefined' && game.state === GameState.TRAVEL) {
+            if (typeof changeState === 'function') changeState(GameState.PLAYING);
+        } else {
+            if (typeof openTravel === 'function') openTravel();
+            else console.warn('openTravel function not found');
+        }
     },
 
-    // 🎒 Open inventory panel
+    // 🎒 Toggle inventory panel
     openInventory() {
-        if (typeof openInventory === 'function') openInventory();
-        else console.warn('openInventory function not found');
+        if (typeof game !== 'undefined' && game.state === GameState.INVENTORY) {
+            if (typeof changeState === 'function') changeState(GameState.PLAYING);
+        } else {
+            if (typeof openInventory === 'function') openInventory();
+            else console.warn('openInventory function not found');
+        }
     },
 
     // 👥 Open people panel
@@ -622,11 +654,17 @@ const KeyBindings = {
         else console.warn('QuestSystem not found');
     },
 
-    // 🏆 Open achievements panel
+    // 🏆 Toggle achievements panel
     openAchievements() {
-        if (typeof openAchievementPanel === 'function') openAchievementPanel();
-        else if (typeof AchievementSystem !== 'undefined' && AchievementSystem.showPanel) AchievementSystem.showPanel();
-        else console.warn('Achievement panel not found');
+        const overlay = document.getElementById('achievement-overlay');
+        if (overlay && overlay.classList.contains('active')) {
+            if (typeof closeAchievementPanel === 'function') closeAchievementPanel();
+            else overlay.classList.remove('active');
+        } else {
+            if (typeof openAchievementPanel === 'function') openAchievementPanel();
+            else if (typeof AchievementSystem !== 'undefined' && AchievementSystem.showPanel) AchievementSystem.showPanel();
+            else console.warn('Achievement panel not found');
+        }
     },
 
     // 💾 Open save dialog
@@ -643,25 +681,45 @@ const KeyBindings = {
         else console.warn('Load system not found');
     },
 
-    // ⚙️ Open settings panel
+    // ⚙️ Toggle settings panel
     openSettings() {
-        if (typeof SettingsPanel !== 'undefined' && SettingsPanel.show) SettingsPanel.show();
-        else console.warn('SettingsPanel not found');
+        if (typeof SettingsPanel === 'undefined') {
+            console.warn('SettingsPanel not found');
+            return;
+        }
+        const panel = SettingsPanel.panelElement || document.getElementById('settings-panel');
+        if (panel && panel.classList.contains('active')) {
+            if (SettingsPanel.hide) SettingsPanel.hide();
+        } else {
+            if (SettingsPanel.show) SettingsPanel.show();
+        }
     },
 
-    // 🏠 Open properties panel
+    // 🏠 Toggle properties panel
     openProperties() {
         const panel = document.getElementById('property-employee-panel');
         if (panel) {
-            panel.classList.remove('hidden');
-            panel.style.display = '';
+            const isVisible = !panel.classList.contains('hidden') && panel.style.display !== 'none';
+            if (isVisible) {
+                panel.classList.add('hidden');
+                panel.style.display = 'none';
+            } else {
+                panel.classList.remove('hidden');
+                panel.style.display = '';
+            }
         } else {
             console.warn('property-employee-panel not found');
         }
     },
 
-    // 💰 Open financial sheet
+    // 💰 Toggle financial sheet
     openFinancialSheet() {
+        const overlay = document.getElementById('financial-sheet-overlay');
+        if (overlay && (overlay.classList.contains('active') || overlay.style.display === 'flex')) {
+            overlay.classList.remove('active');
+            overlay.style.display = 'none';
+            return;
+        }
         this.createFinancialSheetOverlay();
         if (typeof addMessage === 'function') addMessage('💰 Financial sheet opened [F]');
     },

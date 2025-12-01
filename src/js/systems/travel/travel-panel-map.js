@@ -431,9 +431,19 @@ const TravelPanelMap = {
         el.dataset.locationId = location.id;
         el.dataset.visibility = visibility;
 
+        // 💀 Check if July 18th Dungeon Bonanza is active AND this is a dungeon type
+        const dungeonTypes = ['dungeon', 'cave', 'ruins'];
+        const isDungeonType = dungeonTypes.includes(location.type);
+        const isBonanzaActive = typeof DungeonBonanzaSystem !== 'undefined' && DungeonBonanzaSystem.isDungeonBonanzaDay();
+        const hasBonanzaEffect = isDungeonType && isBonanzaActive && !isDiscovered;
+
         const bgColor = isDiscovered ? '#555555' : style.color;
-        const borderColor = isDiscovered ? '#777777' : this.lightenColor(style.color, 20);
+        const borderColor = isDiscovered ? '#777777' : (hasBonanzaEffect ? '#a855f7' : this.lightenColor(style.color, 20));
         const opacity = isDiscovered ? '0.6' : '1';
+        // 💀 Purple glow for dungeons during bonanza
+        const boxShadowStyle = hasBonanzaEffect
+            ? '0 0 12px 4px rgba(168, 85, 247, 0.7), 0 0 25px 10px rgba(168, 85, 247, 0.4)'
+            : '0 2px 8px rgba(0, 0, 0, 0.5)';
 
         el.style.cssText = `
             position: absolute;
@@ -451,12 +461,34 @@ const TravelPanelMap = {
             font-size: ${style.size * 0.5}px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            box-shadow: ${boxShadowStyle};
             z-index: 10;
             opacity: ${opacity};
+            ${hasBonanzaEffect ? 'animation: bonanza-pulse-mini 1.5s ease-in-out infinite;' : ''}
         `;
 
         el.innerHTML = isDiscovered ? '❓' : style.icon;
+
+        // 💀 Add "⚡" badge for dungeons during bonanza (smaller version)
+        if (hasBonanzaEffect) {
+            const bonanzaBadge = document.createElement('div');
+            bonanzaBadge.className = 'bonanza-badge-mini';
+            bonanzaBadge.innerHTML = '⚡';
+            bonanzaBadge.style.cssText = `
+                position: absolute;
+                top: -4px;
+                right: -4px;
+                background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+                color: #fff;
+                font-size: 8px;
+                padding: 1px 3px;
+                border-radius: 6px;
+                border: 1px solid #c084fc;
+                z-index: 15;
+                pointer-events: none;
+            `;
+            el.appendChild(bonanzaBadge);
+        }
 
         // Hover effects
         el.addEventListener('mouseenter', (e) => this.onLocationHover(e, location, isDiscovered));
@@ -645,6 +677,17 @@ const TravelPanelMap = {
             @keyframes shadow-pulse-mini {
                 0%, 100% { transform: scale(1); opacity: 0.3; }
                 50% { transform: scale(0.7); opacity: 0.4; }
+            }
+            /* 💀 July 18th Dungeon Bonanza pulse effect (mini) */
+            @keyframes bonanza-pulse-mini {
+                0%, 100% {
+                    box-shadow: 0 0 12px 4px rgba(168, 85, 247, 0.7), 0 0 25px 10px rgba(168, 85, 247, 0.4);
+                    transform: translate(-50%, -50%) scale(1);
+                }
+                50% {
+                    box-shadow: 0 0 18px 6px rgba(168, 85, 247, 0.9), 0 0 35px 15px rgba(168, 85, 247, 0.5);
+                    transform: translate(-50%, -50%) scale(1.05);
+                }
             }
         `;
         document.head.appendChild(styleSheet);
@@ -1107,7 +1150,8 @@ const TravelPanelMap = {
 
         // 🖤 Start travel if we have a destination and aren't already traveling
         // Either waitingToTravel flag is set OR we just have a destination ready
-        if (this.currentDestination && !this.travelState.isActive) {
+        // 🦇 FIX: Also check that destination hasn't already been reached (prevents re-travel bug)
+        if (this.currentDestination && !this.travelState.isActive && !this.currentDestination.reached) {
             if (typeof addMessage === 'function') {
                 addMessage(`🚶 Setting off for ${this.currentDestination.name}...`);
             }

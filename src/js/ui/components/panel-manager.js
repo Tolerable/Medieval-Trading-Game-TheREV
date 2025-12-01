@@ -70,9 +70,9 @@ const PanelManager = {
         console.log('🪟 PanelManager: Ready');
     },
 
-    // 🖤 Add close buttons (red X top-right, blue close bottom-right) to all panels
+    // 🖤 Add X close button (top-right only) to panels that need it
     addCloseButtonsToAllPanels() {
-        // Get all panels
+        // Get all panels and overlays
         const panels = document.querySelectorAll('.panel, .overlay');
 
         panels.forEach(panel => {
@@ -81,8 +81,8 @@ const PanelManager = {
             // Skip panels that shouldn't have close buttons
             if (this.noCloseButtonPanels.includes(panelId)) return;
 
-            // Skip if already has close buttons
-            if (panel.querySelector('.panel-close-x')) return;
+            // Skip if already has any close button (panel-close-x, overlay-close, etc.)
+            if (panel.querySelector('.panel-close-x, .overlay-close')) return;
 
             // Make panel position relative for absolute positioning of buttons
             const computedStyle = window.getComputedStyle(panel);
@@ -90,7 +90,7 @@ const PanelManager = {
                 panel.style.position = 'relative';
             }
 
-            // 🔴 Add red X button (top-right)
+            // 🖤 Add X button (top-right) - only one per panel
             const closeX = document.createElement('button');
             closeX.className = 'panel-close-x';
             closeX.innerHTML = '×';
@@ -101,35 +101,7 @@ const PanelManager = {
             };
             panel.appendChild(closeX);
 
-            // 🔵 Add blue Close button (bottom-right) - check if panel has a footer
-            let footer = panel.querySelector('.panel-footer, .modal-footer, footer');
-            if (!footer) {
-                // Create a footer if needed
-                footer = document.createElement('div');
-                footer.className = 'panel-footer';
-                footer.style.cssText = `
-                    display: flex;
-                    justify-content: flex-end;
-                    padding: 10px;
-                    border-top: 1px solid rgba(79, 195, 247, 0.2);
-                    margin-top: auto;
-                `;
-                panel.appendChild(footer);
-            }
-
-            // Only add if footer doesn't already have a close button
-            if (!footer.querySelector('.panel-close-btn-footer')) {
-                const closeBtn = document.createElement('button');
-                closeBtn.className = 'panel-close-btn-footer';
-                closeBtn.textContent = 'Close';
-                closeBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    this.closePanel(panelId);
-                };
-                footer.appendChild(closeBtn);
-            }
-
-            console.log('🖤 Added close buttons to:', panelId);
+            console.log('🖤 Added close button to:', panelId);
         });
     },
 
@@ -400,7 +372,10 @@ const PanelManager = {
         // Check if this panel uses the 'active' class instead of 'hidden'
         const info = this.panelInfo[panelId];
         if (info && info.useActiveClass) {
-            return panel.classList.contains('active');
+            // 🖤 Check both active class AND display style - overlays use both 💀
+            const hasActive = panel.classList.contains('active');
+            const displayFlex = panel.style.display === 'flex' || window.getComputedStyle(panel).display === 'flex';
+            return hasActive || displayFlex;
         }
 
         // Check various visibility indicators
@@ -428,14 +403,23 @@ const PanelManager = {
             return;
         }
 
+        // 🖤 Special handling for character/financial sheets - use KeyBindings toggle 💀
+        // These panels have their own toggle logic that handles create + open + close
+        if (panelId === 'character-sheet-overlay') {
+            if (typeof KeyBindings !== 'undefined' && KeyBindings.openCharacterSheet) {
+                KeyBindings.openCharacterSheet(); // Has built-in toggle logic
+            }
+            return;
+        }
+        if (panelId === 'financial-sheet-overlay') {
+            if (typeof KeyBindings !== 'undefined' && KeyBindings.openFinancialSheet) {
+                KeyBindings.openFinancialSheet(); // Has built-in toggle logic
+            }
+            return;
+        }
+
         // Special handling for dynamically created panels that may not exist yet
         if (!panel) {
-            // If it's a dynamically created panel, try to open it (which will create it)
-            if (panelId === 'character-sheet-overlay' || panelId === 'financial-sheet-overlay') {
-                console.log(`🪟 Panel ${panelId} not found, attempting to create it...`);
-                this.openPanel(panelId);
-                return;
-            }
             console.warn(`🪟 Panel not found: ${panelId}`);
             return;
         }
@@ -526,6 +510,8 @@ const PanelManager = {
         // 💀 Active-class panels need different dark magic
         if (info && info.useActiveClass) {
             panel.classList.remove('active');
+            // 🖤 Overlays also need display:none to fully hide 💀
+            panel.style.display = 'none';
             // 🖤 Some panels have special close rituals
             if (panelId === 'achievement-overlay' && typeof closeAchievementPanel === 'function') {
                 closeAchievementPanel();

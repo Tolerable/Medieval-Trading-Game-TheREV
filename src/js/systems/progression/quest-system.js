@@ -2099,7 +2099,7 @@ const QuestSystem = {
                     <span class="drag-grip" style="opacity:0.5;pointer-events:none;">⋮⋮</span>
                     <span style="flex:1;pointer-events:none;">🎯 Tracked Quest</span>
                     <button class="tracker-expand" onclick="QuestSystem.showQuestLog()" title="Open Quest Log" style="background:rgba(79,195,247,0.3);border:none;border-radius:4px;padding:2px 8px;color:white;cursor:pointer;font-size:12px;">📋</button>
-                    <button class="tracker-close" onclick="QuestSystem.hideQuestTracker()" title="Close" style="background:rgba(244,67,54,0.8);border:none;border-radius:50%;width:20px;height:20px;color:white;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;margin-left:4px;">×</button>
+                    <button class="tracker-close" onclick="QuestSystem.hideQuestTracker()" title="Close" style="background:transparent;border:none;border-radius:4px;width:20px;height:20px;color:#888;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;margin-left:4px;">×</button>
                 </div>
                 <div class="tracker-tracked-quest" onclick="QuestSystem.showQuestInfoPanel('${quest.id}')">
                     <div class="tracker-quest-title">
@@ -2140,7 +2140,7 @@ const QuestSystem = {
                         <span>📋 Quests</span>
                     </span>
                     <button class="tracker-expand" onclick="QuestSystem.showQuestLog()" title="Open Quest Log" style="background:rgba(79,195,247,0.3);border:none;border-radius:4px;padding:2px 8px;color:white;cursor:pointer;font-size:12px;">▼</button>
-                    <button class="tracker-close" onclick="QuestSystem.hideQuestTracker()" title="Close" style="background:rgba(244,67,54,0.8);border:none;border-radius:50%;width:20px;height:20px;color:white;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;margin-left:4px;">×</button>
+                    <button class="tracker-close" onclick="QuestSystem.hideQuestTracker()" title="Close" style="background:transparent;border:none;border-radius:4px;width:20px;height:20px;color:#888;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;margin-left:4px;">×</button>
                 </div>
                 <div class="tracker-quests">
                     ${activeQuestsList.map(quest => {
@@ -2671,19 +2671,19 @@ const QuestSystem = {
             }
             .quest-info-icon { font-size: 24px; }
             .quest-info-close {
-                background: rgba(244, 67, 54, 0.8);
+                background: transparent;
                 border: none;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                color: white;
+                border-radius: 4px;
+                width: 28px;
+                height: 28px;
+                color: #888;
                 cursor: pointer;
-                font-size: 16px;
+                font-size: 1.4rem;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
-            .quest-info-close:hover { background: #f44336; }
+            .quest-info-close:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
             .quest-info-body { padding: 15px; }
             .quest-info-desc {
                 color: #ccc;

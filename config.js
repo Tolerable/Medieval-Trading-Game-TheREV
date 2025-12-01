@@ -327,10 +327,11 @@ const GameConfig = {
     // all calculations assume 5-minute game intervals (1440 min/day)
     survival: {
         // 🍖 HUNGER - the stomach is a demanding master
+        // 🦇 FIX: Changed from 4 days to 5 days per user requirement
         hunger: {
-            decayDays: 4,              // days from 100% to 0% - slow starvation
-            // calculated: 100 / (4 * 1440 / 5) = 0.0868 per 5-min update
-            decayPerUpdate: 0.0868,    // the actual hunger drain per tick
+            decayDays: 5,              // days from 100% to 0% - slow starvation
+            // calculated: 100 / (5 * 1440 / 5) = 0.0694 per 5-min update
+            decayPerUpdate: 0.0694,    // the actual hunger drain per tick
             criticalThreshold: 20,     // below this, no health regen
             warningThreshold: 30       // time to panic about food
         },

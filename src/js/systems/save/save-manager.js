@@ -464,6 +464,8 @@ const SaveManager = {
         if (gameData.questState && typeof QuestSystem !== 'undefined') {
             QuestSystem.activeQuests = gameData.questState.activeQuests || {};
             QuestSystem.completedQuests = gameData.questState.completedQuests || [];
+            // 🖤 Restore failed quests too - the void remembers ALL your failures 💀
+            QuestSystem.failedQuests = gameData.questState.failedQuests || [];
         }
 
         // Show game UI (wrap in try-catch for robustness)
@@ -787,16 +789,19 @@ const SaveManager = {
                 font-size: 18px;
             }
             .save-manager-close {
-                background: rgba(244, 67, 54, 0.3);
-                border: 1px solid #f44336;
-                color: #f44336;
+                background: transparent;
+                border: none;
+                color: #888;
                 width: 28px;
                 height: 28px;
-                border-radius: 50%;
+                border-radius: 4px;
                 cursor: pointer;
-                font-size: 14px;
+                font-size: 1.4rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
-            .save-manager-close:hover { background: #f44336; color: #fff; }
+            .save-manager-close:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
             .save-manager-content {
                 flex: 1;
                 overflow-y: auto;

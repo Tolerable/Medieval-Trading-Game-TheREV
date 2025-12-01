@@ -70,6 +70,9 @@
     --z-loading-screen: 2000;
     --z-error-modal: 2500;
     --z-debooger-console: 3000;
+
+    /* 🖤 LAYER 3000+: Above main menu (main-menu is 3001) */
+    --z-settings-panel: 3100;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -219,9 +222,13 @@ body.state-setup #game-world {
 #inventory-panel,
 #financial-panel,
 #achievements-panel,
-#settings-panel,
 #properties-panel {
     z-index: var(--z-draggable-panel) !important; /* 120 - well above weather */
+}
+
+/* 🖤 Settings panel needs to be ABOVE main-menu (3001) so it shows on start screen */
+#settings-panel {
+    z-index: var(--z-settings-panel) !important; /* 3100 - above main menu */
 }
 
 /* Quest tracker */

@@ -141,10 +141,8 @@ const NPCManager = {
         }
 
         // 🎲 Random encounters 🗡️
-        if (typeof NPCEncounterSystem !== 'undefined' && Math.random() < 0.01) {
-            // 1% chance per second for encounter check
-            NPCEncounterSystem.checkForEncounter();
-        }
+        // NPCEncounterSystem hooks into TravelSystem and CityEventSystem directly
+        // No periodic polling needed - encounters trigger on travel/arrival/events
     },
 
     // 🏠 Handle location change 🌙
@@ -265,8 +263,8 @@ const NPCManager = {
 
     // 🎲 Spawn random NPC encounter 🦇
     spawnEncounter(type = 'random') {
-        if (typeof NPCEncounterSystem !== 'undefined') {
-            return NPCEncounterSystem.spawnEncounter(type);
+        if (typeof NPCEncounterSystem !== 'undefined' && NPCEncounterSystem.spawnRandomEncounter) {
+            return NPCEncounterSystem.spawnRandomEncounter('road', type === 'random' ? null : type);
         }
         return null;
     },

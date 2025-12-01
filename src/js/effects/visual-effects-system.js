@@ -213,11 +213,12 @@ const VisualEffectsSystem = {
         });
     },
     
-    // 🔁 Start particle animation loop - the eternal cycle begins
+    // 🔁 Start particle animation loop - the eternal cycle begins 🖤
     startParticleLoop() {
         const animate = () => {
             this.updateParticles();
-            requestAnimationFrame(animate);
+            // 💀 Store frame ID so cleanup() can cancel it
+            this.particleFrameId = requestAnimationFrame(animate);
         };
         animate();
     },
@@ -894,16 +895,22 @@ const VisualEffectsSystem = {
     },
     
     cleanup() {
+        // 🖤 Cancel animation frame to stop the eternal loop 💀
+        if (this.particleFrameId) {
+            cancelAnimationFrame(this.particleFrameId);
+            this.particleFrameId = null;
+        }
+
         this.clearAllParticles();
         this.clearWeather();
-        
+
         // 💀 Remove overlays - banishing the layers of illusion
         const overlays = ['night-overlay', 'golden-hour-overlay', 'weather-overlay'];
         overlays.forEach(id => {
             const element = document.getElementById(id);
             if (element) element.remove();
         });
-        
+
         // 🗑️ Remove particle container - destroying the stage itself
         if (this.particleSystem.container && this.particleSystem.container.parentNode) {
             this.particleSystem.container.remove();

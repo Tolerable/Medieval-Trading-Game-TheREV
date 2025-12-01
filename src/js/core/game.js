@@ -955,11 +955,11 @@ const KeyBindings = {
             <div class="char-sheet-section">
                 <h3>❤️ Vitals</h3>
                 <div class="char-vitals">
-                    <div class="char-vital"><span>Health</span><div class="vital-bar-inline"><div style="width: ${(stats.health / stats.maxHealth) * 100}%; background: #e53935;"></div></div><span>${stats.health}/${stats.maxHealth}</span></div>
-                    <div class="char-vital"><span>Hunger</span><div class="vital-bar-inline"><div style="width: ${(stats.hunger / stats.maxHunger) * 100}%; background: #ff9800;"></div></div><span>${stats.hunger}/${stats.maxHunger}</span></div>
-                    <div class="char-vital"><span>Thirst</span><div class="vital-bar-inline"><div style="width: ${(stats.thirst / stats.maxThirst) * 100}%; background: #2196f3;"></div></div><span>${stats.thirst}/${stats.maxThirst}</span></div>
-                    <div class="char-vital"><span>Stamina</span><div class="vital-bar-inline"><div style="width: ${(stats.stamina / stats.maxStamina) * 100}%; background: #9c27b0;"></div></div><span>${stats.stamina}/${stats.maxStamina}</span></div>
-                    <div class="char-vital"><span>Happiness</span><div class="vital-bar-inline"><div style="width: ${(stats.happiness / stats.maxHappiness) * 100}%; background: #4caf50;"></div></div><span>${stats.happiness}/${stats.maxHappiness}</span></div>
+                    <div class="char-vital"><span>Health</span><div class="vital-bar-inline"><div style="width: ${(stats.health / stats.maxHealth) * 100}%; background: #e53935;"></div></div><span>${Math.round(stats.health)}/${Math.round(stats.maxHealth)}</span></div>
+                    <div class="char-vital"><span>Hunger</span><div class="vital-bar-inline"><div style="width: ${(stats.hunger / stats.maxHunger) * 100}%; background: #ff9800;"></div></div><span>${Math.round(stats.hunger)}/${Math.round(stats.maxHunger)}</span></div>
+                    <div class="char-vital"><span>Thirst</span><div class="vital-bar-inline"><div style="width: ${(stats.thirst / stats.maxThirst) * 100}%; background: #2196f3;"></div></div><span>${Math.round(stats.thirst)}/${Math.round(stats.maxThirst)}</span></div>
+                    <div class="char-vital"><span>Stamina</span><div class="vital-bar-inline"><div style="width: ${(stats.stamina / stats.maxStamina) * 100}%; background: #9c27b0;"></div></div><span>${Math.round(stats.stamina)}/${Math.round(stats.maxStamina)}</span></div>
+                    <div class="char-vital"><span>Happiness</span><div class="vital-bar-inline"><div style="width: ${(stats.happiness / stats.maxHappiness) * 100}%; background: #4caf50;"></div></div><span>${Math.round(stats.happiness)}/${Math.round(stats.maxHappiness)}</span></div>
                 </div>
             </div>
 
@@ -2194,10 +2194,8 @@ const game = {
             NPCMerchantSystem.updateEconomy();
         }
 
-        // Update death timer
-        this.updateDeathTimer();
-
         // 🖤 Process player stats over time - the body's slow decay (and recovery)
+        // Death timer logic is handled within processPlayerStatsOverTime (starvation/dehydration)
         this.processPlayerStatsOverTime();
 
         // Update UI
@@ -2215,6 +2213,9 @@ const game = {
     processPlayerStatsOverTime() {
         if (!game.player || !game.player.stats) return;
 
+        // 🖤 FIX: Stats only decay when TIME is flowing - paused = frozen in time 💀
+        if (typeof TimeMachine !== 'undefined' && TimeMachine.isPaused) return;
+
         const timeInfo = TimeSystem.getTimeInfo();
 
         // Only update every few game minutes to avoid rapid changes
@@ -2229,11 +2230,19 @@ const game = {
             healthRegen: { baseRegenPerUpdate: 0.5, wellFedBonus: 1.0, wellFedThreshold: 70, enduranceBonusMultiplier: 0.05 }
         };
 
+        // 🦇 FIX: Apply seasonal effects to hunger/thirst decay
+        // Seasons modify decay rates (e.g., winter = more hunger, summer = more thirst)
+        const season = (typeof TimeMachine !== 'undefined' && TimeMachine.getSeasonData)
+            ? TimeMachine.getSeasonData()
+            : { effects: { hungerDrain: 1.0, thirstDrain: 1.0 } };
+        const hungerSeasonMod = season.effects?.hungerDrain || 1.0;
+        const thirstSeasonMod = season.effects?.thirstDrain || 1.0;
+
         // 🍖 HUNGER DECAY - dragged from the config's cold embrace
-        game.player.stats.hunger = Math.max(0, game.player.stats.hunger - survivalConfig.hunger.decayPerUpdate);
+        game.player.stats.hunger = Math.max(0, game.player.stats.hunger - (survivalConfig.hunger.decayPerUpdate * hungerSeasonMod));
 
         // 💧 THIRST DECAY - dehydration comes for us all
-        game.player.stats.thirst = Math.max(0, game.player.stats.thirst - survivalConfig.thirst.decayPerUpdate);
+        game.player.stats.thirst = Math.max(0, game.player.stats.thirst - (survivalConfig.thirst.decayPerUpdate * thirstSeasonMod));
 
         // ⚡ STAMINA REGENERATION - rest restores energy when idle 🖤
         // 0% to 100% in 5 game hours when not gathering or traveling
@@ -7314,10 +7323,10 @@ function updatePlayerStats() {
     if (thirstFill) thirstFill.style.width = `${(stats.thirst / stats.maxThirst) * 100}%`;
     if (energyFill) energyFill.style.width = `${(stats.stamina / stats.maxStamina) * 100}%`;
 
-    if (healthDisplay) healthDisplay.textContent = stats.health;
-    if (hungerDisplay) hungerDisplay.textContent = stats.hunger;
-    if (thirstDisplay) thirstDisplay.textContent = stats.thirst;
-    if (energyDisplay) energyDisplay.textContent = stats.stamina;
+    if (healthDisplay) healthDisplay.textContent = Math.round(stats.health);
+    if (hungerDisplay) hungerDisplay.textContent = Math.round(stats.hunger);
+    if (thirstDisplay) thirstDisplay.textContent = Math.round(stats.thirst);
+    if (energyDisplay) energyDisplay.textContent = Math.round(stats.stamina);
 
     // Legacy: keep old stats display working if it exists elsewhere
     let statsDisplay = document.getElementById('player-stats');
@@ -7328,35 +7337,35 @@ function updatePlayerStats() {
                 <div class="stat-progress">
                     <div class="stat-fill health-fill" style="width: ${(stats.health / stats.maxHealth) * 100}%"></div>
                 </div>
-                <span class="stat-value">${stats.health}/${stats.maxHealth}</span>
+                <span class="stat-value">${Math.round(stats.health)}/${Math.round(stats.maxHealth)}</span>
             </div>
             <div class="stat-bar">
                 <span class="stat-label">🍖 Hunger</span>
                 <div class="stat-progress">
                     <div class="stat-fill hunger-fill" style="width: ${(stats.hunger / stats.maxHunger) * 100}%"></div>
                 </div>
-                <span class="stat-value">${stats.hunger}/${stats.maxHunger}</span>
+                <span class="stat-value">${Math.round(stats.hunger)}/${Math.round(stats.maxHunger)}</span>
             </div>
             <div class="stat-bar">
                 <span class="stat-label">💧 Thirst</span>
                 <div class="stat-progress">
                     <div class="stat-fill thirst-fill" style="width: ${(stats.thirst / stats.maxThirst) * 100}%"></div>
                 </div>
-                <span class="stat-value">${stats.thirst}/${stats.maxThirst}</span>
+                <span class="stat-value">${Math.round(stats.thirst)}/${Math.round(stats.maxThirst)}</span>
             </div>
             <div class="stat-bar">
                 <span class="stat-label">⚡ Stamina</span>
                 <div class="stat-progress">
                     <div class="stat-fill stamina-fill" style="width: ${(stats.stamina / stats.maxStamina) * 100}%"></div>
                 </div>
-                <span class="stat-value">${stats.stamina}/${stats.maxStamina}</span>
+                <span class="stat-value">${Math.round(stats.stamina)}/${Math.round(stats.maxStamina)}</span>
             </div>
             <div class="stat-bar">
                 <span class="stat-label">😊 Happiness</span>
                 <div class="stat-progress">
                     <div class="stat-fill happiness-fill" style="width: ${(stats.happiness / stats.maxHappiness) * 100}%"></div>
                 </div>
-                <span class="stat-value">${stats.happiness}/${stats.maxHappiness}</span>
+                <span class="stat-value">${Math.round(stats.happiness)}/${Math.round(stats.maxHappiness)}</span>
             </div>
         `;
     }
