@@ -78,13 +78,33 @@ Each entry follows this format:
 - Initial page load (once)
 - User clicks "View All Champions" button
 - User returns to main menu (sees Hall of Champions)
-- User clicks refresh button in settings
+- ~~User clicks refresh button in settings~~ **REMOVED - see below**
 - User saves score (on death/retire)
 - Dev console commands (debooger)
 
 **Files Changed:**
 - `src/js/ui/panels/leaderboard-panel.js`
 - `src/js/ui/panels/settings-panel.js`
+
+---
+
+### Remove Refresh Button from Settings (More API Spam Prevention) 🖤💀
+
+**Request:** Remove the refresh button too - that's another way users can spam the API
+**Context:** Gee correctly pointed out I left a spam vector. Fucking rookie mistake.
+**Status:** COMPLETE ✅
+
+**Fixes Applied:**
+1. **settings-panel.js:1718** - Removed orphan event listener code for `#refresh-leaderboard-btn` (button didn't even exist in template, but cleaned up the dead code)
+
+**API Calls Now LIMITED To:**
+- Initial page load (once)
+- User clicks "View All Champions" button
+- User returns to main menu
+- User saves score (on death/retire)
+- Dev console commands (debooger only)
+
+**NO MORE refresh buttons or test buttons anywhere.**
 
 ---
 

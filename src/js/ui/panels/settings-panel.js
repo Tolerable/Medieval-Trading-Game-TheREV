@@ -1715,14 +1715,7 @@ const SettingsPanel = {
             saveLeaderboardBtn.addEventListener('click', () => this.saveLeaderboardConfig());
         }
 
-        const refreshLeaderboardBtn = this.panelElement.querySelector('#refresh-leaderboard-btn');
-        if (refreshLeaderboardBtn) {
-            refreshLeaderboardBtn.addEventListener('click', () => {
-                if (typeof GlobalLeaderboardSystem !== 'undefined') {
-                    GlobalLeaderboardSystem.refresh().then(() => this.refreshLeaderboardPreview());
-                }
-            });
-        }
+        // 🖤 Refresh button REMOVED - prevents API spam to JSONBin 💀
 
         // 🎙️ AI Voice tab controls - where NPCs get their voices
         this.setupAIVoiceControls();
