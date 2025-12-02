@@ -18,6 +18,42 @@ Each entry follows this format:
 
 ## 2025-12-02 - Current Session
 
+### Hall of Champions Main Menu Bug + Backend Default 🖤💀
+
+**Request:** Multiple Hall of Champions issues:
+1. Main menu shows "No Champions have risen yet" but clicking View All Champions shows the actual list
+2. Top 3 should be visible on main menu WITHOUT needing to click View All
+3. View All Champions should show top 100
+4. UI colors/borders glitch when switching from Local to JSONBin backend in settings
+5. JSONBin should be the default backend (not Local)
+**Context:**
+- `SaveUISystem.updateLeaderboard()` calls `GlobalLeaderboardSystem.fetchLeaderboard()` which returns data
+- But data isn't rendering to the main menu widget
+- Settings backend switch causes visual glitches
+**Status:** MOSTLY COMPLETE ✅ (UI glitch needs more info)
+
+**Root Causes Found:**
+1. **Timing Issue:** `fetchLeaderboard()` was returning empty cache when concurrent callers hit it during an in-progress fetch
+2. **No auto-refresh of menu:** After initial JSONBin fetch completed, the main menu wasn't being updated
+
+**Fixes Applied:**
+1. **leaderboard-panel.js:35** - Changed `_isFetching` flag to `_fetchPromise` - concurrent callers now AWAIT the same fetch instead of getting empty cache
+2. **leaderboard-panel.js:191-223** - Rewrote `fetchLeaderboard()` to store and return a promise that all callers can await
+3. **leaderboard-panel.js:63-66** - Added `SaveUISystem.updateLeaderboard()` call after initial fetch completes to update main menu
+
+**JSONBin Default:**
+- Already set as default in `config.js:168` (`backend: 'jsonbin'`)
+- Credentials already configured
+
+**UI Color Glitch:**
+- Could not reproduce or find cause in code - NO JavaScript changes colors when switching backends
+- Need more info from Gee: screenshot, browser console errors, exact steps to reproduce
+
+**Files Changed:**
+- `src/js/ui/panels/leaderboard-panel.js`
+
+---
+
 ### Settings About Tab Empty Bug Fix 🖤💀
 
 **Request:** About info in settings is blank! It shall show all Unity AI Lab info, media addresses, and creators = Hackall360, Sponge, GFourteen. All info should load from config.

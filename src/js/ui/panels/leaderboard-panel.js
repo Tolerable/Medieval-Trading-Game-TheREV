@@ -32,7 +32,7 @@ const GlobalLeaderboardSystem = {
     lastFetch: null,
     autoRefreshInterval: null,
     // cacheTimeout now comes from config
-    _isFetching: false, // 🖤 Guard flag to prevent concurrent fetches 💀
+    _fetchPromise: null, // 🖤 Stores ongoing fetch promise so concurrent callers can await 💀
 
     // 🎮 Initialize the system
     init() {
@@ -59,6 +59,11 @@ const GlobalLeaderboardSystem = {
         this.fetchLeaderboard().then(() => {
             console.log('🏆 Initial fetch complete, entries:', this.leaderboard.length);
             this.renderLeaderboard();
+
+            // 🖤 Also update main menu Hall of Champions after initial fetch completes 💀
+            if (typeof SaveUISystem !== 'undefined' && SaveUISystem.updateLeaderboard) {
+                SaveUISystem.updateLeaderboard();
+            }
         });
 
         // Start auto-refresh every 10 minutes
@@ -184,9 +189,9 @@ const GlobalLeaderboardSystem = {
 
     // 📥 Fetch leaderboard from backend
     async fetchLeaderboard() {
-        // 🖤 Prevent concurrent fetches - return cached if already fetching 💀
-        if (this._isFetching) {
-            return this.leaderboard;
+        // 🖤 If a fetch is already in progress, wait for it instead of returning empty cache 💀
+        if (this._fetchPromise) {
+            return this._fetchPromise;
         }
 
         // Check cache
@@ -194,24 +199,28 @@ const GlobalLeaderboardSystem = {
             return this.leaderboard;
         }
 
-        this._isFetching = true;
-        try {
-            switch (this.config.backend) {
-                case 'jsonbin':
-                    return await this.fetchFromJSONBin();
-                case 'gist':
-                    return await this.fetchFromGist();
-                case 'local':
-                default:
-                    return this.fetchFromLocal();
+        // 🖤 Store the promise so concurrent callers can await the same fetch 💀
+        this._fetchPromise = (async () => {
+            try {
+                switch (this.config.backend) {
+                    case 'jsonbin':
+                        return await this.fetchFromJSONBin();
+                    case 'gist':
+                        return await this.fetchFromGist();
+                    case 'local':
+                    default:
+                        return this.fetchFromLocal();
+                }
+            } catch (error) {
+                // 🦇 Network issue - silently fall back to local, no console spam
+                return this.fetchFromLocal();
+            } finally {
+                // 🖤 Clear the promise when done so next call can fetch fresh 💀
+                this._fetchPromise = null;
             }
-        } catch (error) {
-            // 🦇 Network issue - silently fall back to local, no console spam
-            return this.fetchFromLocal();
-        } finally {
-            // 🖤 Always reset flag when done 💀
-            this._isFetching = false;
-        }
+        })();
+
+        return this._fetchPromise;
     },
 
     // 📤 Submit score to leaderboard
