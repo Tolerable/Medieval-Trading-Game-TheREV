@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // CRAFTING ENGINE - turning failure into profit
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -482,6 +482,10 @@ const CraftingEngine = {
         // Try game.player.inventory
         if (typeof game !== 'undefined' && game.player?.inventory) {
             game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + quantity;
+            // 🖤 Emit item-received for quest progress tracking 💀
+            document.dispatchEvent(new CustomEvent('item-received', {
+                detail: { item: itemId, quantity: quantity, source: 'crafting' }
+            }));
             return;
         }
         console.warn('🔨 CraftingEngine: No inventory system found to add item');

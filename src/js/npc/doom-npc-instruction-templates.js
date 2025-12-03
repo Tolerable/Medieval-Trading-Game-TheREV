@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // DOOM NPC INSTRUCTION TEMPLATES - Voices from the apocalypse 💀🔥
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Every NPC has been broken by the doom. Their responses reflect
 // desperation, trauma, survival instinct, and loss.
 // ═══════════════════════════════════════════════════════════════
@@ -242,6 +242,15 @@ Example: "A weapon? Bring me iron, leather, and food for the forge fire. {openCr
         mad_ferryman: {
             greeting: "I take the living across. I take the dead across. Sometimes it's hard to tell which is which.",
             trade: "Passage to the other shores... the living ones cost food. The dead pay in memories. {openMarket}",
+            demeanor: 'cryptic'
+        },
+
+        // THE BOATMAN (Portal NPC)
+        boatman: {
+            greeting: "You've crossed over. The world you knew is gone. This... this is what remains. The Shadow Throne has consumed everything.",
+            trade: "I ferry souls, not goods. But if you have food... I'll remember your kindness. {openMarket}",
+            questGive: "The Doom has taken everything, but some still live. Find them. Learn what happened. Then decide if you'll fight... or join the dead. {startQuest:doom_arrival}",
+            questProgress: "Still breathing? Good. The survivors need all the help they can get. Keep moving. Stay alive.",
             demeanor: 'cryptic'
         },
 

@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME WORLD RENDERER - main world map rendering engine
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -48,6 +48,33 @@ const GameWorldRenderer = {
             x: pos.x * scaleX + this.MAP_PADDING,
             y: pos.y * scaleY + this.MAP_PADDING
         };
+    },
+
+    // 🖤 Get location name - returns doom name if in doom world 💀
+    getLocationName(locationId) {
+        // 🦇 Check if we're in doom world
+        const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld()) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
+                       (typeof game !== 'undefined' && game.inDoomWorld);
+
+        if (inDoom) {
+            // 🖤 Try DoomWorldNPCs for corrupted names
+            if (typeof DoomWorldNPCs !== 'undefined' && DoomWorldNPCs.locationNames[locationId]) {
+                return DoomWorldNPCs.locationNames[locationId];
+            }
+            // 🦇 Try DoomQuests for location data
+            if (typeof DoomQuests !== 'undefined' && DoomQuests.doomLocations) {
+                const doomLoc = DoomQuests.doomLocations['doom_' + locationId];
+                if (doomLoc && doomLoc.doomName) return doomLoc.doomName;
+            }
+            // 💀 Fallback: add doom prefix to normal name
+            const normalLoc = GameWorld?.locations?.[locationId];
+            if (normalLoc) return 'Ruined ' + normalLoc.name;
+        }
+
+        // 🖤 Normal world - just return the regular name
+        const location = GameWorld?.locations?.[locationId];
+        return location ? location.name : locationId;
     },
 
     // 📜 location visit history - breadcrumbs of everywhere you've been and regretted
@@ -169,6 +196,7 @@ const GameWorldRenderer = {
         `;
 
         // Style the map element - 🖤 MASSIVE map for infinite scroll feel
+        // 🖤 CRITICAL: isolation: isolate creates a new stacking context so child z-index works! 💀
         this.mapElement.style.cssText = `
             position: absolute;
             top: 0;
@@ -182,6 +210,7 @@ const GameWorldRenderer = {
             cursor: grab;
             user-select: none;
             border-radius: 0;
+            isolation: isolate;
         `;
 
         // 🦇 Try to load the backdrop image - if it exists, use it
@@ -579,13 +608,16 @@ const GameWorldRenderer = {
         const labelOffsets = this.calculateLabelOffsets(visibleLocations);
 
         // Draw each location with its calculated label offset and visibility state
+        let createdCount = 0;
         Object.values(locations).forEach(location => {
             const visibility = visibilityMap[location.id] || 'hidden';
             if (visibility !== 'hidden') {
                 const offset = labelOffsets[location.id] || 0;
                 this.createLocationElement(location, offset, visibility);
+                createdCount++;
             }
         });
+        console.log(`🗺️ Created ${createdCount} location elements on map`);
 
         // Apply current transform
         this.updateTransform();
@@ -748,7 +780,7 @@ const GameWorldRenderer = {
 
         this.tooltipElement.innerHTML = `
             <div style="font-size: 14px; font-weight: bold; color: #4fc3f7; margin-bottom: 8px;">
-                🏘️ Your Properties in ${location.name}
+                🏘️ Your Properties in ${this.getLocationName(location.id)}
             </div>
             ${propertyList}
             <div style="margin-top: 8px; font-size: 11px; color: #aaa;">
@@ -1367,7 +1399,8 @@ const GameWorldRenderer = {
         const label = document.createElement('div');
         label.className = 'map-location-label' + (isDiscovered ? ' discovered' : '');
         // Show "Unknown" or "???" for discovered but unexplored locations
-        label.textContent = isDiscovered ? '???' : location.name;
+        // 🖤 Use getLocationName() to get doom names when in doom world 💀
+        label.textContent = isDiscovered ? '???' : this.getLocationName(location.id);
         const labelColor = isDiscovered ? '#aabbcc' : '#fff'; // 🖤 Lighter grey-blue for unexplored - actually visible!
         label.style.cssText = `
             position: absolute;
@@ -1840,8 +1873,10 @@ const GameWorldRenderer = {
         // Add arrival animation styles if not already present
         this.addArrivalStyles();
 
-        // Re-render to update exploration state
-        this.render();
+        // 🖤 DO NOT call render() here - TravelSystem.completeTravel() handles this AFTER
+        // setting game.currentLocation properly. Calling render() here races with TravelSystem
+        // and can render with stale location data, causing player to snap back to start.
+        // TravelSystem calls: completeTravelAnimation() -> updatePlayerMarker() -> render()
     },
 
     // 🎨 css magic for when you finally arrive somewhere (celebrate the small victories)
@@ -2261,7 +2296,7 @@ const GameWorldRenderer = {
 
         // Apply constraints and update
         this.updateTransform();
-        console.log(`🗺️ Centered on "${location.name}" at`, pos, 'offset:', this.mapState.offsetX, this.mapState.offsetY);
+        console.log(`🗺️ Centered on "${this.getLocationName(locationId)}" at`, pos, 'offset:', this.mapState.offsetX, this.mapState.offsetY);
         return true;
     },
 
@@ -2315,10 +2350,16 @@ const GameWorldRenderer = {
             if (typeof QuestSystem !== 'undefined' && QuestSystem.getQuestInfoForLocation) {
                 const quest = QuestSystem.getQuestInfoForLocation(location.id);
                 if (quest) {
+                    // 🖤💀 Use ORANGE for doom quests, gold for normal
+                    const isDoomQuest = quest.isDoom || quest.questId?.startsWith('doom_');
+                    const bgColor = isDoomQuest ? 'rgba(255, 140, 0, 0.15)' : 'rgba(255, 215, 0, 0.15)';
+                    const borderColor = isDoomQuest ? '#ff8c00' : '#ffd700';
+                    const textColor = isDoomQuest ? '#ff8c00' : '#ffd700';
+                    const subTextColor = isDoomQuest ? '#ffb347' : '#ffeb3b';
                     questInfo = `
-                        <div style="margin-top: 8px; padding: 8px; background: rgba(255, 215, 0, 0.15); border-radius: 6px; border-left: 3px solid #ffd700;">
-                            <div style="color: #ffd700; font-weight: bold; margin-bottom: 4px;">🎯 ${quest.questName}</div>
-                            ${quest.objective ? `<div style="color: #ffeb3b; font-size: 11px;">${quest.objective}</div>` : ''}
+                        <div style="margin-top: 8px; padding: 8px; background: ${bgColor}; border-radius: 6px; border-left: 3px solid ${borderColor};">
+                            <div style="color: ${textColor}; font-weight: bold; margin-bottom: 4px;">🎯 ${quest.questName}</div>
+                            ${quest.objective ? `<div style="color: ${subTextColor}; font-size: 11px;">${quest.objective}</div>` : ''}
                         </div>
                     `;
                 }
@@ -2329,7 +2370,7 @@ const GameWorldRenderer = {
                 // so players can make informed decisions about where to travel
                 this.tooltipElement.innerHTML = `
                     <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #ff9800;">
-                        🏰 ${location.name}
+                        🏰 ${this.getLocationName(location.id)}
                     </div>
                     <div style="color: #aaa; font-size: 12px; margin-bottom: 5px;">
                         Outpost • ${location.region} (unexplored)
@@ -2366,10 +2407,16 @@ const GameWorldRenderer = {
             if (typeof QuestSystem !== 'undefined' && QuestSystem.getQuestInfoForLocation) {
                 const quest = QuestSystem.getQuestInfoForLocation(location.id);
                 if (quest) {
+                    // 🖤💀 Use ORANGE for doom quests, gold for normal
+                    const isDoomQuest = quest.isDoom || quest.questId?.startsWith('doom_');
+                    const bgColor = isDoomQuest ? 'rgba(255, 140, 0, 0.15)' : 'rgba(255, 215, 0, 0.15)';
+                    const borderColor = isDoomQuest ? '#ff8c00' : '#ffd700';
+                    const textColor = isDoomQuest ? '#ff8c00' : '#ffd700';
+                    const subTextColor = isDoomQuest ? '#ffb347' : '#ffeb3b';
                     questInfo = `
-                        <div style="margin-top: 8px; padding: 8px; background: rgba(255, 215, 0, 0.15); border-radius: 6px; border-left: 3px solid #ffd700;">
-                            <div style="color: #ffd700; font-weight: bold; margin-bottom: 4px;">🎯 ${quest.questName}</div>
-                            ${quest.objective ? `<div style="color: #ffeb3b; font-size: 11px;">${quest.objective}</div>` : ''}
+                        <div style="margin-top: 8px; padding: 8px; background: ${bgColor}; border-radius: 6px; border-left: 3px solid ${borderColor};">
+                            <div style="color: ${textColor}; font-weight: bold; margin-bottom: 4px;">🎯 ${quest.questName}</div>
+                            ${quest.objective ? `<div style="color: ${subTextColor}; font-size: 11px;">${quest.objective}</div>` : ''}
                         </div>
                     `;
                 }
@@ -2377,7 +2424,7 @@ const GameWorldRenderer = {
 
             this.tooltipElement.innerHTML = `
                 <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">
-                    ${style.icon} ${location.name}
+                    ${style.icon} ${this.getLocationName(location.id)}
                 </div>
                 <div style="color: #aaa; font-size: 12px; margin-bottom: 5px;">
                     ${location.type.charAt(0).toUpperCase() + location.type.slice(1)} • ${location.region}
@@ -2438,7 +2485,7 @@ const GameWorldRenderer = {
         e.stopPropagation();
 
         if (this.isCurrentLocation(location)) {
-            addMessage(`📍 You are already at ${location.name}. go touch grass or something.`);
+            addMessage(`📍 You are already at ${this.getLocationName(location.id)}. go touch grass or something.`);
             return;
         }
 

@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // COMBAT SYSTEM - when words fail, blades speak
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -502,6 +502,10 @@ const CombatSystem = {
                         game.player.inventory[itemId] = 0;
                     }
                     game.player.inventory[itemId]++;
+                    // 🖤 Emit item-received for quest progress tracking 💀
+                    document.dispatchEvent(new CustomEvent('item-received', {
+                        detail: { item: itemId, quantity: 1, source: 'combat_loot' }
+                    }));
                     const item = typeof ItemDatabase !== 'undefined' ?
                         ItemDatabase.getItem(itemId) : { name: itemId };
                     this.addCombatLog(`📦 Looted: ${item?.name || itemId}`);

@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // TRAVEL SYSTEM - wandering from one mistake to another
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -402,37 +402,6 @@ const TravelSystem = {
         // - TravelPanelMap (travel panel map - HTML divs)
         console.log('🗺️ TravelSystem.setupCanvas: Canvas rendering disabled - using HTML-based GameWorldRenderer and TravelPanelMap instead');
         return;
-
-        /* OLD CANVAS CODE - DISABLED
-        // try to find the main canvas (if it even exists)
-        let canvas = document.getElementById('world-map-canvas');
-
-        // no luck? grab the overlay canvas (plan b, as always)
-        if (!canvas) {
-            canvas = document.getElementById('world-map-overlay-canvas');
-        }
-
-        // still nothing? manifest one from pure desperation
-        if (!canvas) {
-            const mapContainer = document.getElementById('map-container');
-            if (mapContainer) {
-                const newCanvas = document.createElement('canvas');
-                newCanvas.id = 'world-map-canvas';
-                newCanvas.width = 800;
-                newCanvas.height = 600;
-                mapContainer.appendChild(newCanvas);
-                canvas = newCanvas;
-            }
-        }
-
-        if (canvas) {
-            this.canvas = canvas;
-            this.ctx = canvas.getContext('2d');
-            console.log('🖼️ Canvas summoned:', canvas.id, '- dimensions:', canvas.width, 'x', canvas.height, 'pixels of potential');
-        } else {
-            console.error('💀 TravelSystem: No canvas found... the void stares back');
-        }
-        */
     },
 
     // birth a world from the void (playing god at 3am hits different)
@@ -1550,8 +1519,6 @@ const TravelSystem = {
                 // Calculate time for this segment (no cap - real journeys take real time)
                 const segmentTime = segmentDistance / effectiveSpeed;
 
-                // 🦇 FIX: Removed random variance - it caused displayed time to differ from actual travel time
-                // because calculateTravelInfo() was called separately for display and for startTravel()
                 totalTimeHours += segmentTime;
                 totalDistance += segmentDistance;
                 totalStaminaCost += Math.round(segmentInfo.staminaDrain * segmentTime * 10);
@@ -2085,10 +2052,8 @@ const TravelSystem = {
             console.log(`🚶 journey progress: ${progressPct}% (${elapsed}/${duration} mins elapsed)`);
         }
 
-        // 🖤 FIX: REMOVED travel stat drain - game.js processPlayerStatsOverTime() handles ALL vital decay 💀
-        // Travel just advances game time, which naturally triggers the unified decay system
-        // This prevents double-drain and ensures 3 day thirst / 5 day hunger rates are accurate
-        // this.applyTravelStatDrain(elapsed); // DISABLED
+        // 🖤 game.js processPlayerStatsOverTime() handles ALL vital decay 💀
+        // Travel advances game time, which naturally triggers the unified decay system
 
         // Update player position along path
         this.updatePlayerPositionAlongPath();
@@ -2260,10 +2225,12 @@ const TravelSystem = {
         }
 
         // Update game state
+        // 🖤 Include description so updateLocationInfo() can display it 💀
         game.currentLocation = {
             id: destination.id,
             name: destination.name,
-            type: destination.type
+            type: destination.type,
+            description: destination.description || ''
         };
 
         // 🖤 CRITICAL: Mark location as VISITED/EXPLORED so tooltips and panels update 💀
@@ -2319,6 +2286,11 @@ const TravelSystem = {
                 // and showing the "arrived" state (hovering above the location)
                 if (GameWorldRenderer.completeTravelAnimation) {
                     GameWorldRenderer.completeTravelAnimation();
+                }
+                // 🖤 Re-render map AFTER game.currentLocation is set (lines 2263-2267 above)
+                // This ensures new location shows as explored and connected locations as discovered
+                if (GameWorldRenderer.render) {
+                    GameWorldRenderer.render();
                 }
                 if (GameWorldRenderer.updatePlayerMarker) {
                     GameWorldRenderer.updatePlayerMarker();
@@ -2911,6 +2883,14 @@ const TravelSystem = {
         }
 
         // 📍 Update Location Panel - show the new location info
+        // 🖤 Call the ACTUAL global functions from game.js that update the location panel 💀
+        if (typeof updateLocationInfo === 'function') {
+            updateLocationInfo();
+        }
+        if (typeof updateLocationPanel === 'function') {
+            updateLocationPanel();
+        }
+        // Also try LocationPanel object if it exists
         if (typeof LocationPanel !== 'undefined' && LocationPanel.update) {
             LocationPanel.update();
         }
@@ -3119,48 +3099,10 @@ const TravelSystem = {
     // and TravelPanelMap (HTML-based) for all map displays. This function is kept as a
     // no-op to prevent errors from existing calls throughout the codebase.
     render() {
-        // Old canvas rendering disabled - GameWorldRenderer and TravelPanelMap handle map display now
-        // If you need to update the travel panel map, use: TravelPanelMap.render()
-        // If you need to update the main map, use: GameWorldRenderer.render()
+        // GameWorldRenderer and TravelPanelMap handle map display
+        // To update the travel panel map, use: TravelPanelMap.render()
+        // To update the main map, use: GameWorldRenderer.render()
         return;
-
-        /* OLD CANVAS CODE - DISABLED
-        if (!this.ctx || !this.canvas) return;
-
-        // Clear canvas
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Save context state
-        this.ctx.save();
-
-        // Apply zoom and pan
-        this.ctx.translate(this.worldMap.offsetX, this.worldMap.offsetY);
-        this.ctx.scale(this.worldMap.zoom, this.worldMap.zoom);
-
-        // Render terrain background
-        this.renderTerrain();
-
-        // Render paths
-        this.renderPaths();
-
-        // Render resource nodes
-        this.renderResourceNodes();
-
-        // Render locations
-        this.renderLocations();
-
-        // Render points of interest
-        this.renderPointsOfInterest();
-
-        // Render player
-        this.renderPlayer();
-
-        // Restore context state
-        this.ctx.restore();
-
-        // Render tooltip (not affected by zoom/pan)
-        this.renderTooltip();
-        */
     },
 
     // Render terrain background
@@ -3674,8 +3616,12 @@ const TravelSystem = {
             game.player.inventory[resourceType] = 0;
         }
         game.player.inventory[resourceType] += yield;
+        // 🖤 Emit item-received for quest progress tracking 💀
+        document.dispatchEvent(new CustomEvent('item-received', {
+            detail: { item: resourceType, quantity: yield, source: 'travel_forage' }
+        }));
         game.player.inventory.currentWeight += totalWeight;
-        
+
         // Reduce resource abundance (depletion)
         node.abundance[resourceType] *= 0.9;
         

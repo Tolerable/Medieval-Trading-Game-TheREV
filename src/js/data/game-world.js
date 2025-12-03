@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME WORLD SYSTEM - where dreams die and gold lives in darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -870,8 +870,50 @@ const GameWorld = {
 
     // 💀 Get NPC data with persona info for display
     getNPCDataForLocation(locationId) {
-        const npcTypes = this.getNPCsForLocation(locationId);
         const location = this.locations[locationId];
+
+        // 🖤💀 DOOM WORLD NPC SYSTEM 💀🖤
+        // When in doom world, return doom NPCs instead of normal NPCs
+        const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
+                       (typeof game !== 'undefined' && game.inDoomWorld);
+
+        if (inDoom && typeof DoomWorldNPCs !== 'undefined') {
+            const doomLocationData = DoomWorldNPCs.locationNPCs[locationId];
+            if (doomLocationData && doomLocationData.npcs) {
+                const doomLocationName = DoomWorldNPCs.locationNames[locationId] || `Ruined ${location?.name || locationId}`;
+
+                return doomLocationData.npcs.map(doomNpcType => {
+                    // Get doom NPC type data
+                    const doomType = DoomWorldNPCs.npcTypes[doomNpcType];
+                    const npcId = `doom_${locationId}_${doomNpcType}`;
+
+                    // 🖤 Doom NPC names are more descriptive
+                    const doomName = this.formatDoomNPCName(doomNpcType);
+                    const doomTitle = doomType?.title || 'Survivor';
+                    const demeanor = doomType?.demeanor || 'desperate';
+
+                    return {
+                        id: npcId,
+                        type: doomNpcType,
+                        baseType: doomType?.base || doomNpcType,
+                        name: doomName,
+                        title: doomTitle,
+                        voice: 'onyx', // 💀 Darker voice for doom NPCs
+                        personality: demeanor,
+                        demeanor: demeanor,
+                        location: locationId,
+                        locationName: doomLocationName,
+                        description: doomLocationData.description,
+                        atmosphere: doomLocationData.atmosphere,
+                        isDoom: true
+                    };
+                });
+            }
+        }
+
+        // 🦇 Normal world NPC loading
+        const npcTypes = this.getNPCsForLocation(locationId);
 
         return npcTypes.map(npcType => {
             // 🖤 Try to get persona from database
@@ -895,6 +937,14 @@ const GameWorld = {
                 ...persona
             };
         });
+    },
+
+    // 💀 Format doom NPC type to display name
+    formatDoomNPCName(doomNpcType) {
+        // Convert doom_type names like 'fallen_noble' to 'The Fallen Noble'
+        const words = doomNpcType.split('_');
+        const formatted = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        return `The ${formatted}`;
     },
 
     // 🖤 Helper: format NPC type to display name
@@ -972,8 +1022,9 @@ const GameWorld = {
     init() {
         console.log('🌍 GameWorld awakens from the void...');
         this.unlockedRegions = ['starter', 'capital', 'northern', 'eastern', 'western', 'southern'];
-        // 🖤 Start with Greendale + nearby locations already explored 💀
-        this.visitedLocations = ['greendale', 'southern_outpost', 'royal_capital'];
+        // 🖤 Start with greendale as default - createCharacter() will add proper starting location based on perks 💀
+        // This ensures the map always has something to render even if called before character creation
+        this.visitedLocations = ['greendale'];
         this.currentRegion = 'starter';
 
         // 🦇 Try to setup market prices (may fail if ItemDatabase not loaded)

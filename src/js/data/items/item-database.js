@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // ITEM DATABASE - the sacred tome of all tradeable darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -2277,6 +2277,32 @@ const ItemDatabase = {
         if (!item) return 0;
 
         let price = item.basePrice || 0;
+
+        // 🖤💀 DOOM WORLD ECONOMY 💀🖤
+        // When in doom world, apply apocalyptic price modifiers
+        const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
+                       (typeof game !== 'undefined' && game.inDoomWorld);
+
+        if (inDoom && typeof DoomWorldNPCs !== 'undefined') {
+            // Check for exact item match in doom economy
+            let doomModifier = DoomWorldNPCs.economyModifiers[itemId];
+
+            // If no exact match, check by category/type
+            if (!doomModifier && item.category) {
+                doomModifier = DoomWorldNPCs.economyModifiers[item.category];
+            }
+
+            // Check item type as fallback
+            if (!doomModifier && item.type) {
+                doomModifier = DoomWorldNPCs.economyModifiers[item.type];
+            }
+
+            // Apply doom modifier (defaults to 1.0 if no match - neutral)
+            if (doomModifier) {
+                price *= doomModifier;
+            }
+        }
 
         // Apply location multiplier
         if (modifiers.locationMultiplier) {

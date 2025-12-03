@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // NPC WORKFLOW SYSTEM - the brains behind every interaction
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -263,100 +263,166 @@ PLAYER IS BROWSING:
     },
 
     // ═══════════════════════════════════════════════════════════════
+    // 🖤 PRE-VALIDATED QUEST CHECKER - client-side validation to reduce API lag 💀
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * Pre-validates quest state CLIENT-SIDE so API doesn't have to figure it out.
+     * Returns simple action directive instead of raw data dumps.
+     */
+    getPreValidatedQuestAction(npcData, playerData) {
+        const npcType = npcData?.type || npcData?.id;
+        const activeQuests = playerData?.activeQuests || (typeof QuestSystem !== 'undefined' ? QuestSystem.activeQuests : {});
+        const completedQuests = playerData?.completedQuests || (typeof QuestSystem !== 'undefined' ? QuestSystem.completedQuests : []);
+
+        // 🦇 Check 1: Does player have a quest READY TO TURN IN to this NPC?
+        for (const [questId, quest] of Object.entries(activeQuests)) {
+            const isReady = typeof QuestSystem !== 'undefined' ?
+                QuestSystem.checkProgress(questId)?.status === 'ready_to_complete' : false;
+
+            if (isReady && (quest.giver === npcType || quest.turnInNpc === npcType)) {
+                // Validate collection items are actually in inventory
+                const missingItems = [];
+                for (const obj of quest.objectives || []) {
+                    if (obj.type === 'collect' && obj.item) {
+                        const has = game?.player?.inventory?.[obj.item] || 0;
+                        if (has < obj.count) {
+                            missingItems.push({ item: obj.item, need: obj.count, have: has });
+                        }
+                    }
+                }
+
+                if (missingItems.length === 0) {
+                    return {
+                        action: 'COMPLETE_QUEST',
+                        questId: questId,
+                        questName: quest.name,
+                        command: `{completeQuest:${questId}}`,
+                        message: `Player has completed "${quest.name}" - accept turn-in and give reward`
+                    };
+                } else {
+                    return {
+                        action: 'MISSING_ITEMS',
+                        questId: questId,
+                        questName: quest.name,
+                        missingItems: missingItems,
+                        message: `Quest "${quest.name}" objectives done but player missing: ${missingItems.map(m => `${m.need - m.have}x ${m.item}`).join(', ')}`
+                    };
+                }
+            }
+        }
+
+        // 🦇 Check 2: Does player have an ACTIVE quest from this NPC (progress check)?
+        for (const [questId, quest] of Object.entries(activeQuests)) {
+            if (quest.giver === npcType || quest.turnInNpc === npcType) {
+                const progress = typeof QuestSystem !== 'undefined' ? QuestSystem.checkProgress(questId) : null;
+                return {
+                    action: 'CHECK_PROGRESS',
+                    questId: questId,
+                    questName: quest.name,
+                    progress: progress?.progress || 'unknown',
+                    objectives: quest.objectives,
+                    message: `Player has active quest "${quest.name}" - remind them what's needed`
+                };
+            }
+        }
+
+        // 🦇 Check 3: Can this NPC OFFER a new quest?
+        const npcQuests = npcData?.quests || [];
+        for (const quest of npcQuests) {
+            const qId = quest.id || quest;
+            const questDef = typeof QuestSystem !== 'undefined' ? QuestSystem.quests[qId] : quest;
+            if (!questDef) continue;
+
+            const alreadyActive = activeQuests[qId];
+            const alreadyDone = completedQuests.includes(qId);
+            const prereqMet = !questDef.prerequisite || completedQuests.includes(questDef.prerequisite);
+
+            if (!alreadyActive && !alreadyDone && prereqMet) {
+                return {
+                    action: 'OFFER_QUEST',
+                    questId: qId,
+                    questName: questDef.name,
+                    description: questDef.description,
+                    command: `{startQuest:${qId}}`,
+                    message: `You can offer quest "${questDef.name}" - use ${`{startQuest:${qId}}`} when player accepts`
+                };
+            }
+        }
+
+        // 🦇 No quest actions available
+        return {
+            action: 'NO_QUEST',
+            message: 'No quest actions available with this NPC - have normal conversation'
+        };
+    },
+
+    /**
+     * Pre-validates item state CLIENT-SIDE for collection/delivery quests.
+     */
+    getPreValidatedItemCheck(itemId, requiredQty = 1) {
+        const playerHas = game?.player?.inventory?.[itemId] || 0;
+        const questItemHas = game?.player?.questItems?.[itemId] ? 1 : 0;
+
+        return {
+            itemId: itemId,
+            required: requiredQty,
+            playerHas: playerHas,
+            hasQuestItem: questItemHas > 0,
+            canComplete: playerHas >= requiredQty || questItemHas > 0,
+            message: playerHas >= requiredQty ?
+                `Player HAS ${playerHas}x ${itemId} - can complete` :
+                `Player MISSING ${requiredQty - playerHas}x ${itemId}`
+        };
+    },
+
+    // ═══════════════════════════════════════════════════════════════
     // 📜 QUEST WORKFLOW - how to handle quest interactions
     // ═══════════════════════════════════════════════════════════════
 
     getQuestContext(npcData, playerData, interactionType, questData = null) {
-        const availableQuests = npcData.quests || [];
-        const activeQuests = playerData.activeQuests || {};
-        const completedQuests = playerData.completedQuests || [];
-        const playerInventory = playerData.inventory || {};
-        const playerQuestItems = playerData.questItems || {};
+        // 🖤 Use pre-validated quest checker to reduce API context size 💀
+        const preValidated = this.getPreValidatedQuestAction(npcData, playerData);
 
-        let context = `
-=== QUEST CONTEXT ===
+        let context = `\n=== QUEST STATUS (PRE-VALIDATED) ===\n`;
+
+        // 🦇 Simple, direct instructions based on pre-validation
+        switch (preValidated.action) {
+            case 'COMPLETE_QUEST':
+                context += `QUEST READY TO COMPLETE: "${preValidated.questName}"
+ACTION: Accept the turn-in and complete the quest.
+USE THIS COMMAND: ${preValidated.command}
+EXAMPLE: "Well done! You've completed the task. Here's your reward. ${preValidated.command}"
 `;
+                break;
 
-        // Check for quests this NPC can offer
-        const offerableQuests = availableQuests.filter(q =>
-            !activeQuests[q.id] && !completedQuests.includes(q.id)
-        );
-
-        // Check for active quests involving this NPC
-        const relevantActiveQuests = Object.values(activeQuests).filter(q =>
-            q.giver === npcData.type || q.turnInNpc === npcData.id || q.turnInNpc === npcData.type
-        );
-
-        if (interactionType === this.INTERACTION_TYPES.QUEST_OFFER) {
-            if (offerableQuests.length > 0) {
-                const quest = offerableQuests[0];
-                context += `
-YOU HAVE A QUEST TO OFFER:
-Quest: "${quest.name}"
-Description: ${quest.description}
-Objectives: ${JSON.stringify(quest.objectives)}
-Rewards: ${quest.rewards?.gold || 0} gold, ${quest.rewards?.items?.join(', ') || 'no items'}
-
-HOW TO OFFER THIS QUEST:
-1. Explain the situation/problem
-2. Describe what you need done
-3. Mention the reward
-4. Wait for player response
-5. If they accept: "{startQuest:${quest.id}}"
-6. If they decline: express disappointment but respect their choice
-
-EXAMPLE:
-"I need someone to clear the rats from my cellar. There's 50 gold in it for you. What do you say? {startQuest:${quest.id}}"
+            case 'MISSING_ITEMS':
+                context += `QUEST INCOMPLETE: "${preValidated.questName}"
+PROBLEM: ${preValidated.message}
+ACTION: Tell player what items they still need. Do NOT complete the quest.
 `;
-            } else {
-                context += `
-You have no quests available for this player.
-- Either they've done all your quests
-- Or they haven't met the prerequisites
-Engage in normal conversation instead.
-`;
-            }
-        } else if (interactionType === this.INTERACTION_TYPES.QUEST_TURNIN) {
-            if (relevantActiveQuests.length > 0) {
-                const quest = relevantActiveQuests[0];
-                context += `
-PLAYER IS TURNING IN A QUEST:
-Quest: "${quest.name}"
-Required items/objectives: ${JSON.stringify(quest.objectives)}
+                break;
 
-PLAYER HAS:
-- Quest Items: ${JSON.stringify(playerQuestItems)}
-- Regular Items: ${Object.entries(playerInventory).map(([id, qty]) => `${id}:${qty}`).join(', ') || 'none'}
-
-HOW TO HANDLE TURN-IN:
-1. Check if they have required items/completed objectives
-2. If YES - accept the items and complete quest:
-   "Excellent! You've done it! {takeQuestItem:ITEM_IF_NEEDED}{completeQuest:${quest.id}}"
-3. If NO - tell them what's still needed:
-   "You still need to [remaining objective]. Come back when it's done."
-
-EXAMPLE COMPLETION:
-"You found the ancient relic! Magnificent! {takeQuestItem:ancient_relic}{completeQuest:temple_quest} Here's your reward - 200 gold and my eternal gratitude."
+            case 'CHECK_PROGRESS':
+                context += `ACTIVE QUEST: "${preValidated.questName}"
+PROGRESS: ${preValidated.progress}
+ACTION: Remind player what they need to do. Give hints if asked.
 `;
-            } else {
-                context += `
-Player has no active quests to turn in to you.
-Let them know you're not expecting anything from them.
-`;
-            }
-        } else if (interactionType === this.INTERACTION_TYPES.QUEST_PROGRESS) {
-            if (relevantActiveQuests.length > 0) {
-                const quest = relevantActiveQuests[0];
-                context += `
-PLAYER ASKING ABOUT QUEST PROGRESS:
-Active Quest: "${quest.name}"
-Objectives: ${JSON.stringify(quest.objectives)}
+                break;
 
-Remind them what they need to do.
-Offer hints if they seem stuck.
-Don't complete the quest for them - they need to do the work!
+            case 'OFFER_QUEST':
+                context += `NEW QUEST AVAILABLE: "${preValidated.questName}"
+DESCRIPTION: ${preValidated.description || 'No description'}
+ACTION: Offer this quest to the player. If they accept, use: ${preValidated.command}
+EXAMPLE: "I have a task for you... [describe quest]. Will you help? ${preValidated.command}"
 `;
-            }
+                break;
+
+            case 'NO_QUEST':
+            default:
+                context += `No quest interactions available. Have a normal conversation.
+`;
+                break;
         }
 
         return context;

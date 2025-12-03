@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // PROPERTY PURCHASE - acquiring your empire piece by piece in darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -13,7 +13,8 @@ const PropertyPurchase = {
         const propertyType = PropertyTypes.get(propertyId);
         if (!propertyType) return 0;
 
-        const location = GameWorld.locations[game.currentLocation.id];
+        // 🖤 Guard against null currentLocation - don't crash if player hasn't moved yet 💀
+        const location = GameWorld.locations[game?.currentLocation?.id];
         if (!location) return propertyType.basePrice;
 
         let price = propertyType.basePrice;

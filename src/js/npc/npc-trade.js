@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // NPC TRADE WINDOW - portable capitalism in a popup storefront
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -926,6 +926,10 @@ const NPCTradeWindow = {
         // 🎁 Claim your prizes - merchant's wares become yours 💰
         for (const [itemId, qty] of Object.entries(this.npcOffer.items)) {
             game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + qty;
+            // 🖤 Emit item-received for quest progress tracking 💀
+            document.dispatchEvent(new CustomEvent('item-received', {
+                detail: { item: itemId, quantity: qty, source: 'trade' }
+            }));
             // 💭 Merchant inventory would update here if it was persistent 🗃️
         }
 

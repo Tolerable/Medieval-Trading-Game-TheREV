@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // NPC DIALOGUE SYSTEM - unified voice of all digital souls
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -1103,6 +1103,10 @@ Available commands:\n`;
 
                 if (!game.player.inventory) game.player.inventory = {};
                 game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + qty;
+                // 🖤 Emit item-received for quest progress tracking 💀
+                document.dispatchEvent(new CustomEvent('item-received', {
+                    detail: { item: itemId, quantity: qty, source: 'npc_gift' }
+                }));
 
                 if (typeof addMessage === 'function') {
                     addMessage(`${npcData.name || 'NPC'} gave you ${qty}x ${itemId}!`);

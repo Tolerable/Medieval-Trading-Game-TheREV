@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // SETTINGS PANEL - game configuration interface
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -39,11 +39,21 @@ const SettingsPanel = {
     // current settings - your personal flavor of chaos
     currentSettings: {},
 
+    // 🖤 Track if we've already initialized 💀
+    _initialized: false,
+
     // initialize settings panel - birth of the preference nightmare
     init() {
+        // 🖤 Prevent double initialization that causes duplicate IDs 💀
+        if (this._initialized) {
+            console.log('⚙️ Settings panel already initialized, skipping');
+            return;
+        }
+
         this.loadSettings();
         this.createPanel();
         this.setupEventListeners();
+        this._initialized = true;
         console.log('Settings panel initialized');
     },
 
@@ -82,6 +92,14 @@ const SettingsPanel = {
 
     // create settings panel - build the cathedral of customization
     createPanel() {
+        // 🖤 Check if panel already exists - prevent duplicate ID nightmare 💀
+        const existingPanel = document.getElementById('settings-panel');
+        if (existingPanel) {
+            this.panelElement = existingPanel;
+            console.log('⚙️ Settings panel already exists, reusing');
+            return;
+        }
+
         // create main panel container - our temple of options
         this.panelElement = document.createElement('div');
         this.panelElement.id = 'settings-panel';
@@ -632,6 +650,11 @@ const SettingsPanel = {
 
     // add styles for settings panel - css wizardry at 3am
     addStyles() {
+        // 🖤 Check if styles already exist - prevent duplicate style injection 💀
+        if (document.getElementById('settings-panel-styles')) {
+            return;
+        }
+
         const style = document.createElement('style');
         style.id = 'settings-panel-styles';
         style.textContent = `
@@ -1697,7 +1720,6 @@ const SettingsPanel = {
         }
 
         // 🏆 Scores tab - NO controls needed, just displays cached leaderboard 💀
-        // All backend config removed - JSONBin is the ONLY backend, hardcoded in config.js
 
         // 🎙️ AI Voice tab controls - where NPCs get their voices
         this.setupAIVoiceControls();

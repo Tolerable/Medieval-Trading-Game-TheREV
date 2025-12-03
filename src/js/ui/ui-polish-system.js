@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // UI POLISH SYSTEM - smooth animations and transitions
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -106,10 +106,7 @@ const UIPolishSystem = {
             [data-font-size="large"] {
                 font-size: 18px;
             }
-            
-            /* Button hover effects - DISABLED */
-            /* The circular aura effect has been removed */
-            
+
             /* Panel transition styles */
             .panel-transition {
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -350,7 +347,6 @@ const UIPolishSystem = {
     },
     
     // Setup button hover effects - DISABLED
-    // The circular aura/glow effect has been completely removed
     setupButtonEffects() {
         // No button hover effects - keeping it clean
     },

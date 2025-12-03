@@ -285,8 +285,6 @@ input:focus, textarea:focus, select:focus {
     font-size: 20px;
 }
 
-/* 🖤 High contrast mode CSS variables - REMOVED (merged into main .high-contrast block at line 162) */
-
 /* Colorblind modes */
 .colorblind-protanopia {
     --red: #0066cc;
@@ -892,8 +890,6 @@ input:focus, textarea:focus, select:focus {
     pointer-events: none;
     z-index: 2000;
 }
-
-/* 🖤 .tooltip - REMOVED (merged into main .tooltip block at line 49) */
 
 /* Particle effects */
 #particle-container {

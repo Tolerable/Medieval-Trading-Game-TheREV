@@ -622,8 +622,13 @@ const PeoplePanel = {
         peopleList.innerHTML = '';
 
         const currentLocation = game?.currentLocation;
-        const locationName = currentLocation?.name || 'Unknown Location';
         const locationId = currentLocation?.id || null;
+
+        // 🖤 Use doom-aware location name if DoomWorldSystem is active 💀
+        let locationName = currentLocation?.name || 'Unknown Location';
+        if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive && DoomWorldSystem.getCurrentLocationName && locationId) {
+            locationName = DoomWorldSystem.getCurrentLocationName(locationId);
+        }
 
         if (locationContext) {
             locationContext.textContent = `📍 ${locationName}`;
@@ -638,6 +643,15 @@ const PeoplePanel = {
         // 💀 Fallback sources
         if (npcs.length === 0 && typeof NPCManager !== 'undefined' && locationId) {
             npcs = NPCManager.getAvailableNPCs(locationId) || [];
+        }
+
+        // 🖤 Add Boatman NPC if available at this location 💀
+        if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isBoatmanHere(locationId)) {
+            const boatman = DoomWorldSystem.getBoatmanNPC();
+            // 🦇 Don't add duplicate
+            if (!npcs.find(n => n.id === 'boatman' || n.type === 'boatman')) {
+                npcs.unshift(boatman); // Add at beginning for visibility
+            }
         }
 
         if (npcs.length > 0) {
@@ -1004,6 +1018,27 @@ const PeoplePanel = {
             actions.push({ label: '💚 I need healing', action: () => this.askForHealing(), priority: 22 });
         }
 
+        // 🖤 BOATMAN PORTAL ACTION - Special case for doom world access 💀
+        if (npcType === 'boatman') {
+            const inDoom = typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive;
+            if (inDoom) {
+                actions.push({
+                    label: '🌅 Return to Normal World',
+                    action: () => this.useBoatmanPortal('normal'),
+                    priority: 0, // Highest priority
+                    questRelated: true
+                });
+            } else {
+                actions.push({
+                    label: '💀 Enter the Doom World',
+                    action: () => this.useBoatmanPortal('doom'),
+                    priority: 0, // Highest priority
+                    questRelated: true
+                });
+            }
+            actions.push({ label: '🔮 Ask about the other world', action: () => this.askAboutDoomWorld(), priority: 1 });
+        }
+
         // 🖤 Generic actions - always available
         actions.push({ label: '❓ Ask for directions', action: () => this.askDirections(), priority: 50 });
         actions.push({ label: '👋 Say goodbye', action: () => this.sayGoodbye(), priority: 100 });
@@ -1280,6 +1315,78 @@ const PeoplePanel = {
         // 🖤 Send standardized HEAL instruction to API 💀
         await this.sendActionMessage('heal', "I'm injured. Can you help me?");
     },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 💀 BOATMAN PORTAL METHODS - Doom World Access 🦇
+    // ═══════════════════════════════════════════════════════════════
+
+    // 🖤 Use the boatman's portal to travel between worlds
+    async useBoatmanPortal(destination) {
+        if (!this.currentNPC || this.currentNPC.type !== 'boatman') {
+            console.warn('💀 useBoatmanPortal called without boatman NPC');
+            return;
+        }
+
+        const currentLocation = game?.currentLocation?.id || 'shadow_dungeon';
+
+        // 🦇 Display atmospheric message in chat
+        if (destination === 'doom') {
+            this.addChatMessage("*reaches toward the shimmering portal*", 'player');
+            this.addChatMessage("*The Boatman's hollow voice echoes* So you choose to witness what could have been... Step through, and may your resolve not falter.", 'npc');
+
+            // 🖤 Small delay for dramatic effect
+            await new Promise(r => setTimeout(r, 1500));
+
+            // 🦇 Enter doom world
+            if (typeof DoomWorldSystem !== 'undefined') {
+                DoomWorldSystem.enterDoomWorld(currentLocation);
+            } else if (typeof TravelSystem !== 'undefined') {
+                TravelSystem.portalToDoomWorld(currentLocation);
+            }
+
+            // 🖤 Close the panel after transition
+            this.close();
+
+        } else {
+            this.addChatMessage("*prepares to leave this dark realm*", 'player');
+            this.addChatMessage("*The Boatman nods slowly* The light calls you back... Return now, but remember what you've seen.", 'npc');
+
+            await new Promise(r => setTimeout(r, 1500));
+
+            // 🦇 Exit doom world
+            if (typeof DoomWorldSystem !== 'undefined') {
+                DoomWorldSystem.exitDoomWorld(currentLocation);
+            } else if (typeof TravelSystem !== 'undefined') {
+                TravelSystem.portalToNormalWorld(currentLocation);
+            }
+
+            this.close();
+        }
+    },
+
+    // 🖤 Ask about the doom world
+    async askAboutDoomWorld() {
+        const inDoom = typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive;
+
+        if (inDoom) {
+            await this.sendActionMessage('doom_info', "What happened to this world?");
+        } else {
+            await this.sendActionMessage('doom_info', "What lies beyond the portal?");
+        }
+    },
+
+    // 🖤 Get boatman-specific instruction for API calls
+    getBoatmanInstruction(action) {
+        if (typeof DoomWorldSystem !== 'undefined') {
+            return DoomWorldSystem.getBoatmanInstruction(action);
+        }
+
+        const inDoom = typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld();
+        return `You are the Boatman, a mysterious ferryman between worlds.
+Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world' : 'doom world'}.`;
+    },
+
+    // ═══════════════════════════════════════════════════════════════
 
     // 🖤 NEW: Send message with standardized action type to NPCInstructionTemplates 💀
     async sendActionMessage(actionType, displayMessage) {
@@ -1592,7 +1699,7 @@ const PeoplePanel = {
             elder: '👴', guard: '⚔️', blacksmith: '🔨', merchant: '💰',
             innkeeper: '🍺', healer: '💚', priest: '⛪', apothecary: '🧪',
             traveler: '🚶', courier: '📜', noble: '👑', beggar: '🙏',
-            thief: '🗡️', spy: '👁️', ferryman: '⛵', stablemaster: '🐴',
+            thief: '🗡️', spy: '👁️', ferryman: '⛵', boatman: '💀', stablemaster: '🐴',
             guild_master: '📋', drunk: '🍻', scholar: '📚', jeweler: '💎',
             tailor: '🧵', baker: '🍞', farmer: '🌾', fisherman: '🐟',
             miner: '⛏️', woodcutter: '🪓', barkeep: '🍺', general_store: '🏪',
@@ -1608,6 +1715,7 @@ const PeoplePanel = {
             merchant: 'Traveling Merchant', innkeeper: 'Innkeeper', healer: 'Healer',
             priest: 'Temple Priest', apothecary: 'Apothecary', traveler: 'Traveler',
             courier: 'Royal Courier', noble: 'Noble', beggar: 'Beggar',
+            boatman: 'Ferryman of Worlds',
             thief: 'Shady Character', ferryman: 'Ferryman', stablemaster: 'Stablemaster',
             guild_master: 'Guild Master', drunk: 'Local Drunk', scholar: 'Scholar',
             jeweler: 'Jeweler', tailor: 'Tailor', baker: 'Baker', farmer: 'Farmer',
@@ -1630,6 +1738,7 @@ const PeoplePanel = {
             apothecary: 'Brews potions and remedies.',
             farmer: 'Tends to crops and livestock.',
             general_store: 'Sells general supplies and necessities.',
+            boatman: 'A cloaked figure beside a shimmering portal. Can transport between worlds.',
             default: 'A local going about their business.'
         };
         return descriptions[type] || descriptions.default;

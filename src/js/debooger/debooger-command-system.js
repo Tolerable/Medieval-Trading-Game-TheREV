@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // DEBOOGER COMMAND SYSTEM - bending reality with dark commands
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -725,42 +725,182 @@ const DeboogerCommandSystem = {
             return results.join(' | ');
         });
 
-        // doom - Instant apocalypse weather + dungeon bonanza for one day
-        this.registerCommand('doom', 'Trigger apocalypse: weather, dungeon backdrop, bonanza for 1 day', () => {
+        // doom - FULL DOOM WORLD TRANSPORT - Teleport to random dungeon + activate all doom systems
+        this.registerCommand('doom', 'Enter DOOM WORLD: transport to random dungeon, full apocalypse mode', () => {
             let results = [];
 
-            // Try menu weather first (main menu)
-            if (typeof MenuWeatherSystem !== 'undefined' && MenuWeatherSystem.isActive) {
-                MenuWeatherSystem.changeSeason('apocalypse');
-                console.log('☄️ MENU APOCALYPSE MODE ACTIVATED!');
-                results.push('Menu weather: apocalypse');
+            // 🖤 Pick random dungeon entry point
+            const dungeons = ['shadow_dungeon', 'ruins_of_malachar'];
+            const entryDungeon = dungeons[Math.floor(Math.random() * dungeons.length)];
+            const doomName = entryDungeon === 'shadow_dungeon' ? 'The Shadow Throne' : 'Ruins of Malachar';
+
+            console.log(`💀 DOOM COMMAND: Entering doom world at ${doomName}...`);
+
+            // 🖤 Step 1: Transport player to dungeon location
+            if (typeof TravelSystem !== 'undefined') {
+                // 🦇 Clear doom discovered paths - start fresh, only entry point known
+                TravelSystem.doomDiscoveredPaths = new Set();
+                TravelSystem.doomDiscoveredPaths.add(entryDungeon);
+
+                // 🖤 Use portal function which handles world switching
+                TravelSystem.portalToDoomWorld(entryDungeon);
+                results.push(`Transported to: ${doomName}`);
+                console.log(`💀 Transported to ${entryDungeon}`);
             }
 
-            // Also try in-game weather
+            // 🖤 Step 2: Activate DoomWorldSystem if available
+            if (typeof DoomWorldSystem !== 'undefined') {
+                DoomWorldSystem.isActive = true;
+                DoomWorldSystem.entryDungeon = entryDungeon;
+                // 🦇 Spawn boatman at entry dungeon so player can return
+                DoomWorldSystem.boatmanLocations.add(entryDungeon);
+                DoomWorldSystem._applyDoomEffects();
+                DoomWorldSystem._saveState();
+                results.push('DoomWorldSystem: active');
+                console.log('💀 DoomWorldSystem activated');
+            }
+
+            // 🖤 Step 3: Activate DoomWorldConfig
+            if (typeof DoomWorldConfig !== 'undefined') {
+                DoomWorldConfig.activate();
+                results.push('DoomWorldConfig: active');
+                console.log('💀 DoomWorldConfig activated');
+            }
+
+            // 🖤 Step 4: Set apocalypse weather
             if (typeof WeatherSystem !== 'undefined') {
                 WeatherSystem.changeWeather('apocalypse');
-                console.log('☄️ GAME APOCALYPSE MODE ACTIVATED!');
-                results.push('Game weather: apocalypse');
+                results.push('Weather: apocalypse');
+                console.log('💀 Apocalypse weather activated');
             }
 
-            // Activate dungeon backdrop (in-game)
+            // 🖤 Step 5: Activate dungeon backdrop
             if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.enterDungeonMode) {
                 GameWorldRenderer.enterDungeonMode();
-                console.log('☄️ DUNGEON WORLD BACKDROP ACTIVATED!');
-                results.push('Dungeon backdrop: active');
+                results.push('Backdrop: doom');
+                console.log('💀 Doom backdrop activated');
             }
 
-            // Activate dungeon bonanza for one game day
-            if (typeof DungeonBonanzaSystem !== 'undefined') {
-                DungeonBonanzaSystem.activateManualOverride();
-                console.log('☄️ DUNGEON BONANZA FOR ONE DAY!');
-                results.push('Bonanza: active for 1 day');
+            // 🖤 Step 6: Show doom world message
+            if (typeof game !== 'undefined' && game.addMessage) {
+                game.addMessage('💀 THE DOOM WORLD - You have crossed into the apocalypse.', 'danger');
+                game.addMessage(`📍 You emerged at ${doomName}. All other locations are unexplored.`, 'warning');
+                game.addMessage('⚠️ Gold is worthless here. Trade survival items to survive.', 'warning');
+                game.addMessage('🚪 Find the Boatman to return to the normal world.', 'info');
+            }
+
+            // 🖤 Step 7: Update current location to show doom version
+            if (typeof game !== 'undefined' && game.currentLocation) {
+                game.currentLocation.id = entryDungeon;
+                // 🦇 Get doom name from DoomWorldNPCs if available
+                if (typeof DoomWorldNPCs !== 'undefined') {
+                    const doomLocName = DoomWorldNPCs.locationNames[entryDungeon] || doomName;
+                    game.currentLocation.name = doomLocName;
+                }
+            }
+
+            // 🖤 Step 8: Register doom quests and start intro quest
+            if (typeof DoomQuestSystem !== 'undefined') {
+                DoomQuestSystem.registerDoomQuests();
+                DoomQuestSystem.startIntroQuest();
+                results.push('Doom quests registered');
+            }
+
+            // 🖤💀 Step 8.5: Mark that player has entered doom world (unlocks doom quests in quest log)
+            if (typeof QuestSystem !== 'undefined') {
+                QuestSystem._hasEnteredDoomWorld = true;
+            }
+            if (typeof DoomWorldSystem !== 'undefined') {
+                DoomWorldSystem.hasEverEntered = true;
+                // 🖤💀 BOATMAN AT BOTH DUNGEONS - only way out of doom world!
+                DoomWorldSystem.boatmanLocations.add('shadow_dungeon');
+                DoomWorldSystem.boatmanLocations.add('ruins_of_malachar');
+                DoomWorldSystem._spawnBoatman('shadow_dungeon');
+                DoomWorldSystem._spawnBoatman('ruins_of_malachar');
+            }
+            localStorage.setItem('mtg_hasEnteredDoom', 'true');
+
+            // 🖤 Step 9: Refresh all panels to show doom state
+            if (typeof PeoplePanel !== 'undefined') {
+                PeoplePanel.refresh();
+            }
+            if (typeof QuestSystem !== 'undefined') {
+                QuestSystem.updateQuestLogUI?.();
             }
 
             if (results.length > 0) {
-                return '☄️ DOOM ACTIVATED! ' + results.join(' | ');
+                return `💀 ENTERED DOOM WORLD at ${doomName}! | ` + results.join(' | ');
             }
-            return 'No systems found';
+            return '💀 Doom world activated, but some systems were missing';
+        });
+
+        // 🖤 exitdoom - Return to normal world from doom AT CURRENT LOCATION
+        this.registerCommand('exitdoom', 'Exit DOOM WORLD: return to normal world at current location', () => {
+            if (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld()) {
+                // 🖤 Get CURRENT location - wherever player is now in doom world
+                const currentLocationId = game?.currentLocation?.id ||
+                                          TravelSystem?.playerPosition?.currentLocation ||
+                                          'greendale';
+
+                // 🦇 Get the normal world name for this location
+                const normalName = GameWorld?.locations?.[currentLocationId]?.name || currentLocationId;
+
+                // 🖤 Portal back to normal world at SAME location (uncorrupted version)
+                TravelSystem.portalToNormalWorld(currentLocationId);
+
+                if (typeof DoomWorldSystem !== 'undefined') {
+                    DoomWorldSystem.isActive = false;
+                    DoomWorldSystem._removeDoomEffects();
+                }
+
+                if (typeof DoomWorldConfig !== 'undefined') {
+                    DoomWorldConfig.deactivate();
+                }
+
+                if (typeof game !== 'undefined') {
+                    game.inDoomWorld = false;
+                }
+
+                document.body.classList.remove('doom-world');
+
+                if (typeof WeatherSystem !== 'undefined') {
+                    WeatherSystem.changeWeather('clear');
+                }
+
+                if (typeof game !== 'undefined' && game.addMessage) {
+                    game.addMessage('🌅 The darkness fades... you have returned to the normal world.', 'success');
+                    game.addMessage(`📍 You are now at ${normalName}.`, 'info');
+                }
+
+                // 🦇 Refresh panels to show normal world data
+                if (typeof PeoplePanel !== 'undefined') PeoplePanel.refresh?.();
+                if (typeof TravelPanelMap !== 'undefined') TravelPanelMap.refresh?.();
+                if (typeof GameWorldRenderer !== 'undefined') GameWorldRenderer.render?.();
+
+                return `🌅 Returned to normal world at ${normalName}`;
+            }
+            return 'You are not in the doom world';
+        });
+
+        // 🖤 spawnboatman - Debug: spawn boatman at current location
+        this.registerCommand('spawnboatman', 'Spawn boatman at current location (doom portal)', () => {
+            const loc = game?.currentLocation?.id || 'shadow_dungeon';
+
+            if (typeof DoomWorldSystem !== 'undefined') {
+                DoomWorldSystem.bossesDefeated.shadow_guardian = true;
+                DoomWorldSystem.bossesDefeated.ruins_guardian = true;
+                DoomWorldSystem.boatmanLocations.add('shadow_dungeon');
+                DoomWorldSystem.boatmanLocations.add('ruins_of_malachar');
+                DoomWorldSystem.boatmanLocations.add(loc);
+                DoomWorldSystem._saveState();
+
+                if (typeof PeoplePanel !== 'undefined') {
+                    PeoplePanel.refresh();
+                }
+
+                return `⛵ Boatman spawned at shadow_dungeon, ruins_of_malachar, and ${loc}`;
+            }
+            return 'DoomWorldSystem not found';
         });
 
         // 🖤 DRY season jump commands - one helper to rule them all 💀

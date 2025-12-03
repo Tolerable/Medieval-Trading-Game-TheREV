@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // QUEST SYSTEM - tasks that pretend to matter
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -176,242 +176,11 @@ const QuestSystem = {
     // ═══════════════════════════════════════════════════════════════
     // 📚 QUEST DATABASE - every damn task in this godforsaken realm
     // ═══════════════════════════════════════════════════════════════
+    // 🖤 Main story quests (35 quests) are loaded from main-quests.js via loadExternalQuests() 💀
+    // 🖤 Side quests (50 quests) are loaded from side-quests.js via loadExternalQuests() 💀
+    // 🖤 Doom quests (15 quests) are loaded from doom-quests.js via loadExternalQuests() 💀
+    // 🖤 Only LOCATION-SPECIFIC quests remain hardcoded below 💀
     quests: {
-        // ═══════════════════════════════════════════════════════════
-        // 🌟 MAIN STORY QUEST CHAIN - The Shadow Rising
-        // ═══════════════════════════════════════════════════════════
-        main_prologue: {
-            id: 'main_prologue',
-            name: 'A New Beginning',
-            description: 'Establish yourself as a trader. Make your first purchase from any merchant, then travel to Greendale to speak with Elder Morin about the strange rumors.',
-            giver: 'elder',
-            giverName: 'Elder Morin',
-            location: 'greendale', // 🖤 Fixed location - players must travel here 💀
-            type: 'main',
-            chain: 'shadow_rising',
-            chainOrder: 1,
-            difficulty: 'easy',
-            objectives: [
-                { type: 'buy', count: 1, current: 0, description: 'Make your first purchase from any merchant' },
-                { type: 'visit', location: 'greendale', completed: false, description: 'Travel to Greendale' },
-                { type: 'talk', npc: 'elder', completed: false, description: 'Speak with Elder Morin in Greendale' }
-            ],
-            rewards: { gold: 25, reputation: 10, experience: 20 },
-            timeLimit: null,
-            repeatable: false,
-            prerequisite: null,
-            nextQuest: 'main_rumors',
-            dialogue: {
-                offer: "Welcome to Greendale, young trader. I've been expecting someone like you. Dark rumors spread across the realm... but first, show me you can handle yourself. Make a trade, then return.",
-                progress: "Have you completed a trade yet? The merchants await.",
-                complete: "Good. You have the makings of a capable trader. Now, let me tell you of darker things stirring in the realm..."
-            }
-        },
-
-        main_rumors: {
-            id: 'main_rumors',
-            name: 'Whispers of Darkness',
-            // 🖤 REBALANCED: First go SOUTH to Sunhaven, not north to Ironforge!
-            description: 'Strange rumors speak of darkness in the realm. Travel to Sunhaven in the south and speak with the harbor master about strange shipments.',
-            giver: 'elder',
-            giverName: 'Elder Morin',
-            location: 'greendale',
-            type: 'main',
-            chain: 'shadow_rising',
-            chainOrder: 2,
-            difficulty: 'easy',
-            objectives: [
-                { type: 'visit', location: 'sunhaven', completed: false, description: 'Travel to Sunhaven (south)' },
-                { type: 'talk', npc: 'merchant', completed: false, description: 'Speak with Harbor Master' }
-            ],
-            rewards: { gold: 50, reputation: 15, experience: 40 },
-            timeLimit: null,
-            repeatable: false,
-            prerequisite: 'main_prologue',
-            nextQuest: 'main_eastern_clues',
-            dialogue: {
-                offer: "Dark rumors reach my ears. Strange shipments pass through Sunhaven to the south. Travel there - the harbor master may know more.",
-                progress: "Have you reached Sunhaven yet? The southern coast holds secrets.",
-                complete: "What did the harbor master say? The trail leads east..."
-            }
-        },
-
-        // 🦇 NEW QUEST: Follow clues to the Eastern zone
-        main_eastern_clues: {
-            id: 'main_eastern_clues',
-            name: 'Eastern Whispers',
-            description: 'The trail leads to Jade Harbor in the east. Find the smuggler who knows about the dark shipments.',
-            giver: 'merchant',
-            giverName: 'Harbor Master Rosa',
-            location: 'sunhaven',
-            type: 'main',
-            chain: 'shadow_rising',
-            chainOrder: 3,
-            difficulty: 'medium',
-            objectives: [
-                { type: 'visit', location: 'smugglers_cove', completed: false, description: 'Find Smuggler\'s Cove (via coastal_cave back path or 1000g toll)' },
-                { type: 'talk', npc: 'merchant', completed: false, description: 'Speak with the smuggler contact' }
-            ],
-            rewards: { gold: 150, reputation: 20, experience: 75 },
-            timeLimit: null,
-            repeatable: false,
-            prerequisite: 'main_rumors',
-            nextQuest: 'main_investigation',
-            dialogue: {
-                offer: "Dark cargo passes through here, bound for the east. Seek Smuggler's Cove - you can reach it through the coastal caves if you can't afford the eastern toll.",
-                progress: "The smugglers are secretive. Approach carefully.",
-                complete: "So the darkness flows north from here... to Ironforge. You'll need gold to pay the northern toll - 10,000 gold."
-            }
-        },
-
-        main_investigation: {
-            id: 'main_investigation',
-            name: 'Into the Shadows',
-            // 💀 This quest requires 10,000g northern toll OR the player to have saved up from trading
-            description: 'The trail leads to Ironforge City in the north. Investigate the abandoned mines and find evidence of dark activity. (Requires 10,000g passage fee)',
-            giver: 'merchant',
-            giverName: 'The Smuggler',
-            location: 'smugglers_cove',
-            type: 'main',
-            chain: 'shadow_rising',
-            chainOrder: 4,
-            difficulty: 'medium',
-            objectives: [
-                { type: 'visit', location: 'ironforge_city', completed: false, description: 'Travel to Ironforge City (10,000g toll)' },
-                { type: 'explore', dungeon: 'abandoned_mines', rooms: 5, current: 0, description: 'Explore 5 rooms of the mines' },
-                { type: 'collect', item: 'shadow_essence', count: 1, current: 0, description: 'Find evidence of dark magic' }
-            ],
-            rewards: { gold: 500, items: { potion: 5 }, reputation: 30, experience: 150 },
-            givesQuestItem: 'shadow_essence',
-            timeLimit: null,
-            repeatable: false,
-            prerequisite: 'main_eastern_clues',
-            nextQuest: 'main_preparation',
-            dialogue: {
-                offer: "The dark cargo came from Ironforge's old mines. Something evil stirs there. You'll need 10,000 gold to pass the northern toll - time to start trading seriously.",
-                progress: "Be careful in those mines. Dark things dwell in the deep places.",
-                complete: "Shadow essence... by the gods. This confirms our fears. The dark wizard Malachar has returned."
-            }
-        },
-
-        main_preparation: {
-            id: 'main_preparation',
-            name: 'Preparing for War',
-            description: 'Gather supplies for the assault on the Shadow Tower. The blacksmith needs iron ore, the apothecary needs herbs.',
-            giver: 'guard',
-            giverName: 'Captain Aldric',
-            location: 'ironforge_city',
-            type: 'main',
-            chain: 'shadow_rising',
-            chainOrder: 5, // 💀 Updated chain order
-            difficulty: 'medium',
-            objectives: [
-                { type: 'collect', item: 'iron_ore', count: 15, current: 0, description: 'Gather 15 iron ore' },
-                { type: 'collect', item: 'herbs', count: 10, current: 0, description: 'Gather 10 healing herbs' },
-                { type: 'talk', npc: 'blacksmith', completed: false, description: 'Deliver ore to blacksmith' },
-                { type: 'talk', npc: 'apothecary', completed: false, description: 'Deliver herbs to apothecary' }
-            ],
-            rewards: { gold: 300, items: { sword: 1, potion: 5 }, reputation: 25, experience: 100 },
-            timeLimit: null,
-            repeatable: false,
-            prerequisite: 'main_investigation',
-            nextQuest: 'main_western_approach',
-            dialogue: {
-                offer: "We must prepare. The blacksmith needs ore for weapons, the apothecary needs herbs for medicine. Gather these supplies - war is coming.",
-                progress: "Do you have the supplies? Every moment we delay, Malachar grows stronger.",
-                complete: "Excellent work. The blacksmith forged you a blade. But the Shadow Tower lies in the Western Wilds... you'll need 50,000 gold."
-            }
-        },
-
-        // ⚰️ NEW QUEST: Western approach - the final toll gate
-        main_western_approach: {
-            id: 'main_western_approach',
-            name: 'The Western Gate',
-            description: 'The Shadow Tower lies in the Western Wilds. Amass 50,000 gold to pay the passage fee, or find another way through trading and exploration.',
-            giver: 'guard',
-            giverName: 'Captain Aldric',
-            location: 'ironforge_city',
-            type: 'main',
-            chain: 'shadow_rising',
-            chainOrder: 6,
-            difficulty: 'hard',
-            objectives: [
-                { type: 'gold', amount: 50000, current: 0, description: 'Amass 50,000 gold for western passage' },
-                { type: 'visit', location: 'western_outpost', completed: false, description: 'Reach Western Watch outpost' }
-            ],
-            rewards: { gold: 1000, reputation: 40, experience: 200 },
-            timeLimit: null,
-            repeatable: false,
-            prerequisite: 'main_preparation',
-            nextQuest: 'main_shadow_key',
-            dialogue: {
-                offer: "The Shadow Tower lies beyond the Western Watch. The toll is steep - 50,000 gold. Trade wisely, or you'll never reach Malachar.",
-                progress: "Have you gathered the gold? The western frontier is expensive to cross.",
-                complete: "You've amassed a fortune. Now pay the toll and find the Shadow Key."
-            }
-        },
-
-        main_shadow_key: {
-            id: 'main_shadow_key',
-            name: 'The Shadow Key',
-            // ⚰️ Shadow Tower is in the Western Wilds (50k toll zone)
-            description: 'Find the Shadow Key hidden in the Crystal Cave of the Western Wilds. Without it, the inner sanctum of the Shadow Tower cannot be breached.',
-            giver: 'guard',
-            giverName: 'Frontier Captain',
-            location: 'western_outpost',
-            type: 'main',
-            chain: 'shadow_rising',
-            chainOrder: 7,
-            difficulty: 'hard',
-            objectives: [
-                { type: 'visit', location: 'druid_grove', completed: false, description: 'Consult the druids about the key' },
-                { type: 'explore', dungeon: 'forest_dungeon', rooms: 8, current: 0, description: 'Navigate the Overgrown Crypt' },
-                { type: 'collect', item: 'shadow_key', count: 1, current: 0, description: 'Retrieve the Shadow Key' }
-            ],
-            rewards: { gold: 2000, items: { crystal_heart: 1 }, reputation: 50, experience: 300 },
-            givesQuestItem: 'shadow_key',
-            timeLimit: null,
-            repeatable: false,
-            prerequisite: 'main_western_approach',
-            nextQuest: 'main_tower_assault',
-            dialogue: {
-                offer: "The Shadow Key is hidden in the Overgrown Crypt. The druids of the grove may know more. Find it, or the Shadow Tower remains sealed.",
-                progress: "The crypt is treacherous. Many have entered, few returned. Be cautious.",
-                complete: "The Shadow Key! You've done what countless others could not. Now... only the final battle remains."
-            }
-        },
-
-        main_tower_assault: {
-            id: 'main_tower_assault',
-            name: 'The Shadow Tower',
-            // ⚰️ Final quest - in the Western Wilds endgame zone
-            description: 'Assault the Shadow Tower in the depths of the Western Wilds and defeat the dark wizard Malachar once and for all.',
-            giver: 'guard',
-            giverName: 'Frontier Captain',
-            location: 'western_outpost',
-            type: 'main',
-            chain: 'shadow_rising',
-            chainOrder: 8,
-            difficulty: 'legendary',
-            objectives: [
-                { type: 'visit', location: 'shadow_dungeon', completed: false, description: 'Enter the Shadow Dungeon' },
-                { type: 'explore', dungeon: 'shadow_dungeon', rooms: 10, current: 0, description: 'Descend to the depths' },
-                { type: 'defeat', enemy: 'malachar', count: 1, current: 0, description: 'Defeat Malachar' },
-                { type: 'collect', item: 'blade_of_virtue', count: 1, current: 0, description: 'Claim the Blade of Virtue' }
-            ],
-            rewards: { gold: 10000, items: { blade_of_virtue: 1, dark_staff: 1 }, reputation: 100, experience: 1000 },
-            givesQuestItem: 'blade_of_virtue',
-            timeLimit: null,
-            repeatable: false,
-            prerequisite: 'main_shadow_key',
-            nextQuest: null,
-            dialogue: {
-                offer: "The time has come. Take the Shadow Key, descend into the Shadow Dungeon, and end Malachar's reign of terror. The realm is counting on you.",
-                progress: "Steel your resolve. Malachar awaits in the dungeon's depths.",
-                complete: "You've done it... Malachar is defeated! You are the savior of the realm! The Blade of Virtue is yours by right."
-            }
-        },
-
         // ═══════════════════════════════════════════════════════════
         // 🌾 GREENDALE QUESTS - starter zone, farming community
         // ═══════════════════════════════════════════════════════════
@@ -1207,10 +976,23 @@ const QuestSystem = {
         if (quest?.givesQuestItem) {
             const itemId = quest.givesQuestItem;
             const itemInfo = this.questItems[itemId];
-            if (itemInfo && typeof addMessage === 'function') {
-                addMessage(`Received quest item: ${itemInfo.name}`, 'success');
+
+            // 🖤 Actually ADD the quest item to player's quest inventory! 💀
+            if (typeof game !== 'undefined' && game.player) {
+                if (!game.player.questItems) {
+                    game.player.questItems = {};
+                }
+                game.player.questItems[itemId] = (game.player.questItems[itemId] || 0) + 1;
+
+                // 🖤 Emit item-received for consistency 💀
+                document.dispatchEvent(new CustomEvent('item-received', {
+                    detail: { item: itemId, quantity: 1, isQuestItem: true }
+                }));
             }
-            // quest items are tracked in the quest itself, not regular inventory
+
+            if (itemInfo && typeof addMessage === 'function') {
+                addMessage(`📦 Received quest item: ${itemInfo.name}`, 'success');
+            }
             return true;
         }
         return false;
@@ -1219,7 +1001,12 @@ const QuestSystem = {
     removeQuestItem(questId) {
         const quest = this.activeQuests[questId] || this.quests[questId];
         if (quest?.givesQuestItem) {
-            // item removed when quest completes
+            const itemId = quest.givesQuestItem;
+
+            // 🖤 Actually REMOVE the quest item from player's quest inventory! 💀
+            if (typeof game !== 'undefined' && game.player?.questItems?.[itemId]) {
+                delete game.player.questItems[itemId];
+            }
             return true;
         }
         return false;
@@ -1302,6 +1089,8 @@ const QuestSystem = {
         }
 
         document.dispatchEvent(new CustomEvent('quest-started', { detail: { quest: activeQuest } }));
+        // 🖤 Also emit quest-assigned - PeoplePanel waits for this 💀
+        document.dispatchEvent(new CustomEvent('quest-assigned', { detail: { quest: activeQuest, questId } }));
         this.updateQuestLogUI();
 
         return { success: true, quest: activeQuest };
@@ -1399,6 +1188,37 @@ const QuestSystem = {
                             }
                         }
                         break;
+
+                    // 🖤 Gold objective - check if player has accumulated enough wealth 💀
+                    case 'gold':
+                        if (typeof game !== 'undefined' && game.player) {
+                            const playerGold = game.player.gold || 0;
+                            if (playerGold >= objective.amount) {
+                                objective.current = objective.amount;
+                                objective.completed = true;
+                                updated = true;
+                            } else {
+                                objective.current = playerGold;
+                            }
+                        }
+                        break;
+
+                    // 🖤 Sell objective - track items sold 💀
+                    case 'sell':
+                        if (data.item === objective.item || !objective.item) {
+                            objective.current = Math.min((objective.current || 0) + (data.count || 1), objective.count);
+                            updated = true;
+                        }
+                        break;
+
+                    // 🖤 Decision objective - player made a choice 💀
+                    case 'decision':
+                        if (objective.choices && objective.choices.includes(data.choice)) {
+                            objective.completed = true;
+                            objective.choiceMade = data.choice;
+                            updated = true;
+                        }
+                        break;
                 }
 
                 if (updated) {
@@ -1419,8 +1239,20 @@ const QuestSystem = {
         for (const questId in this.activeQuests) {
             const progress = this.checkProgress(questId);
             if (progress.status === 'ready_to_complete') {
-                if (typeof addMessage === 'function') {
-                    addMessage(`Quest "${this.activeQuests[questId].name}" ready to turn in!`, 'info');
+                const quest = this.activeQuests[questId];
+
+                // 🖤 Track which quests were already marked ready to avoid spam 💀
+                if (!quest._wasReadyNotified) {
+                    quest._wasReadyNotified = true;
+
+                    if (typeof addMessage === 'function') {
+                        addMessage(`Quest "${quest.name}" ready to turn in!`, 'info');
+                    }
+
+                    // 🖤 Emit quest-ready event for NPCVoice to extend conversation 💀
+                    document.dispatchEvent(new CustomEvent('quest-ready', {
+                        detail: { quest, questId }
+                    }));
                 }
             }
         }
@@ -1472,6 +1304,10 @@ const QuestSystem = {
                     if (!this.isQuestItem(item)) {
                         game.player.inventory = game.player.inventory || {};
                         game.player.inventory[item] = (game.player.inventory[item] || 0) + qty;
+                        // 🖤 Emit item-received for quest progress tracking 💀
+                        document.dispatchEvent(new CustomEvent('item-received', {
+                            detail: { item, quantity: qty, source: 'quest_reward' }
+                        }));
                     }
                     rewardsGiven.items[item] = qty;
                 }
@@ -1511,6 +1347,11 @@ const QuestSystem = {
         }
 
         document.dispatchEvent(new CustomEvent('quest-completed', { detail: { quest, rewards: rewardsGiven } }));
+        // 🖤 Bridge to EventBus - FactionSystem and ReputationSystem listen here 💀
+        if (typeof EventBus !== 'undefined') {
+            EventBus.emit('quest-completed', { quest, rewards: rewardsGiven });
+            EventBus.emit('quest:completed', { quest, rewards: rewardsGiven });
+        }
         this.updateQuestLogUI();
 
         // 🖤 Auto-offer next quest in chain - keep the story moving! 💀
@@ -1556,6 +1397,11 @@ const QuestSystem = {
         }
 
         document.dispatchEvent(new CustomEvent('quest-failed', { detail: { quest } }));
+        // 🖤 Bridge to EventBus - ReputationSystem listens for quest:failed 💀
+        if (typeof EventBus !== 'undefined') {
+            EventBus.emit('quest-failed', { quest });
+            EventBus.emit('quest:failed', { quest });
+        }
         this.updateQuestLogUI();
 
         return { success: true, quest };
@@ -1598,12 +1444,23 @@ const QuestSystem = {
     // 🤖 NPC/API INTEGRATION - what the AI needs to know
     // ═══════════════════════════════════════════════════════════════
     getQuestsForNPC(npcType, location) {
+        // 🖤 Check if in doom world for doom quest visibility 💀
+        const inDoom = (typeof game !== 'undefined' && game.inDoomWorld) ||
+                       (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive);
+
         return Object.values(this.quests).filter(quest => {
             if (quest.giver !== npcType) return false;
             if (quest.location && quest.location !== location && quest.location !== 'any') return false;
             if (this.activeQuests[quest.id]) return false;
             if (this.completedQuests.includes(quest.id) && !quest.repeatable) return false;
             if (quest.prerequisite && !this.completedQuests.includes(quest.prerequisite)) return false;
+
+            // 🖤💀 DOOM QUEST VISIBILITY - Hide doom quests when not in doom world
+            if (quest.isDoom && !inDoom) return false;
+            // 🖤💀 Hide normal quests when IN doom world (only doom quests available there)
+            if (!quest.isDoom && inDoom) return false;
+
             return true;
         });
     },
@@ -1933,9 +1790,20 @@ const QuestSystem = {
         const failedSet = new Set(this.failedQuests);
         const discoveredSet = new Set(this.discoveredQuests);
 
+        // 🖤💀 Check if player has EVER entered doom world - hide doom quests until then (NO SPOILERS!)
+        const hasEnteredDoom = this._hasEnteredDoomWorld ||
+                               (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.hasEverEntered) ||
+                               localStorage.getItem('mtg_hasEnteredDoom') === 'true';
+
         // filter based on category
         Object.entries(chains).forEach(([chainId, chain]) => {
             chain.quests.forEach(quest => {
+                // 🖤💀 HIDE DOOM QUESTS until player has entered doom world - no spoilers!
+                const isDoomQuest = quest.isDoom || quest.id?.startsWith('doom_');
+                if (isDoomQuest && !hasEnteredDoom) {
+                    return; // Skip this quest entirely - player hasn't discovered doom yet
+                }
+
                 const isActive = !!this.activeQuests[quest.id];
                 const isCompleted = completedSet.has(quest.id);
                 const isFailed = failedSet.has(quest.id);
@@ -2256,11 +2124,17 @@ const QuestSystem = {
             const targetLocation = this.getTrackedQuestLocation();
             const locationName = targetLocation ? this.getLocationDisplayName(targetLocation) : '';
 
+            // 🖤💀 Check if doom quest for styling - orange for doom, gold for normal
+            const isDoomQuest = quest.isDoom || quest.id?.startsWith('doom_');
+            const questClass = isDoomQuest ? 'tracker-tracked-quest doom-quest' : 'tracker-tracked-quest';
+            const worldIndicator = isDoomQuest ? '💀 DOOM' : '🌍 Normal';
+
             // 🖤 Build quest selector dropdown options
             const otherQuests = Object.values(this.activeQuests).filter(q => q.id !== this.trackedQuestId);
-            const questSelectorOptions = otherQuests.map(q =>
-                `<option value="${q.id}">${this.getQuestTypeIcon(q.type)} ${q.name}</option>`
-            ).join('');
+            const questSelectorOptions = otherQuests.map(q => {
+                const isDoom = q.isDoom || q.id?.startsWith('doom_');
+                return `<option value="${q.id}">${isDoom ? '💀' : ''} ${this.getQuestTypeIcon(q.type)} ${q.name}</option>`;
+            }).join('');
 
             // 🖤 FIX: Smaller header, icon after text, no button, scrollable content 💀
             tracker.innerHTML = `
@@ -2270,10 +2144,11 @@ const QuestSystem = {
                     <button class="tracker-close" onclick="QuestSystem.hideQuestTracker()" title="Close">×</button>
                 </div>
                 <div class="tracker-content">
-                    <div class="tracker-tracked-quest" onclick="QuestSystem.showQuestInfoPanel('${quest.id}');">
+                    <div class="${questClass}" onclick="QuestSystem.showQuestInfoPanel('${quest.id}');">
                         <div class="tracker-quest-title">
                             <span class="tracker-quest-icon">${this.getQuestTypeIcon(quest.type)}</span>
                             <span class="tracker-quest-name">${quest.name}</span>
+                            <span class="tracker-world-badge ${isDoomQuest ? 'doom' : 'normal'}">${worldIndicator}</span>
                         </div>
                         ${locationName ? `<div class="tracker-quest-location">📍 ${locationName}</div>` : ''}
                         <div class="tracker-quest-objectives">
@@ -2312,10 +2187,14 @@ const QuestSystem = {
                 <div class="tracker-content">
                     ${activeQuestsList.map(quest => {
                         const progress = this.checkProgress(quest.id);
+                        // 🖤💀 Check if doom quest for styling - orange for doom, gold for normal
+                        const isDoomQuest = quest.isDoom || quest.id?.startsWith('doom_');
+                        const questClass = isDoomQuest ? 'tracker-quest doom-quest' : 'tracker-quest';
+                        const readyClass = progress.status === 'ready_to_complete' ? ' ready' : '';
                         return `
-                            <div class="tracker-quest ${progress.status === 'ready_to_complete' ? 'ready' : ''}" onclick="QuestSystem.showQuestInfoPanel('${quest.id}');">
+                            <div class="${questClass}${readyClass}" onclick="QuestSystem.showQuestInfoPanel('${quest.id}');">
                                 <button class="tracker-track-btn" onclick="event.stopPropagation(); QuestSystem.trackQuest('${quest.id}');" title="Track this quest">🎯</button>
-                                <span class="tracker-quest-name">${quest.name}</span>
+                                <span class="tracker-quest-name">${isDoomQuest ? '💀 ' : ''}${quest.name}</span>
                                 <span class="tracker-quest-progress">${progress.progress}</span>
                             </div>
                         `;
@@ -2353,6 +2232,41 @@ const QuestSystem = {
             .tracker-tracked-quest:hover {
                 background: rgba(255, 215, 0, 0.2);
                 border-color: rgba(255, 215, 0, 0.5);
+            }
+            /* 💀 DOOM QUEST STYLING - Orange instead of gold */
+            .tracker-tracked-quest.doom-quest {
+                background: rgba(255, 140, 0, 0.15);
+                border: 1px solid rgba(255, 140, 0, 0.4);
+            }
+            .tracker-tracked-quest.doom-quest:hover {
+                background: rgba(255, 140, 0, 0.25);
+                border-color: rgba(255, 140, 0, 0.6);
+            }
+            .tracker-quest.doom-quest {
+                background: rgba(255, 140, 0, 0.1);
+                border-left: 3px solid #ff8c00;
+            }
+            .tracker-quest.doom-quest:hover {
+                background: rgba(255, 140, 0, 0.2);
+            }
+            .doom-quest .tracker-quest-title,
+            .doom-quest .tracker-quest-name {
+                color: #ff8c00 !important;
+            }
+            /* 🌍 World badge styling */
+            .tracker-world-badge {
+                font-size: 9px;
+                padding: 1px 4px;
+                border-radius: 3px;
+                margin-left: auto;
+            }
+            .tracker-world-badge.doom {
+                background: rgba(255, 140, 0, 0.3);
+                color: #ff8c00;
+            }
+            .tracker-world-badge.normal {
+                background: rgba(255, 215, 0, 0.2);
+                color: #ffd700;
             }
             .tracker-quest-title {
                 display: flex;
@@ -2637,7 +2551,8 @@ const QuestSystem = {
             questName: quest.name,
             questId: quest.id,
             objective: currentObjective,
-            isTracked: true
+            isTracked: true,
+            isDoom: quest.isDoom || quest.id?.startsWith('doom_') // 🖤💀 Flag for doom quest styling
         };
     },
 
@@ -2688,11 +2603,18 @@ const QuestSystem = {
         }
     },
 
-    // 🖤 Add golden quest marker to a specific location element 💀
+    // 🖤 Add quest marker to a specific location element 💀
+    // Gold for normal quests, ORANGE for doom quests
     addQuestMarkerToElement(locationEl, mapType = 'main') {
         const marker = document.createElement('div');
         marker.className = `quest-target-marker quest-marker-${mapType}`;
         marker.innerHTML = '🎯';
+
+        // 🖤💀 Check if tracked quest is a doom quest - use ORANGE instead of gold
+        const trackedQuest = this.activeQuests[this.trackedQuestId];
+        const isDoomQuest = trackedQuest?.isDoom || this.trackedQuestId?.startsWith('doom_');
+        const glowColor = isDoomQuest ? 'orange' : 'gold';
+        const glowRgba = isDoomQuest ? 'rgba(255, 140, 0, ' : 'rgba(255, 215, 0, ';
 
         const fontSize = mapType === 'mini' ? '16px' : '20px';
         const topOffset = mapType === 'mini' ? '-12px' : '-15px';
@@ -2703,16 +2625,17 @@ const QuestSystem = {
             left: 50%;
             transform: translateX(-50%);
             font-size: ${fontSize};
-            filter: drop-shadow(0 0 8px gold) drop-shadow(0 0 15px gold);
+            filter: drop-shadow(0 0 8px ${glowColor}) drop-shadow(0 0 15px ${glowColor});
             animation: quest-marker-bounce 1s ease-in-out infinite;
             pointer-events: none;
             z-index: 100;
         `;
 
-        // 🦇 Add glow effect to the location itself
+        // 🦇 Add glow effect to the location itself - orange for doom, gold for normal
         locationEl.classList.add('quest-target-glow');
-        locationEl.style.boxShadow = '0 0 20px 10px rgba(255, 215, 0, 0.6), 0 0 40px 20px rgba(255, 215, 0, 0.3)';
-        locationEl.style.animation = 'quest-location-pulse 2s ease-in-out infinite';
+        locationEl.classList.toggle('doom-quest-glow', isDoomQuest);
+        locationEl.style.boxShadow = `0 0 20px 10px ${glowRgba}0.6), 0 0 40px 20px ${glowRgba}0.3)`;
+        locationEl.style.animation = isDoomQuest ? 'doom-quest-location-pulse 2s ease-in-out infinite' : 'quest-location-pulse 2s ease-in-out infinite';
 
         // 💀 Append marker to the location
         locationEl.style.position = 'absolute';
@@ -2769,6 +2692,12 @@ const QuestSystem = {
 
         if (!scaledPos) return;
 
+        // 🖤💀 Check if tracked quest is a doom quest - use ORANGE instead of gold
+        const trackedQuest = this.activeQuests[this.trackedQuestId];
+        const isDoomQuest = trackedQuest?.isDoom || this.trackedQuestId?.startsWith('doom_');
+        const glowColor = isDoomQuest ? 'orange' : 'gold';
+        const glowRgba = isDoomQuest ? 'rgba(255, 140, 0, ' : 'rgba(255, 215, 0, ';
+
         // 🦇 Determine sizes based on map type
         const fontSize = mapType === 'mini' ? '18px' : '28px';
         const glowSize = mapType === 'mini' ? '25px' : '40px';
@@ -2776,6 +2705,7 @@ const QuestSystem = {
         // 🦇 Create floating marker element
         const marker = document.createElement('div');
         marker.className = `quest-target-marker floating-quest-marker floating-quest-marker-${mapType}`;
+        if (isDoomQuest) marker.classList.add('doom-quest-marker');
         marker.innerHTML = '🎯';
         marker.style.cssText = `
             position: absolute;
@@ -2783,7 +2713,7 @@ const QuestSystem = {
             top: ${scaledPos.y}px;
             transform: translate(-50%, -50%);
             font-size: ${fontSize};
-            filter: drop-shadow(0 0 8px gold) drop-shadow(0 0 15px gold);
+            filter: drop-shadow(0 0 8px ${glowColor}) drop-shadow(0 0 15px ${glowColor});
             animation: quest-marker-float-bounce 1s ease-in-out infinite;
             pointer-events: none;
             z-index: 150;
@@ -2792,6 +2722,7 @@ const QuestSystem = {
         // 🖤 Create a glowing circle underneath to show the unexplored destination 💀
         const glow = document.createElement('div');
         glow.className = `quest-target-glow-circle quest-glow-${mapType}`;
+        if (isDoomQuest) glow.classList.add('doom-quest-glow');
         glow.style.cssText = `
             position: absolute;
             left: ${scaledPos.x}px;
@@ -2800,9 +2731,9 @@ const QuestSystem = {
             width: ${glowSize};
             height: ${glowSize};
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, rgba(255, 215, 0, 0.1) 50%, transparent 70%);
-            box-shadow: 0 0 30px 15px rgba(255, 215, 0, 0.4), 0 0 60px 30px rgba(255, 215, 0, 0.2);
-            animation: quest-location-pulse 2s ease-in-out infinite;
+            background: radial-gradient(circle, ${glowRgba}0.4) 0%, ${glowRgba}0.1) 50%, transparent 70%);
+            box-shadow: 0 0 30px 15px ${glowRgba}0.4), 0 0 60px 30px ${glowRgba}0.2);
+            animation: ${isDoomQuest ? 'doom-quest-location-pulse' : 'quest-location-pulse'} 2s ease-in-out infinite;
             pointer-events: none;
             z-index: 140;
         `;
@@ -2890,12 +2821,35 @@ const QuestSystem = {
                     box-shadow: 0 0 30px 15px rgba(255, 215, 0, 0.8), 0 0 60px 30px rgba(255, 215, 0, 0.4);
                 }
             }
+            /* 💀 DOOM QUEST ANIMATIONS - ORANGE instead of gold */
+            @keyframes doom-quest-location-pulse {
+                0%, 100% {
+                    box-shadow: 0 0 20px 10px rgba(255, 140, 0, 0.6), 0 0 40px 20px rgba(255, 140, 0, 0.3);
+                }
+                50% {
+                    box-shadow: 0 0 30px 15px rgba(255, 140, 0, 0.8), 0 0 60px 30px rgba(255, 140, 0, 0.4);
+                }
+            }
+            @keyframes doom-quest-marker-glow {
+                0%, 100% {
+                    filter: drop-shadow(0 0 12px orange) drop-shadow(0 0 20px orange) drop-shadow(0 0 30px rgba(255, 140, 0, 0.5));
+                }
+                50% {
+                    filter: drop-shadow(0 0 18px orange) drop-shadow(0 0 30px orange) drop-shadow(0 0 45px rgba(255, 140, 0, 0.7));
+                }
+            }
             .quest-target-glow {
                 z-index: 35 !important; /* 🖤 ABOVE weather (15) so quest targets are visible 💀 */
+            }
+            .doom-quest-glow {
+                z-index: 35 !important;
             }
             /* 🖤 Floating marker for unexplored quest locations - extra bounce for visibility 💀 */
             .floating-quest-marker {
                 animation: quest-marker-float-bounce 1s ease-in-out infinite, quest-marker-glow 2s ease-in-out infinite !important;
+            }
+            .floating-quest-marker.doom-quest-marker {
+                animation: quest-marker-float-bounce 1s ease-in-out infinite, doom-quest-marker-glow 2s ease-in-out infinite !important;
             }
         `;
         document.head.appendChild(style);
@@ -3225,8 +3179,10 @@ const QuestSystem = {
     // 🎧 EVENT LISTENERS - watching your every move
     // ═══════════════════════════════════════════════════════════════
     setupEventListeners() {
+        // 🖤 Fixed: accept both 'item' and 'itemId' for backwards compatibility 💀
         document.addEventListener('item-received', (e) => {
-            this.updateProgress('collect', { item: e.detail.itemId, count: e.detail.quantity });
+            const itemId = e.detail.item || e.detail.itemId;
+            this.updateProgress('collect', { item: itemId, count: e.detail.quantity || 1 });
         });
 
         document.addEventListener('item-purchased', (e) => {
@@ -3241,7 +3197,8 @@ const QuestSystem = {
             this.updateProgress('defeat', { enemy: e.detail.enemyType, count: 1 });
         });
 
-        document.addEventListener('location-changed', (e) => {
+        // 🖤 Fixed: was 'location-changed' but travel fires 'player-location-changed' 💀
+        document.addEventListener('player-location-changed', (e) => {
             this.updateProgress('visit', { location: e.detail.location });
         });
 
@@ -3251,6 +3208,21 @@ const QuestSystem = {
 
         document.addEventListener('dungeon-room-explored', (e) => {
             this.updateProgress('explore', { dungeon: e.detail.dungeon, rooms: 1 });
+        });
+
+        // 🖤 Gold changes - check wealth gate objectives 💀
+        document.addEventListener('gold-changed', (e) => {
+            this.updateProgress('gold', { amount: e.detail.newAmount || e.detail.gold });
+        });
+
+        // 🖤 Item sold - for sell objectives 💀
+        document.addEventListener('item-sold', (e) => {
+            this.updateProgress('sell', { item: e.detail.itemId || e.detail.item, count: e.detail.quantity || 1 });
+        });
+
+        // 🖤 Player made a decision - for choice quests 💀
+        document.addEventListener('player-decision', (e) => {
+            this.updateProgress('decision', { choice: e.detail.choice });
         });
 
         // 🖤 Refresh quest markers when world map overlay is shown 💀

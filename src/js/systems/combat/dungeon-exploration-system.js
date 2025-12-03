@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // DUNGEON EXPLORATION SYSTEM - greed meets darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -1721,6 +1721,10 @@ const DungeonExplorationSystem = {
         results.loot.forEach(item => {
             if (!game.player.inventory) game.player.inventory = {};
             game.player.inventory[item.id] = (game.player.inventory[item.id] || 0) + item.quantity;
+            // 🖤 Emit item-received for quest progress tracking 💀
+            document.dispatchEvent(new CustomEvent('item-received', {
+                detail: { item: item.id, quantity: item.quantity, source: 'dungeon_loot' }
+            }));
         });
 
         // Update displays
@@ -2634,6 +2638,10 @@ const DungeonExplorationSystem = {
             boss.rewards.items.forEach(itemId => {
                 if (!game.player.inventory) game.player.inventory = {};
                 game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + 1;
+                // 🖤 Emit item-received for quest progress tracking 💀
+                document.dispatchEvent(new CustomEvent('item-received', {
+                    detail: { item: itemId, quantity: 1, source: 'boss_loot' }
+                }));
             });
         }
 

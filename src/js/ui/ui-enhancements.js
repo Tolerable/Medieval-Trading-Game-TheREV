@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // UI ENHANCEMENTS - polish for your trading empire
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -141,14 +141,10 @@ const KeyboardShortcuts = {
     init() {
         this.setupEventListeners();
         this.createHelpOverlay();
-        // ⚰️ this.createSettingsPanel(); - DEAD, now handled by settings-panel.js
-        // ⚰️ this.createQuickActionButtons(); - DEAD, bottom-action-bar handles this
         this.createNotificationSystem();
         this.createLoadingIndicators();
         this.createAccessibilityOptions();
         this.createVisualEffects();
-        // ⚰️ this.createMinimap(); - disabled, never fully implemented
-        // ⚰️ this.createGameStats(); - DEAD, no game-controls container exists
         this.createConfirmationDialogs();
     },
     
@@ -336,9 +332,6 @@ const KeyboardShortcuts = {
         }
     },
     
-    // ⚰️ PURGED 2025-11-27: createSettingsPanel, setupSettingsEventListeners,
-    // saveSettings, loadSettings - all handled by settings-panel.js now
-
     // Apply settings
     applySettings(settings) {
         // Apply font size
@@ -677,102 +670,6 @@ const KeyboardShortcuts = {
         
         document.head.appendChild(style);
     },
-    
-    // ⚰️ MINIMAP DISABLED - never fully implemented, RIP 💀
-    // kept here in case we resurrect this corpse someday
-    /*
-    createMinimap() {
-        const minimapContainer = document.createElement('div');
-        minimapContainer.id = 'minimap-container';
-        minimapContainer.innerHTML = `
-            <div class="minimap-header">
-                <h4>Minimap</h4>
-                <button id="toggle-minimap-btn" title="Toggle Minimap" aria-label="Toggle Minimap" aria-expanded="true">🗺️</button>
-            </div>
-            <div class="minimap-content" role="region" aria-label="Game world minimap">
-                <canvas id="minimap-canvas" width="200" height="150" aria-label="Interactive minimap showing player location and nearby areas"></canvas>
-                <div class="minimap-legend" role="list" aria-label="Map legend">
-                    <div class="legend-item" role="listitem">
-                        <span class="legend-color" style="background: #FF6B6B;" aria-hidden="true"></span>
-                        <span>Cities</span>
-                    </div>
-                    <div class="legend-item" role="listitem">
-                        <span class="legend-color" style="background: #4ECDC4;" aria-hidden="true"></span>
-                        <span>Towns</span>
-                    </div>
-                    <div class="legend-item" role="listitem">
-                        <span class="legend-color" style="background: #95E77E;" aria-hidden="true"></span>
-                        <span>Villages</span>
-                    </div>
-                    <div class="legend-item" role="listitem">
-                        <span class="legend-icon" aria-hidden="true">🏠</span>
-                        <span>Properties</span>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        const gameWorld = document.getElementById('game-world') || document.getElementById('game-container');
-        if (gameWorld) {
-            gameWorld.appendChild(minimapContainer);
-            this.setupMinimap();
-        } else {
-            console.warn('🖤 No game-world element found for minimap');
-        }
-    },
-
-    setupMinimap() {
-        const toggleBtn = document.getElementById('toggle-minimap-btn');
-        const minimapContent = document.querySelector('.minimap-content');
-
-        EventManager.addEventListener(toggleBtn, 'click', () => {
-            minimapContent.classList.toggle('hidden');
-        });
-
-        this.renderMinimap();
-    },
-
-    renderMinimap() {
-        const canvas = document.getElementById('minimap-canvas');
-        const ctx = canvas.getContext('2d');
-
-        if (!ctx) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = '#1a1a1a';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        const scale = 0.1;
-        Object.values(GameWorld.locations).forEach(location => {
-            const x = (location.x || 0) * scale + canvas.width / 2;
-            const y = (location.y || 0) * scale + canvas.height / 2;
-
-            if (GameWorld.isRegionUnlocked(location.region)) {
-                switch (location.type) {
-                    case 'city':
-                        ctx.fillStyle = '#FF6B6B';
-                        break;
-                    case 'town':
-                        ctx.fillStyle = '#4ECDC4';
-                        break;
-                    case 'village':
-                        ctx.fillStyle = '#95E77E';
-                        break;
-                    default:
-                        ctx.fillStyle = '#888888';
-                }
-
-                ctx.fillRect(x - 3, y - 3, 6, 6);
-
-                if (game.currentLocation && game.currentLocation.id === location.id) {
-                    ctx.fillStyle = '#4fc3f7';
-                    ctx.fillRect(x - 2, y - 2, 4, 4);
-                }
-            }
-        });
-    },
-    */
 
     // Create game statistics
     createGameStats() {

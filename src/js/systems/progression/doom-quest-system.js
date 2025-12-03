@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // DOOM QUEST SYSTEM - Tales of tragedy and survival 💀🔥
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Every quest is a story of loss. Every victory comes with grief.
 // The doom broke the world - these quests reflect that horror.
 // Unlocked after defeating the first boss and meeting the Ferryman.
@@ -19,11 +19,14 @@ const DoomQuestSystem = {
             id: 'doom_arrival',
             name: 'Through the Veil',
             description: 'The Ferryman has brought you across to the other world. What was once the kingdom now lies in ruins. The Shadow Throne has conquered all. Find survivors and learn what happened.',
-            giver: 'mad_ferryman',
+            giver: 'boatman',
             giverName: 'The Ferryman',
-            location: 'smugglers_cove', // Entry point to doom world
+            turnInNpc: 'haunted_elder',
+            turnInLocation: 'greendale',
+            location: 'shadow_dungeon', // Entry point - wherever boatman spawns
             type: 'main',
             difficulty: 'hard',
+            isDoom: true,
             objectives: [
                 { type: 'visit', location: 'greendale', completed: false, description: 'Journey to Greendale Ashes' },
                 { type: 'talk', npc: 'haunted_elder', completed: false, description: 'Speak with the Haunted Elder' },
@@ -40,9 +43,12 @@ const DoomQuestSystem = {
             description: 'The Elder speaks of the Royal Capital - now called the Fallen Throne. The king is dead, but something far worse sits on his throne. You must see it for yourself.',
             giver: 'haunted_elder',
             giverName: 'Elder Morin (Haunted)',
+            turnInNpc: 'grief_stricken_elder',
+            turnInLocation: 'royal_capital',
             location: 'greendale',
             type: 'main',
             difficulty: 'hard',
+            isDoom: true,
             objectives: [
                 { type: 'visit', location: 'royal_capital', completed: false, description: 'Enter the Fallen Throne' },
                 { type: 'talk', npc: 'grief_stricken_elder', completed: false, description: 'Find the Royal Scholar' },
@@ -60,9 +66,12 @@ const DoomQuestSystem = {
             description: 'Not all have submitted to the darkness. A resistance fights from the shadows. The Scholar tells of survivors gathering at Smuggler\'s Sanctuary. Find them. Join them. Or die alone.',
             giver: 'grief_stricken_elder',
             giverName: 'Scholar Aldwin (Broken)',
+            turnInNpc: 'survival_smuggler',
+            turnInLocation: 'smugglers_cove',
             location: 'royal_capital',
             type: 'main',
             difficulty: 'hard',
+            isDoom: true,
             objectives: [
                 { type: 'visit', location: 'smugglers_cove', completed: false, description: 'Travel to Smuggler\'s Sanctuary' },
                 { type: 'talk', npc: 'survival_smuggler', completed: false, description: 'Meet the Resistance Leader' },
@@ -452,7 +461,9 @@ const DoomQuestSystem = {
     // ═══════════════════════════════════════════════════════════════
 
     isInDoomWorld() {
-        return typeof game !== 'undefined' && game.inDoomWorld === true;
+        return (typeof game !== 'undefined' && game.inDoomWorld === true) ||
+               (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
+               (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive);
     },
 
     getQuest(questId) {
@@ -505,6 +516,97 @@ const DoomQuestSystem = {
         };
 
         return dialogueStages[stage] || dialogueStages.offer;
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🔗 QUEST SYSTEM INTEGRATION
+    // ═══════════════════════════════════════════════════════════════
+
+    // 🖤 Register all doom quests with the main QuestSystem
+    // Called when entering doom world for the first time
+    registerDoomQuests() {
+        if (typeof QuestSystem === 'undefined') {
+            console.warn('💀 QuestSystem not available - cannot register doom quests');
+            return;
+        }
+
+        console.log('💀 Registering doom quests with QuestSystem...');
+
+        // Add isDoom flag to all quests and register them
+        const allDoomQuests = { ...this.mainQuests, ...this.sideQuests };
+
+        Object.entries(allDoomQuests).forEach(([questId, quest]) => {
+            // Mark as doom quest
+            quest.isDoom = true;
+
+            // Add turnInNpc if not set (defaults to giver)
+            if (!quest.turnInNpc) {
+                quest.turnInNpc = quest.giver;
+            }
+
+            // Register with main QuestSystem if not already there
+            if (!QuestSystem.quests[questId]) {
+                QuestSystem.quests[questId] = quest;
+                console.log(`💀 Registered doom quest: ${quest.name}`);
+            }
+        });
+
+        console.log(`💀 Registered ${Object.keys(allDoomQuests).length} doom quests`);
+    },
+
+    // 🖤 Get quests for a specific NPC (for People Panel)
+    getQuestsForNPC(npcType, locationId) {
+        if (!this.isInDoomWorld()) return [];
+
+        const quests = [];
+        const allDoomQuests = { ...this.mainQuests, ...this.sideQuests };
+
+        Object.values(allDoomQuests).forEach(quest => {
+            // Quest giver matches
+            if (quest.giver === npcType && this._meetsPrerequisites(quest)) {
+                // Check if not already active or completed
+                if (typeof QuestSystem !== 'undefined') {
+                    const isActive = QuestSystem.activeQuests?.[quest.id];
+                    const isCompleted = QuestSystem.completedQuests?.includes(quest.id);
+                    if (!isActive && !isCompleted) {
+                        quests.push({ ...quest, canAccept: true });
+                    }
+                } else {
+                    quests.push({ ...quest, canAccept: true });
+                }
+            }
+
+            // Turn-in NPC matches
+            if (quest.turnInNpc === npcType) {
+                if (typeof QuestSystem !== 'undefined') {
+                    const activeQuest = QuestSystem.activeQuests?.[quest.id];
+                    if (activeQuest && QuestSystem.areObjectivesComplete?.(quest.id)) {
+                        quests.push({ ...quest, canTurnIn: true });
+                    }
+                }
+            }
+        });
+
+        return quests;
+    },
+
+    // 🖤 Start the intro doom quest (from Boatman)
+    startIntroQuest() {
+        if (typeof QuestSystem === 'undefined') return false;
+
+        // Register quests first if not done
+        this.registerDoomQuests();
+
+        // Start the intro quest
+        const result = QuestSystem.startQuest('doom_arrival');
+        if (result.success) {
+            QuestSystem.trackQuest('doom_arrival');
+            if (typeof addMessage === 'function') {
+                addMessage('💀 New Quest: Through the Veil', 'warning');
+                addMessage('The Ferryman has given you a task. Find survivors in this ruined world.', 'info');
+            }
+        }
+        return result.success;
     }
 };
 

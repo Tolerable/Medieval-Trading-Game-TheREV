@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    NPC SYSTEMS STYLES - trade windows in the shadows
    ═══════════════════════════════════════════════════════════════
-   Version: 0.89.9 | Unity AI Lab
+   Version: 0.90.00 | Unity AI Lab
    Creators: Hackall360, Sponge, GFourteen
    www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
    unityailabcontact@gmail.com
@@ -887,8 +887,6 @@
 .quest-tracker.hidden {
     display: none;
 }
-
-/* 🖤 Hide rules moved to z-index-system.css */
 
 /* 🖤 FIX: Smaller header for quest tracker 💀 */
 .tracker-header {

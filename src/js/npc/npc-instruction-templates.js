@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // 🖤 NPC INSTRUCTION TEMPLATES - the soul of every conversation 💀
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 //
@@ -158,6 +158,16 @@ const NPCInstructionTemplates = {
         console.log(`   - action: ${action}`);
         console.log(`   - _loaded: ${this._loaded}`);
 
+        // 🖤💀 DOOM WORLD CHECK - Use doom instructions when in doom world
+        const inDoom = (typeof game !== 'undefined' && game.inDoomWorld) ||
+                       (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive);
+
+        if (inDoom && typeof DoomNPCInstructionTemplates !== 'undefined') {
+            console.log(`💀 DOOM WORLD ACTIVE - Using DoomNPCInstructionTemplates for ${npcType}`);
+            return DoomNPCInstructionTemplates.buildDoomInstruction(npcType, action, context);
+        }
+
         const spec = this.getNPCSpec(npcType);
         console.log(`   - spec found: ${spec ? spec.type : 'NO SPEC FOUND'}`);
 
@@ -254,33 +264,42 @@ const NPCInstructionTemplates = {
 
     // 🖤 ASK QUEST - player wants work 💀
     _buildQuestInstruction(spec, context) {
-        const availableQuests = context.availableQuests || [];
+        // 🖤 Use NPCWorkflowSystem's pre-validated checker for reduced API lag 💀
+        if (typeof NPCWorkflowSystem !== 'undefined') {
+            const npcData = { type: spec.type, quests: context.availableQuests || [] };
+            const preValidated = NPCWorkflowSystem.getPreValidatedQuestAction(npcData, context.player || {});
 
+            if (preValidated.action === 'OFFER_QUEST') {
+                return `You are a ${spec.type}. Offer quest "${preValidated.questName}" in ONE sentence. ${preValidated.description || ''}. MUST include ${preValidated.command}. Example: "I have a task for you... ${preValidated.command}"`;
+            }
+        }
+
+        // 🦇 Fallback to old logic
+        const availableQuests = context.availableQuests || [];
         if (availableQuests.length > 0) {
             const q = availableQuests[0];
-            return `You are a ${spec.type}. Offer this quest in ONE sentence: "${q.name}" - ${q.description}. Reward: ${q.rewards?.gold || 0} gold. MUST include {startQuest:${q.id}} at the end. Example: "I need someone to ${q.description.toLowerCase()}. ${q.rewards?.gold || 0} gold reward. {startQuest:${q.id}}"`;
+            return `You are a ${spec.type}. Offer this quest in ONE sentence: "${q.name}" - ${q.description}. Reward: ${q.rewards?.gold || 0} gold. MUST include {startQuest:${q.id}} at the end.`;
         }
-        return `You are a ${spec.type}. Say ONE sentence: you have no work available right now. Example: "Nothing I need help with today, check back later."`;
+        return `You are a ${spec.type}. Say ONE sentence: you have no work available right now.`;
     },
 
     // 🖤 TURN IN QUEST - player delivering/completing a quest 💀
     _buildTurnInQuestInstruction(spec, context) {
-        const activeQuests = context.activeQuests || [];
-        const playerQuestItems = context.player?.questItems || {};
-        const npcType = spec.type;
+        // 🖤 Use NPCWorkflowSystem's pre-validated checker for reduced API lag 💀
+        if (typeof NPCWorkflowSystem !== 'undefined') {
+            const npcData = { type: spec.type };
+            const preValidated = NPCWorkflowSystem.getPreValidatedQuestAction(npcData, context.player || {});
 
-        const turnInQuests = activeQuests.filter(q => q.turnInNpc === npcType || q.giver === npcType);
-
-        if (turnInQuests.length > 0) {
-            const q = turnInQuests[0];
-            const requiredItem = q.givesQuestItem || q.objectives?.find(o => o.item)?.item;
-            const hasItem = requiredItem && playerQuestItems[requiredItem];
-
-            if (hasItem && requiredItem) {
-                return `You are a ${spec.type}. Player has the quest item. Say ONE sentence accepting delivery and giving reward. MUST include {takeQuestItem:${requiredItem}}{completeQuest:${q.id}}. Example: "Perfect, here's your ${q.rewards?.gold || 0} gold! {takeQuestItem:${requiredItem}}{completeQuest:${q.id}}"`;
+            if (preValidated.action === 'COMPLETE_QUEST') {
+                return `You are a ${spec.type}. Quest "${preValidated.questName}" is COMPLETE. Accept turn-in and congratulate player. MUST include ${preValidated.command}. Example: "Well done! Here's your reward. ${preValidated.command}"`;
+            } else if (preValidated.action === 'MISSING_ITEMS') {
+                return `You are a ${spec.type}. Quest incomplete: ${preValidated.message}. Tell player what they still need. Do NOT use completeQuest command.`;
+            } else if (preValidated.action === 'CHECK_PROGRESS') {
+                return `You are a ${spec.type}. Player has active quest "${preValidated.questName}" (${preValidated.progress}). Remind them what's needed.`;
             }
-            return `You are a ${spec.type}. Say ONE sentence: accept their completed task and give reward. MUST include {completeQuest:${q.id}}. Example: "Well done! Here's your payment. {completeQuest:${q.id}}"`;
         }
+
+        // 🦇 Fallback to old logic
         return `You are a ${spec.type}. Say ONE sentence: you weren't expecting any delivery. Example: "I'm not expecting anything from you."`;
     },
 

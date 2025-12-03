@@ -92,6 +92,26 @@
 
 ## 🟠 HIGH SEVERITY - FIXED ✅
 
+### v0.90.00 Release - Version Bump + Bloat Cleanup (2025-12-02)
+- [x] **ALL FILES** - Version bump from 0.89.x → 0.90.00 across 100+ files
+- [x] **button-fix.js:72** - Made transportation-btn optional (button no longer exists in UI)
+- [x] **travel-system.js** - Removed 67 lines of commented-out canvas code
+- [x] **ui-enhancements.js** - Removed ~95 lines of commented-out minimap code
+- [x] **Multiple files** - Removed bloat comments ("moved", "old code", "REMOVED", etc.)
+
+### Unity GO Workflow Session (2025-12-02)
+- [x] **property-purchase.js:16** - Null check for game.currentLocation ✅ FIXED (added ?. optional chaining)
+- [x] **property-system-facade.js:149** - Null check for ownedProperties ✅ FIXED (added ?. optional chaining)
+
+### Verified Non-Bugs (Wrong Line Numbers / By Design)
+- [x] **time-machine.js:542** - Weekly wage logic (day % 7) ✅ VERIFIED OK (correctly fires on days 7, 14, 21)
+- [x] **event-manager.js:143-158** - One-time listener removal ✅ VERIFIED OK (correctly removes after firing)
+- [x] **npc-voice.js:820-823** - WRONG LINE (line 820-823 is buildNPCDataFromMerchant, not audio)
+- [x] **npc-encounters.js:157-160** - Hook race condition ✅ VERIFIED OK (standard monkey-patching pattern)
+- [x] **save-manager.js:445** - Shallow merge ✅ BY DESIGN (lines 530/533 spreads are correct for save/load)
+- [x] **dynamic-market-system.js:189** - Negative hoursIntoDay ✅ VERIFIED OK (Math.max clamps negatives)
+- [x] **travel-system.js:1886** - WRONG LINE (line 1886 is just `hops: route.length - 1`)
+
 ### Performance Issues
 - [x] **O(n) Duplicate Detection** - event-manager.js:26-30 ✅ FIXED - Changed forEach to find()
 - [x] **Repeated DOM Queries in Game Loop** - time-machine.js:770-827 ✅ FIXED - Added _domCache

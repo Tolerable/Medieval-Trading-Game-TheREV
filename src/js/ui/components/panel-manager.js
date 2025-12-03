@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // PANEL MANAGER - window state orchestration
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -22,12 +22,13 @@ const PanelManager = {
     // Maps customToggle string names to actual functions
     toggleHandlers: {
         'KeyBindings.openMenu()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openMenu?.(),
-        'QuestSystem.toggleQuestTracker()': () => typeof QuestSystem !== 'undefined' && QuestSystem.toggleQuestTracker?.()
+        'QuestSystem.toggleQuestTracker()': () => typeof QuestSystem !== 'undefined' && QuestSystem.toggleQuestTracker?.(),
+        'openMarket()': () => typeof openMarket === 'function' && openMarket()
     },
 
     // All managed panel IDs and their info
     panelInfo: {
-        'market-panel': { name: 'Market', icon: '🏪', shortcut: 'M' },
+        'market-panel': { name: 'Market', icon: '🏪', shortcut: 'M', customToggle: 'openMarket()' },
         'inventory-panel': { name: 'Inventory', icon: '🎒', shortcut: 'I' },
         'travel-panel': { name: 'Travel', icon: '🗺️', shortcut: 'T' },
         'transportation-panel': { name: 'Transport', icon: '🚗', shortcut: 'W' },

@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // PROPERTY SYSTEM FACADE - unified interface to modular darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -146,7 +146,8 @@ const PropertySystem = {
     },
 
     getProperty(propertyId) {
-        return game.player.ownedProperties.find(p => p.id === propertyId);
+        // 🖤 Guard against null ownedProperties - can't find shit in nothing 💀
+        return game.player.ownedProperties?.find(p => p.id === propertyId);
     },
 
     loadProperties(properties) {

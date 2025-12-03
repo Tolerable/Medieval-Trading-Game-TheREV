@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // SAVE MANAGER - preserving your descent into capitalism
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -268,7 +268,8 @@ const SaveManager = {
                     temporaryEffects: game.player.temporaryEffects,
                     level: game.player.level,
                     experience: game.player.experience,
-                    tradeRoutes: game.player.tradeRoutes
+                    tradeRoutes: game.player.tradeRoutes,
+                    questItems: game.player.questItems || {} // 🖤 Quest items for delivery quests 💀
                 } : null,
                 currentLocation: game.currentLocation,
                 // 🖤 Use TimeMachine's getSaveData for complete time state

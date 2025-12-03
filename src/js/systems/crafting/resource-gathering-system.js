@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // RESOURCE GATHERING SYSTEM - mining the earth's corpse
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -673,6 +673,10 @@ const ResourceGatheringSystem = {
         if (typeof game !== 'undefined' && game.player && game.player.inventory) {
             // 🦇 Fixed: inventory is { itemId: quantity }, not array of objects
             game.player.inventory[resourceId] = (game.player.inventory[resourceId] || 0) + totalYield;
+            // 🖤 Emit item-received for quest progress tracking 💀
+            document.dispatchEvent(new CustomEvent('item-received', {
+                detail: { item: resourceId, quantity: totalYield, source: 'gathering' }
+            }));
         }
 
         // DRAIN STAMINA

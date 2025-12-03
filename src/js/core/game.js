@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME - medieval trading where capitalism meets darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -1887,6 +1887,10 @@ const EventSystem = {
             const itemId = event.effects.itemReward;
             game.player.inventory = game.player.inventory || {};
             game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + 1;
+            // 🖤 Emit item-received for quest progress tracking 💀
+            document.dispatchEvent(new CustomEvent('item-received', {
+                detail: { item: itemId, quantity: 1, source: 'event_reward' }
+            }));
             addMessage(`🎁 You received: ${itemId}!`, 'success');
         }
 
@@ -7418,23 +7422,42 @@ function updatePlayerStats() {
 
 function updateLocationInfo() {
     if (game.currentLocation) {
-        document.getElementById('location-name').textContent = game.currentLocation.name;
-        document.getElementById('location-description').textContent = game.currentLocation.description;
+        // 🖤 Use doom-aware location name if DoomWorldSystem is active 💀
+        let locationName = game.currentLocation.name;
+        if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive && DoomWorldSystem.getCurrentLocationName) {
+            locationName = DoomWorldSystem.getCurrentLocationName(game.currentLocation.id);
+        }
+        document.getElementById('location-name').textContent = locationName;
+        document.getElementById('location-description').textContent = game.currentLocation.description || '';
     }
 }
 
 function updateLocationPanel() {
+    if (!game.currentLocation || !game.currentLocation.id) return;
+
     const location = GameWorld.locations[game.currentLocation.id];
     if (!location) return;
-    
+
     const locationPanel = document.getElementById('location-panel');
     if (!locationPanel) return;
-    
+
+    // 🖤 Use doom-aware location name if DoomWorldSystem is active 💀
+    let locationName = location.name;
+    let locationDesc = location.description;
+    if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) {
+        if (DoomWorldSystem.getCurrentLocationName) {
+            locationName = DoomWorldSystem.getCurrentLocationName(game.currentLocation.id);
+        }
+        // 🦇 Doom descriptions could be different too
+        locationDesc = `The doom has transformed this place. ${location.description}`;
+    }
+
     // Update location name and description
-    locationPanel.querySelector('h2').textContent = location.name;
+    const h2 = locationPanel.querySelector('h2');
+    if (h2) h2.textContent = locationName;
     const descElement = locationPanel.querySelector('#location-description');
     if (descElement) {
-        descElement.textContent = location.description;
+        descElement.textContent = locationDesc;
     }
     
     // Add location details after description
@@ -9036,7 +9059,11 @@ function buyItem(itemId, quantity = 1) {
         game.player.inventory[itemId] = 0;
     }
     game.player.inventory[itemId] += actualQuantity;
-    
+    // 🖤 Emit item-received for quest progress tracking 💀
+    document.dispatchEvent(new CustomEvent('item-received', {
+        detail: { item: itemId, quantity: actualQuantity, source: 'market_buy' }
+    }));
+
     // Record trade if in bulk mode
     if (TradingSystem.tradeMode === 'bulk') {
         const tradeItems = new Map();
@@ -9130,6 +9157,14 @@ function sellItem(itemId, quantity = 1) {
     } else {
         game.player.gold += totalSellPrice;
     }
+    // 🖤 Emit item-sold for quest progress tracking 💀
+    document.dispatchEvent(new CustomEvent('item-sold', {
+        detail: { item: itemId, quantity: actualQuantity, gold: totalSellPrice }
+    }));
+    // 🖤 Emit gold-changed for wealth gate quests 💀
+    document.dispatchEvent(new CustomEvent('gold-changed', {
+        detail: { newAmount: game.player.gold, change: totalSellPrice, source: 'sell' }
+    }));
 
     // Add to market stock
     if (!currentLocation.marketPrices[itemId]) {

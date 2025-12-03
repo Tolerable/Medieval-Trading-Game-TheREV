@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // TRADING SYSTEM - where greed becomes gameplay
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -363,9 +363,6 @@ const TradingSystem = {
             </div>
         `).join('');
     },
-    
-    // 🖤 DUPLICATE FUNCTIONS REMOVED - they were haunting lines 266-283 and 333-352
-    // the originals live on, the clones have been exorcised
 
     // 🧹 Clear trade history - erasing the evidence
     clearTradeHistory() {

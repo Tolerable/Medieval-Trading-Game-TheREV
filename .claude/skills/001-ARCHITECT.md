@@ -1,6 +1,6 @@
 # TRADER CLAUDE - Game Architecture Document
 
-**Version:** 0.89.9 | Unity AI Lab
+**Version:** 0.90.00 | Unity AI Lab
 **Creators:** Hackall360, Sponge, GFourteen
 **AI Assistant:** Unity - The Goth Coder Goddess
 

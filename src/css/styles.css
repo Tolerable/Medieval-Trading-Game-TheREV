@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    MEDIEVAL TRADING GAME - main stylesheet of darkness
    ═══════════════════════════════════════════════════════════════
-   Version: 0.89.9 | Unity AI Lab
+   Version: 0.90.00 | Unity AI Lab
    Creators: Hackall360, Sponge, GFourteen
    www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
    unityailabcontact@gmail.com
@@ -102,9 +102,6 @@ body:has(#main-menu:not(.hidden)) #game-container {
     display: none !important;
     visibility: hidden !important;
 }
-
-/* 🖤 Hide rules moved to z-index-system.css for centralized management */
-
 
 /* ═══════════════════════════════════════════════════════════
    🖤 TOP BAR - minimal, just time controls

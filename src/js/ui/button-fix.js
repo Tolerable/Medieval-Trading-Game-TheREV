@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // BUTTON FIX - event listener repair shop
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -69,6 +69,7 @@ function initializeButtonListeners() {
         }
     });
     
+    // 🖤 Optional - transportation-btn was removed from UI, keeping for backwards compat 💀
     safeAddEventListener('transportation-btn', 'click', function() {
         console.log('Transportation button clicked');
         if (typeof openTransportation === 'function') {
@@ -76,7 +77,7 @@ function initializeButtonListeners() {
         } else {
             deboogerWarn('🔧 openTransportation function not found');
         }
-    });
+    }, true); // true = optional, button may not exist
 
     // Optional button - may not exist in all UI configurations
     safeAddEventListener('transportation-quick-btn', 'click', function() {

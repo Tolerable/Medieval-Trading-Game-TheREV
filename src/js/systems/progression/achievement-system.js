@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // ACHIEVEMENT SYSTEM - hollow victories for hollow souls
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -1515,26 +1515,44 @@ const AchievementSystem = {
 
     // wake up this monument to your gaming addiction
     init() {
-        console.log('🏆 Achievement System awakened from its slumber... waiting for first unpause to validate your existence');
-        // 🖤 DON'T check achievements immediately - wait for first unpause 💀
-        // this.checkAchievements(); // REMOVED - achievements deferred until player unpauses
+        console.log('🏆 Achievement System awakened from its slumber... waiting for first unpause + rank up to validate your existence');
+        // 🖤 DON'T check achievements immediately - wait for BOTH first unpause AND first rank up 💀
         this._firstUnpauseOccurred = false;
+        this._firstRankUpOccurred = false;
         this._achievementsEnabled = false;
     },
 
-    // 🖤 Called when player first unpauses the game - NOW we can start checking achievements 💀
-    enableAchievements() {
-        if (this._achievementsEnabled) return; // 🦇 Already enabled, don't double-fire
-
+    // 🖤 Called when player first unpauses the game - tracks unpause but doesn't enable yet 💀
+    onFirstUnpause() {
+        if (this._firstUnpauseOccurred) return;
         this._firstUnpauseOccurred = true;
-        this._achievementsEnabled = true;
-        console.log('🏆 Player unpaused! Achievement checking now ENABLED 🖤💀');
+        console.log('🏆 First unpause detected - waiting for first rank up to enable achievements 🖤💀');
+        this._tryEnableAchievements();
+    },
 
-        // 🖤 NOTE: MerchantRankSystem now has its own enableRankCelebrations() called separately
-        // with a 1.5s delay to prevent overlap with achievement popups 💀
+    // 🖤 Called when player gets their first trader rank up 💀
+    onFirstRankUp() {
+        if (this._firstRankUpOccurred) return;
+        this._firstRankUpOccurred = true;
+        console.log('🏆 First rank up detected - checking if achievements can be enabled 🖤💀');
+        this._tryEnableAchievements();
+    },
+
+    // 🖤 Internal: Only enable achievements when BOTH conditions are met 💀
+    _tryEnableAchievements() {
+        if (this._achievementsEnabled) return;
+        if (!this._firstUnpauseOccurred || !this._firstRankUpOccurred) return;
+
+        this._achievementsEnabled = true;
+        console.log('🏆 BOTH conditions met! Achievement checking now ENABLED 🖤💀');
 
         // Now check achievements for the first time
         this.checkAchievements();
+    },
+
+    // 🖤 DEPRECATED: Use onFirstUnpause() instead - kept for backwards compatibility 💀
+    enableAchievements() {
+        this.onFirstUnpause();
     },
 
     // check all achievements - wrapped in try-catch cuz errors at 3am hit different
@@ -1612,6 +1630,10 @@ const AchievementSystem = {
                 game.player.inventory[itemId] = 0;
             }
             game.player.inventory[itemId] += 1;
+            // 🖤 Emit item-received for quest progress tracking 💀
+            document.dispatchEvent(new CustomEvent('item-received', {
+                detail: { item: itemId, quantity: 1, source: 'achievement_reward' }
+            }));
             console.log(`🎁 Achievement reward: Received ${itemId}!`);
 
             // Show message to player

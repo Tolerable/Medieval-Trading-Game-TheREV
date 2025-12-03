@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    Z-INDEX SYSTEM - the dark tower of stacking contexts
    ═══════════════════════════════════════════════════════════════
-   Version: 0.89.9 | Unity AI Lab
+   Version: 0.90.00 | Unity AI Lab
    Creators: Hackall360, Sponge, GFourteen
    www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
    unityailabcontact@gmail.com
@@ -339,4 +339,145 @@ body.state-setup #game-world {
 /* During setup - transparent background to show weather through */
 body.state-setup #game-container {
     background: transparent !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   💀 DOOM WORLD STYLING - The Apocalypse Aesthetic 🔥
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 🖤 Doom World Body State - Applied when in doom world */
+body.doom-world {
+    --doom-bg: #1a0a0a;
+    --doom-text: #cc3333;
+    --doom-accent: #ff4444;
+    --doom-gold: #8b4513; /* Gold is worthless - make it rusty */
+    --doom-danger: #ff0000;
+}
+
+body.doom-world #game-container {
+    background: linear-gradient(180deg, #1a0a0a 0%, #2a0a0a 50%, #0a0505 100%) !important;
+}
+
+body.doom-world #game-world {
+    filter: sepia(0.3) hue-rotate(-10deg) saturate(1.2) brightness(0.8);
+}
+
+/* 💀 Doom location names - red and ominous */
+body.doom-world .location-name,
+body.doom-world .location-label {
+    color: var(--doom-text) !important;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+/* 🔥 Doom map connections - blood red */
+body.doom-world .map-path,
+body.doom-world .connection-line {
+    stroke: rgba(139, 0, 0, 0.6) !important;
+}
+
+/* 💀 Doom panels - darker styling */
+body.doom-world .panel,
+body.doom-world .game-panel,
+body.doom-world #side-panel {
+    background: linear-gradient(180deg, rgba(20, 5, 5, 0.95) 0%, rgba(30, 10, 10, 0.95) 100%) !important;
+    border-color: rgba(139, 0, 0, 0.4) !important;
+}
+
+/* 🦇 Doom modals */
+body.doom-world .modal-content {
+    background: linear-gradient(180deg, #1a0808 0%, #0a0404 100%) !important;
+    border: 1px solid rgba(139, 0, 0, 0.5) !important;
+}
+
+/* 💰 Gold display - rusty/worthless color */
+body.doom-world #player-gold,
+body.doom-world .gold-amount {
+    color: #8b4513 !important;
+}
+
+/* 🖤 Doom NPC cards - darker */
+body.doom-world .npc-card {
+    background: rgba(30, 10, 10, 0.9) !important;
+    border-color: rgba(139, 0, 0, 0.3) !important;
+}
+
+body.doom-world .npc-card:hover {
+    background: rgba(50, 15, 15, 0.9) !important;
+    border-color: rgba(255, 0, 0, 0.5) !important;
+}
+
+/* ⛵ Boatman NPC special styling */
+body.doom-world .npc-card[data-npc-id="boatman"] {
+    background: linear-gradient(180deg, rgba(50, 20, 50, 0.9) 0%, rgba(30, 10, 30, 0.9) 100%) !important;
+    border: 1px solid rgba(128, 0, 128, 0.5) !important;
+}
+
+.npc-card[data-npc-id="boatman"] {
+    background: linear-gradient(180deg, rgba(30, 30, 50, 0.9) 0%, rgba(20, 20, 40, 0.9) 100%) !important;
+    border: 1px solid rgba(100, 100, 200, 0.4) !important;
+}
+
+.npc-card[data-npc-id="boatman"]:hover {
+    border-color: rgba(150, 100, 255, 0.6) !important;
+    box-shadow: 0 0 15px rgba(100, 50, 200, 0.3);
+}
+
+/* 💀 Doom quick action buttons */
+body.doom-world .quick-action-btn {
+    background: rgba(60, 20, 20, 0.8) !important;
+    border-color: rgba(139, 0, 0, 0.4) !important;
+}
+
+body.doom-world .quick-action-btn:hover {
+    background: rgba(100, 30, 30, 0.9) !important;
+    border-color: rgba(255, 0, 0, 0.6) !important;
+}
+
+/* 🔮 Portal button special styling */
+.quick-action-btn[onclick*="Portal"] {
+    background: linear-gradient(180deg, rgba(80, 40, 120, 0.8) 0%, rgba(40, 20, 80, 0.8) 100%) !important;
+    border-color: rgba(150, 100, 255, 0.5) !important;
+    animation: portal-pulse 2s infinite;
+}
+
+@keyframes portal-pulse {
+    0%, 100% { box-shadow: 0 0 5px rgba(150, 100, 255, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(150, 100, 255, 0.6); }
+}
+
+/* 🖤 Doom message log - darker */
+body.doom-world #message-log,
+body.doom-world .message-log {
+    background: rgba(10, 5, 5, 0.9) !important;
+}
+
+body.doom-world .message-log .message {
+    color: #cc9999;
+}
+
+body.doom-world .message-log .message.danger {
+    color: #ff4444;
+}
+
+/* 💀 Doom world indicator in UI */
+body.doom-world::after {
+    content: '💀 DOOM WORLD';
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(139, 0, 0, 0.8);
+    color: #ff4444;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 9999;
+    pointer-events: none;
+    animation: doom-indicator-glow 2s infinite;
+}
+
+@keyframes doom-indicator-glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+    50% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.8); }
 }

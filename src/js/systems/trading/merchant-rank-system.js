@@ -380,6 +380,11 @@ const MerchantRankSystem = {
             // show celebration (if we have one)
             this.celebrateRankUp(result.newRank);
 
+            // 🖤 Notify AchievementSystem that first rank up occurred - enables achievement checking 💀
+            if (typeof AchievementSystem !== 'undefined' && AchievementSystem.onFirstRankUp) {
+                AchievementSystem.onFirstRankUp();
+            }
+
             // update all name displays
             this.updateAllNameDisplays();
         }
@@ -411,6 +416,11 @@ const MerchantRankSystem = {
 
             // show celebration
             this.celebrateRankUp(this._pendingRankUp);
+
+            // 🖤 Notify AchievementSystem that first rank up occurred - enables achievement checking 💀
+            if (typeof AchievementSystem !== 'undefined' && AchievementSystem.onFirstRankUp) {
+                AchievementSystem.onFirstRankUp();
+            }
 
             this._pendingRankUp = null;
         }

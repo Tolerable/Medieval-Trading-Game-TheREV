@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // BOOTSTRAP.JS - birthing the game from the void into darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -359,12 +359,6 @@ const Bootstrap = {
 // The game.js file has its own DOMContentLoaded handler that properly
 // calls initializeElements() and setupEventListeners()
 // Bootstrap can be called manually if needed: Bootstrap.init()
-
-// if (document.readyState === 'loading') {
-//     document.addEventListener('DOMContentLoaded', () => Bootstrap.init());
-// } else {
-//     Bootstrap.init();
-// }
 
 // Expose globally (but don't auto-start)
 window.Bootstrap = Bootstrap;

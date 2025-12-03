@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // NPC VOICE CHAT SYSTEM - digital souls learn to speak
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.89.9 | Unity AI Lab
+// Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -334,6 +334,39 @@ const NPCVoiceChatSystem = {
     // 💬 TEXT GENERATION - summoning NPC responses from the AI void
     // ═══════════════════════════════════════════════════════════
 
+    // 🖤 Retry helper for transient API failures 💀
+    async _fetchWithRetry(url, options, maxRetries = 2) {
+        let lastError;
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                const response = await fetch(url, options);
+                if (response.ok) return response;
+
+                // 🦇 Don't retry client errors (4xx), only server errors (5xx)
+                if (response.status >= 400 && response.status < 500) {
+                    throw new Error(`API client error: ${response.status}`);
+                }
+
+                // 🖤 Server error - retry with exponential backoff
+                lastError = new Error(`API server error: ${response.status}`);
+                if (attempt < maxRetries) {
+                    const delay = Math.pow(2, attempt) * 500; // 500ms, 1000ms
+                    console.warn(`🎙️ API retry ${attempt + 1}/${maxRetries} after ${delay}ms...`);
+                    await new Promise(r => setTimeout(r, delay));
+                }
+            } catch (error) {
+                lastError = error;
+                // 🦇 Network errors - retry
+                if (attempt < maxRetries && error.name !== 'AbortError') {
+                    const delay = Math.pow(2, attempt) * 500;
+                    console.warn(`🎙️ Network retry ${attempt + 1}/${maxRetries} after ${delay}ms:`, error.message);
+                    await new Promise(r => setTimeout(r, delay));
+                }
+            }
+        }
+        throw lastError;
+    },
+
     async generateNPCResponse(npcData, playerMessage, conversationHistory = [], options = {}) {
         try {
             // 🖤 Use new NPCInstructionTemplates if action type specified, otherwise fallback to NPCPromptBuilder 💀
@@ -431,18 +464,18 @@ RELATIONSHIP MEMORY:
 
             console.log('🎙️ Sending request to text API...', { model: payload.model, messageCount: messages.length });
 
-            const response = await fetch(`${this.config.textEndpoint}?referrer=${this.config.referrer}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+            // 🖤 Use retry helper for transient failures 💀
+            const response = await this._fetchWithRetry(
+                `${this.config.textEndpoint}?referrer=${this.config.referrer}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
                 },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                // 🦇 API error - throw to trigger fallback response
-                throw new Error(`API error: ${response.status}`);
-            }
+                2 // max 2 retries
+            );
 
             const data = await response.json();
             const rawAssistantMessage = data.choices?.[0]?.message?.content || 'The NPC stares at you blankly...';
@@ -487,27 +520,102 @@ RELATIONSHIP MEMORY:
             };
 
         } catch (error) {
-            // 🦇 API failed - use fallback response gracefully
+            // 🖤 API failed - log detailed error and use fallback response gracefully 💀
+            console.error('🎙️ NPC Voice API Error:', {
+                npcType: npcData?.type || npcData?.id || 'unknown',
+                npcName: npcData?.name || 'Unknown NPC',
+                errorMessage: error.message,
+                errorStack: error.stack?.split('\n').slice(0, 3).join('\n'),
+                timestamp: new Date().toISOString()
+            });
 
-            // return a fallback response
+            // 🦇 Track API failures for debugging
+            this._apiFailureCount = (this._apiFailureCount || 0) + 1;
+            this._lastApiError = { error: error.message, time: Date.now(), npc: npcData?.type };
+
+            // return a fallback response that fits the NPC type
             return {
                 text: this.getFallbackResponse(npcData),
                 success: false,
-                error: error.message
+                error: error.message,
+                fallbackUsed: true
             };
         }
     },
 
     getFallbackResponse(npcData) {
-        const fallbacks = [
-            "*mumbles something unintelligible*",
-            "*looks at you with a puzzled expression*",
-            "Hmm? What was that?",
-            "*seems distracted by something*",
-            "I... uh... *trails off*"
-        ];
+        // 🖤 NPC-type-specific fallbacks that actually feel like conversations 💀
+        const npcType = npcData?.type || npcData?.id || 'merchant';
 
-        return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+        const fallbacksByType = {
+            merchant: [
+                "Take your time, friend. Browse my wares - I've got quality goods at fair prices.",
+                "Anything catch your eye? I stand behind everything I sell.",
+                "Business is business. What can I help you with today?",
+                "Feel free to look around. Let me know when you're ready to trade."
+            ],
+            elder: [
+                "The old ways teach us patience. What wisdom do you seek?",
+                "I've seen much in my years... perhaps I can help guide you.",
+                "These are troubling times. But there is always hope for those who persevere.",
+                "The young often rush where the wise would pause. What brings you here?"
+            ],
+            guard: [
+                "Keep your nose clean and we won't have problems.",
+                "I'm watching. Always watching. Move along if you've no business here.",
+                "The law is the law. Best you remember that.",
+                "Trouble finds those who seek it. Don't be that person."
+            ],
+            blacksmith: [
+                "Steel and sweat - that's what builds empires. Need something forged?",
+                "The forge is always hungry. What do you need crafted?",
+                "Quality work takes time. I don't rush, and neither should you.",
+                "Iron bends to skill, not force. What can I make for you?"
+            ],
+            healer: [
+                "The body heals when given rest and proper care. How may I help?",
+                "I sense weariness in you. Perhaps you need restoration?",
+                "Nature provides all remedies. Tell me your ailments.",
+                "Health is wealth they say. And they're not wrong."
+            ],
+            innkeeper: [
+                "Room, drink, or both? We've got it all here.",
+                "Everyone needs rest sometime. Looking for a bed?",
+                "The fire's warm and the ale's cold. What'll it be?",
+                "Weary travelers are always welcome. What do you need?"
+            ],
+            thief: [
+                "*glances around nervously* Keep your voice down.",
+                "Information isn't free. Neither is... anything else.",
+                "You look like someone who appreciates discretion.",
+                "Let's just say I know people who know things. Interested?"
+            ],
+            bandit: [
+                "Your gold or your life. Actually... both.",
+                "Nice gear you've got there. Be a shame if something happened to it.",
+                "Wrong place, wrong time, friend.",
+                "Don't make this harder than it needs to be."
+            ],
+            scholar: [
+                "Knowledge is the greatest treasure. What do you wish to learn?",
+                "The ancient texts speak of many things. Ask your question.",
+                "Curiosity is the spark of wisdom. How may I enlighten you?",
+                "Books hold the memories of ages past. What do you seek?"
+            ],
+            noble: [
+                "My time is valuable. State your business quickly.",
+                "The common folk always want something. What is it?",
+                "Ah, another petitioner. Very well, speak.",
+                "I trust this is important. My schedule is quite full."
+            ]
+        };
+
+        // 🦇 Get type-specific fallbacks or use generic merchant ones
+        const typeFallbacks = fallbacksByType[npcType] ||
+                              fallbacksByType[npcData?.category] ||
+                              fallbacksByType.merchant;
+
+        return typeFallbacks[Math.floor(Math.random() * typeFallbacks.length)];
     },
 
     getGameContext() {
