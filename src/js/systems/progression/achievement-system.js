@@ -1545,6 +1545,8 @@ const AchievementSystem = {
 
         this._achievementsEnabled = true;
         console.log('🏆 BOTH conditions met! Achievement checking now ENABLED 🖤💀');
+        // 🖤 DEBUG: Log current journey stats when enabling 💀
+        console.log(`🏆 At enable time - journeysStarted: ${this.stats.journeysStarted}`);
 
         // Now check achievements for the first time
         this.checkAchievements();
@@ -1564,6 +1566,9 @@ const AchievementSystem = {
         if (!this._achievementsEnabled) {
             return; // 🦇 Achievements not enabled yet - player hasn't unpaused
         }
+
+        // 🖤 DEBUG: Log first_journey stats to trace why it's not unlocking 💀
+        console.log(`🏆 checkAchievements called - journeysStarted: ${this.stats.journeysStarted}, first_journey unlocked: ${this.achievements.first_journey?.unlocked}`);
 
         const newlyUnlocked = [];
 

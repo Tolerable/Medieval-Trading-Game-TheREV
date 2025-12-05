@@ -117,7 +117,7 @@ const PeoplePanel = {
                     <div id="people-trade-section" class="trade-section hidden">
                         <div class="trade-header">💰 Trade Available</div>
                         <div id="trade-preview" class="trade-preview"></div>
-                        <button class="trade-btn" data-action="open-trade">Open Market</button>
+                        <button class="trade-btn" data-action="open-trade">Trade with NPC</button>
                     </div>
                 </div>
 
@@ -1026,7 +1026,13 @@ const PeoplePanel = {
         // 🖤 Trade-related actions - vendors and service NPCs
         if (this.npcCanTrade(npcType)) {
             actions.push({ label: '💰 Browse wares', action: () => this.askAboutWares(), priority: 10 });
-            actions.push({ label: '🛒 Open market', action: () => this.openFullTrade(), priority: 11 });
+
+            // 🖤💀 "Open market" button ONLY at Royal Capital with merchant NPC 💀
+            // This opens the grand city market, not the NPC's personal inventory
+            const currentLocationId = game?.currentLocation?.id;
+            if (currentLocationId === 'royal_capital' && npcType === 'merchant') {
+                actions.push({ label: '🏛️ Open Grand Market', action: () => this.openGrandMarket(), priority: 11 });
+            }
         }
 
         // 🖤 Rumors - innkeepers, travelers, merchants know gossip
@@ -1168,14 +1174,58 @@ const PeoplePanel = {
     },
 
     // 📜 ASK ABOUT QUEST - Prompt NPC to offer this quest
+    // 🖤💀 FIXED: Directly assign the quest, API is just for flavor text! 💀
     async askAboutQuest(quest) {
+        const questId = quest.id || quest.questId;
+
+        // 🖤 Display player message
         const message = `I heard you might have work available? Tell me about "${quest.name}".`;
-        document.getElementById('people-chat-input').value = message;
-        await this.sendMessage();
+        this.addChatMessage(message, 'player');
+        this.chatHistory.push({ role: 'user', content: message });
+
+        // 🖤💀 CRITICAL: DIRECTLY assign the quest - don't wait for API! 💀
+        let assignResult = null;
+        if (typeof QuestSystem !== 'undefined' && QuestSystem.assignQuest) {
+            assignResult = QuestSystem.assignQuest(questId, { name: this.currentNPC?.name || 'NPC' });
+            console.log(`🎭 Quest assignment result for ${questId}:`, assignResult);
+        }
+
+        // 🖤 Generate NPC response (flavor text only - quest already assigned!)
+        let npcResponse;
+
+        if (assignResult?.success) {
+            // Quest assigned successfully!
+            npcResponse = `*nods thoughtfully* "${quest.name}" - yes, I have need of your help. `;
+            npcResponse += quest.description || 'Complete the objectives and return to me.';
+            npcResponse += ` The reward is ${quest.rewards?.gold || 0} gold.`;
+        } else if (assignResult?.error === 'Quest already active') {
+            npcResponse = `*raises eyebrow* You already accepted this task. Focus on completing it first.`;
+        } else if (assignResult?.error === 'Quest already completed') {
+            npcResponse = `*smiles* You've already done this work. Thank you again for your help.`;
+        } else {
+            npcResponse = `*shakes head* I don't have that work available right now.`;
+        }
+
+        this.addChatMessage(npcResponse, 'npc');
+        this.chatHistory.push({ role: 'assistant', content: npcResponse });
+
+        // 🔊 Play TTS
+        if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
+            const voice = this.getNPCVoice(this.currentNPC);
+            NPCVoiceChatSystem.playVoice(npcResponse, voice);
+        }
+
+        // 🖤 Update UI
+        this.updateQuestItems();
+        this.updateQuickActions(this.currentNPC);
     },
 
     // ✅ ASK TO COMPLETE QUEST - Tell NPC we've finished
+    // 🖤💀 FIXED: Directly complete the quest, API is just for flavor text! 💀
     async askToCompleteQuest(quest) {
+        const questId = quest.id || quest.questId;
+
+        // 🖤 Display player message
         let message;
         if (quest.type === 'delivery') {
             message = `I've completed the delivery you asked for. The "${quest.name}" task is done.`;
@@ -1185,29 +1235,301 @@ const PeoplePanel = {
         } else {
             message = `I've completed "${quest.name}" as you requested. The task is done.`;
         }
-        document.getElementById('people-chat-input').value = message;
-        await this.sendMessage();
+
+        this.addChatMessage(message, 'player');
+        this.chatHistory.push({ role: 'user', content: message });
+
+        // 🖤💀 CRITICAL: DIRECTLY complete the quest - don't wait for API! 💀
+        let completionResult = null;
+        if (typeof QuestSystem !== 'undefined' && QuestSystem.completeQuest) {
+            completionResult = QuestSystem.completeQuest(questId);
+            console.log(`🎭 Quest completion result for ${questId}:`, completionResult);
+        }
+
+        // 🖤 Generate NPC response (flavor text only - quest already completed!)
+        const npcType = this.currentNPC?.type || 'stranger';
+        let npcResponse;
+
+        if (completionResult?.success) {
+            // Quest completed successfully!
+            const rewards = completionResult.rewards || quest.rewards || {};
+            npcResponse = `*smiles warmly* Well done! You've completed "${quest.name}". `;
+            if (rewards.gold) npcResponse += `Here's ${rewards.gold} gold for your trouble. `;
+            if (rewards.experience) npcResponse += `You've gained valuable experience. `;
+            npcResponse += `Thank you for your help!`;
+        } else if (completionResult?.error === 'Objectives not complete') {
+            npcResponse = `*shakes head* You haven't finished all the objectives yet. Check your quest log.`;
+        } else if (completionResult?.error === 'missing_collection_items') {
+            npcResponse = `*looks at your hands* You don't have the items I need. Come back when you have them.`;
+        } else {
+            npcResponse = `*looks confused* I'm not sure what you mean. Do you have a quest to turn in?`;
+        }
+
+        this.addChatMessage(npcResponse, 'npc');
+        this.chatHistory.push({ role: 'assistant', content: npcResponse });
+
+        // 🔊 Play TTS
+        if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
+            const voice = this.getNPCVoice(this.currentNPC);
+            NPCVoiceChatSystem.playVoice(npcResponse, voice);
+        }
+
+        // 🖤 Update UI
+        this.updateQuestItems();
+        this.updateQuickActions(this.currentNPC);
     },
 
     // 📦 DELIVER QUEST ITEM - Hand over delivery to recipient NPC
+    // 🖤💀 FIXED: Directly deliver item and complete quest! 💀
     async deliverQuestItem(quest) {
-        const message = `I have a delivery for you - a ${quest.itemName} from ${quest.giverName || 'someone'}.`;
-        document.getElementById('people-chat-input').value = message;
-        await this.sendMessage();
+        const questId = quest.questId || quest.id;
+        const itemId = quest.itemId;
+        const itemName = quest.itemName || itemId;
+
+        // 🖤 Display player message
+        const message = `I have a delivery for you - a ${itemName} from ${quest.giverName || 'someone'}.`;
+        this.addChatMessage(message, 'player');
+        this.chatHistory.push({ role: 'user', content: message });
+
+        // 🖤💀 CRITICAL: Take the quest item and complete the quest! 💀
+        let deliverySuccess = false;
+
+        // Take the quest item
+        if (itemId && game?.player?.questItems?.[itemId]) {
+            delete game.player.questItems[itemId];
+            deliverySuccess = true;
+        }
+
+        // Complete the delivery quest
+        let completionResult = null;
+        if (deliverySuccess && typeof QuestSystem !== 'undefined' && QuestSystem.completeQuest) {
+            completionResult = QuestSystem.completeQuest(questId);
+            console.log(`🎭 Delivery quest completion result for ${questId}:`, completionResult);
+        }
+
+        // 🖤 Generate NPC response
+        let npcResponse;
+
+        if (completionResult?.success) {
+            npcResponse = `*accepts the ${itemName}* Ah, this is exactly what I was expecting! Thank you for the delivery. `;
+            const rewards = completionResult.rewards || quest.rewards || {};
+            if (rewards.gold) npcResponse += `Here's ${rewards.gold} gold for your trouble.`;
+        } else if (!deliverySuccess) {
+            npcResponse = `*looks confused* You don't seem to have the ${itemName} with you.`;
+        } else {
+            npcResponse = `*examines the item* Thank you for bringing this.`;
+        }
+
+        this.addChatMessage(npcResponse, 'npc');
+        this.chatHistory.push({ role: 'assistant', content: npcResponse });
+
+        // 🔊 Play TTS
+        if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
+            const voice = this.getNPCVoice(this.currentNPC);
+            NPCVoiceChatSystem.playVoice(npcResponse, voice);
+        }
+
+        // 🖤 Update UI
+        this.updateQuestItems();
+        this.updateQuickActions(this.currentNPC);
     },
 
     // ⏳ ASK QUEST PROGRESS - Check status of active quests (generic)
     async askQuestProgress() {
         const message = `How am I doing on the tasks you gave me?`;
-        document.getElementById('people-chat-input').value = message;
-        await this.sendMessage();
+        await this.sendQuestActionMessage('CHECK_PROGRESS', message, null);
     },
 
     // 🖤💀 ASK QUEST PROGRESS SPECIFIC - Check status of a SPECIFIC quest
     async askQuestProgressSpecific(quest) {
         const message = `What's the status on "${quest.name}"? How am I doing?`;
-        document.getElementById('people-chat-input').value = message;
-        await this.sendMessage();
+
+        this._currentQuestAction = {
+            type: 'CHECK_PROGRESS',
+            quest: quest,
+            questId: quest.id,
+            questName: quest.name
+        };
+
+        await this.sendQuestActionMessage('CHECK_PROGRESS', message, quest);
+    },
+
+    // 🖤💀 NEW: Send quest-specific action message with full quest context 💀
+    async sendQuestActionMessage(actionType, displayMessage, quest) {
+        if (this.isWaitingForResponse || !this.currentNPC) return;
+
+        this.addChatMessage(displayMessage, 'player');
+        this.chatHistory.push({ role: 'user', content: displayMessage });
+
+        this.isWaitingForResponse = true;
+        this.addChatMessage('...', 'npc typing-indicator');
+
+        try {
+            if (typeof NPCVoiceChatSystem === 'undefined') {
+                throw new Error('NPCVoiceChatSystem not available');
+            }
+
+            // 🖤 Build quest-specific context for API instructions 💀
+            const questContext = quest ? {
+                questId: quest.id || quest.questId,
+                questName: quest.name || quest.questName,
+                questType: quest.type || quest.questType,
+                rewards: quest.rewards,
+                objectives: quest.objectives,
+                itemName: quest.itemName,
+                giverName: quest.giverName
+            } : null;
+
+            // 🦇 Get progress info if checking progress
+            let progressInfo = null;
+            if (actionType === 'CHECK_PROGRESS' && quest && typeof QuestSystem !== 'undefined') {
+                progressInfo = QuestSystem.checkProgress(quest.id);
+            }
+
+            const options = {
+                action: actionType,
+                questAction: this._currentQuestAction,
+                questContext: questContext,
+                progressInfo: progressInfo,
+                availableQuests: this.getAvailableQuestsForNPC(),
+                activeQuests: this.getActiveQuestsForNPC()
+            };
+
+            console.log(`🎭 PeoplePanel: Sending ${actionType} quest action for ${this.currentNPC.type || this.currentNPC.id}`);
+            console.log('🎭 Quest context:', questContext);
+
+            const response = await NPCVoiceChatSystem.generateNPCResponse(
+                this.currentNPC,
+                displayMessage,
+                this.chatHistory,
+                options
+            );
+
+            // 🖤 Remove typing indicator
+            const messages = document.getElementById('people-chat-messages');
+            const typing = messages?.querySelector('.typing-indicator');
+            if (typing) typing.remove();
+
+            if (!response || !response.text) {
+                throw new Error('Empty response from API');
+            }
+
+            // 🖤💀 CRITICAL: Parse and execute commands from API response! 💀
+            // The API returns {completeQuest:questId} etc. that need to be executed
+            let cleanText = response.text;
+            if (typeof NPCWorkflowSystem !== 'undefined' && NPCWorkflowSystem.parseCommands) {
+                const parseResult = NPCWorkflowSystem.parseCommands(response.text);
+                cleanText = parseResult.cleanText;
+                if (parseResult.commands && parseResult.commands.length > 0) {
+                    console.log('🎭 Executing commands from API response:', parseResult.commands.map(c => c.command).join(', '));
+                    NPCWorkflowSystem.executeCommands(parseResult.commands, { npc: this.currentNPC });
+                }
+            }
+
+            this.addChatMessage(cleanText, 'npc');
+            this.chatHistory.push({ role: 'assistant', content: cleanText });
+
+            // 🔊 Play TTS with NPC-specific voice (use clean text without commands)
+            if (NPCVoiceChatSystem.settings?.voiceEnabled) {
+                const voice = this.getNPCVoice(this.currentNPC);
+                NPCVoiceChatSystem.playVoice(cleanText, voice);
+            }
+
+            // 🖤 Update quest items and quick actions in case quest state changed
+            this.updateQuestItems();
+            this.updateQuickActions(this.currentNPC);
+
+        } catch (e) {
+            console.error('🖤 Quest action message error:', e);
+
+            const messages = document.getElementById('people-chat-messages');
+            const typing = messages?.querySelector('.typing-indicator');
+            if (typing) typing.remove();
+
+            // 🦇 Use quest-specific fallback responses
+            const fallback = this.getQuestActionFallback(actionType, quest);
+            this.addChatMessage(fallback, 'npc');
+            this.chatHistory.push({ role: 'assistant', content: fallback });
+
+            // 🖤💀 CRITICAL: Actually execute the quest action even in fallback! 💀
+            // If API fails but user clicked "Complete Quest", we should still complete it
+            this.executeQuestActionFallback(actionType, quest);
+        }
+
+        this.isWaitingForResponse = false;
+        this._currentQuestAction = null;
+
+        // 🖤 Update UI after quest action
+        this.updateQuestItems();
+        this.updateQuickActions(this.currentNPC);
+    },
+
+    // 🖤💀 Execute quest action when API fails - the fallback must work! 💀
+    executeQuestActionFallback(actionType, quest) {
+        if (!quest) return;
+
+        const questId = quest.id || quest.questId;
+        console.log(`🎭 Executing fallback quest action: ${actionType} for ${questId}`);
+
+        switch (actionType) {
+            case 'TURN_IN_QUEST':
+                // Complete the quest - give rewards
+                if (typeof QuestSystem !== 'undefined' && QuestSystem.completeQuest) {
+                    const result = QuestSystem.completeQuest(questId);
+                    if (result?.success) {
+                        console.log(`✅ Quest ${questId} completed via fallback`);
+                        if (typeof addMessage === 'function') {
+                            addMessage(`🎉 Quest "${quest.name}" completed! Rewards received.`, 'success');
+                        }
+                    } else {
+                        console.warn(`❌ Failed to complete quest ${questId}:`, result?.error);
+                    }
+                }
+                break;
+
+            case 'OFFER_QUEST':
+                // Start the quest
+                if (typeof QuestSystem !== 'undefined' && QuestSystem.assignQuest) {
+                    const result = QuestSystem.assignQuest(questId, { name: this.currentNPC?.name || 'NPC' });
+                    if (result?.success) {
+                        console.log(`✅ Quest ${questId} started via fallback`);
+                        if (typeof addMessage === 'function') {
+                            addMessage(`📜 Quest "${quest.name}" accepted!`, 'success');
+                        }
+                    }
+                }
+                break;
+
+            case 'DELIVER_ITEM':
+                // Take the quest item and complete
+                if (quest.itemId && typeof QuestSystem !== 'undefined') {
+                    // Take the quest item
+                    if (game?.player?.questItems?.[quest.itemId]) {
+                        delete game.player.questItems[quest.itemId];
+                    }
+                    // Complete the delivery quest
+                    if (QuestSystem.completeQuest) {
+                        QuestSystem.completeQuest(questId);
+                    }
+                }
+                break;
+
+            case 'CHECK_PROGRESS':
+                // Just checking progress - no action needed, fallback message is enough
+                break;
+        }
+    },
+
+    // 🖤 Get fallback response for quest actions 💀
+    getQuestActionFallback(actionType, quest) {
+        const questName = quest?.name || quest?.questName || 'the task';
+        const fallbacks = {
+            OFFER_QUEST: `*nods thoughtfully* Yes, I have work for you. "${questName}" - are you interested?`,
+            TURN_IN_QUEST: `*examines your work* Well done with "${questName}". You've earned your reward.`,
+            DELIVER_ITEM: `*accepts the delivery* Thank you for bringing this. The sender will be pleased.`,
+            CHECK_PROGRESS: `*considers* You're making progress on "${questName}". Keep at it.`
+        };
+        return fallbacks[actionType] || `*nods* I understand.`;
     },
 
     // 📦 UPDATE QUEST ITEMS SECTION
@@ -1310,11 +1632,11 @@ const PeoplePanel = {
                     preview.innerHTML = '<span style="color:#4a9">✓ Trade Available</span><br>Various goods for trade';
                 }
 
-                // 🖤 Update button to be active
+                // 🖤 Update button to be active - opens NPC's inventory
                 const btn = container.querySelector('.trade-btn');
                 if (btn) {
                     btn.disabled = false;
-                    btn.textContent = 'Open Market';
+                    btn.textContent = 'Trade with NPC';
                     btn.style.opacity = '1';
                 }
             } else {
@@ -1339,8 +1661,33 @@ const PeoplePanel = {
     async askAboutWares() {
         if (!this.currentNPC) return;
 
-        // 🖤 Send standardized BROWSE_GOODS instruction to API 💀
-        await this.sendActionMessage('browse_goods', "Show me what you have for sale.");
+        // 🖤💀 "Browse Wares" directly opens NPC's inventory - no API needed! 💀
+        // The player clicked "Browse Wares" - they want to SEE the wares, not hear about them
+        this.addChatMessage("Show me what you have for sale.", 'player');
+        this.chatHistory.push({ role: 'user', content: "Show me what you have for sale." });
+
+        // 🖤 Quick NPC response then open trade
+        const npcType = this.currentNPC.type || this.currentNPC.id;
+        const responses = {
+            merchant: "*spreads hands over the goods* Take a look at what I've got.",
+            innkeeper: "*gestures to the bar* Here's what we have in stock.",
+            blacksmith: "*points to the forge and racks* See for yourself - quality work.",
+            apothecary: "*waves at the shelves* Browse my remedies and potions.",
+            jeweler: "*unlocks the display case* Fine pieces, every one.",
+            default: "*shows their wares* Here's what I have available."
+        };
+        const response = responses[npcType] || responses.default;
+        this.addChatMessage(response, 'npc');
+        this.chatHistory.push({ role: 'assistant', content: response });
+
+        // 🖤 Play TTS for the response
+        if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
+            const voice = this.getNPCVoice(this.currentNPC);
+            NPCVoiceChatSystem.playVoice(response, voice);
+        }
+
+        // 🖤 Open the NPC's inventory after a short delay for the message to show
+        setTimeout(() => this.openFullTrade(), 500);
     },
 
     async askAboutWork() {
@@ -1510,13 +1857,25 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
                 throw new Error('Empty response from API');
             }
 
-            this.addChatMessage(response.text, 'npc');
-            this.chatHistory.push({ role: 'assistant', content: response.text });
+            // 🖤💀 CRITICAL: Parse and execute commands from API response! 💀
+            // The API returns {openMarket}, {assignQuest:id}, etc. that need to be executed
+            let cleanText = response.text;
+            if (typeof NPCWorkflowSystem !== 'undefined' && NPCWorkflowSystem.parseCommands) {
+                const parseResult = NPCWorkflowSystem.parseCommands(response.text);
+                cleanText = parseResult.cleanText;
+                if (parseResult.commands && parseResult.commands.length > 0) {
+                    console.log('🎭 Executing commands from API response:', parseResult.commands.map(c => c.command).join(', '));
+                    NPCWorkflowSystem.executeCommands(parseResult.commands, { npc: this.currentNPC });
+                }
+            }
 
-            // 🔊 Play TTS with NPC-specific voice
+            this.addChatMessage(cleanText, 'npc');
+            this.chatHistory.push({ role: 'assistant', content: cleanText });
+
+            // 🔊 Play TTS with NPC-specific voice (use clean text without commands)
             if (NPCVoiceChatSystem.settings?.voiceEnabled) {
                 const voice = this.getNPCVoice(this.currentNPC);
-                NPCVoiceChatSystem.playVoice(response.text, voice);
+                NPCVoiceChatSystem.playVoice(cleanText, voice);
             }
 
             // 🖤 Update quest items in case something changed
@@ -1531,13 +1890,53 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             const typing = messages?.querySelector('.typing-indicator');
             if (typing) typing.remove();
 
-            // 🦇 Use action-specific fallback responses
+            // 🖤💀 CRITICAL: Fallback must ALSO execute the action! 💀
             const fallback = this.getActionFallback(actionType, this.currentNPC);
             this.addChatMessage(fallback, 'npc');
             this.chatHistory.push({ role: 'assistant', content: fallback });
+
+            // 🖤 Execute the action even on fallback - the fallback message is just flavor
+            this.executeActionFallback(actionType);
         }
 
         this.isWaitingForResponse = false;
+    },
+
+    // 🖤💀 Execute action when API fails - fallback must still work! 💀
+    executeActionFallback(actionType) {
+        console.log(`🎭 Executing fallback action: ${actionType}`);
+
+        switch (actionType) {
+            case 'browse_goods':
+                // Open NPC trade directly
+                this.openFullTrade();
+                break;
+
+            case 'rest':
+                // Open rest if at inn
+                if (typeof restAtInn === 'function') {
+                    restAtInn();
+                }
+                break;
+
+            case 'heal':
+                // Open healing if healer
+                if (typeof NPCTradeWindow !== 'undefined' && this.currentNPC) {
+                    NPCTradeWindow.open(this.currentNPC, 'heal');
+                }
+                break;
+
+            case 'ask_quest':
+            case 'ask_rumors':
+            case 'ask_directions':
+            case 'farewell':
+            case 'greeting':
+                // These are just informational - fallback message is enough
+                break;
+
+            default:
+                console.log(`🎭 No fallback action for: ${actionType}`);
+        }
     },
 
     // 🖤 Get fallback response based on action type 💀
@@ -1610,6 +2009,36 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         }
 
         return rumors.length > 0 ? rumors : ['Things are quiet around here lately.'];
+    },
+
+    // 🖤💀 Open the Grand Market at Royal Capital 💀
+    openGrandMarket() {
+        // 🏛️ This opens the city-wide market, not an NPC's personal inventory
+        if (game?.currentLocation?.id !== 'royal_capital') {
+            if (typeof addMessage === 'function') {
+                addMessage('The Grand Market is only available at the Royal Capital.');
+            }
+            return;
+        }
+
+        // 🖤 Add chat messages for flavor
+        this.addChatMessage("I'd like to browse the Grand Market.", 'player');
+        this.chatHistory.push({ role: 'user', content: "I'd like to browse the Grand Market." });
+
+        this.addChatMessage("*gestures toward the bustling market square* The Grand Market awaits - finest goods in all the realm!", 'npc');
+        this.chatHistory.push({ role: 'assistant', content: "*gestures toward the bustling market square* The Grand Market awaits - finest goods in all the realm!" });
+
+        // 🖤 Open the market using the global function
+        if (typeof openMarket === 'function') {
+            openMarket();
+        } else if (typeof updateMarketDisplay === 'function') {
+            updateMarketDisplay();
+            // Show market panel if it exists
+            const marketPanel = document.querySelector('.market-panel, #market-panel');
+            if (marketPanel) marketPanel.classList.remove('hidden');
+        } else {
+            console.warn('🏛️ Grand market function not available');
+        }
     },
 
     // 🖤 Get nearby locations for directions 💀
@@ -1781,7 +2210,9 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             tailor: '🧵', baker: '🍞', farmer: '🌾', fisherman: '🐟',
             miner: '⛏️', woodcutter: '🪓', barkeep: '🍺', general_store: '🏪',
             herbalist: '🌿', hunter: '🏹', druid: '🌳', sailor: '⚓',
-            explorer: '🧭', adventurer: '⚔️', banker: '🏦', default: '👤'
+            explorer: '🧭', adventurer: '⚔️', banker: '🏦',
+            prophet: '🎭', mysterious_stranger_intro: '🎭', // 🖤 Hooded Stranger intro NPC
+            default: '👤'
         };
         return icons[type] || icons.default;
     },
@@ -1800,6 +2231,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             barkeep: 'Barkeep', general_store: 'Shopkeeper', herbalist: 'Herbalist',
             hunter: 'Hunter', druid: 'Forest Keeper', sailor: 'Sailor',
             explorer: 'Explorer', adventurer: 'Adventurer', banker: 'Banker',
+            prophet: 'Mysterious Prophet', mysterious_stranger_intro: 'Mysterious Figure', // 🖤 Hooded Stranger
             default: 'Local'
         };
         return titles[type] || titles.default;
@@ -1832,8 +2264,176 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         const div = document.createElement('div');
         div.textContent = String(text);
         return div.innerHTML;
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🎭 SPECIAL ENCOUNTER - for intro/quest-specific NPC popups
+    // ═══════════════════════════════════════════════════════════════
+
+    // 🖤 Show a special one-time encounter (like intro Hooded Stranger) 💀
+    // This opens the panel directly to chat view with custom actions
+    showSpecialEncounter(npcData, options = {}) {
+        const {
+            greeting = null,           // 🖤 Custom greeting text (overrides API generation)
+            customActions = [],        // 🖤 Array of {label, action, priority} for special buttons
+            disableChat = false,       // 🖤 If true, hide chat input
+            disableBack = false,       // 🖤 If true, hide back button
+            onClose = null,            // 🖤 Callback when panel closes
+            introText = null,          // 🖤 Narrative text to show before NPC speaks
+            playVoice = true           // 🖤 Whether to play TTS for greeting
+        } = options;
+
+        console.log(`🎭 PeoplePanel: Opening special encounter with ${npcData.name} 🖤💀`);
+
+        // 🦇 Store callback for later
+        this._specialEncounterOnClose = onClose;
+        this._isSpecialEncounter = true;
+        this._specialEncounterActions = customActions;
+        this._disableChat = disableChat;
+
+        // 🖤 Open panel directly to chat view
+        this.open();
+
+        // 🦇 Skip list view entirely - go straight to chat
+        this.viewMode = 'chat';
+        this.currentNPC = npcData;
+        this.chatHistory = [];
+
+        document.getElementById('people-list-view')?.classList.add('hidden');
+        document.getElementById('people-chat-view')?.classList.remove('hidden');
+
+        // 🖤 Optionally hide back button for forced encounters
+        const backBtn = document.querySelector('#people-panel .back-btn');
+        if (backBtn) {
+            backBtn.style.display = disableBack ? 'none' : '';
+        }
+
+        // 🖤 Optionally hide chat input for scripted encounters
+        const chatInputArea = document.querySelector('#people-panel .chat-input-area');
+        if (chatInputArea) {
+            chatInputArea.style.display = disableChat ? 'none' : '';
+        }
+
+        this.updateChatHeader(npcData);
+        this.clearChatMessages();
+
+        // 🖤 Show intro narrative text first (if provided)
+        if (introText) {
+            this.addChatMessage(introText, 'system');
+        }
+
+        // 🖤 Show NPC greeting
+        if (greeting) {
+            // 🦇 Use provided greeting
+            setTimeout(() => {
+                this.addChatMessage(greeting, 'npc');
+                this.chatHistory.push({ role: 'assistant', content: greeting });
+
+                // 🔊 Play TTS
+                if (playVoice && typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
+                    NPCVoiceChatSystem.playVoice(greeting, npcData.voice || 'onyx');
+                }
+            }, 300);
+        } else {
+            // 🦇 Generate greeting via API (standard flow)
+            this.sendGreeting(npcData);
+        }
+
+        // 🖤 Update quick actions with custom actions (after a delay for greeting to render)
+        setTimeout(() => {
+            this.updateSpecialEncounterActions(customActions);
+        }, 500);
+    },
+
+    // 🖤 Update quick actions with custom actions for special encounters 💀
+    updateSpecialEncounterActions(customActions) {
+        const container = document.getElementById('people-quick-actions');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        // 🦇 Add custom actions
+        customActions.forEach(a => {
+            const btn = document.createElement('button');
+            btn.className = 'quick-action-btn';
+            if (a.questRelated) btn.classList.add('quest-action-btn');
+            if (a.primary) btn.classList.add('primary-action-btn');
+            btn.textContent = a.label;
+            btn.addEventListener('click', () => {
+                // 🖤 Execute action and potentially close encounter
+                if (typeof a.action === 'function') {
+                    a.action();
+                }
+                if (a.closeAfter) {
+                    this.closeSpecialEncounter();
+                }
+            });
+            container.appendChild(btn);
+        });
+
+        container.classList.remove('hidden');
+    },
+
+    // 🖤 Close special encounter and cleanup 💀
+    closeSpecialEncounter() {
+        console.log('🎭 PeoplePanel: Closing special encounter 🖤💀');
+
+        // 🦇 Restore normal UI
+        const backBtn = document.querySelector('#people-panel .back-btn');
+        if (backBtn) backBtn.style.display = '';
+
+        const chatInputArea = document.querySelector('#people-panel .chat-input-area');
+        if (chatInputArea) chatInputArea.style.display = '';
+
+        // 🖤 Fire callback if provided
+        if (typeof this._specialEncounterOnClose === 'function') {
+            this._specialEncounterOnClose();
+        }
+
+        // 🖤 Reset special encounter state
+        this._isSpecialEncounter = false;
+        this._specialEncounterOnClose = null;
+        this._specialEncounterActions = [];
+        this._disableChat = false;
+
+        // 🖤 Close the panel
+        this.close();
+    },
+
+    // 🖤 Add system message to chat (for narrative intro text) 💀
+    addSystemMessage(text) {
+        this.addChatMessage(text, 'system');
     }
 };
+
+// 🖤 Add CSS for special encounter styling 💀
+(function() {
+    const style = document.createElement('style');
+    style.textContent = `
+        /* 🎭 Special Encounter Styles */
+        #people-panel .chat-message.system {
+            background: linear-gradient(135deg, rgba(60, 60, 80, 0.9), rgba(40, 40, 60, 0.9));
+            border-left: 3px solid #8080a0;
+            font-style: italic;
+            color: #c0c0d0;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+        }
+
+        #people-panel .primary-action-btn {
+            background: linear-gradient(135deg, #4a7c59, #3a5a47) !important;
+            border: 1px solid #5a9c69 !important;
+            font-weight: bold;
+        }
+
+        #people-panel .primary-action-btn:hover {
+            background: linear-gradient(135deg, #5a9c69, #4a7c59) !important;
+            box-shadow: 0 0 10px rgba(90, 156, 105, 0.5);
+        }
+    `;
+    document.head.appendChild(style);
+})();
 
 // ═══════════════════════════════════════════════════════════════
 // 🌍 GLOBAL ACCESS

@@ -1549,6 +1549,40 @@ permissions:
 
 ---
 
+## 📅 VERSION HISTORY
+
+### v0.90.00 - The Unified Dialogue Update (2025-12-04)
+
+**New Features:**
+- 🎭 **Unified Quest API Instructions** - Button-specific instructions for all quest types
+- 📜 **sendQuestActionMessage()** - Full quest context passed to AI
+- 🖤 **Intro Panel Rework** - Hooded Stranger uses PeoplePanel
+- 🔬 **Mega Regression Test** - 121 checks across 10 categories
+
+**Technical Changes:**
+- Added OFFER_QUEST, DELIVER_ITEM, CHECK_PROGRESS action types
+- Added 3 instruction builder methods to npc-instruction-templates.js
+- Added showSpecialEncounter() to people-panel.js
+- All 42 game-flow tests passing
+- 519+ bugs verified fixed via 10 parallel agent analysis
+
+### v0.89.97 - The Doom World Update (2025-12-02)
+
+**New Features:**
+- 💀 Doom World with economy inversion
+- 🚣 Boatman portal with TTS
+- 🎯 Quest wayfinder markers
+- 📦 Bulk trading (Shift=×5, Ctrl=×25)
+- 🏪 Dungeon loot sellOnly system
+
+**Technical Changes:**
+- SAVE_SCHEMA validation with migrations
+- 13 memory leak fixes with beforeunload handlers
+- Z-index permanent fix (layers 1-4 weather, 10-30 UI)
+- README restructure to /readmes/ folder
+
+---
+
 ```
 ═══════════════════════════════════════════════════════════════════════
                     🖤 END OF NERD README 🖤
@@ -1557,6 +1591,6 @@ permissions:
 
     May your builds compile and your bugs be reproducible.
 
-                                    - Unity AI Lab, v0.89, 2025
+                                    - Unity AI Lab, v0.90.00, 2025
 ═══════════════════════════════════════════════════════════════════════
 ```

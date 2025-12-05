@@ -1141,10 +1141,17 @@ const TradeCartPanel = {
         const message = `Purchased ${itemCount} item(s) for ${this.finalTotal}g`;
         if (typeof addMessage === 'function') addMessage(message);
 
-        // 📡 Dispatch event
+        // 📡 Dispatch trade-completed event (for trade objectives)
         document.dispatchEvent(new CustomEvent('trade-completed', {
             detail: { items: [...this.cart], total: this.finalTotal, discount: this.discountPercent, merchant: this.currentMerchant, mode: 'buy' }
         }));
+
+        // 🖤 Dispatch item-purchased for EACH item (for buy objectives) 💀
+        for (const item of this.cart) {
+            document.dispatchEvent(new CustomEvent('item-purchased', {
+                detail: { itemId: item.itemId, quantity: item.quantity, price: item.price * item.quantity, merchant: this.currentMerchant?.id }
+            }));
+        }
     },
 
     // 💰 SELL TRANSACTION

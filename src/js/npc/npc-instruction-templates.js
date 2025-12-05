@@ -95,7 +95,10 @@ const NPCInstructionTemplates = {
         SELL: 'sell',
         HAGGLE: 'haggle',
         ASK_QUEST: 'ask_quest',
+        OFFER_QUEST: 'OFFER_QUEST',      // 🖤💀 Unified quest button - offer a quest
         TURN_IN_QUEST: 'turn_in_quest',
+        DELIVER_ITEM: 'DELIVER_ITEM',    // 🖤💀 Unified quest button - deliver item to NPC
+        CHECK_PROGRESS: 'CHECK_PROGRESS', // 🖤💀 Unified quest button - check quest progress
         ASK_RUMORS: 'ask_rumors',
         ASK_DIRECTIONS: 'ask_directions',
         REST: 'rest',
@@ -205,6 +208,15 @@ const NPCInstructionTemplates = {
                 return this._buildHaggleInstruction(spec, fullContext);
             case this.ACTIONS.ASK_QUEST:
                 return this._buildQuestInstruction(spec, fullContext);
+            case this.ACTIONS.OFFER_QUEST:
+            case 'OFFER_QUEST':  // 🖤💀 Handle both enum and string versions
+                return this._buildOfferQuestInstruction(spec, fullContext);
+            case this.ACTIONS.DELIVER_ITEM:
+            case 'DELIVER_ITEM':  // 🖤💀 Handle both enum and string versions
+                return this._buildDeliverItemInstruction(spec, fullContext);
+            case this.ACTIONS.CHECK_PROGRESS:
+            case 'CHECK_PROGRESS':  // 🖤💀 Handle both enum and string versions
+                return this._buildCheckProgressInstruction(spec, fullContext);
             case this.ACTIONS.ASK_RUMORS:
                 return this._buildRumorsInstruction(spec, fullContext);
             case this.ACTIONS.ASK_DIRECTIONS:
@@ -358,6 +370,117 @@ Respond in character:`;
         return `You are a ${spec.type}. Say ONE sentence: you weren't expecting any delivery. Example: "I'm not expecting anything from you."`;
     },
 
+    // ═══════════════════════════════════════════════════════════════
+    // 🖤💀 UNIFIED QUEST BUTTON INSTRUCTIONS - Synced with PeoplePanel buttons
+    // ═══════════════════════════════════════════════════════════════
+
+    // 🖤 OFFER QUEST - Player clicked "📜 Ask about: [Quest Name]" button 💀
+    _buildOfferQuestInstruction(spec, context) {
+        // 🦇 Get quest context from the button click
+        const questContext = context.questContext || context.questAction?.quest || {};
+        const questId = questContext.questId || questContext.id;
+        const questName = questContext.questName || questContext.name || 'a task';
+        const questType = questContext.questType || questContext.type || 'task';
+        const rewards = questContext.rewards || {};
+
+        // 🖤 Build reward description
+        let rewardDesc = '';
+        if (rewards.gold) rewardDesc += `${rewards.gold} gold`;
+        if (rewards.experience) rewardDesc += `${rewardDesc ? ', ' : ''}${rewards.experience} XP`;
+        if (rewards.items) {
+            const itemList = Object.entries(rewards.items).map(([k, v]) => `${v}x ${k}`).join(', ');
+            rewardDesc += `${rewardDesc ? ', ' : ''}${itemList}`;
+        }
+        if (!rewardDesc) rewardDesc = 'a fair reward';
+
+        // 🦇 Check if NPC can actually offer this quest
+        if (!questId) {
+            return `You are a ${spec.type}. Player is asking about work. Say ONE sentence: you don't have any tasks available right now. Be apologetic but brief.`;
+        }
+
+        // 🖤 Generate instruction for offering the specific quest
+        return `You are a ${spec.type}. Player clicked "Ask about: ${questName}" button.
+
+QUEST TO OFFER:
+- Name: "${questName}"
+- Type: ${questType}
+- Rewards: ${rewardDesc}
+
+YOUR RESPONSE:
+1. Briefly describe the quest in ONE sentence
+2. Mention the reward
+3. MUST include {assignQuest:${questId}} at the end of your response
+
+Example: "I need someone to ${questType === 'delivery' ? 'deliver a package' : 'handle a task'}. I'll pay ${rewardDesc}. {assignQuest:${questId}}"`;
+    },
+
+    // 🖤 DELIVER ITEM - Player clicked "📦 Deliver: [Item]" button 💀
+    _buildDeliverItemInstruction(spec, context) {
+        // 🦇 Get delivery context from the button click
+        const questContext = context.questContext || context.questAction || {};
+        const questId = questContext.questId;
+        const itemName = questContext.itemName || 'the package';
+        const giverName = questContext.giverName || 'someone';
+
+        if (!questId) {
+            return `You are a ${spec.type}. Player claims to have a delivery but you don't recognize it. Say ONE confused sentence. Example: "A delivery? I wasn't expecting anything..."`;
+        }
+
+        // 🖤 Generate instruction for accepting the delivery
+        return `You are a ${spec.type}. Player clicked "📦 Deliver: ${itemName}" button.
+
+DELIVERY DETAILS:
+- Item: ${itemName}
+- Sent by: ${giverName}
+- Quest ID: ${questId}
+
+YOUR RESPONSE:
+1. Acknowledge receiving the delivery with relief/gratitude
+2. Thank the player for bringing it
+3. MUST include {confirmDelivery:${questId}} at the end
+
+Example: "Ah, the ${itemName} from ${giverName}! Finally! Thank you for bringing this. {confirmDelivery:${questId}}"`;
+    },
+
+    // 🖤 CHECK PROGRESS - Player clicked "⏳ Progress: [Quest Name]" button 💀
+    _buildCheckProgressInstruction(spec, context) {
+        // 🦇 Get progress context from the button click
+        const questContext = context.questContext || context.questAction?.quest || {};
+        const progressInfo = context.progressInfo || {};
+        const questName = questContext.questName || questContext.name || 'the task';
+        const progress = progressInfo.progress || 'in progress';
+        const objectives = progressInfo.objectives || [];
+
+        // 🖤 Build objective status description
+        let objectiveDesc = '';
+        if (objectives.length > 0) {
+            const objList = objectives.map(obj => {
+                const current = obj.current || 0;
+                const target = obj.count || obj.rooms || 1;
+                const done = obj.completed || (current >= target);
+                return `${done ? '✓' : '○'} ${obj.description || obj.type}: ${current}/${target}`;
+            }).join('\n');
+            objectiveDesc = `\nObjectives:\n${objList}`;
+        }
+
+        // 🖤 Generate instruction for checking progress
+        return `You are a ${spec.type}. Player clicked "⏳ Progress: ${questName}" button.
+
+QUEST STATUS:
+- Quest: "${questName}"
+- Progress: ${progress}${objectiveDesc}
+
+YOUR RESPONSE:
+1. Acknowledge player is checking on the quest
+2. Tell them their current progress
+3. If incomplete: encourage them to continue
+4. If complete: remind them they can turn it in
+
+DO NOT include any command tags. Just provide information.
+
+Example: "Ah yes, ${questName}. You're ${progress}. ${objectives.length > 0 && objectives.every(o => o.completed) ? 'Looks like you have everything - come back when ready!' : 'Keep at it, you are making progress.'}"`;
+    },
+
     // 🖤 ASK RUMORS - player wants gossip 💀
     _buildRumorsInstruction(spec, context) {
         const rumors = context.rumors || [];
@@ -372,10 +495,10 @@ Respond in character:`;
         return `You are a ${spec.type}. Give directions in ONE sentence mentioning: ${places}. Example: "Head east for ${places}."`;
     },
 
-    // 🖤 REST - player wants to rest at inn 💀
+    // 🖤 REST - player wants to rest at inn (10 gold, 6 hours, 100% vitals restored) 💀
     _buildRestInstruction(spec, context) {
-        const restCost = spec.restCost || 20;
-        return `You are an innkeeper. Offer rest in ONE sentence: ${restCost} gold for a room. Include {offerRest:${restCost}}. Example: "A room's ${restCost} gold. {offerRest:${restCost}}"`;
+        const restCost = spec.restCost || 10;
+        return `You are an innkeeper. Offer rest in ONE sentence: ${restCost} gold for a room (6 hours, fully restores all vitals). Include {offerRest:${restCost}}. Example: "A room's ${restCost} gold for the night. {offerRest:${restCost}}"`;
     },
 
     // 🖤 HEAL - player wants healing 💀

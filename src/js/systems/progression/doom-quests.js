@@ -18,7 +18,7 @@ const DoomQuests = {
         bosses: 1, // Greedy Won
         arcs: ['survival', 'resistance', 'boss'],
         accessRequirement: 'Defeat either Shadow Tower Guardian or Ruins Guardian',
-        safeZones: ['shadow_tower', 'ruins_of_malachar'],
+        safeZones: ['shadow_dungeon', 'forest_dungeon'],
         exitMethod: 'Return to dungeon safe zones'
     },
 
@@ -125,16 +125,16 @@ const DoomQuests = {
             safeZone: false,
             threats: ['shadow_beasts', 'lost_souls']
         },
-        shadow_tower: {
-            normalName: 'Shadow Tower',
-            doomName: 'Shadow Tower (Safe Zone)',
-            description: 'The dungeon you conquered. Its guardian dead, the tower offers sanctuary.',
+        shadow_dungeon: {
+            normalName: 'Shadow Dungeon',
+            doomName: 'The Shadow Throne (Safe Zone)',
+            description: 'The dungeon you conquered. Its guardian dead, the dark throne offers sanctuary.',
             hasMarket: false,
             safeZone: true,
             hasPortal: true,
             portalDestination: 'normal_world'
         },
-        ruins_of_malachar: {
+        forest_dungeon: {
             normalName: 'Ruins of Malachar',
             doomName: 'Ruins of Malachar (Safe Zone)',
             description: 'The ancient ruins you cleared. Here, the doom cannot reach you.',

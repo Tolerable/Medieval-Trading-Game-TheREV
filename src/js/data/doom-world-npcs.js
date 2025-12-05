@@ -35,7 +35,7 @@ const DoomWorldNPCs = {
         orchard_farm: 'The Rotting Orchard',
         sunny_farm: 'Scorched Meadows',
         shadow_dungeon: 'The Shadow Throne',
-        forest_dungeon: 'Crypt of the Damned',
+        forest_dungeon: 'Ruins of Malachar',
         ruins_of_eldoria: 'Eldoria\'s Corpse',
         deep_cavern: 'The Starving Dark',
         frozen_cave: 'The Frozen Tomb',

@@ -16,7 +16,7 @@ const DoomWorldSystem = {
     // 💀 STATE TRACKING
     // ═══════════════════════════════════════════════════════════════
     isActive: false,
-    entryDungeon: null, // 'shadow_dungeon' or 'ruins_of_malachar'
+    entryDungeon: null, // 'shadow_dungeon' or 'forest_dungeon'
     hasEverEntered: false, // 🖤 Track if player has ever entered doom world (no spoilers!)
 
     // 🦇 Boss defeat tracking
@@ -92,8 +92,8 @@ const DoomWorldSystem = {
         if (bossId === 'ruins_guardian' || questId === 'act5_quest5') {
             this.bossesDefeated.ruins_guardian = true;
             this.bossDefeatTime.ruins_guardian = currentTime;
-            this.boatmanLocations.add('ruins_of_malachar');
-            this._spawnBoatman('ruins_of_malachar');
+            this.boatmanLocations.add('forest_dungeon');
+            this._spawnBoatman('forest_dungeon');
             console.log('💀 Boatman now available at Ruins of Malachar!');
         }
 
@@ -108,9 +108,9 @@ const DoomWorldSystem = {
             this.bossDefeatTime.ruins_guardian = 'permanent';
             // 🖤 Boatman always available at both dungeons forever
             this.boatmanLocations.add('shadow_dungeon');
-            this.boatmanLocations.add('ruins_of_malachar');
+            this.boatmanLocations.add('forest_dungeon');
             this._spawnBoatman('shadow_dungeon');
-            this._spawnBoatman('ruins_of_malachar');
+            this._spawnBoatman('forest_dungeon');
 
             console.log('🔥 GREEDY WON DEFEATED! Dungeon bosses permanently dead. Free Boatman access!');
             if (typeof addMessage === 'function') {
@@ -191,7 +191,7 @@ const DoomWorldSystem = {
         const bossesToCheck = ['shadow_guardian', 'ruins_guardian'];
         const dungeonMap = {
             shadow_guardian: 'shadow_dungeon',
-            ruins_guardian: 'ruins_of_malachar'
+            ruins_guardian: 'forest_dungeon'
         };
 
         bossesToCheck.forEach(bossId => {
@@ -235,9 +235,9 @@ const DoomWorldSystem = {
         // 🖤 Act 5 Quest 5 completion = Ruins Guardian defeated
         if (questId === 'act5_quest5') {
             this.bossesDefeated.ruins_guardian = true;
-            this.boatmanLocations.add('ruins_of_malachar');
-            this._spawnBoatman('ruins_of_malachar');
-            console.log('💀 Ruins Guardian defeated! Boatman now at ruins_of_malachar');
+            this.boatmanLocations.add('forest_dungeon');
+            this._spawnBoatman('forest_dungeon');
+            console.log('💀 Ruins Guardian defeated! Boatman now at forest_dungeon');
             if (typeof addMessage === 'function') {
                 addMessage('💀 A mysterious figure has appeared at the Ruins of Malachar...', 'warning');
             }
@@ -283,12 +283,12 @@ const DoomWorldSystem = {
     isBoatmanHere(locationId) {
         // 🖤💀 In DOOM WORLD - Boatman is always at both dungeons (only way out!)
         if (this.isActive) {
-            return locationId === 'shadow_dungeon' || locationId === 'ruins_of_malachar';
+            return locationId === 'shadow_dungeon' || locationId === 'forest_dungeon';
         }
 
         // 🖤 In NORMAL WORLD - check boss defeat status and respawn timers
         // Boatman only available if boss is dead AND hasn't respawned (or Greedy Won is dead)
-        if (locationId === 'shadow_dungeon' || locationId === 'ruins_of_malachar') {
+        if (locationId === 'shadow_dungeon' || locationId === 'forest_dungeon') {
             return this.isBoatmanAvailable(locationId);
         }
 
@@ -408,9 +408,9 @@ const DoomWorldSystem = {
         // 🖤💀 BOATMAN MUST BE AT BOTH DUNGEONS IN DOOM WORLD - only way out!
         // The Boatman is the ONLY way to exit doom world (no debooger cheats in real gameplay)
         this.boatmanLocations.add('shadow_dungeon');
-        this.boatmanLocations.add('ruins_of_malachar');
+        this.boatmanLocations.add('forest_dungeon');
         this._spawnBoatman('shadow_dungeon');
-        this._spawnBoatman('ruins_of_malachar');
+        this._spawnBoatman('forest_dungeon');
 
         // 🖤 Apply doom effects
         this._applyDoomEffects();
@@ -446,6 +446,15 @@ const DoomWorldSystem = {
         if (typeof QuestSystem !== 'undefined') {
             QuestSystem.updateQuestLogUI?.();
         }
+
+        // 🖤💀 CENTER MAP ON PLAYER LOCATION
+        if (typeof GameWorldRenderer !== 'undefined') {
+            if (GameWorldRenderer.centerOnLocation) {
+                GameWorldRenderer.centerOnLocation(fromLocation);
+            } else if (GameWorldRenderer.centerOnPlayer) {
+                GameWorldRenderer.centerOnPlayer();
+            }
+        }
     },
 
     exitDoomWorld(toLocation = null) {
@@ -459,28 +468,81 @@ const DoomWorldSystem = {
 
         this.isActive = false;
 
-        // 🖤 Use TravelSystem's portal function
+        // 🖤 Get the FULL normal world location object
+        const normalLocation = GameWorld?.locations?.[exitLocation];
+        const normalName = normalLocation?.name || exitLocation;
+
+        // 🖤 Switch TravelSystem back to normal world
         if (typeof TravelSystem !== 'undefined') {
-            TravelSystem.portalToNormalWorld(exitLocation);
+            TravelSystem.currentWorld = 'normal';
+            TravelSystem.saveCurrentWorld();
+            TravelSystem.playerPosition.currentLocation = exitLocation;
+        }
+
+        // 🖤💀 MARK EXIT LOCATION AS VISITED in normal world so it shows on map!
+        if (typeof GameWorld !== 'undefined') {
+            if (!GameWorld.visitedLocations.includes(exitLocation)) {
+                GameWorld.visitedLocations.push(exitLocation);
+                console.log('🌅 Added exit location to normal world visited:', exitLocation);
+            }
+            // 🖤 Also discover paths to connected locations
+            if (normalLocation?.connections && typeof TravelSystem !== 'undefined') {
+                normalLocation.connections.forEach(connId => {
+                    TravelSystem.discoverPath(exitLocation, connId);
+                });
+            }
+        }
+
+        // 🖤💀 PROPERLY SET game.currentLocation to FULL normal world location object
+        if (typeof game !== 'undefined') {
+            if (normalLocation) {
+                game.currentLocation = { ...normalLocation };
+            }
+            game.inDoomWorld = false;
+            // 🖤 Also sync game.visitedLocations if it exists
+            if (game.visitedLocations && !game.visitedLocations.includes(exitLocation)) {
+                game.visitedLocations.push(exitLocation);
+            }
+            console.log('🌅 game.currentLocation set to:', game.currentLocation?.name, game.currentLocation?.id);
         }
 
         // 🖤 Remove doom effects
         this._removeDoomEffects();
+        document.body.classList.remove('doom-world');
 
-        // 🖤 Clear doom world flag on game
-        if (typeof game !== 'undefined') {
-            game.inDoomWorld = false;
+        // 🖤 Restore normal weather
+        if (typeof WeatherSystem !== 'undefined') {
+            WeatherSystem.changeWeather('clear');
+        }
+
+        // 🖤💀 Restore normal world backdrop/background based on current season
+        if (typeof GameWorldRenderer !== 'undefined') {
+            // 🖤 Force exit dungeon mode flag
+            GameWorldRenderer.isInDungeonMode = false;
+
+            // 🖤 Get current season and load that backdrop
+            let currentSeason = 'summer';
+            if (typeof TimeSystem !== 'undefined' && TimeSystem.getSeason) {
+                currentSeason = TimeSystem.getSeason().toLowerCase();
+            }
+
+            // 🖤💀 FORCE clear currentSeason so loadSeasonalBackdrop doesn't skip reload
+            GameWorldRenderer.currentSeason = null;
+
+            // 🖤 Load seasonal backdrop directly
+            if (GameWorldRenderer.loadSeasonalBackdrop) {
+                GameWorldRenderer.loadSeasonalBackdrop(currentSeason);
+                console.log(`🌅 Normal world ${currentSeason} backdrop restored`);
+            }
         }
 
         // 🖤 Emit world change event
         if (typeof EventBus !== 'undefined') {
+            EventBus.emit('worldChanged', { world: 'normal', exitLocation: exitLocation });
             EventBus.emit('doom:exited', { exitLocation: exitLocation });
         }
 
         this._saveState();
-
-        // 🖤 Get normal world location name for message
-        const normalName = GameWorld?.locations?.[exitLocation]?.name || exitLocation;
 
         // 🖤 Show atmospheric message
         if (typeof game !== 'undefined' && game.addMessage) {
@@ -488,10 +550,23 @@ const DoomWorldSystem = {
             game.addMessage(`📍 You are now at ${normalName}.`, 'info');
         }
 
-        // 🦇 Refresh panels to show normal world data
+        // 🦇 Refresh ALL panels to show normal world data
         if (typeof PeoplePanel !== 'undefined') PeoplePanel.refresh?.();
-        if (typeof TravelPanelMap !== 'undefined') TravelPanelMap.refresh?.();
-        if (typeof GameWorldRenderer !== 'undefined') GameWorldRenderer.render?.();
+        if (typeof TravelPanelMap !== 'undefined') TravelPanelMap.render?.();
+        if (typeof GameWorldRenderer !== 'undefined') {
+            GameWorldRenderer.render?.();
+            GameWorldRenderer.updatePlayerMarker?.();
+            // 🖤💀 CENTER MAP ON PLAYER LOCATION
+            if (GameWorldRenderer.centerOnLocation) {
+                GameWorldRenderer.centerOnLocation(exitLocation);
+            } else if (GameWorldRenderer.centerOnPlayer) {
+                GameWorldRenderer.centerOnPlayer();
+            }
+        }
+        if (typeof QuestSystem !== 'undefined') {
+            QuestSystem.updateQuestLogUI?.();
+            QuestSystem.updateQuestTracker?.();
+        }
     },
 
     _onWorldChanged(data) {
@@ -774,7 +849,7 @@ Example: "The veil parts for you... ${this.isActive ? 'return to what was' : 'em
         if (this.greedyWonDefeated) {
             // Greedy Won dead = always spawn at both
             this._spawnBoatman('shadow_dungeon');
-            this._spawnBoatman('ruins_of_malachar');
+            this._spawnBoatman('forest_dungeon');
         } else {
             this.boatmanLocations.forEach(loc => {
                 if (this.isBoatmanAvailable(loc)) {
@@ -809,12 +884,12 @@ Example: "The veil parts for you... ${this.isActive ? 'return to what was' : 'em
         );
 
         DeboogerCommandSystem.registerCommand('spawnboatman',
-            'Spawn boatman at shadow_dungeon and ruins_of_malachar',
+            'Spawn boatman at shadow_dungeon and forest_dungeon',
             () => {
                 this.bossesDefeated.shadow_guardian = true;
                 this.bossesDefeated.ruins_guardian = true;
                 this._spawnBoatman('shadow_dungeon');
-                this._spawnBoatman('ruins_of_malachar');
+                this._spawnBoatman('forest_dungeon');
                 this._saveState();
                 return '⛵ Boatman spawned at both dungeon locations';
             }

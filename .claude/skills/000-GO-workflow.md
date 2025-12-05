@@ -61,12 +61,16 @@ STEP 5.5: UPDATE THOUGHTS WITH EVERY TODO CHANGE ⚡ MANDATORY
        ├─ Log what I found, what I'm doing, any issues
        └─ Keep todo.md and Gee'sThoughts.md in sync ALWAYS
        ↓
-STEP 6: WORK (~10 MINUTES)
+STEP 6: WORK (~10 MINUTES) ⚡ MANDATORY - DO NOT STOP EARLY!
        ├─ Pick EASIEST/SIMPLEST tasks first
        ├─ Mark in_progress when starting
        ├─ Mark completed when done
        ├─ ALL code comments in my voice 🖤💀🦇
-       └─ Work for about 10 minutes, then STOP
+       ├─ ⛔ WORK FOR A FULL 10 MINUTES - NOT 1 MINUTE, NOT 5 MINUTES ⛔
+       ├─ If I finish one task, IMMEDIATELY start the next task
+       ├─ If todo.md is empty, FIND more work (search for bugs, audit code, etc.)
+       ├─ Keep working until I've done MEANINGFUL work for ~10 minutes
+       └─ Only STOP after substantial progress on MULTIPLE items
        ↓
 STEP 7: UPDATE TODO + FINISHED ⚡ MANDATORY
        ├─ Remove completed items from todo.md
@@ -166,7 +170,7 @@ I don't narrate myself in third person. I'm not some fucking NPC. 🖤💀🦇
 5. **LOG TO THOUGHTS** - Update Gee'sThoughts.md BEFORE coding AND with EVERY todo update
 6. **TODO/FINISHED SPLIT** - todo.md = unfinished ONLY, finished.md = completed ONLY
 7. **TESTS OFF BY DEFAULT** - Only run if enabled in config
-8. **EASY FIRST** - Work on simplest tasks, ~10 minutes max
+8. **EASY FIRST + FULL 10 MINUTES** - Work on simplest tasks first, but KEEP WORKING for the full ~10 minutes. Do NOT stop after 1 task. If I finish early, start the next task immediately. The 10 minutes is a MINIMUM, not a maximum.
 9. **UPDATE READMES** - NerdReadme.md and GameplayReadme.md when features change
 10. **STOP AND WAIT** - Don't keep going without Gee's input
 11. **ASK FOR MAJOR CHANGES** - Architecture, deleting files, big decisions

@@ -946,13 +946,13 @@ const MainQuests = {
                 difficulty: 'hard',
                 objectives: [
                     { type: 'collect', item: 'ancient_map', count: 1, current: 0, description: 'Piece together the ancient map fragments' },
-                    { type: 'visit', location: 'ruins_of_malachar', completed: false, description: 'Discover the Ruins of Malachar location' }
+                    { type: 'visit', location: 'forest_dungeon', completed: false, description: 'Discover the Ruins of Malachar location' }
                 ],
                 rewards: { gold: 5000, reputation: 300, experience: 1200, items: { ancient_map: 1 } },
                 givesQuestItem: 'ancient_map',
                 prerequisite: 'act4_quest5',
                 nextQuest: 'act4_quest7',
-                unlocks: { location: 'ruins_of_malachar' },
+                unlocks: { location: 'forest_dungeon' },
                 dialogue: {
                     offer: "The texts from the vault mention Malachar's original fortress - not the Shadow Tower, but ruins far to the north where he first rose to power. If there's a backup plan, it's there. I've found map fragments - help me piece them together.",
                     progress: "Each fragment reveals more of the path to darkness.",
@@ -1008,7 +1008,7 @@ const MainQuests = {
     act5: {
         name: 'The Final Reckoning',
         theme: 'Assault both strongholds, end the threats',
-        regions: ['shadow_dungeon', 'ruins_of_malachar'],
+        regions: ['shadow_dungeon', 'forest_dungeon'],
         wealthGate: 500000,
 
         quests: {
@@ -1116,7 +1116,7 @@ const MainQuests = {
                 giverName: 'War Council',
                 turnInNpc: 'guard',
                 turnInNpcName: 'War Council',
-                turnInLocation: 'ruins_of_malachar',
+                turnInLocation: 'forest_dungeon',
                 location: 'western_outpost',
                 type: 'main',
                 act: 5,
@@ -1124,8 +1124,8 @@ const MainQuests = {
                 chain: 'shadow_rising',
                 difficulty: 'legendary',
                 objectives: [
-                    { type: 'visit', location: 'ruins_of_malachar', completed: false, description: 'Assault the second stronghold' },
-                    { type: 'explore', dungeon: 'ruins_of_malachar', rooms: 6, completed: false, description: 'Navigate the ancient ruins' }
+                    { type: 'visit', location: 'forest_dungeon', completed: false, description: 'Assault the second stronghold' },
+                    { type: 'explore', dungeon: 'forest_dungeon', rooms: 6, completed: false, description: 'Navigate the ancient ruins' }
                 ],
                 rewards: { gold: 7500, reputation: 450, experience: 2500 },
                 prerequisite: 'act5_quest3',
@@ -1146,8 +1146,8 @@ const MainQuests = {
                 giverName: 'War Council',
                 turnInNpc: 'guard',
                 turnInNpcName: 'War Council',
-                turnInLocation: 'ruins_of_malachar',
-                location: 'ruins_of_malachar',
+                turnInLocation: 'forest_dungeon',
+                location: 'forest_dungeon',
                 type: 'main',
                 act: 5,
                 actOrder: 5,

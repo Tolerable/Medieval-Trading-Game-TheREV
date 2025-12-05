@@ -90,9 +90,9 @@ const NPC_EMBEDDED_DATA = {
         "defaultInventory": ["bread", "cheese", "cooked_meat", "ale", "wine", "dried_meat", "fresh_fish", "apples", "carrots", "honey", "milk", "eggs"],
         "services": ["buy_items", "sell_items", "rest", "rumors", "meals"],
         "questTypes": ["delivery", "find_person", "solve_dispute"],
-        "restCost": 20,
+        "restCost": 10,
         "restHours": 6,
-        "restHealing": 0.6,
+        "restHealing": 1.0,
         "greetings": ["Welcome, weary traveler! Come in, come in!", "Oh my, you look exhausted! Sit down, dear.", "Another face I don't recognize! What brings you to my inn?"],
         "farewells": ["Safe travels, dear!", "Come back any time!", "May the roads be kind to you!"]
     },

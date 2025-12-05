@@ -112,7 +112,7 @@ const GameWorld = {
             mapPosition: { x: 560, y: 280 },
             sells: ['silk', 'spices', 'tea', 'exotic_goods', 'porcelain', 'jade', 'perfume', 'rope', 'canvas', 'salt'],
             buys: ['fish', 'grain', 'timber', 'furs', 'iron_bar', 'gems', 'wine'],
-            npcs: ['merchant', 'innkeeper', 'guard', 'sailor', 'ferryman'] // Quest: jade_harbor quests need merchant, innkeeper, guard
+            npcs: ['merchant', 'dockmaster', 'guard', 'sailor', 'ferryman'] // Quest: jade_harbor quests need merchant, guard (innkeeper only at inns!)
         },
         greendale: {
             id: 'greendale',
@@ -127,7 +127,7 @@ const GameWorld = {
             mapPosition: { x: 400, y: 440 },
             sells: ['bread', 'ale', 'flour', 'cheese', 'butter', 'eggs', 'meat', 'vegetables', 'livestock'],
             buys: ['wheat', 'grain', 'milk', 'honey', 'salt', 'herbs', 'wool'],
-            npcs: ['elder', 'innkeeper', 'apothecary', 'merchant', 'farmer', 'guard'] // Quest: act1_quest1 (First Steps) needs elder
+            npcs: ['elder', 'baker', 'apothecary', 'merchant', 'farmer', 'guard'] // Quest: act1_quest1 (First Steps) needs elder (innkeeper only at inns!)
         },
         stonebridge: {
             id: 'stonebridge',
@@ -266,7 +266,7 @@ const GameWorld = {
             mapPosition: { x: 140, y: 380 },
             sells: ['coal', 'ale', 'simple_tools', 'torch', 'lamp'],
             buys: ['food', 'bread', 'meat', 'pickaxe', 'rope', 'bandages'],
-            npcs: ['miner', 'innkeeper', 'merchant']
+            npcs: ['miner', 'bartender', 'merchant'] // innkeeper only at inns - bartender for village tavern
         },
 
         // ═══════════════════════════════════════════════════════════
@@ -454,7 +454,7 @@ const GameWorld = {
             name: 'Overgrown Crypt',
             region: 'western',
             type: 'dungeon',
-            description: 'An ancient crypt overtaken by forest. Treasure hunters find relics and enchanted items.',
+            description: 'An ancient crypt overtaken by forest. Treasure hunters find relics and enchanted items. Portal to the Doom World.',
             population: 0,
             marketSize: 'tiny',
             travelCost: { base: 18 },
@@ -462,7 +462,7 @@ const GameWorld = {
             mapPosition: { x: 80, y: 120 },
             sells: ['artifacts', 'old_books', 'gems', 'jewelry'],
             buys: ['torch', 'rope', 'bandages', 'food', 'weapons'],
-            npcs: ['adventurer', 'scholar']
+            npcs: ['adventurer', 'scholar'] // 🖤💀 Doom world entry point #2
         },
         ruins_of_eldoria: {
             id: 'ruins_of_eldoria',

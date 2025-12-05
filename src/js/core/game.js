@@ -1897,6 +1897,15 @@ const EventSystem = {
         if (event.effects.newItems) {
             this.refreshMarketItems();
         }
+
+        // 🖤💀 UPDATE UI after applying effects so gold/inventory changes show immediately!
+        if (event.effects.goldReward || event.effects.goldLost || event.effects.itemReward) {
+            this.updateUI();
+            // Also emit event for any listeners
+            document.dispatchEvent(new CustomEvent('player-gold-changed', {
+                detail: { gold: game.player?.gold || 0 }
+            }));
+        }
     },
     
     // Refresh market items for all locations
@@ -5705,6 +5714,18 @@ function startNewGame() {
         DeathCauseSystem.reset();
     }
 
+    // 🖤💀 CRITICAL: Reset quest state for new game - prevents old quests from showing! 💀
+    if (typeof QuestSystem !== 'undefined' && QuestSystem.resetAllQuests) {
+        QuestSystem.resetAllQuests();
+    }
+
+    // 🖤 Reset initial encounter state so hooded stranger shows again
+    if (typeof InitialEncounterSystem !== 'undefined') {
+        InitialEncounterSystem.hasShownEncounter = false;
+        InitialEncounterSystem.hasShownTutorialChoice = false;
+        InitialEncounterSystem._mainQuestUnlocked = false;
+    }
+
     // 🖤 Reset stat decay tracker for new game - so decay happens correctly from minute 0 💀
     game._lastProcessedMinute = -1;
 
@@ -7441,13 +7462,29 @@ function updatePlayerStats() {
 
 function updateLocationInfo() {
     if (game.currentLocation) {
-        // 🖤 Use doom-aware location name if DoomWorldSystem is active 💀
+        // 🖤 Check if player is currently traveling between locations 💀
+        const isTraveling = typeof TravelSystem !== 'undefined' &&
+            TravelSystem.playerPosition &&
+            TravelSystem.playerPosition.isTraveling &&
+            TravelSystem.playerPosition.destination;
+
         let locationName = game.currentLocation.name;
-        if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive && DoomWorldSystem.getCurrentLocationName) {
+        let locationDesc = game.currentLocation.description || '';
+
+        if (isTraveling) {
+            // 🖤 Show path info when traveling: "Traveling from X to Y" 💀
+            const startName = game.currentLocation.name;
+            const destName = TravelSystem.playerPosition.destination.name;
+            const progress = Math.round((TravelSystem.playerPosition.travelProgress || 0) * 100);
+            locationName = `🚶 Traveling...`;
+            locationDesc = `From ${startName} → ${destName} (${progress}% complete)`;
+        } else if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive && DoomWorldSystem.getCurrentLocationName) {
+            // 🖤 Use doom-aware location name if DoomWorldSystem is active 💀
             locationName = DoomWorldSystem.getCurrentLocationName(game.currentLocation.id);
         }
+
         document.getElementById('location-name').textContent = locationName;
-        document.getElementById('location-description').textContent = game.currentLocation.description || '';
+        document.getElementById('location-description').textContent = locationDesc;
     }
 }
 
@@ -7460,10 +7497,24 @@ function updateLocationPanel() {
     const locationPanel = document.getElementById('location-panel');
     if (!locationPanel) return;
 
+    // 🖤 Check if player is currently traveling between locations 💀
+    const isTraveling = typeof TravelSystem !== 'undefined' &&
+        TravelSystem.playerPosition &&
+        TravelSystem.playerPosition.isTraveling &&
+        TravelSystem.playerPosition.destination;
+
     // 🖤 Use doom-aware location name if DoomWorldSystem is active 💀
     let locationName = location.name;
     let locationDesc = location.description;
-    if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) {
+
+    if (isTraveling) {
+        // 🖤 Show path info when traveling: "Traveling from X to Y" 💀
+        const startName = location.name;
+        const destName = TravelSystem.playerPosition.destination.name;
+        const progress = Math.round((TravelSystem.playerPosition.travelProgress || 0) * 100);
+        locationName = `🚶 Traveling...`;
+        locationDesc = `From ${startName} → ${destName} (${progress}% complete)`;
+    } else if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) {
         if (DoomWorldSystem.getCurrentLocationName) {
             locationName = DoomWorldSystem.getCurrentLocationName(game.currentLocation.id);
         }
@@ -7509,11 +7560,12 @@ function updateLocationPanel() {
         detailsElement.parentNode.insertBefore(restElement, detailsElement.nextSibling);
     }
     
-    const isInn = location.type === 'town' || location.type === 'city';
+    // 🖤 Only show "Rest at Inn" when at an actual inn location! 💀
+    const isInn = location.type === 'inn';
     restElement.innerHTML = `
         <h3>Rest & Recovery</h3>
-        ${isInn ? `<button class="rest-btn" onclick="restAtInn()">Rest at Inn (20 gold)</button>` : ''}
-        ${game.player && game.player.ownsHouse && isInn ? `<button class="rest-btn" onclick="restInHouse()">Rest in House (Free)</button>` : ''}
+        ${isInn ? `<button class="rest-btn" onclick="restAtInn()">Rest at Inn (10 gold)</button>` : ''}
+        ${game.player && game.player.ownsHouse ? `<button class="rest-btn" onclick="restInHouse()">Rest in House (Free)</button>` : ''}
         ${!game.player || !game.player.ownsHouse ? `<button class="buy-house-btn" onclick="buyHouse()">Buy House (1000 gold)</button>` : ''}
     `;
     
@@ -8628,43 +8680,53 @@ function handlePlayerDeath(deathCause = 'Unknown causes') {
 
 // Rest and Recovery System
 function restAtInn() {
-    const innCost = 20;
+    // 🖤 Inn rest costs 10 gold, takes 6 hours, restores ALL vitals to 100% 💀
+    const innCost = 10;
     const currentHour = TimeSystem.currentTime.hour;
-    
+
     // Check if inn is open (2pm to 8am)
     if (currentHour >= 8 && currentHour < 14) {
         addMessage("The inn is closed during the day. It's only open from 2pm to 8am.");
         return false;
     }
-    
-    if (game.player.gold < innCost) {
-        addMessage(`You need ${innCost} gold to rest at inn.`);
+
+    // 🖤 Check if at an inn location 💀
+    const currentLocation = game.currentLocation;
+    if (!currentLocation || (typeof GameWorld !== 'undefined' && GameWorld.locations[currentLocation.id]?.type !== 'inn')) {
+        addMessage("❌ You need to be at an inn to rest here.");
         return false;
     }
-    
-    // Pay for inn
-    game.player.gold -= innCost;
-    
-    // Calculate health restoration (6 hours of rest = 60% of max health)
-    const healthRestoreAmount = Math.floor(game.player.stats.maxHealth * 0.6);
-    game.player.stats.health = Math.min(game.player.stats.maxHealth, game.player.stats.health + healthRestoreAmount);
-    
-    // Restore all other stats completely
+
+    if (game.player.gold < innCost) {
+        addMessage(`You need ${innCost} gold to rest at inn. You have ${game.player.gold} gold.`);
+        return false;
+    }
+
+    // 🖤 Pay for inn - use UniversalGoldManager if available 💀
+    if (typeof UniversalGoldManager !== 'undefined') {
+        UniversalGoldManager.removeGold(innCost, 'rest at inn');
+        game.player.gold = UniversalGoldManager.getPersonalGold();
+    } else {
+        game.player.gold -= innCost;
+    }
+
+    // 🖤 Restore ALL vitals to 100% 💀
+    game.player.stats.health = game.player.stats.maxHealth;
     game.player.stats.hunger = game.player.stats.maxHunger;
     game.player.stats.thirst = game.player.stats.maxThirst;
     game.player.stats.stamina = game.player.stats.maxStamina;
-    game.player.stats.happiness = Math.min(100, game.player.stats.happiness + 20);
-    
+    game.player.stats.happiness = Math.min(100, game.player.stats.happiness + 30);
+
     // Advance time by 6 hours
     TimeSystem.addMinutes(6 * 60);
-    
-    addMessage("💤 You rested at the inn for 6 hours.");
-    addMessage(`Health restored by ${healthRestoreAmount} points. Other stats fully restored!`);
+
+    addMessage(`💤 You rested at the inn for 6 hours. (-${innCost} gold)`);
+    addMessage(`✨ All vitals fully restored!`);
     addMessage(`⏰ 6 hours have passed.`);
-    
+
     updatePlayerInfo();
     updatePlayerStats();
-    
+
     return true;
 }
 
@@ -9081,9 +9143,13 @@ function buyItem(itemId, quantity = 1) {
         game.player.inventory[itemId] = 0;
     }
     game.player.inventory[itemId] += actualQuantity;
-    // 🖤 Emit item-received for quest progress tracking 💀
+    // 🖤 Emit item-received for quest progress tracking (collect objectives) 💀
     document.dispatchEvent(new CustomEvent('item-received', {
         detail: { item: itemId, quantity: actualQuantity, source: 'market_buy' }
+    }));
+    // 🖤 Emit item-purchased for quest progress tracking (buy objectives) 💀
+    document.dispatchEvent(new CustomEvent('item-purchased', {
+        detail: { itemId, quantity: actualQuantity, price: totalPrice, location: currentLocation.id }
     }));
 
     // Record trade if in bulk mode

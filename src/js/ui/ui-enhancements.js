@@ -218,7 +218,13 @@ const KeyboardShortcuts = {
             this.announceToScreenReader('Redo action');
         }
     },
-    
+
+    // 🖤 Handle key release - placeholder for any keyup actions 💀
+    handleKeyRelease(event) {
+        // Currently no specific keyup handlers needed
+        // This function exists to prevent the error when keyup fires
+    },
+
     // Announce to screen reader
     announceToScreenReader(message) {
         // Create or get live region

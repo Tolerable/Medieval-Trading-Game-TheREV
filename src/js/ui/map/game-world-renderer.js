@@ -1747,6 +1747,8 @@ const GameWorldRenderer = {
     // 🔄 keep the travel animation going - time waits for no one (unless paused)
     // 🖤 Track last logged progress for rate-limited logging
     _lastLoggedProgress: -1,
+    // 🖤 Track last paused update time to throttle when paused 💀
+    _lastPausedUpdateTime: 0,
 
     runTravelAnimation() {
         if (!this.currentTravel) return;
@@ -1765,6 +1767,23 @@ const GameWorldRenderer = {
 
             // Store progress for UI display
             travel.currentProgress = progress;
+
+            // 🖤 THROTTLE when paused - skip frames to reduce lag 💀
+            // Only update once per 500ms when paused since nothing is moving
+            if (isPaused) {
+                const now = performance.now();
+                if (this._lastPausedUpdateTime && (now - this._lastPausedUpdateTime) < 500) {
+                    // Skip this frame, schedule next check
+                    if (progress < 1) {
+                        this.travelAnimation = requestAnimationFrame(() => this.runTravelAnimation());
+                    }
+                    return;
+                }
+                this._lastPausedUpdateTime = now;
+            } else {
+                // Reset throttle timer when unpaused
+                this._lastPausedUpdateTime = 0;
+            }
 
             // 🖤 Rate-limited debooger logging 🦇 - every 10% progress
             const progressPct = Math.floor(progress * 10);

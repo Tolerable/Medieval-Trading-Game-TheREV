@@ -1610,10 +1610,25 @@ const TravelPanelMap = {
     },
 
     // 📊 Update travel progress display in destination tab
+    // 🖤 Track last update time to throttle when paused 💀
+    _lastTravelDisplayUpdate: 0,
+
     updateTravelProgressDisplay() {
         const displayEl = document.getElementById('current-destination-display');
         const actionsEl = document.getElementById('destination-actions');
         if (!displayEl) return;
+
+        // 🖤 Throttle updates when paused - progress doesn't change anyway 💀
+        const isPaused = typeof TimeSystem !== 'undefined' && (TimeSystem.isPaused || TimeSystem.currentSpeed === 'PAUSED');
+        if (isPaused) {
+            const now = performance.now();
+            if (this._lastTravelDisplayUpdate && (now - this._lastTravelDisplayUpdate) < 1000) {
+                return; // Skip update when paused - only update once per second
+            }
+            this._lastTravelDisplayUpdate = now;
+        } else {
+            this._lastTravelDisplayUpdate = 0;
+        }
 
         // Check if we're still traveling
         // 🖤 Null check for playerPosition to prevent race condition 💀
@@ -1753,55 +1768,71 @@ const TravelPanelMap = {
     },
 
     // ❌ Cancel ongoing travel - turn around and head back at ANY point! 🖤💀
+    // 🖤 FIX: Don't call startTravel() - that recalculates everything and crashes
+    // Instead, REVERSE direction in-place: swap start/destination, time continues normally
     cancelTravel() {
         if (typeof TravelSystem === 'undefined') {
             this.onTravelComplete();
             return;
         }
 
-        // 🖤 Get the start location to turn back to 💀
+        // 🖤 Get current travel state before modifying anything 💀
         const startLoc = this.travelState.startLocation;
+        const destLoc = this.travelState.destination || this.currentDestination;
         const currentProgress = TravelSystem.playerPosition.travelProgress || 0;
         const originalDuration = TravelSystem.playerPosition.travelDuration || 30;
+        const originalStartTime = TravelSystem.playerPosition.travelStartTime;
 
-        // Stop current travel
-        TravelSystem.playerPosition.isTraveling = false;
-        TravelSystem.playerPosition.destination = null;
-        TravelSystem.playerPosition.travelProgress = 0;
-
-        // Clear countdown
-        if (this.travelState.countdownInterval) {
-            clearInterval(this.travelState.countdownInterval);
-            this.travelState.countdownInterval = null;
-        }
-
-        // Hide travel marker
-        if (this.travelMarker) {
-            this.travelMarker.style.display = 'none';
-        }
-
-        // 🖤 Turn around and head back - proportional time based on distance traveled 💀
-        if (startLoc && startLoc.id) {
-            // Calculate return time: if 30% there, takes 30% of original time to get back
-            const returnDuration = Math.max(1, Math.round(originalDuration * currentProgress));
-
-            addMessage(`🔙 Turning back to ${startLoc.name}... (${returnDuration} min)`);
-
-            // Reset travel state before starting return journey
-            this.travelState.startLocation = null;
-            this.travelState.destination = null;
-            this.currentDestination = null;
-
-            // Start travel back to where we came from
-            setTimeout(() => {
-                if (typeof TravelSystem !== 'undefined' && TravelSystem.startTravel) {
-                    TravelSystem.startTravel(startLoc.id);
-                }
-            }, 100);
-        } else {
-            // No start location recorded - just cancel
+        // 🖤 If not actually traveling or no valid locations, just cancel 💀
+        if (!TravelSystem.playerPosition.isTraveling || !startLoc || !startLoc.id) {
             addMessage('🛑 Journey cancelled');
             this.onTravelComplete();
+            return;
+        }
+
+        // 🖤 Calculate return journey - proportional time based on distance traveled 💀
+        // If 30% there, takes 30% of original time to get back
+        const returnDuration = Math.max(1, Math.round(originalDuration * currentProgress));
+
+        addMessage(`🔙 Turning back to ${startLoc.name}... (${returnDuration} min)`);
+        console.log(`🖤 Cancel travel: was ${Math.round(currentProgress * 100)}% to ${destLoc?.name}, returning in ${returnDuration} min`);
+
+        // 🖤 REVERSE DIRECTION IN-PLACE - don't stop travel, just swap! 💀
+        // The new "destination" is where we came from (startLoc)
+        // The new "start" is where we were going (destLoc)
+        // Progress flips: 0% (just turned around) will progress to 100% (arrived back)
+
+        // Get the TravelSystem location object (not just the ID)
+        const returnDestination = TravelSystem.locations[startLoc.id] || startLoc;
+
+        // Update TravelSystem state - KEEP traveling, just change direction
+        TravelSystem.playerPosition.destination = returnDestination;
+        TravelSystem.playerPosition.travelDuration = returnDuration;
+        TravelSystem.playerPosition.travelProgress = 0; // Starting fresh on return trip
+        TravelSystem.playerPosition.travelStartTime = TimeSystem.getTotalMinutes(); // Reset start time for return
+        // Note: isTraveling stays TRUE - we're still traveling, just reversed
+
+        // Update our local travel state - swap start and destination
+        this.travelState.startLocation = destLoc; // We're now "coming from" the old destination
+        this.travelState.destination = startLoc; // We're "going to" the old start
+        this.travelState.startTime = TravelSystem.playerPosition.travelStartTime;
+        this.travelState.duration = returnDuration;
+
+        // Update the destination display
+        this.currentDestination = { ...startLoc };
+
+        // 🖤 Update GameWorldRenderer if it exists - tell it we're reversing 💀
+        if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.setDestination) {
+            GameWorldRenderer.setDestination(startLoc.id);
+            if (GameWorldRenderer.onTravelStart) {
+                GameWorldRenderer.onTravelStart(destLoc?.id, startLoc.id, returnDuration);
+            }
+        }
+
+        // Refresh the UI to show the reversed journey
+        this.updateTravelProgressDisplay();
+        if (typeof TravelSystem.updateTravelUI === 'function') {
+            TravelSystem.updateTravelUI();
         }
     },
 

@@ -68,6 +68,11 @@ const TravelSystem = {
     // travel history - everywhere we've been, nowhere we belong
     travelHistory: [],
 
+    // 🖤 ENCOUNTER LIMITS - max 2 per game day, only during travel 💀
+    _encountersToday: 0,
+    _lastEncounterDay: -1,
+    MAX_ENCOUNTERS_PER_DAY: 2,
+
     // favorite routes - the paths i take when running from feelings
     favoriteRoutes: [],
 
@@ -264,19 +269,94 @@ const TravelSystem = {
         // Player returns to the same location in normal world
         this.playerPosition.currentLocation = exitLocationId;
 
+        // 🖤 Get the FULL normal world location object
+        const normalLocation = GameWorld?.locations?.[exitLocationId];
+        const normalName = normalLocation?.name || exitLocationId;
+
+        // 🖤💀 MARK EXIT LOCATION AS VISITED in normal world so it shows on map!
+        if (typeof GameWorld !== 'undefined') {
+            if (!GameWorld.visitedLocations.includes(exitLocationId)) {
+                GameWorld.visitedLocations.push(exitLocationId);
+                console.log('🌅 Added exit location to normal world visited:', exitLocationId);
+            }
+            // 🖤 Also discover paths to connected locations
+            if (normalLocation?.connections) {
+                normalLocation.connections.forEach(connId => {
+                    this.discoverPath(exitLocationId, connId);
+                });
+            }
+        }
+
+        // 🖤💀 PROPERLY SET game.currentLocation to FULL normal world location object
+        if (typeof game !== 'undefined') {
+            if (normalLocation) {
+                game.currentLocation = { ...normalLocation };
+            }
+            game.inDoomWorld = false;
+            // 🖤 Also sync game.visitedLocations if it exists
+            if (game.visitedLocations && !game.visitedLocations.includes(exitLocationId)) {
+                game.visitedLocations.push(exitLocationId);
+            }
+            console.log('🌅 game.currentLocation set to:', game.currentLocation?.name, game.currentLocation?.id);
+        }
+
+        // 🖤 Remove doom effects
+        document.body.classList.remove('doom-world');
+
+        // 🖤 Restore normal weather
+        if (typeof WeatherSystem !== 'undefined') {
+            WeatherSystem.changeWeather('clear');
+        }
+
+        // 🖤💀 Restore normal world backdrop/background based on current season
+        if (typeof GameWorldRenderer !== 'undefined') {
+            // 🖤 Force exit dungeon mode flag
+            GameWorldRenderer.isInDungeonMode = false;
+
+            // 🖤 Get current season and load that backdrop
+            let currentSeason = 'summer';
+            if (typeof TimeSystem !== 'undefined' && TimeSystem.getSeason) {
+                currentSeason = TimeSystem.getSeason().toLowerCase();
+            }
+
+            // 🖤💀 FORCE clear currentSeason so loadSeasonalBackdrop doesn't skip reload
+            GameWorldRenderer.currentSeason = null;
+
+            // 🖤 Load seasonal backdrop directly
+            if (GameWorldRenderer.loadSeasonalBackdrop) {
+                GameWorldRenderer.loadSeasonalBackdrop(currentSeason);
+                console.log(`🌅 Normal world ${currentSeason} backdrop restored`);
+            }
+        }
+
         // Emit event for other systems to react
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('worldChanged', { world: 'normal', exitLocation: exitLocationId });
+            EventBus.emit('doom:exited', { exitLocation: exitLocationId });
         }
 
         addMessage('🌍 You step through the portal back to the normal world...');
-        addMessage('✨ The familiar sights and sounds of home greet you. The nightmare fades.');
+        addMessage(`📍 You are now at ${normalName}. The nightmare fades.`);
 
         console.log('🌍 Back in Normal World. Normal paths discovered:', this.discoveredPaths.size);
 
-        // Force map re-render to show normal world state
+        // 🦇 Refresh ALL panels to show normal world data
         if (typeof TravelPanelMap !== 'undefined') {
             TravelPanelMap.render();
+        }
+        if (typeof GameWorldRenderer !== 'undefined') {
+            GameWorldRenderer.render?.();
+            GameWorldRenderer.updatePlayerMarker?.();
+            // 🖤💀 CENTER MAP ON PLAYER LOCATION
+            if (GameWorldRenderer.centerOnLocation) {
+                GameWorldRenderer.centerOnLocation(exitLocationId);
+            } else if (GameWorldRenderer.centerOnPlayer) {
+                GameWorldRenderer.centerOnPlayer();
+            }
+        }
+        if (typeof QuestSystem !== 'undefined') {
+            QuestSystem.updateQuestLogUI?.();
+            QuestSystem.updateQuestTracker?.();
         }
         this.render();
 
@@ -2042,6 +2122,14 @@ const TravelSystem = {
 
         // Update UI
         this.updateTravelUI();
+
+        // 🖤 Update location panel to show we're now traveling 💀
+        if (typeof updateLocationInfo === 'function') {
+            updateLocationInfo();
+        }
+        if (typeof updateLocationPanel === 'function') {
+            updateLocationPanel();
+        }
     },
 
     // Update travel progress - dragging ourselves through the endless void
@@ -2076,6 +2164,14 @@ const TravelSystem = {
         // Update player position along path
         this.updatePlayerPositionAlongPath();
 
+        // 🖤 Update location panel to show travel progress 💀
+        if (typeof updateLocationInfo === 'function') {
+            updateLocationInfo();
+        }
+        if (typeof updateLocationPanel === 'function') {
+            updateLocationPanel();
+        }
+
         // Check if travel is complete - the light at the end of the tunnel
         if (this.playerPosition.travelProgress >= 1.0) {
             console.log('🖤 destination reached... finally.');
@@ -2083,13 +2179,27 @@ const TravelSystem = {
             return; // exit early, we're done wandering
         }
 
-        // Check for random encounters - only if player is actually traveling and game is initialized
+        // 🖤 Check for random encounters - TimeMachine controlled, max 2 per game day 💀
         if (this.playerPosition.isTraveling &&
             typeof game !== 'undefined' &&
             game.state &&
             game.state === GameState.PLAYING &&
-            Math.random() < 0.01) { // 1% chance per update
-            this.triggerRandomEncounter();
+            typeof TimeMachine !== 'undefined') {
+
+            // Get current day from TimeMachine
+            const currentDay = TimeMachine.currentTime?.day || 1;
+
+            // Reset counter on new day
+            if (currentDay !== this._lastEncounterDay) {
+                this._encountersToday = 0;
+                this._lastEncounterDay = currentDay;
+            }
+
+            // Only trigger if under daily limit (max 2 per day)
+            if (this._encountersToday < this.MAX_ENCOUNTERS_PER_DAY && Math.random() < 0.01) {
+                this._encountersToday++;
+                this.triggerRandomEncounter();
+            }
         }
 
         this.updateTravelUI();
@@ -2361,16 +2471,37 @@ const TravelSystem = {
             return;
         }
 
-        // 🖤 Fallback if TravelPanelMap not available - just stop travel 💀
+        // 🖤 Fallback if TravelPanelMap not available - reverse direction in-place 💀
         if (this.playerPosition.isTraveling) {
-            const startLoc = this.playerPosition.currentLocation;
+            const currentProgress = this.playerPosition.travelProgress || 0;
+            const originalDuration = this.playerPosition.travelDuration || 30;
+            const currentDestination = this.playerPosition.destination;
+            const startLocId = this.playerPosition.currentLocation;
 
-            this.playerPosition.isTraveling = false;
-            this.playerPosition.destination = null;
-            this.playerPosition.travelProgress = 0;
+            // 🖤 Calculate return journey - proportional time based on distance traveled 💀
+            const returnDuration = Math.max(1, Math.round(originalDuration * currentProgress));
+            const startLoc = this.locations[startLocId];
 
-            if (typeof addMessage === 'function') {
-                addMessage('🛑 Journey cancelled');
+            if (startLoc && currentDestination) {
+                if (typeof addMessage === 'function') {
+                    addMessage(`🔙 Turning back to ${startLoc.name}... (${returnDuration} min)`);
+                }
+
+                // 🖤 REVERSE DIRECTION - swap destination, reset progress 💀
+                this.playerPosition.destination = startLoc;
+                this.playerPosition.travelDuration = returnDuration;
+                this.playerPosition.travelProgress = 0;
+                this.playerPosition.travelStartTime = TimeSystem.getTotalMinutes();
+                // Note: isTraveling stays TRUE
+            } else {
+                // No valid locations to reverse to - just stop
+                this.playerPosition.isTraveling = false;
+                this.playerPosition.destination = null;
+                this.playerPosition.travelProgress = 0;
+
+                if (typeof addMessage === 'function') {
+                    addMessage('🛑 Journey cancelled');
+                }
             }
 
             this.updateTravelUI();
@@ -3721,7 +3852,10 @@ const TravelSystem = {
             // 🖤 Doom World state 💀
             currentWorld: this.currentWorld,
             discoveredPaths: Array.from(this.discoveredPaths),
-            doomDiscoveredPaths: Array.from(this.doomDiscoveredPaths)
+            doomDiscoveredPaths: Array.from(this.doomDiscoveredPaths),
+            // 🖤 Encounter daily limits - persist across saves 💀
+            _encountersToday: this._encountersToday,
+            _lastEncounterDay: this._lastEncounterDay
         };
     },
 
@@ -3754,6 +3888,13 @@ const TravelSystem = {
         if (state.doomDiscoveredPaths) {
             this.doomDiscoveredPaths = new Set(state.doomDiscoveredPaths);
             this.saveDoomDiscoveredPaths(); // Sync to localStorage
+        }
+        // 🖤 Load encounter daily limits - no more save/load exploits! 💀
+        if (typeof state._encountersToday === 'number') {
+            this._encountersToday = state._encountersToday;
+        }
+        if (typeof state._lastEncounterDay === 'number') {
+            this._lastEncounterDay = state._lastEncounterDay;
         }
     }
 };

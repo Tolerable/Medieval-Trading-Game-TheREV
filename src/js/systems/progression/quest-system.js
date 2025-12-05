@@ -919,6 +919,37 @@ const QuestSystem = {
     // ═══════════════════════════════════════════════════════════════
     // 💾 PERSISTENCE - because losing progress would be too merciful
     // ═══════════════════════════════════════════════════════════════
+
+    // 🖤💀 RESET ALL QUEST STATE - called on New Game to clear old data 💀
+    resetAllQuests() {
+        console.log('📜 Resetting all quest state for new game...');
+        this.activeQuests = {};
+        this.completedQuests = [];
+        this.failedQuests = [];
+        this.discoveredQuests = [];
+        this.questCompletionTimes = {};
+        this.trackedQuestId = null;
+
+        // Clear quest items from player
+        if (typeof game !== 'undefined' && game.player) {
+            game.player.questItems = {};
+        }
+
+        // Clear from localStorage
+        try {
+            localStorage.removeItem('medievalTradingGameQuests');
+            console.log('📜 Quest localStorage cleared');
+        } catch (e) {
+            console.warn('📜 Could not clear quest localStorage:', e);
+        }
+
+        // Update UI
+        this.updateQuestLogUI();
+        this.updateQuestTracker();
+
+        console.log('📜 Quest state reset complete - fresh start! 🖤');
+    },
+
     saveQuestProgress() {
         const saveData = {
             activeQuests: this.activeQuests,
@@ -1186,9 +1217,21 @@ const QuestSystem = {
                         break;
 
                     case 'buy':
-                    case 'trade':
                         objective.current = Math.min((objective.current || 0) + 1, objective.count);
                         updated = true;
+                        break;
+
+                    case 'trade':
+                        // 🖤 FIX: Check minValue requirement if specified 💀
+                        const tradeValue = data.value || 0;
+                        const minValue = objective.minValue || 0;
+                        if (tradeValue >= minValue) {
+                            objective.current = Math.min((objective.current || 0) + 1, objective.count);
+                            updated = true;
+                            console.log(`📜 Trade objective progress: ${tradeValue}g trade (min: ${minValue}g) - ${objective.current}/${objective.count}`);
+                        } else {
+                            console.log(`📜 Trade too small: ${tradeValue}g < ${minValue}g minimum`);
+                        }
                         break;
 
                     case 'defeat':
@@ -1270,6 +1313,7 @@ const QuestSystem = {
         if (questUpdated) {
             this.saveQuestProgress();
             this.updateQuestLogUI();
+            this.updateQuestTracker(); // 🖤 FIX: Update tracker widget when progress changes 💀
             this.checkForAutoComplete();
         }
     },
@@ -2192,11 +2236,20 @@ const QuestSystem = {
                         </div>
                         ${locationName ? `<div class="tracker-quest-location">📍 ${locationName}</div>` : ''}
                         <div class="tracker-quest-objectives">
-                            ${quest.objectives.filter(o => !o.completed).slice(0, 3).map(obj => `
-                                <div class="tracker-objective">
-                                    ⬜ ${obj.description}${obj.count ? ` (${obj.current || 0}/${obj.count})` : ''}
-                                </div>
-                            `).join('')}
+                            ${quest.objectives.slice(0, 4).map(obj => {
+                                // 🖤 FIX: Check completion for count-based AND boolean objectives 💀
+                                const isCountBased = obj.type === 'collect' || obj.type === 'defeat' || obj.type === 'buy' || obj.type === 'trade' || obj.type === 'sell';
+                                const isExplore = obj.type === 'explore';
+                                const isComplete = isCountBased ? (obj.current || 0) >= obj.count :
+                                                   isExplore ? (obj.current || 0) >= obj.rooms :
+                                                   obj.completed;
+                                const icon = isComplete ? '✅' : '⬜';
+                                const countText = obj.count ? ` (${obj.current || 0}/${obj.count})` :
+                                                  obj.rooms ? ` (${obj.current || 0}/${obj.rooms})` : '';
+                                return `<div class="tracker-objective ${isComplete ? 'completed' : ''}">
+                                    ${icon} ${obj.description}${countText}
+                                </div>`;
+                            }).join('')}
                         </div>
                         <div class="tracker-quest-footer">
                             <span class="tracker-quest-progress ${progress.status}">${progress.progress}</span>
@@ -2330,6 +2383,11 @@ const QuestSystem = {
             }
             .tracker-objective {
                 padding: 1px 0;
+            }
+            .tracker-objective.completed {
+                color: #81c784;
+                text-decoration: line-through;
+                opacity: 0.7;
             }
             .tracker-quest-footer {
                 display: flex;
@@ -3231,7 +3289,8 @@ const QuestSystem = {
         });
 
         document.addEventListener('trade-completed', (e) => {
-            this.updateProgress('trade', { value: e.detail.value || 100 });
+            // 🖤 FIX: trade-cart-panel dispatches 'total' not 'value' 💀
+            this.updateProgress('trade', { value: e.detail.total || e.detail.value || 100 });
         });
 
         document.addEventListener('enemy-defeated', (e) => {
