@@ -1744,15 +1744,29 @@ const PeoplePanel = {
             container.classList.remove('hidden');
 
             if (canTrade) {
-                // 💰 Can trade - show what's available
-                const locationId = game?.currentLocation?.id;
-                const location = typeof GameWorld !== 'undefined' ? GameWorld.locations?.[locationId] : null;
-                const sells = location?.sells || [];
+                // 💰 Can trade - show ACTUAL NPC inventory, not location config!
+                // 🖤💀 FIX: Use NPCTradeWindow.getNPCInventory() to get real items 💀
+                let actualItems = [];
+                if (typeof NPCTradeWindow !== 'undefined' && this.currentNPC) {
+                    const npcInv = NPCTradeWindow.getNPCInventory(this.currentNPC);
+                    if (npcInv && typeof npcInv === 'object') {
+                        // Get item names, exclude 'gold' from the list
+                        actualItems = Object.keys(npcInv).filter(k => k !== 'gold' && npcInv[k] > 0);
+                    }
+                }
 
-                if (sells.length > 0) {
-                    // 🖤 Sanitize NPC data - XSS is my enemy 💀
-                    const sanitizedSells = sells.slice(0, 4).map(s => this.escapeHtml(s)).join(', ');
-                    preview.innerHTML = `<span style="color:#4a9">✓ Trade Available</span><br>Sells: ${sanitizedSells}${sells.length > 4 ? '...' : ''}`;
+                if (actualItems.length > 0) {
+                    // 🖤 Show actual items this NPC has - format nicely 💀
+                    const displayItems = actualItems.slice(0, 4).map(itemId => {
+                        // Try to get display name from ItemDatabase
+                        let name = itemId.replace(/_/g, ' ');
+                        if (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem) {
+                            const item = ItemDatabase.getItem(itemId);
+                            if (item?.name) name = item.name;
+                        }
+                        return this.escapeHtml(name);
+                    }).join(', ');
+                    preview.innerHTML = `<span style="color:#4a9">✓ Trade Available</span><br>Has: ${displayItems}${actualItems.length > 4 ? '...' : ''}`;
                 } else {
                     preview.innerHTML = '<span style="color:#4a9">✓ Trade Available</span><br>Various goods for trade';
                 }

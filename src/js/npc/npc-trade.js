@@ -1391,11 +1391,22 @@ const NPCTradeWindow = {
     },
 
     getNPCInventory(npcData) {
-        // 🎒 Do they have a custom inventory? Use it, otherwise generate 📦
-        if (npcData.inventory) return npcData.inventory;
+        // 🖤💀 Build NPC key consistently 💀
+        const npcId = npcData.id || `${npcData.location || 'unknown'}_${npcData.type}`;
+
+        // 🎒 Do they have a custom inventory? Cache it and return! 📦
+        // 🖤💀 FIX: Always add to cache so getNPCItemCount() works! 💀
+        if (npcData.inventory && !this._npcInventoryCache[npcId]) {
+            this._npcInventoryCache[npcId] = {
+                gold: npcData.gold || 0,
+                items: { ...npcData.inventory },
+                type: npcData.type,
+                location: npcData.location
+            };
+            console.log(`🏪 NPCTrade: Cached custom inventory for ${npcId}`);
+        }
 
         // 🖤💀 Check cache for persistent NPC inventory 💰
-        const npcId = npcData.id || `${npcData.location || 'unknown'}_${npcData.type}`;
 
         if (!this._npcInventoryCache[npcId]) {
             // 🏪 First time seeing this NPC - initialize their inventory
@@ -2286,7 +2297,15 @@ const NPCTradeWindow = {
     },
 
     getItemPrice(itemId) {
-        // 💎 Check the official price list first - what's this item worth? 📋
+        // 🖤💀 PRIORITY 1: Check ItemDatabase - the authoritative source 💀
+        if (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem) {
+            const item = ItemDatabase.getItem(itemId);
+            if (item?.basePrice !== undefined) {
+                return item.basePrice;
+            }
+        }
+
+        // 💎 PRIORITY 2: Check GameConfig price list 📋
         const categories = ['consumables', 'resources', 'tools', 'luxury'];
         for (const category of categories) {
             const items = GameConfig?.items?.[category];
@@ -2295,8 +2314,9 @@ const NPCTradeWindow = {
             }
         }
 
-        // 💰 No official price? Use these backup values 🪙
+        // 💰 PRIORITY 3: Fallback values for common items 🪙
         const fallbackPrices = {
+            gold: 1, // 🖤💀 1 gold = 1 gold (not 5!) 💀
             food: 5, water: 2, bread: 3, fish: 8, ale: 10,
             wood: 8, stone: 5, iron_ore: 12, coal: 6,
             sword: 50, hammer: 15, axe: 20,
