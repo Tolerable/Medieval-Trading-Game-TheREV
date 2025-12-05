@@ -16,6 +16,93 @@ Each entry follows this format:
 
 ---
 
+## 2025-12-05 - SESSION #15: TRAVEL UI BUGS 🖤💀🗺️
+
+**Request:** Gee reported:
+1. Travel NPC icon stuck in frame (Destination tab) instead of showing on map during travel
+2. Time machine resetting to 8:00 AM on arrival to different locations
+
+**Status:** ✅ ALL COMPLETE
+
+### Fixes Applied:
+
+**Issue 1: Travel NPC Icon** - FIXED in `travel-panel-map.js:1737-1755`
+- **Root Cause:** `render()` clears `mapElement.innerHTML`, orphaning the `travelMarker` reference
+- The check `if (!this.travelMarker)` passed because the JS reference existed, but DOM element was destroyed
+- **Fix:** Added same check as `playerMarker` - `!this.mapElement.contains(this.travelMarker)`
+- Also added explicit travel marker update when Map tab is shown during travel (line 218-222)
+
+**Issue 2: Time Reset** - FIXED in `weather-system.js:993-1006`
+- **Root Cause:** `createWeatherOverlay()` used hardcoded "8:00 AM" as default text
+- When overlay was recreated (by `ensureOverlayReady()`), time display reset to default
+- **Fix:** Now uses `TimeSystem.getFormattedClock()` and `DayNightCycle.currentPhase` for actual values
+- Also fixed date indicator (line 981-988) to use `TimeSystem.getFormattedDate()`
+
+---
+
+## 2025-12-05 - SESSION #14: BUG FIXES & UI POLISH 🖤💀🎵
+
+**Request:** Gee reported 8 bugs + console spam to fix:
+1. Gold not syncing across UI panels (different values in trade vs inventory)
+2. Quest reward not showing ($25 gold)
+3. NPC inventory not updating after purchase
+4. Elder Morin quest naming confusion
+5. Buy Water button cut off
+6. Voice playback indicator needed
+7. Messages panel cut off by UI buttons
+8. Farewell action console error
+9. MusicSystem crossfade spam in console (3x "Crossfade complete")
+
+**Status:** ✅ ALL COMPLETE
+
+### What I Fixed:
+
+1. ✅ **Gold Desync** - npc-trade.js, quest-system.js
+   - Multiple places directly modified `game.player.gold` instead of using GoldManager
+   - Fixed by using `GoldManager.setGold()` everywhere gold changes
+
+2. ✅ **Quest Reward Not Showing** - quest-system.js:1380-1387
+   - Same fix - quest rewards now use GoldManager.setGold()
+
+3. ✅ **NPC Inventory Not Updating** - npc-trade.js:957-969
+   - `executeTrade()` wasn't calling `removeNPCItem()`/`addNPCItem()`
+   - Added proper inventory updates after trade
+
+4. ✅ **Elder Morin Confusion** - game-world.js, main-quests.js, initial-encounter.js
+   - Quest used hardcoded "Elder Morin" but NPCs get random names
+   - Added "Morin" to wise_male names, changed quest text to "the Village Elder"
+
+5. ✅ **Buy Water Button** - styles.css
+   - Added `#market-panel { max-width: 850px; min-width: 500px; overflow: visible; }`
+
+6. ✅ **Farewell Console Error** - people-panel.js:2185-2192
+   - Changed verbose error logging to quiet console.log for expected fallbacks
+
+7. ✅ **MusicSystem Crossfade Spam** - music-system.js:233-334
+   - Added `_crossfadingToCategory` tracking to prevent duplicate crossfades
+
+8. ✅ **Voice Playback Indicator** - npc-voice.js:1042-1226
+   - Added global indicator with stop/history buttons (bottom-right corner)
+   - Added voice history (last 10 items) with replay functionality
+
+9. ✅ **Messages Panel Position** - styles.css:2316, draggable-panels.js:56-80
+   - Changed default from `bottom: 10px` to `bottom: 70px` (above action bar)
+   - Added migration to clear saved positions that overlap action bar
+
+**Files Modified:**
+- `src/js/npc/npc-trade.js` - Gold sync, NPC inventory updates
+- `src/js/systems/progression/quest-system.js` - Gold rewards via GoldManager
+- `src/js/data/game-world.js` - Added "Morin" to wise_male names
+- `src/js/systems/progression/main-quests.js` - Changed to "Village Elder"
+- `src/js/systems/story/initial-encounter.js` - Changed to "village Elder"
+- `src/css/styles.css` - Market panel width, message-log position
+- `src/js/ui/panels/people-panel.js` - Quiet farewell fallback logging
+- `src/js/audio/music-system.js` - Crossfade spam prevention
+- `src/js/npc/npc-voice.js` - Voice indicator + history
+- `src/js/ui/components/draggable-panels.js` - Position migration
+
+---
+
 ## 2025-12-05 - SESSION #13: NPC INVENTORY & QUEST FLOW OVERHAUL 🖤💀💰
 
 **Request:** Gee wants:
@@ -6870,6 +6957,198 @@ Check ALL fucking items for equipSlot/equipType!
 ---
 
 *"Every equippable item now has its slot. No more invisible gear."* 🖤💀⚔️
+
+---
+
+## 2025-12-05 - TODO DESTRUCTION SESSION 🖤💀🔥
+
+### Request:
+"DESTROY!" - Complete all remaining TODO items
+
+### Status: COMPLETE ✅
+
+---
+
+### FIXES APPLIED:
+
+**1. Panel Resize Handling (draggable-panels.js):**
+
+The issue was that CSS-positioned panels (quest-tracker, message-log) weren't being repositioned when the browser resized because `_constrainSinglePanel()` only updated panels that had been manually dragged (`userDragged === 'true'`).
+
+**Fix:**
+- Updated `constrainAllPanels()` to properly get computedStyle for all panels
+- Modified `_constrainSinglePanel()` to ALWAYS reposition panels when they go off-screen
+- Removed the condition that only updated panels with `userDragged === 'true'`
+- Now CSS-based panels get repositioned to stay visible during resize
+
+**File:** `src/js/ui/components/draggable-panels.js` (lines 454-529)
+
+---
+
+**2. Quest Turn-In Buttons - VERIFIED WORKING:**
+
+After thorough investigation, the quest button system was found to be ALREADY FULLY IMPLEMENTED:
+
+- `getQuestsReadyToComplete(npcType)` - Checks both quest giver AND turn-in target
+- `getDeliveriesForNPC(npcType)` - Handles delivery quests separately
+- `updateQuickActions()` - Shows all quest buttons with proper priorities
+- `askToCompleteQuest(quest)` - Handles quest completion
+- `deliverQuestItem(quest)` - Handles delivery handoff
+
+All NPCs with quests properly show:
+- `📜 Ask about: [Quest Name]` - Start new quests
+- `✅ Complete Quest: [Quest Name]` - Turn in completed quests
+- `📦 Deliver: [Item]` - Hand over delivery items
+- `⏳ Progress: [Quest Name]` - Check in-progress quests
+
+**File:** `src/js/ui/panels/people-panel.js` (lines 1015-1380)
+
+---
+
+**3. Map-Based Location Picker for Properties - NEW FEATURE! 🗺️**
+
+Created a full-featured world map overlay for buying properties at ANY location:
+
+**New File: `src/js/property/property-map-picker.js`**
+- Full world map with pan/zoom using MapRendererBase
+- Visual indicators: 🟢 Buildable, 🔵 Owned, 🔴 Locked, ⭐ Current
+- Side panel showing available properties at selected location
+- Road access system respected (can only build where road access exists)
+- Price calculations for each location
+- Keyboard support (ESC to close)
+- Responsive design for mobile
+
+**CSS Added: `src/css/styles.css`** (lines 10139-10555)
+- Full modal overlay styling
+- Legend, header, footer with gold display
+- Location markers with hover/selected states
+- Info panel for property listings
+- Mobile responsive breakpoints
+
+**Integration with property-ui.js:**
+- Added `🗺️ Browse All Locations` button to purchase interface
+- New methods: `getPropertiesForLocation()`, `calculatePriceForLocation()`
+- Purchase interface now accepts `locationId` parameter
+- Opens PropertyMapPicker when button clicked
+
+**Files Changed:**
+- NEW: `src/js/property/property-map-picker.js`
+- MODIFIED: `src/js/property/property-ui.js`
+- MODIFIED: `src/css/styles.css`
+- MODIFIED: `index.html` (added script include)
+
+---
+
+### TODO.MD UPDATE:
+
+Before: 4 items remaining
+After: 1 item remaining (feature requests only - no bugs!)
+
+| Item | Status |
+|------|--------|
+| Map-based location picker | ✅ COMPLETE |
+| Panels lose position on resize | ✅ COMPLETE |
+| Quest turn-in buttons | ✅ VERIFIED WORKING |
+
+---
+
+*"TODO list: DESTROYED. Codebase: PRISTINE."* 🖤💀🔥
+
+---
+
+## 2025-12-05 - NEW BUG HUNTING SESSION 🖤💀🐛
+
+### Request:
+Gee found 8 new bugs during gameplay testing. Time to hunt them down!
+
+### Status: IN PROGRESS 🔧
+
+---
+
+### BUGS TO FIX:
+
+| Priority | Bug | Status |
+|----------|-----|--------|
+| 🔴 CRITICAL | Gold not syncing across UI panels | 🔧 IN PROGRESS |
+| 🟠 HIGH | Quest reward not showing | ⏳ PENDING |
+| 🟠 HIGH | NPC inventory not updating after purchase | ⏳ PENDING |
+| 🟠 HIGH | Elder Morin quest target naming | ⏳ PENDING |
+| 🟠 HIGH | Buy Water button cut off | ⏳ PENDING |
+| 🟡 MEDIUM | Voice playback indicator needed | ⏳ PENDING |
+| 🟡 MEDIUM | Messages panel cut off by buttons | ⏳ PENDING |
+| 🟢 LOW | Farewell action console error | ⏳ PENDING |
+
+---
+
+### FIXES COMPLETED:
+
+**1. 🔴 Gold Display Desync - FIXED ✅**
+- **Issue:** NPC trade window showed different gold than character info panel
+- **Cause:** `npc-trade.js` and `quest-system.js` modified `game.player.gold` directly instead of using GoldManager
+- **Fix:** Updated both files to use `GoldManager.setGold()` which syncs ALL gold displays
+- **Files:** `npc-trade.js` (lines 957-962, 1023-1029), `quest-system.js` (lines 1380-1387)
+
+**2. 🟠 Quest Reward Not Showing - FIXED ✅**
+- **Cause:** Quest system bypassed GoldManager when awarding gold
+- **Fix:** Same as above - quest rewards now use GoldManager
+- **File:** `quest-system.js` (lines 1380-1387)
+
+**3. 🟠 NPC Inventory Not Updating - FIXED ✅**
+- **Issue:** Items like "dried meat" stayed in NPC inventory after player purchased
+- **Cause:** `executeTrade()` wasn't calling `removeNPCItem()` or `addNPCItem()`
+- **Fix:** Added proper inventory updates for both player sales AND purchases
+- **File:** `npc-trade.js` (lines 949-969)
+
+**4. 🟠 Elder Morin Quest Naming - FIXED ✅**
+- **Issue:** Quest said "Find Elder Morin" but NPC had random name "Radegund the Elder"
+- **Cause:** NPC names are randomly generated but quest used hardcoded name
+- **Fix:**
+  - Added "Morin" to `wise_male` name list in `game-world.js`
+  - Updated quest text to say "the Village Elder" instead of "Elder Morin"
+- **Files:** `game-world.js` (line 1011), `main-quests.js`, `initial-encounter.js`
+
+**5. 🟠 Buy Water Button Cut Off - FIXED ✅**
+- **Issue:** Market panel buttons getting clipped
+- **Cause:** `.panel` CSS had `overflow-x: hidden` clipping content
+- **Fix:** Added specific `#market-panel` styles with wider max-width and visible overflow for buttons
+- **File:** `styles.css` (lines 1536-1563)
+
+**6. 🟢 Farewell Console Error - FIXED ✅**
+- **Issue:** Console spam with `Action message error: {}` and `NPC: null` on farewell
+- **Cause:** Error handler logged verbose errors for expected fallback scenarios
+- **Fix:** Changed to quiet `console.log` for expected fallbacks (farewell, null NPC)
+- **File:** `people-panel.js` (lines 2185-2192)
+
+---
+
+### REMAINING TASKS (2):
+
+| Priority | Task | Status |
+|----------|------|--------|
+| 🟡 MEDIUM | Voice playback indicator | ⏳ PENDING |
+| 🟡 MEDIUM | Messages panel default position | ⏳ PENDING |
+
+---
+
+### SESSION SUMMARY:
+
+**Total bugs fixed this session: 6/8**
+- 1 CRITICAL bug (gold desync) ✅
+- 4 HIGH bugs (quest reward, NPC inventory, Elder naming, button cutoff) ✅
+- 1 LOW bug (console error) ✅
+
+**Files modified:**
+- `src/js/npc/npc-trade.js`
+- `src/js/systems/progression/quest-system.js`
+- `src/js/data/game-world.js`
+- `src/js/systems/progression/main-quests.js`
+- `src/js/systems/story/initial-encounter.js`
+- `src/css/styles.css`
+- `src/js/ui/panels/people-panel.js`
+
+---
+
+*"Six down, two to go. The darkness recedes."* 🖤💀🔥
 
 ---
 

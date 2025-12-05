@@ -69,14 +69,15 @@ const MainQuests = {
 
         quests: {
             // 1.1 - First Steps (Tutorial)
+            // 🖤💀 Note: giverName is descriptive - actual NPC name is randomly generated 💀
             act1_quest1: {
                 id: 'act1_quest1',
                 name: 'First Steps',
-                description: 'Begin your journey as a trader. Make your first purchase and speak with Elder Morin to learn about the realm.',
+                description: 'Begin your journey as a trader. Make your first purchase and speak with the village Elder in Greendale to learn about the realm.',
                 giver: 'elder',
-                giverName: 'Elder Morin',
+                giverName: 'The Village Elder',
                 turnInNpc: 'elder',
-                turnInNpcName: 'Elder Morin',
+                turnInNpcName: 'The Village Elder',
                 turnInLocation: 'greendale',
                 location: 'greendale',
                 type: 'main',
@@ -86,7 +87,7 @@ const MainQuests = {
                 difficulty: 'easy',
                 objectives: [
                     { type: 'buy', count: 1, current: 0, description: 'Make your first purchase from any merchant' },
-                    { type: 'talk', npc: 'elder', completed: false, description: 'Return to Elder Morin' }
+                    { type: 'talk', npc: 'elder', completed: false, description: 'Return to the Village Elder in Greendale' }
                 ],
                 rewards: { gold: 25, reputation: 10, experience: 20 },
                 prerequisite: null,

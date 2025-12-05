@@ -978,9 +978,14 @@ const WeatherSystem = {
                 const dateIndicator = document.createElement('div');
                 dateIndicator.id = 'date-indicator';
                 dateIndicator.className = 'top-bar-indicator';
+                // 🖤💀 Use ACTUAL current date, not hardcoded default! 💀
+                let currentDateStr = 'April 1, 1111'; // Fallback
+                if (typeof TimeSystem !== 'undefined' && TimeSystem.getFormattedDate) {
+                    currentDateStr = TimeSystem.getFormattedDate();
+                }
                 dateIndicator.innerHTML = `
                     <span class="indicator-icon">📅</span>
-                    <span class="indicator-text" id="date-text">April 1, 1111</span>
+                    <span class="indicator-text" id="date-text">${currentDateStr}</span>
                 `;
                 topBarWidgets.appendChild(dateIndicator);
             }
@@ -990,9 +995,19 @@ const WeatherSystem = {
                 const timeIndicator = document.createElement('div');
                 timeIndicator.id = 'time-phase-indicator';
                 timeIndicator.className = 'top-bar-indicator';
+                // 🖤💀 Use ACTUAL current time, not hardcoded default! 💀
+                // This prevents time display resetting to 8:00 when overlay is recreated
+                let currentTimeStr = '8:00 AM'; // Fallback
+                let currentPhaseIcon = '☀️';
+                if (typeof TimeSystem !== 'undefined' && TimeSystem.getFormattedClock) {
+                    currentTimeStr = TimeSystem.getFormattedClock();
+                }
+                if (typeof DayNightCycle !== 'undefined' && DayNightCycle.phases && DayNightCycle.currentPhase) {
+                    currentPhaseIcon = DayNightCycle.phases[DayNightCycle.currentPhase]?.icon || '☀️';
+                }
                 timeIndicator.innerHTML = `
-                    <span class="indicator-icon phase-icon">☀️</span>
-                    <span class="indicator-text phase-time">8:00 AM</span>
+                    <span class="indicator-icon phase-icon">${currentPhaseIcon}</span>
+                    <span class="indicator-text phase-time">${currentTimeStr}</span>
                 `;
                 topBarWidgets.appendChild(timeIndicator);
             }

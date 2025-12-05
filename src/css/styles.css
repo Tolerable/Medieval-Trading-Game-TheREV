@@ -1533,6 +1533,35 @@ body:has(#main-menu:not(.hidden)) #game-container {
     transition: box-shadow 0.2s ease;
 }
 
+/* 🖤💀 Market panel needs more space for item buttons 💀 */
+#market-panel {
+    max-width: 850px;
+    min-width: 500px;
+}
+
+/* 🖤 Ensure market item buttons are fully visible 💀 */
+#market-panel .items-grid,
+#market-panel .market-item {
+    overflow: visible;
+}
+
+/* 🖤 Fix button clipping in market items 💀 */
+#market-panel .item-actions,
+#market-panel .item-buttons {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+#market-panel .item-actions button,
+#market-panel .item-buttons button {
+    min-width: fit-content;
+    white-space: nowrap;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+}
+
 /* 🖤 CRITICAL FIX: Ensure ALL interactive elements inside panels are clickable 💀 */
 .panel button,
 .panel input,
@@ -2284,7 +2313,7 @@ body:has(#main-menu:not(.hidden)) #game-container {
 /* 🖤💀 RESPONSIVE: Uses calc() so position scales with viewport */
 #message-log {
     position: fixed;
-    bottom: 10px;
+    bottom: 70px; /* 🖤💀 Above the bottom action bar (~60px height + 10px gap) 💀 */
     right: calc(200px + 2vw); /* 🖤 Side-panel width + viewport-relative gap */
     width: min(320px, 30vw); /* 🦇 Cap at 320px but shrink on small screens */
     max-width: 35vw;
@@ -10133,5 +10162,424 @@ button,
     #player-info-panel,
     #location-info-panel {
         width: 500px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   🏘️ PROPERTY PURCHASE INTERFACE ENHANCEMENTS 🖤💀
+   ═══════════════════════════════════════════════════════════════ */
+
+.property-purchase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.property-purchase-header h2 {
+    margin: 0;
+}
+
+.map-picker-btn {
+    background: linear-gradient(180deg, #2196F3 0%, #1976D2 100%);
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.map-picker-btn:hover {
+    background: linear-gradient(180deg, #42A5F5 0%, #2196F3 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+
+.no-properties-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+}
+
+.no-properties-message p {
+    margin: 8px 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   🏘️ PROPERTY MAP PICKER - choose where to build your empire 🖤💀
+   ═══════════════════════════════════════════════════════════════ */
+
+.property-map-picker-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.property-map-picker-modal {
+    width: 90%;
+    max-width: 1200px;
+    height: 85vh;
+    max-height: 800px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border: 2px solid #4fc3f7;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(79, 195, 247, 0.3);
+}
+
+.property-map-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+}
+
+.property-map-header h2 {
+    font-size: 1.5rem;
+    color: #fff;
+    margin: 0;
+}
+
+.property-map-legend {
+    display: flex;
+    gap: 20px;
+    font-size: 0.85rem;
+}
+
+.property-map-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #aaa;
+}
+
+.property-map-legend .legend-item.buildable { color: #4CAF50; }
+.property-map-legend .legend-item.owned { color: #2196F3; }
+.property-map-legend .legend-item.locked { color: #f44336; }
+.property-map-legend .legend-item.current { color: #FFD700; }
+
+.property-map-close-btn {
+    background: rgba(244, 67, 54, 0.2);
+    border: 1px solid #f44336;
+    color: #f44336;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+}
+
+.property-map-close-btn:hover {
+    background: #f44336;
+    color: #fff;
+}
+
+.property-map-content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.property-map-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 100%);
+    cursor: grab;
+}
+
+.property-map-container:active {
+    cursor: grabbing;
+}
+
+#property-map {
+    position: absolute;
+    width: 800px;
+    height: 600px;
+    transform-origin: 0 0;
+}
+
+.property-map-info {
+    width: 280px;
+    background: rgba(0, 0, 0, 0.4);
+    border-left: 1px solid rgba(79, 195, 247, 0.3);
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.property-map-info .info-placeholder {
+    text-align: center;
+    color: #888;
+    padding: 40px 20px;
+}
+
+.property-map-info .info-placeholder p {
+    margin: 8px 0;
+}
+
+.property-map-info .info-hint {
+    font-size: 0.8rem;
+    color: #4CAF50;
+}
+
+.property-map-info .info-location h3 {
+    color: #fff;
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+}
+
+.property-map-info .info-type {
+    color: #4fc3f7;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+.property-map-info .info-owned,
+.property-map-info .info-available {
+    margin-top: 16px;
+}
+
+.property-map-info h4 {
+    color: #fff;
+    font-size: 0.95rem;
+    margin: 0 0 10px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.property-map-info .owned-property {
+    padding: 8px;
+    background: rgba(33, 150, 243, 0.2);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+}
+
+.property-map-info .available-property {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    background: rgba(76, 175, 80, 0.15);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.property-map-info .available-property .property-icon {
+    font-size: 1.2rem;
+}
+
+.property-map-info .available-property .property-name {
+    flex: 1;
+    color: #fff;
+}
+
+.property-map-info .available-property .property-price {
+    color: #FFD700;
+    font-size: 0.85rem;
+}
+
+.property-map-info .no-properties {
+    color: #888;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.property-map-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(79, 195, 247, 0.3);
+}
+
+.property-map-footer .footer-gold {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.property-map-footer .gold-icon {
+    font-size: 1.5rem;
+}
+
+.property-map-footer .gold-amount {
+    color: #FFD700;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.property-map-footer .gold-label {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.property-map-footer .footer-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.property-map-footer .primary-btn {
+    background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+    border: none;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.property-map-footer .primary-btn:hover:not(:disabled) {
+    background: linear-gradient(180deg, #66BB6A 0%, #4CAF50 100%);
+    transform: translateY(-2px);
+}
+
+.property-map-footer .primary-btn:disabled {
+    background: #555;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.property-map-footer .secondary-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.property-map-footer .secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 🖤 Location markers on the property map 💀 */
+.property-location-marker {
+    z-index: 10;
+}
+
+.property-location-marker:hover {
+    transform: scale(1.15);
+    z-index: 20;
+}
+
+.property-location-marker.buildable:hover {
+    box-shadow: 0 0 15px #4CAF50, 0 0 30px #4CAF50 !important;
+}
+
+.property-location-marker.locked {
+    opacity: 0.5;
+}
+
+.property-location-marker.selected {
+    animation: pulseGold 1.5s infinite;
+}
+
+@keyframes pulseGold {
+    0%, 100% { box-shadow: 0 0 20px #FFD700, 0 0 40px #FFD700; }
+    50% { box-shadow: 0 0 30px #FFD700, 0 0 60px #FFD700; }
+}
+
+/* 🦇 Property map tooltip */
+#property-map-tooltip .tooltip-header {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+#property-map-tooltip .tooltip-type {
+    color: #4fc3f7;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+#property-map-tooltip .tooltip-buildable {
+    color: #4CAF50;
+    margin-bottom: 4px;
+}
+
+#property-map-tooltip .tooltip-locked {
+    color: #f44336;
+    margin-bottom: 4px;
+}
+
+#property-map-tooltip .tooltip-hint {
+    color: #888;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+#property-map-tooltip .tooltip-properties,
+#property-map-tooltip .tooltip-owned {
+    color: #aaa;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+/* 📱 Responsive adjustments for property map picker */
+@media (max-width: 900px) {
+    .property-map-picker-modal {
+        width: 95%;
+        height: 90vh;
+    }
+
+    .property-map-content {
+        flex-direction: column;
+    }
+
+    .property-map-info {
+        width: 100%;
+        height: 200px;
+        border-left: none;
+        border-top: 1px solid rgba(79, 195, 247, 0.3);
+    }
+
+    .property-map-legend {
+        display: none;
+    }
+
+    .property-map-header h2 {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .property-map-footer {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .property-map-footer .footer-actions {
+        width: 100%;
+    }
+
+    .property-map-footer .footer-actions button {
+        flex: 1;
     }
 }

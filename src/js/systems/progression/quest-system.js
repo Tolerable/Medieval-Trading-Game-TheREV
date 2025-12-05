@@ -1377,7 +1377,13 @@ const QuestSystem = {
 
         if (typeof game !== 'undefined' && game.player) {
             if (rewards.gold) {
-                game.player.gold = (game.player.gold || 0) + rewards.gold;
+                // 🖤💀 Use GoldManager to sync ALL gold displays across the game! 💰
+                const newGold = (game.player.gold || 0) + rewards.gold;
+                if (typeof GoldManager !== 'undefined' && GoldManager.setGold) {
+                    GoldManager.setGold(newGold, `Quest reward: ${quest.name}`);
+                } else {
+                    game.player.gold = newGold;
+                }
                 rewardsGiven.gold = rewards.gold;
             }
 

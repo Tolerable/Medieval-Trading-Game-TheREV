@@ -1008,7 +1008,8 @@ const GameWorld = {
         strong_male: ['Aldric', 'Gareth', 'Roderick', 'Theron', 'Magnus', 'Bjorn', 'Conrad', 'Godfrey', 'Leofric', 'Wulfric', 'Siegfried', 'Ragnar'],
         strong_female: ['Brynhild', 'Astrid', 'Freya', 'Sigrid', 'Greta', 'Helga', 'Ingrid', 'Brunhilde', 'Thyra', 'Gudrun', 'Valdis', 'Ragnhild'],
         // Wise types (elder, scholar, sage, priest, druid)
-        wise_male: ['Aldous', 'Cornelius', 'Erasmus', 'Fabian', 'Ignatius', 'Marius', 'Severus', 'Tiberius', 'Ambrose', 'Benedict', 'Cuthbert', 'Dunstan'],
+        // 🖤💀 Morin is the canonical elder name used in quests - included for story consistency 💀
+        wise_male: ['Morin', 'Aldous', 'Cornelius', 'Erasmus', 'Fabian', 'Ignatius', 'Marius', 'Severus', 'Tiberius', 'Ambrose', 'Benedict', 'Cuthbert', 'Dunstan'],
         wise_female: ['Hildegard', 'Scholastica', 'Perpetua', 'Eugenia', 'Ursula', 'Brigid', 'Gwendolyn', 'Mechtild', 'Petronilla', 'Radegund', 'Walburga', 'Etheldreda'],
         // Crafty types (jeweler, tailor, apothecary)
         crafty_male: ['Silvanus', 'Tobias', 'Jasper', 'Felix', 'Lucian', 'Cyrus', 'Darius', 'Phineas', 'Ezra', 'Silas', 'Mordecai', 'Zachariah'],

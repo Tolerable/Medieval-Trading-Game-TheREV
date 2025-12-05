@@ -35,6 +35,9 @@ const DraggablePanels = {
     init() {
         console.log('🖤 DraggablePanels: Initializing (drag-only mode)...');
 
+        // 🖤💀 Migrate message-log position if it's in the "bad zone" (overlapping action bar) 💀
+        this.migrateMessageLogPosition();
+
         // Setup global drag events
         this.setupGlobalEvents();
 
@@ -48,6 +51,32 @@ const DraggablePanels = {
         this.loadPositions();
 
         console.log('🖤 DraggablePanels: Ready');
+    },
+
+    // 🖤💀 Clear message-log position if saved too close to bottom (overlaps action bar) 💀
+    migrateMessageLogPosition() {
+        try {
+            const positions = this.getAllPositions();
+            if (positions['message-log']) {
+                const pos = positions['message-log'];
+                // If saved in bottom 70px zone (overlaps with bottom-action-bar), reset it
+                const viewportHeight = window.innerHeight;
+                const savedTop = pos.topPercent !== undefined
+                    ? (pos.topPercent / 100) * viewportHeight
+                    : parseInt(pos.top) || 0;
+
+                // If bottom of message-log would be in the action bar zone, clear it
+                // Message-log is ~220px tall, action bar is at bottom 60px
+                const estimatedBottom = viewportHeight - savedTop - 220;
+                if (estimatedBottom < 70) {
+                    delete positions['message-log'];
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(positions));
+                    console.log('🖤 Migrated message-log position (was overlapping action bar)');
+                }
+            }
+        } catch (e) {
+            // Ignore migration errors
+        }
     },
 
     setupGlobalEvents() {
@@ -462,18 +491,21 @@ const DraggablePanels = {
         // 🦇 First, handle manually-dragged panels (from saved positions)
         Object.keys(positions).forEach(id => {
             const element = document.getElementById(id);
-            if (!element || element.style.position !== 'fixed') return;
-            if (!element.style.left || element.style.left === 'auto') return;
+            if (!element) return;
+            const computedStyle = getComputedStyle(element);
+            if (computedStyle.position !== 'fixed') return;
 
             this._constrainSinglePanel(element, viewportWidth, viewportHeight, margin, minVisible, true);
         });
 
         // 🖤💀 ALSO check ALL fixed-position panels, even if not manually dragged
-        // This prevents CSS-default panels from going off-screen
+        // This prevents CSS-default panels from going off-screen on resize
         const fixedPanels = document.querySelectorAll('.quest-tracker, #message-log, #side-panel, .panel, .overlay');
         fixedPanels.forEach(element => {
-            if (!element || getComputedStyle(element).position !== 'fixed') return;
-            if (element.classList.contains('hidden') || getComputedStyle(element).display === 'none') return;
+            if (!element) return;
+            const computedStyle = getComputedStyle(element);
+            if (computedStyle.position !== 'fixed') return;
+            if (element.classList.contains('hidden') || computedStyle.display === 'none') return;
 
             this._constrainSinglePanel(element, viewportWidth, viewportHeight, margin, minVisible, false);
         });
@@ -510,19 +542,17 @@ const DraggablePanels = {
         }
 
         if (needsUpdate) {
-            // 🖤 Only switch to left/top positioning if panel was manually dragged
-            // CSS-based panels should stay CSS-based, we just need to prevent them from being lost
-            if (element.dataset.userDragged === 'true' || saveAfter) {
-                element.style.position = 'fixed';
-                element.style.left = Math.max(margin, newLeft) + 'px';
-                element.style.top = Math.max(margin, newTop) + 'px';
-                element.style.right = 'auto';
-                element.style.bottom = 'auto';
+            // 🖤💀 ALWAYS reposition if panel is outside viewport - no more lost panels! 🦇
+            // Even CSS-based panels get repositioned to stay visible on resize
+            element.style.position = 'fixed';
+            element.style.left = Math.max(margin, newLeft) + 'px';
+            element.style.top = Math.max(margin, newTop) + 'px';
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
 
-                // Save new position only for manually dragged panels
-                if (saveAfter) {
-                    this.savePosition(element);
-                }
+            // Save new position for manually dragged panels or panels we've repositioned
+            if (saveAfter || element.dataset.userDragged === 'true') {
+                this.savePosition(element);
             }
         }
     },

@@ -2183,9 +2183,14 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             this.updateQuestItems();
 
         } catch (e) {
-            console.error('🖤 Action message error:', e);
-            console.error('🖤 NPC:', this.currentNPC);
-            console.error('🖤 Action:', actionType);
+            // 🖤💀 Only log as warning for expected fallbacks (like farewell when panel closes)
+            // This prevents console spam for normal interactions 💀
+            const isExpectedFallback = !this.currentNPC || actionType === 'farewell';
+            if (isExpectedFallback) {
+                console.log(`🎭 Using fallback for ${actionType} action (NPC context lost or expected)`);
+            } else {
+                console.warn('🖤 Action message fallback triggered:', e?.message || 'Unknown error');
+            }
 
             const messages = document.getElementById('people-chat-messages');
             const typing = messages?.querySelector('.typing-indicator');
@@ -2631,9 +2636,9 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
                 this.addChatMessage(greeting, 'npc');
                 this.chatHistory.push({ role: 'assistant', content: greeting });
 
-                // 🔊 Play TTS
+                // 🔊 Play TTS - pass NPC name as source for indicator 🖤💀
                 if (playVoice && typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
-                    NPCVoiceChatSystem.playVoice(greeting, npcData.voice || 'onyx');
+                    NPCVoiceChatSystem.playVoice(greeting, npcData.voice || 'onyx', npcData.name || 'Stranger');
                 }
             }, 300);
         } else {

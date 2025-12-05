@@ -215,6 +215,11 @@ const TravelPanelMap = {
                     setTimeout(() => {
                         this.render();
                         this.centerOnPlayer();
+                        // 🖤💀 Update travel marker if currently traveling 💀
+                        if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling) {
+                            const progress = TravelSystem.playerPosition.travelProgress || 0;
+                            this.updateTravelMarker(progress);
+                        }
                     }, 50);
                 }
 
@@ -1734,8 +1739,11 @@ const TravelPanelMap = {
 
         if (!startLoc?.mapPosition || !endLoc?.mapPosition) return;
 
-        // Create travel marker if it doesn't exist
-        if (!this.travelMarker) {
+        // 🖤💀 Check if marker exists AND is still in DOM - render() clears innerHTML 💀
+        // Same fix as playerMarker - reset orphaned reference before creating new one
+        if (!this.travelMarker || !this.mapElement.contains(this.travelMarker)) {
+            // Reset orphaned reference
+            this.travelMarker = null;
             this.travelMarker = document.createElement('div');
             this.travelMarker.id = 'travel-moving-marker';
             this.travelMarker.innerHTML = '🚶';

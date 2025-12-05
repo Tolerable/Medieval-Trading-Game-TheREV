@@ -374,7 +374,11 @@ const NPCTradeWindow = {
     updatePlayerGold() {
         const goldDisplay = document.getElementById('player-gold-display');
         if (goldDisplay && typeof game !== 'undefined') {
-            goldDisplay.textContent = game.player?.gold || 0;
+            // 🖤💀 Get gold from GoldManager if available for consistency 💰
+            const gold = (typeof GoldManager !== 'undefined' && GoldManager.getGold)
+                ? GoldManager.getGold()
+                : (game.player?.gold || 0);
+            goldDisplay.textContent = gold;
         }
     },
 
@@ -949,11 +953,29 @@ const NPCTradeWindow = {
             document.dispatchEvent(new CustomEvent('item-received', {
                 detail: { item: itemId, quantity: qty, source: 'trade' }
             }));
-            // 💭 Merchant inventory would update here if it was persistent 🗃️
+            // 🖤💀 Update NPC's persistent inventory - remove items they sold 📦
+            this.removeNPCItem(this.currentNPC, itemId, qty);
+        }
+
+        // 🖤💀 Add items the player sold TO the NPC's inventory 📦
+        for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
+            this.addNPCItem(this.currentNPC, itemId, qty);
+        }
+
+        // 🖤💀 Update NPC gold (they receive player gold, pay out their gold) 💰
+        const npcGoldChange = this.playerOffer.gold - this.npcOffer.gold;
+        if (npcGoldChange !== 0) {
+            this.modifyNPCGold(this.currentNPC, npcGoldChange);
         }
 
         // 💰 Exchange the coin - subtract what you gave, add what you got 🪙
-        game.player.gold = (game.player.gold || 0) - this.playerOffer.gold + this.npcOffer.gold;
+        // 🖤💀 Use GoldManager to sync ALL gold displays across the game! 💰
+        const newGold = (game.player.gold || 0) - this.playerOffer.gold + this.npcOffer.gold;
+        if (typeof GoldManager !== 'undefined' && GoldManager.setGold) {
+            GoldManager.setGold(newGold, 'Trade completed');
+        } else {
+            game.player.gold = newGold;
+        }
 
         // ✅ Deal sealed - merchant smiles (or doesn't) 😊
         this.showNPCResponse("Pleasure doing business with you!");
@@ -1014,7 +1036,13 @@ const NPCTradeWindow = {
                 return;
             }
 
-            game.player.gold -= totalCost;
+            // 🖤💀 Use GoldManager to sync ALL gold displays! 💰
+            const newGold = game.player.gold - totalCost;
+            if (typeof GoldManager !== 'undefined' && GoldManager.setGold) {
+                GoldManager.setGold(newGold, `Hired ${this.currentNPC.name}`);
+            } else {
+                game.player.gold = newGold;
+            }
 
             // 👥 Add them to your crew - they work for you now 🤝
             game.player.employees = game.player.employees || [];

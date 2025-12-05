@@ -358,7 +358,7 @@ const InitialEncounterSystem = {
 
     // 🖤💀 Fallback dialogue if API fails
     _getDefaultStrangerDialogue(playerName, greeting) {
-        return `${greeting} Listen well, ${playerName}... Darkness gathers in the north. The Shadow Tower, long dormant, stirs once more. The wizard Malachar... he has returned. You are more than a simple trader, young one. Fate has brought you here for a reason. Seek out Elder Morin in this village. He will guide your first steps on this path.`;
+        return `${greeting} Listen well, ${playerName}... Darkness gathers in the north. The Shadow Tower, long dormant, stirs once more. The wizard Malachar... he has returned. You are more than a simple trader, young one. Fate has brought you here for a reason. Seek out the village Elder here in Greendale. He will guide your first steps on this path.`;
     },
 
     // 🖤 Accept quest and show quest panel (tutorial already shown at game start) 💀
@@ -499,9 +499,9 @@ const InitialEncounterSystem = {
                     <div style="background: rgba(100, 100, 150, 0.2); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
                         <p style="margin-bottom: 0.5rem; color: #fff;"><strong>Objectives:</strong></p>
                         <p style="color: #c0c0d0; margin-left: 1rem;">• Complete your first trade</p>
-                        <p style="color: #c0c0d0; margin-left: 1rem;">• Speak with Elder Morin</p>
+                        <p style="color: #c0c0d0; margin-left: 1rem;">• Speak with the Village Elder</p>
                     </div>
-                    <p style="color: #a0a0c0; font-style: italic; font-size: 0.9em;">Tip: Look for the Elder in the village. NPCs with quests have a 📜 icon. Press 'Q' to open your Quest Log.</p>
+                    <p style="color: #a0a0c0; font-style: italic; font-size: 0.9em;">Tip: Look for the Elder in Greendale's People panel. NPCs with quests have a 📜 icon. Press 'Q' to open your Quest Log.</p>
                 `,
                 closeable: true,
                 buttons: [
@@ -533,10 +533,10 @@ const InitialEncounterSystem = {
         // 📝 Add journal entry based on choice
         if (typeof addMessage === 'function') {
             if (talkedToStranger) {
-                addMessage('📜 Quest Available: "A New Beginning" - Speak with Elder Morin');
+                addMessage('📜 Quest Available: "First Steps" - Speak with the Village Elder');
                 addMessage('🎭 The stranger\'s words echo in your mind... the Shadow Tower stirs.');
             } else {
-                addMessage('📜 Quest Available: "A New Beginning" - Speak with Elder Morin');
+                addMessage('📜 Quest Available: "First Steps" - Speak with the Village Elder');
             }
         }
 

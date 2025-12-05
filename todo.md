@@ -3,22 +3,38 @@
 **Purpose:** ONLY unfinished items. Completed items move to `finished.md`.
 
 **Last Updated:** 2025-12-05
-**Total Remaining:** 6 items
+**Total Remaining:** 0 items (ALL CLEAR! 🎉)
 
 ---
 
-## 🟠 HIGH - Remaining Items
+## 🟡 MEDIUM - UX/Voice Issues
 
-- [ ] **Map-based location picker** - Can only buy/build properties at current location, need world map selection
-- [ ] **Panels lose position on resize** - Quest widget, message panel don't stay relative when browser resizes
-- [x] **Leaderboard duplicate posts** - ✅ FIXED: Added submission lock + 5s debounce for same characterId in leaderboard-panel.js
+(none - all fixed!)
 
 ---
 
-## 🟡 MEDIUM - Quest/NPC Integration
+## ✅ FIXED THIS SESSION (2025-12-05)
 
-- [ ] **Quest turn-in buttons** - Not all NPCs with quests have proper accept/turn-in buttons in dialogue
-- [x] **Quest location tooltips** - ✅ ALREADY IMPLEMENTED: Code exists in game-world-renderer.js using QuestSystem.getQuestInfoForLocation()
+- [x] **Travel NPC icon in wrong place** - ✅ FIXED: Travel marker DOM element orphaned after render() clears innerHTML. Added contains() check like playerMarker.
+- [x] **Time display resetting to 8:00** - ✅ FIXED: WeatherSystem used hardcoded defaults. Now uses actual TimeSystem values when creating indicators.
+- [x] **MusicSystem crossfade spam** - ✅ FIXED: Added _crossfadingToCategory tracking to prevent duplicate crossfades
+- [x] **Voice playback indicator** - ✅ FIXED: Added global indicator (bottom-right) with stop/history buttons, voice history with replay
+- [x] **Messages panel default position** - ✅ FIXED: Changed default to bottom:70px (above action bar) + migration for old saved positions
+- [x] **Gold not syncing across UI panels** - ✅ FIXED: Updated npc-trade.js and quest-system.js to use GoldManager.setGold()
+- [x] **Quest reward not showing** - ✅ FIXED: Same fix - quest rewards now use GoldManager
+- [x] **NPC inventory not updating** - ✅ FIXED: executeTrade() now calls removeNPCItem/addNPCItem
+- [x] **Elder Morin quest naming** - ✅ FIXED: Added Morin to name list + updated quest text to "the Village Elder"
+- [x] **Buy Water button cut off** - ✅ FIXED: Added #market-panel CSS with wider max-width
+- [x] **Farewell console error** - ✅ FIXED: Changed to quiet console.log for expected fallbacks
+
+---
+
+## ✅ PREVIOUSLY COMPLETED (2025-12-05)
+
+- [x] **Map-based location picker** - ✅ FIXED: Created PropertyMapPicker with full world map overlay
+- [x] **Panels lose position on resize** - ✅ FIXED: Updated _constrainSinglePanel() to always reposition
+- [x] **Quest turn-in buttons** - ✅ VERIFIED WORKING: Comprehensive system in PeoplePanel
+- [x] **Leaderboard duplicate posts** - ✅ FIXED: Added submission lock + 5s debounce
 
 ---
 

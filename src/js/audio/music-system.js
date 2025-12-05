@@ -221,9 +221,18 @@ const MusicSystem = {
 
         // If already playing this category, don't restart
         if (this.currentCategory === category && this.isPlaying) {
-            console.log(`🎵 MusicSystem: Already playing ${category} music`);
+            // 🖤💀 Only log once per second to prevent spam 💀
+            if (!this._lastAlreadyPlayingLog || Date.now() - this._lastAlreadyPlayingLog > 1000) {
+                console.log(`🎵 MusicSystem: Already playing ${category} music`);
+                this._lastAlreadyPlayingLog = Date.now();
+            }
             this.pendingCategory = null;
             return;
+        }
+
+        // 🖤💀 If crossfading TO this category, don't start another crossfade! 💀
+        if (this._crossfadingToCategory === category) {
+            return; // Silent return - crossfade already in progress
         }
 
         // Clear any pending gap timeout
@@ -235,6 +244,7 @@ const MusicSystem = {
         // 🎵 If music is currently playing, do a crossfade transition
         if (this.isPlaying && this.currentAudio && !this.currentAudio.paused) {
             console.log(`🎵 MusicSystem: Crossfading to ${category} music...`);
+            this._crossfadingToCategory = category; // 🖤 Track that we're crossfading
             this.crossfadeToCategory(category);
             return;
         }
@@ -319,6 +329,9 @@ const MusicSystem = {
 
                 // Set up ended listener for new track
                 this.currentAudio.addEventListener('ended', () => this.onTrackEnd(), { once: true });
+
+                // 🖤💀 Clear crossfade tracking flag 💀
+                this._crossfadingToCategory = null;
 
                 console.log(`🎵 MusicSystem: Crossfade complete, now playing ${newCategory}`);
             }

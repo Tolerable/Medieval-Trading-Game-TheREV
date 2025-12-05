@@ -312,18 +312,32 @@ const PropertyUI = {
     },
 
     // 🛒 Show property purchase interface 🖤
-    showPropertyPurchaseInterface() {
-        const availableProperties = PropertySystem.getAvailableProperties();
+    // 🖤💀 Now supports buying at ANY location via map picker! 💀
+    showPropertyPurchaseInterface(locationId = null) {
+        // 🖤 If no locationId provided, use current location
+        const targetLocationId = locationId || game?.currentLocation?.id;
+        const targetLocation = GameWorld.locations[targetLocationId];
 
-        if (availableProperties.length === 0) {
-            addMessage('No properties available for purchase in this location.');
+        if (!targetLocation) {
+            addMessage('Cannot find location information.');
             return;
         }
 
+        // 🦇 Get properties available at target location (not just current!)
+        const availableProperties = this.getPropertiesForLocation(targetLocationId);
+
         const purchaseHtml = `
             <div class="property-purchase-interface">
-                <h2>🏘️ Available Properties in ${game.currentLocation.name}</h2>
-                <div class="properties-grid" id="properties-purchase-grid"></div>
+                <div class="property-purchase-header">
+                    <h2>🏘️ Available Properties in ${this.escapeHtml(targetLocation.name)}</h2>
+                    <button class="map-picker-btn" id="open-property-map-btn" title="Choose a different location">
+                        🗺️ Browse All Locations
+                    </button>
+                </div>
+                ${availableProperties.length === 0 ?
+                    '<div class="no-properties-message"><p>No properties available for purchase at this location.</p><p>Try browsing other locations using the map button above.</p></div>' :
+                    '<div class="properties-grid" id="properties-purchase-grid"></div>'
+                }
                 <div class="purchase-summary">
                     <div class="player-gold">
                         <span class="gold-icon">💰</span>
@@ -334,8 +348,95 @@ const PropertyUI = {
             </div>
         `;
 
-        addMessage('Browsing available properties...');
-        this._populatePropertiesPurchaseGrid(availableProperties);
+        addMessage(`Browsing properties in ${targetLocation.name}...`);
+
+        // 🖤 Store current target location for purchases
+        this._currentPurchaseLocation = targetLocationId;
+
+        if (availableProperties.length > 0) {
+            this._populatePropertiesPurchaseGrid(availableProperties, targetLocationId);
+        }
+
+        // 🦇 Attach map picker button handler after DOM update
+        setTimeout(() => {
+            const mapBtn = document.getElementById('open-property-map-btn');
+            if (mapBtn) {
+                mapBtn.addEventListener('click', () => {
+                    if (typeof PropertyMapPicker !== 'undefined') {
+                        PropertyMapPicker.open((selectedLocationId) => {
+                            // 🖤 Re-open purchase interface at selected location
+                            this.showPropertyPurchaseInterface(selectedLocationId);
+                        });
+                    } else {
+                        addMessage('Map picker not available.');
+                    }
+                });
+            }
+        }, 100);
+    },
+
+    // 🖤💀 Get properties available at ANY location (for map picker integration) 💀
+    getPropertiesForLocation(locationId) {
+        const location = GameWorld.locations[locationId];
+        if (!location) return [];
+
+        const propertyIds = PropertyTypes.getLocationProperties(location.type);
+        const ownedHere = new Set((game?.player?.ownedProperties || [])
+            .filter(p => p.location === locationId)
+            .map(p => p.type));
+
+        const availableProperties = [];
+        propertyIds.forEach(propertyId => {
+            if (ownedHere.has(propertyId)) return; // Already own this type here
+
+            const propertyType = PropertyTypes.get(propertyId);
+            if (!propertyType) return;
+
+            const calculatedPrice = this.calculatePriceForLocation(propertyId, locationId);
+            const dailyIncome = PropertyPurchase.calculateProjectedIncome(propertyId);
+            const roiDays = dailyIncome > 0 ? Math.round(calculatedPrice / dailyIncome) : Infinity;
+
+            availableProperties.push({
+                ...propertyType,
+                location: locationId,
+                calculatedPrice: calculatedPrice,
+                projectedDailyIncome: dailyIncome,
+                roiDays: roiDays,
+                canAfford: game.player.gold >= calculatedPrice
+            });
+        });
+
+        return availableProperties;
+    },
+
+    // 🖤💀 Calculate property price for ANY location (not just current) 💀
+    calculatePriceForLocation(propertyId, locationId) {
+        const propertyType = PropertyTypes.get(propertyId);
+        if (!propertyType) return 0;
+
+        const location = GameWorld.locations[locationId];
+        if (!location) return propertyType.basePrice;
+
+        let price = propertyType.basePrice;
+
+        // 🌙 Location type modifier 🦇
+        const locationModifiers = { village: 0.8, town: 1.0, city: 1.3, capital: 1.5, port: 1.2 };
+        price *= locationModifiers[location.type] || 1.0;
+
+        // ⭐ Reputation modifier 🔮
+        if (typeof CityReputationSystem !== 'undefined') {
+            const reputation = CityReputationSystem.getReputation(locationId);
+            const reputationModifier = 1 - (reputation * 0.002);
+            price *= Math.max(0.7, reputationModifier);
+        }
+
+        // 📊 Merchant rank bonus 💀
+        if (typeof MerchantRankSystem !== 'undefined') {
+            const bonus = MerchantRankSystem.getTradingBonus();
+            price *= (1 - bonus);
+        }
+
+        return Math.round(price);
     },
 
     // 📋 Show property purchase details ⚰️

@@ -837,7 +837,7 @@ RELATIONSHIP MEMORY:
     // 🔊 TEXT-TO-SPEECH - giving NPCs actual voices to haunt you
     // ═══════════════════════════════════════════════════════════
 
-    async playVoice(text, voiceOverride = null) {
+    async playVoice(text, voiceOverride = null, source = 'NPC') {
         if (!this.settings.voiceEnabled) {
             console.log('🎙️ Voice playback disabled');
             return;
@@ -857,6 +857,12 @@ RELATIONSHIP MEMORY:
                 console.log('🎙️ No text to speak after cleaning');
                 return;
             }
+
+            // 🖤💀 Add to voice history for replay 💀
+            this.addToVoiceHistory(cleanText, source);
+
+            // 🖤💀 Store current voice source for indicator 💀
+            this._currentVoiceSource = source;
 
             // split into chunks for long text
             const chunks = this.splitTextIntoChunks(cleanText, 1000);
@@ -962,10 +968,15 @@ RELATIONSHIP MEMORY:
         if (this.voiceQueue.length === 0 || !this.settings.voiceEnabled) {
             this.isPlayingVoice = false;
             this.currentAudio = null;
+            // 🖤💀 Hide global indicator when done 💀
+            this.hideGlobalVoiceIndicator();
             return;
         }
 
         this.isPlayingVoice = true;
+
+        // 🖤💀 Show global voice indicator 💀
+        this.showGlobalVoiceIndicator(this._currentVoiceSource || 'NPC');
 
         const { text, voice } = this.voiceQueue.shift();
 
@@ -1032,11 +1043,200 @@ RELATIONSHIP MEMORY:
             this.currentAudio = null;
         }
 
+        // 🖤💀 Hide global indicator 💀
+        this.hideGlobalVoiceIndicator();
+
         console.log('🎙️ Voice playback stopped');
     },
 
     isVoicePlaying() {
         return this.isPlayingVoice;
+    },
+
+    // ═══════════════════════════════════════════════════════════
+    // 🔊 GLOBAL VOICE INDICATOR & HISTORY - track all spoken words 💀
+    // ═══════════════════════════════════════════════════════════
+
+    // 🖤 Voice history - stores recent voice playbacks for replay
+    _voiceHistory: [],
+    _maxHistoryItems: 10,
+    _globalIndicator: null,
+
+    // 🖤 Add to voice history 💀
+    addToVoiceHistory(text, source = 'NPC') {
+        this._voiceHistory.unshift({
+            text: text,
+            source: source,
+            timestamp: Date.now(),
+            id: `voice_${Date.now()}`
+        });
+
+        // Limit history size
+        if (this._voiceHistory.length > this._maxHistoryItems) {
+            this._voiceHistory.pop();
+        }
+    },
+
+    // 🖤 Get voice history 💀
+    getVoiceHistory() {
+        return this._voiceHistory;
+    },
+
+    // 🖤 Replay a voice from history 💀
+    async replayVoice(historyId) {
+        const item = this._voiceHistory.find(h => h.id === historyId);
+        if (item) {
+            await this.playVoice(item.text);
+        }
+    },
+
+    // 🖤 Create/show global voice indicator 💀
+    showGlobalVoiceIndicator(source = 'NPC') {
+        // Create indicator if it doesn't exist
+        if (!this._globalIndicator) {
+            this._globalIndicator = document.createElement('div');
+            this._globalIndicator.id = 'global-voice-indicator';
+            this._globalIndicator.innerHTML = `
+                <div class="voice-indicator-content">
+                    <div class="voice-waves">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <span class="voice-source"></span>
+                    <button class="voice-stop-btn" title="Stop voice">⏹️</button>
+                    <button class="voice-history-btn" title="Voice history">📜</button>
+                </div>
+            `;
+
+            // Add styles inline for reliability
+            this._globalIndicator.style.cssText = `
+                position: fixed;
+                bottom: 80px;
+                right: 20px;
+                background: rgba(30, 40, 60, 0.95);
+                border: 2px solid #4CAF50;
+                border-radius: 12px;
+                padding: 10px 16px;
+                z-index: 9999;
+                display: none;
+                box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+                animation: voiceIndicatorPulse 2s ease-in-out infinite;
+            `;
+
+            // Add CSS animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes voiceIndicatorPulse {
+                    0%, 100% { box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3); }
+                    50% { box-shadow: 0 4px 30px rgba(76, 175, 80, 0.6); }
+                }
+                #global-voice-indicator .voice-indicator-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    color: #81c784;
+                    font-size: 14px;
+                }
+                #global-voice-indicator .voice-waves {
+                    display: flex;
+                    align-items: center;
+                    gap: 3px;
+                    height: 20px;
+                }
+                #global-voice-indicator .voice-waves span {
+                    width: 4px;
+                    background: #4CAF50;
+                    border-radius: 2px;
+                    animation: voiceWave 0.6s ease-in-out infinite;
+                }
+                #global-voice-indicator .voice-waves span:nth-child(1) { animation-delay: 0s; height: 8px; }
+                #global-voice-indicator .voice-waves span:nth-child(2) { animation-delay: 0.1s; height: 14px; }
+                #global-voice-indicator .voice-waves span:nth-child(3) { animation-delay: 0.2s; height: 6px; }
+                #global-voice-indicator .voice-waves span:nth-child(4) { animation-delay: 0.3s; height: 16px; }
+                #global-voice-indicator .voice-waves span:nth-child(5) { animation-delay: 0.4s; height: 10px; }
+                @keyframes voiceWave {
+                    0%, 100% { transform: scaleY(1); }
+                    50% { transform: scaleY(0.4); }
+                }
+                #global-voice-indicator button {
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 6px;
+                    padding: 4px 8px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    transition: all 0.2s;
+                }
+                #global-voice-indicator button:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(this._globalIndicator);
+
+            // Stop button listener
+            this._globalIndicator.querySelector('.voice-stop-btn').addEventListener('click', () => {
+                this.stopVoicePlayback();
+                this.hideGlobalVoiceIndicator();
+            });
+
+            // History button listener
+            this._globalIndicator.querySelector('.voice-history-btn').addEventListener('click', () => {
+                this.showVoiceHistoryPanel();
+            });
+        }
+
+        // Update source and show
+        const sourceEl = this._globalIndicator.querySelector('.voice-source');
+        if (sourceEl) sourceEl.textContent = `${source} speaking...`;
+
+        this._globalIndicator.style.display = 'block';
+    },
+
+    // 🖤 Hide global voice indicator 💀
+    hideGlobalVoiceIndicator() {
+        if (this._globalIndicator) {
+            this._globalIndicator.style.display = 'none';
+        }
+    },
+
+    // 🖤 Show voice history panel 💀
+    showVoiceHistoryPanel() {
+        // Check if ModalSystem is available
+        if (typeof ModalSystem === 'undefined') {
+            console.log('🎙️ Voice History:', this._voiceHistory);
+            return;
+        }
+
+        const history = this.getVoiceHistory();
+        const historyHtml = history.length > 0
+            ? history.map(h => `
+                <div class="voice-history-item" style="background: rgba(50,50,70,0.5); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #4CAF50;">${h.source}</span>
+                        <span style="color: #888; font-size: 0.8em;">${new Date(h.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <p style="color: #ddd; margin: 8px 0; font-size: 0.9em;">${h.text.substring(0, 150)}${h.text.length > 150 ? '...' : ''}</p>
+                    <button onclick="NPCVoiceChatSystem.replayVoice('${h.id}')" style="background: #2196F3; border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer;">🔊 Replay</button>
+                </div>
+            `).join('')
+            : '<p style="color: #888; text-align: center;">No voice history yet</p>';
+
+        ModalSystem.show({
+            title: '🎙️ Voice History',
+            content: `
+                <div style="max-height: 400px; overflow-y: auto;">
+                    ${historyHtml}
+                </div>
+            `,
+            closeable: true,
+            buttons: [
+                {
+                    text: 'Close',
+                    className: 'secondary',
+                    onClick: () => ModalSystem.hide()
+                }
+            ]
+        });
     },
 
     // ═══════════════════════════════════════════════════════════
