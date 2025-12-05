@@ -90,6 +90,10 @@ const MusicSystem = {
     userHasInteracted: false,
     pendingPlayCategory: null,
 
+    // 🖤💀 Preloaded audio buffers - loaded during page init 💀
+    preloadedAudio: {},
+    preloadProgress: { loaded: 0, total: 0 },
+
     // 🎮 Initialize the music system
     init() {
         console.log('🎵 MusicSystem: Awakening from the sonic void...');
@@ -117,7 +121,52 @@ const MusicSystem = {
         // 🖤 Listen for first user interaction to unlock audio
         this.setupUserInteractionListener();
 
+        // 🖤💀 Note: preloadAllTracks() is called immediately when script loads 💀
+        // This happens BEFORE DOMContentLoaded so audio buffers during loading screen
+
         console.log('🎵 MusicSystem: Ready to haunt your ears 🖤💀');
+    },
+
+    // 🖤💀 Preload all audio tracks during page load 💀
+    preloadAllTracks() {
+        console.log('🎵 MusicSystem: Preloading all audio tracks...');
+
+        // Count total tracks
+        let totalTracks = 0;
+        Object.values(this.TRACKS).forEach(tracks => {
+            totalTracks += tracks.length;
+        });
+        this.preloadProgress = { loaded: 0, total: totalTracks };
+
+        // Preload each category
+        Object.entries(this.TRACKS).forEach(([category, tracks]) => {
+            this.preloadedAudio[category] = [];
+
+            tracks.forEach((trackPath, index) => {
+                const audio = new Audio();
+                audio.preload = 'auto';
+
+                audio.addEventListener('canplaythrough', () => {
+                    this.preloadProgress.loaded++;
+                    console.log(`🎵 Preloaded: ${trackPath.split('/').pop()} (${this.preloadProgress.loaded}/${this.preloadProgress.total})`);
+                }, { once: true });
+
+                audio.addEventListener('error', (e) => {
+                    this.preloadProgress.loaded++;
+                    console.warn(`🎵 Failed to preload: ${trackPath.split('/').pop()}`, e);
+                }, { once: true });
+
+                audio.src = trackPath;
+                audio.load();
+
+                this.preloadedAudio[category][index] = audio;
+            });
+        });
+    },
+
+    // 🖤💀 Get preloaded audio for current track (or null if not ready) 💀
+    getPreloadedAudio(category, trackIndex) {
+        return this.preloadedAudio[category]?.[trackIndex] || null;
     },
 
     // 🖤 Setup listener for first user interaction (unlocks audio autoplay)
@@ -646,6 +695,10 @@ const MusicSystem = {
 
 // 🎵 Auto-initialize when script loads
 if (typeof window !== 'undefined') {
+    // 🖤💀 START PRELOADING IMMEDIATELY when script loads (before DOMContentLoaded) 💀
+    // This allows audio to buffer during the loading screen
+    MusicSystem.preloadAllTracks();
+
     window.addEventListener('DOMContentLoaded', () => {
         MusicSystem.init();
     });
@@ -656,4 +709,4 @@ if (typeof window !== 'undefined') {
     });
 }
 
-console.log('🎵 MusicSystem loaded - the soundtrack awaits 🖤💀');
+console.log('🎵 MusicSystem loaded - preloading audio for the abyss... 🖤💀');

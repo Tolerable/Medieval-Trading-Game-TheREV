@@ -10,6 +10,15 @@
 const LoadingManager = {
     // 📊 Final system check - multiple indicators that game is ready
     finalCheck: () => {
+        // 🖤💀 Check if audio is preloaded (if MusicSystem exists) 💀
+        if (typeof MusicSystem !== 'undefined' && MusicSystem.preloadProgress) {
+            const audioProgress = MusicSystem.preloadProgress;
+            if (audioProgress.total > 0 && audioProgress.loaded < audioProgress.total) {
+                // Audio still loading - not ready yet
+                return false;
+            }
+        }
+
         // Primary: window.startNewGame is set at end of game.js (line 9626)
         if (typeof window.startNewGame === 'function') {
             return true;
@@ -31,8 +40,9 @@ const LoadingManager = {
         { threshold: 15, title: 'Loading core systems...', status: 'Loading configuration...' },
         { threshold: 30, title: 'Generating world...', status: 'Creating locations...' },
         { threshold: 45, title: 'Loading items...', status: 'Filling warehouses...' },
-        { threshold: 60, title: 'Setting up markets...', status: 'Hiring merchants...' },
-        { threshold: 75, title: 'Preparing quests...', status: 'Writing adventures...' },
+        { threshold: 55, title: 'Loading audio...', status: 'Buffering music...' },
+        { threshold: 70, title: 'Setting up markets...', status: 'Hiring merchants...' },
+        { threshold: 80, title: 'Preparing quests...', status: 'Writing adventures...' },
         { threshold: 90, title: 'Almost there...', status: 'Final preparations...' },
         { threshold: 100, title: 'Ready to trade!', status: 'Welcome, merchant...' }
     ],
@@ -122,8 +132,15 @@ const LoadingManager = {
         const now = Date.now();
         if (elapsed > 5000 && (now - this._lastLogTime) >= 5000) {
             this._lastLogTime = now;
+            // 🖤💀 Include audio preload progress in debug log 💀
+            let audioStatus = 'not loaded';
+            if (typeof MusicSystem !== 'undefined' && MusicSystem.preloadProgress) {
+                const ap = MusicSystem.preloadProgress;
+                audioStatus = `${ap.loaded}/${ap.total}`;
+            }
             console.log('🖤 LoadingManager: Still waiting...', {
                 elapsed: Math.round(elapsed / 1000) + 's',
+                'audioPreload': audioStatus,
                 'window.startNewGame': typeof window.startNewGame,
                 'Bootstrap.initialized': typeof Bootstrap !== 'undefined' ? Bootstrap.initialized : 'undefined',
                 'game': typeof game,
