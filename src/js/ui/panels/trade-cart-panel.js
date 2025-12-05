@@ -52,6 +52,7 @@ const TradeCartPanel = {
                         <div class="cart-header-left">
                             <span class="cart-icon">🛒</span>
                             <h2 id="cart-title">Your Cart</h2>
+                            <span class="cart-count-badge" id="cart-count-badge">0</span>
                         </div>
                         <div class="cart-header-right">
                             <span class="merchant-name" id="cart-merchant-name"></span>
@@ -102,15 +103,16 @@ const TradeCartPanel = {
                             <span class="btn-icon">🗣️</span>
                             <span class="btn-text">Haggle</span>
                         </button>
-                        <button class="cart-btn cancel-btn" onclick="TradeCartPanel.close()">
-                            <span class="btn-icon">❌</span>
-                            <span class="btn-text">Cancel</span>
+                        <button class="cart-btn clear-btn" onclick="TradeCartPanel.clearCart()">
+                            <span class="btn-icon">🗑️</span>
+                            <span class="btn-text">Clear</span>
                         </button>
                         <button class="cart-btn complete-btn" id="cart-complete-btn" onclick="TradeCartPanel.completeTrade()">
                             <span class="btn-icon">✅</span>
                             <span class="btn-text">Complete Trade</span>
                         </button>
                     </div>
+                    <p class="cart-hint">💡 Click more items in the market to add them to your cart!</p>
                 </div>
             </div>
         `;
@@ -129,43 +131,48 @@ const TradeCartPanel = {
         const styles = document.createElement('style');
         styles.id = 'trade-cart-styles';
         styles.textContent = `
-            /* 🛒 Trade Cart Panel Styles */
+            /* 🛒 Trade Cart Panel Styles - NON-BLOCKING side panel! */
             .trade-cart-panel {
                 position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
+                top: 80px;
+                right: 20px;
+                bottom: 80px;
                 z-index: 750;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                pointer-events: none; /* Allow clicks to pass through to market */
             }
 
             .trade-cart-panel.hidden {
                 display: none;
             }
 
+            /* 🖤 NO backdrop - let users keep clicking market items! */
             .trade-cart-backdrop {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.7);
+                display: none; /* Disabled - no blocking overlay */
             }
 
             .trade-cart-container {
                 position: relative;
+                pointer-events: auto; /* Cart itself IS clickable */
                 background: linear-gradient(180deg, rgba(35, 35, 50, 0.98) 0%, rgba(25, 25, 40, 0.98) 100%);
                 border: 2px solid rgba(255, 215, 0, 0.4);
                 border-radius: 12px;
-                width: 90%;
-                max-width: 500px;
-                max-height: 80vh;
+                width: 340px;
+                max-height: 100%;
                 display: flex;
                 flex-direction: column;
                 box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+                animation: slideInRight 0.2s ease-out;
+            }
+
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
             }
 
             .trade-cart-header {
@@ -194,6 +201,21 @@ const TradeCartPanel = {
                 font-size: 18px;
             }
 
+            .cart-count-badge {
+                background: #ff6b6b;
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+                padding: 2px 8px;
+                border-radius: 12px;
+                min-width: 20px;
+                text-align: center;
+            }
+
+            .cart-count-badge.empty {
+                background: #666;
+            }
+
             .cart-header-right {
                 display: flex;
                 align-items: center;
@@ -219,13 +241,29 @@ const TradeCartPanel = {
                 color: #ff6b6b;
             }
 
-            /* Cart Items */
+            /* Cart Items - scrollable for unlimited items! */
             .trade-cart-items {
                 flex: 1;
                 overflow-y: auto;
                 padding: 15px;
-                min-height: 150px;
-                max-height: 300px;
+                min-height: 100px;
+                max-height: calc(100vh - 400px); /* Dynamic height based on viewport */
+            }
+
+            /* Custom scrollbar for cart */
+            .trade-cart-items::-webkit-scrollbar {
+                width: 8px;
+            }
+            .trade-cart-items::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 4px;
+            }
+            .trade-cart-items::-webkit-scrollbar-thumb {
+                background: rgba(255, 215, 0, 0.4);
+                border-radius: 4px;
+            }
+            .trade-cart-items::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 215, 0, 0.6);
             }
 
             .empty-cart {
@@ -450,15 +488,27 @@ const TradeCartPanel = {
                 cursor: not-allowed;
             }
 
-            .cancel-btn {
+            .cancel-btn, .clear-btn {
                 background: rgba(255, 255, 255, 0.1);
                 color: #aaa;
                 border: 1px solid rgba(255, 255, 255, 0.2);
             }
 
-            .cancel-btn:hover {
-                background: rgba(255, 255, 255, 0.15);
-                color: #fff;
+            .cancel-btn:hover, .clear-btn:hover {
+                background: rgba(255, 100, 100, 0.2);
+                color: #ff6b6b;
+                border-color: rgba(255, 100, 100, 0.4);
+            }
+
+            .cart-hint {
+                text-align: center;
+                color: #888;
+                font-size: 12px;
+                margin: 10px 15px 15px;
+                padding: 8px;
+                background: rgba(255, 215, 0, 0.1);
+                border-radius: 6px;
+                border: 1px dashed rgba(255, 215, 0, 0.3);
             }
 
             .complete-btn {
@@ -565,6 +615,14 @@ const TradeCartPanel = {
         }
         this.cart = [];
         this.currentMerchant = null;
+    },
+
+    // 🗑️ Clear all items from cart without closing
+    clearCart() {
+        this.cart = [];
+        this.discountPercent = 0;
+        this.haggleAttempted = false;
+        this.updateDisplay();
     },
 
     // ═══════════════════════════════════════════════════════════════
@@ -721,6 +779,17 @@ const TradeCartPanel = {
         this.calculateTotals();
         this.validateCart();
         this.updateButtons();
+        this.updateCountBadge();
+    },
+
+    // Update the item count badge in header
+    updateCountBadge() {
+        const badge = document.getElementById('cart-count-badge');
+        if (!badge) return;
+
+        const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
+        badge.textContent = totalItems;
+        badge.classList.toggle('empty', totalItems === 0);
     },
 
     renderCartItems() {
