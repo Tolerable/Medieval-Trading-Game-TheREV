@@ -138,10 +138,23 @@ const TimeMachine = {
     // 🖤 INITIALIZATION - The beginning of time itself
     // ═══════════════════════════════════════════════════════════════
 
+    // 🖤💀 Track if time has been loaded from save - prevents reset 💀
+    _timeLoadedFromSave: false,
+
     init() {
         console.log('⏰ TIME MACHINE initializing...');
 
-        // 🖤 Set initial time state
+        // 🖤💀 DON'T reset time if it was loaded from a save! 💀
+        // This prevents game.start() -> game.init() -> TimeMachine.init() from wiping saved time
+        if (this._timeLoadedFromSave) {
+            console.log('⏰ TIME MACHINE: Time was loaded from save - skipping reset');
+            this._timeLoadedFromSave = false; // Clear flag for next new game
+            // Still setup UI controls
+            this.setupTimeControls();
+            return true;
+        }
+
+        // 🖤 Set initial time state (only for NEW games)
         this.currentTime = {
             minute: 0,
             hour: 8,
@@ -1066,6 +1079,9 @@ const TimeMachine = {
 
     loadSaveData(data) {
         if (!data) return;
+
+        // 🖤💀 Set flag to prevent init() from resetting this loaded time! 💀
+        this._timeLoadedFromSave = true;
 
         if (data.currentTime) {
             this.currentTime = { ...data.currentTime };
