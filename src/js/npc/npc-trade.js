@@ -2265,6 +2265,13 @@ const NPCTradeWindow = {
                 candle: 12, lantern_oil: 6, book: 4, map: 3,
                 seal_wax: 6, royal_decree: 2
             },
+            // 🖤💀 NEW: Chieftain - northern village leader for Frostholm 💀
+            chieftain: {
+                furs: 15, leather: 10, hide: 8, meat: 12,
+                dried_meat: 8, warm_clothing: 5, wolf_pelt: 3,
+                bread: 5, ale: 8, water: 10,
+                axe: 3, rope: 6, torch: 10
+            },
             villager: {
                 bread: 8, vegetables: 10, eggs: 6, milk: 5,
                 cheese: 4, water: 10, ale: 3

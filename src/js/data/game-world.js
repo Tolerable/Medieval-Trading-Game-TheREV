@@ -191,7 +191,7 @@ const GameWorld = {
             mapPosition: { x: 460, y: 100 },
             sells: ['furs', 'leather', 'hide', 'winter_clothing', 'meat'],
             buys: ['bread', 'ale', 'tools', 'rope', 'salt', 'grain'],
-            npcs: ['elder', 'merchant', 'guard', 'hunter', 'trapper'] // Quest: frostholm quests need elder, merchant, guard
+            npcs: ['chieftain', 'merchant', 'guard', 'hunter', 'trapper'] // 🖤💀 FIXED: Changed elder→chieftain (elder ONLY in Greendale for quest consistency)
         },
         vineyard_village: {
             id: 'vineyard_village',
@@ -866,9 +866,9 @@ const GameWorld = {
     // 🖤 QUEST-ENABLED NPC SPAWNS - all quest givers now spawn somewhere! 💀
     npcSpawnsByLocationType: {
         capital: ['innkeeper', 'blacksmith', 'jeweler', 'tailor', 'banker', 'guard', 'noble', 'general_store', 'apothecary', 'herald', 'steward', 'captain', 'sage'], // 🖤 Capital has sage for wisdom quests 💀
-        city: ['innkeeper', 'blacksmith', 'general_store', 'apothecary', 'guard', 'merchant', 'tailor', 'elder', 'scholar', 'vintner'], // 🖤 Added elder + quest NPCs 💀
+        city: ['innkeeper', 'blacksmith', 'general_store', 'apothecary', 'guard', 'merchant', 'tailor', 'scholar', 'vintner'], // 🖤💀 FIXED: Removed elder - only in Greendale
         town: ['innkeeper', 'blacksmith', 'general_store', 'farmer', 'guard', 'miller', 'mason'], // 🖤 Added craft quest givers
-        village: ['innkeeper', 'farmer', 'general_store', 'elder'], // 🖤 Villages can have elders too
+        village: ['innkeeper', 'farmer', 'general_store'], // 🖤💀 FIXED: Removed elder - only in Greendale for quest consistency
         mine: ['miner', 'blacksmith', 'general_store', 'sergeant'], // 🖤 Mine foreman quests
         forest: ['hunter', 'herbalist', 'druid', 'huntmaster'], // 🖤 Forest quest giver
         farm: ['farmer', 'general_store', 'miller'], // 🖤 Farm quest giver
@@ -1046,7 +1046,7 @@ const GameWorld = {
         merchant: 'merchant', banker: 'merchant', general_store: 'merchant', steward: 'merchant',
         farmer: 'rural', shepherd: 'rural', miller: 'rural', farmhand: 'rural', vintner: 'rural', beekeeper: 'rural', orchardist: 'rural',
         sailor: 'seafaring', ferryman: 'seafaring', fisherman: 'seafaring', dockmaster: 'seafaring', harbormaster: 'seafaring', lighthouse_keeper: 'seafaring', boatwright: 'seafaring',
-        noble: 'noble', herald: 'noble', royal_advisor: 'wise', villager: 'rural', mason: 'strong', // 🖤💀 royal_advisor uses wise names
+        noble: 'noble', herald: 'noble', royal_advisor: 'wise', chieftain: 'strong', villager: 'rural', mason: 'strong', // 🖤💀 royal_advisor uses wise names, chieftain uses strong names
         adventurer: 'adventure', explorer: 'adventure', treasure_hunter: 'adventure', archaeologist: 'adventure', diver: 'adventure', pearl_hunter: 'adventure', ice_harvester: 'adventure', mountain_guide: 'adventure', caravan_master: 'adventure', wanderer: 'adventure',
         miner: 'mining', foreman: 'mining', gem_collector: 'mining',
         hunter: 'hunting', trapper: 'hunting', forager: 'rural', healer: 'wise',
@@ -1129,7 +1129,8 @@ const GameWorld = {
             trapper: 'Trapper', pearl_hunter: 'Pearl Diver', ice_harvester: 'Ice Harvester',
             archaeologist: 'Archaeologist', diver: 'Diver',
             hooded_stranger: 'Stranger', prophet: 'Prophet', // 🖤💀 Quest givers
-            royal_advisor: 'Royal Advisor' // 🖤💀 NEW: Court sage for Royal Capital
+            royal_advisor: 'Royal Advisor', // 🖤💀 NEW: Court sage for Royal Capital
+            chieftain: 'Chieftain' // 🖤💀 NEW: Northern village leader for Frostholm
         };
         return titles[npcType] || npcType.charAt(0).toUpperCase() + npcType.slice(1).replace(/_/g, ' ');
     },
@@ -1168,7 +1169,8 @@ const GameWorld = {
             noble: 'Noble',
             priest: 'Priest',
             elder: 'The Elder',
-            royal_advisor: 'The Royal Advisor' // 🖤💀 NEW
+            royal_advisor: 'The Royal Advisor', // 🖤💀 NEW
+            chieftain: 'The Chieftain' // 🖤💀 NEW: Frostholm leader
         };
         return names[npcType] || npcType.charAt(0).toUpperCase() + npcType.slice(1).replace(/_/g, ' ');
     },

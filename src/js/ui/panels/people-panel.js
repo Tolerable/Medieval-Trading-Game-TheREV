@@ -2726,6 +2726,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             explorer: '🧭', adventurer: '⚔️', banker: '🏦',
             prophet: '🎭', mysterious_stranger_intro: '🎭', hooded_stranger: '🎭', // 🖤 Hooded Stranger intro NPC
             royal_advisor: '📜', // 🖤💀 NEW: Royal Advisor at Royal Capital
+            chieftain: '🪓', // 🖤💀 NEW: Chieftain for Frostholm
             default: '👤'
         };
         return icons[type] || icons.default;
@@ -2747,6 +2748,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             explorer: 'Explorer', adventurer: 'Adventurer', banker: 'Banker',
             prophet: 'Mysterious Prophet', mysterious_stranger_intro: 'Mysterious Figure', hooded_stranger: 'Hooded Stranger', // 🖤 Hooded Stranger
             royal_advisor: 'Royal Advisor', // 🖤💀 NEW: Court sage for Royal Capital
+            chieftain: 'Village Chieftain', // 🖤💀 NEW: Frostholm leader
             default: 'Local'
         };
         return titles[type] || titles.default;
@@ -2765,6 +2767,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             boatman: 'A cloaked figure beside a shimmering portal. Can transport between worlds.',
             hooded_stranger: 'A mysterious cloaked figure watching from the shadows. They seem to have something important to tell you.',
             royal_advisor: 'A learned counselor to the crown. Knows the kingdom\'s secrets and political intrigues.', // 🖤💀 NEW
+            chieftain: 'A hardy northern leader who earned their position through strength. Leads their village through harsh winters.', // 🖤💀 NEW
             default: 'A local going about their business.'
         };
         return descriptions[type] || descriptions.default;

@@ -387,6 +387,22 @@ const NPC_EMBEDDED_DATA = {
         "farewells": ["The court remembers those who serve well.", "*returns to scrolls* Information is power. Remember that.", "May your path serve the kingdom's interests."]
     },
 
+    // 🖤💀 NEW: Chieftain - northern village leader distinct from Greendale elder 💀
+    "chieftain": {
+        "type": "chieftain",
+        "category": "authority",
+        "voice": "onyx",
+        "personality": "stern",
+        "speakingStyle": "gruff, practical, speaks of survival and the harsh north",
+        "background": "Leads this hardy village through frozen winters. Earned leadership through strength and wisdom. Values actions over words.",
+        "traits": ["tough", "practical", "protective"],
+        "services": ["village_protection", "northern_lore", "hunting_wisdom"],
+        "questTypes": ["protect_village", "hunt_beast", "survive_winter"],
+        "repRequirement": 15,
+        "greetings": ["*looks up from sharpening an axe* Another southerner. State your business.", "The north has no time for idle chatter. What do you need?", "*crosses arms* You look soft. Can you survive our winters?"],
+        "farewells": ["May the cold make you stronger.", "The north remembers those who help.", "*nods and returns to work*"]
+    },
+
     // ═══════════════════════════════════════════════════════════════
     // 🗡️ CRIMINALS - thieves, bandits, smugglers
     // ═══════════════════════════════════════════════════════════════
