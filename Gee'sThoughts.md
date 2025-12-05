@@ -16,11 +16,32 @@ Each entry follows this format:
 
 ---
 
-## 2025-12-05 - SESSION #15: TRAVEL UI BUGS 🖤💀🗺️
+## 2025-12-05 - SESSION #16: ATOMIC TRADE TRANSACTIONS 🖤💀💰
+
+**Request:** Gee requested the debooger properly show player trades and AI checks - verify if item not received then gold not taken, and vice versa. All trades (NPC/market/encounter/event/quest) should have transactional integrity.
+
+**Status:** ✅ COMPLETE
+
+### Fixes Applied:
+
+**Atomic Transaction System** - IMPLEMENTED in `npc-trade.js:934-1171`
+- 3-phase approach: VALIDATE → EXECUTE → VERIFY
+- Phase 1: Check player has items/gold, NPC has items/gold BEFORE any changes
+- Phase 2: Execute trade only if validation passes
+- Phase 3: Verify post-trade state matches expected values
+- Full transaction logging with `window._tradeTransactions` for debooger
+- Detailed console output showing pre/post state, gold changes, item transfers
+- New helper methods: `getNPCItemCount()`, `getNPCGold()`, `getTransactionHistory()`
+
+---
+
+## 2025-12-05 - SESSION #15: TRAVEL UI + LOCATION PANEL 🖤💀🗺️
 
 **Request:** Gee reported:
-1. Travel NPC icon stuck in frame (Destination tab) instead of showing on map during travel
-2. Time machine resetting to 8:00 AM on arrival to different locations
+1. Travel NPC icon stuck in frame instead of showing on map during travel
+2. Time machine resetting to 8:00 AM on arrival
+3. Travel destination info overflowing panel (Type, Population, Region extending too far right)
+4. Make location panel collapsible like panels panel
 
 **Status:** ✅ ALL COMPLETE
 
@@ -28,15 +49,20 @@ Each entry follows this format:
 
 **Issue 1: Travel NPC Icon** - FIXED in `travel-panel-map.js:1737-1755`
 - **Root Cause:** `render()` clears `mapElement.innerHTML`, orphaning the `travelMarker` reference
-- The check `if (!this.travelMarker)` passed because the JS reference existed, but DOM element was destroyed
-- **Fix:** Added same check as `playerMarker` - `!this.mapElement.contains(this.travelMarker)`
-- Also added explicit travel marker update when Map tab is shown during travel (line 218-222)
+- **Fix:** Added `!this.mapElement.contains(this.travelMarker)` check + update on Map tab show
 
 **Issue 2: Time Reset** - FIXED in `weather-system.js:993-1006`
-- **Root Cause:** `createWeatherOverlay()` used hardcoded "8:00 AM" as default text
-- When overlay was recreated (by `ensureOverlayReady()`), time display reset to default
-- **Fix:** Now uses `TimeSystem.getFormattedClock()` and `DayNightCycle.currentPhase` for actual values
-- Also fixed date indicator (line 981-988) to use `TimeSystem.getFormattedDate()`
+- **Root Cause:** `createWeatherOverlay()` used hardcoded "8:00 AM" default
+- **Fix:** Now uses `TimeSystem.getFormattedClock()` and `DayNightCycle.currentPhase`
+
+**Issue 3: Travel Destination Overflow** - FIXED in `travel-panel-map.js:2362-2406`
+- Added `max-width: 100%; overflow: hidden` + text truncation with ellipsis
+
+**Issue 4: Collapsible Location Panel** - IMPLEMENTED
+- `index.html`: Added header wrapper with ▼ collapse icon
+- `styles.css`: Added `.collapsed` state CSS + transitions
+- `game.js:5347-5369`: Toggle click handler + localStorage persistence
+- Collapsed = compact header with location name only, Expanded = full content
 
 ---
 

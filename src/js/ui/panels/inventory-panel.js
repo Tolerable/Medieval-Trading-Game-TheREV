@@ -58,6 +58,30 @@ const InventorySystem = {
                 }
             }
         });
+
+        // 🖤💀 RIGHT-CLICK on inventory items - equip if equippable, use if consumable 💀
+        document.addEventListener('contextmenu', (e) => {
+            const inventoryItem = e.target.closest('.inventory-item');
+            if (inventoryItem) {
+                // Find the item ID from the equip or use button inside this item
+                const equipBtn = inventoryItem.querySelector('[data-action="equip-item"]');
+                const useBtn = inventoryItem.querySelector('[data-action="use-item"]');
+
+                if (equipBtn) {
+                    e.preventDefault();
+                    const itemId = equipBtn.dataset.itemId;
+                    if (itemId && typeof EquipmentSystem !== 'undefined') {
+                        EquipmentSystem.equip(itemId);
+                    }
+                } else if (useBtn) {
+                    e.preventDefault();
+                    const itemId = useBtn.dataset.itemId;
+                    if (itemId) {
+                        this.useItem(itemId);
+                    }
+                }
+            }
+        });
     },
     
     // 📦 Update inventory display - admiring our collection

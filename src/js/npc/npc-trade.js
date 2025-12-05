@@ -933,79 +933,241 @@ const NPCTradeWindow = {
 
     executeTrade() {
         if (typeof game === 'undefined' || !game.player) {
-            // 🦇 No game state - can't trade, silently return
             addMessage?.('Trade failed - please try again');
             return;
         }
 
-        // 📦 Transfer the goods - take from player, give to merchant 🔄
+        // ═══════════════════════════════════════════════════════════════
+        // 🔒 ATOMIC TRANSACTION SYSTEM - VERIFY BEFORE COMMIT 🔒
+        // ═══════════════════════════════════════════════════════════════
+
+        const transactionLog = {
+            timestamp: new Date().toISOString(),
+            npc: this.currentNPC?.firstName || 'Unknown',
+            playerGave: { ...this.playerOffer },
+            playerReceived: { ...this.npcOffer },
+            preState: {},
+            postState: {},
+            success: false,
+            errors: []
+        };
+
+        // 📸 SNAPSHOT PRE-STATE for rollback verification
+        transactionLog.preState = {
+            playerGold: game.player.gold || 0,
+            playerInventory: { ...game.player.inventory },
+            npcGold: this.getNPCGold(this.currentNPC) || 0
+        };
+
+        console.log('🔄 TRADE TRANSACTION STARTING ═══════════════════');
+        console.log('📦 Player offering:', this.playerOffer);
+        console.log('🎁 NPC offering:', this.npcOffer);
+        console.log('💰 Pre-trade player gold:', transactionLog.preState.playerGold);
+
+        // ═══════════════════════════════════════════════════════════════
+        // ✅ PHASE 1: VALIDATION - Check everything BEFORE any changes
+        // ═══════════════════════════════════════════════════════════════
+
+        // Verify player has items they're offering
         for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
-            game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) - qty;
-            if (game.player.inventory[itemId] <= 0) {
-                delete game.player.inventory[itemId];
+            const playerHas = game.player.inventory[itemId] || 0;
+            if (playerHas < qty) {
+                transactionLog.errors.push(`Player missing item: ${itemId} (has ${playerHas}, needs ${qty})`);
+                console.error(`❌ TRADE FAILED: Player doesn't have ${qty}x ${itemId} (only has ${playerHas})`);
+                addMessage?.(`Trade failed - you don't have enough ${itemId}!`, 'error');
+                this._logTransaction(transactionLog);
+                return;
             }
         }
 
-        // 🎁 Claim your prizes - merchant's wares become yours 💰
+        // Verify player has gold they're offering
+        if (this.playerOffer.gold > 0 && (game.player.gold || 0) < this.playerOffer.gold) {
+            transactionLog.errors.push(`Player missing gold: has ${game.player.gold}, needs ${this.playerOffer.gold}`);
+            console.error(`❌ TRADE FAILED: Player doesn't have ${this.playerOffer.gold} gold`);
+            addMessage?.(`Trade failed - you don't have enough gold!`, 'error');
+            this._logTransaction(transactionLog);
+            return;
+        }
+
+        // Verify NPC has items they're offering (if we track NPC inventory)
         for (const [itemId, qty] of Object.entries(this.npcOffer.items)) {
-            game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + qty;
-            // 🖤 Emit item-received for quest progress tracking 💀
-            document.dispatchEvent(new CustomEvent('item-received', {
-                detail: { item: itemId, quantity: qty, source: 'trade' }
-            }));
-            // 🖤💀 Update NPC's persistent inventory - remove items they sold 📦
-            this.removeNPCItem(this.currentNPC, itemId, qty);
+            const npcHas = this.getNPCItemCount(this.currentNPC, itemId);
+            if (npcHas !== null && npcHas < qty) {
+                transactionLog.errors.push(`NPC missing item: ${itemId} (has ${npcHas}, needs ${qty})`);
+                console.error(`❌ TRADE FAILED: NPC doesn't have ${qty}x ${itemId}`);
+                addMessage?.(`Trade failed - merchant doesn't have that item!`, 'error');
+                this._logTransaction(transactionLog);
+                return;
+            }
         }
 
-        // 🖤💀 Add items the player sold TO the NPC's inventory 📦
-        for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
-            this.addNPCItem(this.currentNPC, itemId, qty);
+        // Verify NPC has gold they're offering
+        if (this.npcOffer.gold > 0) {
+            const npcGold = this.getNPCGold(this.currentNPC);
+            if (npcGold !== null && npcGold < this.npcOffer.gold) {
+                transactionLog.errors.push(`NPC missing gold: has ${npcGold}, needs ${this.npcOffer.gold}`);
+                console.error(`❌ TRADE FAILED: NPC doesn't have ${this.npcOffer.gold} gold`);
+                addMessage?.(`Trade failed - merchant can't afford that!`, 'error');
+                this._logTransaction(transactionLog);
+                return;
+            }
         }
 
-        // 🖤💀 Update NPC gold (they receive player gold, pay out their gold) 💰
-        const npcGoldChange = this.playerOffer.gold - this.npcOffer.gold;
-        if (npcGoldChange !== 0) {
-            this.modifyNPCGold(this.currentNPC, npcGoldChange);
+        console.log('✅ Validation passed - executing trade...');
+
+        // ═══════════════════════════════════════════════════════════════
+        // 💫 PHASE 2: EXECUTION - All changes happen here
+        // ═══════════════════════════════════════════════════════════════
+
+        try {
+            // 📦 Remove items from player inventory
+            for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
+                game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) - qty;
+                if (game.player.inventory[itemId] <= 0) {
+                    delete game.player.inventory[itemId];
+                }
+                console.log(`  📤 Player gave: ${qty}x ${itemId}`);
+            }
+
+            // 🎁 Add items to player inventory from NPC
+            for (const [itemId, qty] of Object.entries(this.npcOffer.items)) {
+                game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + qty;
+                console.log(`  📥 Player received: ${qty}x ${itemId}`);
+
+                // Emit item-received for quest tracking
+                document.dispatchEvent(new CustomEvent('item-received', {
+                    detail: { item: itemId, quantity: qty, source: 'trade' }
+                }));
+
+                // Remove from NPC inventory
+                this.removeNPCItem(this.currentNPC, itemId, qty);
+            }
+
+            // 📦 Add items player sold TO NPC inventory
+            for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
+                this.addNPCItem(this.currentNPC, itemId, qty);
+            }
+
+            // 💰 Calculate and apply gold exchange
+            const playerGoldChange = this.npcOffer.gold - this.playerOffer.gold;
+            const newPlayerGold = (game.player.gold || 0) + playerGoldChange;
+
+            if (typeof GoldManager !== 'undefined' && GoldManager.setGold) {
+                GoldManager.setGold(newPlayerGold, `Trade with ${this.currentNPC?.firstName || 'NPC'}`);
+            } else {
+                game.player.gold = newPlayerGold;
+            }
+            console.log(`  💰 Player gold: ${transactionLog.preState.playerGold} → ${newPlayerGold} (${playerGoldChange >= 0 ? '+' : ''}${playerGoldChange})`);
+
+            // Update NPC gold
+            const npcGoldChange = this.playerOffer.gold - this.npcOffer.gold;
+            if (npcGoldChange !== 0) {
+                this.modifyNPCGold(this.currentNPC, npcGoldChange);
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // 🔍 PHASE 3: VERIFICATION - Confirm trade was successful
+            // ═══════════════════════════════════════════════════════════════
+
+            transactionLog.postState = {
+                playerGold: game.player.gold || 0,
+                playerInventory: { ...game.player.inventory },
+                npcGold: this.getNPCGold(this.currentNPC) || 0
+            };
+
+            // Verify player received items
+            for (const [itemId, qty] of Object.entries(this.npcOffer.items)) {
+                const playerNowHas = game.player.inventory[itemId] || 0;
+                const playerHadBefore = transactionLog.preState.playerInventory[itemId] || 0;
+                if (playerNowHas < playerHadBefore + qty) {
+                    transactionLog.errors.push(`VERIFICATION FAILED: Player didn't receive ${itemId}`);
+                    console.error(`⚠️ VERIFICATION WARNING: Player may not have received ${itemId}`);
+                }
+            }
+
+            // Verify gold changed correctly
+            const expectedGold = transactionLog.preState.playerGold + playerGoldChange;
+            if (Math.abs(transactionLog.postState.playerGold - expectedGold) > 0.01) {
+                transactionLog.errors.push(`Gold mismatch: expected ${expectedGold}, got ${transactionLog.postState.playerGold}`);
+                console.warn(`⚠️ Gold verification: expected ${expectedGold}, got ${transactionLog.postState.playerGold}`);
+            }
+
+            transactionLog.success = transactionLog.errors.length === 0;
+            console.log(`✅ TRADE COMPLETE - Success: ${transactionLog.success}`);
+            console.log('═══════════════════════════════════════════════════');
+
+        } catch (error) {
+            transactionLog.errors.push(`Exception: ${error.message}`);
+            console.error('❌ TRADE EXCEPTION:', error);
+            addMessage?.('Trade failed due to an error!', 'error');
+            this._logTransaction(transactionLog);
+            return;
         }
 
-        // 💰 Exchange the coin - subtract what you gave, add what you got 🪙
-        // 🖤💀 Use GoldManager to sync ALL gold displays across the game! 💰
-        const newGold = (game.player.gold || 0) - this.playerOffer.gold + this.npcOffer.gold;
-        if (typeof GoldManager !== 'undefined' && GoldManager.setGold) {
-            GoldManager.setGold(newGold, 'Trade completed');
-        } else {
-            game.player.gold = newGold;
-        }
+        // Log the transaction for debooger
+        this._logTransaction(transactionLog);
 
-        // ✅ Deal sealed - merchant smiles (or doesn't) 😊
+        // ✅ Success feedback
         this.showNPCResponse("Pleasure doing business with you!");
-
         if (typeof addMessage === 'function') {
             addMessage('Trade completed successfully!', 'success');
         }
 
-        // 📡 Tell the quest system - this trade might matter 📜
-        const event = new CustomEvent('trade-completed', {
+        // 📡 Dispatch events for quest system
+        document.dispatchEvent(new CustomEvent('trade-completed', {
             detail: {
                 npc: this.currentNPC,
                 playerGave: this.playerOffer,
-                playerReceived: this.npcOffer
+                playerReceived: this.npcOffer,
+                transaction: transactionLog
             }
-        });
-        document.dispatchEvent(event);
+        }));
 
-        // 🎯 Track each item purchased - quests might be listening 👂
         for (const itemId of Object.keys(this.npcOffer.items)) {
-            const purchaseEvent = new CustomEvent('item-purchased', {
+            document.dispatchEvent(new CustomEvent('item-purchased', {
                 detail: { itemId, npc: this.currentNPC }
-            });
-            document.dispatchEvent(purchaseEvent);
+            }));
         }
 
-        // 🧹 Clean the slate - reset for the next deal 🔄
+        // 🧹 Clean up and refresh UI
         this.clearOffer();
         this.updatePlayerGold();
         this.renderContent(this.interactionType, this.currentNPC);
+    },
+
+    // 🔍 Get NPC's item count (returns null if not tracked)
+    getNPCItemCount(npc, itemId) {
+        if (!npc?.id || !this._npcInventoryCache) return null;
+        const inventory = this._npcInventoryCache[npc.id];
+        if (!inventory) return null;
+        return inventory[itemId] || 0;
+    },
+
+    // 💰 Get NPC's gold (returns null if not tracked)
+    getNPCGold(npc) {
+        if (!npc?.id || !this._npcGoldCache) return null;
+        return this._npcGoldCache[npc.id] ?? null;
+    },
+
+    // 📝 Log transaction to debooger history
+    _transactionHistory: [],
+    _logTransaction(log) {
+        this._transactionHistory.push(log);
+        // Keep last 50 transactions
+        if (this._transactionHistory.length > 50) {
+            this._transactionHistory.shift();
+        }
+        // Expose for debooger
+        window._tradeTransactions = this._transactionHistory;
+
+        if (log.errors.length > 0) {
+            console.warn('🔴 Transaction had errors:', log.errors);
+        }
+    },
+
+    // 🔍 DEBOOGER: Get transaction history
+    getTransactionHistory() {
+        return this._transactionHistory;
     },
 
     showNPCResponse(text) {

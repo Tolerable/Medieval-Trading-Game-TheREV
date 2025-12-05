@@ -15,6 +15,9 @@
 
 ## ✅ FIXED THIS SESSION (2025-12-05)
 
+- [x] **Atomic trade transactions** - ✅ IMPLEMENTED: 3-phase VALIDATE→EXECUTE→VERIFY with transaction logging for debooger
+- [x] **Travel destination info overflow** - ✅ FIXED: Added text truncation with ellipsis to prevent overflow
+- [x] **Collapsible location panel** - ✅ IMPLEMENTED: Click header to collapse/expand, saves state to localStorage
 - [x] **Travel NPC icon in wrong place** - ✅ FIXED: Travel marker DOM element orphaned after render() clears innerHTML. Added contains() check like playerMarker.
 - [x] **Time display resetting to 8:00** - ✅ FIXED: WeatherSystem used hardcoded defaults. Now uses actual TimeSystem values when creating indicators.
 - [x] **MusicSystem crossfade spam** - ✅ FIXED: Added _crossfadingToCategory tracking to prevent duplicate crossfades

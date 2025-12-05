@@ -1104,14 +1104,19 @@
             </div>
         </div>
 
-        <!-- 🖤 Location Panel - FIXED bottom-left, outside ui-panels -->
+        <!-- 🖤 Location Panel - FIXED bottom-left, COLLAPSIBLE -->
         <section id="location-panel" class="panel">
-            <h2 id="location-name">Town Square</h2>
-            <p id="location-description">You are in the town square.</p>
-            <div id="location-actions">
-                <button id="visit-market-btn" title="Visit the local market">Visit Market</button>
-                <button id="travel-btn" title="Toggle travel panel">Travel</button>
-                <button id="people-btn" title="Toggle people panel">People</button>
+            <div id="location-panel-header" class="location-panel-header" title="Click to expand/collapse">
+                <span id="location-collapse-icon" class="collapse-icon">▼</span>
+                <h2 id="location-name">Town Square</h2>
+            </div>
+            <div id="location-panel-content" class="location-panel-content">
+                <p id="location-description">You are in the town square.</p>
+                <div id="location-actions">
+                    <button id="visit-market-btn" title="Visit the local market">Visit Market</button>
+                    <button id="travel-btn" title="Toggle travel panel">Travel</button>
+                    <button id="people-btn" title="Toggle people panel">People</button>
+                </div>
             </div>
         </section>
 

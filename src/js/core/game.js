@@ -5344,6 +5344,30 @@ function setupEventListeners() {
         });
     });
     
+    // 🖤💀 Location Panel collapse toggle 💀
+    const locationPanelHeader = document.getElementById('location-panel-header');
+    if (locationPanelHeader) {
+        EventManager.addEventListener(locationPanelHeader, 'click', () => {
+            const locationPanel = document.getElementById('location-panel');
+            if (locationPanel) {
+                locationPanel.classList.toggle('collapsed');
+                // 🖤 Save preference to localStorage 💀
+                const isCollapsed = locationPanel.classList.contains('collapsed');
+                try {
+                    localStorage.setItem('locationPanelCollapsed', isCollapsed ? 'true' : 'false');
+                } catch (e) { /* Ignore storage errors */ }
+            }
+        });
+        // 🖤 Restore collapsed state from localStorage 💀
+        try {
+            const savedState = localStorage.getItem('locationPanelCollapsed');
+            if (savedState === 'true') {
+                const locationPanel = document.getElementById('location-panel');
+                if (locationPanel) locationPanel.classList.add('collapsed');
+            }
+        } catch (e) { /* Ignore storage errors */ }
+    }
+
     // Keyboard shortcuts
     EventManager.addEventListener(document, 'keydown', handleKeyPress);
 }

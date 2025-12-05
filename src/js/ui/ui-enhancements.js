@@ -1145,6 +1145,8 @@ const KeyboardShortcuts = {
     
     // Show tooltip
     showTooltip(event) {
+        // 🖤💀 Safety check - some targets (SVG, etc) may not have closest() 💀
+        if (!event?.target?.closest) return;
         const element = event.target.closest('[title], [data-tooltip]');
         if (!element || !this.currentSettings?.enableTooltips) return;
         

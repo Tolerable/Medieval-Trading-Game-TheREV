@@ -121,6 +121,27 @@ const EquipmentSystem = {
             }
         });
 
+        // 🖤💀 RIGHT-CLICK to unequip items - the natural way to do things 💀
+        document.addEventListener('contextmenu', (e) => {
+            const target = e.target.closest('.equipment-slot-box.equipped');
+            if (target) {
+                e.preventDefault();
+                const slotId = target.dataset.slot || target.dataset.slotId;
+                if (slotId && this.getEquipped(slotId)) {
+                    this.unequip(slotId);
+                }
+            }
+        });
+
+        // 🖤💀 Listen for equipment changes to refresh character sheet if open 💀
+        document.addEventListener('equipment-changed', () => {
+            // Update character sheet equipment display if visible
+            const charSheet = document.getElementById('character-sheet-overlay');
+            if (charSheet && (charSheet.classList.contains('active') || charSheet.style.display === 'flex')) {
+                this.updateEquipmentDisplay();
+            }
+        });
+
         console.log('⚔️ EquipmentSystem ready to adorn your mortal shell');
     },
 

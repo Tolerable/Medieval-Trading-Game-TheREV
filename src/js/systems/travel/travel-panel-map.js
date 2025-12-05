@@ -2367,26 +2367,42 @@ if (document.readyState === 'loading') {
             padding: 10px;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 8px;
+            /* 🖤💀 Prevent overflow - contain text within panel 💀 */
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .travel-destination-info .dest-icon {
             font-size: 32px;
+            flex-shrink: 0; /* 🖤 Don't shrink the icon 💀 */
         }
 
         .travel-destination-info .dest-details {
             display: flex;
             flex-direction: column;
+            /* 🖤💀 Allow text to wrap/truncate 💀 */
+            min-width: 0;
+            flex: 1;
+            overflow: hidden;
         }
 
         .travel-destination-info .dest-name {
             font-size: 14px;
             font-weight: bold;
             color: #fff;
+            /* 🖤💀 Truncate long names 💀 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .travel-destination-info .dest-type {
             font-size: 11px;
             color: #888;
+            /* 🖤💀 Truncate long type/region info 💀 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .travel-progress-container {

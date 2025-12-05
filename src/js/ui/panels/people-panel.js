@@ -282,35 +282,44 @@ const PeoplePanel = {
                 display: flex;
                 justify-content: space-around;
                 align-items: center;
-                gap: 8px;
-                padding: 8px 12px;
+                gap: 4px;
+                padding: 6px 8px;
                 background: rgba(0,0,0,0.3);
                 border-bottom: 1px solid rgba(255,255,255,0.1);
+                flex-wrap: wrap;
+                overflow: hidden;
             }
 
             .npc-stat-item {
                 display: flex;
                 align-items: center;
-                gap: 4px;
-                padding: 4px 8px;
+                gap: 3px;
+                padding: 3px 6px;
                 background: rgba(255,255,255,0.05);
                 border-radius: 4px;
                 cursor: help;
+                min-width: 0;
+                flex-shrink: 1;
             }
 
             .npc-stat-item .stat-icon {
-                font-size: 1em;
+                font-size: 0.9em;
+                flex-shrink: 0;
             }
 
             .npc-stat-item .stat-label {
-                font-size: 0.8em;
+                font-size: 0.75em;
                 color: #aaa;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .npc-stat-item .stat-value {
-                font-size: 0.85em;
+                font-size: 0.8em;
                 color: #ffd700;
                 font-weight: bold;
+                white-space: nowrap;
             }
 
             .chat-content {
@@ -546,7 +555,13 @@ const PeoplePanel = {
 
         // 🖤 listen for quest updates
         document.addEventListener('quest-assigned', () => this.updateQuestItems());
-        document.addEventListener('quest-completed', () => this.updateQuestItems());
+        document.addEventListener('quest-completed', () => {
+            this.updateQuestItems();
+            // 🖤💀 Also refresh stats bar to show updated reputation after quest reward
+            if (this.currentNPC && this.viewMode === 'chat') {
+                this.updateNPCStatsBar(this.currentNPC);
+            }
+        });
     },
 
     // 🔓 OPEN PANEL
@@ -824,8 +839,10 @@ const PeoplePanel = {
         if (typeof NPCRelationshipSystem !== 'undefined') {
             const rel = NPCRelationshipSystem.relationships?.[npcId];
             if (rel) {
+                // 🖤💀 getRelationshipLevel returns { key, icon, label, min, max } object
+                const levelInfo = NPCRelationshipSystem.getRelationshipLevel(rel.reputation || 0);
                 relationship = {
-                    level: NPCRelationshipSystem.getRelationshipLevel(rel.reputation || 0) || 'neutral',
+                    levelInfo: levelInfo,
                     reputation: rel.reputation || 0
                 };
                 tradeStats = {
@@ -835,10 +852,8 @@ const PeoplePanel = {
             }
         }
 
-        // 🦇 Get level info for icon and label
-        const levelInfo = typeof NPCRelationshipSystem !== 'undefined'
-            ? NPCRelationshipSystem.levels?.[relationship.level]
-            : null;
+        // 🦇 Get level info for icon and label - already retrieved from getRelationshipLevel
+        const levelInfo = relationship.levelInfo;
 
         const icon = levelInfo?.icon || '😐';
         const label = levelInfo?.label || 'Neutral';
@@ -1620,6 +1635,19 @@ const PeoplePanel = {
     // 🖤 Get fallback response for quest actions 💀
     getQuestActionFallback(actionType, quest) {
         const questName = quest?.name || quest?.questName || 'the task';
+
+        // 🖤💀 CHECK_PROGRESS: Check actual quest status to give accurate fallback 💀
+        if (actionType === 'CHECK_PROGRESS' && quest?.id && typeof QuestSystem !== 'undefined') {
+            const progress = QuestSystem.checkProgress(quest.id);
+            if (progress.status === 'ready_to_complete') {
+                return `*eyes widen* "${questName}" is complete! You've done it! Come, let me reward you for your efforts.`;
+            } else if (progress.status === 'completed') {
+                return `*nods* You already completed "${questName}". Well done, that task is behind you.`;
+            } else if (progress.progress) {
+                return `*considers* You're at ${progress.progress} on "${questName}". ${progress.progress === '0/1' ? 'Just getting started.' : 'Keep at it!'}`;
+            }
+        }
+
         const fallbacks = {
             OFFER_QUEST: `*nods thoughtfully* Yes, I have work for you. "${questName}" - are you interested?`,
             TURN_IN_QUEST: `*examines your work* Well done with "${questName}". You've earned your reward.`,

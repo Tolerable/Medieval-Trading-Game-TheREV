@@ -1563,6 +1563,11 @@ const UniversalGoldManager = {
         return this.setPersonalGold(current + amount, reason);
     },
 
+    // 🖤💀 Alias for addPersonalGold - used by trade-cart-panel 💀
+    addGold(amount, reason = '') {
+        return this.addPersonalGold(amount, reason);
+    },
+
     // Remove gold - tries personal first, then storage
     removeGold(amount, reason = '') {
         let remaining = amount;
