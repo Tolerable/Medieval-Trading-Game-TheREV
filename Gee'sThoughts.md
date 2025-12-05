@@ -16,6 +16,33 @@ Each entry follows this format:
 
 ---
 
+## 2025-12-05 - SESSION #27: FULL NEW GAME VALIDATION 🖤💀✅
+
+**Request:** Gee reported that the new game setup doesn't properly warn about ALL missing fields:
+- Character name (was partially working - just red border)
+- Attribute points not fully spent
+- No clear modal explaining what's missing
+
+**Status:** ✅ COMPLETE
+
+### Fixes Applied:
+
+**Comprehensive Validation Modal** - FIXED in `game.js:6956-7072`
+- **Root Cause:** Previous validation only checked name with a tiny tooltip
+- **Fix:** Added full validation system that checks:
+  1. ⚠️ Character name is required
+  2. ⚠️ All attribute points must be spent (shows count remaining)
+- Shows a centered modal popup listing ALL validation errors
+- Red border + shake animation on invalid fields
+- Highlights the attribute points section if points remain
+- "OK, I'll fix it" button to dismiss
+- Also logs errors to message feed
+
+**Files Modified:**
+- `src/js/core/game.js` - Comprehensive validation modal
+
+---
+
 ## 2025-12-05 - SESSION #26: FIREFOX COMPATIBILITY FIX 🖤💀🦊
 
 **Request:** Gee reported Settings panel completely dead in Firefox - NO buttons work, entire panel is stalled

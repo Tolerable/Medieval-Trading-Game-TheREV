@@ -6953,74 +6953,122 @@ function createCharacter(event) {
     console.log('Character creation state:', characterCreationState);
     console.log('Selected perks:', selectedPerks);
 
-    // 🖤💀 VALIDATION: Check for missing required fields and highlight them 💀
-    let hasErrors = false;
+    // 🖤💀 VALIDATION: Check for ALL missing required fields and show warnings 💀
+    let validationErrors = [];
 
+    // 🖤 Add shake animation if not already defined 💀
+    if (!document.getElementById('validation-shake-style')) {
+        const style = document.createElement('style');
+        style.id = 'validation-shake-style';
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                20%, 60% { transform: translateX(-5px); }
+                40%, 80% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // 🖤💀 CHECK 1: Character name is required 💀
     if (!name) {
-        hasErrors = true;
-        addMessage('Please enter a character name.', 'error');
-        console.warn('Character creation aborted: no name entered');
+        validationErrors.push('⚠️ Character name is required!');
 
-        // 🖤 Highlight the name field with red border + shake animation 💀
+        // Highlight the name field
         if (characterNameInput) {
             characterNameInput.style.border = '2px solid #f44336';
             characterNameInput.style.animation = 'shake 0.5s ease-in-out';
             characterNameInput.focus();
 
-            // 🖤 Show tooltip below the input 💀
-            let tooltip = document.getElementById('name-validation-tooltip');
-            if (!tooltip) {
-                tooltip = document.createElement('div');
-                tooltip.id = 'name-validation-tooltip';
-                tooltip.style.cssText = `
-                    position: absolute;
-                    background: #f44336;
-                    color: white;
-                    padding: 6px 12px;
-                    border-radius: 4px;
-                    font-size: 12px;
-                    font-weight: bold;
-                    z-index: 10000;
-                    pointer-events: none;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                `;
-                document.body.appendChild(tooltip);
-            }
-            tooltip.textContent = '⚠️ Character name is required!';
-            tooltip.style.display = 'block';
-
-            // Position below the input
-            const rect = characterNameInput.getBoundingClientRect();
-            tooltip.style.left = rect.left + 'px';
-            tooltip.style.top = (rect.bottom + 5) + 'px';
-
-            // 🖤 Clear error styling when user types 💀
-            const clearError = () => {
+            // Clear error on input
+            const clearNameError = () => {
                 characterNameInput.style.border = '';
                 characterNameInput.style.animation = '';
-                if (tooltip) tooltip.style.display = 'none';
-                characterNameInput.removeEventListener('input', clearError);
+                characterNameInput.removeEventListener('input', clearNameError);
             };
-            characterNameInput.addEventListener('input', clearError);
+            characterNameInput.addEventListener('input', clearNameError);
+        }
+    }
 
-            // 🖤 Add shake animation if not already defined 💀
-            if (!document.getElementById('validation-shake-style')) {
-                const style = document.createElement('style');
-                style.id = 'validation-shake-style';
-                style.textContent = `
-                    @keyframes shake {
-                        0%, 100% { transform: translateX(0); }
-                        20%, 60% { transform: translateX(-5px); }
-                        40%, 80% { transform: translateX(5px); }
-                    }
-                `;
-                document.head.appendChild(style);
+    // 🖤💀 CHECK 2: All attribute points must be spent 💀
+    const remainingPoints = characterCreationState.availableAttributePoints || 0;
+    if (remainingPoints > 0) {
+        validationErrors.push(`⚠️ You have ${remainingPoints} attribute point${remainingPoints > 1 ? 's' : ''} left to spend!`);
+
+        // Highlight the attribute points section
+        const pointsElement = document.getElementById('attr-points-remaining');
+        if (pointsElement) {
+            pointsElement.style.color = '#f44336';
+            pointsElement.style.fontWeight = 'bold';
+            pointsElement.style.animation = 'shake 0.5s ease-in-out';
+
+            // Also highlight parent container if exists
+            const attrSection = pointsElement.closest('.attribute-points-section') ||
+                               pointsElement.closest('.attributes-section') ||
+                               pointsElement.parentElement;
+            if (attrSection) {
+                attrSection.style.border = '2px solid #f44336';
+                attrSection.style.borderRadius = '8px';
+                attrSection.style.padding = '10px';
             }
         }
     }
 
-    if (hasErrors) {
-        return;
+    // 🖤💀 SHOW ALL VALIDATION ERRORS IN A MODAL/TOOLTIP 💀
+    if (validationErrors.length > 0) {
+        console.warn('Character creation validation failed:', validationErrors);
+
+        // Show validation modal/tooltip with all errors
+        let validationTooltip = document.getElementById('creation-validation-tooltip');
+        if (!validationTooltip) {
+            validationTooltip = document.createElement('div');
+            validationTooltip.id = 'creation-validation-tooltip';
+            validationTooltip.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #2c1810 0%, #1a0a05 100%);
+                border: 3px solid #f44336;
+                color: white;
+                padding: 20px 30px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: bold;
+                z-index: 100000;
+                box-shadow: 0 8px 32px rgba(244, 67, 54, 0.5);
+                max-width: 400px;
+                text-align: left;
+            `;
+            document.body.appendChild(validationTooltip);
+        }
+
+        validationTooltip.innerHTML = `
+            <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f44336; padding-bottom: 10px;">
+                <span style="font-size: 24px; margin-right: 10px;">🚫</span>
+                <span style="font-size: 16px; color: #f44336;">Cannot Start Game</span>
+            </div>
+            <div style="margin-bottom: 15px;">
+                ${validationErrors.map(err => `<div style="margin: 8px 0; padding-left: 10px; border-left: 3px solid #f44336;">${err}</div>`).join('')}
+            </div>
+            <button onclick="this.parentElement.style.display='none'" style="
+                width: 100%;
+                padding: 10px;
+                background: #f44336;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 14px;
+            ">OK, I'll fix it</button>
+        `;
+        validationTooltip.style.display = 'block';
+
+        // Also show in message log
+        validationErrors.forEach(err => addMessage(err, 'error'));
+
+        return; // Don't proceed with character creation
     }
 
     // Get starting gold from GoldManager (single source of truth)
