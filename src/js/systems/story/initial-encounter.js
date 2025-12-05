@@ -11,7 +11,7 @@ const InitialEncounterSystem = {
     // 🔧 CONFIG
     hasShownEncounter: false,
     hasShownTutorialChoice: false, // 🖤 Track if we've shown the tutorial Yes/No popup
-    encounterDelay: 1500, // ms after game start to show encounter
+    encounterDelay: 500, // 🖤💀 FAST - show encounter quickly after game start!
 
     // 📖 THE MYSTERIOUS STRANGER - your first encounter in this world
     mysteriousStranger: {
@@ -243,6 +243,7 @@ const InitialEncounterSystem = {
     },
 
     // 📖 INTRODUCTION SEQUENCE - the story begins
+    // 🖤💀 Now uses unified PeoplePanel - combines location intro with stranger encounter in ONE panel! 💀
     showIntroductionSequence(playerName, startLocation) {
         // Pause time during this sequence (🖤 store previous speed for proper restoration 💀)
         if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
@@ -250,35 +251,13 @@ const InitialEncounterSystem = {
             TimeSystem.setSpeed('PAUSED');
         }
 
-        // 🖤 First, show a narrative text overlay
-        const introText = this.getLocationIntro(startLocation);
+        // 🖤 Build the combined narrative (location intro + stranger approach)
+        const locationIntro = this.getLocationIntro(startLocation);
+        const fullNarrative = `${locationIntro}\n\nYou arrived here with little more than the clothes on your back and a handful of coins. The road behind you holds nothing but memories; the road ahead holds... everything.\n\nAs you take your first steps into the village square, you notice a hooded figure watching you from the shadows...`;
 
-        if (typeof ModalSystem !== 'undefined') {
-            ModalSystem.show({
-                title: '🌄 A New Dawn',
-                content: `
-                    <div style="font-style: italic; color: #c0c0d0; line-height: 1.8; font-size: 1.05em;">
-                        <p style="margin-bottom: 1rem;">${introText}</p>
-                        <p style="margin-bottom: 1rem;">You arrived here with little more than the clothes on your back and a handful of coins. The road behind you holds nothing but memories; the road ahead holds... everything.</p>
-                        <p style="color: #a0a0c0;">As you take your first steps into the village square, you notice a hooded figure watching you from the shadows...</p>
-                    </div>
-                `,
-                closeable: false, // 🖤 Must approach the stranger - no escape from destiny
-                buttons: [
-                    {
-                        text: '🎭 Approach the Stranger',
-                        className: 'primary',
-                        onClick: () => {
-                            ModalSystem.hide();
-                            this.showStrangerEncounter(playerName);
-                        }
-                    }
-                ]
-            });
-        } else {
-            // 🖤 fallback - just unlock the quest
-            this.unlockMainQuest();
-        }
+        // 🖤💀 Skip the "A New Dawn" modal - go straight to Hooded Stranger encounter! 💀
+        // The narrative text will appear in the People Panel before the stranger speaks
+        this.showStrangerEncounter(playerName);
     },
 
     // 📍 Get location-specific intro text
@@ -296,69 +275,76 @@ const InitialEncounterSystem = {
     },
 
     // 🎭 STRANGER ENCOUNTER - the mysterious figure speaks
-    // 🖤💀 Now with API TTS! The first voice players hear sets the tone! 💀
-    async showStrangerEncounter(playerName) {
+    // 🖤💀 INSTANT - uses pre-written dialogue, NO API WAIT! 💀
+    showStrangerEncounter(playerName) {
         const stranger = this.mysteriousStranger;
         const greeting = stranger.greetings[Math.floor(Math.random() * stranger.greetings.length)];
 
-        // 🖤💀 Generate API dialogue for the stranger - this is the FIRST voice players hear!
-        let strangerDialogue = this._getDefaultStrangerDialogue(playerName, greeting);
-        let useAPIVoice = false;
+        // 🖤💀 Use pre-written dialogue for INSTANT loading - no API wait! 💀
+        // The initial encounter MUST be fast - first impression matters!
+        const strangerDialogue = this._getDefaultStrangerDialogue(playerName, greeting);
+        console.log('🎭 Using instant pre-written dialogue for hooded stranger (no API wait)');
 
-        try {
-            if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
-                console.log('🎭 Generating hooded stranger dialogue via API...');
+        // 🖤💀 Use unified PeoplePanel for the intro encounter!
+        if (typeof PeoplePanel !== 'undefined' && PeoplePanel.showSpecialEncounter) {
+            const introNarrative = `A figure in a dark cloak steps forward from the shadows. You cannot see their face beneath the hood, but you sense ancient eyes studying you...`;
 
-                const response = await NPCVoiceChatSystem.generateNPCResponse(
-                    stranger,
-                    `The player ${playerName} has just arrived in this world. Give them a cryptic, ominous introduction about the darkness gathering and Malachar's return. Tell them to seek Elder Morin. Be mysterious and prophetic.`,
-                    [], // No chat history - first encounter
+            PeoplePanel.showSpecialEncounter(stranger, {
+                introText: introNarrative,
+                greeting: strangerDialogue,
+                disableChat: true,  // 🖤 No freeform chat during intro
+                disableBack: true,  // 🖤 No escape from destiny
+                playVoice: true,
+                customActions: [
                     {
-                        action: 'introduction',
-                        context: 'first_encounter',
-                        playerName: playerName,
-                        isFirstVoice: true // 🖤 Flag for special handling
-                    }
-                );
-
-                if (response && response.text) {
-                    strangerDialogue = response.text;
-                    useAPIVoice = true;
-                    console.log('🎭 API dialogue generated successfully!');
-                }
-            }
-        } catch (e) {
-            console.warn('🎭 API dialogue failed, using fallback:', e);
-            // Keep default dialogue
-        }
-
-        if (typeof ModalSystem !== 'undefined') {
-            ModalSystem.show({
-                title: '🎭 The Hooded Stranger',
-                content: `
-                    <p style="margin-bottom: 1rem; color: #a0a0c0;">A figure in a dark cloak steps forward from the shadows. You cannot see their face beneath the hood, but you sense ancient eyes studying you.</p>
-                    <p style="font-style: italic; color: #c0a0ff; font-size: 1.1em; margin-bottom: 1rem; line-height: 1.6;">"${strangerDialogue}"</p>
-                    <p style="color: #f0a0a0; margin-top: 1rem;">The stranger's voice fades like mist in morning light...</p>
-                `,
-                closeable: false, // 🖤 Must accept quest - no escape from destiny
-                buttons: [
-                    {
-                        text: '✅ Accept Quest',
-                        className: 'primary',
-                        onClick: () => {
-                            ModalSystem.hide();
-                            // 🖤 Accept quest FIRST, then ask about tutorial 💀
+                        label: '✅ Accept Quest: First Steps',
+                        action: () => {
+                            console.log('🎭 Player accepted quest from Hooded Stranger');
                             this.showQuestAcceptedThenTutorialOption(playerName);
-                        }
+                        },
+                        primary: true,
+                        questRelated: true,
+                        closeAfter: true
+                    },
+                    {
+                        label: '❓ Who are you?',
+                        action: () => {
+                            // 🖤 Add mysterious response to chat
+                            PeoplePanel.addChatMessage("*asks* Who... who are you?", 'player');
+                            setTimeout(() => {
+                                PeoplePanel.addChatMessage("*The hood tilts slightly* I am but a watcher. A keeper of memories. I have seen empires rise and fall... When you have proven yourself worthy, we shall meet again.", 'npc');
+                            }, 500);
+                        },
+                        questRelated: false
                     }
-                ]
+                ],
+                onClose: () => {
+                    console.log('🎭 Stranger encounter closed');
+                }
             });
-
-            // 🖤💀 Play TTS AFTER modal is shown so player can read along
-            if (useAPIVoice && typeof NPCVoiceChatSystem !== 'undefined') {
-                setTimeout(() => {
-                    NPCVoiceChatSystem.playVoice(strangerDialogue, stranger.voice || 'onyx');
-                }, 500); // Small delay for modal to render
+        } else {
+            // 🖤 Fallback to old ModalSystem if PeoplePanel unavailable
+            console.warn('🎭 PeoplePanel not available, using ModalSystem fallback');
+            if (typeof ModalSystem !== 'undefined') {
+                ModalSystem.show({
+                    title: '🎭 The Hooded Stranger',
+                    content: `
+                        <p style="margin-bottom: 1rem; color: #a0a0c0;">A figure in a dark cloak steps forward from the shadows. You cannot see their face beneath the hood, but you sense ancient eyes studying you.</p>
+                        <p style="font-style: italic; color: #c0a0ff; font-size: 1.1em; margin-bottom: 1rem; line-height: 1.6;">"${strangerDialogue}"</p>
+                        <p style="color: #f0a0a0; margin-top: 1rem;">The stranger's voice fades like mist in morning light...</p>
+                    `,
+                    closeable: false,
+                    buttons: [
+                        {
+                            text: '✅ Accept Quest',
+                            className: 'primary',
+                            onClick: () => {
+                                ModalSystem.hide();
+                                this.showQuestAcceptedThenTutorialOption(playerName);
+                            }
+                        }
+                    ]
+                });
             }
         }
     },
