@@ -21,8 +21,8 @@ const PropertyStorage = {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return false;
 
-        // 🖤 Use ??= for concise null coalescing assignment 💀
-        property.storage ??= {};
+        // 🖤💀 FIXED: Firefox compatibility - don't use ??= 💀
+        if (!property.storage) property.storage = {};
 
         const propertyType = PropertyTypes.get(property.type);
         let capacity = propertyType.storageBonus || 0;
@@ -101,7 +101,7 @@ const PropertyStorage = {
         }
 
         // ➕ Add items 🦇
-        property.storage[itemId] ??= 0;
+        if (!property.storage[itemId]) property.storage[itemId] = 0;
         property.storage[itemId] += quantity;
         property.storageUsed += itemWeight;
 
@@ -195,7 +195,7 @@ const PropertyStorage = {
         // 🔄 Transfer 💀
         this.remove(propertyId, itemId, quantity);
 
-        game.player.inventory[itemId] ??= 0;
+        if (!game.player.inventory[itemId]) game.player.inventory[itemId] = 0;
         game.player.inventory[itemId] += quantity;
 
         if (typeof updateCurrentLoad === 'function') updateCurrentLoad();
@@ -246,7 +246,7 @@ const PropertyStorage = {
         game.player.ownedProperties.forEach(property => {
             if (property.storage) {
                 for (const [itemId, quantity] of Object.entries(property.storage)) {
-                    allItems[itemId] ??= 0;
+                    if (!allItems[itemId]) allItems[itemId] = 0;
                     allItems[itemId] += quantity;
                 }
             }
@@ -298,7 +298,7 @@ const PropertyStorage = {
 
                     // 🎒 Fallback to player inventory 🗡️
                     if (!stored) {
-                        game.player.inventory[itemId] ??= 0;
+                        if (!game.player.inventory[itemId]) game.player.inventory[itemId] = 0;
                         game.player.inventory[itemId] += quantity;
                         addMessage(`${quantity} ${itemId} added to your inventory (no storage available)!`);
                     }

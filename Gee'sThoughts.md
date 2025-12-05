@@ -16,6 +16,39 @@ Each entry follows this format:
 
 ---
 
+## 2025-12-05 - SESSION #26: FIREFOX COMPATIBILITY FIX 🖤💀🦊
+
+**Request:** Gee reported Settings panel completely dead in Firefox - NO buttons work, entire panel is stalled
+
+**Status:** ✅ COMPLETE
+
+### Root Cause:
+- `??=` (nullish coalescing assignment) operator is ES2021 feature
+- Older Firefox versions don't support it, causing syntax error that breaks EventManager
+- EventManager handles ALL event listeners in the game
+- If EventManager fails to load, NO buttons work anywhere!
+
+### Fixes Applied:
+
+**EventManager** - FIXED in `event-manager.js:22-26`
+- Changed `element._eventManagerId ??= value` to `if (!element._eventManagerId) element._eventManagerId = value`
+
+**PropertyStorage** - FIXED in `property-storage.js` (5 occurrences)
+- Changed all `??=` operators to `if (!x) x = value` pattern
+- Lines: 25, 104, 198, 249, 301
+
+**Settings Panel Robustness** - FIXED in `settings-panel.js:3657-3671`
+- Added safety check to re-attach event listeners if they're missing
+- Reset `_initialized` flag if panel element doesn't exist
+- Prevents "dead buttons" bug where HTML exists but listeners were lost
+
+**Files Modified:**
+- `src/js/core/event-manager.js` - Remove ??= operator
+- `src/js/property/property-storage.js` - Remove 5 ??= operators
+- `src/js/ui/panels/settings-panel.js` - Robust listener re-attachment
+
+---
+
 ## 2025-12-05 - SESSION #25: NEW GAME VALIDATION + QUEST SEGWAYS 🖤💀🔗
 
 **Request:** Gee reported two issues:

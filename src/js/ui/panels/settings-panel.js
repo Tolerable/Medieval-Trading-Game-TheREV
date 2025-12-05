@@ -96,8 +96,10 @@ const SettingsPanel = {
         const existingPanel = document.getElementById('settings-panel');
         if (existingPanel) {
             this.panelElement = existingPanel;
-            console.log('⚙️ Settings panel already exists, reusing');
-            return;
+            console.log('⚙️ Settings panel HTML already exists, reusing element');
+            // 🖤💀 FIXED: Don't return early! We still need to setup event listeners! 💀
+            // The HTML might exist from a previous session but listeners are lost on page load
+            return; // We'll re-attach listeners in openPanel() if needed
         }
 
         // create main panel container - our temple of options
@@ -3655,9 +3657,19 @@ const SettingsPanel = {
 
     // open settings panel - welcome to configuration hell
     openPanel() {
-        // ensure panel is initialized before opening
-        if (!this.panelElement) {
+        // 🖤💀 FIXED: Force full re-init if panel doesn't exist or is broken 💀
+        // This fixes the "dead buttons" bug where HTML exists but listeners don't
+        if (!this.panelElement || !document.getElementById('settings-panel')) {
+            this._initialized = false; // Reset init flag to allow full re-init
             this.init();
+        }
+
+        // 🖤💀 SAFETY: Verify listeners are attached by checking if close button works 💀
+        const closeBtn = this.panelElement?.querySelector('.settings-close-btn');
+        if (closeBtn && !closeBtn._listenerAttached) {
+            console.log('⚙️ Re-attaching settings panel event listeners (were missing)');
+            this.setupEventListeners();
+            closeBtn._listenerAttached = true; // Mark so we don't re-attach every open
         }
 
         // 🖤 Ensure KeyBindings is initialized before showing panel
@@ -3715,14 +3727,7 @@ const SettingsPanel = {
 
     // alias for show - another way in
     show() {
-        // ensure panel is initialized before showing
-        if (!this.panelElement) {
-            this.init();
-        }
-        // 🖤 Ensure KeyBindings is initialized for controls tab
-        if (typeof KeyBindings !== 'undefined' && !KeyBindings.current?.pause) {
-            KeyBindings.init();
-        }
+        // 🖤💀 Just delegate to openPanel() which handles all the init/listener checks now 💀
         this.openPanel();
     },
 

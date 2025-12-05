@@ -19,8 +19,11 @@ const EventManager = {
     // 🖤 Generate a stable key for element+eventType pair 💀
     _getElementEventKey(element, eventType) {
         // Use a WeakMap-style approach with element reference + eventType
-        const elementId = element._eventManagerId ??= `em_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-        return `${elementId}::${eventType}`;
+        // 🖤💀 FIXED: Use older syntax for Firefox compatibility (??= not supported in older versions) 💀
+        if (!element._eventManagerId) {
+            element._eventManagerId = `em_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        }
+        return `${element._eventManagerId}::${eventType}`;
     },
 
     // 🖤 Add event listener with tracking - prevents duplicates, prevents obsession
