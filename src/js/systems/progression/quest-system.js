@@ -2343,13 +2343,35 @@ const QuestSystem = {
             const quests = chains[chainName];
             if (quests.length === 0) continue;
 
+            // 🖤💀 FIX: Only show chains that have at least one UNLOCKED quest 💀
+            // A quest is "unlocked" if it's completed, active, discovered, or available (prereq met)
+            const hasUnlockedQuest = quests.some(quest => {
+                const isCompleted = this.completedQuests.includes(quest.id);
+                const isActive = !!this.activeQuests[quest.id];
+                const isDiscovered = this.discoveredQuests?.includes(quest.id);
+                const prereqMet = !quest.prerequisite || this.completedQuests.includes(quest.prerequisite);
+                return isCompleted || isActive || isDiscovered || prereqMet;
+            });
+
+            // 🖤 Skip chains where ALL quests are still locked 💀
+            if (!hasUnlockedQuest) continue;
+
             const chainExpanded = this.expandedChains[chainName] || false;
             const chainDisplayName = this.getChainDisplayName(chainName);
 
-            // Count quest statuses in this chain
+            // Count quest statuses in this chain (only count unlocked quests)
             const completedCount = quests.filter(q => this.completedQuests.includes(q.id)).length;
             const activeCount = quests.filter(q => this.activeQuests[q.id]).length;
-            const totalCount = quests.length;
+
+            // 🖤 For total, only count quests that are unlocked (not fully locked) 💀
+            const unlockedQuests = quests.filter(quest => {
+                const isCompleted = this.completedQuests.includes(quest.id);
+                const isActive = !!this.activeQuests[quest.id];
+                const isDiscovered = this.discoveredQuests?.includes(quest.id);
+                const prereqMet = !quest.prerequisite || this.completedQuests.includes(quest.prerequisite);
+                return isCompleted || isActive || isDiscovered || prereqMet;
+            });
+            const totalCount = unlockedQuests.length;
 
             // 🖤 Auto-expand chains with active quests
             const hasActiveQuest = activeCount > 0;
@@ -2362,7 +2384,7 @@ const QuestSystem = {
                         <span class="chain-progress ${activeCount > 0 ? 'active' : ''}">${completedCount}/${totalCount}</span>
                     </div>
                     <div class="chain-quests ${chainExpanded ? 'visible' : 'hidden'}">
-                        ${this.buildChainQuestList(quests)}
+                        ${this.buildChainQuestList(unlockedQuests)}
                     </div>
                 </div>
             `;

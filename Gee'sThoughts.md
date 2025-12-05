@@ -16,6 +16,39 @@ Each entry follows this format:
 
 ---
 
+## 2025-12-05 - SESSION #22: QUEST TRACKER - HIDE LOCKED CHAINS 🖤💀🔗
+
+**Request:** Gee requested:
+- Don't show locked/unexplored quest chains in the quest tracker
+- Doom quest line shouldn't appear until unlocked
+- All quest categories should remain hidden until player has a quest in that category
+
+**Status:** ✅ COMPLETE
+
+### Fix Applied:
+
+**Quest Chain Visibility** - FIXED in `quest-system.js:2346-2391`
+- **Root Cause:** `buildQuestChainView()` showed ALL chains even if every quest was locked
+- **Fix:** Added check to only show chains that have at least one UNLOCKED quest
+- A quest is "unlocked" if it meets ANY of these conditions:
+  - Already completed
+  - Currently active
+  - Has been discovered
+  - Prerequisite is met (available to start)
+- Chains where ALL quests are locked are now completely hidden
+- Progress counter now only counts unlocked quests (not the total in the chain)
+- Only unlocked quests are passed to `buildChainQuestList()`
+
+**Example Impact:**
+- Doom World chain: Hidden until player unlocks doom world access
+- Location chains: Hidden until player visits that region and has a quest available there
+- Main story: Shows only quests up to current progression point
+
+**Files Modified:**
+- `src/js/systems/progression/quest-system.js` - Chain visibility filtering
+
+---
+
 ## 2025-12-05 - SESSION #21: SAVE/LOAD REGRESSION FIX 🖤💀💾
 
 **Request:** Gee reported save/load system broken:
