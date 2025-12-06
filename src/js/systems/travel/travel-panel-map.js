@@ -1241,16 +1241,20 @@ const TravelPanelMap = {
             addMessage(`🚶 Setting off for ${destName}...`);
         }
 
-        // If game is paused, auto-unpause with user's preferred speed
-        const isPaused = typeof TimeMachine !== 'undefined' &&
-                        (TimeMachine.isPaused || TimeMachine.currentSpeed === 'PAUSED');
+        // Get the time system (supports both names)
+        const timeSystem = typeof TimeSystem !== 'undefined' ? TimeSystem :
+                          (typeof TimeMachine !== 'undefined' ? TimeMachine : null);
 
-        if (isPaused && typeof TimeMachine !== 'undefined') {
-            // Get user's preferred speed from dropdown selection
-            const preferredSpeed = TimeMachine.userPreferredSpeed || 'NORMAL';
-            const speedLabel = TimeMachine.SPEED_LABELS?.[preferredSpeed] || preferredSpeed;
-            console.log(`Auto-resuming at ${speedLabel} speed for travel`);
-            TimeMachine.setSpeed(preferredSpeed);
+        // If game is paused, auto-unpause with user's preferred speed
+        if (timeSystem) {
+            const isPaused = timeSystem.isPaused || timeSystem.currentSpeed === 'PAUSED';
+
+            if (isPaused) {
+                // Get user's preferred speed from dropdown selection
+                const preferredSpeed = timeSystem.userPreferredSpeed || 'NORMAL';
+                console.log(`Auto-resuming at ${preferredSpeed} speed for travel`);
+                timeSystem.setSpeed(preferredSpeed);
+            }
         }
 
         // Start travel immediately
