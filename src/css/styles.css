@@ -6544,6 +6544,31 @@ button.menu-social-link {
     transform: translateY(-1px);
 }
 
+/* Cancel Travel Button - danger style */
+.travel-btn-danger {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #e74c3c;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    pointer-events: auto;
+}
+
+.travel-btn-danger:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+}
+
+.travel-actions-during {
+    margin-top: 0.8rem;
+    pointer-events: auto;
+}
+
 /* Map Controls Expanded */
 .map-controls-expanded {
     display: flex;

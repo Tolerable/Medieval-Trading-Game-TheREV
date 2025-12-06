@@ -1744,16 +1744,18 @@ const GameWorldRenderer = {
             startY: scaledFrom.y,
             endX: scaledTo.x,
             endY: scaledTo.y,
-            waypoints: waypoints, // 🖤 NEW: Array of waypoint positions 💀
+            waypoints: waypoints,
             durationMinutes: travelTimeMinutes,
-            startGameTime: typeof TimeSystem !== 'undefined' ? TimeSystem.getTotalMinutes() : 0
+            startGameTime: typeof TimeSystem !== 'undefined' ? TimeSystem.getTotalMinutes() : 0,
+            lastX: scaledFrom.x,
+            movingRight: scaledTo.x > scaledFrom.x
         };
 
         // 🖤 CRITICAL: Ensure marker exists BEFORE applying traveling style
         // Call updatePlayerMarker with start position to create marker if needed
         this.updatePlayerMarker(scaledFrom.x, scaledFrom.y, true);
 
-        // 🖤 Add traveling class to marker - the tack walks along the path 💀
+        // Add traveling class to marker - the tack walks along the path
         // Now marker is guaranteed to exist after updatePlayerMarker call above
         if (this.playerMarker) {
             this.playerMarker.classList.add('traveling');
@@ -1761,6 +1763,8 @@ const GameWorldRenderer = {
             const tack = this.playerMarker.querySelector('.marker-tack');
             if (tack) {
                 tack.textContent = '🚶'; // Walking person while traveling
+                // Set initial direction - mirror if moving right (emoji faces left by default)
+                tack.style.transform = this.currentTravel.movingRight ? 'scaleX(-1)' : 'scaleX(1)';
             }
             // Update label to show "TRAVELING..."
             const label = this.playerMarker.querySelector('.marker-label');
@@ -1901,13 +1905,18 @@ const GameWorldRenderer = {
         this.updatePlayerMarker(currentX, currentY, true);
 
         // Mirror the walking emoji based on travel direction
-        // Default emoji faces left, so mirror when moving right (increasing X)
+        // Default emoji faces left, so mirror when moving right
         if (this.playerMarker) {
             const tack = this.playerMarker.querySelector('.marker-tack');
-            if (tack && travel.lastX !== undefined) {
-                const movingRight = currentX > travel.lastX;
+            if (tack) {
+                // Use overall direction (end vs start) for consistent facing
+                // Update direction if it changes (e.g. via waypoints or cancel)
+                const currentMovingRight = currentX > travel.lastX;
+                if (travel.lastX !== undefined && currentMovingRight !== travel.movingRight) {
+                    travel.movingRight = currentMovingRight;
+                }
                 // scaleX(-1) mirrors horizontally for right-facing movement
-                tack.style.transform = movingRight ? 'scaleX(-1)' : 'scaleX(1)';
+                tack.style.transform = travel.movingRight ? 'scaleX(-1)' : 'scaleX(1)';
             }
             travel.lastX = currentX;
         }
