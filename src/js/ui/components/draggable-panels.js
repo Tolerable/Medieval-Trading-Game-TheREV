@@ -11,9 +11,15 @@ const DraggablePanels = {
     dragState: null,
     STORAGE_KEY: 'trader-claude-panel-positions',
     eventsSetup: false,
-    _questTrackerRetries: 0, // 🖤 Track setupQuestTracker retry attempts (max 10) 💀
+    _questTrackerRetries: 0,
 
-    // 🖤 Map of panel IDs/classes to their drag handle selectors
+    // Panel focus system - dynamic z-index within gameplay panel range (100-199)
+    // Higher values = more recently focused = on top
+    Z_INDEX_BASE: 100,      // Minimum z-index for gameplay panels
+    Z_INDEX_MAX: 199,       // Maximum z-index for gameplay panels (below tooltips at 200)
+    panelStack: [],         // Array of panel IDs in focus order (last = topmost)
+
+    // Map of panel IDs/classes to their drag handle selectors
     // If not listed, will try common header selectors
     panelDragHandles: {
         'market-panel': '.market-header',
@@ -36,7 +42,7 @@ const DraggablePanels = {
     init() {
         console.log('🖤 DraggablePanels: Initializing (drag-only mode)...');
 
-        // 🖤💀 Migrate message-log position if it's in the "bad zone" (overlapping action bar) 💀
+        // Migrate message-log position if it's in the "bad zone" (overlapping action bar)
         this.migrateMessageLogPosition();
 
         // Setup global drag events
@@ -52,6 +58,69 @@ const DraggablePanels = {
         this.loadPositions();
 
         console.log('🖤 DraggablePanels: Ready');
+    },
+
+    // Bring a panel to the front of the stack (highest z-index in gameplay range)
+    bringToFront(element) {
+        if (!element) return;
+
+        const panelId = element.id || element.className.split(' ')[0];
+        if (!panelId) return;
+
+        // Remove from current position in stack (if present)
+        const existingIndex = this.panelStack.indexOf(panelId);
+        if (existingIndex !== -1) {
+            this.panelStack.splice(existingIndex, 1);
+        }
+
+        // Add to top of stack
+        this.panelStack.push(panelId);
+
+        // Reassign z-indices to all tracked panels
+        this.updateAllPanelZIndices();
+    },
+
+    // Update z-indices for all panels based on their stack position
+    updateAllPanelZIndices() {
+        const maxPanels = this.Z_INDEX_MAX - this.Z_INDEX_BASE;
+
+        // If we have more panels than our range allows, compress the stack
+        if (this.panelStack.length > maxPanels) {
+            // Keep only the most recent panels
+            this.panelStack = this.panelStack.slice(-maxPanels);
+        }
+
+        // Assign z-indices based on stack position
+        this.panelStack.forEach((panelId, index) => {
+            const panel = document.getElementById(panelId) ||
+                          document.querySelector(`.${panelId}`);
+            if (panel) {
+                panel.style.zIndex = this.Z_INDEX_BASE + index;
+            }
+        });
+    },
+
+    // Setup click-to-focus on a panel
+    setupPanelFocus(element) {
+        if (!element || element.dataset.focusSetup) return;
+
+        element.dataset.focusSetup = 'true';
+
+        // Use mousedown for immediate response (before drag starts)
+        element.addEventListener('mousedown', (e) => {
+            this.bringToFront(element);
+        }, true); // Use capture to get event first
+
+        element.addEventListener('touchstart', (e) => {
+            this.bringToFront(element);
+        }, { passive: true, capture: true });
+
+        // Add to stack if not present
+        const panelId = element.id || element.className.split(' ')[0];
+        if (panelId && !this.panelStack.includes(panelId)) {
+            this.panelStack.push(panelId);
+            element.style.zIndex = this.Z_INDEX_BASE + this.panelStack.length - 1;
+        }
     },
 
     // 🖤💀 Clear message-log position if saved too close to bottom (overlaps action bar) 💀
@@ -173,6 +242,9 @@ const DraggablePanels = {
         if (!element || element.dataset.draggable === 'true') return;
         element.dataset.draggable = 'true';
 
+        // Setup click-to-focus for panel stacking
+        this.setupPanelFocus(element);
+
         // Find the drag handle (header element)
         const handle = this.findDragHandle(element);
         if (!handle) {
@@ -278,7 +350,8 @@ const DraggablePanels = {
         element.style.bottom = 'auto';
         element.style.transform = 'none';
         element.style.margin = '0';
-        element.style.zIndex = '1000';
+        // Use temporary high z-index during drag (within safe range, below tooltips)
+        element.style.zIndex = String(this.Z_INDEX_MAX);
 
         // 🖤 Cache width/height here - no getBoundingClientRect() spam in onDrag()
         // This prevents layout thrashing during drag operations 💀
@@ -325,15 +398,17 @@ const DraggablePanels = {
 
         const { element } = this.dragState;
         element.classList.remove('dragging');
-        element.style.zIndex = '100';
 
-        // 🖤 Mark that user has manually dragged this panel - prevents auto-repositioning 💀
+        // Bring panel to front of stack after drag completes
+        this.bringToFront(element);
+
+        // Mark that user has manually dragged this panel - prevents auto-repositioning
         element.dataset.userDragged = 'true';
 
         this.savePosition(element);
         this.dragState = null;
 
-        // 🖤 Remove listeners - no more mousemove spam until next drag 💀
+        // Remove listeners - no more mousemove spam until next drag
         this._removeDragListeners();
     },
 

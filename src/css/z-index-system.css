@@ -217,20 +217,20 @@ body > #menu-weather-container {
    🎛️ FLOATING PANELS - Layer 100-199
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Quest tracker */
-.quest-tracker {
-    z-index: var(--z-quest-tracker) !important;
-}
-
-/* All standard panels */
+/* All gameplay panels - z-index controlled dynamically by DraggablePanels.js */
+/* Base z-index set here, JavaScript adjusts for panel focus stacking (100-199 range) */
+/* Clicking a panel brings it to the front */
+.quest-tracker,
 .panel,
 #travel-panel,
 #character-panel,
 #inventory-panel,
 #financial-panel,
 #achievements-panel,
-#properties-panel {
-    z-index: var(--z-draggable-panel) !important;
+#properties-panel,
+#message-log,
+#people-panel {
+    z-index: var(--z-draggable-panel);
 }
 
 /* Setup panel - above other floating panels */
