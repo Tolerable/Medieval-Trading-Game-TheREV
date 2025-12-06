@@ -1310,12 +1310,15 @@ const PeoplePanel = {
         if (typeof QuestSystem === 'undefined') return [];
 
         const location = game?.currentLocation?.id;
+        console.log(`  📋 getQuestsReadyToComplete('${npcType}') at '${location}'`);
 
         // 🖤💀 Get quests where this NPC is the GIVER
         const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType, location);
+        console.log(`    activeFromNPC:`, activeFromNPC.map(q => `${q.id} (giver:${q.giver})`));
 
         // 🖤💀 ALSO get quests where this NPC is the TURN-IN target (might be different from giver!)
         const allActive = Object.values(QuestSystem.activeQuests || {});
+        console.log(`    allActive:`, allActive.map(q => `${q.id} (turnIn:${q.turnInNpc}, loc:${q.turnInLocation})`))
 
         const turnInQuests = allActive.filter(q => {
             // 🖤💀 FIX: More precise matching for turn-in NPCs 💀
@@ -1331,12 +1334,14 @@ const PeoplePanel = {
 
             return (turnInMatches || talkMatches) && locationMatches;
         });
+        console.log(`    turnInQuests:`, turnInQuests.map(q => q.id));
 
         // 🦇 Combine and dedupe
         const combined = [...activeFromNPC, ...turnInQuests];
         const uniqueQuests = [...new Map(combined.map(q => [q.id, q])).values()];
+        console.log(`    uniqueQuests (before ready filter):`, uniqueQuests.map(q => q.id));
 
-        return uniqueQuests.filter(q => {
+        const result = uniqueQuests.filter(q => {
             const progress = QuestSystem.checkProgress(q.id);
 
             // 🖤💀 Standard check - all objectives complete
@@ -1369,6 +1374,8 @@ const PeoplePanel = {
 
             return false;
         });
+        console.log(`    FINAL result:`, result.map(q => `${q.id} (status: ${QuestSystem.checkProgress(q.id).status})`));
+        return result;
     },
 
     // 📦 GET DELIVERIES FOR NPC - where this NPC is the RECIPIENT (not the giver)
@@ -2727,9 +2734,11 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         if (typeof QuestSystem === 'undefined') return null;
 
         const location = typeof game !== 'undefined' ? game.currentLocation?.id : null;
+        console.log(`🔍 getQuestMarker('${npcType}') at location '${location}'`);
 
         // 🖤 PRIORITY 1: Quest ready to turn in (? markers)
         const readyToComplete = this.getQuestsReadyToComplete(npcType);
+        console.log(`  readyToComplete:`, readyToComplete.map(q => q.id));
         if (readyToComplete.length > 0) {
             // Find the highest priority quest to show
             const mainQuest = readyToComplete.find(q => q.type === 'main');
