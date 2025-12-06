@@ -84,9 +84,9 @@ const PeoplePanel = {
                         <span class="stat-icon" id="npc-relation-icon">😐</span>
                         <span class="stat-label" id="npc-relation-label">Neutral</span>
                     </div>
-                    <div class="npc-stat-item" title="Reputation">
+                    <div class="npc-stat-item" title="Reputation (current / trade requirement)">
                         <span class="stat-icon">⭐</span>
-                        <span class="stat-value" id="npc-reputation-value">0</span>
+                        <span class="stat-value" id="npc-reputation-value">0</span><span class="stat-sep">/</span><span class="stat-value stat-req" id="npc-rep-required">0</span>
                     </div>
                     <div class="npc-stat-item" title="Trades Completed">
                         <span class="stat-icon">🤝</span>
@@ -345,6 +345,16 @@ const PeoplePanel = {
                 color: #ffd700;
                 font-weight: bold;
                 white-space: nowrap;
+            }
+            .npc-stat-item .stat-sep {
+                font-size: 0.7em;
+                color: #666;
+                margin: 0 1px;
+            }
+            .npc-stat-item .stat-req {
+                font-size: 0.75em;
+                color: #888;
+                font-weight: normal;
             }
 
             .chat-content {
@@ -746,7 +756,8 @@ const PeoplePanel = {
         // 🖤💀 WOW-STYLE QUEST MARKERS - Check for quest status 💀
         const questMarker = this.getQuestMarker(npc.type || npc.id);
         const hasDelivery = this.npcHasDeliveryForThem(npc.type || npc.id);
-        const canTrade = this.npcCanTrade(npc.type || npc.id);
+        // 🖤💀 Also check npc.canTrade for random encounters (smuggler, courier, pilgrim) 💀
+        const canTrade = this.npcCanTrade(npc.type || npc.id) || npc.canTrade;
 
         let badges = '';
         if (questMarker) {
@@ -878,7 +889,8 @@ const PeoplePanel = {
         if (this.npcHasDeliveryForThem(npcData.type || npcData.id)) {
             badges.innerHTML += '<span class="badge badge-delivery">📦 Delivery</span>';
         }
-        if (this.npcCanTrade(npcData.type || npcData.id)) {
+        // 🖤💀 Also check npcData.canTrade for random encounters (smuggler, courier, pilgrim) 💀
+        if (this.npcCanTrade(npcData.type || npcData.id) || npcData.canTrade) {
             badges.innerHTML += '<span class="badge badge-trade">💰 Trade</span>';
         }
     },
@@ -913,16 +925,37 @@ const PeoplePanel = {
         const icon = levelInfo?.icon || '😐';
         const label = levelInfo?.label || 'Neutral';
 
+        // 🖤💀 Get the trade requirement for this NPC type 💀
+        const npcType = npcData.type || npcData.id;
+        const repRequired = this.getTradeRepRequirement(npcType);
+        const canTrade = this.npcCanTrade(npcType) || npcData.canTrade;
+
         // 🖤 Update UI elements
         const relationIcon = document.getElementById('npc-relation-icon');
         const relationLabel = document.getElementById('npc-relation-label');
         const reputationValue = document.getElementById('npc-reputation-value');
+        const repRequiredEl = document.getElementById('npc-rep-required');
         const tradesValue = document.getElementById('npc-trades-value');
         const goldTradedValue = document.getElementById('npc-gold-traded-value');
 
         if (relationIcon) relationIcon.textContent = icon;
         if (relationLabel) relationLabel.textContent = label;
-        if (reputationValue) reputationValue.textContent = relationship.reputation;
+        if (reputationValue) {
+            reputationValue.textContent = relationship.reputation;
+            // 🖤💀 Color code: green if trade unlocked, yellow if close, red if far 💀
+            if (canTrade) {
+                reputationValue.style.color = '#4a9';
+            } else if (relationship.reputation >= repRequired * 0.5) {
+                reputationValue.style.color = '#da4';
+            } else {
+                reputationValue.style.color = '#c66';
+            }
+        }
+        if (repRequiredEl) {
+            repRequiredEl.textContent = repRequired;
+            // 🖤 Show requirement in muted color, or green if already met
+            repRequiredEl.style.color = canTrade ? '#4a9' : '#888';
+        }
         if (tradesValue) tradesValue.textContent = tradeStats.timesTraded;
         if (goldTradedValue) goldTradedValue.textContent = tradeStats.totalGoldTraded.toLocaleString();
     },
@@ -1146,7 +1179,8 @@ const PeoplePanel = {
         }
 
         // 🖤 Trade-related actions - vendors and service NPCs
-        if (this.npcCanTrade(npcType)) {
+        // 🖤💀 Also check npcData.canTrade for random encounters (smuggler, courier, pilgrim) 💀
+        if (this.npcCanTrade(npcType) || npcData.canTrade) {
             actions.push({ label: '💰 Browse wares', action: () => this.askAboutWares(), priority: 10 });
 
             // 🖤💀 "Open market" button ONLY at Royal Capital with merchant NPC 💀
@@ -1791,12 +1825,14 @@ const PeoplePanel = {
         if (!container || !preview) return;
 
         const npcType = npcData.type || npcData.id;
-        const canTrade = this.npcCanTrade(npcType);
+        // 🖤💀 Also check npcData.canTrade for random encounters (smuggler, courier, pilgrim) 💀
+        const canTrade = this.npcCanTrade(npcType) || npcData.canTrade;
         const repRequired = this.getTradeRepRequirement(npcType);
         const currentRep = this.getNPCReputation(npcType);
 
         // 🖤 Always show trade section for potential traders, but indicate locked status
-        const potentialTrader = repRequired > 0 || ['merchant', 'innkeeper', 'general_store', 'baker',
+        // 🖤💀 Also include NPCs with canTrade flag from encounters 💀
+        const potentialTrader = npcData.canTrade || repRequired > 0 || ['merchant', 'innkeeper', 'general_store', 'baker',
             'farmer', 'fisherman', 'ferryman', 'traveler', 'blacksmith', 'apothecary',
             'tailor', 'herbalist', 'miner', 'jeweler', 'banker', 'guild_master', 'noble'].includes(npcType);
 

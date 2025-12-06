@@ -93,10 +93,14 @@ const InitialEncounterSystem = {
         if (this.hasShownTutorialChoice) return;
         this.hasShownTutorialChoice = true;
 
-        // Pause time during this choice (🖤 store previous speed for proper restoration 💀)
-        if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
-            this._previousSpeedForTutorial = TimeSystem.currentSpeed || 'NORMAL';
-            TimeSystem.setSpeed('PAUSED');
+        // 🖤💀 Pause time during this choice using interrupt system 💀
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.pauseForInterrupt) {
+                TimeSystem.pauseForInterrupt('tutorial_choice');
+            } else if (!TimeSystem.isPaused) {
+                this._previousSpeedForTutorial = TimeSystem.currentSpeed || 'NORMAL';
+                TimeSystem.setSpeed('PAUSED');
+            }
         }
 
         if (typeof ModalSystem !== 'undefined') {
@@ -197,10 +201,14 @@ const InitialEncounterSystem = {
 
     // 🖤 Proceed after tutorial choice - resume normal game flow 💀
     _proceedAfterTutorialChoice() {
-        // Resume time to previous speed if we paused it (🖤 restore actual speed, not just 'NORMAL' 💀)
-        if (this._previousSpeedForTutorial && typeof TimeSystem !== 'undefined') {
-            TimeSystem.setSpeed(this._previousSpeedForTutorial);
-            this._previousSpeedForTutorial = null;
+        // 🖤💀 Resume time using interrupt system - restores user's preferred speed 💀
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.resumeFromInterrupt) {
+                TimeSystem.resumeFromInterrupt('tutorial_choice');
+            } else if (this._previousSpeedForTutorial) {
+                TimeSystem.setSpeed(this._previousSpeedForTutorial);
+                this._previousSpeedForTutorial = null;
+            }
         }
 
         // 🦇 Wait for rank-up celebration to finish BEFORE showing intro
@@ -247,10 +255,14 @@ const InitialEncounterSystem = {
     // 📖 INTRODUCTION SEQUENCE - the story begins
     // 🖤💀 Now uses unified PeoplePanel - combines location intro with stranger encounter in ONE panel! 💀
     showIntroductionSequence(playerName, startLocation) {
-        // Pause time during this sequence (🖤 store previous speed for proper restoration 💀)
-        if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
-            this._previousSpeedForIntro = TimeSystem.currentSpeed || 'NORMAL';
-            TimeSystem.setSpeed('PAUSED');
+        // 🖤💀 Pause time during this sequence using interrupt system 💀
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.pauseForInterrupt) {
+                TimeSystem.pauseForInterrupt('intro_sequence');
+            } else if (!TimeSystem.isPaused) {
+                this._previousSpeedForIntro = TimeSystem.currentSpeed || 'NORMAL';
+                TimeSystem.setSpeed('PAUSED');
+            }
         }
 
         // 🖤 Build the combined narrative (location intro + stranger approach)
@@ -524,10 +536,14 @@ const InitialEncounterSystem = {
         // 📜 Unlock the main quest
         this.unlockMainQuest();
 
-        // 🖤 Resume time to previous speed if we paused it (restore actual speed, not just 'NORMAL' 💀)
-        if (this._previousSpeedForIntro && typeof TimeSystem !== 'undefined') {
-            TimeSystem.setSpeed(this._previousSpeedForIntro);
-            this._previousSpeedForIntro = null;
+        // 🖤💀 Resume time using interrupt system - restores user's preferred speed 💀
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.resumeFromInterrupt) {
+                TimeSystem.resumeFromInterrupt('intro_sequence');
+            } else if (this._previousSpeedForIntro) {
+                TimeSystem.setSpeed(this._previousSpeedForIntro);
+                this._previousSpeedForIntro = null;
+            }
         }
 
         // 📝 Add journal entry based on choice
@@ -670,10 +686,14 @@ const InitialEncounterSystem = {
             addMessage('🎭 The hooded stranger lingers in the shadows... perhaps you should speak with them.', 'info');
         }
 
-        // 🖤 Resume time if it was paused
-        if (this._previousSpeedForIntro && typeof TimeSystem !== 'undefined') {
-            TimeSystem.setSpeed(this._previousSpeedForIntro);
-            this._previousSpeedForIntro = null;
+        // 🖤💀 Resume time using interrupt system 💀
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.resumeFromInterrupt) {
+                TimeSystem.resumeFromInterrupt('intro_sequence');
+            } else if (this._previousSpeedForIntro) {
+                TimeSystem.setSpeed(this._previousSpeedForIntro);
+                this._previousSpeedForIntro = null;
+            }
         }
     },
 

@@ -171,6 +171,11 @@ const TimeMachine = {
         this.lastFrameTime = 0;
         this.accumulatedTime = 0;
 
+        // 🖤💀 USER PREFERRED SPEED - The speed the player WANTS, not what the system forces 💀
+        // This is what we restore to after interrupts (encounters, achievements, etc.)
+        this.userPreferredSpeed = 'NORMAL';
+        this._interruptStack = []; // Track nested interrupts (achievement during encounter, etc.)
+
         // ⚡ Setup UI controls
         this.setupTimeControls();
 
@@ -500,6 +505,71 @@ const TimeMachine = {
             this.setSpeed('PAUSED');
         }
         return this.isPaused;
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🖤💀 INTERRUPT HANDLING - Pause for events, restore user's preferred speed 💀
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * Pause for an interrupt (encounter, achievement, modal, etc.)
+     * Saves current speed to stack so nested interrupts work properly
+     * @param {string} source - What's causing the interrupt (for debugging)
+     */
+    pauseForInterrupt(source = 'unknown') {
+        // 🖤 Save current speed to the interrupt stack (for nested interrupts)
+        const speedToSave = this.isPaused ? 'PAUSED' : this.currentSpeed;
+        this._interruptStack.push({
+            speed: speedToSave,
+            source: source,
+            timestamp: Date.now()
+        });
+
+        // 🦇 Only pause if not already paused
+        if (!this.isPaused) {
+            this.setSpeed('PAUSED');
+        }
+
+        console.log(`⏸️ Time paused for interrupt: ${source} | Stack depth: ${this._interruptStack.length} | Saved speed: ${speedToSave}`);
+    },
+
+    /**
+     * Resume from an interrupt - restores previous speed from stack
+     * If stack is empty, uses userPreferredSpeed as fallback
+     * @param {string} source - What was causing the interrupt (for debugging)
+     */
+    resumeFromInterrupt(source = 'unknown') {
+        // 🖤 Pop from interrupt stack
+        const savedState = this._interruptStack.pop();
+
+        if (savedState) {
+            // 🦇 Restore the speed that was active before THIS interrupt
+            const speedToRestore = savedState.speed;
+            console.log(`▶️ Resuming from interrupt: ${source} | Restoring speed: ${speedToRestore} | Stack depth: ${this._interruptStack.length}`);
+
+            // 🔮 Only restore if we're still paused (another system might have already changed it)
+            if (this.isPaused && speedToRestore !== 'PAUSED') {
+                this.setSpeed(speedToRestore);
+            }
+        } else {
+            // 🖤 Stack empty - use user's preferred speed as fallback
+            console.log(`▶️ Resuming from interrupt: ${source} | No saved state, using userPreferredSpeed: ${this.userPreferredSpeed}`);
+            if (this.isPaused) {
+                this.setSpeed(this.userPreferredSpeed);
+            }
+        }
+    },
+
+    /**
+     * Set user's preferred speed - called when USER manually changes speed
+     * This is what gets restored after all interrupts clear
+     * @param {string} speed - The speed the user wants
+     */
+    setUserPreferredSpeed(speed) {
+        if (speed !== 'PAUSED' && this.SPEEDS.hasOwnProperty(speed)) {
+            this.userPreferredSpeed = speed;
+            console.log(`⏰ User preferred speed set to: ${speed}`);
+        }
     },
 
     // 🚶 Check for pending travel destination
@@ -919,6 +989,10 @@ const TimeMachine = {
                 e.stopPropagation();
                 console.log(`⏰ Speed button: ${speed}`);
                 self.setSpeed(speed);
+                // 🖤💀 Track user's preferred speed (not PAUSED) for interrupt restoration 💀
+                if (speed !== 'PAUSED') {
+                    self.setUserPreferredSpeed(speed);
+                }
             };
         };
 

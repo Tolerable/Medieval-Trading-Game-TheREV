@@ -1713,8 +1713,11 @@ const AchievementSystem = {
     showNextAchievementPopup() {
         if (this.pendingAchievements.length === 0) {
             this.isShowingPopup = false;
-            // Resume game if we paused it
-            if (!this.wasGamePaused && typeof TimeSystem !== 'undefined') {
+            // 🖤💀 Resume game using interrupt system - restores user's preferred speed 💀
+            if (typeof TimeSystem !== 'undefined' && TimeSystem.resumeFromInterrupt) {
+                TimeSystem.resumeFromInterrupt('achievement');
+            } else if (!this.wasGamePaused && typeof TimeSystem !== 'undefined') {
+                // Fallback for old API
                 TimeSystem.setSpeed('NORMAL');
             }
             return;
@@ -1722,11 +1725,16 @@ const AchievementSystem = {
 
         this.isShowingPopup = true;
 
-        // Pause the game (remember if it was already paused)
+        // 🖤💀 Pause the game using interrupt system - saves current speed for restoration 💀
         if (typeof TimeSystem !== 'undefined') {
-            this.wasGamePaused = TimeSystem.isPaused;
-            if (!this.wasGamePaused) {
-                TimeSystem.setSpeed('PAUSED');
+            if (TimeSystem.pauseForInterrupt) {
+                TimeSystem.pauseForInterrupt('achievement');
+            } else {
+                // Fallback for old API
+                this.wasGamePaused = TimeSystem.isPaused;
+                if (!this.wasGamePaused) {
+                    TimeSystem.setSpeed('PAUSED');
+                }
             }
         }
 

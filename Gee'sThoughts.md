@@ -16,6 +16,112 @@ Each entry follows this format:
 
 ---
 
+## 2025-12-05 - SESSION #33: REPUTATION DISPLAY UNIFICATION 🖤💀⭐
+
+**Request:** Gee reported reputation values inconsistent across UI - showing 3, 2, 15 in different places
+
+**Status:** ✅ COMPLETE
+
+### Problem:
+- Stats bar showed current rep (e.g., 3)
+- Trade section showed requirement (e.g., 15)
+- Messages showed +1/+2 gains
+- Confusing because they're different values for different purposes!
+
+### Solution: Unified "Current/Required" Display
+
+**Stats Bar Now Shows: ⭐ 3/15**
+- Left number = current reputation (color-coded)
+- Right number = trade requirement
+- Slash separator between them
+
+**Color Coding:**
+- 🟢 Green = Trade unlocked (current >= required)
+- 🟡 Yellow = Getting close (current >= 50% of required)
+- 🔴 Red = Far from unlocking (current < 50% of required)
+
+### Files Modified:
+**people-panel.js:**
+- Line 87-89: Added `/required` display to stats bar HTML
+- Line 349-358: Added CSS for separator and requirement styling
+- Line 918-950: Updated `updateNPCStatsBar()` to show both values with color coding
+
+### Trade Requirements (unchanged, now visible):
+- Always trade: merchant, innkeeper, general_store, baker, farmer, fisherman, ferryman, traveler = **0**
+- Low rep: blacksmith, apothecary, tailor, herbalist, miner = **10**
+- Med rep: jeweler, banker, guild_master = **25**
+- High rep: noble = **50**
+- Everyone else = **15**
+
+---
+
+## 2025-12-05 - SESSION #32: TIME SPEED INTERRUPT SYSTEM 🖤💀⏰
+
+**Request:** Gee reported time setting resets after encounters/achievements instead of restoring user's preferred speed
+
+**Status:** ✅ COMPLETE
+
+### Problem:
+- User sets time to FAST or VERY_FAST
+- Encounter/achievement/tutorial pauses time
+- After interrupt ends, time resets to NORMAL instead of restoring FAST
+
+### Solution: New Interrupt System in TimeMachine
+
+**time-machine.js** - Added:
+- `userPreferredSpeed` - Tracks what speed the player WANTS (not system forced)
+- `_interruptStack` - Stack for nested interrupts (achievement during encounter)
+- `pauseForInterrupt(source)` - Pauses and saves current speed to stack
+- `resumeFromInterrupt(source)` - Pops stack and restores previous speed
+- `setUserPreferredSpeed(speed)` - Called when user manually clicks speed buttons
+
+**Files Updated to Use Interrupt System:**
+- `achievement-system.js:1713-1739` - Achievement popups
+- `npc-encounters.js:328-361` - Random encounters
+- `initial-encounter.js:96-104, 202-212, 258-266, 539-547, 689-697` - Tutorial/intro sequence
+
+**Speed Button Fix:**
+- `time-machine.js:986-997` - Buttons now call `setUserPreferredSpeed()` when clicked
+
+### How It Works:
+1. User clicks FAST button → `userPreferredSpeed = 'FAST'`
+2. Encounter triggers → `pauseForInterrupt('encounter')` saves 'FAST' to stack
+3. Encounter ends → `resumeFromInterrupt('encounter')` pops stack, restores 'FAST'
+4. Nested: Achievement during encounter → Both get stacked properly!
+
+---
+
+## 2025-12-05 - SESSION #31: RANDOM ENCOUNTER BROWSE WARES FIX 🖤💀💰
+
+**Request:** Gee reported random encounters that offer to sell wares don't have "Browse Wares" button
+
+**Status:** ✅ COMPLETE
+
+### Root Cause:
+- `npcCanTrade()` only checked NPC type against a hardcoded list
+- Random encounters set `npcData.canTrade = true` for trader types (smuggler, courier, pilgrim)
+- But the UI checks never looked at `npcData.canTrade` property!
+
+### Fixes Applied:
+
+**people-panel.js** - 4 locations fixed to check `npcData.canTrade`:
+1. **Line 750** - NPC card trade badge: `|| npc.canTrade`
+2. **Line 883** - Chat view trade badge: `|| npcData.canTrade`
+3. **Line 1150** - Quick action "Browse Wares" button: `|| npcData.canTrade`
+4. **Line 1796** - Trade section display: `|| npcData.canTrade`
+
+**Now supports:**
+- traveler ✅ (was already working)
+- merchant ✅ (was already working)
+- smuggler ✅ (NOW FIXED)
+- courier ✅ (NOW FIXED)
+- pilgrim ✅ (NOW FIXED)
+
+**Files Modified:**
+- `src/js/ui/panels/people-panel.js` - 4 canTrade checks updated
+
+---
+
 ## 2025-12-05 - SESSION #30: MODAL Z-INDEX FIX 🖤💀📐
 
 **Request:** Gee reported Clear All Data and Main Menu buttons STILL not working after Session #29 fix
