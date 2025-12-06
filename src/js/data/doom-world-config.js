@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
-// DOOM WORLD CONFIG - The rules of the apocalypse 💀🔥
+// DOOM WORLD CONFIG - The rules of the apocalypse
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // This file configures everything about the doom world:
 // - Economy (barter system, worthless gold)
 // - World state (corruption, danger levels)
@@ -11,7 +11,7 @@
 
 const DoomWorldConfig = {
     // ═══════════════════════════════════════════════════════════════
-    // 🔥 WORLD STATE
+    // WORLD STATE
     // ═══════════════════════════════════════════════════════════════
     worldState: {
         name: 'The Doom',
@@ -28,7 +28,7 @@ const DoomWorldConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💰 DOOM ECONOMY - Barter system, gold is worthless
+    // DOOM ECONOMY - Barter system, gold is worthless
     // ═══════════════════════════════════════════════════════════════
     economy: {
         goldMultiplier: 0.01, // Gold is worth 1% of normal
@@ -134,7 +134,7 @@ const DoomWorldConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // ⚠️ DANGER SYSTEM
+    // DANGER SYSTEM
     // ═══════════════════════════════════════════════════════════════
     danger: {
         // Base danger levels by location type
@@ -171,7 +171,7 @@ const DoomWorldConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎨 UI CONFIGURATION - Doom aesthetic
+    // UI CONFIGURATION - Doom aesthetic
     // ═══════════════════════════════════════════════════════════════
     ui: {
         // Color scheme
@@ -188,13 +188,13 @@ const DoomWorldConfig = {
 
         // Message prefixes
         messagePrefix: {
-            info: '💀',
-            warning: '⚠️',
-            danger: '🔥',
-            death: '☠️',
-            quest: '📜',
-            trade: '🔄',
-            hope: '🌱'
+            info: '',
+            warning: '',
+            danger: '',
+            death: '',
+            quest: '',
+            trade: '',
+            hope: ''
         },
 
         // Atmosphere text for locations
@@ -222,7 +222,7 @@ const DoomWorldConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔧 INTEGRATION FUNCTIONS
+    // INTEGRATION FUNCTIONS
     // ═══════════════════════════════════════════════════════════════
 
     // Check if doom world is active
@@ -236,7 +236,7 @@ const DoomWorldConfig = {
         if (typeof game !== 'undefined') {
             game.inDoomWorld = true;
         }
-        console.log('💀 DOOM WORLD ACTIVATED - The apocalypse begins...');
+        console.log('DOOM WORLD ACTIVATED - The apocalypse begins...');
         this._applyDoomEffects();
     },
 
@@ -246,7 +246,7 @@ const DoomWorldConfig = {
         if (typeof game !== 'undefined') {
             game.inDoomWorld = false;
         }
-        console.log('🌅 Returned to the normal world...');
+        console.log('Returned to the normal world...');
         this._removeDoomEffects();
     },
 
@@ -359,4 +359,4 @@ const DoomWorldConfig = {
 // ═══════════════════════════════════════════════════════════════
 window.DoomWorldConfig = DoomWorldConfig;
 
-console.log('💀 DoomWorldConfig loaded - The apocalypse is configured...');
+console.log('DoomWorldConfig loaded - The apocalypse is configured...');

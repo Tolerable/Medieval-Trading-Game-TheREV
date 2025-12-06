@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // IMMERSIVE EXPERIENCE INTEGRATION - dark magic converges here
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -28,7 +28,7 @@ const ImmersiveExperienceIntegration = {
             this.setupAudioIntegration();
         }
         
-        // ✨ Initialize visual effects system - painting reality with magic
+        // Initialize visual effects system - painting reality with magic
         if (typeof VisualEffectsSystem !== 'undefined') {
             VisualEffectsSystem.init();
             this.setupVisualEffectsIntegration();
@@ -52,7 +52,7 @@ const ImmersiveExperienceIntegration = {
             this.setupEnvironmentalIntegration();
         }
         
-        // ⚙️ Initialize settings panel - giving control to the mortals
+        // Initialize settings panel - giving control to the mortals
         if (typeof SettingsPanel !== 'undefined') {
             SettingsPanel.init();
             this.setupSettingsIntegration();
@@ -159,7 +159,7 @@ const ImmersiveExperienceIntegration = {
         });
     },
     
-    // ✨ Setup visual effects integration - making every action sparkle
+    // Setup visual effects integration - making every action sparkle
     setupVisualEffectsIntegration() {
         // 💰 Gold transactions - money deserves to glitter
         EventManager.addEventListener(document, 'goldTransaction', (e) => {
@@ -386,7 +386,7 @@ const ImmersiveExperienceIntegration = {
         });
     },
     
-    // ⚙️ Setup settings integration - control is an illusion, but a nice one
+    // Setup settings integration - control is an illusion, but a nice one
     setupSettingsIntegration() {
         // 🚫 settings button removed - we already have settings in the side panel and main menu
         // no need for a floating button cluttering up the screen
@@ -409,7 +409,7 @@ const ImmersiveExperienceIntegration = {
                 // Call original function
                 originalAddMessage.call(this, text, type);
                 
-                // ✨ Add immersive effects based on message type - every word gets its flavor
+                // Add immersive effects based on message type - every word gets its flavor
                 if (type === 'warning') {
                     document.dispatchEvent(new CustomEvent('warning', { detail: { message: text } }));
                 } else if (type === 'error') {
@@ -637,7 +637,7 @@ const ImmersiveExperienceIntegration = {
                         EnvironmentalEffectsSystem.setQuality('low');
                     }
                 } else if (fps > 50) {
-                    // ⚡ Can handle higher quality - unleash the full power
+                    // Can handle higher quality - unleash the full power
                     if (typeof VisualEffectsSystem !== 'undefined') {
                         VisualEffectsSystem.setQuality('high');
                     }

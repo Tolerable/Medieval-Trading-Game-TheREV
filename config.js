@@ -12,14 +12,14 @@ const GameConfig = {
     // 📋 VERSION INFO - tracking our descent into madness
     // ═══════════════════════════════════════════════════════════════
     version: {
-        game: '0.90.00',        // the credits & about update 🖤
-        file: '0.90.00',        // keeping pace with the darkness
+        game: '0.90.01',        // the credits & about update
+        file: '0.90.01',        // keeping pace with the darkness
         build: '2025.12',      // born in the depths of 2025
         releaseDate: '2025'    // the year we unleashed this beast
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔧 DEBOOGER CONFIG - for developers and chaos agents
+    // DEBOOGER CONFIG - for developers and chaos agents
     // ═══════════════════════════════════════════════════════════════
     // set enabled to false for production builds
     // this locks out all debooger commands so players can't wreck the leaderboards
@@ -30,7 +30,7 @@ const GameConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎮 GAME IDENTITY - who even are we anyway
+    // GAME IDENTITY - who even are we anyway
     // ═══════════════════════════════════════════════════════════════
     game: {
         name: 'Medieval Trading Game',
@@ -40,7 +40,7 @@ const GameConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 👥 CREDITS - the souls who sacrificed their sanity
+    // CREDITS - the souls who sacrificed their sanity
     // ═══════════════════════════════════════════════════════════════
     credits: {
         studio: 'Unity AI Lab',
@@ -57,7 +57,7 @@ const GameConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔗 LINKS - escape routes from this madness
+    // LINKS - escape routes from this madness
     // ═══════════════════════════════════════════════════════════════
     links: {
         website: 'https://www.unityailab.com',           // the shrine of darkness
@@ -67,7 +67,7 @@ const GameConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🤖 API CONFIG - summoning circles for external services
+    // API CONFIG - summoning circles for external services
     // ═══════════════════════════════════════════════════════════════
     // all the endpoints live here now. one config to bind them all.
     // change these and watch the whole damn thing dance to your tune.

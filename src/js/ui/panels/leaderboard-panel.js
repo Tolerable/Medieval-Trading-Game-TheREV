@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // LEADERBOARD PANEL - global rankings and hall of fame
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -10,7 +10,7 @@
 console.log('🏆 Global Leaderboard System awakening from the void...');
 
 const GlobalLeaderboardSystem = {
-    // 🌐 Configuration - reads from GameConfig in config.js
+    // Configuration - reads from GameConfig in config.js
     // Set your JSONBin credentials in config.js, not here!
     // This is THE SINGLE SOURCE OF TRUTH for the Hall of Champions
     // All saves, deaths, and retirements go through here
@@ -27,17 +27,17 @@ const GlobalLeaderboardSystem = {
         cacheTimeout: 300000
     },
 
-    // 📊 Local cache of leaderboard
+    // Local cache of leaderboard
     leaderboard: [],
     lastFetch: null,
-    // 🖤 No auto-refresh interval - API calls only on user action 💀
+    // No auto-refresh interval - API calls only on user action
     // cacheTimeout now comes from config
-    _fetchPromise: null, // 🖤 Stores ongoing fetch promise so concurrent callers can await 💀
-    _submitPromise: null, // 🖤 Prevents concurrent submissions from causing duplicates 💀
-    _lastSubmittedCharacterId: null, // 🖤 Track last submitted character to block rapid re-submissions 💀
-    _lastSubmitTime: 0, // 🖤 Timestamp of last submission for debounce 💀
+    _fetchPromise: null, // Stores ongoing fetch promise so concurrent callers can await
+    _submitPromise: null, // Prevents concurrent submissions from causing duplicates
+    _lastSubmittedCharacterId: null, // Track last submitted character to block rapid re-submissions
+    _lastSubmitTime: 0, // Timestamp of last submission for debounce
 
-    // 🎮 Initialize the system
+    // Initialize the system
     init() {
         console.log('🏆 Global Leaderboard initializing...');
 
@@ -47,7 +47,7 @@ const GlobalLeaderboardSystem = {
         // Then check for any user overrides in localStorage
         this.loadConfig();
 
-        // Log final config state (show partial key for deboogering 🦇)
+        // Log final config state (show partial key for deboogering)
         const keyPreview = this.config.API_KEY ?
             this.config.API_KEY.substring(0, 15) + '...' + this.config.API_KEY.substring(this.config.API_KEY.length - 10) :
             'MISSING';
@@ -63,12 +63,12 @@ const GlobalLeaderboardSystem = {
             console.log('🏆 Initial fetch complete, entries:', this.leaderboard.length);
             this.renderLeaderboard();
 
-            // 🖤 Update main menu Hall of Champions - retry if SaveUISystem not ready yet 💀
+            // Update main menu Hall of Champions - retry if SaveUISystem not ready yet
             this.updateMainMenuHallOfChampions();
         });
     },
 
-    // 🖤 Helper to update main menu with retries (handles race condition with SaveUISystem) 💀
+    // Helper to update main menu with retries (handles race condition with SaveUISystem)
     updateMainMenuHallOfChampions() {
         const tryUpdate = (attempt = 1) => {
             // Check if SaveUISystem exists
@@ -89,7 +89,7 @@ const GlobalLeaderboardSystem = {
         tryUpdate();
     },
 
-    // 📜 Load configuration from GameConfig (config.js)
+    // Load configuration from GameConfig (config.js)
     loadFromGameConfig() {
         if (typeof GameConfig === 'undefined' || !GameConfig.leaderboard) {
             console.log('🏆 GameConfig.leaderboard not found, using defaults');

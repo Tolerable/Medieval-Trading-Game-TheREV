@@ -1,5 +1,5 @@
 /**
- * 🖤 TEST HELPERS - Common utilities for Playwright tests
+ * TEST HELPERS - Common utilities for Playwright tests
  */
 
 const config = require('../config/test-config');
@@ -83,7 +83,7 @@ async function startNewGame(page) {
 }
 
 /**
- * 🖤 Start a new game and skip ALL intro modals to get to playable game state 💀
+ * Start a new game and skip ALL intro modals to get to playable game state
  * This handles the COMPLETE game initialization sequence:
  * 1. New Game button → Character Setup
  * 2. Randomize character → Start Game
@@ -97,14 +97,14 @@ async function startNewGame(page) {
 async function startGameAndSkipIntro(page) {
   await waitForGameLoad(page);
 
-  // 🖤 Step 1: Click New Game
+  // Step 1: Click New Game
   await page.click('#new-game-btn');
   await page.waitForFunction(() => {
     const panel = document.getElementById('game-setup-panel');
     return panel && !panel.classList.contains('hidden');
   }, { timeout: 10000 });
 
-  // 🖤 Step 2: Use Randomize button (faster than manual attribute allocation)
+  // Step 2: Use Randomize button (faster than manual attribute allocation)
   const randomizeBtn = page.locator('#randomize-character-btn');
   if (await randomizeBtn.count() > 0) {
     await randomizeBtn.click();
@@ -124,14 +124,14 @@ async function startGameAndSkipIntro(page) {
 
   await page.waitForTimeout(300);
 
-  // 🖤 Step 3: Click Start Game
+  // Step 3: Click Start Game
   await page.click('#start-game-btn');
   await page.waitForTimeout(500);
 
-  // 🖤 Step 4: Handle Tutorial Choice modal - click "No, Just Start"
-  await handleModalButton(page, ['No, Just Start', 'No Thanks', '❌ No', 'Skip'], 3000);
+  // Step 4: Handle Tutorial Choice modal - click "No, Just Start"
+  await handleModalButton(page, ['No, Just Start', 'No Thanks', 'No', 'Skip'], 3000);
 
-  // 🖤 Step 5: Wait for Rank Celebration to appear and auto-dismiss (or click to dismiss)
+  // Step 5: Wait for Rank Celebration to appear and auto-dismiss (or click to dismiss)
   await page.waitForTimeout(1000);
   const rankCelebration = page.locator('.rank-up-celebration, .rank-celebration');
   if (await rankCelebration.count() > 0) {
@@ -146,13 +146,13 @@ async function startGameAndSkipIntro(page) {
     }, { timeout: 6000 }).catch(() => {});
   }
 
-  // 🖤 Step 6: Handle Introduction modal - click "Approach the Stranger"
-  await handleModalButton(page, ['Approach the Stranger', 'Approach', '🎭 Approach'], 5000);
+  // Step 6: Handle Introduction modal - click "Approach the Stranger"
+  await handleModalButton(page, ['Approach the Stranger', 'Approach'], 5000);
 
-  // 🖤 Step 7: Handle Stranger Encounter modal - click "Accept Quest"
-  await handleModalButton(page, ['Accept Quest', 'Accept', '✅ Accept'], 5000);
+  // Step 7: Handle Stranger Encounter modal - click "Accept Quest"
+  await handleModalButton(page, ['Accept Quest', 'Accept'], 5000);
 
-  // 🖤 Step 8: Close Quest Info Panel if visible
+  // Step 8: Close Quest Info Panel if visible
   await page.waitForTimeout(500);
 
   // Try multiple methods to close any open quest panels
@@ -177,7 +177,7 @@ async function startGameAndSkipIntro(page) {
 
   await page.waitForTimeout(300);
 
-  // 🖤 Step 9: Verify game is in playable state
+  // Step 9: Verify game is in playable state
   await page.waitForFunction(() => {
     // Game is ready when:
     // - Location panel is visible (main gameplay UI)
@@ -193,7 +193,7 @@ async function startGameAndSkipIntro(page) {
     return (locationVisible || gameVisible) && noBlockingModal;
   }, { timeout: 10000 });
 
-  // 🖤 Final: Ensure any remaining modals are closed
+  // Final: Ensure any remaining modals are closed
   await page.evaluate(() => {
     // Force close any lingering modals
     const modalContainers = document.querySelectorAll('.modal-container, .modal-overlay');
@@ -212,7 +212,7 @@ async function startGameAndSkipIntro(page) {
 }
 
 /**
- * 🖤 Helper: Click a button in a modal by searching for text patterns 💀
+ * Helper: Click a button in a modal by searching for text patterns
  */
 async function handleModalButton(page, buttonTexts, timeout = 3000) {
   const startTime = Date.now();
@@ -245,11 +245,11 @@ async function handleModalButton(page, buttonTexts, timeout = 3000) {
 }
 
 /**
- * 🖤 Open the Debooger console (button-only, no keyboard shortcut) 💀
+ * Open the Debooger console (button-only, no keyboard shortcut)
  * NOTE: For testing, this FORCE-ENABLES the debooger if it's disabled in config
  */
 async function openDeboogerConsole(page) {
-  // 🖤 FIRST: Force-enable debooger for testing purposes
+  // FIRST: Force-enable debooger for testing purposes
   await page.evaluate(() => {
     // Enable debooger in GameConfig
     if (typeof GameConfig !== 'undefined' && GameConfig.debooger) {
@@ -281,7 +281,7 @@ async function openDeboogerConsole(page) {
 
   await page.waitForTimeout(100);
 
-  // 🖤 Click the Debooger button to open it
+  // Click the Debooger button to open it
   const deboogerBtn = page.locator('#toggle-debooger-console, #debooger-toggle-btn, .debooger-toggle, button:has-text("Debooger")');
   if (await deboogerBtn.count() > 0 && await deboogerBtn.first().isVisible()) {
     await deboogerBtn.first().click();
@@ -298,7 +298,7 @@ async function openDeboogerConsole(page) {
     await page.waitForTimeout(config.actionDelay);
   }
 
-  // Wait for Debooger console to be visible 🕯️
+  // Wait for Debooger console to be visible
   await page.waitForFunction(() => {
     const deboogerConsole = document.getElementById('debooger-console') ||
                     document.querySelector('.debooger-console');
@@ -308,7 +308,7 @@ async function openDeboogerConsole(page) {
     console.log('Debooger console not visible, forcing display...');
   });
 
-  // 🖤 Final fallback: Force the console visible
+  // Final fallback: Force the console visible
   await page.evaluate(() => {
     const deboogerConsole = document.getElementById('debooger-console');
     if (deboogerConsole) {
@@ -323,19 +323,19 @@ async function openDeboogerConsole(page) {
 }
 
 /**
- * 🖤 Execute a debooger command 🔮
+ * Execute a debooger command
  * NOTE: For testing, this executes via DeboogerCommandSystem.execute() directly
  * and FORCE-ENABLES the debooger if it's disabled in config
  */
 async function runDeboogerCommand(page, command) {
-  // 🖤 Execute directly via DeboogerCommandSystem - bypasses UI entirely
+  // Execute directly via DeboogerCommandSystem - bypasses UI entirely
   const result = await page.evaluate(async (cmd) => {
     // First, force-enable debooger for testing
     if (typeof GameConfig !== 'undefined' && GameConfig.debooger) {
       GameConfig.debooger.enabled = true;
     }
 
-    // 🖤 If commands weren't registered (because debooger was disabled at load), register them now
+    // If commands weren't registered (because debooger was disabled at load), register them now
     if (typeof DeboogerCommandSystem !== 'undefined') {
       if (!DeboogerCommandSystem.commands || Object.keys(DeboogerCommandSystem.commands).length === 0) {
         DeboogerCommandSystem.registerBuiltInCommands();
@@ -357,7 +357,7 @@ async function runDeboogerCommand(page, command) {
 }
 
 /**
- * 🖤 Get the last debooger console output 🦇
+ * Get the last debooger console output
  */
 async function getDeboogerOutput(page) {
   return await page.evaluate(() => {
@@ -445,11 +445,11 @@ async function closePanel(page, panelId) {
 
 /**
  * Get player gold amount
- * 🖤 Reads directly from game.player.gold to ensure fresh value after load
+ * Reads directly from game.player.gold to ensure fresh value after load
  */
 async function getPlayerGold(page) {
   return await page.evaluate(() => {
-    // 🖤 Read directly from game.player.gold for most accurate value
+    // Read directly from game.player.gold for most accurate value
     if (typeof game !== 'undefined' && game.player) {
       return game.player.gold || 0;
     }
@@ -467,7 +467,7 @@ async function getPlayerGold(page) {
 
 /**
  * Get player stats
- * 🖤 Stats are in game.player.stats object, not directly on game.player
+ * Stats are in game.player.stats object, not directly on game.player
  */
 async function getPlayerStats(page) {
   return await page.evaluate(() => {
@@ -542,15 +542,15 @@ function filterCriticalErrors(errors) {
     !e.includes('net::ERR') &&
     !e.includes('getSavedGames') &&
     !e.includes('NPCScheduleSystem') &&
-    !e.includes('NPC Voice API Error')  // 🖤 Cosmetic voice API errors are non-critical
+    !e.includes('NPC Voice API Error')  // Cosmetic voice API errors are non-critical
   );
 }
 
 module.exports = {
   waitForGameLoad,
   startNewGame,
-  startGameAndSkipIntro,  // 🖤 NEW: Complete game setup with all intro handling 💀
-  handleModalButton,       // 🖤 NEW: Helper for clicking modal buttons 💀
+  startGameAndSkipIntro,  // NEW: Complete game setup with all intro handling
+  handleModalButton,       // NEW: Helper for clicking modal buttons
   openDeboogerConsole,
   runDeboogerCommand,
   getDeboogerOutput,

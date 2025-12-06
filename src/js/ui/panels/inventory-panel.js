@@ -1,29 +1,29 @@
 // ═══════════════════════════════════════════════════════════════
 // INVENTORY PANEL - item management interface
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
 // ═══════════════════════════════════════════════════════════════
 
 const InventorySystem = {
-    // ⚙️ Config - limits on our hoarding tendencies
+    // Config - limits on our hoarding tendencies
     maxSlots: 20,
     maxWeight: 100,
     sortCriteria: 'name',
     filterCriteria: null,
 
-    // 🖤 Store dropdown close handlers for cleanup 💀
+    // Store dropdown close handlers for cleanup
     _dropdownCloseHandler: null,
-    
-    // 🌙 Initialize - waking up the hoard
+
+    // Initialize - waking up the hoard
     init() {
         this.setupEventListeners();
         this.updateInventoryDisplay();
     },
     
-    // 👂 Setup event listeners - listening for organizing impulses
+    // Setup event listeners - listening for organizing impulses
     setupEventListeners() {
         // sorting - for the anxious organizers
         const sortBtn = document.getElementById('sort-inventory-btn');
@@ -43,7 +43,7 @@ const InventorySystem = {
             EventManager.addEventListener(settingsBtn, 'click', () => this.showInventorySettings());
         }
 
-        // 🖤💀 Event delegation for item action buttons - no more inline onclick garbage
+        // Event delegation for item action buttons - no more inline onclick garbage
         document.addEventListener('click', (e) => {
             if (e.target.matches('[data-action="use-item"]')) {
                 const itemId = e.target.dataset.itemId;
@@ -59,7 +59,7 @@ const InventorySystem = {
             }
         });
 
-        // 🖤💀 RIGHT-CLICK on inventory items - equip if equippable, use if consumable 💀
+        // RIGHT-CLICK on inventory items - equip if equippable, use if consumable
         document.addEventListener('contextmenu', (e) => {
             const inventoryItem = e.target.closest('.inventory-item');
             if (inventoryItem) {
@@ -84,7 +84,7 @@ const InventorySystem = {
         });
     },
     
-    // 📦 Update inventory display - admiring our collection
+    // Update inventory display - admiring our collection
     updateInventoryDisplay() {
         const inventoryContainer = document.getElementById('inventory-items');
         if (!inventoryContainer) return;
@@ -96,7 +96,7 @@ const InventorySystem = {
             return;
         }
 
-        // 🖤💀 Safety check - ItemDatabase might not be loaded yet during early init
+        // Safety check - ItemDatabase might not be loaded yet during early init
         if (typeof ItemDatabase === 'undefined') {
             console.warn('🎒 InventoryPanel: ItemDatabase not loaded yet, skipping update');
             inventoryContainer.innerHTML = '<p>Loading inventory...</p>';
@@ -106,7 +106,7 @@ const InventorySystem = {
         let totalWeight = 0;
         let totalValue = 0;
 
-        // 🖤💀 INVENTORY ORDERING: Gold → Weather → Food → Water → Everything else 💰
+        // INVENTORY ORDERING: Gold → Weather → Food → Water → Everything else
         const sortedItems = this._sortInventoryByPriority(Object.entries(game.player.inventory));
 
         for (const [itemId, quantity] of sortedItems) {
@@ -166,7 +166,7 @@ const InventorySystem = {
         }
     },
 
-    // 🖤💀 INVENTORY PRIORITY SORTING - Gold → Weather → Food → Water → Everything else 💰
+    // INVENTORY PRIORITY SORTING - Gold → Weather → Food → Water → Everything else
     _sortInventoryByPriority(items) {
         // Priority groups (lower = higher priority)
         const getPriority = (itemId) => {
@@ -312,7 +312,7 @@ const InventorySystem = {
         }
     },
     
-    // Drop item - 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+    // Drop item - FIXED: Use modal instead of browser confirm()
     dropItem(itemId) {
         if (game.player.inventory[itemId] > 0) {
             const item = ItemDatabase.getItem(itemId);
@@ -427,7 +427,7 @@ const InventorySystem = {
 
         document.body.appendChild(dropdown);
 
-        // 🖤 Cleanup helper - removes dropdown and its close handler 💀
+        // Cleanup helper - removes dropdown and its close handler
         const cleanupDropdown = () => {
             if (this._dropdownCloseHandler) {
                 document.removeEventListener('click', this._dropdownCloseHandler);
@@ -591,7 +591,7 @@ const InventorySystem = {
 
         document.body.appendChild(dropdown);
 
-        // 🖤 Cleanup helper - removes dropdown and its close handler 💀
+        // Cleanup helper - removes dropdown and its close handler
         const cleanupDropdown = () => {
             if (this._dropdownCloseHandler) {
                 document.removeEventListener('click', this._dropdownCloseHandler);

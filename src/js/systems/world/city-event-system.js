@@ -1,14 +1,14 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // CITY EVENT SYSTEM - disrupting your plans daily
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const CityEventSystem = {
-    // 🎲 Event types - varieties of disruption to ruin your plans
+    //  Event types - varieties of disruption to ruin your plans
     eventTypes: {
         FESTIVAL: 'festival',
         RAID: 'raid',
@@ -134,7 +134,7 @@ const CityEventSystem = {
             try {
                 this.activeEvents = JSON.parse(saved);
             } catch (e) {
-                // 🖤 Corrupt data? Nuke it and start fresh - silent fallback
+                //  Corrupt data? Nuke it and start fresh - silent fallback
                 localStorage.removeItem('tradingGameCityEvents');
                 this.activeEvents = {};
             }
@@ -146,7 +146,7 @@ const CityEventSystem = {
         try {
             localStorage.setItem('tradingGameCityEvents', JSON.stringify(this.activeEvents));
         } catch (e) {
-            // 🖤 Storage full or blocked - silent fail, not critical
+            //  Storage full or blocked - silent fail, not critical
         }
     },
 
@@ -203,13 +203,13 @@ const CityEventSystem = {
         addMessage(`📢 Event in ${cityId}: ${event.name}`);
         addMessage(event.description);
 
-        // 🖤 Town crier voice announcement (if player is in this city)
+        //  Town crier voice announcement (if player is in this city)
         if (game.currentLocation && game.currentLocation.id === cityId) {
             this.playTownCrierAnnouncement(event, cityId);
         }
     },
 
-    // 🖤 Play town crier voice announcement for city events
+    //  Play town crier voice announcement for city events
     async playTownCrierAnnouncement(event, cityId) {
         // Only play if voice is enabled
         if (typeof NPCVoiceChatSystem === 'undefined' || !NPCVoiceChatSystem.settings?.voiceEnabled) {

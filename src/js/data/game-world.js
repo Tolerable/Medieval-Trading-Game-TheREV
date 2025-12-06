@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME WORLD SYSTEM - where dreams die and gold lives in darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -9,14 +9,14 @@
 
 const GameWorld = {
     // ═══════════════════════════════════════════════════════════════
-    // 🌍 MEDIEVAL MAP REGIONS - The lands that await your conquest
+    //  MEDIEVAL MAP REGIONS - The lands that await your conquest
     // ═══════════════════════════════════════════════════════════════
     regions: {
         starter: {
             id: 'starter',
             name: 'Riverlands',
             description: 'A peaceful realm perfect for new merchants.',
-            unlockRequirement: null, // 🖤 Always available - where noobs are born
+            unlockRequirement: null, //  Always available - where noobs are born
             goldRequirement: 0
         },
         northern: {
@@ -57,13 +57,13 @@ const GameWorld = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📍 LOCATIONS - SPOKE LAYOUT radiating from Royal Capital at center
-    // 🖤 Includes: cities, towns, villages, mines, forests, farms,
+    //  LOCATIONS - SPOKE LAYOUT radiating from Royal Capital at center
+    //  Includes: cities, towns, villages, mines, forests, farms,
     //    dungeons, caves, inns, ruins, ports
     // ═══════════════════════════════════════════════════════════════
     locations: {
         // ═══════════════════════════════════════════════════════════
-        // 👑 ROYAL CAPITAL - CENTER HUB (400, 300)
+        //  ROYAL CAPITAL - CENTER HUB (400, 300)
         // ═══════════════════════════════════════════════════════════
         royal_capital: {
             id: 'royal_capital',
@@ -78,11 +78,11 @@ const GameWorld = {
             mapPosition: { x: 400, y: 300 },
             sells: ['royal_goods', 'luxury_items', 'fine_clothes', 'jewelry', 'silk_garments', 'perfume', 'wine', 'spices'],
             buys: ['artifacts', 'rare_gems', 'silk', 'gems', 'gold_bar', 'exotic_goods', 'furs', 'spices'],
-            npcs: ['noble', 'guard', 'captain', 'jeweler', 'tailor', 'banker', 'herald', 'merchant', 'royal_advisor'] // 🖤💀 FIXED: Changed elder→royal_advisor to prevent quest confusion with village elders
+            npcs: ['noble', 'guard', 'captain', 'jeweler', 'tailor', 'banker', 'herald', 'merchant', 'royal_advisor'] //  FIXED: Changed elder→royal_advisor to prevent quest confusion with village elders
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🏰 CITIES (6 major cities around the capital)
+        //  CITIES (6 major cities around the capital)
         // ═══════════════════════════════════════════════════════════
         ironforge_city: {
             id: 'ironforge_city',
@@ -177,7 +177,7 @@ const GameWorld = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🏘️ VILLAGES (6 small settlements)
+        //  VILLAGES (6 small settlements)
         // ═══════════════════════════════════════════════════════════
         frostholm_village: {
             id: 'frostholm_village',
@@ -192,7 +192,7 @@ const GameWorld = {
             mapPosition: { x: 460, y: 100 },
             sells: ['furs', 'leather', 'hide', 'winter_clothing', 'meat'],
             buys: ['bread', 'ale', 'tools', 'rope', 'salt', 'grain'],
-            npcs: ['chieftain', 'merchant', 'guard', 'hunter', 'trapper'] // 🖤💀 FIXED: Changed elder→chieftain (elder ONLY in Greendale for quest consistency)
+            npcs: ['chieftain', 'merchant', 'guard', 'hunter', 'trapper'] //  FIXED: Changed elder→chieftain (elder ONLY in Greendale for quest consistency)
         },
         vineyard_village: {
             id: 'vineyard_village',
@@ -271,9 +271,9 @@ const GameWorld = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // ⛏️ MINES (4 mining locations) - Sell raw ore, buy tools
+        //  MINES (4 mining locations) - Sell raw ore, buy tools
         // ═══════════════════════════════════════════════════════════
-        // 🖤💀 gatheringDifficulty: 1.0 = normal, higher = harder but better resources
+        //  gatheringDifficulty: 1.0 = normal, higher = harder but better resources
         iron_mines: {
             id: 'iron_mines',
             name: 'Iron Mines',
@@ -288,8 +288,8 @@ const GameWorld = {
             sells: ['iron_ore', 'coal', 'stone'],
             buys: ['pickaxe', 'torch', 'lamp', 'rope', 'food', 'ale', 'bandages'],
             npcs: ['miner', 'foreman', 'merchant'],
-            gatheringDifficulty: 1.0, // 🖤 Base difficulty - common iron and coal
-            availableResources: ['stone', 'iron_ore', 'coal', 'copper_ore'] // 🦇 What can be gathered here
+            gatheringDifficulty: 1.0, //  Base difficulty - common iron and coal
+            availableResources: ['stone', 'iron_ore', 'coal', 'copper_ore'] //  What can be gathered here
         },
         silver_mine: {
             id: 'silver_mine',
@@ -305,8 +305,8 @@ const GameWorld = {
             sells: ['silver_ore', 'gems', 'stone'],
             buys: ['pickaxe', 'torch', 'food', 'ale', 'rope', 'bandages'],
             npcs: ['miner', 'foreman', 'jeweler'],
-            gatheringDifficulty: 1.5, // 🖤 Harder - precious metals
-            availableResources: ['stone', 'silver_ore', 'coal'] // 🦇 Silver mine specializes in silver
+            gatheringDifficulty: 1.5, //  Harder - precious metals
+            availableResources: ['stone', 'silver_ore', 'coal'] //  Silver mine specializes in silver
         },
         deep_mine: {
             id: 'deep_mine',
@@ -322,14 +322,14 @@ const GameWorld = {
             sells: ['gold_ore', 'gems', 'rare_gems', 'coal'],
             buys: ['steel_pickaxe', 'lamp', 'rope', 'food', 'bandages', 'ale'],
             npcs: ['miner', 'adventurer'],
-            gatheringDifficulty: 2.0, // 🖤 Very hard - gold and rare gems!
-            availableResources: ['stone', 'iron_ore', 'gold_ore', 'coal'] // 🦇 Deep mine has gold!
+            gatheringDifficulty: 2.0, //  Very hard - gold and rare gems!
+            availableResources: ['stone', 'iron_ore', 'gold_ore', 'coal'] //  Deep mine has gold!
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🌲 FORESTS (5 forest locations) - Sell gathered goods
+        //  FORESTS (5 forest locations) - Sell gathered goods
         // ═══════════════════════════════════════════════════════════
-        // 🖤💀 gatheringDifficulty: 1.0 = normal, higher = harder but rarer/better resources
+        //  gatheringDifficulty: 1.0 = normal, higher = harder but rarer/better resources
         ancient_forest: {
             id: 'ancient_forest',
             name: 'Ancient Forest',
@@ -344,8 +344,8 @@ const GameWorld = {
             sells: ['herbs', 'medical_plants', 'mushrooms', 'timber', 'berries'],
             buys: ['bread', 'cheese', 'ale', 'axe', 'rope'],
             npcs: ['herbalist', 'hunter', 'forager'],
-            gatheringDifficulty: 1.8, // 🖤 Hard - ancient trees, rare herbs
-            availableResources: ['wood', 'timber', 'herbs', 'mushrooms', 'berries'] // 🦇 Ancient timber here!
+            gatheringDifficulty: 1.8, //  Hard - ancient trees, rare herbs
+            availableResources: ['wood', 'timber', 'herbs', 'mushrooms', 'berries'] //  Ancient timber here!
         },
         whispering_woods: {
             id: 'whispering_woods',
@@ -361,8 +361,8 @@ const GameWorld = {
             sells: ['herbs', 'medical_plants', 'mushrooms', 'honey', 'berries'],
             buys: ['bread', 'salt', 'glass', 'cloth'],
             npcs: ['herbalist', 'alchemist', 'wanderer'],
-            gatheringDifficulty: 1.5, // 🖤 Medium-hard - magical herbs
-            availableResources: ['wood', 'herbs', 'mushrooms', 'honey', 'berries'] // 🦇 Rare herbs!
+            gatheringDifficulty: 1.5, //  Medium-hard - magical herbs
+            availableResources: ['wood', 'herbs', 'mushrooms', 'honey', 'berries'] //  Rare herbs!
         },
         hunters_wood: {
             id: 'hunters_wood',
@@ -378,14 +378,14 @@ const GameWorld = {
             sells: ['furs', 'leather', 'hide', 'meat', 'mutton'],
             buys: ['bow', 'arrows', 'bread', 'ale', 'rope', 'salt'],
             npcs: ['hunter', 'trapper', 'merchant'],
-            gatheringDifficulty: 1.0, // 🖤 Easy - beginner hunting ground
-            availableResources: ['wood', 'meat', 'hide', 'herbs'] // 🦇 Basic forest resources
+            gatheringDifficulty: 1.0, //  Easy - beginner hunting ground
+            availableResources: ['wood', 'meat', 'hide', 'herbs'] //  Basic forest resources
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🌾 FARMS (4 farming locations) - Sell crops, buy tools
+        //  FARMS (4 farming locations) - Sell crops, buy tools
         // ═══════════════════════════════════════════════════════════
-        // 🖤💀 gatheringDifficulty: farms are generally easy (0.8-1.2)
+        //  gatheringDifficulty: farms are generally easy (0.8-1.2)
         wheat_farm: {
             id: 'wheat_farm',
             name: 'Golden Wheat Farm',
@@ -400,8 +400,8 @@ const GameWorld = {
             sells: ['wheat', 'grain', 'eggs', 'vegetables', 'straw'],
             buys: ['scythe', 'tools', 'seeds', 'salt', 'cloth'],
             npcs: ['farmer', 'miller', 'farmhand'],
-            gatheringDifficulty: 0.8, // 🖤 Very easy - basic farming
-            availableResources: ['wheat', 'eggs', 'vegetables', 'milk'] // 🦇 Basic farm stuff
+            gatheringDifficulty: 0.8, //  Very easy - basic farming
+            availableResources: ['wheat', 'eggs', 'vegetables', 'milk'] //  Basic farm stuff
         },
         eastern_farm: {
             id: 'eastern_farm',
@@ -417,8 +417,8 @@ const GameWorld = {
             sells: ['tea', 'silk', 'vegetables', 'herbs', 'eggs'],
             buys: ['tools', 'seeds', 'cloth', 'salt', 'iron_tools'],
             npcs: ['farmer', 'silkweaver', 'merchant'],
-            gatheringDifficulty: 1.2, // 🖤 Slightly harder - exotic crops require skill
-            availableResources: ['vegetables', 'herbs', 'eggs', 'flax'] // 🦇 Exotic eastern crops
+            gatheringDifficulty: 1.2, //  Slightly harder - exotic crops require skill
+            availableResources: ['vegetables', 'herbs', 'eggs', 'flax'] //  Exotic eastern crops
         },
         orchard_farm: {
             id: 'orchard_farm',
@@ -434,8 +434,8 @@ const GameWorld = {
             sells: ['apples', 'fruits', 'cider', 'honey', 'wax'],
             buys: ['tools', 'seeds', 'barrels', 'cloth'],
             npcs: ['farmer', 'beekeeper', 'orchardist'],
-            gatheringDifficulty: 1.0, // 🖤 Normal - orchards and bees
-            availableResources: ['honey', 'eggs', 'wool', 'milk'] // 🦇 Orchard goods + bees
+            gatheringDifficulty: 1.0, //  Normal - orchards and bees
+            availableResources: ['honey', 'eggs', 'wool', 'milk'] //  Orchard goods + bees
         },
         sunny_farm: {
             id: 'sunny_farm',
@@ -451,12 +451,12 @@ const GameWorld = {
             sells: ['grapes', 'oil', 'vegetables', 'herbs', 'honey'],
             buys: ['tools', 'seeds', 'barrels', 'salt', 'cloth'],
             npcs: ['farmer', 'vintner', 'olive_presser'],
-            gatheringDifficulty: 1.1, // 🖤 Slightly harder - olive pressing, wine grapes
-            availableResources: ['grapes', 'vegetables', 'herbs', 'oil'] // 🦇 Southern specialty crops
+            gatheringDifficulty: 1.1, //  Slightly harder - olive pressing, wine grapes
+            availableResources: ['grapes', 'vegetables', 'herbs', 'oil'] //  Southern specialty crops
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 💀 DUNGEONS (2) & RUINS (1) - Sell artifacts, buy supplies
+        //  DUNGEONS (2) & RUINS (1) - Sell artifacts, buy supplies
         // ═══════════════════════════════════════════════════════════
         shadow_dungeon: {
             id: 'shadow_dungeon',
@@ -486,7 +486,7 @@ const GameWorld = {
             mapPosition: { x: 80, y: 120 },
             sells: ['artifacts', 'old_books', 'gems', 'jewelry'],
             buys: ['torch', 'rope', 'bandages', 'food', 'weapons'],
-            npcs: ['adventurer', 'scholar'] // 🖤💀 Doom world entry point #2
+            npcs: ['adventurer', 'scholar'] //  Doom world entry point #2
         },
         ruins_of_eldoria: {
             id: 'ruins_of_eldoria',
@@ -505,8 +505,8 @@ const GameWorld = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🦇 CAVES (6 cave locations) - Sell gathered cave goods
-        // 🖤💀 gatheringDifficulty: caves are moderate to hard (1.2-2.0)
+        //  CAVES (6 cave locations) - Sell gathered cave goods
+        //  gatheringDifficulty: caves are moderate to hard (1.2-2.0)
         // ═══════════════════════════════════════════════════════════
         deep_cavern: {
             id: 'deep_cavern',
@@ -522,8 +522,8 @@ const GameWorld = {
             sells: ['mushrooms', 'crystals', 'stone'],
             buys: ['torch', 'lamp', 'rope', 'food'],
             npcs: ['explorer', 'miner'], // Quest: hidden_riches needs to enter here
-            gatheringDifficulty: 1.4, // 🖤 Moderate - deep but common goods
-            availableResources: ['stone', 'mushrooms', 'crystals'] // 🦇 Cavern resources
+            gatheringDifficulty: 1.4, //  Moderate - deep but common goods
+            availableResources: ['stone', 'mushrooms', 'crystals'] //  Cavern resources
         },
         frozen_cave: {
             id: 'frozen_cave',
@@ -539,8 +539,8 @@ const GameWorld = {
             sells: ['crystals', 'fish', 'ice_goods'],
             buys: ['torch', 'food', 'furs', 'ale'],
             npcs: ['explorer', 'ice_harvester'], // Quest: frostholm_secret needs to enter here
-            gatheringDifficulty: 1.8, // 🖤 Hard - freezing conditions, rare ice crystals
-            availableResources: ['crystals', 'fish', 'stone'] // 🦇 Frozen specialties
+            gatheringDifficulty: 1.8, //  Hard - freezing conditions, rare ice crystals
+            availableResources: ['crystals', 'fish', 'stone'] //  Frozen specialties
         },
         crystal_cave: {
             id: 'crystal_cave',
@@ -556,8 +556,8 @@ const GameWorld = {
             sells: ['crystals', 'gems', 'mushrooms', 'stone'],
             buys: ['torch', 'lamp', 'rope', 'pickaxe', 'food'],
             npcs: ['gem_collector', 'miner'],
-            gatheringDifficulty: 1.6, // 🖤 Medium-hard - valuable crystals and gems
-            availableResources: ['crystals', 'gems', 'stone', 'mushrooms'] // 🦇 Crystal specialties
+            gatheringDifficulty: 1.6, //  Medium-hard - valuable crystals and gems
+            availableResources: ['crystals', 'gems', 'stone', 'mushrooms'] //  Crystal specialties
         },
         river_cave: {
             id: 'river_cave',
@@ -573,8 +573,8 @@ const GameWorld = {
             sells: ['pearls', 'fish', 'stone', 'mushrooms'],
             buys: ['torch', 'rope', 'food', 'ale'],
             npcs: ['diver', 'pearl_hunter'],
-            gatheringDifficulty: 1.2, // 🖤 Easy-moderate - beginner cave, water hazards
-            availableResources: ['fish', 'pearls', 'stone', 'mushrooms'] // 🦇 River cave goods
+            gatheringDifficulty: 1.2, //  Easy-moderate - beginner cave, water hazards
+            availableResources: ['fish', 'pearls', 'stone', 'mushrooms'] //  River cave goods
         },
         coastal_cave: {
             id: 'coastal_cave',
@@ -590,8 +590,8 @@ const GameWorld = {
             sells: ['pearls', 'gems', 'gold_bar', 'artifacts'],
             buys: ['torch', 'rope', 'food', 'weapons'],
             npcs: ['treasure_hunter', 'diver'],
-            gatheringDifficulty: 1.7, // 🖤 Hard - tides, treasure hunting danger
-            availableResources: ['pearls', 'gems', 'coral', 'fish'] // 🦇 Coastal treasures
+            gatheringDifficulty: 1.7, //  Hard - tides, treasure hunting danger
+            availableResources: ['pearls', 'gems', 'coral', 'fish'] //  Coastal treasures
         },
         fairy_cave: {
             id: 'fairy_cave',
@@ -607,12 +607,12 @@ const GameWorld = {
             sells: ['mushrooms', 'herbs', 'medical_plants', 'crystals', 'honey'],
             buys: ['bread', 'cheese', 'cloth', 'glass'],
             npcs: ['herbalist', 'wanderer'],
-            gatheringDifficulty: 1.5, // 🖤 Medium - magical interference, rare herbs
-            availableResources: ['mushrooms', 'herbs', 'crystals', 'honey'] // 🦇 Magical cave goods
+            gatheringDifficulty: 1.5, //  Medium - magical interference, rare herbs
+            availableResources: ['mushrooms', 'herbs', 'crystals', 'honey'] //  Magical cave goods
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🍺 INNS (7 rest stops and taverns)
+        //  INNS (7 rest stops and taverns)
         // ═══════════════════════════════════════════════════════════
         kings_inn: {
             id: 'kings_inn',
@@ -721,7 +721,7 @@ const GameWorld = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // ⚔️ OUTPOSTS (3 frontier locations)
+        //  OUTPOSTS (3 frontier locations)
         // ═══════════════════════════════════════════════════════════
         northern_outpost: {
             id: 'northern_outpost',
@@ -770,7 +770,7 @@ const GameWorld = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // ⚓ PORTS (2 water locations)
+        //  PORTS (2 water locations)
         // ═══════════════════════════════════════════════════════════
         fishermans_port: {
             id: 'fishermans_port',
@@ -804,7 +804,7 @@ const GameWorld = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🔮 SPECIAL LOCATIONS
+        //  SPECIAL LOCATIONS
         // ═══════════════════════════════════════════════════════════
         hermit_grove: {
             id: 'hermit_grove',
@@ -820,8 +820,8 @@ const GameWorld = {
             sells: ['herbs', 'medical_plants', 'mushrooms', 'honey', 'berries'],
             buys: ['bread', 'cheese', 'cloth', 'parchment', 'ink'],
             npcs: ['hermit', 'sage'],
-            gatheringDifficulty: 1.6, // 🖤 Medium-hard - rare healing herbs, mystical forest
-            availableResources: ['herbs', 'mushrooms', 'honey', 'berries'] // 🦇 Rare herbs
+            gatheringDifficulty: 1.6, //  Medium-hard - rare healing herbs, mystical forest
+            availableResources: ['herbs', 'mushrooms', 'honey', 'berries'] //  Rare herbs
         },
         druid_grove: {
             id: 'druid_grove',
@@ -837,8 +837,8 @@ const GameWorld = {
             sells: ['medical_plants', 'herbs', 'honey', 'berries', 'mushrooms'],
             buys: ['bread', 'fruit', 'vegetables', 'cloth', 'glass'],
             npcs: ['druid', 'herbalist', 'acolyte'], // Quest: main_shadow_key needs druid
-            gatheringDifficulty: 1.9, // 🖤 Hard - sacred grove, druids guard best herbs
-            availableResources: ['herbs', 'medical_plants', 'honey', 'mushrooms'] // 🦇 Enchanted herbs
+            gatheringDifficulty: 1.9, //  Hard - sacred grove, druids guard best herbs
+            availableResources: ['herbs', 'medical_plants', 'honey', 'mushrooms'] //  Enchanted herbs
         },
         stone_quarry: {
             id: 'stone_quarry',
@@ -854,68 +854,68 @@ const GameWorld = {
             sells: ['stone', 'clay', 'sand', 'bricks'],
             buys: ['pickaxe', 'tools', 'food', 'ale', 'rope', 'bandages'],
             npcs: ['quarry_foreman', 'stonecutter', 'merchant'],
-            gatheringDifficulty: 0.9, // 🖤 Easy - open pit quarry, no cave dangers
-            availableResources: ['stone', 'clay', 'sand'] // 🦇 Building materials
+            gatheringDifficulty: 0.9, //  Easy - open pit quarry, no cave dangers
+            availableResources: ['stone', 'clay', 'sand'] //  Building materials
         }
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 👥 NPC SPAWN CONFIG - who the fuck lives where? 🖤
+    //  NPC SPAWN CONFIG - who the fuck lives where? 
     // ═══════════════════════════════════════════════════════════════
-    // 🦇 Maps location types to NPC types that spawn there
+    //  Maps location types to NPC types that spawn there
     // This makes People panel actually show people, imagine that
-    // 🖤 QUEST-ENABLED NPC SPAWNS - all quest givers now spawn somewhere! 💀
+    //  QUEST-ENABLED NPC SPAWNS - all quest givers now spawn somewhere! 
     npcSpawnsByLocationType: {
-        capital: ['innkeeper', 'blacksmith', 'jeweler', 'tailor', 'banker', 'guard', 'noble', 'general_store', 'apothecary', 'herald', 'steward', 'captain', 'sage'], // 🖤 Capital has sage for wisdom quests 💀
-        city: ['innkeeper', 'blacksmith', 'general_store', 'apothecary', 'guard', 'merchant', 'tailor', 'scholar', 'vintner'], // 🖤💀 FIXED: Removed elder - only in Greendale
-        town: ['innkeeper', 'blacksmith', 'general_store', 'farmer', 'guard', 'miller', 'mason'], // 🖤 Added craft quest givers
-        village: ['innkeeper', 'farmer', 'general_store'], // 🖤💀 FIXED: Removed elder - only in Greendale for quest consistency
-        mine: ['miner', 'blacksmith', 'general_store', 'sergeant'], // 🖤 Mine foreman quests
-        forest: ['hunter', 'herbalist', 'druid', 'huntmaster'], // 🖤 Forest quest giver
-        farm: ['farmer', 'general_store', 'miller'], // 🖤 Farm quest giver
+        capital: ['innkeeper', 'blacksmith', 'jeweler', 'tailor', 'banker', 'guard', 'noble', 'general_store', 'apothecary', 'herald', 'steward', 'captain', 'sage'], //  Capital has sage for wisdom quests 
+        city: ['innkeeper', 'blacksmith', 'general_store', 'apothecary', 'guard', 'merchant', 'tailor', 'scholar', 'vintner'], //  FIXED: Removed elder - only in Greendale
+        town: ['innkeeper', 'blacksmith', 'general_store', 'farmer', 'guard', 'miller', 'mason'], //  Added craft quest givers
+        village: ['innkeeper', 'farmer', 'general_store'], //  FIXED: Removed elder - only in Greendale for quest consistency
+        mine: ['miner', 'blacksmith', 'general_store', 'sergeant'], //  Mine foreman quests
+        forest: ['hunter', 'herbalist', 'druid', 'huntmaster'], //  Forest quest giver
+        farm: ['farmer', 'general_store', 'miller'], //  Farm quest giver
         inn: ['innkeeper', 'traveler', 'merchant', 'guard'],
-        cave: ['explorer', 'miner', 'scholar'], // 🖤 Cave exploration quests
-        dungeon: ['adventurer', 'guard', 'scholar'], // 🖤 Dungeon lore quests
-        ruins: ['scholar', 'adventurer', 'explorer', 'sage'], // 🖤 Ancient knowledge quests
-        outpost: ['guard', 'blacksmith', 'general_store', 'healer', 'sergeant'], // 🖤 Military quest NPCs
-        port: ['ferryman', 'merchant', 'sailor', 'general_store', 'fisherman', 'harbormaster'], // 🖤 Port quest giver
-        temple: ['priest', 'healer', 'sage'], // 🖤 Wisdom quests
-        grove: ['druid', 'herbalist', 'sage'], // 🖤 Nature wisdom quests
-        fortress: ['guard', 'captain', 'sergeant', 'blacksmith'] // 🖤 Military strongholds
+        cave: ['explorer', 'miner', 'scholar'], //  Cave exploration quests
+        dungeon: ['adventurer', 'guard', 'scholar'], //  Dungeon lore quests
+        ruins: ['scholar', 'adventurer', 'explorer', 'sage'], //  Ancient knowledge quests
+        outpost: ['guard', 'blacksmith', 'general_store', 'healer', 'sergeant'], //  Military quest NPCs
+        port: ['ferryman', 'merchant', 'sailor', 'general_store', 'fisherman', 'harbormaster'], //  Port quest giver
+        temple: ['priest', 'healer', 'sage'], //  Wisdom quests
+        grove: ['druid', 'herbalist', 'sage'], //  Nature wisdom quests
+        fortress: ['guard', 'captain', 'sergeant', 'blacksmith'] //  Military strongholds
     },
 
-    // 🖤 Get NPCs that should spawn at a location
+    //  Get NPCs that should spawn at a location
     getNPCsForLocation(locationId) {
         const location = this.locations[locationId];
         if (!location) return [];
 
-        // 💀 Check if location has explicit NPCs defined - ALL locations should have this now
+        //  Check if location has explicit NPCs defined - ALL locations should have this now
         if (location.npcs && location.npcs.length > 0) {
             return location.npcs;
         }
 
-        // ⚠️ FALLBACK WARNING - Location is missing explicit NPCs array!
-        console.warn(`⚠️ Location "${locationId}" missing explicit npcs array! Using type-based fallback.`);
+        //  FALLBACK WARNING - Location is missing explicit NPCs array!
+        console.warn(` Location "${locationId}" missing explicit npcs array! Using type-based fallback.`);
 
-        // 🦇 Fall back to type-based spawns (legacy - should not be needed)
+        //  Fall back to type-based spawns (legacy - should not be needed)
         const typeNPCs = this.npcSpawnsByLocationType[location.type] || [];
 
-        // 🖤 Scale number of NPCs based on population
+        //  Scale number of NPCs based on population
         let npcCount = 2; // minimum 2 NPCs
         if (location.population >= 1000) npcCount = 6;
         else if (location.population >= 500) npcCount = 5;
         else if (location.population >= 100) npcCount = 4;
         else if (location.population >= 50) npcCount = 3;
 
-        // 🦇 Return the first N NPCs of this type
+        //  Return the first N NPCs of this type
         return typeNPCs.slice(0, Math.min(npcCount, typeNPCs.length));
     },
 
-    // 💀 Get NPC data with persona info for display
+    //  Get NPC data with persona info for display
     getNPCDataForLocation(locationId) {
         const location = this.locations[locationId];
 
-        // 🖤💀 DOOM WORLD NPC SYSTEM 💀🖤
+        //  DOOM WORLD NPC SYSTEM 
         // When in doom world, return doom NPCs instead of normal NPCs
         const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
                        (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
@@ -931,7 +931,7 @@ const GameWorld = {
                     const doomType = DoomWorldNPCs.npcTypes[doomNpcType];
                     const npcId = `doom_${locationId}_${doomNpcType}`;
 
-                    // 🖤 Doom NPC names are more descriptive
+                    //  Doom NPC names are more descriptive
                     const doomName = this.formatDoomNPCName(doomNpcType);
                     const doomTitle = doomType?.title || 'Survivor';
                     const demeanor = doomType?.demeanor || 'desperate';
@@ -942,7 +942,7 @@ const GameWorld = {
                         baseType: doomType?.base || doomNpcType,
                         name: doomName,
                         title: doomTitle,
-                        voice: 'onyx', // 💀 Darker voice for doom NPCs
+                        voice: 'onyx', //  Darker voice for doom NPCs
                         personality: demeanor,
                         demeanor: demeanor,
                         location: locationId,
@@ -955,38 +955,38 @@ const GameWorld = {
             }
         }
 
-        // 🦇 Normal world NPC loading
+        //  Normal world NPC loading
         const npcTypes = this.getNPCsForLocation(locationId);
 
         return npcTypes.map(npcType => {
-            // 🖤 Try to get persona from database
+            //  Try to get persona from database
             let persona = null;
             if (typeof NPCPersonaDatabase !== 'undefined') {
                 persona = NPCPersonaDatabase.getPersona(npcType);
             }
 
-            // 🦇 Generate unique ID for this NPC at this location
+            //  Generate unique ID for this NPC at this location
             const npcId = `${locationId}_${npcType}`;
 
-            // 🖤💀 Generate unique name for this NPC at this location
+            //  Generate unique name for this NPC at this location
             const generatedName = this.generateNPCName(locationId, npcType);
 
             return {
                 id: npcId,
-                name: generatedName, // 🖤 Now uses unique location-seeded name!
+                name: generatedName, //  Now uses unique location-seeded name!
                 title: persona?.title || this.getNPCTitle(npcType),
                 voice: persona?.voice || 'nova',
                 personality: persona?.personality || 'friendly',
                 location: locationId,
                 locationName: location?.name || locationId,
                 ...persona,
-                // 🖤💀 CRITICAL: Set type AFTER persona spread to prevent overwrite from fallback personas
+                //  CRITICAL: Set type AFTER persona spread to prevent overwrite from fallback personas
                 type: npcType
             };
         });
     },
 
-    // 💀 Format doom NPC type to display name
+    //  Format doom NPC type to display name
     formatDoomNPCName(doomNpcType) {
         // Convert doom_type names like 'fallen_noble' to 'The Fallen Noble'
         const words = doomNpcType.split('_');
@@ -995,13 +995,13 @@ const GameWorld = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖤💀 NPC NAME GENERATOR - Medieval names seeded by location 🦇
+    //  NPC NAME GENERATOR - Medieval names seeded by location 
     // ═══════════════════════════════════════════════════════════════
     // Each NPC gets a UNIQUE name based on their type and location
     // Names are deterministic - same location+type = same name always
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Medieval first names by personality type
+    //  Medieval first names by personality type
     _npcFirstNames: {
         // Hospitable types (innkeeper, bartender, traveler)
         hospitable_male: ['Edmund', 'Geoffrey', 'Harold', 'Oswald', 'Bertram', 'Gilbert', 'Walter', 'Cedric', 'Aldwin', 'Godwin', 'Humphrey', 'Reginald'],
@@ -1010,7 +1010,7 @@ const GameWorld = {
         strong_male: ['Aldric', 'Gareth', 'Roderick', 'Theron', 'Magnus', 'Bjorn', 'Conrad', 'Godfrey', 'Leofric', 'Wulfric', 'Siegfried', 'Ragnar'],
         strong_female: ['Brynhild', 'Astrid', 'Freya', 'Sigrid', 'Greta', 'Helga', 'Ingrid', 'Brunhilde', 'Thyra', 'Gudrun', 'Valdis', 'Ragnhild'],
         // Wise types (elder, scholar, sage, priest, druid)
-        // 🖤💀 Morin is the canonical elder name used in quests - included for story consistency 💀
+        //  Morin is the canonical elder name used in quests - included for story consistency 
         wise_male: ['Morin', 'Aldous', 'Cornelius', 'Erasmus', 'Fabian', 'Ignatius', 'Marius', 'Severus', 'Tiberius', 'Ambrose', 'Benedict', 'Cuthbert', 'Dunstan'],
         wise_female: ['Hildegard', 'Scholastica', 'Perpetua', 'Eugenia', 'Ursula', 'Brigid', 'Gwendolyn', 'Mechtild', 'Petronilla', 'Radegund', 'Walburga', 'Etheldreda'],
         // Crafty types (jeweler, tailor, apothecary)
@@ -1039,7 +1039,7 @@ const GameWorld = {
         hunting_female: ['Artemis', 'Diana', 'Falcon', 'Huntress', 'Lynx', 'Raven', 'Scout', 'Swift', 'Vixen', 'Wildheart', 'Dawn', 'Starlight']
     },
 
-    // 🖤 NPC type to name category mapping
+    //  NPC type to name category mapping
     _npcTypeCategories: {
         innkeeper: 'hospitable', bartender: 'hospitable', traveler: 'hospitable', bard: 'hospitable',
         guard: 'strong', blacksmith: 'strong', captain: 'strong', sergeant: 'strong', scout: 'strong',
@@ -1048,14 +1048,14 @@ const GameWorld = {
         merchant: 'merchant', banker: 'merchant', general_store: 'merchant', steward: 'merchant',
         farmer: 'rural', shepherd: 'rural', miller: 'rural', farmhand: 'rural', vintner: 'rural', beekeeper: 'rural', orchardist: 'rural',
         sailor: 'seafaring', ferryman: 'seafaring', fisherman: 'seafaring', dockmaster: 'seafaring', harbormaster: 'seafaring', lighthouse_keeper: 'seafaring', boatwright: 'seafaring',
-        noble: 'noble', herald: 'noble', royal_advisor: 'wise', chieftain: 'strong', villager: 'rural', mason: 'strong', // 🖤💀 royal_advisor uses wise names, chieftain uses strong names
+        noble: 'noble', herald: 'noble', royal_advisor: 'wise', chieftain: 'strong', villager: 'rural', mason: 'strong', //  royal_advisor uses wise names, chieftain uses strong names
         adventurer: 'adventure', explorer: 'adventure', treasure_hunter: 'adventure', archaeologist: 'adventure', diver: 'adventure', pearl_hunter: 'adventure', ice_harvester: 'adventure', mountain_guide: 'adventure', caravan_master: 'adventure', wanderer: 'adventure',
         miner: 'mining', foreman: 'mining', gem_collector: 'mining',
         hunter: 'hunting', trapper: 'hunting', forager: 'rural', healer: 'wise',
-        hooded_stranger: 'mysterious', prophet: 'mysterious' // 🖤💀 Quest givers
+        hooded_stranger: 'mysterious', prophet: 'mysterious' //  Quest givers
     },
 
-    // 🖤💀 QUEST NPC NAME OVERRIDES - Ensure quest NPCs have correct canonical names
+    //  QUEST NPC NAME OVERRIDES - Ensure quest NPCs have correct canonical names
     // Maps location_npcType to the specific name that quest expects
     _questNPCNames: {
         'greendale_merchant': 'Cassia the Merchant',  // act1_quest2 - Establishing Trade
@@ -1064,10 +1064,10 @@ const GameWorld = {
         // Add more quest-specific NPCs as needed
     },
 
-    // 🖤 Cache for generated NPC names - consistent across sessions
+    //  Cache for generated NPC names - consistent across sessions
     _npcNameCache: {},
 
-    // 🦇 Seeded random number generator for consistent names
+    //  Seeded random number generator for consistent names
     _seededRandom(seed) {
         let hash = 0;
         for (let i = 0; i < seed.length; i++) {
@@ -1083,47 +1083,47 @@ const GameWorld = {
         return hash / m;
     },
 
-    // 🖤💀 Generate a unique NPC name based on location and type
+    //  Generate a unique NPC name based on location and type
     generateNPCName(locationId, npcType) {
         const cacheKey = `${locationId}_${npcType}`;
 
-        // 🎯 PRIORITY: Check if this NPC has a quest-specific name override
+        //  PRIORITY: Check if this NPC has a quest-specific name override
         if (this._questNPCNames[cacheKey]) {
             return this._questNPCNames[cacheKey];
         }
 
-        // 🦇 Return cached name if we already generated one
+        //  Return cached name if we already generated one
         if (this._npcNameCache[cacheKey]) {
             return this._npcNameCache[cacheKey];
         }
 
-        // 🖤 Get the category for this NPC type
+        //  Get the category for this NPC type
         const category = this._npcTypeCategories[npcType] || 'hospitable';
 
-        // 🦇 Use seeded random to pick gender (deterministic based on location+type)
+        //  Use seeded random to pick gender (deterministic based on location+type)
         const genderSeed = this._seededRandom(cacheKey + '_gender');
         const isMale = genderSeed > 0.5;
 
-        // 🖤 Get the appropriate name list
+        //  Get the appropriate name list
         const nameKey = `${category}_${isMale ? 'male' : 'female'}`;
         const nameList = this._npcFirstNames[nameKey] || this._npcFirstNames.hospitable_male;
 
-        // 🦇 Pick name using seeded random
+        //  Pick name using seeded random
         const nameSeed = this._seededRandom(cacheKey + '_name');
         const nameIndex = Math.floor(nameSeed * nameList.length);
         const firstName = nameList[nameIndex];
 
-        // 🖤 Format the full name with title
+        //  Format the full name with title
         const title = this._getNPCRoleTitle(npcType);
         const fullName = `${firstName} the ${title}`;
 
-        // 🦇 Cache it for consistency
+        //  Cache it for consistency
         this._npcNameCache[cacheKey] = fullName;
 
         return fullName;
     },
 
-    // 🖤 Get role-appropriate title for NPC (simpler than full getNPCTitle)
+    //  Get role-appropriate title for NPC (simpler than full getNPCTitle)
     _getNPCRoleTitle(npcType) {
         const titles = {
             innkeeper: 'Innkeeper', blacksmith: 'Smith', general_store: 'Shopkeeper',
@@ -1144,21 +1144,21 @@ const GameWorld = {
             gem_collector: 'Gem Hunter', treasure_hunter: 'Treasure Hunter',
             trapper: 'Trapper', pearl_hunter: 'Pearl Diver', ice_harvester: 'Ice Harvester',
             archaeologist: 'Archaeologist', diver: 'Diver',
-            hooded_stranger: 'Stranger', prophet: 'Prophet', // 🖤💀 Quest givers
-            royal_advisor: 'Royal Advisor', // 🖤💀 NEW: Court sage for Royal Capital
-            chieftain: 'Chieftain' // 🖤💀 NEW: Northern village leader for Frostholm
+            hooded_stranger: 'Stranger', prophet: 'Prophet', //  Quest givers
+            royal_advisor: 'Royal Advisor', //  NEW: Court sage for Royal Capital
+            chieftain: 'Chieftain' //  NEW: Northern village leader for Frostholm
         };
         return titles[npcType] || npcType.charAt(0).toUpperCase() + npcType.slice(1).replace(/_/g, ' ');
     },
 
-    // 🖤 Helper: format NPC type to display name (NOW USES GENERATED NAMES)
+    //  Helper: format NPC type to display name (NOW USES GENERATED NAMES)
     formatNPCName(npcType, locationId = null) {
-        // 🦇 If we have a location, generate a unique name
+        //  If we have a location, generate a unique name
         if (locationId) {
             return this.generateNPCName(locationId, npcType);
         }
 
-        // 🖤 Fallback to generic names if no location provided
+        //  Fallback to generic names if no location provided
         const names = {
             innkeeper: 'The Innkeeper',
             blacksmith: 'The Blacksmith',
@@ -1185,13 +1185,13 @@ const GameWorld = {
             noble: 'Noble',
             priest: 'Priest',
             elder: 'The Elder',
-            royal_advisor: 'The Royal Advisor', // 🖤💀 NEW
-            chieftain: 'The Chieftain' // 🖤💀 NEW: Frostholm leader
+            royal_advisor: 'The Royal Advisor', //  NEW
+            chieftain: 'The Chieftain' //  NEW: Frostholm leader
         };
         return names[npcType] || npcType.charAt(0).toUpperCase() + npcType.slice(1).replace(/_/g, ' ');
     },
 
-    // 🦇 Helper: get NPC title based on type
+    //  Helper: get NPC title based on type
     getNPCTitle(npcType) {
         const titles = {
             innkeeper: 'Keeper of the Inn',
@@ -1223,86 +1223,86 @@ const GameWorld = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🌙 RUNTIME STATE - Unlocked regions and visited locations
+    //  RUNTIME STATE - Unlocked regions and visited locations
     // ═══════════════════════════════════════════════════════════════
     unlockedRegions: [],
     visitedLocations: [],
-    doomVisitedLocations: [], // 🖤💀 Separate tracking for Doom World - starts fresh on each entry!
+    doomVisitedLocations: [], //  Separate tracking for Doom World - starts fresh on each entry!
     currentRegion: 'starter',
 
     // ═══════════════════════════════════════════════════════════════
-    // 💀 INITIALIZATION - Where the world awakens
+    //  INITIALIZATION - Where the world awakens
     // ═══════════════════════════════════════════════════════════════
     init() {
-        console.log('🌍 GameWorld awakens from the void...');
+        console.log(' GameWorld awakens from the void...');
         this.unlockedRegions = ['starter', 'capital', 'northern', 'eastern', 'western', 'southern'];
-        // 🖤 Start with greendale as default - createCharacter() will add proper starting location based on perks 💀
+        //  Start with greendale as default - createCharacter() will add proper starting location based on perks 
         // This ensures the map always has something to render even if called before character creation
         this.visitedLocations = ['greendale'];
-        // 🖤💀 Reset doom world visited locations on new game - no bleeding between games!
+        //  Reset doom world visited locations on new game - no bleeding between games!
         this.doomVisitedLocations = [];
         this.currentRegion = 'starter';
 
-        // 🦇 Try to setup market prices (may fail if ItemDatabase not loaded)
+        //  Try to setup market prices (may fail if ItemDatabase not loaded)
         try {
             this.setupMarketPrices();
         } catch (error) {
-            console.warn('❌ setupMarketPrices failed:', error.message);
+            console.warn(' setupMarketPrices failed:', error.message);
         }
 
-        // ⚰️ Initialize dependent systems (wrap each in try-catch)
+        //  Initialize dependent systems (wrap each in try-catch)
         try {
             if (typeof CityReputationSystem !== 'undefined') {
                 CityReputationSystem.init();
-                console.log('✅ CityReputationSystem initialized');
+                console.log(' CityReputationSystem initialized');
             }
         } catch (error) {
-            console.warn('❌ CityReputationSystem.init failed:', error.message);
+            console.warn(' CityReputationSystem.init failed:', error.message);
         }
 
         try {
             if (typeof CityEventSystem !== 'undefined') {
                 CityEventSystem.init();
-                console.log('✅ CityEventSystem initialized');
+                console.log(' CityEventSystem initialized');
             }
         } catch (error) {
-            console.warn('❌ CityEventSystem.init failed:', error.message);
+            console.warn(' CityEventSystem.init failed:', error.message);
         }
 
         try {
             if (typeof MarketPriceHistory !== 'undefined') {
                 MarketPriceHistory.init();
-                console.log('✅ MarketPriceHistory initialized');
+                console.log(' MarketPriceHistory initialized');
             }
         } catch (error) {
-            console.warn('❌ MarketPriceHistory.init failed:', error.message);
+            console.warn(' MarketPriceHistory.init failed:', error.message);
         }
 
         try {
             if (typeof DynamicMarketSystem !== 'undefined') {
                 DynamicMarketSystem.init();
-                console.log('✅ DynamicMarketSystem initialized');
+                console.log(' DynamicMarketSystem initialized');
             }
         } catch (error) {
-            console.warn('❌ DynamicMarketSystem.init failed:', error.message);
+            console.warn(' DynamicMarketSystem.init failed:', error.message);
         }
 
-        console.log('✅ GameWorld initialization complete - the realm awaits');
+        console.log(' GameWorld initialization complete - the realm awaits');
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💰 MARKET SYSTEM - Setup and management
+    //  MARKET SYSTEM - Setup and management
     // ═══════════════════════════════════════════════════════════════
     setupMarketPrices() {
-        // 🖤 Check if ItemDatabase is loaded
+        //  Check if ItemDatabase is loaded
         try {
             if (!window.ItemDatabase) {
                 throw new Error('ItemDatabase not on window object');
             }
-            console.log('✅ ItemDatabase is available, setting up market prices...');
+            console.log(' ItemDatabase is available, setting up market prices...');
         } catch (error) {
-            // 🦇 ItemDatabase not ready - use empty markets
-            console.warn('❌ ItemDatabase not loaded - using fallback market pricing');
+            //  ItemDatabase not ready - use empty markets
+            console.warn(' ItemDatabase not loaded - using fallback market pricing');
             Object.values(this.locations).forEach(location => {
                 location.marketPrices = {};
             });
@@ -1312,7 +1312,7 @@ const GameWorld = {
         Object.values(this.locations).forEach(location => {
             location.marketPrices = {};
 
-            // 🦇 Base items available everywhere
+            //  Base items available everywhere
             const baseItems = ['food', 'water', 'bread'];
             baseItems.forEach(itemId => {
                 const item = ItemDatabase.getItem(itemId);
@@ -1324,7 +1324,7 @@ const GameWorld = {
                 }
             });
 
-            // 🗡️ Specialties with better prices (🖤 check both 'sells' and 'specialties' for backwards compat 💀)
+            //  Specialties with better prices ( check both 'sells' and 'specialties' for backwards compat )
             const locationItems = location.sells || location.specialties;
             if (locationItems && Array.isArray(locationItems)) {
                 locationItems.forEach(specialty => {
@@ -1338,14 +1338,14 @@ const GameWorld = {
                 });
             }
 
-            // ⚰️ Add random additional items based on location type
+            //  Add random additional items based on location type
             this.addRandomMarketItems(location);
 
-            // 🖤 Lookup tables for stock calculation - avoids if-else chains 💀
+            //  Lookup tables for stock calculation - avoids if-else chains 
             const locationStockBase = { city: 15, town: 10, village: 5 };
             const rarityMultiplier = { common: 2, uncommon: 1.5, rare: 1, epic: 0.5, legendary: 0.2 };
 
-            // 💀 Ensure ALL items from ItemDatabase are available
+            //  Ensure ALL items from ItemDatabase are available
             Object.keys(ItemDatabase.items).forEach(itemId => {
                 if (!location.marketPrices[itemId]) {
                     const item = ItemDatabase.getItem(itemId);
@@ -1362,7 +1362,7 @@ const GameWorld = {
         });
     },
 
-    // 🦇 Add random items to market based on location type
+    //  Add random items to market based on location type
     addRandomMarketItems(location) {
         const locationItemPools = {
             village: ['herbs', 'logs', 'stone', 'seeds', 'wool', 'clay', 'wood', 'food', 'water', 'bread', 'vegetables'],
@@ -1386,7 +1386,7 @@ const GameWorld = {
         }
     },
 
-    // 💰 Get base price for an item type
+    //  Get base price for an item type
     getBasePrice(itemType) {
         const basePrices = {
             food: 5, water: 2, bread: 3, fish: 8, meat: 12, vegetables: 6, cheese: 15,
@@ -1407,7 +1407,7 @@ const GameWorld = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🗺️ REGION SYSTEM
+    //  REGION SYSTEM
     // ═══════════════════════════════════════════════════════════════
     isRegionUnlocked(regionId) {
         return this.unlockedRegions.includes(regionId);
@@ -1418,7 +1418,7 @@ const GameWorld = {
             const region = this.regions[regionId];
             if (region && this.canUnlockRegion(regionId)) {
                 this.unlockedRegions.push(regionId);
-                addMessage(`🎉 New region unlocked: ${region.name}!`);
+                addMessage(` New region unlocked: ${region.name}!`);
                 return true;
             }
         }
@@ -1438,7 +1438,7 @@ const GameWorld = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🚶 TRAVEL SYSTEM
+    //  TRAVEL SYSTEM
     // ═══════════════════════════════════════════════════════════════
     getAvailableDestinations() {
         const currentLocation = this.locations[game.currentLocation.id];
@@ -1472,11 +1472,11 @@ const GameWorld = {
         const toLocation = this.locations[toId];
         if (!fromLocation || !toLocation) return 0;
 
-        // 💀 Check for Dungeon Bonanza event (July 18th) - instant 30 min dungeon travel
+        //  Check for Dungeon Bonanza event (July 18th) - instant 30 min dungeon travel
         if (typeof DungeonBonanzaSystem !== 'undefined') {
             const bonanzaOverride = DungeonBonanzaSystem.getDungeonTravelTimeOverride(fromId, toId);
             if (bonanzaOverride !== null) {
-                console.log(`💀 Dark Convergence active! Dungeon travel reduced to ${bonanzaOverride} minutes`);
+                console.log(` Dark Convergence active! Dungeon travel reduced to ${bonanzaOverride} minutes`);
                 return bonanzaOverride;
             }
         }
@@ -1486,7 +1486,7 @@ const GameWorld = {
         const speedModifier = transport ? transport.speedModifier : 1.0;
         const eventModifier = game.travelSpeedModifier || 1.0;
 
-        // 🖤 Apply weather and seasonal modifiers - MUST match TravelSystem 💀
+        //  Apply weather and seasonal modifiers - MUST match TravelSystem 
         let weatherSpeedMod = 1.0;
         let seasonalSpeedMod = 1.0;
 
@@ -1534,12 +1534,12 @@ const GameWorld = {
             cost: travelCost
         });
 
-        // 🖤 Track journey start for achievements (Start Your Journey!)
+        //  Track journey start for achievements (Start Your Journey!)
         if (typeof AchievementSystem !== 'undefined' && AchievementSystem.trackJourneyStart) {
             AchievementSystem.trackJourneyStart(locationId);
         }
 
-        addMessage(`🚶 Traveling to ${destination.name}... (Arrival in ${travelTime} minutes)`);
+        addMessage(` Traveling to ${destination.name}... (Arrival in ${travelTime} minutes)`);
         updatePlayerInfo();
         return true;
     },
@@ -1556,21 +1556,21 @@ const GameWorld = {
 
         if (!this.visitedLocations.includes(locationId)) {
             this.visitedLocations.push(locationId);
-            addMessage(`📍 First time visiting ${destination.name}!`);
+            addMessage(` First time visiting ${destination.name}!`);
         }
 
-        // 🦇 Update map backdrop based on location type (dungeon vs normal)
+        //  Update map backdrop based on location type (dungeon vs normal)
         if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.updateBackdropForLocation) {
             GameWorldRenderer.updateBackdropForLocation(locationId);
         }
 
         updateLocationInfo();
         updateLocationPanel();
-        addMessage(`✅ Arrived at ${destination.name}!`);
+        addMessage(` Arrived at ${destination.name}!`);
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🛒 MARKET FUNCTIONS
+    //  MARKET FUNCTIONS
     // ═══════════════════════════════════════════════════════════════
     getLocationMarket(locationId) {
         const location = this.locations[locationId];
@@ -1603,10 +1603,10 @@ const GameWorld = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔧 TOOL SYSTEM
+    //  TOOL SYSTEM
     // ═══════════════════════════════════════════════════════════════
     tools: {
-        // 🗡️ Basic tools
+        //  Basic tools
         axe: { id: 'axe', name: 'Basic Axe', description: 'A simple axe for chopping wood.', type: 'tool', resource: 'wood', efficiency: 1.0, durability: 100, price: 15, requiredSkill: 0 },
         pickaxe: { id: 'pickaxe', name: 'Pickaxe', description: 'For mining stone and minerals.', type: 'tool', resource: 'stone', efficiency: 1.0, durability: 120, price: 20, requiredSkill: 0 },
         hammer: { id: 'hammer', name: 'Hammer', description: 'Basic hammer for construction.', type: 'tool', resource: 'iron', efficiency: 1.0, durability: 80, price: 12, requiredSkill: 0 },
@@ -1616,7 +1616,7 @@ const GameWorld = {
         knife: { id: 'knife', name: 'Knife', description: 'Sharp knife for various tasks.', type: 'tool', resource: 'herbs', efficiency: 1.0, durability: 70, price: 10, requiredSkill: 0 },
         saw: { id: 'saw', name: 'Hand Saw', description: 'For cutting wood efficiently.', type: 'tool', resource: 'wood', efficiency: 1.2, durability: 110, price: 30, requiredSkill: 1 },
 
-        // ⚔️ Upgraded tools
+        //  Upgraded tools
         strong_axe: { id: 'strong_axe', name: 'Strong Axe', description: 'A sturdy axe that chops wood 50% faster.', type: 'upgrade', resource: 'wood', efficiency: 1.5, durability: 200, price: 50, requiredSkill: 2, requires: 'axe' },
         hot_oven: { id: 'hot_oven', name: 'Hot Oven', description: 'Cooks food 30% faster and preserves nutrients.', type: 'upgrade', resource: 'food', efficiency: 1.3, durability: 300, price: 80, requiredSkill: 3, requires: 'cooking_pot' },
         fast_hammer: { id: 'fast_hammer', name: 'Fast Hammer', description: 'Works 40% faster than basic hammer.', type: 'upgrade', resource: 'iron', efficiency: 1.4, durability: 150, price: 35, requiredSkill: 2, requires: 'hammer' },
@@ -1732,22 +1732,22 @@ const GameWorld = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖤💀 DOOM WORLD VISITED LOCATIONS HELPERS
+    //  DOOM WORLD VISITED LOCATIONS HELPERS
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Get the correct visited locations array based on current world 💀
+    //  Get the correct visited locations array based on current world 
     getActiveVisitedLocations() {
         const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld()) ||
                        (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive);
         return inDoom ? this.doomVisitedLocations : this.visitedLocations;
     },
 
-    // 🖤 Check if a location is visited in the current world 💀
+    //  Check if a location is visited in the current world 
     isLocationVisited(locationId) {
         return this.getActiveVisitedLocations().includes(locationId);
     },
 
-    // 🖤 Mark a location as visited in the current world 💀
+    //  Mark a location as visited in the current world 
     markLocationVisited(locationId) {
         const visited = this.getActiveVisitedLocations();
         if (!visited.includes(locationId)) {
@@ -1757,20 +1757,20 @@ const GameWorld = {
         return false; // Already visited
     },
 
-    // 🖤 Reset doom visited locations for fresh entry 💀
+    //  Reset doom visited locations for fresh entry 
     resetDoomVisitedLocations(entryLocationId) {
         this.doomVisitedLocations = [entryLocationId];
-        console.log('💀 GameWorld: Doom visited locations reset to:', this.doomVisitedLocations);
+        console.log(' GameWorld: Doom visited locations reset to:', this.doomVisitedLocations);
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💾 SAVE/LOAD
+    //  SAVE/LOAD
     // ═══════════════════════════════════════════════════════════════
     getSaveData() {
         return {
             unlockedRegions: [...this.unlockedRegions],
             visitedLocations: [...this.visitedLocations],
-            doomVisitedLocations: [...this.doomVisitedLocations], // 🖤💀 Save doom progress too!
+            doomVisitedLocations: [...this.doomVisitedLocations], //  Save doom progress too!
             currentRegion: this.currentRegion
         };
     },
@@ -1779,16 +1779,16 @@ const GameWorld = {
         if (!data) return;
         if (data.unlockedRegions) this.unlockedRegions = [...data.unlockedRegions];
         if (data.visitedLocations) this.visitedLocations = [...data.visitedLocations];
-        if (data.doomVisitedLocations) this.doomVisitedLocations = [...data.doomVisitedLocations]; // 🖤💀
+        if (data.doomVisitedLocations) this.doomVisitedLocations = [...data.doomVisitedLocations]; // 
         if (data.currentRegion) this.currentRegion = data.currentRegion;
-        console.log('🖤 GameWorld state restored from the abyss');
+        console.log(' GameWorld state restored from the abyss');
     }
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY - Let the world spread
+//  EXPOSE GLOBALLY - Let the world spread
 // ═══════════════════════════════════════════════════════════════
 
 window.GameWorld = GameWorld;
 
-console.log('🗺️ GameWorld loaded - the realm awaits your conquest');
+console.log(' GameWorld loaded - the realm awaits your conquest');

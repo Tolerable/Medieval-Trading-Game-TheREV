@@ -88,7 +88,7 @@ const ShipSystem = {
         },
         warGalley: {
             name: 'War Galley',
-            icon: '⚔️',
+            icon: '',
             tier: 'premium',
             price: 8000,
             stats: {
@@ -790,7 +790,7 @@ const ShipSystem = {
             stats.cargoWeight -= quantity;
 
             game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + quantity;
-            // 🖤 Emit item-received for quest progress tracking 💀
+            //  Emit item-received for quest progress tracking 
             document.dispatchEvent(new CustomEvent('item-received', {
                 detail: { item: itemId, quantity: quantity, source: 'ship_unload' }
             }));

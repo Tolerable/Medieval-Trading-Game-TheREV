@@ -1,18 +1,18 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // COMBAT SYSTEM - when words fail, blades speak
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const CombatSystem = {
-    // ═══════════════════════════════════════════════════════════════
-    // UTILITIES - Security first, bitches 🖤💀
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    // UTILITIES - Security first, bitches
+    // 
 
-    // 🛡️ Escape HTML to prevent XSS - Unity says "sanitize or die" 🦇
+    // Escape HTML to prevent XSS - Unity says "sanitize or die"
     escapeHtml(text) {
         if (text == null) return '';
         const div = document.createElement('div');
@@ -20,9 +20,9 @@ const CombatSystem = {
         return div.innerHTML;
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // CONFIGURATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     config: {
         baseDamage: 10,
         baseDefense: 5,
@@ -36,11 +36,11 @@ const CombatSystem = {
     // Combat state
     activeCombat: null,
     combatLog: [],
-    isProcessingAction: false, // 🖤 Mutex flag to prevent double-click race conditions 💀
+    isProcessingAction: false, // Mutex flag to prevent double-click race conditions
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // ENEMY DEFINITIONS
-    // ═══════════════════════════════════════════════════════════════
+    // 
     enemies: {
         // Common enemies
         bandit: {
@@ -157,11 +157,11 @@ const CombatSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // INITIALIZATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     init() {
-        console.log('⚔️ CombatSystem: Ready for battle!');
+        console.log('CombatSystem: Ready for battle!');
         this.setupEventListeners();
     },
 
@@ -173,9 +173,9 @@ const CombatSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // PLAYER STATS CALCULATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     getPlayerCombatStats() {
         const player = game?.player;
         if (!player) return { attack: 10, defense: 5, health: 100, speed: 5 };
@@ -214,15 +214,15 @@ const CombatSystem = {
         };
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // COMBAT INITIATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     startCombat(options) {
         const enemyId = options.enemyId || 'bandit';
         const enemy = this.enemies[enemyId];
 
         if (!enemy) {
-            console.error(`⚔️ Unknown enemy: ${enemyId}`);
+            console.error(`Unknown enemy: ${enemyId}`);
             return null;
         }
 
@@ -238,7 +238,7 @@ const CombatSystem = {
         };
 
         this.combatLog = [];
-        this.addCombatLog(`⚔️ Combat begins! You face a ${scaledEnemy.name}!`);
+        this.addCombatLog(`Combat begins! You face a ${scaledEnemy.name}!`);
 
         // Show combat UI
         this.showCombatUI();
@@ -261,13 +261,13 @@ const CombatSystem = {
         };
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // COMBAT ACTIONS
-    // ═══════════════════════════════════════════════════════════════
+    // 
     playerAttack() {
-        // 🖤 Mutex check - prevent double-click race conditions 💀
+        // Mutex check - prevent double-click race conditions
         if (!this.activeCombat || this.activeCombat.state !== 'active') return;
-        if (this.isProcessingAction) return; // 🦇 Already processing, fuck off
+        if (this.isProcessingAction) return; // Already processing, fuck off
         this.isProcessingAction = true;
 
         const combat = this.activeCombat;
@@ -285,7 +285,7 @@ const CombatSystem = {
         if (playerDamage.crit) {
             this.addCombatLog(`💥 CRITICAL HIT! You deal ${playerDamage.damage} damage!`);
         } else {
-            this.addCombatLog(`⚔️ You attack for ${playerDamage.damage} damage.`);
+            this.addCombatLog(`You attack for ${playerDamage.damage} damage.`);
         }
 
         // Check if enemy is dead
@@ -299,9 +299,9 @@ const CombatSystem = {
     },
 
     playerDefend() {
-        // 🖤 Mutex check - darkness waits for no one 💀
+        // Mutex check - darkness waits for no one
         if (!this.activeCombat || this.activeCombat.state !== 'active') return;
-        if (this.isProcessingAction) return; // 🦇 Already processing
+        if (this.isProcessingAction) return; // Already processing
         this.isProcessingAction = true;
 
         const combat = this.activeCombat;
@@ -321,9 +321,9 @@ const CombatSystem = {
     },
 
     playerFlee() {
-        // 🖤 Mutex check - can't escape twice at once 💀
+        // Mutex check - can't escape twice at once
         if (!this.activeCombat || this.activeCombat.state !== 'active') return;
-        if (this.isProcessingAction) return; // 🦇 Already processing
+        if (this.isProcessingAction) return; // Already processing
         this.isProcessingAction = true;
 
         const combat = this.activeCombat;
@@ -338,20 +338,20 @@ const CombatSystem = {
             this.addCombatLog(`🏃 You successfully flee from combat!`);
             this.endCombat('fled');
         } else {
-            this.addCombatLog(`❌ You failed to escape!`);
+            this.addCombatLog(`You failed to escape!`);
             // Enemy gets a free attack
             this.enemyTurn();
         }
     },
 
     useItem(itemId) {
-        // 🖤 Mutex check - one potion at a time, mortal 💀
+        // Mutex check - one potion at a time, mortal
         if (!this.activeCombat || this.activeCombat.state !== 'active') return;
-        if (this.isProcessingAction) return; // 🦇 Already processing
+        if (this.isProcessingAction) return; // Already processing
         this.isProcessingAction = true;
 
         const item = typeof ItemDatabase !== 'undefined' ? ItemDatabase.getItem(itemId) : null;
-        // 🖤 Reset mutex if item invalid - don't trap the player in processing hell 💀
+        // Reset mutex if item invalid - don't trap the player in processing hell
         if (!item || !item.consumable) {
             this.isProcessingAction = false;
             return;
@@ -379,9 +379,9 @@ const CombatSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // ENEMY AI
-    // ═══════════════════════════════════════════════════════════════
+    // 
     enemyTurn() {
         const combat = this.activeCombat;
         if (!combat || combat.state !== 'active') return;
@@ -425,17 +425,17 @@ const CombatSystem = {
 
         // Check max rounds
         if (combat.round >= this.config.maxRounds) {
-            this.addCombatLog(`⏰ The battle drags on... both combatants retreat.`);
+            this.addCombatLog(`The battle drags on... both combatants retreat.`);
             this.endCombat('draw');
         }
 
-        // 🖤 Reset mutex - action complete, ready for next move 💀
+        // Reset mutex - action complete, ready for next move
         this.isProcessingAction = false;
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // DAMAGE CALCULATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     calculateDamage(attack, defense, ignoreDefense = false) {
         // Base damage with some randomness
         let damage = attack * (0.8 + Math.random() * 0.4);
@@ -457,9 +457,9 @@ const CombatSystem = {
         return { damage, crit };
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // COMBAT RESOLUTION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     victory() {
         const combat = this.activeCombat;
         combat.state = 'victory';
@@ -502,7 +502,7 @@ const CombatSystem = {
                         game.player.inventory[itemId] = 0;
                     }
                     game.player.inventory[itemId]++;
-                    // 🖤 Emit item-received for quest progress tracking 💀
+                    // Emit item-received for quest progress tracking
                     document.dispatchEvent(new CustomEvent('item-received', {
                         detail: { item: itemId, quantity: 1, source: 'combat_loot' }
                     }));
@@ -563,7 +563,7 @@ const CombatSystem = {
     },
 
     endCombat(result) {
-        // 🖤 Always reset mutex when combat ends 💀
+        // Always reset mutex when combat ends
         this.isProcessingAction = false;
 
         if (this.activeCombat) {
@@ -587,9 +587,9 @@ const CombatSystem = {
         }, 2000);
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // COMBAT UI
-    // ═══════════════════════════════════════════════════════════════
+    // 
     showCombatUI() {
         // Remove existing
         const existing = document.getElementById('combat-overlay');
@@ -602,7 +602,7 @@ const CombatSystem = {
         overlay.innerHTML = `
             <div class="combat-container">
                 <div class="combat-header">
-                    <h2>⚔️ Combat!</h2>
+                    <h2>Combat!</h2>
                     <span class="combat-round">Round ${combat.round}</span>
                 </div>
 
@@ -615,7 +615,7 @@ const CombatSystem = {
                         </div>
                         <div class="health-text">${combat.player.health} / ${combat.player.maxHealth} HP</div>
                         <div class="combatant-stats">
-                            <span>⚔️ ${combat.player.attack}</span>
+                            <span>${combat.player.attack}</span>
                             <span>🛡️ ${combat.player.defense}</span>
                         </div>
                     </div>
@@ -630,7 +630,7 @@ const CombatSystem = {
                         </div>
                         <div class="health-text">${combat.enemy.currentHealth} / ${combat.enemy.health} HP</div>
                         <div class="combatant-stats">
-                            <span>⚔️ ${combat.enemy.attack}</span>
+                            <span>${combat.enemy.attack}</span>
                             <span>🛡️ ${combat.enemy.defense}</span>
                         </div>
                     </div>
@@ -641,7 +641,7 @@ const CombatSystem = {
                 </div>
 
                 <div class="combat-actions" id="combat-actions">
-                    <button class="combat-btn attack-btn" onclick="CombatSystem.playerAttack()">⚔️ Attack</button>
+                    <button class="combat-btn attack-btn" onclick="CombatSystem.playerAttack()">Attack</button>
                     <button class="combat-btn defend-btn" onclick="CombatSystem.playerDefend()">🛡️ Defend</button>
                     <button class="combat-btn flee-btn" onclick="CombatSystem.playerFlee()">🏃 Flee</button>
                     <button class="combat-btn item-btn" onclick="CombatSystem.showItemMenu()">🧪 Items</button>
@@ -701,7 +701,7 @@ const CombatSystem = {
             roundText.textContent = `Round ${combat.round}`;
         }
 
-        // Update combat log - 🛡️ Sanitized against XSS 🦇
+        // Update combat log - Sanitized against XSS
         const logDisplay = document.getElementById('combat-log-display');
         if (logDisplay) {
             logDisplay.innerHTML = this.combatLog.map(msg =>
@@ -745,7 +745,7 @@ const CombatSystem = {
         }
 
         if (consumables.length === 0) {
-            this.addCombatLog('❌ No usable items!');
+            this.addCombatLog('No usable items!');
             this.updateCombatUI();
             return;
         }
@@ -766,7 +766,7 @@ const CombatSystem = {
         const actions = document.getElementById('combat-actions');
         if (actions && this.activeCombat?.state === 'active') {
             actions.innerHTML = `
-                <button class="combat-btn attack-btn" onclick="CombatSystem.playerAttack()">⚔️ Attack</button>
+                <button class="combat-btn attack-btn" onclick="CombatSystem.playerAttack()">Attack</button>
                 <button class="combat-btn defend-btn" onclick="CombatSystem.playerDefend()">🛡️ Defend</button>
                 <button class="combat-btn flee-btn" onclick="CombatSystem.playerFlee()">🏃 Flee</button>
                 <button class="combat-btn item-btn" onclick="CombatSystem.showItemMenu()">🧪 Items</button>
@@ -957,9 +957,9 @@ const CombatSystem = {
         document.head.appendChild(style);
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // QUICK COMBAT (Auto-resolve without UI)
-    // ═══════════════════════════════════════════════════════════════
+    // 
     quickCombat(enemyId, playerAdvantage = 0) {
         const enemy = this.enemies[enemyId];
         if (!enemy) return { result: 'error', message: 'Unknown enemy' };
@@ -1010,9 +1010,9 @@ const CombatSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // ROBBERY DEFENSE (Special combat for robbery events)
-    // ═══════════════════════════════════════════════════════════════
+    // 
     startRobberyDefense(options) {
         const numBandits = options.bandits || 1;
 
@@ -1036,9 +1036,9 @@ const CombatSystem = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
+// 
 // GLOBAL EXPOSURE
-// ═══════════════════════════════════════════════════════════════
+// 
 window.CombatSystem = CombatSystem;
 
 // Initialize when DOM ready
@@ -1048,4 +1048,4 @@ if (document.readyState === 'loading') {
     CombatSystem.init();
 }
 
-console.log('⚔️ CombatSystem loaded');
+console.log('CombatSystem loaded');

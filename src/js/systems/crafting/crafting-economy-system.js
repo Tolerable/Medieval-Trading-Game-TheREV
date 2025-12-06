@@ -1,14 +1,14 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // CRAFTING ECONOMY SYSTEM - capitalism through creation
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const CraftingSystem = {
-    // 🏭 Production facilities - where the magic happens
+    //  Production facilities - where the magic happens
     facilities: {
         NONE: 'none',           // No facility needed (hand crafting)
         FARM: 'farm',           // Growing crops

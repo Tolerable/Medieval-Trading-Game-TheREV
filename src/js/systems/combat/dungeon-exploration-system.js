@@ -1,18 +1,18 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // DUNGEON EXPLORATION SYSTEM - greed meets darkness
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 console.log('🏚️ DungeonExplorationSystem crawling out of the shadows...');
 
 const DungeonExplorationSystem = {
-    // ═══════════════════════════════════════════════════════════════
-    // 💀 EXPLORATION LOOT - trinkets worth dying for (or getting close)
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  EXPLORATION LOOT - trinkets worth dying for (or getting close)
+    // 
     // these are the juicy collectibles that only exist in dark scary places
     // merchants will buy them because they're too scared to get them themselves
 
@@ -281,9 +281,9 @@ const DungeonExplorationSystem = {
             loreText: 'Contains a piece of a world that might have been. Or might yet be. Time is weird.'
         },
 
-        // ═══════════════════════════════════════════════════════════════
-        // 🗑️ VENDOR TRASH TRINKETS - worthless to you, gold to merchants
-        // ═══════════════════════════════════════════════════════════════
+        // 
+        //  VENDOR TRASH TRINKETS - worthless to you, gold to merchants
+        // 
         // these exist solely to pad your pockets via merchant sympathy
         // no use, no purpose, just cold hard profit potential
 
@@ -419,9 +419,9 @@ const DungeonExplorationSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎭 EXPLORATION EVENTS - choices that define your doom
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  EXPLORATION EVENTS - choices that define your doom
+    // 
     // each event has choices, each choice has consequences
     // some paths lead to glory, others to an unmarked grave
 
@@ -441,7 +441,7 @@ const DungeonExplorationSystem = {
                     preview: 'Risk: Low health drain. Could receive blessing or curse.',
                     healthCost: { min: 5, max: 15 },
                     staminaCost: { min: 5, max: 10 },
-                    // 🖤 Outcome weight distribution (must total 100): 💀
+                    //  Outcome weight distribution (must total 100): 
                     // 40% blessing - reward the faithful with health + decent loot
                     // 35% neutral - gods are AFK, you get participation trophy (dusty tome)
                     // 25% curse - dark gods demand sacrifice, health penalty but consolation loot
@@ -601,7 +601,7 @@ const DungeonExplorationSystem = {
                 },
                 {
                     id: 'widen_passage',
-                    text: '⛏️ Try to widen it',
+                    text: 'Try to widen it',
                     preview: 'Risk: High stamina drain. Requires patience. Do you have patience?',
                     healthCost: { min: 5, max: 15 },
                     staminaCost: { min: 35, max: 50 },
@@ -777,13 +777,13 @@ const DungeonExplorationSystem = {
             id: 'mine_dig_spot',
             name: 'Promising Dig Site',
             description: 'The rock here glitters differently. Could be a vein of something valuable... or just pyrite. Fools gold for fools.',
-            icon: '⛏️',
+            icon: '',
             locationType: ['mine', 'cave'],
             difficulty: 'medium',
             choices: [
                 {
                     id: 'dig_carefully',
-                    text: '⛏️ Dig carefully',
+                    text: 'Dig carefully',
                     preview: 'Risk: High stamina drain. Mining is hard work.',
                     healthCost: { min: 5, max: 15 },
                     staminaCost: { min: 35, max: 50 },
@@ -823,9 +823,9 @@ const DungeonExplorationSystem = {
             ]
         },
 
-        // ═══════════════════════════════════════════════════════════════
-        // 🆕 NEW DUNGEON EVENTS - more ways to die or get rich
-        // ═══════════════════════════════════════════════════════════════
+        // 
+        //  NEW DUNGEON EVENTS - more ways to die or get rich
+        // 
 
         dungeon_skeleton_hoard: {
             id: 'dungeon_skeleton_hoard',
@@ -837,7 +837,7 @@ const DungeonExplorationSystem = {
             choices: [
                 {
                     id: 'fight_skeleton',
-                    text: '⚔️ Challenge the Skeleton King',
+                    text: 'Challenge the Skeleton King',
                     preview: 'Risk: EXTREME. He didnt get that throne by being friendly.',
                     healthCost: { min: 30, max: 55 },
                     staminaCost: { min: 35, max: 50 },
@@ -1025,9 +1025,9 @@ const DungeonExplorationSystem = {
             ]
         },
 
-        // ═══════════════════════════════════════════════════════════════
-        // 🏘️ SETTLEMENT EVENTS - towns, villages, cities, capital
-        // ═══════════════════════════════════════════════════════════════
+        // 
+        //  SETTLEMENT EVENTS - towns, villages, cities, capital
+        // 
 
         town_market_stall: {
             id: 'town_market_stall',
@@ -1254,9 +1254,9 @@ const DungeonExplorationSystem = {
             ]
         },
 
-        // ═══════════════════════════════════════════════════════════════
-        // 🌲 WILDERNESS EVENTS - forests, farms
-        // ═══════════════════════════════════════════════════════════════
+        // 
+        //  WILDERNESS EVENTS - forests, farms
+        // 
 
         forest_hidden_grove: {
             id: 'forest_hidden_grove',
@@ -1316,7 +1316,7 @@ const DungeonExplorationSystem = {
                 },
                 {
                     id: 'quick_grab',
-                    text: '⚡ Grab what you can and run',
+                    text: 'Grab what you can and run',
                     preview: 'Risk: Low. Fast in, fast out.',
                     healthCost: { min: 0, max: 5 },
                     staminaCost: { min: 15, max: 20 },
@@ -1401,9 +1401,9 @@ const DungeonExplorationSystem = {
             ]
         },
 
-        // ═══════════════════════════════════════════════════════════════
-        // ⚓ PORT EVENTS - docks and harbors
-        // ═══════════════════════════════════════════════════════════════
+        // 
+        //  PORT EVENTS - docks and harbors
+        // 
 
         port_docks: {
             id: 'port_docks',
@@ -1463,7 +1463,7 @@ const DungeonExplorationSystem = {
                 },
                 {
                     id: 'report_him',
-                    text: '⚔️ Report to guards',
+                    text: 'Report to guards',
                     preview: 'Risk: None. Law-abiding citizen reward.',
                     healthCost: { min: 0, max: 0 },
                     staminaCost: { min: 5, max: 5 },
@@ -1476,9 +1476,9 @@ const DungeonExplorationSystem = {
             ]
         },
 
-        // ═══════════════════════════════════════════════════════════════
-        // ⛏️ MINE EVENTS (supplementary to existing)
-        // ═══════════════════════════════════════════════════════════════
+        // 
+        // MINE EVENTS (supplementary to existing)
+        // 
 
         mine_abandoned_shaft: {
             id: 'mine_abandoned_shaft',
@@ -1562,9 +1562,9 @@ const DungeonExplorationSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 👹 BOSS ENCOUNTERS - the big bads that guard the good loot
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  BOSS ENCOUNTERS - the big bads that guard the good loot
+    // 
     // These spawn at specific locations after exploration threshold
     // Defeating them fires 'enemy-defeated' for quest completion
 
@@ -1742,9 +1742,9 @@ const DungeonExplorationSystem = {
     bossProgress: {},
     defeatedBosses: {},
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📊 DIFFICULTY SCALING - distance from safety = more pain
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DIFFICULTY SCALING - distance from safety = more pain
+    // 
 
     DIFFICULTY_MULTIPLIERS: {
         easy: { healthMult: 0.7, staminaMult: 0.7, lootMult: 0.8, goldMult: 0.8 },
@@ -1763,9 +1763,9 @@ const DungeonExplorationSystem = {
         northern: 'hard'
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🛡️ SURVIVAL REQUIREMENTS - gear up or die trying
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  SURVIVAL REQUIREMENTS - gear up or die trying
+    // 
     // minimum equipment needed to not instantly regret your decisions
 
     SURVIVAL_REQUIREMENTS: {
@@ -1803,19 +1803,19 @@ const DungeonExplorationSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // ⏰ COOLDOWN TRACKING - even dungeons need beauty sleep
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    // COOLDOWN TRACKING - even dungeons need beauty sleep
+    // 
 
-    // 🖤 12-hour cooldown ensures dungeons feel special, not farmable 💀
+    //  12-hour cooldown ensures dungeons feel special, not farmable 
     // Balancing act: long enough to prevent exploitation, short enough to keep players engaged
     // Players can still explore multiple locations, just not spam the same one repeatedly
     COOLDOWN_HOURS: 12,
     locationCooldowns: {},
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎮 CORE METHODS - the gears that grind the bones
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  CORE METHODS - the gears that grind the bones
+    // 
 
     init() {
         console.log('🏚️ DungeonExplorationSystem: Rising from the crypt...');
@@ -1823,7 +1823,7 @@ const DungeonExplorationSystem = {
         // Load cooldowns from storage
         this.loadCooldowns();
 
-        // 👹 Load boss progress
+        //  Load boss progress
         this.loadBossProgress();
 
         // Register exploration loot in ItemDatabase
@@ -1887,7 +1887,7 @@ const DungeonExplorationSystem = {
 
     // Check if location is on cooldown
     isOnCooldown(locationId) {
-        // 💀 Dungeon Bonanza (July 18th) bypasses all cooldowns!
+        //  Dungeon Bonanza (July 18th) bypasses all cooldowns!
         if (typeof DungeonBonanzaSystem !== 'undefined' && DungeonBonanzaSystem.shouldBypassCooldowns()) {
             console.log('💀 Dark Convergence active - dungeon cooldowns bypassed!');
             return false;
@@ -1957,9 +1957,9 @@ const DungeonExplorationSystem = {
         );
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🛡️ SURVIVAL CHECK METHODS - are you ready for this?
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  SURVIVAL CHECK METHODS - are you ready for this?
+    // 
 
     // Get player's total armor defense value
     getPlayerArmorValue(playerStats) {
@@ -2040,7 +2040,7 @@ const DungeonExplorationSystem = {
         if (avgReadiness >= 100) {
             survivalTier = 'READY';
             tierColor = '#00ff00';
-            tierIcon = '✅';
+            tierIcon = '';
         } else if (avgReadiness >= 75) {
             survivalTier = 'PREPARED';
             tierColor = '#88ff00';
@@ -2138,7 +2138,7 @@ const DungeonExplorationSystem = {
 
         if (avgRisk > 0.7) return { level: 'DEADLY', color: '#ff0000', emoji: '💀' };
         if (avgRisk > 0.5) return { level: 'DANGEROUS', color: '#ff6600', emoji: '⚠️' };
-        if (avgRisk > 0.3) return { level: 'RISKY', color: '#ffcc00', emoji: '⚡' };
+        if (avgRisk > 0.3) return { level: 'RISKY', color: '#ffcc00', emoji: '' };
         if (avgRisk > 0.15) return { level: 'MODERATE', color: '#00cc00', emoji: '✓' };
         return { level: 'SAFE', color: '#00ff00', emoji: '😎' };
     },
@@ -2148,7 +2148,7 @@ const DungeonExplorationSystem = {
         const difficulty = this.getLocationDifficulty(location);
         const diffMult = this.DIFFICULTY_MULTIPLIERS[difficulty];
 
-        // 🔧 Get equipment bonuses for combat
+        //  Get equipment bonuses for combat
         let defenseBonus = 0;
         let damageReduction = 0;
         let luckBonus = 0;
@@ -2210,7 +2210,7 @@ const DungeonExplorationSystem = {
 
     // Select outcome based on weights
     selectOutcome(outcomes, event = null, choice = null) {
-        // 🎯 QUEST OVERRIDE: Strange Cargo quest requires shipping_manifest
+        //  QUEST OVERRIDE: Strange Cargo quest requires shipping_manifest
         // If the quest is active and we're at harbor_warehouse, force the manifest outcome
         if (event && event.id === 'harbor_warehouse') {
             const hasStrangeCargoQuest = typeof QuestSystem !== 'undefined' &&
@@ -2300,21 +2300,21 @@ const DungeonExplorationSystem = {
 
         // Add loot to inventory (check if quest item vs regular item)
         results.loot.forEach(item => {
-            // 🎯 Check if this is a quest item
+            //  Check if this is a quest item
             const isQuestItem = typeof QuestSystem !== 'undefined' && QuestSystem.isQuestItem?.(item.id);
 
             if (isQuestItem) {
-                // 📦 Quest items go into questItems inventory
+                //  Quest items go into questItems inventory
                 if (!game.player.questItems) game.player.questItems = {};
                 game.player.questItems[item.id] = (game.player.questItems[item.id] || 0) + item.quantity;
                 console.log(`📦 Quest item found in loot: ${item.id} x${item.quantity}`);
             } else {
-                // 🎒 Regular items go into normal inventory
+                //  Regular items go into normal inventory
                 if (!game.player.inventory) game.player.inventory = {};
                 game.player.inventory[item.id] = (game.player.inventory[item.id] || 0) + item.quantity;
             }
 
-            // 🖤 Emit item-received for quest progress tracking 💀
+            //  Emit item-received for quest progress tracking 
             document.dispatchEvent(new CustomEvent('item-received', {
                 detail: { item: item.id, quantity: item.quantity, source: 'dungeon_loot', isQuestItem }
             }));
@@ -2328,9 +2328,9 @@ const DungeonExplorationSystem = {
         return true;
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🖥️ UI METHODS - making the darkness look pretty
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  UI METHODS - making the darkness look pretty
+    // 
 
     // Show exploration panel for a location
     showExplorationPanel(locationId) {
@@ -2361,7 +2361,7 @@ const DungeonExplorationSystem = {
             return;
         }
 
-        // 🖤💀 FIXED: Play dungeon music AFTER all validation passes 💀
+        //  FIXED: Play dungeon music AFTER all validation passes 
         if (typeof MusicSystem !== 'undefined') {
             MusicSystem.playDungeonMusic();
         }
@@ -2420,7 +2420,7 @@ const DungeonExplorationSystem = {
                         </div>
                     </div>
                     <div class="readiness-item">
-                        <span style="font-size: 0.85em;">⚡ Stamina: ${survival.current.stamina}/${survival.requirements.minStamina} needed</span>
+                        <span style="font-size: 0.85em;">Stamina: ${survival.current.stamina}/${survival.requirements.minStamina} needed</span>
                         <div style="background: #333; height: 6px; border-radius: 3px; overflow: hidden;">
                             <div style="background: ${survival.readiness.stamina >= 100 ? '#4caf50' : survival.readiness.stamina >= 50 ? '#ff9800' : '#f44336'}; height: 100%; width: ${Math.min(100, survival.readiness.stamina)}%;"></div>
                         </div>
@@ -2432,7 +2432,7 @@ const DungeonExplorationSystem = {
                         </div>
                     </div>
                     <div class="readiness-item">
-                        <span style="font-size: 0.85em;">⚔️ Weapon: ${survival.current.weapon}/${survival.requirements.recommendedWeapon} recommended</span>
+                        <span style="font-size: 0.85em;">Weapon: ${survival.current.weapon}/${survival.requirements.recommendedWeapon} recommended</span>
                         <div style="background: #333; height: 6px; border-radius: 3px; overflow: hidden;">
                             <div style="background: ${survival.readiness.weapon >= 100 ? '#4caf50' : survival.readiness.weapon >= 50 ? '#ff9800' : '#f44336'}; height: 100%; width: ${Math.min(100, survival.readiness.weapon)}%;"></div>
                         </div>
@@ -2473,7 +2473,7 @@ const DungeonExplorationSystem = {
                             ${!hasHealth ? '<span class="warning">(FATAL!)</span>' : ''}
                         </span>
                         <span class="cost stamina-cost" title="Stamina drain">
-                            ⚡ ${drain.stamina.min}-${drain.stamina.max}
+                            ${drain.stamina.min}-${drain.stamina.max}
                             ${!hasStamina ? '<span class="warning">(Exhausting!)</span>' : ''}
                         </span>
                         ${choice.goldCost ? `<span class="cost gold-cost" title="Gold required">
@@ -2512,7 +2512,7 @@ const DungeonExplorationSystem = {
 
                 <div class="player-status-bar">
                     <span class="status-item">❤️ ${playerStats.stats?.health || 100}/${playerStats.stats?.maxHealth || 100}</span>
-                    <span class="status-item">⚡ ${playerStats.stats?.stamina || 100}/${playerStats.stats?.maxStamina || 100}</span>
+                    <span class="status-item">${playerStats.stats?.stamina || 100}/${playerStats.stats?.maxStamina || 100}</span>
                     <span class="status-item">💰 ${playerStats.gold || 0}</span>
                 </div>
 
@@ -2570,7 +2570,7 @@ const DungeonExplorationSystem = {
         // Apply results
         this.applyResults(results);
 
-        // 👹 Increment boss progress for this location
+        //  Increment boss progress for this location
         this.incrementBossProgress(location.id);
 
         // Fire dungeon-room-explored event for quest tracking
@@ -2594,7 +2594,7 @@ const DungeonExplorationSystem = {
             }
         }
 
-        // 👹 Check if boss should now appear
+        //  Check if boss should now appear
         if (this.shouldBossAppear(location.id)) {
             const boss = this.getBossForLocation(location.id);
             if (boss) {
@@ -2642,7 +2642,7 @@ const DungeonExplorationSystem = {
                 <div class="result-stats">
                     ${results.healthLost > 0 ? `<span class="stat-loss">❤️ -${results.healthLost}</span>` : ''}
                     ${results.healthGained > 0 ? `<span class="stat-gain">❤️ +${results.healthGained}</span>` : ''}
-                    ${results.staminaLost > 0 ? `<span class="stat-loss">⚡ -${results.staminaLost}</span>` : ''}
+                    ${results.staminaLost > 0 ? `<span class="stat-loss">-${results.staminaLost}</span>` : ''}
                     ${results.goldChange > 0 ? `<span class="stat-gain">💰 +${results.goldChange}</span>` : ''}
                     ${results.goldChange < 0 ? `<span class="stat-loss">💰 ${results.goldChange}</span>` : ''}
                 </div>
@@ -2656,7 +2656,7 @@ const DungeonExplorationSystem = {
                 </div>
 
                 <div class="result-footer">
-                    <p class="cooldown-notice">⏰ This location will refresh in ${this.COOLDOWN_HOURS} hours.</p>
+                    <p class="cooldown-notice">This location will refresh in ${this.COOLDOWN_HOURS} hours.</p>
                     <button class="btn-primary" onclick="DungeonExplorationSystem.closeExploration()">
                         Continue
                     </button>
@@ -2680,7 +2680,7 @@ const DungeonExplorationSystem = {
                 <button class="overlay-close" onclick="DungeonExplorationSystem.closeExploration()">×</button>
 
                 <div class="cooldown-message">
-                    <span class="cooldown-icon">⏰</span>
+                    <span class="cooldown-icon"></span>
                     <h2>Location Exhausted</h2>
                     <p>${location.name} has been thoroughly explored recently.</p>
                     <p>The darkness needs time to replenish its treasures... and its monsters.</p>
@@ -2705,7 +2705,7 @@ const DungeonExplorationSystem = {
             overlay.classList.remove('active');
         }
 
-        // 🎵 Return to normal world music when leaving exploration
+        //  Return to normal world music when leaving exploration
         if (typeof MusicSystem !== 'undefined') {
             // Check if we're in doom world
             const isDoom = typeof game !== 'undefined' && game.player?.isDoomWorld;
@@ -2717,7 +2717,7 @@ const DungeonExplorationSystem = {
         }
     },
 
-    // Track exploration section collapsed state - 🖤💀 DEFAULT TO COLLAPSED
+    // Track exploration section collapsed state -  DEFAULT TO COLLAPSED
     explorationSectionCollapsed: true,
 
     // Calculate enhanced difficulty based on gear, stats, rep, location type, and NPCs
@@ -2790,7 +2790,7 @@ const DungeonExplorationSystem = {
         return events;
     },
 
-    // Toggle exploration section collapse - 🖤💀 Collapse to just a button, not full header
+    // Toggle exploration section collapse -  Collapse to just a button, not full header
     toggleExplorationSection() {
         this.explorationSectionCollapsed = !this.explorationSectionCollapsed;
         const content = document.getElementById('exploration-section-content');
@@ -2849,7 +2849,7 @@ const DungeonExplorationSystem = {
         const onCooldown = this.isOnCooldown(locationId);
 
         // Build section content with collapsible header
-        // 🖤💀 Two states: collapsed (just button) vs expanded (full header + content)
+        //  Two states: collapsed (just button) vs expanded (full header + content)
         let contentHTML = `
             <!-- 🖤 Collapsed state: Just a simple "Explore" button -->
             <button id="exploration-collapsed-btn"
@@ -2885,7 +2885,7 @@ const DungeonExplorationSystem = {
             const minutes = Math.round((remaining - hours) * 60);
             contentHTML += `
                 <div class="cooldown-notice" style="background: #333; border-left: 4px solid #ff9800; padding: 12px; margin: 10px 0; border-radius: 4px;">
-                    <p style="margin: 0; color: #ff9800;">⏰ This location needs time to respawn new treasures and threats.</p>
+                    <p style="margin: 0; color: #ff9800;">This location needs time to respawn new treasures and threats.</p>
                     <p style="margin: 5px 0 0 0; font-size: 0.9em;">Available in: <strong>${hours}h ${minutes}m</strong></p>
                     <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #888; font-style: italic;">
                         "Even the darkness needs a nap between victims."
@@ -2914,9 +2914,9 @@ const DungeonExplorationSystem = {
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.85em;">
                         <span>❤️ ${survival.current.health}/${survival.requirements.minHealth}</span>
-                        <span>⚡ ${survival.current.stamina}/${survival.requirements.minStamina}</span>
+                        <span>${survival.current.stamina}/${survival.requirements.minStamina}</span>
                         <span>🛡️ ${survival.current.armor}/${survival.requirements.recommendedArmor}</span>
-                        <span>⚔️ ${survival.current.weapon}/${survival.requirements.recommendedWeapon}</span>
+                        <span>${survival.current.weapon}/${survival.requirements.recommendedWeapon}</span>
                     </div>
                 </div>
             `;
@@ -3089,9 +3089,9 @@ const DungeonExplorationSystem = {
         return colors[difficulty] || '#666';
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 👹 BOSS ENCOUNTER METHODS - face your doom
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  BOSS ENCOUNTER METHODS - face your doom
+    // 
 
     // Get boss for current location (if any)
     getBossForLocation(locationId) {
@@ -3166,7 +3166,7 @@ const DungeonExplorationSystem = {
                         <p style="margin: 5px 0;">Health: ${boss.health}</p>
                     </div>
                     <div style="text-align: center; padding: 10px; background: rgba(255,152,0,0.2); border-radius: 8px;">
-                        <span style="font-size: 1.5em;">⚔️</span>
+                        <span style="font-size: 1.5em;"></span>
                         <p style="margin: 5px 0;">Damage: ${boss.damage.min}-${boss.damage.max}</p>
                     </div>
                 </div>
@@ -3174,7 +3174,7 @@ const DungeonExplorationSystem = {
                 <div class="boss-actions" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
                     <button class="boss-fight-btn" onclick="DungeonExplorationSystem.startBossFight('${boss.id}')"
                         style="padding: 15px 30px; background: linear-gradient(180deg, #f44336, #c62828); border: none; border-radius: 8px; color: white; font-size: 1.2em; cursor: pointer;">
-                        ⚔️ FIGHT!
+                        FIGHT!
                     </button>
                     <button class="boss-flee-btn" onclick="DungeonExplorationSystem.fleeBoss()"
                         style="padding: 15px 30px; background: linear-gradient(180deg, #666, #444); border: none; border-radius: 8px; color: white; font-size: 1.2em; cursor: pointer;">
@@ -3268,7 +3268,7 @@ const DungeonExplorationSystem = {
 
         overlay.querySelector('.overlay-content').innerHTML = `
             <div class="boss-combat">
-                <h2 style="color: #f44336; text-align: center;">⚔️ BATTLE: ${boss.name} ⚔️</h2>
+                <h2 style="color: #f44336; text-align: center;">BATTLE: ${boss.name}</h2>
 
                 <div class="combat-arena" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
                     <!-- Player Side -->
@@ -3278,7 +3278,7 @@ const DungeonExplorationSystem = {
                             <div style="width: ${playerHealthPercent}%; height: 100%; background: linear-gradient(90deg, #4caf50, #8bc34a);"></div>
                         </div>
                         <p>❤️ ${playerHealth} / ${maxPlayerHealth}</p>
-                        <p style="font-size: 0.8em; color: #888;">⚔️ ATK: ${playerAttack} | 🛡️ DEF: ${playerDefense}</p>
+                        <p style="font-size: 0.8em; color: #888;">ATK: ${playerAttack} | 🛡️ DEF: ${playerDefense}</p>
                     </div>
 
                     <!-- Boss Side -->
@@ -3288,7 +3288,7 @@ const DungeonExplorationSystem = {
                             <div style="width: ${bossHealthPercent}%; height: 100%; background: linear-gradient(90deg, #f44336, #ff5722);"></div>
                         </div>
                         <p>❤️ ${boss.currentHealth} / ${boss.health}</p>
-                        <p style="font-size: 0.8em; color: #888;">⚔️ DMG: ${boss.damage.min}-${boss.damage.max} | 🛡️ DEF: ${boss.defense}</p>
+                        <p style="font-size: 0.8em; color: #888;">DMG: ${boss.damage.min}-${boss.damage.max} | 🛡️ DEF: ${boss.defense}</p>
                     </div>
                 </div>
 
@@ -3299,7 +3299,7 @@ const DungeonExplorationSystem = {
                 <div class="combat-actions" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                     <button onclick="DungeonExplorationSystem.bossAttack()"
                         style="padding: 12px 25px; background: linear-gradient(180deg, #f44336, #c62828); border: none; border-radius: 8px; color: white; font-size: 1.1em; cursor: pointer;">
-                        ⚔️ Attack
+                        Attack
                     </button>
                     <button onclick="DungeonExplorationSystem.bossDefend()"
                         style="padding: 12px 25px; background: linear-gradient(180deg, #2196f3, #1565c0); border: none; border-radius: 8px; color: white; font-size: 1.1em; cursor: pointer;">
@@ -3472,21 +3472,21 @@ const DungeonExplorationSystem = {
 
             // Add items to inventory (check if quest item vs regular item)
             boss.rewards.items.forEach(itemId => {
-                // 🎯 Check if this is a quest item
+                //  Check if this is a quest item
                 const isQuestItem = typeof QuestSystem !== 'undefined' && QuestSystem.isQuestItem?.(itemId);
 
                 if (isQuestItem) {
-                    // 📦 Quest items go into questItems inventory
+                    //  Quest items go into questItems inventory
                     if (!game.player.questItems) game.player.questItems = {};
                     game.player.questItems[itemId] = (game.player.questItems[itemId] || 0) + 1;
                     console.log(`📦 Quest item found in boss loot: ${itemId}`);
                 } else {
-                    // 🎒 Regular items go into normal inventory
+                    //  Regular items go into normal inventory
                     if (!game.player.inventory) game.player.inventory = {};
                     game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + 1;
                 }
 
-                // 🖤 Emit item-received for quest progress tracking 💀
+                //  Emit item-received for quest progress tracking 
                 document.dispatchEvent(new CustomEvent('item-received', {
                     detail: { item: itemId, quantity: 1, source: 'boss_loot', isQuestItem }
                 }));

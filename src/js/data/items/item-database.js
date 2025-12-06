@@ -1,13 +1,13 @@
 // ═══════════════════════════════════════════════════════════════
 // ITEM DATABASE - the sacred tome of all tradeable darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
 // ═══════════════════════════════════════════════════════════════
 
-console.log('📚 Item Database emerging from the depths of localStorage...');
+console.log(' Item Database emerging from the depths of localStorage...');
 
 const ItemDatabase = {
     // 🏷️ Item categories - organizing the chaos
@@ -20,12 +20,12 @@ const ItemDatabase = {
         LUXURY: 'luxury',
         WEAPONS: 'weapons',
         ARMOR: 'armor',
-        DUNGEON_LOOT: 'dungeon_loot',  // 🖤 Sell-only trash from dungeons 💀
-        TREASURE: 'treasure'            // 🦇 Valuable finds from events/dungeons
+        DUNGEON_LOOT: 'dungeon_loot',  //  Sell-only trash from dungeons 
+        TREASURE: 'treasure'            //  Valuable finds from events/dungeons
     },
 
     // ✨ Rarity levels - how special is your junk?
-    // 🖤 Cleaned up - lowercase only, getRarity() handles case-insensitive lookup 💀
+    //  Cleaned up - lowercase only, getRarity() handles case-insensitive lookup 
     rarity: {
         common: { name: 'Common', color: '#888888' },
         uncommon: { name: 'Uncommon', color: '#00ff00' },
@@ -34,7 +34,7 @@ const ItemDatabase = {
         legendary: { name: 'Legendary', color: '#ff8000' }
     },
 
-    // 🦇 Case-insensitive rarity lookup for backwards compatibility
+    //  Case-insensitive rarity lookup for backwards compatibility
     getRarity(rarityKey) {
         if (!rarityKey) return this.rarity.common;
         const key = String(rarityKey).toLowerCase();
@@ -48,10 +48,10 @@ const ItemDatabase = {
             id: 'gold',
             name: 'Gold Coins',
             description: 'Standard currency used throughout the realm. Each coin weighs almost nothing.',
-            icon: '💰',
+            icon: '',
             category: 'currency',
             rarity: 'common',
-            // 🖤 Gold weight is INTENTIONALLY this low 💀
+            //  Gold weight is INTENTIONALLY this low 
             // 0.0001 means 10,000 gold coins = 1 weight unit
             // This is a DESIGN CHOICE so gold doesn't fuck up your inventory capacity
             // Don't "fix" this unless Gee says so - gold needs to be light as air
@@ -133,7 +133,7 @@ const ItemDatabase = {
             id: 'iron_ore',
             name: 'Iron Ore',
             description: 'Raw iron ore for smelting.',
-            icon: '⛏️',
+            icon: '',
             category: 'raw_ores',
             rarity: 'common',
             weight: 15,
@@ -183,7 +183,7 @@ const ItemDatabase = {
             id: 'pickaxe',
             name: 'Pickaxe',
             description: 'Tool for mining.',
-            icon: '⛏️',
+            icon: '',
             category: 'tools',
             rarity: 'common',
             weight: 6,
@@ -199,7 +199,7 @@ const ItemDatabase = {
             id: 'sword',
             name: 'Sword',
             description: 'Basic weapon for defense.',
-            icon: '⚔️',
+            icon: '',
             category: 'weapons',
             rarity: 'common',
             weight: 5,
@@ -269,7 +269,7 @@ const ItemDatabase = {
             id: 'ale',
             name: 'Ale',
             description: 'Local brewed ale.',
-            icon: '🍺',
+            icon: '',
             category: 'consumables',
             rarity: 'common',
             weight: 2,
@@ -294,7 +294,7 @@ const ItemDatabase = {
             id: 'grain',
             name: 'Grain',
             description: 'Basic food staple.',
-            icon: '🌾',
+            icon: '',
             category: 'basic_resources',
             rarity: 'common',
             weight: 2,
@@ -318,7 +318,7 @@ const ItemDatabase = {
             id: 'tools',
             name: 'Tools',
             description: 'Various tools and equipment.',
-            icon: '🔧',
+            icon: '',
             category: 'tools',
             rarity: 'common',
             weight: 8,
@@ -328,12 +328,12 @@ const ItemDatabase = {
             id: 'weapons',
             name: 'Weapons',
             description: 'Various weapons and armor.',
-            icon: '⚔️',
+            icon: '',
             category: 'weapons',
             rarity: 'uncommon',
             weight: 10,
             basePrice: 60,
-            // 🖤💀 EQUIPPABLE: Generic weapon bundle 💀
+            //  EQUIPPABLE: Generic weapon bundle 
             equipSlot: 'weapon',
             equipType: 'weapon',
             damage: 15,
@@ -344,11 +344,11 @@ const ItemDatabase = {
             name: 'Armor',
             description: 'Protective equipment.',
             icon: '🛡️',
-            category: 'armor',  // 🖤 Fixed: was 'weapons', now 'armor' 💀
+            category: 'armor',  //  Fixed: was 'weapons', now 'armor' 
             rarity: 'uncommon',
             weight: 15,
             basePrice: 80,
-            // 🖤💀 EQUIPPABLE: Generic armor set 💀
+            //  EQUIPPABLE: Generic armor set 
             equipSlot: 'body',
             equipType: 'armor',
             bonuses: { defense: 15 }
@@ -357,7 +357,7 @@ const ItemDatabase = {
             id: 'luxury_goods',
             name: 'Luxury Goods',
             description: 'High-end luxury items.',
-            icon: '👑',
+            icon: '',
             category: 'luxury',
             rarity: 'rare',
             weight: 5,
@@ -397,7 +397,7 @@ const ItemDatabase = {
             id: 'crystals',
             name: 'Crystals',
             description: 'Magical crystals.',
-            icon: '🔮',
+            icon: '',
             category: 'luxury',
             rarity: 'epic',
             weight: 0.5,
@@ -492,7 +492,7 @@ const ItemDatabase = {
             id: 'imperial_goods',
             name: 'Imperial Goods',
             description: 'Goods from the imperial court.',
-            icon: '👑',
+            icon: '',
             category: 'luxury',
             rarity: 'epic',
             weight: 3,
@@ -542,7 +542,7 @@ const ItemDatabase = {
             id: 'imperial_favors',
             name: 'Imperial Favors',
             description: 'Favors from the imperial court.',
-            icon: '👑',
+            icon: '',
             category: 'luxury',
             rarity: 'legendary',
             weight: 0,
@@ -561,7 +561,7 @@ const ItemDatabase = {
             basePrice: 150,
             stackable: true,
             tradeable: true,
-            sellOnly: false  // 🖤 Merchants will buy this - it's valuable 💀
+            sellOnly: false  //  Merchants will buy this - it's valuable 
         },
         ancient_coin: {
             id: 'ancient_coin',
@@ -593,7 +593,7 @@ const ItemDatabase = {
             id: 'enchanted_crystal',
             name: 'Enchanted Crystal',
             description: 'A crystal pulsing with magical energy. Mages and alchemists covet these.',
-            icon: '🔮',
+            icon: '',
             category: 'treasure',
             rarity: 'epic',
             weight: 0.5,
@@ -617,19 +617,19 @@ const ItemDatabase = {
         },
 
         // === 🗑️ DUNGEON LOOT - Sell-only trash from dungeons ===
-        // 🖤 Merchants will NOT sell these - only buy them from players 💀
+        //  Merchants will NOT sell these - only buy them from players 
         rusty_dagger: {
             id: 'rusty_dagger',
             name: 'Rusty Dagger',
             description: 'A corroded blade. Worthless for combat but can be sold for scrap.',
-            icon: '🗡️',
+            icon: '️',
             category: 'dungeon_loot',
             rarity: 'common',
             weight: 0.5,
             basePrice: 3,
             stackable: true,
             tradeable: true,
-            sellOnly: true  // 🖤 Merchants buy but don't sell 💀
+            sellOnly: true  //  Merchants buy but don't sell 
         },
         tattered_cloth: {
             id: 'tattered_cloth',
@@ -736,13 +736,13 @@ const ItemDatabase = {
             sellOnly: true
         },
 
-        // === 🗡️ ENEMY LOOT - Combat drops (sell-only) ===
-        // 🖤 These drop from enemies in combat - merchants buy but don't sell 💀
+        // === ️ ENEMY LOOT - Combat drops (sell-only) ===
+        //  These drop from enemies in combat - merchants buy but don't sell 
         rusty_sword: {
             id: 'rusty_sword',
             name: 'Rusty Sword',
             description: 'A corroded blade from a bandit. Worth little but can be melted down.',
-            icon: '⚔️',
+            icon: '',
             category: 'dungeon_loot',
             rarity: 'common',
             weight: 2,
@@ -1002,7 +1002,7 @@ const ItemDatabase = {
             id: 'fire_essence',
             name: 'Fire Essence',
             description: 'Crystallized dragon fire. Burns eternally. Mages covet this.',
-            icon: '🔥',
+            icon: '',
             category: 'dungeon_loot',
             rarity: 'epic',
             weight: 0.2,
@@ -1188,7 +1188,7 @@ const ItemDatabase = {
             rarity: 'uncommon',
             weight: 3,
             basePrice: 60,
-            // 🖤💀 EQUIPPABLE: Body slot - weather protection 💀
+            //  EQUIPPABLE: Body slot - weather protection 
             equipSlot: 'body',
             equipType: 'clothing',
             stats: { coldResist: 10, weatherProtection: 5 }
@@ -1249,7 +1249,7 @@ const ItemDatabase = {
             id: 'trade_goods',
             name: 'Trade Goods',
             description: 'Assorted goods popular with merchants.',
-            icon: '📦',
+            icon: '',
             category: 'basic_resources',
             rarity: 'common',
             weight: 5,
@@ -1261,7 +1261,7 @@ const ItemDatabase = {
             id: 'royal_goods',
             name: 'Royal Goods',
             description: 'Fine goods fit for nobility.',
-            icon: '👑',
+            icon: '',
             category: 'luxury',
             rarity: 'epic',
             weight: 2,
@@ -1339,7 +1339,7 @@ const ItemDatabase = {
             id: 'information',
             name: 'Information',
             description: 'Valuable intelligence and rumors.',
-            icon: '📜',
+            icon: '',
             category: 'luxury',
             rarity: 'uncommon',
             weight: 0,
@@ -1361,7 +1361,7 @@ const ItemDatabase = {
             id: 'dagger',
             name: 'Dagger',
             description: 'A sharp, concealable blade.',
-            icon: '🗡️',
+            icon: '️',
             category: 'weapons',
             rarity: 'common',
             weight: 1,
@@ -1379,7 +1379,7 @@ const ItemDatabase = {
             category: 'weapons',
             rarity: 'uncommon',
             weight: 6,
-            basePrice: 85, // 🖤 Balanced: 25 damage uncommon ranged, same tier as longsword 💀
+            basePrice: 85, //  Balanced: 25 damage uncommon ranged, same tier as longsword 
             damage: 25,
             equipSlot: 'weapon',
             equipType: 'weapon',
@@ -1389,7 +1389,7 @@ const ItemDatabase = {
             id: 'longsword',
             name: 'Longsword',
             description: 'A well-balanced blade for knights.',
-            icon: '⚔️',
+            icon: '',
             category: 'weapons',
             rarity: 'uncommon',
             weight: 4,
@@ -1431,7 +1431,7 @@ const ItemDatabase = {
             id: 'lance',
             name: 'Lance',
             description: 'Cavalry weapon for mounted combat.',
-            icon: '🎯',
+            icon: '',
             category: 'weapons',
             rarity: 'uncommon',
             weight: 7,
@@ -1808,7 +1808,7 @@ const ItemDatabase = {
             id: 'cider',
             name: 'Cider',
             description: 'Apple cider from local orchards.',
-            icon: '🍺',
+            icon: '',
             category: 'consumables',
             rarity: 'common',
             weight: 2,
@@ -1892,7 +1892,7 @@ const ItemDatabase = {
             id: 'parchment',
             name: 'Parchment',
             description: 'Prepared animal skin for writing.',
-            icon: '📜',
+            icon: '',
             category: 'basic_resources',
             rarity: 'uncommon',
             weight: 0.2,
@@ -1927,7 +1927,7 @@ const ItemDatabase = {
             rarity: 'common',
             weight: 2,
             basePrice: 18,
-            // 🖤💀 EQUIPPABLE: Off-hand light source 💀
+            //  EQUIPPABLE: Off-hand light source 
             equipSlot: 'offhand',
             equipType: 'lantern',
             stats: { perception: 2, dungeonBonus: 5 }
@@ -1941,7 +1941,7 @@ const ItemDatabase = {
             rarity: 'common',
             weight: 1,
             basePrice: 3,
-            // 🖤💀 EQUIPPABLE: Off-hand light source 💀
+            //  EQUIPPABLE: Off-hand light source 
             equipSlot: 'offhand',
             equipType: 'lantern',
             stats: { perception: 1, dungeonBonus: 3 }
@@ -1955,7 +1955,7 @@ const ItemDatabase = {
             rarity: 'rare',
             weight: 0.3,
             basePrice: 75,
-            // 🖤💀 EQUIPPABLE: Accessory for navigation 💀
+            //  EQUIPPABLE: Accessory for navigation 
             equipSlot: 'accessory1',
             equipType: 'trinket',
             stats: { navigation: 5, travelSpeed: 2 }
@@ -1969,7 +1969,7 @@ const ItemDatabase = {
             rarity: 'rare',
             weight: 2,
             basePrice: 90,
-            // 🖤💀 EQUIPPABLE: Tool for scouting 💀
+            //  EQUIPPABLE: Tool for scouting 
             equipSlot: 'tool',
             equipType: 'tool',
             stats: { perception: 5, scouting: 3 }
@@ -1984,7 +1984,7 @@ const ItemDatabase = {
             weight: 2,
             basePrice: 20,
             carryBonus: 10,
-            // 🖤💀 EQUIPPABLE: Accessory for carrying 💀
+            //  EQUIPPABLE: Accessory for carrying 
             equipSlot: 'accessory2',
             equipType: 'accessory',
             stats: { carryCapacity: 10 }
@@ -2055,17 +2055,17 @@ const ItemDatabase = {
             id: 'crown',
             name: 'Crown',
             description: 'Ornate crown fit for nobility.',
-            icon: '👑',
+            icon: '',
             category: 'luxury',
             rarity: 'legendary',
             weight: 2,
             basePrice: 1500,
-            // 🖤💀 EQUIPPABLE: Head slot - royalty flex 💀
+            //  EQUIPPABLE: Head slot - royalty flex 
             equipSlot: 'head',
             equipType: 'crown',
             bonuses: { charisma: 15, reputation: 10, luck: 5 }
         },
-        // 🖤 dragon_scale REMOVED - duplicate of line 592 in treasure section 💀
+        //  dragon_scale REMOVED - duplicate of line 592 in treasure section 
         phoenix_feather: {
             id: 'phoenix_feather',
             name: 'Phoenix Feather',
@@ -2089,12 +2089,12 @@ const ItemDatabase = {
             basePrice: 16,
             craftable: true
         },
-        // 🖤 Construction Materials - Planks → Building Items 💀
+        //  Construction Materials - Planks → Building Items 
         crate: {
             id: 'crate',
             name: 'Wooden Crate',
             description: 'Sturdy wooden crate for storing and transporting goods.',
-            icon: '📦',
+            icon: '',
             category: 'building_materials',
             rarity: 'common',
             weight: 8,
@@ -2138,7 +2138,7 @@ const ItemDatabase = {
             id: 'flour',
             name: 'Flour',
             description: 'Ground wheat flour for baking.',
-            icon: '🌾',
+            icon: '',
             category: 'consumables',
             rarity: 'common',
             weight: 1,
@@ -2149,7 +2149,7 @@ const ItemDatabase = {
             id: 'wheat',
             name: 'Wheat',
             description: 'Raw wheat grain from farms.',
-            icon: '🌾',
+            icon: '',
             category: 'basic_resources',
             rarity: 'common',
             weight: 2,
@@ -2185,7 +2185,7 @@ const ItemDatabase = {
             id: 'flax',
             name: 'Flax',
             description: 'Flax plant for making linen.',
-            icon: '🌾',
+            icon: '',
             category: 'basic_resources',
             rarity: 'common',
             weight: 1,
@@ -2243,14 +2243,14 @@ const ItemDatabase = {
             id: 'iron_sword',
             name: 'Iron Sword',
             description: 'Well-forged iron blade.',
-            icon: '⚔️',
+            icon: '',
             category: 'weapons',
             rarity: 'uncommon',
             weight: 5,
             basePrice: 85,
             damage: 30,
             craftable: true,
-            // 🖤💀 EQUIPPABLE: Weapon slot 💀
+            //  EQUIPPABLE: Weapon slot 
             equipSlot: 'weapon',
             equipType: 'weapon',
             bonuses: { attack: 10, damage: 30 }
@@ -2259,14 +2259,14 @@ const ItemDatabase = {
             id: 'steel_sword',
             name: 'Steel Sword',
             description: 'High-quality steel blade.',
-            icon: '⚔️',
+            icon: '',
             category: 'weapons',
             rarity: 'rare',
             weight: 5,
             basePrice: 180,
             damage: 50,
             craftable: true,
-            // 🖤💀 EQUIPPABLE: Weapon slot 💀
+            //  EQUIPPABLE: Weapon slot 
             equipSlot: 'weapon',
             equipType: 'weapon',
             bonuses: { attack: 18, damage: 50, speed: 1 }
@@ -2277,7 +2277,7 @@ const ItemDatabase = {
             id: 'blade_of_the_hacker',
             name: '💻 Blade of the Hacker',
             description: 'A legendary digital blade that glitches reality itself. Awarded for completing ALL achievements. +100 Attack, +100 Damage, +50 to all stats. Unstoppable.',
-            icon: '🗡️',
+            icon: '️',
             category: 'weapons',
             rarity: 'legendary',
             weight: 0,  // Weightless - it exists outside physics
@@ -2297,7 +2297,7 @@ const ItemDatabase = {
                 speed: 25,
                 strength: 25
             },
-            lore: 'Forged in the fires of a thousand debooger sessions 💀, this blade cuts through code and flesh alike. Only those who have proven themselves worthy by mastering every challenge may wield it.',
+            lore: 'Forged in the fires of a thousand debooger sessions , this blade cuts through code and flesh alike. Only those who have proven themselves worthy by mastering every challenge may wield it.',
             visualEffect: 'glitch'  // Special visual effect when equipped
         },
 
@@ -2313,7 +2313,7 @@ const ItemDatabase = {
             basePrice: 200,
             defense: 40,
             craftable: true,
-            // 🖤💀 EQUIPPABLE: Body slot 💀
+            //  EQUIPPABLE: Body slot 
             equipSlot: 'body',
             equipType: 'armor',
             bonuses: { defense: 40, endurance: 3, speed: -1 }
@@ -2325,12 +2325,12 @@ const ItemDatabase = {
             name: 'Simple Clothes',
             description: 'Basic linen clothing.',
             icon: '👕',
-            category: 'armor',  // 🖤 Changed to armor for equipment system 💀
+            category: 'armor',  //  Changed to armor for equipment system 
             rarity: 'common',
             weight: 2,
             basePrice: 25,
             craftable: true,
-            // 🖤💀 EQUIPPABLE: Body slot - basic clothing 💀
+            //  EQUIPPABLE: Body slot - basic clothing 
             equipSlot: 'body',
             equipType: 'clothing',
             bonuses: { charisma: 1 }
@@ -2340,12 +2340,12 @@ const ItemDatabase = {
             name: 'Fine Clothes',
             description: 'Elegant silk garments.',
             icon: '👗',
-            category: 'armor',  // 🖤 Changed to armor for equipment system 💀
+            category: 'armor',  //  Changed to armor for equipment system 
             rarity: 'rare',
             weight: 2,
             basePrice: 120,
             craftable: true,
-            // 🖤💀 EQUIPPABLE: Body slot - fancy clothing 💀
+            //  EQUIPPABLE: Body slot - fancy clothing 
             equipSlot: 'body',
             equipType: 'clothing',
             bonuses: { charisma: 8, reputation: 5, tradingDiscount: 3 }
@@ -2355,12 +2355,12 @@ const ItemDatabase = {
             name: 'Silk Garments',
             description: 'Luxurious silk clothing.',
             icon: '🥻',
-            category: 'armor',  // 🖤 Changed to armor for equipment system 💀
+            category: 'armor',  //  Changed to armor for equipment system 
             rarity: 'rare',
             weight: 1,
             basePrice: 150,
             craftable: true,
-            // 🖤💀 EQUIPPABLE: Body slot - luxury clothing 💀
+            //  EQUIPPABLE: Body slot - luxury clothing 
             equipSlot: 'body',
             equipType: 'clothing',
             bonuses: { charisma: 10, reputation: 8, luck: 2 }
@@ -2390,14 +2390,14 @@ const ItemDatabase = {
             id: 'iron_tools',
             name: 'Iron Tools',
             description: 'Sturdy iron tools for various tasks.',
-            icon: '🔧',
+            icon: '',
             category: 'tools',
             rarity: 'uncommon',
             weight: 6,
             basePrice: 55,
             craftable: true,
             durability: 200,
-            // 🖤💀 EQUIPPABLE: Tool slot 💀
+            //  EQUIPPABLE: Tool slot 
             equipSlot: 'tool',
             equipType: 'tool',
             bonuses: { crafting: 3, gathering: 2 }
@@ -2414,7 +2414,7 @@ const ItemDatabase = {
             toolType: 'farming',
             craftable: true,
             durability: 150,
-            // 🖤💀 EQUIPPABLE: Tool slot 💀
+            //  EQUIPPABLE: Tool slot 
             equipSlot: 'tool',
             bonuses: { gathering: 3, farming: 5 }
         },
@@ -2430,7 +2430,7 @@ const ItemDatabase = {
             toolType: 'fishing',
             craftable: true,
             durability: 100,
-            // 🖤💀 EQUIPPABLE: Tool slot 💀
+            //  EQUIPPABLE: Tool slot 
             equipSlot: 'tool',
             bonuses: { gathering: 2, fishing: 5 }
         },
@@ -2438,7 +2438,7 @@ const ItemDatabase = {
             id: 'steel_pickaxe',
             name: 'Steel Pickaxe',
             description: 'High-quality mining tool. Mines ore faster and lasts longer.',
-            icon: '⛏️',
+            icon: '',
             category: 'tools',
             rarity: 'rare',
             weight: 7,
@@ -2446,7 +2446,7 @@ const ItemDatabase = {
             toolType: 'mining',
             craftable: true,
             durability: 250,
-            // 🖤💀 EQUIPPABLE: Tool slot - better than regular pickaxe 💀
+            //  EQUIPPABLE: Tool slot - better than regular pickaxe 
             equipSlot: 'tool',
             bonuses: { gathering: 4, mining: 8 }
         },
@@ -2460,7 +2460,7 @@ const ItemDatabase = {
             weight: 4,
             basePrice: 12,
             craftable: true,
-            // 🖤💀 EQUIPPABLE: Tool slot - basic starter tools 💀
+            //  EQUIPPABLE: Tool slot - basic starter tools 
             equipSlot: 'tool',
             equipType: 'tool',
             bonuses: { crafting: 1, gathering: 1 }
@@ -2583,7 +2583,7 @@ const ItemDatabase = {
             id: 'trade_contract',
             name: 'Trade Contract',
             description: 'Legal contract for trade agreements.',
-            icon: '📜',
+            icon: '',
             category: 'luxury',
             rarity: 'uncommon',
             weight: 0.1,
@@ -2628,12 +2628,12 @@ const ItemDatabase = {
             name: 'Colorful Clothes',
             description: 'Bright, eye-catching garments.',
             icon: '👘',
-            category: 'armor',  // 🖤 Changed to armor for equipment system 💀
+            category: 'armor',  //  Changed to armor for equipment system 
             rarity: 'uncommon',
             weight: 2,
             basePrice: 45,
             craftable: true,
-            // 🖤💀 EQUIPPABLE: Body slot - flashy clothing 💀
+            //  EQUIPPABLE: Body slot - flashy clothing 
             equipSlot: 'body',
             equipType: 'clothing',
             bonuses: { charisma: 5, happiness: 3, luck: 1 }
@@ -2642,7 +2642,7 @@ const ItemDatabase = {
             id: 'tale_scrolls',
             name: 'Tale Scrolls',
             description: 'Written stories and legends.',
-            icon: '📜',
+            icon: '',
             category: 'luxury',
             rarity: 'uncommon',
             weight: 0.3,
@@ -2653,7 +2653,7 @@ const ItemDatabase = {
             id: 'old_books',
             name: 'Old Books',
             description: 'Ancient tomes of knowledge.',
-            icon: '📚',
+            icon: '',
             category: 'luxury',
             rarity: 'rare',
             weight: 2,
@@ -2670,20 +2670,20 @@ const ItemDatabase = {
             weight: 2,
             basePrice: 15,
             craftable: true,
-            // 🖤💀 EQUIPPABLE: Can be equipped in tool slot for travel bonuses 💀
+            //  EQUIPPABLE: Can be equipped in tool slot for travel bonuses 
             equipType: 'staff',
             equipSlot: 'tool',
             stats: {
-                speed: 1,        // 🦇 Slightly faster travel
-                defense: 1,      // 🖤 Can fend off weak attackers
-                stamina: 5       // 💀 Helps with long journeys
+                speed: 1,        //  Slightly faster travel
+                defense: 1,      //  Can fend off weak attackers
+                stamina: 5       //  Helps with long journeys
             }
         },
         wisdom_scrolls: {
             id: 'wisdom_scrolls',
             name: 'Wisdom Scrolls',
             description: 'Scrolls containing ancient wisdom.',
-            icon: '📜',
+            icon: '',
             category: 'luxury',
             rarity: 'rare',
             weight: 0.2,
@@ -2774,14 +2774,14 @@ const ItemDatabase = {
             weight: 3,
             basePrice: 120,
             craftable: true,
-            // 🖤💀 EQUIPPABLE: Body slot - charisma boost 💀
+            //  EQUIPPABLE: Body slot - charisma boost 
             equipSlot: 'body',
             equipType: 'clothing',
             bonuses: { charisma: 5, reputation: 3, defense: 3 }
         },
 
-        // === 💀 DOOM WORLD SPECIFIC ITEMS 💀 ===
-        // 🖤 Corrupted food - survival items from the apocalypse 💀
+        // ===  DOOM WORLD SPECIFIC ITEMS  ===
+        //  Corrupted food - survival items from the apocalypse 
         tainted_bread: {
             id: 'tainted_bread',
             name: 'Tainted Bread',
@@ -2790,12 +2790,12 @@ const ItemDatabase = {
             category: 'consumables',
             rarity: 'common',
             weight: 0.5,
-            basePrice: 30,  // 🖤 10x normal bread price in doom 💀
+            basePrice: 30,  //  10x normal bread price in doom 
             consumable: true,
             doomOnly: true,
             effects: {
                 hunger: 10,
-                health: -2  // 🖤 Slightly poisonous 💀
+                health: -2  //  Slightly poisonous 
             }
         },
         void_water: {
@@ -2806,7 +2806,7 @@ const ItemDatabase = {
             category: 'consumables',
             rarity: 'common',
             weight: 2,
-            basePrice: 30,  // 🖤 15x normal water price in doom 💀
+            basePrice: 30,  //  15x normal water price in doom 
             consumable: true,
             doomOnly: true,
             effects: {
@@ -2822,7 +2822,7 @@ const ItemDatabase = {
             category: 'consumables',
             rarity: 'uncommon',
             weight: 1,
-            basePrice: 150,  // 🖤 10x military rations in doom 💀
+            basePrice: 150,  //  10x military rations in doom 
             consumable: true,
             doomOnly: true,
             effects: {
@@ -2838,7 +2838,7 @@ const ItemDatabase = {
             category: 'consumables',
             rarity: 'common',
             weight: 2,
-            basePrice: 120,  // 🖤 10x normal meat in doom 💀
+            basePrice: 120,  //  10x normal meat in doom 
             consumable: true,
             doomOnly: true,
             effects: {
@@ -2847,7 +2847,7 @@ const ItemDatabase = {
             }
         },
 
-        // 🖤 Dark potions - medicine in the apocalypse 💀
+        //  Dark potions - medicine in the apocalypse 
         void_essence_potion: {
             id: 'void_essence_potion',
             name: 'Void Essence',
@@ -2856,12 +2856,12 @@ const ItemDatabase = {
             category: 'consumables',
             rarity: 'rare',
             weight: 0.5,
-            basePrice: 300,  // 🖤 12x medicine price in doom 💀
+            basePrice: 300,  //  12x medicine price in doom 
             consumable: true,
             doomOnly: true,
             effects: {
                 health: 40,
-                happiness: -10  // 🖤 Tastes like death 💀
+                happiness: -10  //  Tastes like death 
             }
         },
         shadow_elixir: {
@@ -2872,7 +2872,7 @@ const ItemDatabase = {
             category: 'consumables',
             rarity: 'epic',
             weight: 0.3,
-            basePrice: 600,  // 🖤 Premium doom medicine 💀
+            basePrice: 600,  //  Premium doom medicine 
             consumable: true,
             doomOnly: true,
             effects: {
@@ -2900,16 +2900,16 @@ const ItemDatabase = {
             }
         },
 
-        // 🖤 Cursed weapons - doom world arsenal 💀
+        //  Cursed weapons - doom world arsenal 
         shadow_blade: {
             id: 'shadow_blade',
             name: 'Shadow Blade',
             description: 'A sword forged in darkness. It whispers to you when held.',
-            icon: '⚔️',
+            icon: '',
             category: 'weapons',
             rarity: 'rare',
             weight: 4,
-            basePrice: 180,  // 🖤 3x weapon price in doom 💀
+            basePrice: 180,  //  3x weapon price in doom 
             damage: 45,
             equipSlot: 'weapon',
             equipType: 'weapon',
@@ -2920,7 +2920,7 @@ const ItemDatabase = {
             id: 'void_dagger',
             name: 'Void Dagger',
             description: 'A blade that seems to absorb light itself. Silent and deadly.',
-            icon: '🗡️',
+            icon: '️',
             category: 'weapons',
             rarity: 'uncommon',
             weight: 2,
@@ -2947,12 +2947,12 @@ const ItemDatabase = {
             bonuses: { attack: 20, damage: 60, strength: 8, life_drain: 5 }
         },
 
-        // 🖤 Shadow materials - crafting in the darkness 💀
+        //  Shadow materials - crafting in the darkness 
         void_crystal: {
             id: 'void_crystal',
             name: 'Void Crystal',
             description: 'A crystallized shard of pure darkness. It hums with otherworldly power.',
-            icon: '🔮',
+            icon: '',
             category: 'basic_resources',
             rarity: 'rare',
             weight: 0.3,
@@ -3008,7 +3008,7 @@ const ItemDatabase = {
             craftable: true
         },
 
-        // 🖤 Doom-specific consumables - survival necessities 💀
+        //  Doom-specific consumables - survival necessities 
         shadow_torch: {
             id: 'shadow_torch',
             name: 'Shadow Torch',
@@ -3019,7 +3019,7 @@ const ItemDatabase = {
             weight: 1,
             basePrice: 15,
             doomOnly: true,
-            // 🖤💀 EQUIPPABLE: Off-hand doom light source 💀
+            //  EQUIPPABLE: Off-hand doom light source 
             equipSlot: 'offhand',
             equipType: 'lantern',
             stats: { perception: 2, dungeonBonus: 5, dark_resistance: 3 }
@@ -3032,7 +3032,7 @@ const ItemDatabase = {
             category: 'basic_resources',
             rarity: 'uncommon',
             weight: 1,
-            basePrice: 100,  // 🖤 4x normal salt in doom 💀
+            basePrice: 100,  //  4x normal salt in doom 
             doomOnly: true
         },
         corrupted_herbs: {
@@ -3043,7 +3043,7 @@ const ItemDatabase = {
             category: 'consumables',
             rarity: 'uncommon',
             weight: 0.5,
-            basePrice: 96,  // 🖤 12x medicine price in doom 💀
+            basePrice: 96,  //  12x medicine price in doom 
             consumable: true,
             doomOnly: true,
             effects: {
@@ -3101,7 +3101,7 @@ const ItemDatabase = {
             id: 'ice_blade',
             name: 'Ice Blade',
             description: 'A legendary blade forged from eternal ice. It never melts and chills all it touches.',
-            icon: '🗡️',
+            icon: '️',
             category: 'weapons',
             rarity: 'epic',
             weight: 4,
@@ -3116,7 +3116,7 @@ const ItemDatabase = {
             id: 'dragonbone_blade',
             name: 'Dragonbone Blade',
             description: 'A massive blade carved from the bones of an ancient dragon. Radiates primal power.',
-            icon: '⚔️',
+            icon: '',
             category: 'weapons',
             rarity: 'legendary',
             weight: 8,
@@ -3149,7 +3149,7 @@ const ItemDatabase = {
 
         let price = item.basePrice || 0;
 
-        // 🖤💀 DOOM WORLD ECONOMY 💀🖤
+        //  DOOM WORLD ECONOMY 
         // When in doom world, apply apocalyptic price modifiers
         const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
                        (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
@@ -3237,7 +3237,7 @@ const ItemDatabase = {
     // Get item icon
     getItemIcon(itemId) {
         const item = this.getItem(itemId);
-        return item ? item.icon : '📦';
+        return item ? item.icon : '';
     },
 
     // Check if item is consumable
@@ -3321,7 +3321,7 @@ const ItemDatabase = {
 
 // Expose ItemDatabase globally
 window.ItemDatabase = ItemDatabase;
-console.log('✅ ItemDatabase exposed globally!', typeof window.ItemDatabase);
+console.log(' ItemDatabase exposed globally!', typeof window.ItemDatabase);
 
 // Initialize item database when DOM is loaded
 if (document.readyState === 'loading') {

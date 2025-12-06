@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // DEBOOGER SYSTEM - opt-in debugging for dark souls of code
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -9,7 +9,7 @@
 // disabled by default for performance, enable when you need to suffer
 
 const DeboogerSystem = {
-    enabled: false,  // 🖤💀 NOW respects GameConfig - check on init
+    enabled: false,  // NOW respects GameConfig - check on init
     maxEntries: 500, // prevent memory bloat like my todo list at 3am
     _initialized: false,
     _originalLog: null,
@@ -18,28 +18,28 @@ const DeboogerSystem = {
 
     // initialize Debooger system - NOW CHECKS CONFIG FIRST
     init() {
-        // 🖤💀 Check GameConfig.debooger.enabled FIRST - production builds stay locked
+        // Check GameConfig.debooger.enabled FIRST - production builds stay locked
         var deboogerBtn = document.getElementById('toggle-debooger-console');
         var deboogerPanel = document.getElementById('debooger-console');
 
         if (typeof GameConfig !== 'undefined' && GameConfig.debooger && GameConfig.debooger.enabled === true) {
             this.enabled = true;
             this.setupConsoleCapture();
-            // 🔓 Show the button for developers
+            // Show the button for developers
             if (deboogerBtn) deboogerBtn.style.display = 'block';
             console.log('🐛 Debooger system enabled - Super Hacker mode!');
         } else {
             this.enabled = false;
-            // 🔒 Hide the button and console panel for production
+            // Hide the button and console panel for production
             if (deboogerBtn) deboogerBtn.style.display = 'none';
             if (deboogerPanel) deboogerPanel.style.display = 'none';
             console.log('🔒 Debooger system DISABLED by config');
         }
     },
 
-    // 🔓 Enable Debooger manually 🗡️ - BUT CONFIG IS STILL THE MASTER 🖤💀
+    // Enable Debooger manually - BUT CONFIG IS STILL THE MASTER
     enable() {
-        // 🔒 Config override - if config says NO, manual enable is DENIED 🦇
+        // Config override - if config says NO, manual enable is DENIED
         if (typeof GameConfig !== 'undefined' && GameConfig.debooger && GameConfig.debooger.enabled === false) {
             console.log('🔒 Cannot enable - GameConfig.debooger.enabled = false is ABSOLUTE');
             return;
@@ -49,7 +49,7 @@ const DeboogerSystem = {
         console.log('🐛 Debooger system manually enabled');
     },
 
-    // 🔒 Disable Debooger 🌙
+    // Disable Debooger
     disable() {
         this.enabled = false;
         if (this._originalLog) {
@@ -57,7 +57,7 @@ const DeboogerSystem = {
             console.warn = this._originalWarn;
             console.error = this._originalError;
         }
-        // 🖤 Clear console content to free memory 💀
+        // Clear console content to free memory
         const contentEl = document.getElementById('debooger-console-content');
         if (contentEl) {
             contentEl.innerHTML = '';
@@ -65,7 +65,7 @@ const DeboogerSystem = {
         console.log('🐛 Debooger system disabled');
     },
 
-    // 🎯 Setup console capture (only when enabled) 🔮
+    // Setup console capture (only when enabled)
     setupConsoleCapture() {
         if (this._initialized) return;
 
@@ -95,7 +95,7 @@ const DeboogerSystem = {
             }
         };
 
-        // 💀 Store originals for restoration
+        // Store originals for restoration
         this._originalLog = console.log;
         this._originalWarn = console.warn;
         this._originalError = console.error;
@@ -108,12 +108,12 @@ const DeboogerSystem = {
     }
 };
 
-// 🌙 expose to global scope 🦇
+// expose to global scope
 window.DeboogerSystem = DeboogerSystem;
 
-// 🔒 ONLY auto-init if debooger is enabled in config
+// ONLY auto-init if debooger is enabled in config
 if (typeof GameConfig !== 'undefined' && GameConfig.debooger && GameConfig.debooger.enabled === true) {
-    // 🖤 AUTO-INIT - Debooger system initializes itself on load
+    // AUTO-INIT - Debooger system initializes itself on load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
             DeboogerSystem.init();

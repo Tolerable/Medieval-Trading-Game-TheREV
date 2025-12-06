@@ -1,14 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════
    NPC SYSTEMS STYLES - trade windows in the shadows
    ═══════════════════════════════════════════════════════════════
-   Version: 0.90.00 | Unity AI Lab
+   Version: 0.90.01 | Unity AI Lab
    Creators: Hackall360, Sponge, GFourteen
    www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
    unityailabcontact@gmail.com
    ═══════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════
-   🎨 CSS VARIABLES - the dark palette
+   CSS VARIABLES - the dark palette
    ═══════════════════════════════════════════════════════════════ */
 :root {
     --npc-bg-dark: #1a1a2e;
@@ -25,7 +25,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   💱 NPC TRADE WINDOW
+   NPC TRADE WINDOW
    ═══════════════════════════════════════════════════════════════ */
 .npc-trade-window {
     position: fixed;
@@ -33,7 +33,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: var(--z-npc-chat); /* 🖤 FIXED: was 10000, now uses z-index system (1200) 💀 */
+    z-index: var(--z-npc-chat); /* FIXED: was 10000, now uses z-index system (1200) */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -552,7 +552,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   📜 QUEST LOG PANEL
+   QUEST LOG PANEL
    ═══════════════════════════════════════════════════════════════ */
 .quest-log-panel {
     position: fixed;
@@ -566,7 +566,7 @@
     border: 2px solid var(--npc-border);
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    z-index: var(--z-modal); /* 🖤 FIXED: was 9999, now uses z-index system (1000) 💀 */
+    z-index: var(--z-modal); /* FIXED: was 9999, now uses z-index system (1000) */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -861,19 +861,19 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   📍 QUEST TRACKER (Mini HUD) - Positioned BELOW player info, NEXT TO panels toolbar
-   🖤 NEW Layout (swapped positions):
-   🖤   - Panel Toolbar: top: 70px, right: 10px (far right, taller)
-   🖤   - Player Info (side-panel): top: 70px, right: 160px (left of panels)
-   🖤   - Quest Tracker: below player info, same column as player info
+   QUEST TRACKER (Mini HUD) - Positioned BELOW player info, NEXT TO panels toolbar
+   NEW Layout (swapped positions):
+     - Panel Toolbar: top: 70px, right: 10px (far right, taller)
+     - Player Info (side-panel): top: 70px, right: 160px (left of panels)
+     - Quest Tracker: below player info, same column as player info
    ═══════════════════════════════════════════════════════════════ */
-/* 🖤💀 RESPONSIVE: Quest tracker uses calc() for viewport-aware positioning */
+/* RESPONSIVE: Quest tracker uses calc() for viewport-aware positioning */
 .quest-tracker {
     position: fixed;
-    top: min(350px, 40vh); /* 🖤 Below side-panel, but not too far down on small screens */
+    top: min(350px, 40vh); /* Below side-panel, but not too far down on small screens */
     bottom: auto;
-    right: calc(10px + 1vw); /* 🖤 Small offset from right edge, scales with viewport */
-    width: min(200px, 25vw); /* 🦇 Match side-panel width, shrink on small screens */
+    right: calc(10px + 1vw); /* Small offset from right edge, scales with viewport */
+    width: min(200px, 25vw); /* Match side-panel width, shrink on small screens */
     max-width: 30vw;
     background: rgba(26, 26, 46, 0.85);
     border: 1px solid rgba(79, 195, 247, 0.3);
@@ -884,16 +884,16 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
-    max-height: min(375px, 50vh); /* 🖤💀 50% taller (was 250px/35vh) 💀 */
+    max-height: min(375px, 50vh); /* 50% taller (was 250px/35vh) */
     pointer-events: auto;
-    /* 🖤 Draggable via header - cursor set there */
+    /* Draggable via header - cursor set there */
 }
 
 .quest-tracker.hidden {
     display: none;
 }
 
-/* 🖤 FIX: Smaller header for quest tracker 💀 */
+/* FIX: Smaller header for quest tracker */
 .tracker-header {
     padding: 6px 10px;
     background: linear-gradient(180deg, rgba(79, 195, 247, 0.2) 0%, rgba(79, 195, 247, 0.05) 100%);
@@ -2427,7 +2427,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ⚔️ EQUIPMENT SYSTEM STYLES
+   EQUIPMENT SYSTEM STYLES
    ═══════════════════════════════════════════════════════════════ */
 
 /* Equipment Grid in Character Sheet */

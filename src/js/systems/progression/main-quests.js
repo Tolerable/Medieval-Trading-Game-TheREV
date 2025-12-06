@@ -1,15 +1,15 @@
-// ═══════════════════════════════════════════════════════════════
-// 🖤 MAIN STORY QUESTS - The Shadow Rising & Black Ledger 💀
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+//  MAIN STORY QUESTS - The Shadow Rising & Black Ledger 
+// 
+// Version: 0.90.01 | Unity AI Lab
 // 35 Main Story Quests across 5 Acts
 // Dual threat: Malachar (dark wizard) + Black Ledger (merchant conspiracy)
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const MainQuests = {
-    // ═══════════════════════════════════════════════════════════════
-    // 🎭 STORY METADATA
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  STORY METADATA
+    // 
     storyInfo: {
         name: 'The Shadow Rising',
         totalActs: 5,
@@ -19,9 +19,9 @@ const MainQuests = {
         description: 'An ancient wizard stirs in the Shadow Tower while a merchant conspiracy funds his return. Only a clever trader can uncover the truth and stop both threats.'
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 💰 WEALTH GATES - Difficulty Scaled
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  WEALTH GATES - Difficulty Scaled
+    // 
     wealthGates: {
         // Base requirements (Normal difficulty)
         act1: { rank: 'vagrant', gold: 0 },
@@ -56,11 +56,11 @@ const MainQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📖 ACT 1: A TRADER'S BEGINNING (Quests 1-7)
+    // 
+    //  ACT 1: A TRADER'S BEGINNING (Quests 1-7)
     // Theme: Establish yourself, learn the world
     // Regions: Greendale (starter), Sunhaven (south)
-    // ═══════════════════════════════════════════════════════════════
+    // 
     act1: {
         name: 'A Trader\'s Beginning',
         theme: 'Establish yourself, learn the world',
@@ -68,8 +68,8 @@ const MainQuests = {
         wealthGate: 0,
 
         quests: {
-            // 🖤💀 NOTE: All giverName/turnInNpcName values are descriptive titles
-            // The actual NPC's name is randomly generated when they spawn 💀
+            //  NOTE: All giverName/turnInNpcName values are descriptive titles
+            // The actual NPC's name is randomly generated when they spawn 
 
             // 1.1 - First Steps (Tutorial)
             act1_quest1: {
@@ -288,12 +288,12 @@ const MainQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📖 ACT 2: WHISPERS OF CONSPIRACY (Quests 8-14)
+    // 
+    //  ACT 2: WHISPERS OF CONSPIRACY (Quests 8-14)
     // Theme: Discover the Black Ledger, investigate their operations
     // Wealth Gate: 5,000 gold (scaled by difficulty)
     // Regions: Ironforge, Jade Harbor, Eastern territories
-    // ═══════════════════════════════════════════════════════════════
+    // 
     act2: {
         name: 'Whispers of Conspiracy',
         theme: 'Discover something is wrong, investigate',
@@ -522,12 +522,12 @@ const MainQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📖 ACT 3: THE DARK CONNECTION (Quests 15-21)
+    // 
+    //  ACT 3: THE DARK CONNECTION (Quests 15-21)
     // Theme: Link Malachar and Black Ledger, make crucial choices
     // Wealth Gate: 50,000 gold (scaled by difficulty)
     // Regions: Royal Capital, Frostholm, Northern territories
-    // ═══════════════════════════════════════════════════════════════
+    // 
     act3: {
         name: 'The Dark Connection',
         theme: 'Link Malachar and Black Ledger, choose sides',
@@ -766,12 +766,12 @@ const MainQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📖 ACT 4: WAR OF COMMERCE (Quests 22-28)
+    // 
+    //  ACT 4: WAR OF COMMERCE (Quests 22-28)
     // Theme: Economic warfare, sabotage, alliance building
     // Wealth Gate: 150,000 gold (scaled by difficulty)
     // Regions: Western territories, Shadow Tower approaches
-    // ═══════════════════════════════════════════════════════════════
+    // 
     act4: {
         name: 'War of Commerce',
         theme: 'Economic warfare, sabotage, alliance building',
@@ -1006,12 +1006,12 @@ const MainQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📖 ACT 5: THE FINAL RECKONING (Quests 29-35)
+    // 
+    //  ACT 5: THE FINAL RECKONING (Quests 29-35)
     // Theme: Assault both strongholds, end the threats, open Doom World
     // Wealth Gate: 500,000 gold (scaled by difficulty)
     // Regions: Shadow Tower, Ruins of Malachar, Doom World access
-    // ═══════════════════════════════════════════════════════════════
+    // 
     act5: {
         name: 'The Final Reckoning',
         theme: 'Assault both strongholds, end the threats',
@@ -1251,9 +1251,9 @@ const MainQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🛠️ UTILITY METHODS
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  UTILITY METHODS
+    // 
 
     getAllQuests() {
         const allQuests = {};
@@ -1296,7 +1296,7 @@ const MainQuests = {
     }
 };
 
-// 🖤 Export for use in quest-system.js 💀
+//  Export for use in quest-system.js 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = MainQuests;
 }

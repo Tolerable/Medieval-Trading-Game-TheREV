@@ -1,16 +1,16 @@
-// ═══════════════════════════════════════════════════════════════
-// 🖤 REGIONAL SIDE QUESTS - Combat & Trade Chains 💀
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+//  REGIONAL SIDE QUESTS - Combat & Trade Chains 
+// 
+// Version: 0.90.01 | Unity AI Lab
 // 14 Quest Chains (2 per region) | ~50 Total Quests
 // Combat chains: Fight threats, protect civilians
 // Trade chains: Economic opportunities, merchant relationships
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const SideQuests = {
-    // ═══════════════════════════════════════════════════════════════
-    // 📊 SIDE QUEST METADATA
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  SIDE QUEST METADATA
+    // 
     sideQuestInfo: {
         totalChains: 14,
         chainsPerRegion: 2,
@@ -19,9 +19,9 @@ const SideQuests = {
         regions: ['greendale', 'sunhaven', 'ironforge', 'jade_harbor', 'royal_capital', 'frostholm', 'western_territories']
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🌾 GREENDALE - Starter Region
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  GREENDALE - Starter Region
+    // 
     greendale: {
         regionName: 'Greendale',
         description: 'The peaceful farming community where your journey began.',
@@ -41,7 +41,7 @@ const SideQuests = {
                     description: 'The cellar beneath the inn has become infested with giant rats. Clear them out before they ruin the food stores.',
                     giver: 'innkeeper',
                     giverName: 'Martha the Innkeeper',
-                    location: 'riverside_inn', // 🖤💀 Fixed: Innkeeper is at the inn, not the city!
+                    location: 'riverside_inn', // ���💀 Fixed: Innkeeper is at the inn, not the city!
                     type: 'side',
                     subtype: 'combat',
                     chain: 'greendale_vermin',
@@ -139,7 +139,7 @@ const SideQuests = {
                     description: 'The miller needs wheat to demonstrate his new grinding technique. Help gather a good supply.',
                     giver: 'miller',
                     giverName: 'Old Gus the Miller',
-                    location: 'wheat_farm', // 🖤💀 Fixed: Miller is at the wheat farm, not the city!
+                    location: 'wheat_farm', // ���💀 Fixed: Miller is at the wheat farm, not the city!
                     type: 'side',
                     subtype: 'trade',
                     chain: 'greendale_farm',
@@ -166,7 +166,7 @@ const SideQuests = {
                     description: 'Old Gus wants to share his special flour recipe, but needs rare ingredients to perfect it.',
                     giver: 'miller',
                     giverName: 'Old Gus the Miller',
-                    location: 'wheat_farm', // 🖤💀 Fixed: Miller is at the wheat farm!
+                    location: 'wheat_farm', // ���💀 Fixed: Miller is at the wheat farm!
                     type: 'side',
                     subtype: 'trade',
                     chain: 'greendale_farm',
@@ -229,9 +229,9 @@ const SideQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // ⚓ SUNHAVEN - Southern Port
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  SUNHAVEN - Southern Port
+    // 
     sunhaven: {
         regionName: 'Sunhaven',
         description: 'A bustling southern port known for wine, fish, and occasional pirate trouble.',
@@ -474,9 +474,9 @@ const SideQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // ⚒️ IRONFORGE - Industrial City
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  IRONFORGE - Industrial City
+    // 
     ironforge: {
         regionName: 'Ironforge',
         description: 'The industrial heart of the realm, famous for its smiths and mines.',
@@ -766,9 +766,9 @@ const SideQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🐉 JADE HARBOR - Eastern Port
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  JADE HARBOR - Eastern Port
+    // 
     jade_harbor: {
         regionName: 'Jade Harbor',
         description: 'An exotic eastern port known for silk, jade, and smuggling operations.',
@@ -1019,9 +1019,9 @@ const SideQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 👑 ROYAL CAPITAL - Central Hub
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  ROYAL CAPITAL - Central Hub
+    // 
     royal_capital: {
         regionName: 'Royal Capital',
         description: 'The seat of power, where nobility and commerce intersect.',
@@ -1306,9 +1306,9 @@ const SideQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // ❄️ FROSTHOLM - Northern Wilderness
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  FROSTHOLM - Northern Wilderness
+    // 
     frostholm: {
         regionName: 'Frostholm',
         description: 'A harsh northern frontier where only the strongest survive.',
@@ -1558,9 +1558,9 @@ const SideQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🏜️ WESTERN TERRITORIES - Frontier
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  WESTERN TERRITORIES - Frontier
+    // 
     western_territories: {
         regionName: 'Western Territories',
         description: 'The wild frontier where law is scarce and opportunity abundant.',
@@ -1815,9 +1815,9 @@ const SideQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🛠️ UTILITY METHODS
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  UTILITY METHODS
+    // 
 
     /**
      * Get all side quests as a flat array

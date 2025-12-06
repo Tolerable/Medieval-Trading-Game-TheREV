@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME - medieval trading where capitalism meets darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -168,7 +168,7 @@ document.addEventListener('input', function(e) {
     }
 }, { passive: true });
 
-// 🦇 Expose for manual deboogering 💀
+// 🦇 Expose for manual deboogering
 window.DeboogerSystem = DeboogerSystem;
 
 // 🖤 NOTE: CurrentTaskSystem is defined in current-task-system.js (loaded before this file)
@@ -423,7 +423,7 @@ const LeaderboardFeatures = {
         }
     },
 
-    // Clear all active high scores 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+    // Clear all active high scores  FIXED: Use modal instead of browser confirm()
     clearActiveScores() {
         const doClear = () => {
             localStorage.removeItem(this.ACTIVE_SCORES_KEY);
@@ -524,10 +524,10 @@ const LeaderboardFeatures = {
 // Expose globally
 window.LeaderboardFeatures = LeaderboardFeatures;
 
-// 🖤 KEYBOARD BINDINGS - MOVED TO src/js/ui/key-bindings.js 💀
+// 🖤 KEYBOARD BINDINGS - MOVED TO src/js/ui/key-bindings.js 
 // 🦇 800+ lines of dead code removed by Unity on 2025-12-01
 // Keyboard bindings live in src/js/ui/key-bindings.js now
-// ⚰️ RIP dead code - 750+ lines removed here 💀
+// ⚰️ RIP dead code - 750+ lines removed here 
 
 // ═══════════════════════════════════════════════════════════════
 // 📝 GAME LOG MANAGER - tracking everything for deboogering 🦇

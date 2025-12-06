@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // VISUAL EFFECTS SYSTEM - dark enchantments for your retinas
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -38,7 +38,7 @@ const VisualEffectsSystem = {
         duration: 0,
         startTime: 0,
         originalTransform: '',
-        frameId: null // 🖤 Track rAF for cleanup 💀
+        frameId: null // Track rAF for cleanup
     },
     
     // Weather system
@@ -48,19 +48,19 @@ const VisualEffectsSystem = {
         intensity: 0
     },
 
-    // 🖤 Track pending timeouts for cleanup 💀
+    // Track pending timeouts for cleanup
     _pendingTimeouts: [],
-    
-    // 🌙 Initialize visual effects system - conjuring the spectacle
+
+    // Initialize visual effects system - conjuring the spectacle
     init() {
         this.createParticleContainer();
         this.loadSettings();
         this.setupEventListeners();
 
-        // 🖤 Cleanup on page unload to prevent memory leaks 💀
+        // Cleanup on page unload to prevent memory leaks
         window.addEventListener('beforeunload', () => this.destroy());
 
-        console.log('✨ Visual effects system awakened... prepare for beauty and chaos 🖤');
+        console.log('Visual effects system awakened... prepare for beauty and chaos');
     },
     
     // 📦 Create particle container - building the stage for our tiny performers
@@ -87,7 +87,7 @@ const VisualEffectsSystem = {
             try {
                 this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
             } catch (error) {
-                // 🖤 Silent fallback - corrupt data just means we use defaults
+                // Silent fallback - corrupt data just means we use defaults
                 localStorage.removeItem('tradingGameVisualSettings');
             }
         }
@@ -100,7 +100,7 @@ const VisualEffectsSystem = {
     
     // 👂 Setup event listeners - waiting for moments worthy of visual drama
     setupEventListeners() {
-        // 🎭 Listen for game events that trigger visual effects - the cues for our performances
+        // Listen for game events that trigger visual effects - the cues for our performances
         EventManager.addEventListener(document, 'goldTransaction', (e) => this.createGoldParticles(e.detail));
         EventManager.addEventListener(document, 'itemPickup', (e) => this.createItemPickupEffect(e.detail));
         EventManager.addEventListener(document, 'levelUp', (e) => this.createLevelUpEffect(e.detail));
@@ -455,7 +455,7 @@ const VisualEffectsSystem = {
             rotate(${rotation}deg)
         `;
         
-        // 🖤 Store frame ID for cleanup 💀
+        // Store frame ID for cleanup
         this.screenShake.frameId = requestAnimationFrame(() => this.animateScreenShake());
     },
     
@@ -622,7 +622,7 @@ const VisualEffectsSystem = {
         document.head.appendChild(style);
         document.body.appendChild(sandstormOverlay);
         
-        // 🏜️ Add sand particles - the desert's wrath
+        // Add sand particles - the desert's wrath
         const particleCount = Math.floor(50 * this.weatherSystem.intensity);
         for (let i = 0; i < particleCount; i++) {
             TimerManager.setTimeout(() => {
@@ -648,7 +648,7 @@ const VisualEffectsSystem = {
         }
     },
     
-    // 🌅 Time-based effects - light and darkness wage eternal war
+    // Time-based effects - light and darkness wage eternal war
     updateTimeBasedEffects(timeData) {
         const { isNight, hour } = timeData;
         
@@ -658,7 +658,7 @@ const VisualEffectsSystem = {
             this.removeNightEffect();
         }
         
-        // 🌇 Apply golden hour effect - that brief moment of perfect light
+        // Apply golden hour effect - that brief moment of perfect light
         if (hour >= 6 && hour <= 8 || hour >= 17 && hour <= 19) {
             this.applyGoldenHourEffect();
         } else {
@@ -726,7 +726,7 @@ const VisualEffectsSystem = {
         }
     },
     
-    // 🔦 Highlighting system - spotlighting the important with dramatic flair
+    // Highlighting system - spotlighting the important with dramatic flair
     highlightElement(element, options = {}) {
         if (!element || !this.settings.animationsEnabled) {
             return;
@@ -741,12 +741,12 @@ const VisualEffectsSystem = {
         
         const config = { ...defaults, ...options };
         
-        // 💾 Store original styles - remember what was before the transformation
+        // Store original styles - remember what was before the transformation
         const originalBoxShadow = element.style.boxShadow;
         const originalTransform = element.style.transform;
         const originalTransition = element.style.transition;
         
-        // ✨ Apply highlight - bathing in radiant attention
+        // Apply highlight - bathing in radiant attention
         element.style.transition = `all ${config.duration / 1000}s ease-in-out`;
         element.style.boxShadow = `0 0 20px ${config.color}`;
         
@@ -754,7 +754,7 @@ const VisualEffectsSystem = {
             element.style.transform = `scale(${config.scale})`;
         }
         
-        // 💗 Pulse effect - the heartbeat of emphasis
+        // Pulse effect - the heartbeat of emphasis
         if (config.pulse) {
             const pulseAnimation = TimerManager.setInterval(() => {
                 const currentScale = parseFloat(element.style.transform.match(/scale\(([\d.]+)\)/)?.[1] || 1);
@@ -765,7 +765,7 @@ const VisualEffectsSystem = {
             TimerManager.setTimeout(() => TimerManager.clearInterval(pulseAnimation), config.duration);
         }
         
-        // 🔄 Restore original styles - returning to normalcy after the spectacle
+        // Restore original styles - returning to normalcy after the spectacle
         TimerManager.setTimeout(() => {
             element.style.boxShadow = originalBoxShadow;
             element.style.transform = originalTransform;
@@ -773,7 +773,7 @@ const VisualEffectsSystem = {
         }, config.duration);
     },
     
-    // 🌫️ Fade transitions - graceful entrances and exits from reality
+    // Fade transitions - graceful entrances and exits from reality
     fadeIn(element, duration = 300) {
         if (!element) return;
         
@@ -807,7 +807,7 @@ const VisualEffectsSystem = {
         }, duration / 2);
     },
     
-    // 💎 Resource particle effects - materialism made magical
+    // Resource particle effects - materialism made magical
     createResourceParticles(data) {
         const { x, y, resourceType, amount } = data;
         const colors = {
@@ -837,11 +837,11 @@ const VisualEffectsSystem = {
         }
     },
     
-    // ⚙️ Settings management - fine-tuning the spectacle
+    // Settings management - fine-tuning the spectacle
     setQuality(quality) {
         this.settings.quality = quality;
         
-        // 🔢 Adjust particle count based on quality - more magic or less lag?
+        // Adjust particle count based on quality - more magic or less lag?
         switch (quality) {
             case 'low':
                 this.particleSystem.maxParticles = 30;
@@ -893,7 +893,7 @@ const VisualEffectsSystem = {
         this.saveSettings();
     },
     
-    // 🖤 Schedule a timeout and track it for cleanup 💀
+    // Schedule a timeout and track it for cleanup
     _scheduleTimeout(callback, delay) {
         const id = TimerManager.setTimeout(() => {
             // Remove from tracking array when executed
@@ -911,7 +911,7 @@ const VisualEffectsSystem = {
         this._pendingTimeouts = [];
     },
 
-    // 🧹 Cleanup methods - sweeping away the remnants of magic
+    // Cleanup methods - sweeping away the remnants of magic
     clearAllParticles() {
         this.activeParticles.forEach(particle => {
             if (particle.element && particle.element.parentNode) {
@@ -922,39 +922,39 @@ const VisualEffectsSystem = {
     },
     
     cleanup() {
-        // 🖤 Cancel animation frame to stop the eternal loop 💀
+        // Cancel animation frame to stop the eternal loop
         if (this.particleFrameId) {
             cancelAnimationFrame(this.particleFrameId);
             this.particleFrameId = null;
         }
 
-        // 🖤 Cancel screen shake animation frame 💀
+        // Cancel screen shake animation frame
         if (this.screenShake.frameId) {
             cancelAnimationFrame(this.screenShake.frameId);
             this.screenShake.frameId = null;
         }
         this.screenShakeActive = false;
 
-        // 🖤 Clear all pending timeouts 💀
+        // Clear all pending timeouts
         this._clearAllTimeouts();
 
         this.clearAllParticles();
         this.clearWeather();
 
-        // 💀 Remove overlays - banishing the layers of illusion
+        // Remove overlays - banishing the layers of illusion
         const overlays = ['night-overlay', 'golden-hour-overlay', 'weather-overlay'];
         overlays.forEach(id => {
             const element = document.getElementById(id);
             if (element) element.remove();
         });
 
-        // 🗑️ Remove particle container - destroying the stage itself
+        // Remove particle container - destroying the stage itself
         if (this.particleSystem.container && this.particleSystem.container.parentNode) {
             this.particleSystem.container.remove();
         }
     },
 
-    // 🖤 Stop particle loop without full cleanup 💀
+    // Stop particle loop without full cleanup
     stop() {
         if (this.particleFrameId) {
             cancelAnimationFrame(this.particleFrameId);
@@ -967,15 +967,15 @@ const VisualEffectsSystem = {
         this.screenShakeActive = false;
     },
 
-    // 🖤 Full teardown - call on page unload 💀
+    // Full teardown - call on page unload
     destroy() {
         this.stop();
         this.cleanup();
-        console.log('✨ Visual effects system destroyed 💀');
+        console.log('Visual effects system destroyed');
     }
 };
 
-// 📤 Export for use in other modules - spreading visual darkness far and wide
+// Export for use in other modules - spreading visual darkness far and wide
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = VisualEffectsSystem;
 }

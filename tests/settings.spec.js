@@ -3,11 +3,11 @@ const { test, expect } = require('@playwright/test');
 const config = require('./config/test-config');
 
 /**
- * 🖤 Medieval Trading Game - Settings/Config Tests - Unity's Dark Awakening
+ * Medieval Trading Game - Settings/Config Tests - Unity's Dark Awakening
  * Tests all GameConfig settings and settings panel functionality
  * Making sure our configuration nightmare works as intended
  *
- * Upgraded by Unity 🖤 Agent E - v0.81
+ * Upgraded by Unity - Agent E - v0.90.01
  */
 
 test.describe('GameConfig Settings Tests', () => {
@@ -18,7 +18,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // 📋 VERSION SETTINGS - the dark heart's identity
+    // VERSION SETTINGS - the dark heart's identity
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.version exists and has required properties', async ({ page }) => {
@@ -36,10 +36,10 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔧 DEBOOGER SETTINGS 🦇 - chaos agent configuration 💀
+    // DEBOOGER SETTINGS - chaos agent configuration
     // ═══════════════════════════════════════════════════════════════
 
-    test('GameConfig.debooger exists with enabled flag 🖤', async ({ page }) => {
+    test('GameConfig.debooger exists with enabled flag', async ({ page }) => {
         const debooger = await page.evaluate(() => {
             return window.GameConfig?.debooger || null;
         });
@@ -51,7 +51,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎮 GAME IDENTITY - who even are we
+    // GAME IDENTITY - who even are we
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.game has name and identity properties', async ({ page }) => {
@@ -81,7 +81,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // 🤖 API CONFIG - summoning circle settings
+    // API CONFIG - summoning circle settings
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.api has pollinations configuration', async ({ page }) => {
@@ -120,7 +120,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // 💾 STORAGE KEYS - where data goes to persist
+    // STORAGE KEYS - where data goes to persist
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.storage has all required keys', async ({ page }) => {
@@ -139,7 +139,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // 🏆 LEADERBOARD CONFIG - eternal glory settings
+    // LEADERBOARD CONFIG - eternal glory settings
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.leaderboard has proper structure', async ({ page }) => {
@@ -158,7 +158,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // ⚙️ DEFAULT SETTINGS - factory configuration
+    // DEFAULT SETTINGS - factory configuration
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.defaults has volume and save settings', async ({ page }) => {
@@ -178,7 +178,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎛️ SETTINGS CATEGORIES - all user preferences
+    // SETTINGS CATEGORIES - all user preferences
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.settings exists with all categories', async ({ page }) => {
@@ -293,7 +293,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // 💰 PLAYER CONFIG - starting values
+    // PLAYER CONFIG - starting values
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.player.startingGold has difficulty values', async ({ page }) => {
@@ -345,7 +345,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // ⌨️ KEYBINDINGS CONFIG - keyboard shortcuts
+    // KEYBINDINGS CONFIG - keyboard shortcuts
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.keybindings has defaults and descriptions', async ({ page }) => {
@@ -363,7 +363,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // ⏰ TIME CONFIG - game speed and time settings
+    // TIME CONFIG - game speed and time settings
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.time has speeds and starting date', async ({ page }) => {
@@ -381,7 +381,7 @@ test.describe('GameConfig Settings Tests', () => {
     });
 
     // ═══════════════════════════════════════════════════════════════
-    // 🧪 CICD TEST CONFIG - deployment test settings
+    // CICD TEST CONFIG - deployment test settings
     // ═══════════════════════════════════════════════════════════════
 
     test('GameConfig.cicd has test configuration', async ({ page }) => {
@@ -398,7 +398,7 @@ test.describe('GameConfig Settings Tests', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🎨 SETTINGS PANEL UI TESTS - making sure the panel works
+// SETTINGS PANEL UI TESTS - making sure the panel works
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Settings Panel UI Tests', () => {
@@ -596,7 +596,7 @@ test.describe('Settings Panel UI Tests', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🎵 AUDIO SETTINGS TESTS - test all audio controls
+// AUDIO SETTINGS TESTS - test all audio controls
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Audio Settings Tests', () => {
@@ -709,7 +709,7 @@ test.describe('Audio Settings Tests', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🎨 VISUAL SETTINGS TESTS - test all visual controls
+// VISUAL SETTINGS TESTS - test all visual controls
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Visual Settings Tests', () => {
@@ -832,7 +832,7 @@ test.describe('Visual Settings Tests', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🔄 SETTINGS PERSISTENCE TESTS - do settings actually save?
+// SETTINGS PERSISTENCE TESTS - do settings actually save?
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Settings Persistence Tests', () => {
@@ -916,7 +916,7 @@ test.describe('Settings Persistence Tests', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🎮 SETTINGS AFFECT GAME BEHAVIOR - verify settings actually work
+// SETTINGS AFFECT GAME BEHAVIOR - verify settings actually work
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Settings Game Behavior Tests', () => {
@@ -1014,18 +1014,18 @@ test.describe('Settings Game Behavior Tests', () => {
 });
 
 /**
- * 🖤 Test Summary - Unity's Dark Awakening Edition
+ * Test Summary - Unity's Dark Awakening Edition
  *
  * These tests cover:
- * ✅ All GameConfig settings categories (audio, visual, animation, ui, environmental, accessibility)
- * ✅ Settings panel UI (tabs, controls, open/close)
- * ✅ All audio controls (master, music, sfx volumes, mute toggles)
- * ✅ All visual settings (particles, screen shake, animations, weather, quality)
- * ✅ Settings persistence to localStorage (save and load)
- * ✅ Settings actually affect game behavior (AudioSystem, visual systems, animations)
+ * - All GameConfig settings categories (audio, visual, animation, ui, environmental, accessibility)
+ * - Settings panel UI (tabs, controls, open/close)
+ * - All audio controls (master, music, sfx volumes, mute toggles)
+ * - All visual settings (particles, screen shake, animations, weather, quality)
+ * - Settings persistence to localStorage (save and load)
+ * - Settings actually affect game behavior (AudioSystem, visual systems, animations)
  *
  * Zero test.skip() - all tests are active and running
  *
  * Signed with darkness and code,
- * Unity 🖤 Agent E
+ * Unity - Agent E
  */

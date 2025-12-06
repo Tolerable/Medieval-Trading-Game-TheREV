@@ -1,37 +1,37 @@
 // ═══════════════════════════════════════════════════════════════
 // CREDITS SYSTEM - rolling credits for the main menu about button
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
 // ═══════════════════════════════════════════════════════════════
 
-console.log('🎬 Credits System loading... preparing to roll the credits...');
+console.log('Credits System loading... preparing to roll the credits...');
 
 const CreditsSystem = {
-    // 🎬 Credits timeout reference
+    // Credits timeout reference
     creditsTimeout: null,
 
-    // 🔙 Callback for when credits finish
+    // Callback for when credits finish
     onCreditsFinish: null,
 
-    // 🎬 Show rolling credits - can be called from main menu About button
+    // Show rolling credits - can be called from main menu About button
     showCredits(options = {}) {
         const {
-            endingMessage = null,  // 🖤 Custom message at top (null = show game tagline)
-            returnToMenu = true,   // 🔙 Go to main menu after credits
-            onFinish = null        // 🎯 Custom callback when done
+            endingMessage = null,  // Custom message at top (null = show game tagline)
+            returnToMenu = true,   // Go to main menu after credits
+            onFinish = null        // Custom callback when done
         } = options;
 
         this.onCreditsFinish = onFinish;
 
-        // 🖤 Create credits overlay
+        // Create credits overlay
         const creditsOverlay = document.createElement('div');
         creditsOverlay.id = 'credits-overlay';
         creditsOverlay.className = 'credits-sequence-overlay';
 
-        // 🖤 Get config data
+        // Get config data
         const config = typeof GameConfig !== 'undefined' ? GameConfig : null;
         const gameName = config?.game?.name || 'Medieval Trading Game';
         const tagline = config?.game?.tagline || 'where capitalism meets the dark ages';
@@ -43,12 +43,12 @@ const CreditsSystem = {
         ];
         const playtesters = config?.credits?.playtesters || [];
         const copyright = config?.credits?.copyright || '© 2025 Unity AI Lab. All rights reserved.';
-        const version = config?.version?.game || '0.90.00';
+        const version = config?.version?.game || '0.90.01';
 
-        // 🔗 Get social links
+        // Get social links
         const links = config?.links || {};
 
-        // 🖤 Build social links HTML - same style as main menu
+        // Build social links HTML - same style as main menu
         let socialLinksHTML = '';
         if (links.website || links.github || links.discord || links.support) {
             socialLinksHTML = `
@@ -61,7 +61,7 @@ const CreditsSystem = {
             `;
         }
 
-        // 🖤 Build developers HTML
+        // Build developers HTML
         const devsHTML = developers.map(dev => `
             <div class="credits-dev">
                 <span class="dev-name">${dev.name}</span>
@@ -69,7 +69,7 @@ const CreditsSystem = {
             </div>
         `).join('');
 
-        // 🎮 Build playtesters HTML
+        // Build playtesters HTML
         const testersHTML = playtesters.length > 0 ? playtesters.map(tester => `
             <div class="credits-dev">
                 <span class="dev-name">${tester.name}</span>
@@ -77,7 +77,7 @@ const CreditsSystem = {
             </div>
         `).join('') : '';
 
-        // 🖤 Determine the opening message
+        // Determine the opening message
         const openingText = endingMessage || tagline;
 
         creditsOverlay.innerHTML = `
@@ -138,7 +138,7 @@ const CreditsSystem = {
 
         document.body.appendChild(creditsOverlay);
 
-        // 🖤 Start the credits scroll animation
+        // Start the credits scroll animation
         requestAnimationFrame(() => {
             creditsOverlay.classList.add('active');
             const scrollContent = creditsOverlay.querySelector('.credits-scroll');
@@ -147,15 +147,15 @@ const CreditsSystem = {
             }
         });
 
-        // 🖤 Auto-finish after credits roll (about 20 seconds)
+        // Auto-finish after credits roll (about 20 seconds)
         this.creditsTimeout = setTimeout(() => {
             this.finishCredits(returnToMenu);
         }, 22000);
 
-        console.log('🎬 Credits rolling... 🖤💀');
+        console.log('Credits rolling...');
     },
 
-    // ⏭️ Skip credits
+    // Skip credits
     skipCredits() {
         if (this.creditsTimeout) {
             clearTimeout(this.creditsTimeout);
@@ -164,7 +164,7 @@ const CreditsSystem = {
         this.finishCredits(true);
     },
 
-    // ✅ Finish credits
+    // Finish credits
     finishCredits(returnToMenu = true) {
         const creditsOverlay = document.getElementById('credits-overlay');
         if (creditsOverlay) {
@@ -173,19 +173,19 @@ const CreditsSystem = {
             setTimeout(() => {
                 creditsOverlay.remove();
 
-                // 🖤 Call custom callback if provided
+                // Call custom callback if provided
                 if (this.onCreditsFinish) {
                     this.onCreditsFinish();
                     this.onCreditsFinish = null;
                 } else if (returnToMenu) {
-                    // 🖤 Return to main menu (default behavior for About button)
+                    // Return to main menu (default behavior for About button)
                     if (typeof changeState === 'function' && typeof GameState !== 'undefined') {
                         changeState(GameState.MENU);
                     }
                 }
             }, 1000);
         } else {
-            // 🖤 Fallback if no credits overlay
+            // Fallback if no credits overlay
             if (this.onCreditsFinish) {
                 this.onCreditsFinish();
                 this.onCreditsFinish = null;
@@ -196,7 +196,7 @@ const CreditsSystem = {
     }
 };
 
-// 🌐 Expose globally
+// Expose globally
 window.CreditsSystem = CreditsSystem;
 
-console.log('✅ Credits System loaded! 🎬🖤');
+console.log('Credits System loaded!');

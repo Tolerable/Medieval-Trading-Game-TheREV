@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // NPC RELATIONSHIP SYSTEM - memories, reputation, and bonds
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -9,17 +9,17 @@
 
 const NPCRelationshipSystem = {
     // ═══════════════════════════════════════════════════════════════
-    // 📋 STATE
+    // STATE
     // ═══════════════════════════════════════════════════════════════
     initialized: false,
     relationships: {},     // NPC-specific relationships
     factionReputation: {}, // Faction-wide reputation
     playerTitle: null,     // Earned title based on reputation
-    unlockedBenefits: {},  // 🖤 Track which faction benefits have been unlocked 💀
-    _saveTimeout: null,    // 🖤 Debounce timer for saveRelationships 💀
+    unlockedBenefits: {},  // Track which faction benefits have been unlocked
+    _saveTimeout: null,    // Debounce timer for saveRelationships
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎭 RELATIONSHIP LEVELS
+    // RELATIONSHIP LEVELS
     // ═══════════════════════════════════════════════════════════════
     levels: {
         hostile:    { min: -100, max: -50, label: 'Hostile', icon: '😠', color: '#ff4444' },
@@ -32,7 +32,7 @@ const NPCRelationshipSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🏛️ FACTIONS
+    // FACTIONS
     // ═══════════════════════════════════════════════════════════════
     factions: {
         merchants_guild: {
@@ -98,7 +98,7 @@ const NPCRelationshipSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🚀 INITIALIZATION
+    // INITIALIZATION
     // ═══════════════════════════════════════════════════════════════
     init() {
         if (this.initialized) {
@@ -115,19 +115,19 @@ const NPCRelationshipSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💾 PERSISTENCE
+    // PERSISTENCE
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 DEPRECATED - Use getSaveData/loadSaveData for per-slot saving 💀
+    // DEPRECATED - Use getSaveData/loadSaveData for per-slot saving
     // Kept for backwards compatibility - will load old global data on first run
     saveRelationships() {
-        // 🖤 Debounce saves - batch rapid changes into single write 💀
+        // Debounce saves - batch rapid changes into single write
         // NOTE: This is now called less often - SaveManager handles persistence
         if (this._saveTimeout) {
             clearTimeout(this._saveTimeout);
         }
         this._saveTimeout = setTimeout(() => {
-            // 🖤 Only save to global if SaveManager hasn't taken over 💀
+            // Only save to global if SaveManager hasn't taken over
             // This maintains backwards compatibility for old saves
             if (!this._managedBySaveManager) {
                 const saveData = {
@@ -146,7 +146,7 @@ const NPCRelationshipSystem = {
     },
 
     loadRelationships() {
-        // 🖤 Only load from global localStorage if SaveManager hasn't loaded us 💀
+        // Only load from global localStorage if SaveManager hasn't loaded us
         if (this._managedBySaveManager) return;
 
         try {
@@ -164,7 +164,7 @@ const NPCRelationshipSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖤 SAVE MANAGER INTEGRATION - Per-slot relationship storage 💀
+    // SAVE MANAGER INTEGRATION - Per-slot relationship storage
     // ═══════════════════════════════════════════════════════════════
 
     /**

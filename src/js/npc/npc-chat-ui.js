@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // NPC CHAT UI - where digital souls judge your life choices
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -18,7 +18,7 @@ const NPCChatUI = {
     panelElement: null,
     isWaitingForResponse: false,
 
-    // 🖤 Guards and timeout tracking for cleanup 💀
+    // Guards and timeout tracking for cleanup
     _initialized: false,
     _typewriterTimeouts: [],
 
@@ -27,16 +27,16 @@ const NPCChatUI = {
     // ═══════════════════════════════════════════════════════════
 
     init() {
-        // 🖤 Guard against double init 💀
+        // Guard against double init
         if (this._initialized) {
-            console.log('🗨️ NPCChatUI: Already initialized, skipping');
+            console.log('NPCChatUI: Already initialized, skipping');
             return;
         }
         this._initialized = true;
 
         this.createPanel();
         this.setupEventListeners();
-        console.log('🗨️ NPCChatUI: Initialized - ready to facilitate digital conversations');
+        console.log('NPCChatUI: Initialized - ready to facilitate digital conversations');
     },
 
     // ═══════════════════════════════════════════════════════════
@@ -667,8 +667,8 @@ const NPCChatUI = {
 
     open(npcData) {
         if (!npcData) {
-            // 🦇 No NPC data - silently return, nothing to show
-            console.warn('🗨️ NPCChatUI: No NPC data provided');
+            // No NPC data - silently return, nothing to show
+            console.warn('NPCChatUI: No NPC data provided');
             return;
         }
 
@@ -676,12 +676,12 @@ const NPCChatUI = {
         this.chatHistory = [];
         this.isWaitingForResponse = false;
 
-        // 🦇 TRACK NPC MEETING - so quests know we've actually talked to this person
-        // the void remembers all who cross its path... 🖤
+        // TRACK NPC MEETING - so quests know we've actually talked to this person
+        // the void remembers all who cross its path...
         const npcId = npcData.id || npcData.type || npcData.name;
         if (typeof NPCRelationshipSystem !== 'undefined' && npcId) {
             NPCRelationshipSystem.recordInteraction(npcId, 'conversation', { npcData });
-            console.log(`🦇 Recorded meeting with ${npcData.name || npcId} - quest availability updated`);
+            console.log(`Recorded meeting with ${npcData.name || npcId} - quest availability updated`);
         }
 
         // update UI with NPC info
@@ -701,14 +701,14 @@ const NPCChatUI = {
             const greeting = persona.greetings[Math.floor(Math.random() * persona.greetings.length)];
             this.addNPCMessage(greeting, true);
 
-            // 🎤 Give their greeting a voice - let them speak into the void 🔊
+            // Give their greeting a voice - let them speak into the void
             if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
                 const voice = npcData.voice || persona.voice || 'nova';
                 NPCVoiceChatSystem.playVoice(greeting, voice);
             }
         }
 
-        // 🎯 Update quick response buttons based on NPC type 💀
+        // Update quick response buttons based on NPC type
         this.updateQuickResponses(npcData);
 
         // show panel
@@ -724,10 +724,10 @@ const NPCChatUI = {
         // update turns display
         this.updateTurnsDisplay();
 
-        console.log('🗨️ NPCChatUI: Opened chat with', npcData.name || 'Unknown NPC');
+        console.log('NPCChatUI: Opened chat with', npcData.name || 'Unknown NPC');
     },
 
-    // 🎯 UPDATE QUICK RESPONSES - show relevant options based on NPC type 💀
+    // UPDATE QUICK RESPONSES - show relevant options based on NPC type
     // Quest givers get quest option, merchants get trade option, etc.
     updateQuickResponses(npcData) {
         const quickResponsesContainer = document.getElementById('quick-responses');
@@ -740,7 +740,7 @@ const NPCChatUI = {
         const canTrade = permissions.includes('merchant') || npcData.canTrade;
         const canGiveQuests = permissions.includes('questGiver');
 
-        // 🖤 Build appropriate quick responses 🦇
+        // Build appropriate quick responses
         let buttons = [];
 
         // Always show greeting
@@ -763,7 +763,7 @@ const NPCChatUI = {
         // Show directions
         buttons.push({ message: 'I need directions.', icon: '🧭', label: 'Directions' });
 
-        // 🖤 Render buttons (max 6 to prevent overflow) 💀
+        // Render buttons (max 6 to prevent overflow)
         quickResponsesContainer.innerHTML = buttons.slice(0, 6).map(btn => `
             <button class="quick-response-btn" data-message="${this.escapeHtml(btn.message)}">
                 ${btn.icon} ${btn.label}
@@ -787,10 +787,10 @@ const NPCChatUI = {
             });
         });
 
-        console.log(`🎯 Quick responses updated for ${npcType}: trade=${canTrade}, quests=${canGiveQuests}`);
+        console.log(`Quick responses updated for ${npcType}: trade=${canTrade}, quests=${canGiveQuests}`);
     },
 
-    // 🖤 Simple HTML escape for button data attributes 💀
+    // Simple HTML escape for button data attributes
     escapeHtml(str) {
         if (!str) return '';
         return String(str)
@@ -814,7 +814,7 @@ const NPCChatUI = {
         this.currentNPC = null;
         this.chatHistory = [];
 
-        console.log('🗨️ NPCChatUI: Chat closed');
+        console.log('NPCChatUI: Chat closed');
     },
 
     // ═══════════════════════════════════════════════════════════

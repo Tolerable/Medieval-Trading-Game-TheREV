@@ -1,11 +1,11 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // RESOURCE GATHERING SYSTEM - mining the earth's corpse
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const ResourceGatheringSystem = {
     // Currently active gathering session
@@ -160,20 +160,20 @@ const ResourceGatheringSystem = {
         quarry: 'both'
     },
 
-    // ⛏️ wake this fucker up - time to ruin your back gathering rocks
+    // wake this fucker up - time to ruin your back gathering rocks
     init() {
-        console.log('⛏️ ResourceGatheringSystem: Crawling out of the mines to serve you...');
+        console.log('ResourceGatheringSystem: Crawling out of the mines to serve you...');
 
-        // 💀 make sure player has somewhere to store their pickaxe collection
+        //  make sure player has somewhere to store their pickaxe collection
         this.initPlayerTools();
 
-        // 🦇 slap the gathering UI into existence
+        //  slap the gathering UI into existence
         this.setupGatheringUI();
 
-        console.log('⛏️ ResourceGatheringSystem: Ready to break your spine for shiny rocks 🖤');
+        console.log('ResourceGatheringSystem: Ready to break your spine for shiny rocks 🖤');
     },
 
-    // 🔨 conjure the player's tool tracking from the void
+    //  conjure the player's tool tracking from the void
     initPlayerTools() {
         if (typeof game !== 'undefined' && game.player) {
             game.player.tools = game.player.tools || {};
@@ -187,22 +187,22 @@ const ResourceGatheringSystem = {
         }
     },
 
-    // 🔮 reality check - do you even have the right tool or are you gonna mine with your bare hands
+    //  reality check - do you even have the right tool or are you gonna mine with your bare hands
     hasRequiredTool(resourceId) {
         const requirement = this.TOOL_REQUIREMENTS[resourceId];
         if (!requirement || !requirement.tool) {
-            return { hasTool: true, tool: null }; // 🦇 no tool needed - peasant work
+            return { hasTool: true, tool: null }; // ��� no tool needed - peasant work
         }
 
         if (typeof game === 'undefined' || !game.player) {
             return { hasTool: false, reason: 'Player data not available' };
         }
 
-        // 💀 dig through player's shit to see if they own the right equipment
+        //  dig through player's shit to see if they own the right equipment
         const toolType = requirement.tool;
         const playerTools = game.player.tools || {};
 
-        // 🗡️ find exact match or any upgraded version (because we're generous like that)
+        //  find exact match or any upgraded version (because we're generous like that)
         const matchingTools = Object.keys(this.TOOLS).filter(toolId => {
             const tool = this.TOOLS[toolId];
             return toolId === toolType ||
@@ -223,7 +223,7 @@ const ResourceGatheringSystem = {
         return { hasTool: true, tool: ownedTool, toolInfo: this.TOOLS[ownedTool] };
     },
 
-    // 📜 skill check - are you even qualified to do this or just pretending
+    //  skill check - are you even qualified to do this or just pretending
     hasRequiredSkill(resourceId) {
         const requirement = this.TOOL_REQUIREMENTS[resourceId];
         if (!requirement || requirement.minLevel === 0) {
@@ -231,7 +231,7 @@ const ResourceGatheringSystem = {
         }
 
         if (typeof game === 'undefined' || !game.player || !game.player.skills) {
-            return { hasSkill: true }; // 🦇 can't verify - fuck it, let them try
+            return { hasSkill: true }; // ��� can't verify - fuck it, let them try
         }
 
         const playerSkillLevel = game.player.skills[requirement.skill] || 0;
@@ -248,9 +248,9 @@ const ResourceGatheringSystem = {
         return { hasSkill: true };
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📊 DRAIN PREVIEW SYSTEM - know what youre getting into
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DRAIN PREVIEW SYSTEM - know what youre getting into
+    // 
     // calculate expected resource consumption before committing
 
     // Base stamina drain per gathering action by resource type
@@ -297,14 +297,14 @@ const ResourceGatheringSystem = {
         const currentStamina = playerStats?.stats?.stamina || 100;
         const currentHealth = playerStats?.stats?.health || 100;
 
-        // 🖤💀 Location-specific difficulty modifier - uses gatheringDifficulty from game-world.js
+        //  Location-specific difficulty modifier - uses gatheringDifficulty from game-world.js
         // Each mine/forest/farm/cave has its own difficulty based on resource value
         let difficultyMod = 1.0;
         if (location?.gatheringDifficulty) {
-            // 🦇 Use the location's specific difficulty (set in game-world.js)
+            //  Use the location's specific difficulty (set in game-world.js)
             difficultyMod = location.gatheringDifficulty;
         } else if (location?.region) {
-            // 🖤 Fallback to region-based difficulty if no specific difficulty set
+            //  Fallback to region-based difficulty if no specific difficulty set
             const regionMods = {
                 capital: 0.7,
                 starter: 0.8,
@@ -345,7 +345,7 @@ const ResourceGatheringSystem = {
         } else if (avgRisk > 0.15) {
             riskLevel = 'MODERATE';
             riskColor = '#ffcc00';
-            riskEmoji = '⚡';
+            riskEmoji = '';
         } else {
             riskLevel = 'EASY';
             riskColor = '#00ff00';
@@ -393,7 +393,7 @@ const ResourceGatheringSystem = {
                 </div>
                 <div class="drain-stats" style="display: flex; gap: 15px; flex-wrap: wrap;">
                     <span style="font-size: 0.9em;">
-                        ⚡ Stamina: ${drain.staminaDrain.min}-${drain.staminaDrain.max}
+                        Stamina: ${drain.staminaDrain.min}-${drain.staminaDrain.max}
                         <span style="color: #888;">(you have ${drain.staminaDrain.current})</span>
                     </span>
                     <span style="font-size: 0.9em;">
@@ -406,16 +406,16 @@ const ResourceGatheringSystem = {
         `;
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎒 CARRY WEIGHT SYSTEM - your back can only take so much
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  CARRY WEIGHT SYSTEM - your back can only take so much
+    // 
 
-    // Get player's current carry weight - 🖤 fixed: inventory is object not array 💀
+    // Get player's current carry weight -  fixed: inventory is object not array 
     getCurrentCarryWeight() {
         if (typeof game === 'undefined' || !game.player?.inventory) return 0;
 
         let totalWeight = 0;
-        // 🦇 inventory is { itemId: quantity }, not an array of objects
+        //  inventory is { itemId: quantity }, not an array of objects
         Object.entries(game.player.inventory).forEach(([itemId, quantity]) => {
             const weight = this.getResourceWeight(itemId) || 1;
             totalWeight += weight * (quantity || 1);
@@ -462,9 +462,9 @@ const ResourceGatheringSystem = {
         return Math.min(100, (current / max) * 100);
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // ⛏️ CONTINUOUS GATHERING SYSTEM - work until you drop
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    // CONTINUOUS GATHERING SYSTEM - work until you drop
+    // 
     // players can leave before first action, but once committed, they work
     // until stamina runs out (then slow pace) or carry weight maxes out (stop)
 
@@ -475,7 +475,7 @@ const ResourceGatheringSystem = {
     commitToLocation(locationId) {
         this.isCommitted = true;
         this.committedLocationId = locationId;
-        addMessage('⚔️ youve committed to this location. finish your work or exhaust yourself trying.', 'info');
+        addMessage('youve committed to this location. finish your work or exhaust yourself trying.', 'info');
     },
 
     // Check if player can leave current location
@@ -505,21 +505,21 @@ const ResourceGatheringSystem = {
     startGathering(locationId, resourceId) {
         // Check if already gathering
         if (this.activeGathering) {
-            addMessage('⛏️ already gathering. one task at a time, eager beaver.', 'warning');
+            addMessage('already gathering. one task at a time, eager beaver.', 'warning');
             return false;
         }
 
         // Find the location
         const location = this.findLocation(locationId);
         if (!location) {
-            addMessage('❌ invalid location. did you wander off the map?', 'error');
+            addMessage('invalid location. did you wander off the map?', 'error');
             return false;
         }
 
         // Check if location supports this resource
         const resources = location.resources || [];
         if (!resources.includes(resourceId)) {
-            addMessage(`❌ no ${resourceId} here. try opening your eyes.`, 'error');
+            addMessage(`no ${resourceId} here. try opening your eyes.`, 'error');
             return false;
         }
 
@@ -556,10 +556,10 @@ const ResourceGatheringSystem = {
             this.commitToLocation(locationId);
         }
 
-        // 🖤💀 Calculate gathering time - harder locations take longer but yield better resources
+        //  Calculate gathering time - harder locations take longer but yield better resources
         const baseTime = 15 + Math.random() * 15;
         const toolEfficiency = toolCheck.toolInfo?.efficiency || 1.0;
-        const locationDifficulty = location.gatheringDifficulty || 1.0; // 🦇 Uses location-specific difficulty
+        const locationDifficulty = location.gatheringDifficulty || 1.0; // ��� Uses location-specific difficulty
         let gatheringTime = Math.round((baseTime * locationDifficulty) / toolEfficiency);
 
         // SLOW MODE: if stamina is low, gathering takes longer
@@ -595,7 +595,7 @@ const ResourceGatheringSystem = {
         }
 
         const slowNote = this.activeGathering.isSlowMode ? ' (slow mode - youre exhausted)' : '';
-        addMessage(`⛏️ gathering ${this.getResourceName(resourceId)}... ~${gatheringTime} min${slowNote}`, 'info');
+        addMessage(`gathering ${this.getResourceName(resourceId)}... ~${gatheringTime} min${slowNote}`, 'info');
 
         // Show gathering progress UI
         this.showGatheringProgress();
@@ -626,7 +626,7 @@ const ResourceGatheringSystem = {
 
         const { resourceId, abundance, tool, staminaCost, locationId, isSlowMode } = this.activeGathering;
 
-        // 🖤💀 Get location for difficulty-based yield bonus
+        //  Get location for difficulty-based yield bonus
         const location = this.findLocation(locationId);
         const locationDifficulty = location?.gatheringDifficulty || 1.0;
 
@@ -634,12 +634,12 @@ const ResourceGatheringSystem = {
         const baseYield = Math.floor(1 + abundance * 3);
         const bonusYield = Math.random() < abundance ? 1 : 0;
 
-        // 🦇 Higher difficulty locations give better yields (risk vs reward!)
+        //  Higher difficulty locations give better yields (risk vs reward!)
         // Difficulty 2.0 = +50% yield, Difficulty 0.8 = -10% yield
         const difficultyBonus = Math.floor((locationDifficulty - 1.0) * 2);
         let totalYield = baseYield + bonusYield + Math.max(0, difficultyBonus);
 
-        // 🔧 Apply equipment gathering bonuses
+        //  Apply equipment gathering bonuses
         if (typeof EquipmentSystem !== 'undefined') {
             const gatherBonus = EquipmentSystem.getTotalBonus('gathering');
             const toolBonus = EquipmentSystem.getGatheringBonus(tool);
@@ -683,11 +683,11 @@ const ResourceGatheringSystem = {
             addMessage(`🎒 only grabbed ${totalYield} - bags are almost full!`, 'warning');
         }
 
-        // Add resources to inventory - 🖤 inventory is object {itemId: quantity} not array 💀
+        // Add resources to inventory -  inventory is object {itemId: quantity} not array 
         if (typeof game !== 'undefined' && game.player && game.player.inventory) {
-            // 🦇 Fixed: inventory is { itemId: quantity }, not array of objects
+            //  Fixed: inventory is { itemId: quantity }, not array of objects
             game.player.inventory[resourceId] = (game.player.inventory[resourceId] || 0) + totalYield;
-            // 🖤 Emit item-received for quest progress tracking 💀
+            //  Emit item-received for quest progress tracking 
             document.dispatchEvent(new CustomEvent('item-received', {
                 detail: { item: resourceId, quantity: totalYield, source: 'gathering' }
             }));
@@ -714,7 +714,7 @@ const ResourceGatheringSystem = {
             game.player.skills[requirement.skill] = (game.player.skills[requirement.skill] || 0) + xpGain * 0.01;
         }
 
-        addMessage(`✅ got ${totalYield}x ${this.getResourceName(resourceId)}!`, 'success');
+        addMessage(`got ${totalYield}x ${this.getResourceName(resourceId)}!`, 'success');
 
         // Update player stats display
         if (typeof updatePlayerStats === 'function') {
@@ -765,7 +765,7 @@ const ResourceGatheringSystem = {
             manual: '👋 called it quits. coward. (jk, self-care is important)'
         };
 
-        console.log(`⛏️ Gathering stopped: ${reasonMessages[reason] || reason}`);
+        console.log(`Gathering stopped: ${reasonMessages[reason] || reason}`);
     },
 
     // Cancel current gathering
@@ -825,10 +825,10 @@ const ResourceGatheringSystem = {
         return names[resourceId] || resourceId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     },
 
-    // 🖤💀 Track gathering section collapsed state
+    //  Track gathering section collapsed state
     gatheringSectionCollapsed: true,
 
-    // 🖤💀 Toggle gathering section collapse
+    //  Toggle gathering section collapse
     toggleGatheringSection() {
         this.gatheringSectionCollapsed = !this.gatheringSectionCollapsed;
         const content = document.getElementById('gathering-section-content');
@@ -846,7 +846,7 @@ const ResourceGatheringSystem = {
         }
     },
 
-    // 🖤💀 Add gathering section to location panel (like exploration section)
+    //  Add gathering section to location panel (like exploration section)
     addGatheringSection(locationId) {
         const location = this.findLocation(locationId);
         if (!location) return;
@@ -878,7 +878,7 @@ const ResourceGatheringSystem = {
                            color: #4caf50; font-weight: bold; cursor: pointer;
                            align-items: center; justify-content: center; gap: 8px;"
                     onclick="ResourceGatheringSystem.toggleGatheringSection()">
-                ⛏️ Gather Resources (${availableActions.length} available)
+                Gather Resources (${availableActions.length} available)
             </button>
 
             <!-- 🖤 Expanded state: Full header with details -->
@@ -887,7 +887,7 @@ const ResourceGatheringSystem = {
                  onclick="ResourceGatheringSystem.toggleGatheringSection()">
                 <h3 style="color: #4caf50; margin: 0; display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 0.8em; width: 16px;">▼</span>
-                    ⛏️ Gathering
+                    Gathering
                 </h3>
                 <span style="color: #888; font-size: 0.85em;">${availableActions.length} resources</span>
             </div>
@@ -958,7 +958,7 @@ const ResourceGatheringSystem = {
         locationPanel.appendChild(section);
     },
 
-    // 🖤💀 Get available gathering actions for a location type
+    //  Get available gathering actions for a location type
     getAvailableGatheringActions(locationType) {
         if (typeof UnifiedItemSystem === 'undefined') return [];
 
@@ -974,7 +974,7 @@ const ResourceGatheringSystem = {
         return actions;
     },
 
-    // 🖤💀 Check tool requirement for gathering action
+    //  Check tool requirement for gathering action
     checkToolRequirement(action) {
         if (!action.toolRequired) {
             return { hasRequired: true, toolName: null, requiredTool: null };
@@ -1003,16 +1003,16 @@ const ResourceGatheringSystem = {
         return { hasRequired: false, toolName: null, requiredTool: action.toolRequired.replace(/_/g, ' ') };
     },
 
-    // 🖤💀 Start gathering from the panel UI
+    //  Start gathering from the panel UI
     startGatheringFromPanel(actionId) {
         if (typeof game === 'undefined' || !game.currentLocation) {
-            addMessage('❌ cannot gather here - no location data', 'error');
+            addMessage('cannot gather here - no location data', 'error');
             return;
         }
 
         const action = UnifiedItemSystem?.gatheringActions?.[actionId];
         if (!action) {
-            addMessage('❌ invalid gathering action', 'error');
+            addMessage('invalid gathering action', 'error');
             return;
         }
 
@@ -1046,7 +1046,7 @@ const ResourceGatheringSystem = {
             `;
             progressDiv.innerHTML = `
                 <div class="gathering-title" style="color: #4fc3f7; font-size: 1.1em; margin-bottom: 8px;">
-                    ⛏️ Gathering...
+                    Gathering...
                 </div>
                 <div class="gathering-resource" style="color: #e0e0e0; margin-bottom: 12px;"></div>
                 <div class="progress-bar-container" style="

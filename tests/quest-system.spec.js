@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 const config = require('./config/test-config');
 const {
   waitForGameLoad,
-  startGameAndSkipIntro,  // 🖤 Use new helper that handles ALL intro modals 💀
+  startGameAndSkipIntro,  // Use new helper that handles ALL intro modals
   openPanel,
   isPanelVisible,
   getPlayerGold,
@@ -11,7 +11,7 @@ const {
 } = require('./helpers/test-helpers');
 
 /**
- * 🖤 QUEST SYSTEM TESTS - Unity's comprehensive quest testing suite
+ * QUEST SYSTEM TESTS - Unity's comprehensive quest testing suite
  * Tests quest tracker widget, quest log panel, quest workflow, and all quest functionality
  *
  * Test Coverage:
@@ -25,17 +25,17 @@ const {
  * - Quest filtering and categories
  * - Quest markers on map
  *
- * Signed: Unity 🖤 Agent C
+ * Signed: Unity - Agent C
  */
 
 // ═══════════════════════════════════════════════════════════════
-// 🎯 QUEST TRACKER WIDGET TESTS - HUD element that shows tracked quest
+// QUEST TRACKER WIDGET TESTS - HUD element that shows tracked quest
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Quest Tracker Widget', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Quest tracker widget exists in DOM', async ({ page }) => {
@@ -197,13 +197,13 @@ test.describe('Quest Tracker Widget', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 📋 QUEST LOG PANEL TESTS - Full quest UI
+// QUEST LOG PANEL TESTS - Full quest UI
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Quest Log Panel', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Quest log panel exists in DOM', async ({ page }) => {
@@ -349,13 +349,13 @@ test.describe('Quest Log Panel', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ QUEST WORKFLOW TESTS - Accepting, tracking, completing
+// QUEST WORKFLOW TESTS - Accepting, tracking, completing
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Quest Workflow - Accept, Track, Complete', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Can accept a quest', async ({ page }) => {
@@ -564,13 +564,13 @@ test.describe('Quest Workflow - Accept, Track, Complete', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 📊 QUEST PROGRESS & REWARDS TESTS
+// QUEST PROGRESS & REWARDS TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Quest Progress and Rewards', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Quest progress updates correctly for collect objectives', async ({ page }) => {
@@ -766,13 +766,13 @@ test.describe('Quest Progress and Rewards', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🔍 QUEST FILTERING & CATEGORIES TESTS
+// QUEST FILTERING & CATEGORIES TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Quest Filtering and Categories', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Can filter quests by "All"', async ({ page }) => {
@@ -984,13 +984,13 @@ test.describe('Quest Filtering and Categories', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🗺️ QUEST MARKERS ON MAP TESTS
+// QUEST MARKERS ON MAP TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Quest Markers on Map', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Quest marker element exists in DOM', async ({ page }) => {
@@ -1132,13 +1132,13 @@ test.describe('Quest Markers on Map', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🎯 QUEST SYSTEM INTEGRATION TESTS
+// QUEST SYSTEM INTEGRATION TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Quest System Integration', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('QuestSystem initializes correctly', async ({ page }) => {
@@ -1328,26 +1328,26 @@ test.describe('Quest System Integration', () => {
 });
 
 /**
- * 🖤 Test Summary
+ * Test Summary
  *
  * This comprehensive test suite covers:
- * ✅ Quest tracker widget (HUD element)
- * ✅ Quest log panel (full UI)
- * ✅ Accepting quests
- * ✅ Tracking quests
- * ✅ Completing quests
- * ✅ Quest progress tracking
- * ✅ Quest rewards (gold, items, XP, reputation)
- * ✅ Quest filtering (all, active, available, main, side, completed)
- * ✅ Quest categories and types
- * ✅ Quest markers on map
- * ✅ Quest system integration
- * ✅ Quest prerequisites
- * ✅ Quest items
- * ✅ Quest events
- * ✅ Quest persistence
+ * - Quest tracker widget (HUD element)
+ * - Quest log panel (full UI)
+ * - Accepting quests
+ * - Tracking quests
+ * - Completing quests
+ * - Quest progress tracking
+ * - Quest rewards (gold, items, XP, reputation)
+ * - Quest filtering (all, active, available, main, side, completed)
+ * - Quest categories and types
+ * - Quest markers on map
+ * - Quest system integration
+ * - Quest prerequisites
+ * - Quest items
+ * - Quest events
+ * - Quest persistence
  *
  * ALL test.skip() REMOVED - All tests active when questTests: true in config
  *
- * Signed: Unity 🖤 Agent C
+ * Signed: Unity - Agent C
  */

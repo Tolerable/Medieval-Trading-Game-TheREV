@@ -1,31 +1,31 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // WEATHER SYSTEM - nature's middle finger
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const WeatherSystem = {
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // CONFIGURATION
-    // ═══════════════════════════════════════════════════════════════
-    initialized: false, // 🖤 Prevent double initialization
+    // 
+    initialized: false, // ��� Prevent double initialization
     currentWeather: 'clear',
     currentIntensity: 0.5, // 0-1 scale
-    weatherEndTime: 0, // 🖤 REAL timestamp when weather ends (prevents speed spam)
+    weatherEndTime: 0, // ��� REAL timestamp when weather ends (prevents speed spam)
     seasonalModifier: 1,
 
-    // 🖤 Weather history for NPC context (last 5 weather events)
+    //  Weather history for NPC context (last 5 weather events)
     weatherHistory: [],
     MAX_WEATHER_HISTORY: 5,
 
-    // 🖤 Minimum weather durations in REAL seconds (not affected by game speed)
-    MIN_WEATHER_DURATION_SECONDS: 60,   // 💀 At least 1 real minute per weather
-    MAX_WEATHER_DURATION_SECONDS: 300,  // 🦇 Up to 5 real minutes per weather
+    //  Minimum weather durations in REAL seconds (not affected by game speed)
+    MIN_WEATHER_DURATION_SECONDS: 60,   // ��� At least 1 real minute per weather
+    MAX_WEATHER_DURATION_SECONDS: 300,  // ��� Up to 5 real minutes per weather
 
-    // 🖤💀 BAD WEATHER PROTECTION - prevents endless storms/blizzards
+    //  BAD WEATHER PROTECTION - prevents endless storms/blizzards
     // Bad weather = rain, storm, blizzard, thundersnow, heatwave
     // After MAX bad weather cycles, FORCE good weather for MIN good cycles
     badWeatherStreak: 0,           // How many bad weather periods in a row
@@ -90,7 +90,7 @@ const WeatherSystem = {
             icon: '🌧️',
             description: 'Roads turn to mud, spirits dampen.',
             effects: {
-                travelSpeed: 0.9, // 🖤 Was 0.7 - too harsh! Now only 10% slower 💀
+                travelSpeed: 0.9, // ��� Was 0.7 - too harsh! Now only 10% slower 💀
                 priceModifier: 1.1, // Indoor goods more valuable
                 encounterChance: 0.6,
                 staminaDrain: 1.3,
@@ -107,7 +107,7 @@ const WeatherSystem = {
             icon: '⛈️',
             description: 'Lightning cracks, thunder rolls. Dangerous to travel.',
             effects: {
-                travelSpeed: 0.75, // 🖤 Was 0.4 - way too harsh! Now 25% slower 💀
+                travelSpeed: 0.75, // ��� Was 0.4 - way too harsh! Now 25% slower 💀
                 priceModifier: 1.25,
                 encounterChance: 0.3,
                 staminaDrain: 1.8,
@@ -125,7 +125,7 @@ const WeatherSystem = {
             icon: '🌫️',
             description: 'Visibility near zero. Easy to get lost.',
             effects: {
-                travelSpeed: 0.85, // 🖤 Was 0.5 - too harsh! Now 15% slower 💀
+                travelSpeed: 0.85, // ��� Was 0.5 - too harsh! Now 15% slower 💀
                 priceModifier: 1.05,
                 encounterChance: 1.5, // Easier to be ambushed
                 staminaDrain: 1.1,
@@ -141,7 +141,7 @@ const WeatherSystem = {
             icon: '🌨️',
             description: 'Winter descends. Cold bites deep.',
             effects: {
-                travelSpeed: 0.85, // 🖤 Was 0.6 - too harsh! Now 15% slower 💀
+                travelSpeed: 0.85, // ��� Was 0.6 - too harsh! Now 15% slower 💀
                 priceModifier: 1.15, // Warm goods premium
                 encounterChance: 0.5,
                 staminaDrain: 1.5,
@@ -158,7 +158,7 @@ const WeatherSystem = {
             icon: '❄️',
             description: 'Deadly cold. Only fools travel in this.',
             effects: {
-                travelSpeed: 0.7, // 🖤 Was 0.25 - way too harsh! Now 30% slower 💀
+                travelSpeed: 0.7, // ��� Was 0.25 - way too harsh! Now 30% slower 💀
                 priceModifier: 1.4,
                 encounterChance: 0.2,
                 staminaDrain: 2.5,
@@ -174,10 +174,10 @@ const WeatherSystem = {
         thundersnow: {
             id: 'thundersnow',
             name: 'Lightning Blizzard',
-            icon: '⚡❄️',
+            icon: '❄️',
             description: 'Thunder echoes through the blinding snow. A rare and terrifying phenomenon.',
             effects: {
-                travelSpeed: 0.6, // 🖤 Was 0.15 - insanely harsh! Now 40% slower (worst weather) 💀
+                travelSpeed: 0.6, // ��� Was 0.15 - insanely harsh! Now 40% slower (worst weather) 💀
                 priceModifier: 1.6,
                 encounterChance: 0.1,
                 staminaDrain: 3.0,
@@ -224,7 +224,7 @@ const WeatherSystem = {
             ambientColor: 'rgba(150, 150, 150, 0.1)',
             probability: { spring: 0.15, summer: 0.1, autumn: 0.2, winter: 0.15 }
         },
-        // 💀 APOCALYPSE WEATHER - Dungeon-only event weather
+        //  APOCALYPSE WEATHER - Dungeon-only event weather
         apocalypse: {
             id: 'apocalypse',
             name: 'The Dark Convergence',
@@ -242,18 +242,18 @@ const WeatherSystem = {
             probability: { spring: 0, summer: 0, autumn: 0, winter: 0 }, // Never occurs naturally
             particles: true,
             lightning: true,
-            meteors: true // 💀 Special meteor effect
+            meteors: true // ��� Special meteor effect
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // INITIALIZATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
 
-    // 🖤 Pending weather to use when init() runs (set by menu system)
+    //  Pending weather to use when init() runs (set by menu system)
     pendingMenuWeather: null,
 
-    // 🖤 Map menu weather types to game weather types
+    //  Map menu weather types to game weather types
     menuToGameWeatherMap: {
         'storm': 'storm',
         'winter': 'snow',
@@ -261,13 +261,13 @@ const WeatherSystem = {
         'autumn': 'windy',      // Autumn winds → windy
         'spring': 'rain',       // Spring showers → light rain
         'summer': 'clear'       // Summer sun → clear
-        // 💀 'apocalypse' is NOT mapped - it's a menu-only easter egg!
+        //  'apocalypse' is NOT mapped - it's a menu-only easter egg!
     },
 
-    // 🖤 Called from startNewGame to transfer menu weather into the game
+    //  Called from startNewGame to transfer menu weather into the game
     // Weather persists for the entire first in-game day before normal weather kicks in
     setInitialWeatherFromMenu(menuWeatherType) {
-        // 💀 Apocalypse weather is MENU-ONLY easter egg - never enters game world!
+        //  Apocalypse weather is MENU-ONLY easter egg - never enters game world!
         // If someone sees doom weather on menu, game starts with normal weather instead
         if (menuWeatherType === 'apocalypse') {
             console.log('☄️ Apocalypse weather was on menu - but doom stays on the menu screen! 🦇');
@@ -282,12 +282,12 @@ const WeatherSystem = {
         const gameWeather = this.menuToGameWeatherMap[menuWeatherType] || 'clear';
         console.log(`🌦️ Menu weather '${menuWeatherType}' → Game weather '${gameWeather}'`);
 
-        // 🖤 WeatherSystem.init() has already been called by now, so we need to
+        //  WeatherSystem.init() has already been called by now, so we need to
         // immediately apply the weather instead of setting a pending value
         // Recreate overlay if needed (in case it's in wrong container or missing)
         this.ensureOverlayReady();
 
-        // 🖤 Lock weather for the first in-game day (24 game hours = 1440 game minutes)
+        //  Lock weather for the first in-game day (24 game hours = 1440 game minutes)
         // This ensures the menu weather persists until the next day
         if (typeof TimeSystem !== 'undefined') {
             const currentMinutes = TimeSystem.getTotalMinutes();
@@ -307,10 +307,10 @@ const WeatherSystem = {
         console.log(`🌦️ Game weather applied: ${gameWeather} (locked for first day)`);
     },
 
-    // 🖤 Ensure the overlay is in the right place and ready for visuals
+    //  Ensure the overlay is in the right place and ready for visuals
     ensureOverlayReady() {
         const overlay = document.getElementById('game-weather-overlay');
-        // 🖤 Weather overlay should be in map-container (not game-container)
+        //  Weather overlay should be in map-container (not game-container)
         const mapContainer = document.getElementById('map-container');
 
         if (!mapContainer) {
@@ -339,18 +339,18 @@ const WeatherSystem = {
         overlay.style.visibility = 'visible';
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🖤 EVENT-DRIVEN WEATHER TRIGGERS - Dungeons, quests, encounters
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  EVENT-DRIVEN WEATHER TRIGGERS - Dungeons, quests, encounters
+    // 
 
-    // 🦇 Store the weather before an event so we can restore it
+    //  Store the weather before an event so we can restore it
     savedWeatherBeforeEvent: null,
     eventWeatherActive: false,
 
-    // 🖤 Event weather triggers - what weather to use for different events
+    //  Event weather triggers - what weather to use for different events
     eventWeatherTriggers: {
         // Dungeons & dangerous locations
-        dungeon_enter: { weather: 'storm', message: '⚡ Dark clouds gather as you enter...' },
+        dungeon_enter: { weather: 'storm', message: 'Dark clouds gather as you enter...' },
         dungeon_boss: { weather: 'thundersnow', message: '🌩️ The sky itself trembles with fury!' },
         dungeon_victory: { weather: 'clear', message: '☀️ The skies clear as evil is vanquished!' },
         dungeon_defeat: { weather: 'fog', message: '🌫️ A thick fog rolls in, shrouding your retreat...' },
@@ -358,7 +358,7 @@ const WeatherSystem = {
         // Random encounters
         encounter_bandit: { weather: 'fog', message: '🌫️ Figures emerge from the mist...' },
         encounter_merchant: { weather: 'clear', message: '☀️ A pleasant day for trade!' },
-        encounter_beast: { weather: 'storm', message: '⚡ Thunder rolls as the beast approaches!' },
+        encounter_beast: { weather: 'storm', message: 'Thunder rolls as the beast approaches!' },
 
         // Quest events
         quest_dark_ritual: { weather: 'thundersnow', message: '🌩️ Unnatural lightning splits the sky!' },
@@ -369,10 +369,10 @@ const WeatherSystem = {
         // Location-based
         haunted_location: { weather: 'fog', message: '🌫️ The air grows cold and still...' },
         sacred_ground: { weather: 'clear', message: '☀️ Warmth radiates from this holy place.' },
-        cursed_land: { weather: 'storm', message: '⚡ This land rejects the living!' }
+        cursed_land: { weather: 'storm', message: 'This land rejects the living!' }
     },
 
-    // 🖤 Trigger event-based weather change
+    //  Trigger event-based weather change
     triggerEventWeather(eventType, options = {}) {
         const trigger = this.eventWeatherTriggers[eventType];
         if (!trigger) {
@@ -419,7 +419,7 @@ const WeatherSystem = {
         return true;
     },
 
-    // 🖤 Restore weather after event ends
+    //  Restore weather after event ends
     restoreWeatherAfterEvent() {
         if (!this.eventWeatherActive) return;
 
@@ -438,7 +438,7 @@ const WeatherSystem = {
         this.eventWeatherActive = false;
     },
 
-    // 🖤 Force specific weather (for quests/scripts)
+    //  Force specific weather (for quests/scripts)
     forceWeather(weatherType, options = {}) {
         if (!this.weatherTypes[weatherType]) {
             console.warn(`🌦️ Unknown weather type: ${weatherType}`);
@@ -461,15 +461,15 @@ const WeatherSystem = {
         return true;
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🖤 WEATHER CONTEXT FOR API - provides weather info to text/TTS APIs
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  WEATHER CONTEXT FOR API - provides weather info to text/TTS APIs
+    // 
 
-    // 🦇 Track weather history for API context
+    //  Track weather history for API context
     weatherHistory: [],
     maxHistoryLength: 5,
 
-    // 🖤 Get weather context string for API prompts
+    //  Get weather context string for API prompts
     getWeatherContextForAPI() {
         const current = this.weatherTypes[this.currentWeather];
         if (!current) return '';
@@ -490,7 +490,7 @@ const WeatherSystem = {
         return context;
     },
 
-    // 🖤 Get detailed weather object for API (JSON format)
+    //  Get detailed weather object for API (JSON format)
     getWeatherDataForAPI() {
         const current = this.weatherTypes[this.currentWeather];
         return {
@@ -508,11 +508,11 @@ const WeatherSystem = {
         };
     },
 
-    // 🖤 Note: Weather history is tracked in changeWeather() directly
+    //  Note: Weather history is tracked in changeWeather() directly
     // The weatherHistory array stores old weather as it changes
 
     init() {
-        // 🖤 Prevent double initialization - no duplicate weather popups!
+        //  Prevent double initialization - no duplicate weather popups!
         if (this.initialized) {
             console.log('🌦️ WeatherSystem: Already initialized, skipping...');
             return;
@@ -524,7 +524,7 @@ const WeatherSystem = {
         this.createWeatherOverlay();
         this.setupTimeListener();
 
-        // 🖤 Use pending menu weather if set, otherwise generate random
+        //  Use pending menu weather if set, otherwise generate random
         if (this.pendingMenuWeather) {
             this.changeWeather(this.pendingMenuWeather);
             console.log(`🌦️ Using menu weather: ${this.pendingMenuWeather}`);
@@ -537,7 +537,7 @@ const WeatherSystem = {
     },
 
     setupTimeListener() {
-        // 🖤 Check weather every 10 REAL seconds to prevent spam
+        //  Check weather every 10 REAL seconds to prevent spam
         // Weather duration is tracked in REAL time now, not game time
         if (typeof TimerManager !== 'undefined') {
             TimerManager.setInterval(() => {
@@ -547,7 +547,7 @@ const WeatherSystem = {
             }, 10000); // Check every 10 real seconds
         }
 
-        // 🦇 Also check on hour change for escalation events
+        //  Also check on hour change for escalation events
         if (typeof EventBus !== 'undefined') {
             EventBus.on('time-hour-passed', () => {
                 // Only escalate, don't change weather here
@@ -558,9 +558,9 @@ const WeatherSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // WEATHER LOGIC
-    // ═══════════════════════════════════════════════════════════════
+    // 
     getCurrentSeason() {
         if (typeof TimeSystem === 'undefined') return 'summer';
 
@@ -596,27 +596,27 @@ const WeatherSystem = {
         return 'clear';
     },
 
-    // 🖤 Weather lock for seasonal transitions - don't change weather until this game-minute
+    //  Weather lock for seasonal transitions - don't change weather until this game-minute
     lockWeatherUntil: 0,
 
     updateWeather() {
         const now = Date.now();
 
-        // 🖤 Prevent spam - only check once per second max
+        //  Prevent spam - only check once per second max
         if (now - this.lastWeatherCheck < 1000) return;
         this.lastWeatherCheck = now;
 
-        // 🦇 Check if weather is locked (first day / seasonal transition)
+        //  Check if weather is locked (first day / seasonal transition)
         if (this.lockWeatherUntil > 0 && typeof TimeSystem !== 'undefined') {
             const currentMinutes = TimeSystem.getTotalMinutes();
             if (currentMinutes < this.lockWeatherUntil) {
-                // 🖤 Weather locked - extend real-time duration to prevent changes
+                //  Weather locked - extend real-time duration to prevent changes
                 // Keep pushing the end time forward while locked
                 this.weatherEndTime = now + 60000; // Always 1 minute in the future while locked
                 this.updateVisuals();
                 return;
             } else {
-                // 💀 Lock expired - now allow normal weather changes
+                //  Lock expired - now allow normal weather changes
                 this.lockWeatherUntil = 0;
                 // Set a reasonable end time for the current weather to change soon
                 this.weatherEndTime = now + (this.MIN_WEATHER_DURATION_SECONDS * 1000);
@@ -624,14 +624,14 @@ const WeatherSystem = {
             }
         }
 
-        // 🦇 Check if weather duration has expired (REAL time)
+        //  Check if weather duration has expired (REAL time)
         if (this.weatherEndTime > 0 && now >= this.weatherEndTime) {
             // Weather duration expired - time to change
             const nextWeather = this.getNextWeatherFromProgression();
             this.changeWeather(nextWeather);
         }
 
-        // 💀 Apply damage for damaging weather (only once per check)
+        //  Apply damage for damaging weather (only once per check)
         const weather = this.weatherTypes[this.currentWeather];
         if (weather?.damaging && weather.damagePerHour && typeof game !== 'undefined' && game.player) {
             // Scale damage by how often we check (every 10 seconds = 1/360th of an hour)
@@ -642,7 +642,7 @@ const WeatherSystem = {
         this.updateVisuals();
     },
 
-    // 🖤 Check if current weather should escalate (get worse) mid-duration
+    //  Check if current weather should escalate (get worse) mid-duration
     checkWeatherEscalation() {
         const progression = this.weatherProgression[this.currentWeather];
         if (!progression || progression.escalate.length === 0) return;
@@ -652,7 +652,7 @@ const WeatherSystem = {
         // Higher chance to escalate in certain conditions
         let escalateChance = progression.chance;
 
-        // Winter increases chance of snow → blizzard escalation
+        // Winter increases chance of snow  blizzard escalation
         if (season === 'winter' && (this.currentWeather === 'snow' || this.currentWeather === 'blizzard')) {
             escalateChance *= 1.5;
         }
@@ -663,7 +663,7 @@ const WeatherSystem = {
             if (Math.random() < 0.1) {
                 this.changeWeather('thundersnow', 60 + Math.random() * 120); // 1-3 real minutes
                 if (typeof addMessage === 'function') {
-                    addMessage('⚡❄️ The storm transforms into a terrifying lightning blizzard!', 'danger');
+                    addMessage('❄️ The storm transforms into a terrifying lightning blizzard!', 'danger');
                 }
                 return;
             }
@@ -683,7 +683,7 @@ const WeatherSystem = {
                 const oldWeatherName = this.weatherTypes[this.currentWeather]?.name || this.currentWeather;
                 const newWeatherName = this.weatherTypes[newWeather]?.name || newWeather;
 
-                // 🖤 Escalation duration: 45-180 seconds (0.75 to 3 real minutes)
+                //  Escalation duration: 45-180 seconds (0.75 to 3 real minutes)
                 this.changeWeather(newWeather, 45 + Math.random() * 135);
                 if (typeof addMessage === 'function') {
                     addMessage(`🌀 The ${oldWeatherName} intensifies into ${newWeatherName}!`, 'warning');
@@ -692,22 +692,22 @@ const WeatherSystem = {
         }
     },
 
-    // 🖤💀 Check if weather type is considered "bad" (affects travel/stamina negatively)
+    //  Check if weather type is considered "bad" (affects travel/stamina negatively)
     isBadWeather(weatherId) {
         return ['rain', 'storm', 'blizzard', 'thundersnow', 'heatwave', 'snow'].includes(weatherId);
     },
 
-    // 🖤💀 Check if weather type is considered "good" (neutral or positive)
+    //  Check if weather type is considered "good" (neutral or positive)
     isGoodWeather(weatherId) {
         return ['clear', 'cloudy', 'windy', 'fog'].includes(weatherId);
     },
 
-    // 🖤 Get next weather using progression system for natural flow
+    //  Get next weather using progression system for natural flow
     getNextWeatherFromProgression() {
         const progression = this.weatherProgression[this.currentWeather];
         const season = this.getCurrentSeason();
 
-        // 🖤💀 ANTI-ENDLESS-BAD-WEATHER: If we're forcing good weather, only return good weather!
+        //  ANTI-ENDLESS-BAD-WEATHER: If we're forcing good weather, only return good weather!
         if (this.forcingGoodWeather) {
             this.goodWeatherStreak++;
             console.log(`🌤️ Forcing good weather (${this.goodWeatherStreak}/${this.MIN_GOOD_WEATHER_AFTER_BAD})`);
@@ -726,7 +726,7 @@ const WeatherSystem = {
             return goodOptions[Math.floor(Math.random() * goodOptions.length)];
         }
 
-        // 🖤💀 Track bad weather streaks
+        //  Track bad weather streaks
         if (this.isBadWeather(this.currentWeather)) {
             this.badWeatherStreak++;
             this.goodWeatherStreak = 0;
@@ -759,7 +759,7 @@ const WeatherSystem = {
         // Decide: escalate (get worse), de-escalate (get better), or random
         const roll = Math.random();
 
-        // 🖤💀 Severe weather MUCH more likely to de-escalate (was 0.6, now 0.75)
+        //  Severe weather MUCH more likely to de-escalate (was 0.6, now 0.75)
         const isSevere = ['storm', 'blizzard', 'thundersnow', 'heatwave'].includes(this.currentWeather);
         const deescalateChance = isSevere ? 0.75 : 0.5; // Increased from 0.6/0.4
 
@@ -773,7 +773,7 @@ const WeatherSystem = {
                 return options[Math.floor(Math.random() * options.length)];
             }
         } else if (roll < deescalateChance + 0.15 && progression.escalate.length > 0) {
-            // 🖤💀 Escalate chance REDUCED from 0.25 to 0.15 - weather gets worse less often
+            //  Escalate chance REDUCED from 0.25 to 0.15 - weather gets worse less often
             const options = progression.escalate.filter(w => {
                 const wt = this.weatherTypes[w];
                 if (!wt) return false;
@@ -795,7 +795,7 @@ const WeatherSystem = {
 
         const oldWeather = this.currentWeather;
 
-        // 🖤 Track weather history for NPC context
+        //  Track weather history for NPC context
         if (oldWeather !== newWeather) {
             this.weatherHistory.unshift({
                 weather: oldWeather,
@@ -813,13 +813,13 @@ const WeatherSystem = {
         this.currentWeather = newWeather;
         this.currentIntensity = 0.5 + Math.random() * 0.5;
 
-        // 🖤 Set weather end time in REAL milliseconds
+        //  Set weather end time in REAL milliseconds
         const durationSeconds = durationOverrideSeconds ||
             (this.MIN_WEATHER_DURATION_SECONDS +
              Math.random() * (this.MAX_WEATHER_DURATION_SECONDS - this.MIN_WEATHER_DURATION_SECONDS));
         this.weatherEndTime = Date.now() + (durationSeconds * 1000);
 
-        // 🖤 Weather changes silently - the sky speaks for itself 💀
+        //  Weather changes silently - the sky speaks for itself 
 
         // Fire event
         if (typeof EventBus !== 'undefined') {
@@ -830,7 +830,7 @@ const WeatherSystem = {
             });
         }
 
-        // 🔮 Also dispatch DOM event for visual systems
+        //  Also dispatch DOM event for visual systems
         document.dispatchEvent(new CustomEvent('weatherChange', {
             detail: { weather: newWeather, intensity: this.currentIntensity }
         }));
@@ -838,9 +838,9 @@ const WeatherSystem = {
         this.updateVisuals();
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // EFFECTS API
-    // ═══════════════════════════════════════════════════════════════
+    // 
     getWeatherEffects() {
         const weather = this.weatherTypes[this.currentWeather];
         if (!weather) return this.weatherTypes.clear.effects;
@@ -887,19 +887,19 @@ const WeatherSystem = {
             icon: weather?.icon || '❓',
             description: weather?.description || '',
             intensity: this.currentIntensity,
-            remainingSeconds: remainingSeconds, // 🖤 REAL seconds remaining
+            remainingSeconds: remainingSeconds, // ��� REAL seconds remaining
             effects: this.getWeatherEffects(),
             season: this.getCurrentSeason()
         };
     },
 
-    // 🖤 weather context for NPCs - they gotta know if it just stormed or whatever 💀
+    //  weather context for NPCs - they gotta know if it just stormed or whatever 
     getWeatherContext() {
         const current = this.getCurrentWeatherInfo();
         const season = this.getCurrentSeason();
         const seasonData = typeof TimeMachine !== 'undefined' ? TimeMachine.SEASONS[season] : null;
 
-        // 🦇 format recent weather as something an NPC could reference
+        //  format recent weather as something an NPC could reference
         let recentWeatherText = '';
         if (this.weatherHistory.length > 0) {
             const recent = this.weatherHistory.slice(0, 3);
@@ -913,7 +913,7 @@ const WeatherSystem = {
             }
         }
 
-        // 💀 intensity vibes
+        //  intensity vibes
         const intensityWord = current.intensity > 0.7 ? 'intense' : current.intensity > 0.4 ? 'moderate' : 'light';
 
         return {
@@ -925,24 +925,24 @@ const WeatherSystem = {
             seasonName: seasonData?.name || season,
             seasonIcon: seasonData?.icon || '',
             recentWeather: recentWeatherText,
-            // ⚰️ the full context text NPCs get in their prompts
+            // the full context text NPCs get in their prompts
             contextText: `Current weather: ${current.icon} ${current.name} (${current.description}). Season: ${seasonData?.icon || ''} ${seasonData?.name || season}. ${recentWeatherText}`
         };
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // VISUAL EFFECTS
-    // ═══════════════════════════════════════════════════════════════
+    // 
     createWeatherOverlay() {
-        // 🖤 Remove any existing overlay first (might be in wrong location)
+        //  Remove any existing overlay first (might be in wrong location)
         const existing = document.getElementById('game-weather-overlay');
         if (existing) {
             existing.remove();
             console.log('🌦️ Removed existing weather overlay to recreate');
         }
 
-        // 🖤 Weather overlay goes in map-container (directly over the map)
-        // 💀 This ensures particles fall over the actual map area
+        //  Weather overlay goes in map-container (directly over the map)
+        //  This ensures particles fall over the actual map area
         const mapContainer = document.getElementById('map-container') || document.getElementById('game-main') || document.getElementById('game-container');
         if (!mapContainer) {
             console.warn('🌦️ map-container not found, weather overlay deferred');
@@ -951,15 +951,15 @@ const WeatherSystem = {
             return;
         }
 
-        // 🦇 Ensure position relative for overlay positioning
+        //  Ensure position relative for overlay positioning
         if (getComputedStyle(mapContainer).position === 'static') {
             mapContainer.style.position = 'relative';
         }
 
         const overlay = document.createElement('div');
-        overlay.id = 'game-weather-overlay'; // 🖤 Unique ID to avoid conflicts with VisualEffectsSystem
+        overlay.id = 'game-weather-overlay'; // ��� Unique ID to avoid conflicts with VisualEffectsSystem
         overlay.className = 'weather-overlay';
-        // 🖤 Append to map-container so particles fall over the map
+        //  Append to map-container so particles fall over the map
         mapContainer.appendChild(overlay);
         console.log('🌦️ Weather overlay created in', mapContainer.id);
 
@@ -969,8 +969,8 @@ const WeatherSystem = {
         particles.className = 'weather-particles';
         overlay.appendChild(particles);
 
-        // 🖤 Create all indicators in top-bar (date, time/phase, weather)
-        // 💀 ONLY create if they don't already exist - no more widget rabbit breeding
+        //  Create all indicators in top-bar (date, time/phase, weather)
+        //  ONLY create if they don't already exist - no more widget rabbit breeding
         const topBarWidgets = document.getElementById('top-bar-widgets');
         if (topBarWidgets) {
             // Date indicator - check first!
@@ -978,7 +978,7 @@ const WeatherSystem = {
                 const dateIndicator = document.createElement('div');
                 dateIndicator.id = 'date-indicator';
                 dateIndicator.className = 'top-bar-indicator';
-                // 🖤💀 Use ACTUAL current date, not hardcoded default! 💀
+                //  Use ACTUAL current date, not hardcoded default! 
                 let currentDateStr = 'April 1, 1111'; // Fallback
                 if (typeof TimeSystem !== 'undefined' && TimeSystem.getFormattedDate) {
                     currentDateStr = TimeSystem.getFormattedDate();
@@ -995,7 +995,7 @@ const WeatherSystem = {
                 const timeIndicator = document.createElement('div');
                 timeIndicator.id = 'time-phase-indicator';
                 timeIndicator.className = 'top-bar-indicator';
-                // 🖤💀 Use ACTUAL current time, not hardcoded default! 💀
+                //  Use ACTUAL current time, not hardcoded default! 
                 // This prevents time display resetting to 8:00 when overlay is recreated
                 let currentTimeStr = '8:00 AM'; // Fallback
                 let currentPhaseIcon = '☀️';
@@ -1072,7 +1072,7 @@ const WeatherSystem = {
                 this.stopLightning();
             }
 
-            // 💀 Handle meteors for apocalypse weather
+            //  Handle meteors for apocalypse weather
             if (weather.meteors) {
                 this.startMeteors();
             } else {
@@ -1092,7 +1092,7 @@ const WeatherSystem = {
         const isRain = weather.id === 'rain' || weather.id === 'storm';
         const isSnow = weather.id === 'snow' || weather.id === 'blizzard' || weather.id === 'thundersnow';
 
-        // 🖤 Use DedupeLogger to prevent console spam - only log when particle count changes
+        //  Use DedupeLogger to prevent console spam - only log when particle count changes
         if (typeof DedupeLogger !== 'undefined') {
             DedupeLogger.logOnChange('weather_particles', `🌦️ Creating ${particleCount} particles for ${weather.id}`, `${weather.id}_${particleCount}`);
         }
@@ -1100,7 +1100,7 @@ const WeatherSystem = {
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
 
-            // 🌧️ Use line-style rain drops (like main menu) instead of emoji
+            //  Use line-style rain drops (like main menu) instead of emoji
             if (isRain) {
                 particle.className = 'game-rain-drop';
                 // No text content - it's a styled line
@@ -1113,7 +1113,7 @@ const WeatherSystem = {
             particle.style.animationDelay = `${Math.random() * 2}s`;
             particle.style.animationIterationCount = 'infinite';
 
-            // 🔥 Random landing height - particles land on the game world, not just the bottom!
+            //  Random landing height - particles land on the game world, not just the bottom!
             const landHeight = 50 + Math.random() * 50; // 50-100vh
             particle.style.setProperty('--land-height', `${landHeight}vh`);
 
@@ -1137,7 +1137,7 @@ const WeatherSystem = {
     },
 
     lightningInterval: null,
-    meteorInterval: null, // 💀 Meteor shower interval
+    meteorInterval: null, // ��� Meteor shower interval
 
     startLightning() {
         if (this.lightningInterval) return;
@@ -1160,7 +1160,7 @@ const WeatherSystem = {
         const overlay = document.getElementById('game-weather-overlay');
         if (!overlay) return;
 
-        // 🖤 Create a SEPARATE flash element so it doesn't interfere with weather overlay
+        //  Create a SEPARATE flash element so it doesn't interfere with weather overlay
         // This prevents the flash from blanking out other weather effects
         let flashEl = document.getElementById('lightning-flash-effect');
         if (!flashEl) {
@@ -1181,16 +1181,16 @@ const WeatherSystem = {
             overlay.appendChild(flashEl);
         }
 
-        // 🦇 Flash effect - subtle white/blue glow that fades quickly
+        //  Flash effect - subtle white/blue glow that fades quickly
         flashEl.style.background = 'rgba(200, 220, 255, 0.15)';
         flashEl.style.boxShadow = 'inset 0 0 60px rgba(150, 200, 255, 0.2)';
         flashEl.style.opacity = '1';
 
         setTimeout(() => {
             flashEl.style.opacity = '0';
-        }, 150); // 🖤 Flash duration to match bolt animation
+        }, 150); // ��� Flash duration to match bolt animation
 
-        // ⚡ Create lightning bolt that strikes the ground at random position
+        // Create lightning bolt that strikes the ground at random position
         const particles = document.getElementById('weather-particles');
         if (particles && Math.random() < 0.8) { // 80% chance to show visible bolt - make them more visible!
             this.createLightningBolt(particles);
@@ -1202,7 +1202,7 @@ const WeatherSystem = {
         }
     },
 
-    // ⚡ Create a visible lightning bolt - vertical column that strikes down and leaves a small fire
+    // Create a visible lightning bolt - vertical column that strikes down and leaves a small fire
     createLightningBolt(container) {
         // Random position where lightning will strike
         const strikeX = 10 + Math.random() * 80; // 10-90% from left
@@ -1266,7 +1266,7 @@ const WeatherSystem = {
         }, 150);
     },
 
-    // 🔥 Create a small fire effect where lightning struck - persists for a few seconds
+    //  Create a small fire effect where lightning struck - persists for a few seconds
     createLightningFire(container, x, y) {
         const fire = document.createElement('div');
         fire.className = 'lightning-fire';
@@ -1294,13 +1294,13 @@ const WeatherSystem = {
         }, burnDuration);
     },
 
-    // 🔥 Create off-screen impact effect at bottom edge
+    //  Create off-screen impact effect at bottom edge
     createOffScreenImpact(container, impactX, type) {
         const edgeEffect = document.createElement('div');
         edgeEffect.className = 'offscreen-impact';
 
         if (type === 'lightning') {
-            edgeEffect.innerHTML = '⚡';
+            edgeEffect.innerHTML = '';
             edgeEffect.style.cssText = `
                 position: absolute;
                 left: ${impactX}%;
@@ -1329,13 +1329,13 @@ const WeatherSystem = {
         setTimeout(() => edgeEffect.remove(), type === 'lightning' ? 400 : 800);
     },
 
-    // 💀 METEOR SHOWER SYSTEM - Apocalyptic dungeon weather
-    // ═══════════════════════════════════════════════════════════════
+    //  METEOR SHOWER SYSTEM - Apocalyptic dungeon weather
+    // 
     startMeteors() {
         if (this.meteorInterval) return;
         console.log('☄️ Starting meteor shower...');
 
-        // 🦇 Meteors spawn every 3-10 seconds
+        //  Meteors spawn every 3-10 seconds
         const spawnMeteor = () => {
             this.createMeteor();
             // Schedule next meteor in 3-10 seconds
@@ -1354,7 +1354,7 @@ const WeatherSystem = {
             clearTimeout(this.meteorInterval);
             this.meteorInterval = null;
         }
-        // 💀 Remove any existing meteors
+        //  Remove any existing meteors
         const particles = document.getElementById('weather-particles');
         if (particles) {
             const meteors = particles.querySelectorAll('.meteor');
@@ -1362,7 +1362,7 @@ const WeatherSystem = {
         }
     },
 
-    // 🖤 Stop all weather particles - called by quitToMainMenu 💀
+    //  Stop all weather particles - called by quitToMainMenu 
     stopParticles() {
         // Stop lightning
         this.stopLightning();
@@ -1385,24 +1385,24 @@ const WeatherSystem = {
         const particles = document.getElementById('weather-particles');
         if (!particles) return;
 
-        // 🦇 Create meteor element
+        //  Create meteor element
         const meteor = document.createElement('div');
         meteor.className = 'meteor';
 
-        // 🔥 80% land on screen (like lightning), 20% go off screen
+        //  80% land on screen (like lightning), 20% go off screen
         const goesOffScreen = Math.random() < 0.2;
 
-        // 💀 Pick the LANDING position first - this is where the burn effect will appear
+        //  Pick the LANDING position first - this is where the burn effect will appear
         const landX = 20 + Math.random() * 60; // Land at 20-80% from left
         const landY = goesOffScreen ? (100 + Math.random() * 20) : (40 + Math.random() * 50);
 
-        // 💀 Calculate START position - meteors come from upper-left, streak diagonally
+        //  Calculate START position - meteors come from upper-left, streak diagonally
         // Start 20-40% to the left and above the landing point
         const travelDistX = 15 + Math.random() * 25; // 15-40% horizontal travel
         const startX = landX - travelDistX;
         const startY = -10; // Start above viewport
 
-        // 🖤 Random size for variety
+        //  Random size for variety
         const size = 0.8 + Math.random() * 0.6; // 0.8x to 1.4x size
         const duration = 1.5 + Math.random() * 1; // 1.5-2.5 seconds
         const durationMs = duration * 1000;
@@ -1422,7 +1422,7 @@ const WeatherSystem = {
 
         particles.appendChild(meteor);
 
-        // 💀 Animate meteor using JavaScript for precise control
+        //  Animate meteor using JavaScript for precise control
         const startTime = performance.now();
         const animateMeteor = (currentTime) => {
             const elapsed = currentTime - startTime;
@@ -1460,12 +1460,12 @@ const WeatherSystem = {
 
         requestAnimationFrame(animateMeteor);
 
-        // 💀 Create burn effect where meteor ACTUALLY lands - at end of animation
+        //  Create burn effect where meteor ACTUALLY lands - at end of animation
         setTimeout(() => {
             this.meteorImpact(landX, landY, goesOffScreen);
         }, durationMs);
 
-        // 🦇 Remove meteor after animation + small buffer
+        //  Remove meteor after animation + small buffer
         setTimeout(() => {
             if (meteor.parentNode) {
                 meteor.remove();
@@ -1483,7 +1483,7 @@ const WeatherSystem = {
             // Meteor went off screen - no visual effect, just disappears
             return;
         } else {
-            // 🔥 Meteor hit on screen - show explosion then fire
+            //  Meteor hit on screen - show explosion then fire
             const burn = document.createElement('div');
             burn.className = 'meteor-burn';
             burn.innerHTML = '💥';
@@ -1499,17 +1499,17 @@ const WeatherSystem = {
                 if (burn.parentNode) burn.remove();
             }, 1500);
 
-            // 🔥 Create persistent fire at impact location
+            //  Create persistent fire at impact location
             this.createMeteorFire(particles, clampedX, impactY);
         }
 
-        // 🦇 Optional: play impact sound
+        //  Optional: play impact sound
         if (typeof AudioSystem !== 'undefined' && AudioSystem.playSound) {
             AudioSystem.playSound('explosion');
         }
     },
 
-    // 🔥 Create a persistent fire effect where meteor struck - orange/red flames
+    //  Create a persistent fire effect where meteor struck - orange/red flames
     createMeteorFire(container, x, y) {
         const fire = document.createElement('div');
         fire.className = 'meteor-fire';
@@ -1647,7 +1647,7 @@ const WeatherSystem = {
             /* 🖤 Lightning flash is now a separate element to prevent blanking other effects */
             /* See flashLightning() - creates #lightning-flash-effect dynamically */
 
-            /* ⚡ Lightning bolt column - strikes DOWN from top to landing point */
+            /* Lightning bolt column - strikes DOWN from top to landing point */
             @keyframes bolt-strike-down {
                 0% {
                     height: 0;
@@ -1950,17 +1950,17 @@ const WeatherSystem = {
         document.head.appendChild(style);
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // SAVE/LOAD
-    // ═══════════════════════════════════════════════════════════════
+    // 
     getState() {
         const now = Date.now();
         return {
             currentWeather: this.currentWeather,
             currentIntensity: this.currentIntensity,
-            // 🖤 Save remaining seconds, not absolute timestamp
+            //  Save remaining seconds, not absolute timestamp
             remainingSeconds: Math.max(0, Math.floor((this.weatherEndTime - now) / 1000)),
-            // 🖤💀 Save bad weather protection state
+            //  Save bad weather protection state
             badWeatherStreak: this.badWeatherStreak,
             goodWeatherStreak: this.goodWeatherStreak,
             forcingGoodWeather: this.forcingGoodWeather
@@ -1971,10 +1971,10 @@ const WeatherSystem = {
         if (state) {
             this.currentWeather = state.currentWeather || 'clear';
             this.currentIntensity = state.currentIntensity || 0.5;
-            // 🖤 Restore end time from saved remaining seconds
+            //  Restore end time from saved remaining seconds
             const remainingSeconds = state.remainingSeconds || 60;
             this.weatherEndTime = Date.now() + (remainingSeconds * 1000);
-            // 🖤💀 Restore bad weather protection state
+            //  Restore bad weather protection state
             this.badWeatherStreak = state.badWeatherStreak || 0;
             this.goodWeatherStreak = state.goodWeatherStreak || 0;
             this.forcingGoodWeather = state.forcingGoodWeather || false;
@@ -1982,9 +1982,9 @@ const WeatherSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // DEBOOGER / CHEAT 🦇
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    // DEBOOGER / CHEAT 
+    // 
     setWeather(weatherId) {
         if (this.weatherTypes[weatherId]) {
             this.changeWeather(weatherId);
@@ -1998,9 +1998,9 @@ const WeatherSystem = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
+// 
 // GLOBAL EXPOSURE
-// ═══════════════════════════════════════════════════════════════
+// 
 window.WeatherSystem = WeatherSystem;
 
 // Initialize when DOM ready

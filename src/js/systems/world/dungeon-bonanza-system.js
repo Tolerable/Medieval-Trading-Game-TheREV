@@ -1,30 +1,30 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // DUNGEON BONANZA - annual bloodbath celebration
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const DungeonBonanzaSystem = {
-    // 🦇 Event configuration
+    //  Event configuration
     EVENT_MONTH: 7,  // July
     EVENT_DAY: 18,   // 18th
     EVENT_NAME: 'The Dark Convergence',
 
-    // 💀 Dungeon travel time override (30 minutes to any dungeon)
+    //  Dungeon travel time override (30 minutes to any dungeon)
     DUNGEON_TRAVEL_TIME: 30,
 
-    // 🖤 Track if we've shown the event notification today
+    //  Track if we've shown the event notification today
     hasShownNotificationToday: false,
     lastNotificationDay: 0,
 
-    // ☄️ Manual override for doom command - active until end of current game day
+    //  Manual override for doom command - active until end of current game day
     manualOverrideActive: false,
     manualOverrideEndDay: 0,
 
-    // ☄️ Activate bonanza manually for one game day
+    //  Activate bonanza manually for one game day
     activateManualOverride() {
         this.manualOverrideActive = true;
         // Set end day to current day - will expire on next day
@@ -33,14 +33,14 @@ const DungeonBonanzaSystem = {
         this.showEventNotification();
     },
 
-    // ☄️ Deactivate manual override
+    //  Deactivate manual override
     deactivateManualOverride() {
         this.manualOverrideActive = false;
         this.manualOverrideEndDay = 0;
         console.log('☄️ Doom bonanza ended');
     },
 
-    // ☄️ Check if manual override is still valid (same day)
+    //  Check if manual override is still valid (same day)
     isManualOverrideValid() {
         if (!this.manualOverrideActive) return false;
         const currentDay = this.getCurrentDay();
@@ -52,7 +52,7 @@ const DungeonBonanzaSystem = {
         return true;
     },
 
-    // 🦇 Check if today is July 18th (The Dark Convergence) OR manual override active
+    //  Check if today is July 18th (The Dark Convergence) OR manual override active
     isDungeonBonanzaDay() {
         // Check manual override first
         if (this.isManualOverrideValid()) {
@@ -68,7 +68,7 @@ const DungeonBonanzaSystem = {
                TimeMachine.currentTime.day === this.EVENT_DAY;
     },
 
-    // 💀 Get current game date for tracking
+    //  Get current game date for tracking
     getCurrentDay() {
         if (typeof TimeMachine !== 'undefined') {
             return TimeMachine.currentTime.year * 1000 +
@@ -83,7 +83,7 @@ const DungeonBonanzaSystem = {
         return 0;
     },
 
-    // 🦇 Get event modifiers for travel and dungeons
+    //  Get event modifiers for travel and dungeons
     getEventModifiers() {
         if (!this.isDungeonBonanzaDay()) {
             return {
@@ -100,31 +100,31 @@ const DungeonBonanzaSystem = {
         };
     },
 
-    // 💀 Check if dungeon cooldowns should be bypassed
+    //  Check if dungeon cooldowns should be bypassed
     shouldBypassCooldowns() {
         return this.isDungeonBonanzaDay();
     },
 
-    // 🖤 Calculate travel time with Dungeon Bonanza override
+    //  Calculate travel time with Dungeon Bonanza override
     // Returns null if no override should apply, otherwise returns the override time
     getDungeonTravelTimeOverride(fromId, toId) {
         if (!this.isDungeonBonanzaDay()) return null;
 
-        // 🦇 Check if destination is a dungeon
+        //  Check if destination is a dungeon
         if (typeof GameWorld === 'undefined' || !GameWorld.locations) return null;
 
         const destination = GameWorld.locations[toId];
         if (!destination) return null;
 
-        // 💀 Only override for dungeon-type locations
+        //  Only override for dungeon-type locations
         const dungeonTypes = ['dungeon', 'cave', 'ruins', 'mine'];
         if (!dungeonTypes.includes(destination.type)) return null;
 
-        // 🖤 Return the special 30-minute travel time
+        //  Return the special 30-minute travel time
         return this.DUNGEON_TRAVEL_TIME;
     },
 
-    // 🦇 Show event notification (once per game day)
+    //  Show event notification (once per game day)
     showEventNotification() {
         const currentDay = this.getCurrentDay();
 
@@ -141,29 +141,29 @@ const DungeonBonanzaSystem = {
         this.hasShownNotificationToday = true;
         this.lastNotificationDay = currentDay;
 
-        // 💀 Show dramatic notification
+        //  Show dramatic notification
         if (typeof addMessage === 'function') {
             addMessage('═══════════════════════════════════════════════════', 'special');
             addMessage('💀 THE DARK CONVERGENCE HAS BEGUN! 💀', 'special');
             addMessage('═══════════════════════════════════════════════════', 'special');
             addMessage('🦇 On this sacred day, July 18th, the veil thins...', 'info');
-            addMessage('⚡ All dungeon travel reduced to 30 minutes!', 'success');
+            addMessage('All dungeon travel reduced to 30 minutes!', 'success');
             addMessage('🔓 Dungeon cooldowns have been lifted!', 'success');
-            addMessage('⚔️ Seize this day to conquer the darkness!', 'info');
+            addMessage('Seize this day to conquer the darkness!', 'info');
             addMessage('═══════════════════════════════════════════════════', 'special');
         }
 
         console.log('💀 DUNGEON BONANZA: The Dark Convergence is active!');
     },
 
-    // 🖤 Check and update event status (call from game loop)
+    //  Check and update event status (call from game loop)
     update() {
         if (this.isDungeonBonanzaDay()) {
             this.showEventNotification();
         }
     },
 
-    // 🦇 Get event status for UI display
+    //  Get event status for UI display
     getEventStatus() {
         if (!this.isDungeonBonanzaDay()) {
             return {
@@ -181,11 +181,11 @@ const DungeonBonanzaSystem = {
         };
     },
 
-    // 💀 Initialize the system
+    //  Initialize the system
     init() {
         console.log('💀 DungeonBonanzaSystem initialized - watching for July 18th...');
 
-        // 🦇 Check immediately if today is the event
+        //  Check immediately if today is the event
         if (this.isDungeonBonanzaDay()) {
             this.showEventNotification();
         }
@@ -194,7 +194,7 @@ const DungeonBonanzaSystem = {
     }
 };
 
-// 🖤 Auto-initialize when loaded
+//  Auto-initialize when loaded
 if (typeof window !== 'undefined') {
     window.DungeonBonanzaSystem = DungeonBonanzaSystem;
 }

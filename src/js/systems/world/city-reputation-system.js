@@ -1,14 +1,14 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // CITY REPUTATION - measuring local contempt
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const CityReputationSystem = {
-    // 📊 Reputation levels - from "loved" to "shoot on sight"
+    //  Reputation levels - from "loved" to "shoot on sight"
     levels: {
         HOSTILE: { name: 'Hostile', min: -100, max: -50, color: '#ff0000' },
         UNTRUSTED: { name: 'Untrusted', min: -49, max: -25, color: '#ff4444' },
@@ -34,7 +34,7 @@ const CityReputationSystem = {
             try {
                 this.cityReputation = JSON.parse(saved);
             } catch (e) {
-                // 🖤 Corrupt data? Nuke it and start fresh - silent fallback
+                //  Corrupt data? Nuke it and start fresh - silent fallback
                 localStorage.removeItem('tradingGameCityReputation');
                 this.cityReputation = {};
             }
@@ -46,7 +46,7 @@ const CityReputationSystem = {
         try {
             localStorage.setItem('tradingGameCityReputation', JSON.stringify(this.cityReputation));
         } catch (e) {
-            // 🖤 Storage full or blocked - silent fail, not critical
+            //  Storage full or blocked - silent fail, not critical
         }
     },
 

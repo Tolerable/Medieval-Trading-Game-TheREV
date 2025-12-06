@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // EQUIPMENT PANEL - gear and equipment management
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -9,16 +9,16 @@
 
 const EquipmentSystem = {
     // ═══════════════════════════════════════════════════════════════
-    // 🎰 EQUIPMENT SLOTS - the holes in your existence to fill
+    // EQUIPMENT SLOTS - the holes in your existence to fill
     // ═══════════════════════════════════════════════════════════════
-    // 🖤💀 Equipment slots - allowedTypes must match both item.category AND item.equipType 💀
+    // Equipment slots - allowedTypes must match both item.category AND item.equipType
     slots: {
         weapon: {
             id: 'weapon',
             name: 'Weapon',
             icon: '⚔️',
             description: 'Primary weapon for combat',
-            // 🖤 Added 'weapons' (category) and 'spear' type
+            // Added 'weapons' (category) and 'spear' type
             allowedTypes: ['weapon', 'weapons', 'sword', 'axe', 'mace', 'dagger', 'bow', 'spear', 'staff'],
             bonusTypes: ['attack', 'combat', 'damage']
         },
@@ -35,7 +35,7 @@ const EquipmentSystem = {
             name: 'Head',
             icon: '🎩',
             description: 'Headwear and helmets',
-            // 🖤 Added 'headgear' category
+            // Added 'headgear' category
             allowedTypes: ['helmet', 'hat', 'hood', 'crown', 'headwear', 'headgear'],
             bonusTypes: ['defense', 'intelligence', 'perception']
         },
@@ -44,7 +44,7 @@ const EquipmentSystem = {
             name: 'Body',
             icon: '🥋',
             description: 'Armor and clothing',
-            // 🖤 Added 'armors' category
+            // Added 'armors' category
             allowedTypes: ['armor', 'armors', 'robe', 'clothing', 'chest'],
             bonusTypes: ['defense', 'endurance', 'protection']
         },
@@ -69,7 +69,7 @@ const EquipmentSystem = {
             name: 'Tool',
             icon: '🔧',
             description: 'Equipped tool for gathering/crafting',
-            // 🖤💀 CRITICAL: Added 'tools' (category) - this was the walking_staff bug! 💀
+            // CRITICAL: Added 'tools' (category) - this was the walking_staff bug!
             allowedTypes: ['tool', 'tools', 'pickaxe', 'axe', 'hammer', 'fishing_rod', 'sickle', 'scythe', 'staff', 'walking_staff'],
             bonusTypes: ['gathering', 'crafting', 'efficiency']
         },
@@ -78,7 +78,7 @@ const EquipmentSystem = {
             name: 'Accessory 1',
             icon: '💍',
             description: 'Ring, amulet, or trinket',
-            // 🖤 Added 'accessories' category and more types
+            // Added 'accessories' category and more types
             allowedTypes: ['ring', 'amulet', 'necklace', 'trinket', 'accessory', 'accessories', 'jewelry'],
             bonusTypes: ['luck', 'charisma', 'special']
         },
@@ -87,14 +87,14 @@ const EquipmentSystem = {
             name: 'Accessory 2',
             icon: '📿',
             description: 'Second accessory slot',
-            // 🖤 Added 'accessories' category and more types
+            // Added 'accessories' category and more types
             allowedTypes: ['ring', 'amulet', 'necklace', 'trinket', 'accessory', 'accessories', 'jewelry'],
             bonusTypes: ['luck', 'charisma', 'special']
         }
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎮 INITIALIZATION - awakening the gear machine
+    // INITIALIZATION - awakening the gear machine
     // ═══════════════════════════════════════════════════════════════
     init() {
         console.log('⚔️ EquipmentSystem crawling from the void...');
@@ -110,7 +110,7 @@ const EquipmentSystem = {
         // migrate legacy equipment
         this.migrateLegacyEquipment();
 
-        // 🖤💀 Event delegation for unequip actions - no more inline onclick garbage
+        // Event delegation for unequip actions - no more inline onclick garbage
         document.addEventListener('click', (e) => {
             const target = e.target.closest('[data-action="unequip-slot"]');
             if (target) {
@@ -121,7 +121,7 @@ const EquipmentSystem = {
             }
         });
 
-        // 🖤💀 RIGHT-CLICK to unequip items - the natural way to do things 💀
+        // RIGHT-CLICK to unequip items - the natural way to do things
         document.addEventListener('contextmenu', (e) => {
             const target = e.target.closest('.equipment-slot-box.equipped');
             if (target) {
@@ -133,7 +133,7 @@ const EquipmentSystem = {
             }
         });
 
-        // 🖤💀 Listen for equipment changes to refresh character sheet if open 💀
+        // Listen for equipment changes to refresh character sheet if open
         document.addEventListener('equipment-changed', () => {
             // Update character sheet equipment display if visible
             const charSheet = document.getElementById('character-sheet-overlay');
@@ -159,7 +159,7 @@ const EquipmentSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎯 CORE EQUIPMENT FUNCTIONS - the ritual of gear
+    // CORE EQUIPMENT FUNCTIONS - the ritual of gear
     // ═══════════════════════════════════════════════════════════════
 
     // Get what's equipped in a slot
@@ -280,7 +280,7 @@ const EquipmentSystem = {
             this.unequip(slotId, false); // silent unequip
         }
 
-        // 🖤💀 Ensure equipment object exists before equipping! 💀
+        // Ensure equipment object exists before equipping!
         if (!game.player.equipment) {
             game.player.equipment = {};
         }
@@ -363,7 +363,7 @@ const EquipmentSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📊 EQUIPMENT BONUSES - the perks of being dressed
+    // EQUIPMENT BONUSES - the perks of being dressed
     // ═══════════════════════════════════════════════════════════════
 
     // Get total bonus for a stat from all equipment
@@ -481,7 +481,7 @@ const EquipmentSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖥️ UI DISPLAY - making gear look pretty
+    // UI DISPLAY - making gear look pretty
     // ═══════════════════════════════════════════════════════════════
 
     // Update equipment display in character sheet
@@ -500,7 +500,7 @@ const EquipmentSystem = {
             const itemId = this.getEquipped(slotId);
             const item = itemId ? ItemDatabase?.items?.[itemId] : null;
 
-            // 💀 Click equipped item to unequip - no button needed
+            // Click equipped item to unequip - no button needed
             html += `
                 <div class="equipment-slot-box ${itemId ? 'equipped clickable-unequip' : 'empty'}"
                      data-slot="${slotId}"
@@ -595,7 +595,7 @@ const EquipmentSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔧 UTILITY FUNCTIONS - the boring but necessary bits
+    // UTILITY FUNCTIONS - the boring but necessary bits
     // ═══════════════════════════════════════════════════════════════
 
     // Check if item is equippable
@@ -643,10 +643,10 @@ const EquipmentSystem = {
     }
 };
 
-// 🖤 Expose to window for onclick handlers 💀
+// Expose to window for onclick handlers
 window.EquipmentSystem = EquipmentSystem;
 
-// 🌙 Auto-init when the page awakens from its digital slumber
+// Auto-init when the page awakens from its digital slumber
 document.addEventListener('DOMContentLoaded', () => {
     // wait for game to init first
     setTimeout(() => {

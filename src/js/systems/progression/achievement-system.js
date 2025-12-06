@@ -1,14 +1,14 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // ACHIEVEMENT SYSTEM - hollow victories for hollow souls
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const AchievementSystem = {
-    // 🎖️ Achievement data - every flex you can earn
+    //  Achievement data - every flex you can earn
     achievements: {
         // --- WEALTH ACHIEVEMENTS ---
         first_gold: {
@@ -20,7 +20,7 @@ const AchievementSystem = {
             rarity: 'common',
             unlocked: false,
             unlockedAt: null,
-            condition: () => AchievementSystem.stats.totalGoldEarned >= 1 // 🖤 FIX: Track EARNED gold, not starting gold 💀
+            condition: () => AchievementSystem.stats.totalGoldEarned >= 1 // ��� FIX: Track EARNED gold, not starting gold 💀
         },
         merchant_apprentice: {
             id: 'merchant_apprentice',
@@ -263,7 +263,7 @@ const AchievementSystem = {
             id: 'act5_complete',
             name: 'The Shadow\'s End',
             description: 'Complete Act 5 - defeat Malachar and end the threat',
-            icon: '⚔️',
+            icon: '',
             category: 'quests',
             rarity: 'legendary',
             unlocked: false,
@@ -614,7 +614,7 @@ const AchievementSystem = {
             id: 'trading_legend',
             name: 'Trading Legend',
             description: 'Complete 200 trades',
-            icon: '⭐',
+            icon: '',
             category: 'trading',
             rarity: 'rare',
             unlocked: false,
@@ -698,7 +698,7 @@ const AchievementSystem = {
             id: 'bandit_hunter',
             name: 'Bandit Hunter',
             description: 'Defeat 20 bandit encounters',
-            icon: '⚔️',
+            icon: '',
             category: 'survival',
             rarity: 'rare',
             unlocked: false,
@@ -912,7 +912,7 @@ const AchievementSystem = {
             id: 'first_weapon',
             name: 'Armed and Ready',
             description: 'Acquire your first weapon',
-            icon: '⚔️',
+            icon: '',
             category: 'equipment',
             rarity: 'common',
             unlocked: false,
@@ -1046,7 +1046,7 @@ const AchievementSystem = {
             id: 'legendary_creator',
             name: 'Legendary Creator',
             description: 'Craft a legendary quality item',
-            icon: '⭐',
+            icon: '',
             category: 'crafting',
             rarity: 'legendary',
             unlocked: false,
@@ -1237,10 +1237,10 @@ const AchievementSystem = {
             unlocked: false,
             unlockedAt: null,
             hidden: true,
-            // 🖤 FIX: Must visit ALL dungeons (caves, ruins, dungeons) AND have 0 bandit encounters 💀
+            //  FIX: Must visit ALL dungeons (caves, ruins, dungeons) AND have 0 bandit encounters 
             // Main dungeons have bosses, caves/ruins have quest NPCs - but they're ALL dungeons
             condition: () => {
-                // 🖤 Safety check: Need to have visited AT LEAST one location first 💀
+                //  Safety check: Need to have visited AT LEAST one location first 
                 const visited = AchievementSystem.stats.uniqueLocationsVisited;
                 if (!visited || visited.size === 0) return false;
 
@@ -1252,7 +1252,7 @@ const AchievementSystem = {
                         .map(([id]) => id)
                     : ['shadow_dungeon', 'forest_dungeon', 'ancient_ruins', 'coastal_cave', 'crystal_cave', 'mountain_cave', 'hidden_cave', 'smugglers_cove', 'ice_cave'];
 
-                // 🖤 Safety: Must have dungeons to check AND have visited at least one dungeon 💀
+                //  Safety: Must have dungeons to check AND have visited at least one dungeon 
                 if (allDungeons.length === 0) return false;
 
                 // Check if player visited ALL dungeons
@@ -1301,7 +1301,7 @@ const AchievementSystem = {
             id: 'speed_runner',
             name: 'Speed Runner',
             description: 'Reach 10,000 gold within the first 30 in-game days',
-            icon: '⚡',
+            icon: '',
             category: 'hidden',
             rarity: 'legendary',
             unlocked: false,
@@ -1328,9 +1328,9 @@ const AchievementSystem = {
             }
         },
 
-        // ═══════════════════════════════════════════════════════════
-        // 🏛️ FACTION REPUTATION ACHIEVEMENTS - 5 solid milestones 🖤
-        // ═══════════════════════════════════════════════════════════
+        // 
+        //  FACTION REPUTATION ACHIEVEMENTS - 5 solid milestones 
+        // 
 
         first_faction_friend: {
             id: 'first_faction_friend',
@@ -1427,13 +1427,13 @@ const AchievementSystem = {
         }
     },
 
-    // 📊 statistics tracking - quantifying your mediocrity since day one
+    //  statistics tracking - quantifying your mediocrity since day one
     // every number here is a monument to your obsession
     stats: {
         // trading stats - receipts of your capitalism addiction
         tradesCompleted: 0,
         highestProfit: 0,
-        totalGoldEarned: 0, // 🖤 Track EARNED gold, not starting gold 💀
+        totalGoldEarned: 0, // ��� Track EARNED gold, not starting gold 💀
         nightTrades: 0,
         maxMerchantTrades: 0,
         merchantTradeCount: {},
@@ -1442,7 +1442,7 @@ const AchievementSystem = {
         locationsVisited: 0,
         uniqueLocationsVisited: new Set(),
         distanceTraveled: 0,
-        journeysStarted: 0,    // 🖤 tracks when you BEGIN a journey
+        journeysStarted: 0,    // ��� tracks when you BEGIN a journey
         journeysCompleted: 0,
         dungeonVisits: 0,
         dungeonVisitsIn5Years: 0,
@@ -1453,7 +1453,7 @@ const AchievementSystem = {
         banditsDefeated: 0,
         narrowEscapes: 0,
         banditEncounters: 0,
-        stealthyExplorer: false, // 🖤 FIX: Must EARN this by visiting all locations without bandits 💀
+        stealthyExplorer: false, // ��� FIX: Must EARN this by visiting all locations without bandits 💀
 
         // collection stats - hoarding is self care actually
         rareItemsOwned: 0,
@@ -1508,12 +1508,12 @@ const AchievementSystem = {
         fullMoonProfitToday: 0
     },
 
-    // 🎉 Achievement popup queue system
+    //  Achievement popup queue system
     pendingAchievements: [],
     isShowingPopup: false,
     wasGamePaused: false,
 
-    // 🖤 FIX: Don't award achievements until player first unpauses the game 💀
+    //  FIX: Don't award achievements until player first unpauses the game 
     // This prevents starting gold/wealth achievements from triggering immediately
     _firstUnpauseOccurred: false,
     _achievementsEnabled: false,
@@ -1521,12 +1521,12 @@ const AchievementSystem = {
     // wake up this monument to your gaming addiction
     init() {
         console.log('🏆 Achievement System awakened from its slumber... waiting for first unpause to validate your existence');
-        // 🖤 DON'T check achievements immediately - wait for first unpause 💀
+        //  DON'T check achievements immediately - wait for first unpause 
         this._firstUnpauseOccurred = false;
         this._achievementsEnabled = false;
     },
 
-    // 🖤 Called when player first unpauses the game - enables achievements 💀
+    //  Called when player first unpauses the game - enables achievements 
     onFirstUnpause() {
         if (this._firstUnpauseOccurred) return;
         this._firstUnpauseOccurred = true;
@@ -1534,7 +1534,7 @@ const AchievementSystem = {
         this._enableAchievements();
     },
 
-    // 🖤 Called when player gets their first trader rank up - also triggers check 💀
+    //  Called when player gets their first trader rank up - also triggers check 
     onFirstRankUp() {
         console.log('🏆 First rank up detected - checking achievements 🖤💀');
         if (this._achievementsEnabled) {
@@ -1542,25 +1542,25 @@ const AchievementSystem = {
         }
     },
 
-    // 🖤 Internal: Enable achievements and run first check 💀
+    //  Internal: Enable achievements and run first check 
     _enableAchievements() {
         if (this._achievementsEnabled) return;
 
         this._achievementsEnabled = true;
         console.log('🏆 Achievement checking now ENABLED 🖤💀');
-        // 🖤 DEBUG: Log current journey stats when enabling 💀
+        //  DEBUG: Log current journey stats when enabling 
         console.log(`🏆 At enable time - journeysStarted: ${this.stats.journeysStarted}`);
 
         // Now check achievements for the first time
         this.checkAchievements();
     },
 
-    // 🖤 Backwards compatibility 💀
+    //  Backwards compatibility 
     _tryEnableAchievements() {
         this._enableAchievements();
     },
 
-    // 🖤 DEPRECATED: Use onFirstUnpause() instead - kept for backwards compatibility 💀
+    //  DEPRECATED: Use onFirstUnpause() instead - kept for backwards compatibility 
     enableAchievements() {
         this.onFirstUnpause();
     },
@@ -1570,12 +1570,12 @@ const AchievementSystem = {
     checkAchievements() {
         if (!game.player) return;
 
-        // 🖤 FIX: Don't check achievements until player has unpaused at least once 💀
+        //  FIX: Don't check achievements until player has unpaused at least once 
         if (!this._achievementsEnabled) {
-            return; // 🦇 Achievements not enabled yet - player hasn't unpaused
+            return; // ��� Achievements not enabled yet - player hasn't unpaused
         }
 
-        // 🖤 DEBUG: Log first_journey stats to trace why it's not unlocking 💀
+        //  DEBUG: Log first_journey stats to trace why it's not unlocking 
         console.log(`🏆 checkAchievements called - journeysStarted: ${this.stats.journeysStarted}, first_journey unlocked: ${this.achievements.first_journey?.unlocked}`);
 
         const newlyUnlocked = [];
@@ -1608,10 +1608,10 @@ const AchievementSystem = {
 
     // Unlock a single achievement directly (for manual unlocks)
     unlockAchievement(achievementId) {
-        // 🖤 FIX: Don't unlock achievements until player has unpaused at least once 💀
+        //  FIX: Don't unlock achievements until player has unpaused at least once 
         if (!this._achievementsEnabled) {
             console.log(`🏆 Achievement ${achievementId} deferred - waiting for first unpause`);
-            return; // 🦇 Achievements not enabled yet - player hasn't unpaused
+            return; // ��� Achievements not enabled yet - player hasn't unpaused
         }
 
         const achievement = this.achievements[achievementId];
@@ -1643,7 +1643,7 @@ const AchievementSystem = {
                 game.player.inventory[itemId] = 0;
             }
             game.player.inventory[itemId] += 1;
-            // 🖤 Emit item-received for quest progress tracking 💀
+            //  Emit item-received for quest progress tracking 
             document.dispatchEvent(new CustomEvent('item-received', {
                 detail: { item: itemId, quantity: 1, source: 'achievement_reward' }
             }));
@@ -1655,9 +1655,9 @@ const AchievementSystem = {
             }
         }
 
-        // Unlock debooger console for this save 🦇 - BUT ONLY IF CONFIG ALLOWS IT 🖤💀
+        // Unlock debooger console for this save  - BUT ONLY IF CONFIG ALLOWS IT 
         if (achievement.reward.unlockDebooger) {
-            // 🔒 CONFIG IS THE MASTER - check both enabled AND allowAchievementUnlock
+            //  CONFIG IS THE MASTER - check both enabled AND allowAchievementUnlock
             const deboogerConfig = (typeof GameConfig !== 'undefined' && GameConfig.debooger) ? GameConfig.debooger : null;
             const canUnlock = deboogerConfig && deboogerConfig.enabled === true && deboogerConfig.allowAchievementUnlock === true;
 
@@ -1680,10 +1680,10 @@ const AchievementSystem = {
         }
     },
 
-    // Check if debooger is unlocked for current save (via Super Hacker achievement) 🦇
-    // 🖤💀 NOW RESPECTS CONFIG - if config says NO, this ALWAYS returns false 🔒
+    // Check if debooger is unlocked for current save (via Super Hacker achievement) 
+    //  NOW RESPECTS CONFIG - if config says NO, this ALWAYS returns false 
     isDeboogerUnlockedForSave() {
-        // 🔒 CONFIG IS THE MASTER - need BOTH enabled AND allowAchievementUnlock
+        //  CONFIG IS THE MASTER - need BOTH enabled AND allowAchievementUnlock
         const deboogerConfig = (typeof GameConfig !== 'undefined' && GameConfig.debooger) ? GameConfig.debooger : null;
         if (!deboogerConfig || deboogerConfig.enabled !== true || deboogerConfig.allowAchievementUnlock !== true) {
             return false;
@@ -1713,7 +1713,7 @@ const AchievementSystem = {
     showNextAchievementPopup() {
         if (this.pendingAchievements.length === 0) {
             this.isShowingPopup = false;
-            // 🖤💀 Resume game using interrupt system - restores user's preferred speed 💀
+            //  Resume game using interrupt system - restores user's preferred speed 
             if (typeof TimeSystem !== 'undefined' && TimeSystem.resumeFromInterrupt) {
                 TimeSystem.resumeFromInterrupt('achievement');
             } else if (!this.wasGamePaused && typeof TimeSystem !== 'undefined') {
@@ -1725,7 +1725,7 @@ const AchievementSystem = {
 
         this.isShowingPopup = true;
 
-        // 🖤💀 Pause the game using interrupt system - saves current speed for restoration 💀
+        //  Pause the game using interrupt system - saves current speed for restoration 
         if (typeof TimeSystem !== 'undefined') {
             if (TimeSystem.pauseForInterrupt) {
                 TimeSystem.pauseForInterrupt('achievement');
@@ -1817,7 +1817,7 @@ const AchievementSystem = {
         // Add styles if not present
         this.addAchievementPopupStyles();
 
-        // 🖤 Button has onclick attribute - don't add duplicate listener 💀
+        //  Button has onclick attribute - don't add duplicate listener 
         // The inline onclick="AchievementSystem.closeAchievementPopup()" handles clicks
 
         // Add keyboard handler for Enter/Escape/Space
@@ -1849,7 +1849,7 @@ const AchievementSystem = {
 
     // Close the current achievement popup and show next (if any)
     closeAchievementPopup() {
-        // 🖤 Guard against double-clicks or rapid calls 💀
+        //  Guard against double-clicks or rapid calls 
         if (this._isClosingPopup) {
             console.log('🏆 Achievement popup already closing, ignoring duplicate call');
             return;
@@ -1867,7 +1867,7 @@ const AchievementSystem = {
             const overlay = document.getElementById('achievement-popup-overlay');
             if (overlay) {
                 overlay.style.animation = 'achievementFadeOut 0.2s ease-in';
-                overlay.style.pointerEvents = 'none'; // 🖤 Prevent clicks during animation 💀
+                overlay.style.pointerEvents = 'none'; // ��� Prevent clicks during animation 💀
                 setTimeout(() => {
                     try {
                         if (overlay.parentNode) {
@@ -2201,7 +2201,7 @@ const AchievementSystem = {
     // Track trade completion
     trackTrade(profit) {
         AchievementSystem.stats.tradesCompleted++;
-        // 🖤 Track total gold EARNED through trades (only positive profit counts) 💀
+        //  Track total gold EARNED through trades (only positive profit counts) 
         if (profit > 0) {
             AchievementSystem.stats.totalGoldEarned += profit;
         }
@@ -2221,7 +2221,7 @@ const AchievementSystem = {
         this.checkAchievements();
     },
 
-    // 🖤 Track journey START - when you begin traveling (for Start Your Journey achievement)
+    //  Track journey START - when you begin traveling (for Start Your Journey achievement)
     trackJourneyStart(destinationId) {
         AchievementSystem.stats.journeysStarted++;
         console.log(`🗺️ Journey started to ${destinationId}! Total journeys started: ${AchievementSystem.stats.journeysStarted}`);
@@ -2299,7 +2299,7 @@ const AchievementSystem = {
             achievements: {},
             stats: {
                 ...this.stats,
-                // 🖤 FIX: Convert Set to Array for JSON serialization (Sets don't serialize) 💀
+                //  FIX: Convert Set to Array for JSON serialization (Sets don't serialize) 
                 uniqueLocationsVisited: Array.from(AchievementSystem.stats.uniqueLocationsVisited)
             }
         };
@@ -2338,7 +2338,7 @@ const AchievementSystem = {
                 this.stats = {
                     ...this.stats,
                     ...saveData.stats,
-                    // 🖤 FIX: Convert Array back to Set after loading (ghost_trader achievement needs this) 💀
+                    //  FIX: Convert Array back to Set after loading (ghost_trader achievement needs this) 
                     uniqueLocationsVisited: new Set(saveData.stats.uniqueLocationsVisited || []),
                     dungeonVisitLog: Array.isArray(saveData.stats.dungeonVisitLog) ? saveData.stats.dungeonVisitLog : [],
                     merchantTradeCount: saveData.stats.merchantTradeCount || {}
@@ -2363,7 +2363,7 @@ const AchievementSystem = {
             // Trading stats
             tradesCompleted: 0,
             highestProfit: 0,
-            totalGoldEarned: 0, // 🖤 Track EARNED gold, not starting gold 💀
+            totalGoldEarned: 0, // ��� Track EARNED gold, not starting gold 💀
             nightTrades: 0,
             maxMerchantTrades: 0,
             merchantTradeCount: {},
@@ -2383,7 +2383,7 @@ const AchievementSystem = {
             banditsDefeated: 0,
             narrowEscapes: 0,
             banditEncounters: 0,
-            stealthyExplorer: false, // 🖤 FIX: Must EARN this by visiting all locations without bandits 💀
+            stealthyExplorer: false, // ��� FIX: Must EARN this by visiting all locations without bandits 💀
 
             // Collection stats
             rareItemsOwned: 0,

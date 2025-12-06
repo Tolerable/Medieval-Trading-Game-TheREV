@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // 👥 UNIFIED PEOPLE PANEL - talk, trade, quest, exist... all in one dark place
 // ═══════════════════════════════════════════════════════════════
-// File Version: GameConfig.version.file
+// File Version: 0.90.01
 // conjured by Unity AI Lab - every soul, every transaction, every whisper
 // the NPC list + embedded chat + trade + quest items in seamless harmony
 // ═══════════════════════════════════════════════════════════════

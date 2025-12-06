@@ -1,11 +1,11 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // PROPERTY-EMPLOYEE BRIDGE - fixing broken relationships
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const PropertyEmployeeBridge = {
     // Initialize bridge after all systems are loaded

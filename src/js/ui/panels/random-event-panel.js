@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // 🎲 RANDOM EVENT PANEL - when fate decides to mess with you
 // ═══════════════════════════════════════════════════════════════
-// File Version: GameConfig.version.file
+// File Version: 0.90.01
 // conjured by Unity AI Lab - showing players what chaos befalls them
 // uses the same panel pattern as People Panel for consistency
 // ═══════════════════════════════════════════════════════════════
@@ -11,12 +11,12 @@ const RandomEventPanel = {
     panelId: 'random-event-panel',
     isOpen: false,
     currentEvent: null,
-    eventQueue: [], // 🦇 Queue events if multiple trigger at once
-    eventAcknowledged: false, // 🖤 Track if player has acknowledged the event 💀
+    eventQueue: [], // Queue events if multiple trigger at once
+    eventAcknowledged: false, // Track if player has acknowledged the event
     isDragging: false,
     dragOffset: { x: 0, y: 0 },
 
-    // 🎭 EVENT ICONS - matching event types to visual flair
+    // EVENT ICONS - matching event types to visual flair
     eventIcons: {
         market_boom: '📈',
         market_crash: '📉',
@@ -34,7 +34,7 @@ const RandomEventPanel = {
         default: '🎲'
     },
 
-    // 🎨 EVENT COLORS - visual mood setting
+    // EVENT COLORS - visual mood setting
     eventColors: {
         market_boom: '#4ade80',      // green - good
         market_crash: '#f87171',     // red - bad
@@ -474,7 +474,7 @@ const RandomEventPanel = {
             subtitleEl.textContent = this.getEventSubtitle(event);
         }
 
-        // ⚰️ Update description
+        // Update description
         const descEl = document.getElementById('event-description');
         if (descEl) {
             descEl.textContent = event.description || 'Something strange is happening...';
@@ -544,7 +544,7 @@ const RandomEventPanel = {
         }
     },
 
-    // ⏱️ UPDATE DURATION DISPLAY
+    // UPDATE DURATION DISPLAY
     updateDuration(event) {
         const durationEl = document.getElementById('event-duration-text');
         if (!durationEl) return;

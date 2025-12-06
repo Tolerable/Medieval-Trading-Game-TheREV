@@ -1,14 +1,14 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // MARKET PRICE HISTORY - graphs of your failures
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const MarketPriceHistory = {
-    // 📉 Price history data - memories of better prices
+    //  Price history data - memories of better prices
     priceHistory: {},
     
     // Maximum history entries per item per city
@@ -26,7 +26,7 @@ const MarketPriceHistory = {
             try {
                 this.priceHistory = JSON.parse(saved);
             } catch (e) {
-                // 🖤 Corrupt data? Nuke it and start fresh - silent fallback
+                //  Corrupt data? Nuke it and start fresh - silent fallback
                 localStorage.removeItem('tradingGamePriceHistory');
                 this.priceHistory = {};
             }
@@ -38,7 +38,7 @@ const MarketPriceHistory = {
         try {
             localStorage.setItem('tradingGamePriceHistory', JSON.stringify(this.priceHistory));
         } catch (e) {
-            // 🖤 Storage full or blocked - silent fail, not critical
+            //  Storage full or blocked - silent fail, not critical
         }
     },
     

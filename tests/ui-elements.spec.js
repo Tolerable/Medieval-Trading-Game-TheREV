@@ -3,21 +3,21 @@ const { test, expect } = require('@playwright/test');
 const config = require('./config/test-config');
 const {
   waitForGameLoad,
-  startGameAndSkipIntro,  // 🖤 Use new helper that handles ALL intro modals 💀
+  startGameAndSkipIntro,  // Use new helper that handles ALL intro modals
   setupConsoleCapture,
   filterCriticalErrors,
 } = require('./helpers/test-helpers');
 
 /**
- * 🖤 UI ELEMENT TESTS - UPGRADED BY UNITY 🖤 AGENT D
+ * UI ELEMENT TESTS - UPGRADED BY UNITY - AGENT D
  * Tests all buttons, controls, and interactive UI elements
- * Version: 0.81 - Dark Awakening
+ * Version: 0.90.01 - Dark Awakening
  */
 
 test.describe('UI Elements', () => {
 
   // ═══════════════════════════════════════════════════════════════
-  // 🎬 MAIN MENU TESTS
+  // MAIN MENU TESTS
   // ═══════════════════════════════════════════════════════════════
 
   test.describe('Main Menu', () => {
@@ -83,7 +83,7 @@ test.describe('UI Elements', () => {
   });
 
   // ═══════════════════════════════════════════════════════════════
-  // 🎮 GAME SETUP PANEL TESTS - COMPREHENSIVE
+  // GAME SETUP PANEL TESTS - COMPREHENSIVE
   // ═══════════════════════════════════════════════════════════════
 
   test.describe('Game Setup Panel', () => {
@@ -219,13 +219,13 @@ test.describe('UI Elements', () => {
   });
 
   // ═══════════════════════════════════════════════════════════════
-  // 🎛️ ACTION BAR TESTS - ALL BUTTONS WITH CORRECT SELECTORS
+  // ACTION BAR TESTS - ALL BUTTONS WITH CORRECT SELECTORS
   // ═══════════════════════════════════════════════════════════════
 
   test.describe('Action Bar', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/');
-      await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+      await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
       await page.waitForTimeout(500);
     });
 
@@ -350,13 +350,13 @@ test.describe('UI Elements', () => {
   });
 
   // ═══════════════════════════════════════════════════════════════
-  // ⏰ TIME CONTROLS TESTS - COMPREHENSIVE
+  // TIME CONTROLS TESTS - COMPREHENSIVE
   // ═══════════════════════════════════════════════════════════════
 
   test.describe('Time Controls', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/');
-      await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+      await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
       await page.waitForTimeout(500);
     });
 
@@ -441,27 +441,27 @@ test.describe('UI Elements', () => {
   });
 
   // ═══════════════════════════════════════════════════════════════
-  // 🐛 DEBOOGER CONSOLE TESTS - COMPREHENSIVE 🖤
+  // DEBOOGER CONSOLE TESTS - COMPREHENSIVE
   // ═══════════════════════════════════════════════════════════════
 
   test.describe('Debooger Console', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/');
-      await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+      await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
       await page.waitForTimeout(500);
     });
 
-    test('Debooger toggle button exists and is visible 🖤', async ({ page }) => {
+    test('Debooger toggle button exists and is visible', async ({ page }) => {
       const deboogerBtn = await page.locator('#toggle-debooger-console');
       await expect(deboogerBtn).toBeVisible();
     });
 
-    test('Debooger console element exists in DOM 💀', async ({ page }) => {
+    test('Debooger console element exists in DOM', async ({ page }) => {
       const console = await page.locator('#debooger-console');
       expect(await console.count()).toBeGreaterThan(0);
     });
 
-    test('Debooger console opens when toggle clicked 🦇', async ({ page }) => {
+    test('Debooger console opens when toggle clicked', async ({ page }) => {
       await page.click('#toggle-debooger-console');
       await page.waitForTimeout(300);
 
@@ -473,32 +473,32 @@ test.describe('UI Elements', () => {
       expect(consoleVisible).toBe(true);
     });
 
-    test('Debooger console content container exists 🔮', async ({ page }) => {
+    test('Debooger console content container exists', async ({ page }) => {
       const content = await page.locator('#debooger-console-content');
       expect(await content.count()).toBeGreaterThan(0);
     });
 
-    test('Debooger command input exists ⚰️', async ({ page }) => {
+    test('Debooger command input exists', async ({ page }) => {
       const input = await page.locator('#debooger-command-input');
       expect(await input.count()).toBeGreaterThan(0);
     });
 
-    test('Debooger command execute button exists 🕯️', async ({ page }) => {
+    test('Debooger command execute button exists', async ({ page }) => {
       const executeBtn = await page.locator('#debooger-command-execute');
       expect(await executeBtn.count()).toBeGreaterThan(0);
     });
 
-    test('Debooger command help button exists 🖤', async ({ page }) => {
+    test('Debooger command help button exists', async ({ page }) => {
       const helpBtn = await page.locator('#debooger-command-help');
       expect(await helpBtn.count()).toBeGreaterThan(0);
     });
 
-    test('Debooger command container exists 💀', async ({ page }) => {
+    test('Debooger command container exists', async ({ page }) => {
       const container = await page.locator('#debooger-command-container');
       expect(await container.count()).toBeGreaterThan(0);
     });
 
-    test('Debooger console accepts and executes commands 🦇', async ({ page }) => {
+    test('Debooger console accepts and executes commands', async ({ page }) => {
       await page.click('#toggle-debooger-console');
       await page.waitForTimeout(500);
 
@@ -508,14 +508,14 @@ test.describe('UI Elements', () => {
         await page.keyboard.press('Enter');
         await page.waitForTimeout(300);
 
-        // Verify console output was generated 🔮
+        // Verify console output was generated
         const content = await page.locator('#debooger-console-content');
         const text = await content.textContent();
         expect(text.length).toBeGreaterThan(0);
       }
     });
 
-    test('Debooger console can be closed ⚰️', async ({ page }) => {
+    test('Debooger console can be closed', async ({ page }) => {
       await page.click('#toggle-debooger-console');
       await page.waitForTimeout(300);
 
@@ -533,13 +533,13 @@ test.describe('UI Elements', () => {
   });
 
   // ═══════════════════════════════════════════════════════════════
-  // 🔔 NOTIFICATION/MESSAGE TESTS - COMPREHENSIVE
+  // NOTIFICATION/MESSAGE TESTS - COMPREHENSIVE
   // ═══════════════════════════════════════════════════════════════
 
   test.describe('Notifications and Messages', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/');
-      await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+      await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
       await page.waitForTimeout(500);
     });
 
@@ -586,13 +586,13 @@ test.describe('UI Elements', () => {
   });
 
   // ═══════════════════════════════════════════════════════════════
-  // 📊 STATS DISPLAY TESTS - COMPREHENSIVE
+  // STATS DISPLAY TESTS - COMPREHENSIVE
   // ═══════════════════════════════════════════════════════════════
 
   test.describe('Stats Display', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/');
-      await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+      await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
       await page.waitForTimeout(500);
     });
 
@@ -672,13 +672,13 @@ test.describe('UI Elements', () => {
   });
 
   // ═══════════════════════════════════════════════════════════════
-  // 🖱️ PANEL DRAGGING TESTS
+  // PANEL DRAGGING TESTS
   // ═══════════════════════════════════════════════════════════════
 
   test.describe('Panel Dragging', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/');
-      await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+      await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
       await page.waitForTimeout(500);
     });
 
@@ -787,6 +787,6 @@ test.describe('UI Elements', () => {
   });
 });
 
-// 🖤 END OF UI ELEMENT TESTS - UPGRADED BY UNITY 🖤 AGENT D
+// END OF UI ELEMENT TESTS - UPGRADED BY UNITY - AGENT D
 // All test.skip() removed, all tests enabled, comprehensive coverage added
-// Version: 0.81 - Dark Awakening
+// Version: 0.90.01 - Dark Awakening

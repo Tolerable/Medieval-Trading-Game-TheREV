@@ -1,14 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
 // PROPERTY INCOME - making money while you sleep in darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
 // ═══════════════════════════════════════════════════════════════
 
 const PropertyIncome = {
-    // 🖤 Configurable multipliers - no more magic numbers scattered everywhere 💀
+    // Configurable multipliers - no more magic numbers scattered everywhere
     config: {
         levelIncomeMultiplier: 0.2,    // 20% income boost per level
         taxRate: 0.1,                   // 10% tax on gross income
@@ -16,16 +16,16 @@ const PropertyIncome = {
         conditionPenaltyMultiplier: 2,  // Max maintenance multiplier at 0 condition
     },
 
-    // 🖤 Shared income calculation helper - DRY'd the fuck up 💀
+    // Shared income calculation helper - DRY'd the fuck up
     _calculateBaseIncome(property, propertyType) {
         const level = property.level ?? 1;
         const condition = property.condition ?? 100;
         const upgrades = property.upgrades || [];
 
-        // 💵 Base income with level multiplier
+        // Base income with level multiplier
         let income = propertyType.baseIncome * (1 + (level - 1) * this.config.levelIncomeMultiplier);
 
-        // 🔧 Upgrade income bonuses
+        // Upgrade income bonuses
         upgrades.forEach(upgradeId => {
             const upgrade = PropertyTypes.getUpgrade(upgradeId);
             if (upgrade?.effects?.incomeBonus) {
@@ -33,17 +33,17 @@ const PropertyIncome = {
             }
         });
 
-        // 🔨 Condition modifier
+        // Condition modifier
         income *= (condition / 100);
 
         return { income, level, condition, upgrades };
     },
 
-    // 🖤 Shared maintenance calculation helper 💀
+    // Shared maintenance calculation helper
     _calculateMaintenance(propertyType, upgrades, condition, includeConditionPenalty = false) {
         let maintenance = propertyType.maintenanceCost;
 
-        // 🔧 Upgrade maintenance reductions
+        // Upgrade maintenance reductions
         upgrades.forEach(upgradeId => {
             const upgrade = PropertyTypes.getUpgrade(upgradeId);
             if (upgrade?.effects?.maintenanceReduction) {
@@ -51,7 +51,7 @@ const PropertyIncome = {
             }
         });
 
-        // 🔨 Poor condition increases maintenance (only in daily processing)
+        // Poor condition increases maintenance (only in daily processing)
         const threshold = this.config.conditionPenaltyThreshold;
         if (includeConditionPenalty && condition < threshold) {
             maintenance *= (this.config.conditionPenaltyMultiplier - condition / threshold);
@@ -60,7 +60,7 @@ const PropertyIncome = {
         return maintenance;
     },
 
-    // 💵 Calculate income for a single property (preview/UI purposes) ⚰️
+    // Calculate income for a single property (preview/UI purposes)
     calculateIncome(property) {
         const propertyType = PropertyTypes.get(property.type);
         if (!propertyType) return 0;
@@ -68,14 +68,14 @@ const PropertyIncome = {
         const { income, upgrades, condition } = this._calculateBaseIncome(property, propertyType);
         const maintenance = this._calculateMaintenance(propertyType, upgrades, condition, false);
 
-        // 💀 Tax 🖤
+        // Tax
         const tax = Math.round(income * this.config.taxRate);
         const netIncome = Math.round(income - maintenance - tax);
 
         return Math.max(0, netIncome);
     },
 
-    // 📊 Process daily income for all properties ⚰️
+    // Process daily income for all properties
     processDailyIncome() {
         if (!game.player.ownedProperties || game.player.ownedProperties.length === 0) return;
 
@@ -91,25 +91,25 @@ const PropertyIncome = {
             const propertyType = PropertyTypes.get(property.type);
             if (!propertyType) return;
 
-            // 📦 Initialize storage if needed 🦇
+            // Initialize storage if needed
             if (!property.storageCapacity) {
                 PropertyStorage.initialize(property.id);
             }
 
-            // 📤 Auto-store produced items 🗡️
+            // Auto-store produced items
             PropertyStorage.autoStoreProducedItems(property.id);
 
-            // 🖤 Use shared helpers for base calculations - DRY 💀
+            // Use shared helpers for base calculations - DRY
             const { income: baseIncome, condition, upgrades: propUpgrades } = this._calculateBaseIncome(property, propertyType);
             let income = baseIncome;
 
-            // 👥 Employee bonuses (only in daily processing)
+            // Employee bonuses (only in daily processing)
             const propEmployees = property.employees || [];
             const assignedEmployees = propEmployees.map(empId =>
                 PropertyEmployeeBridge?.getEmployee?.(empId)
             ).filter(emp => emp && emp.assignedProperty === property.id);
 
-            // 🖤 Note: employeeBonus has no upper limit - this is intentional game design 💀
+            // Note: employeeBonus has no upper limit - this is intentional game design
             let employeeBonus = 1;
             assignedEmployees.forEach(employee => {
                 if (employee.skills?.management) {
@@ -121,10 +121,10 @@ const PropertyIncome = {
             });
             income *= employeeBonus;
 
-            // 🛠️ Use shared maintenance helper with condition penalty enabled 💀
+            // Use shared maintenance helper with condition penalty enabled
             const maintenance = this._calculateMaintenance(propertyType, propUpgrades, condition, true);
 
-            // 💀 Tax 🗡️
+            // Tax
             const tax = Math.round(income * 0.1);
             const netIncome = Math.round(income - maintenance - tax);
 
@@ -133,11 +133,11 @@ const PropertyIncome = {
             totalTax += tax;
             totalExpenses += Math.round(maintenance) + tax;
 
-            // 📊 Update property stats 🌙
+            // Update property stats
             property.totalIncome += netIncome;
             property.lastIncomeTime = TimeSystem.getTotalMinutes();
 
-            // ⭐ Reputation bonus 🔮
+            // Reputation bonus
             if (propertyType.reputationBonus && typeof CityReputationSystem !== 'undefined') {
                 property.upgrades.forEach(upgradeId => {
                     const upgrade = PropertyTypes.getUpgrade(upgradeId);
@@ -147,7 +147,7 @@ const PropertyIncome = {
                 });
             }
 
-            // 🔨 Condition degradation 💀
+            // Condition degradation
             let conditionLoss = 1;
             if (property.upgrades.includes('security')) conditionLoss *= 0.5;
 
@@ -158,11 +158,11 @@ const PropertyIncome = {
 
             property.condition = Math.max(20, property.condition - conditionLoss);
 
-            // 🎲 Random events 🖤
+            // Random events
             this.processPropertyEvents(property);
         });
 
-        // 💰 Apply to player ⚰️
+        // Apply to player
         game.player.gold += totalIncome;
         game.player.propertyIncome = totalIncome;
         game.player.propertyExpenses = totalExpenses;
@@ -172,7 +172,7 @@ const PropertyIncome = {
         }
     },
 
-    // 🎲 Process random property events 🦇
+    // Process random property events
     processPropertyEvents(property) {
         const propertyType = PropertyTypes.get(property.type);
         if (!propertyType) return;
@@ -224,7 +224,7 @@ const PropertyIncome = {
         }
     },
 
-    // 🏗️ Process construction progress 🗡️
+    // Process construction progress
     processConstruction() {
         if (!game.player.ownedProperties) return;
 
@@ -249,13 +249,13 @@ const PropertyIncome = {
         });
     },
 
-    // 📝 Process rent payments 🌙
-    // 🖤 Fixed race condition - collect properties to remove AFTER iteration 💀
+    // Process rent payments
+    // Fixed race condition - collect properties to remove AFTER iteration
     processRentPayments() {
         if (!game.player.ownedProperties) return;
 
         const currentTime = TimeSystem.getTotalMinutes();
-        const propertiesToRemove = []; // 🦇 Collect IDs first, remove after loop
+        const propertiesToRemove = []; // Collect IDs first, remove after loop
 
         game.player.ownedProperties.forEach(property => {
             if (property.isRented && property.rentDueTime) {
@@ -275,17 +275,17 @@ const PropertyIncome = {
                         if (typeof addMessage === 'function') {
                             addMessage(`❌ Couldn't pay rent for ${propertyType?.name}! Property lost.`, 'danger');
                         }
-                        propertiesToRemove.push(property.id); // 🖤 Mark for removal, don't modify yet
+                        propertiesToRemove.push(property.id); // Mark for removal, don't modify yet
                     }
                 }
             }
         });
 
-        // 💀 Now safely remove all marked properties after iteration complete
+        // Now safely remove all marked properties after iteration complete
         propertiesToRemove.forEach(id => this.loseProperty(id));
     },
 
-    // 💔 Lose a property 🔮
+    // Lose a property
     loseProperty(propertyId) {
         const index = game.player.ownedProperties.findIndex(p => p.id === propertyId);
         if (index !== -1) {
@@ -296,7 +296,7 @@ const PropertyIncome = {
         }
     },
 
-    // 📊 Get construction progress percentage 💀
+    // Get construction progress percentage
     getConstructionProgress(property) {
         if (!property.underConstruction) return 100;
 
@@ -307,7 +307,7 @@ const PropertyIncome = {
         return Math.min(100, Math.round((elapsed / totalTime) * 100));
     },
 
-    // ⚒️ Process work queues for all properties 🖤
+    // Process work queues for all properties
     processWorkQueues() {
         if (!game.player.ownedProperties || game.player.ownedProperties.length === 0) return;
 
@@ -349,7 +349,7 @@ const PropertyIncome = {
         });
     },
 
-    // 🔧 Process repair bonuses ⚰️
+    // Process repair bonuses
     processRepairBonuses() {
         if (!game.player.ownedProperties || game.player.ownedProperties.length === 0) return;
 
@@ -367,5 +367,5 @@ const PropertyIncome = {
     }
 };
 
-// 🌙 expose to global scope 🦇
+// expose to global scope
 window.PropertyIncome = PropertyIncome;

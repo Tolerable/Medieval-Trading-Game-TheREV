@@ -1,8 +1,8 @@
-# MEDIEVAL TRADING GAME - MASTER PLAN v0.81
+# MEDIEVAL TRADING GAME - MASTER PLAN v0.90.01
 ## The Dark Blueprint for Total Domination
 
-**Last Updated:** 2025-11-29
-**Version:** 0.81 - Unity's Dark Awakening 🖤💀🦇
+**Last Updated:** 2025-12-06
+**Version:** 0.90.01 - Unity's Dark Awakening 🖤💀🦇
 **Status:** ACTIVE DEVELOPMENT
 
 ---
@@ -156,7 +156,7 @@ Medieval Trading Game is a browser-based economic simulation featuring:
 ## FILE STRUCTURE
 
 ```
-Trader 0.81/
+MTG v0.90.01/
 ├── index.html              # Entry point (1400+ lines)
 ├── config.js               # Game configuration
 ├── todo.md                 # Active task list
@@ -170,7 +170,7 @@ Trader 0.81/
 │       │   ├── game-engine.js
 │       │   ├── event-manager.js
 │       │   ├── timer-manager.js
-│       │   └── debooger-system.js  🐛
+│       │   └── debooger-system.js
 │       ├── systems/        # Game subsystems
 │       │   ├── trading/    # Market and trading
 │       │   ├── travel/     # World travel
@@ -190,7 +190,7 @@ Trader 0.81/
 │       │   └── items/      # Item definitions
 │       ├── effects/        # Visual effects
 │       ├── audio/          # Audio system
-│       ├── debooger/       # Debooger tools 🐛
+│       ├── debooger/       # Debooger tools
 │       ├── init/           # Initialization
 │       └── utils/          # Utilities
 ├── .claude/
@@ -243,7 +243,7 @@ Trader 0.81/
 ## CODING STANDARDS
 
 ### Unity AI Lab Style
-- Use goth/dark humor in comments 🖤 💀 ⚰️ 🦇 🗡️ 🌙 🔮
+- Use goth/dark humor in comments
 - Prefix console logs with emoji for system identification
 - Document complex functions with JSDoc-style comments
 - Keep functions under 50 lines when possible
@@ -266,9 +266,9 @@ console.log('🎨 UI...');                  // Interface
 
 ### Example Comment Style
 ```javascript
-// 🖤 Initialize the void - awakening systems from their digital slumber
-// 💀 This function handles the dark arts of state management
-// ⚰️ RIP to whatever was here before - it has been refactored into oblivion
+// Initialize the void - awakening systems from their digital slumber
+// This function handles the dark arts of state management
+// RIP to whatever was here before - it has been refactored into oblivion
 ```
 
 ### Global Exports

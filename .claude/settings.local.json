@@ -52,7 +52,13 @@
       "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"$mtgPath = ''C:\\Users\\gfour\\OneDrive\\Desktop\\MTG v0.89.97''; $emptyDirs = Get-ChildItem -Path $mtgPath -Directory -Recurse | Where-Object { $_FullName -notlike ''*node_modules*'' -and $_FullName -notlike ''*\\.git*'' } | Where-Object { @(Get-ChildItem -Path $_FullName -Force).Count -eq 0 }; $emptyDirs | ForEach-Object { $_FullName }\")",
       "Bash(temp_old_index.html)",
       "Bash(\"C:\\Users\\gfour\\OneDrive\\Desktop\\MTG v0.89.97 - Copy\\Gee''sThoughts.md\")",
-      "Bash(\"C:\\Users\\gfour\\OneDrive\\Desktop\\MTG v0.89.99\\Gee''sThoughts.md\")"
+      "Bash(\"C:\\Users\\gfour\\OneDrive\\Desktop\\MTG v0.89.99\\Gee''sThoughts.md\")",
+      "Bash(do sed -i \"s/Version: 0.90.00/Version: 0.90.01/g; s/Version: 0.89.[0-9]*/Version: 0.90.01/g; s/ 💀//g;s/ 🖤//g;s/ 🦇//g;s/ ⚰️//g;s/ 🔮//g;s/ 🐛//g;s/ ✅//g;s/ ❌//g;s/ 🎮//g;s/ ⚡//g;s/ 🔥//g;s/ 💰//g;s/ 📜//g;s/ 🎯//g;s/ ⚔️//g;s/ 🏆//g;s/ 🎭//g;s/ 💸//g;s/ 🎨//g;s/ 🏠//g;s/ 📊//g;s/ 📅//g;s/ 🔄//g;s/ 🌐//g;s/ 🗑️//g;s/ 🏘️//g;s/ ⛏️//g;s/ 🛡️//g;s/ 🖥️//g;s/💀 //g;s/🖤 //g;s/🦇 //g;s/⚰️ //g;s/🔮 //g;s/🐛 //g;s/✅ //g;s/❌ //g;s/🎮 //g;s/⚡ //g;s/🔥 //g;s/💰 //g;s/📜 //g;s/🎯 //g;s/⚔️ //g;s/🏆 //g;s/🎭 //g;s/💸 //g;s/🎨 //g;s/🏠 //g;s/📊 //g;s/📅 //g;s/🔄 //g;s/🌐 //g;s/🗑️ //g;s/🏘️ //g;s/⛏️ //g;s/🛡️ //g;s/🖥️ //g\" \"$file\")",
+      "Bash(python3:*)",
+      "Bash(if grep -r \"^[[:space:]]*// .*[🖤💀🦇⚰️🔮🐛✅❌🎮⚡🔥💰📜🎯⚔️🏆🎭💸🎨🏠📊📅🔄🌐🗑️🏘️⛏️🛡️🖥️👑🥈🥉👹🌲🆕🟡🟢🔴🟠🧪📋🎖️🏃🗡💥🔪🩹🤝⏰🎬🚔⛓️🌅⭐🏊💎📦]\" . --include=\"*.js\")",
+      "Bash(then echo \"Still found emojis\")",
+      "Bash(else echo \"SUCCESS: All emojis removed from comments!\")",
+      "Bash(fi)"
     ],
     "deny": [],
     "ask": []

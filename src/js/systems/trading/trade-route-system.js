@@ -1,16 +1,16 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // TRADE ROUTE SYSTEM - roads paved with broken dreams
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const TradeRouteSystem = {
     // Initialize trade route system
     init() {
-        // 🖤 Guard against early initialization when player doesn't exist yet 💀
+        //  Guard against early initialization when player doesn't exist yet 
         if (!game || !game.player) {
             console.log('🖤 TradeRouteSystem.init() called before player exists... routes await their merchants');
             return;
@@ -139,7 +139,7 @@ const TradeRouteSystem = {
         if (!item) return;
         
         // Check if it's time to trade (once per day)
-        // 🖤 Use HOURS_PER_DAY * MINUTES_PER_HOUR (24 * 60 = 1440 minutes per day) 💀
+        //  Use HOURS_PER_DAY * MINUTES_PER_HOUR (24 * 60 = 1440 minutes per day) 
         const currentTime = TimeSystem.getTotalMinutes();
         const MINUTES_PER_DAY = (TimeSystem.HOURS_PER_DAY || 24) * (TimeSystem.MINUTES_PER_HOUR || 60);
         if (currentTime - route.lastTradeTime < MINUTES_PER_DAY) {
@@ -156,7 +156,7 @@ const TradeRouteSystem = {
             return;
         }
         
-        // Get market prices (🖤 null check warehouseLocation.marketPrices 💀)
+        // Get market prices ( null check warehouseLocation.marketPrices )
         const warehouseLocation = GameWorld.locations[warehouse.location];
         const warehousePrice = warehouseLocation?.marketPrices?.[route.itemId]?.price || ItemDatabase.calculatePrice(route.itemId);
         const destinationPrice = destination?.marketPrices?.[route.itemId]?.price || ItemDatabase.calculatePrice(route.itemId);
@@ -172,9 +172,9 @@ const TradeRouteSystem = {
             return;
         }
         
-        // Execute trade - 🖤 with profit cap to prevent exploit 💀
+        // Execute trade -  with profit cap to prevent exploit 
         let totalProfit = profitPerItem * route.amount;
-        // 🦇 Cap daily profit per route to prevent infinite gold exploit
+        //  Cap daily profit per route to prevent infinite gold exploit
         const MAX_DAILY_PROFIT = 10000;
         totalProfit = Math.min(totalProfit, MAX_DAILY_PROFIT);
 
@@ -189,7 +189,7 @@ const TradeRouteSystem = {
         route.totalProfit += totalProfit;
         route.lastTradeTime = currentTime;
         
-        addMessage(`✅ Route ${route.name}: Traded ${route.amount} ${item.name} for ${totalProfit} gold profit!`);
+        addMessage(`Route ${route.name}: Traded ${route.amount} ${item.name} for ${totalProfit} gold profit!`);
         
         // Update UI
         updatePlayerInfo();

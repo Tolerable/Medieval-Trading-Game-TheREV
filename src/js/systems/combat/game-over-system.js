@@ -1,36 +1,36 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // GAME OVER SYSTEM - every story ends in the void
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 console.log('💀 Game Over System loading... preparing for inevitable failures...');
 
 const GameOverSystem = {
-    // 💰 Bankruptcy threshold - below this and you're jailed
+    //  Bankruptcy threshold - below this and you're jailed
     BANKRUPTCY_THRESHOLD: -1000,
 
-    // 📊 Track if game over is already being processed
+    //  Track if game over is already being processed
     isProcessingGameOver: false,
 
-    // 🎮 Last known game stats for display
+    //  Last known game stats for display
     finalStats: null,
 
-    // 🏆 Player's ranking result
+    //  Player's ranking result
     rankingResult: null,
 
-    // 💀 boot up the reaper - we're all gonna need this eventually
+    // boot up the reaper - we're all gonna need this eventually
     init() {
-        console.log('💀 Game Over System ready to collect souls and document your failures 🖤');
+        console.log('💀 Game Over System ready to collect souls and document your failures');
         this.isProcessingGameOver = false;
         this.finalStats = null;
         this.rankingResult = null;
     },
 
-    // 💸 Check for bankruptcy - called after any gold transaction
+    //  Check for bankruptcy - called after any gold transaction
     checkBankruptcy() {
         if (this.isProcessingGameOver) return false;
 
@@ -43,7 +43,7 @@ const GameOverSystem = {
         return false;
     },
 
-    // 🚔 Trigger bankruptcy game over
+    //  Trigger bankruptcy game over
     triggerBankruptcy() {
         if (this.isProcessingGameOver) return;
 
@@ -58,12 +58,12 @@ const GameOverSystem = {
 
         addMessage('💀 the debt collectors have come...');
         addMessage('🚔 you are being arrested for failure to pay your debts!');
-        addMessage('⛓️ sentenced to debtors prison... your trading days are over.');
+        addMessage('sentenced to debtors prison... your trading days are over.');
 
         this.handleGameOver(causeOfDeath);
     },
 
-    // 💀 Main game over handler
+    //  Main game over handler
     async handleGameOver(causeOfDeath = 'unknown causes') {
         if (this.isProcessingGameOver) return;
         this.isProcessingGameOver = true;
@@ -85,7 +85,7 @@ const GameOverSystem = {
         this.showGameOverScreen();
     },
 
-    // 📊 Calculate comprehensive final stats
+    //  Calculate comprehensive final stats
     calculateFinalStats(causeOfDeath) {
         const player = game?.player;
         if (!player) return this.getDefaultStats(causeOfDeath);
@@ -155,7 +155,7 @@ const GameOverSystem = {
 
         return {
             playerName: player.name || 'Anonymous Merchant',
-            characterId: player.characterId || null, // 🏆 CRITICAL: Unique ID for leaderboard deduplication 💀
+            characterId: player.characterId || null, // CRITICAL: Unique ID for leaderboard deduplication
             causeOfDeath,
             gold: player.gold || 0,
             daysSurvived,
@@ -173,7 +173,7 @@ const GameOverSystem = {
         };
     },
 
-    // 📅 Format survival time nicely
+    //  Format survival time nicely
     formatSurvivalTime(days) {
         if (days < 7) {
             return `${days} day${days !== 1 ? 's' : ''}`;
@@ -192,7 +192,7 @@ const GameOverSystem = {
         }
     },
 
-    // 🎯 Get default stats when player data unavailable
+    //  Get default stats when player data unavailable
     getDefaultStats(causeOfDeath) {
         return {
             playerName: 'Unknown Soul',
@@ -213,7 +213,7 @@ const GameOverSystem = {
         };
     },
 
-    // 🏆 Submit to Hall of Champions (unified leaderboard)
+    //  Submit to Hall of Champions (unified leaderboard)
     async submitToLeaderboards() {
         if (!this.finalStats) return;
 
@@ -222,7 +222,7 @@ const GameOverSystem = {
             try {
                 const scoreData = {
                     playerName: this.finalStats.playerName,
-                    characterId: this.finalStats.characterId, // 🏆 CRITICAL: Prevents duplicate leaderboard entries 💀
+                    characterId: this.finalStats.characterId, // CRITICAL: Prevents duplicate leaderboard entries
                     score: this.finalStats.score,
                     gold: this.finalStats.gold,
                     daysSurvived: this.finalStats.daysSurvived,
@@ -233,7 +233,7 @@ const GameOverSystem = {
                     inventoryValue: this.finalStats.inventoryValue,
                     netWorth: this.finalStats.netWorth,
                     achievements: this.finalStats.achievements,
-                    isAlive: false  // 💀 They died or retired
+                    isAlive: false  // They died or retired
                 };
 
                 await GlobalLeaderboardSystem.submitScore(scoreData);
@@ -260,13 +260,13 @@ const GameOverSystem = {
                     addMessage('Your score didn\'t make the top 100 champions...');
                 }
             } catch (error) {
-                // 🖤 Network error - silent fail, not critical for game over flow
+                //  Network error - silent fail, not critical for game over flow
                 console.warn('⚠️ Hall of Champions submit failed:', error.message);
             }
         }
     },
 
-    // 🎖️ Get ranking message based on position in Hall of Champions (top 100)
+    // Get ranking message based on position in Hall of Champions (top 100)
     getRankingMessage(rank) {
         const messages = {
             1: '👑 SUPREME CHAMPION! The realm shall remember your name forever!',
@@ -288,7 +288,7 @@ const GameOverSystem = {
         return `Rank #${rank} - a footnote in history.`;
     },
 
-    // 💀 Show the game over screen
+    // Show the game over screen
     showGameOverScreen() {
         const overlay = document.getElementById('game-over-overlay');
         if (!overlay) {
@@ -306,7 +306,7 @@ const GameOverSystem = {
 
         if (titleEl) {
             if (this.finalStats.causeOfDeath.includes('jail') || this.finalStats.causeOfDeath.includes('bankrupt')) {
-                titleEl.textContent = '⛓️ IMPRISONED ⛓️';
+                titleEl.textContent = 'IMPRISONED ';
             } else if (this.finalStats.causeOfDeath.includes('retired')) {
                 titleEl.textContent = '🌅 RETIRED 🌅';
             } else {
@@ -328,20 +328,20 @@ const GameOverSystem = {
         overlay.classList.remove('hidden');
     },
 
-    // 📊 Populate the stats grid
+    // Populate the stats grid
     populateStatsGrid() {
         const statsGrid = document.getElementById('game-over-stats-grid');
         if (!statsGrid || !this.finalStats) return;
 
         const stats = [
-            { icon: '⏰', value: this.finalStats.survivalTime, label: 'Survived' },
+            { icon: '', value: this.finalStats.survivalTime, label: 'Survived' },
             { icon: '💰', value: this.finalStats.gold.toLocaleString(), label: 'Final Gold' },
             { icon: '🏠', value: this.finalStats.propertyCount, label: 'Properties' },
             { icon: '📦', value: this.finalStats.inventoryValue.toLocaleString(), label: 'Inventory Value' },
             { icon: '💎', value: this.finalStats.netWorth.toLocaleString(), label: 'Net Worth' },
             { icon: '🏆', value: this.finalStats.achievements, label: 'Achievements' },
             { icon: '🤝', value: this.finalStats.tradesCompleted, label: 'Trades' },
-            { icon: '⭐', value: this.finalStats.score.toLocaleString(), label: 'Final Score' }
+            { icon: '', value: this.finalStats.score.toLocaleString(), label: 'Final Score' }
         ];
 
         statsGrid.innerHTML = stats.map(stat => `
@@ -353,7 +353,7 @@ const GameOverSystem = {
         `).join('');
     },
 
-    // 🏆 Populate ranking section
+    // Populate ranking section
     populateRanking() {
         const rankingEl = document.getElementById('game-over-ranking');
         if (!rankingEl) return;
@@ -375,7 +375,7 @@ const GameOverSystem = {
         }
     },
 
-    // 🔄 Reset and restart - skip credits, go straight to character creation
+    // Reset and restart - skip credits, go straight to character creation
     resetAndRestart() {
         const overlay = document.getElementById('game-over-overlay');
         if (overlay) {
@@ -396,14 +396,14 @@ const GameOverSystem = {
         }
     },
 
-    // 🏠 Return to menu - show credits first, then main menu
+    // Return to menu - show credits first, then main menu
     returnToMenu() {
         const overlay = document.getElementById('game-over-overlay');
         if (overlay) {
             overlay.classList.add('hidden');
         }
 
-        // 🖤 Determine ending message based on cause of death
+        // Determine ending message based on cause of death
         let endingMessage = 'Your journey has ended...';
         if (this.finalStats) {
             if (this.finalStats.causeOfDeath.includes('retired')) {
@@ -417,20 +417,20 @@ const GameOverSystem = {
             }
         }
 
-        // 🎬 Use unified CreditsSystem to show credits, then return to menu
+        // Use unified CreditsSystem to show credits, then return to menu
         if (typeof CreditsSystem !== 'undefined') {
             CreditsSystem.showCredits({
                 endingMessage: endingMessage,
                 returnToMenu: true,
                 onFinish: () => {
-                    // 🖤 Reset game over state after credits
+                    // Reset game over state after credits
                     this.isProcessingGameOver = false;
                     this.finalStats = null;
                     this.rankingResult = null;
                 }
             });
         } else {
-            // 🖤 Fallback if CreditsSystem not loaded - go straight to menu
+            // Fallback if CreditsSystem not loaded - go straight to menu
             console.warn('CreditsSystem not loaded, going straight to menu');
             this.isProcessingGameOver = false;
             this.finalStats = null;
@@ -442,9 +442,9 @@ const GameOverSystem = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// 🏆 LEADERBOARD PANEL FUNCTIONS - view the hall of champions
-// ═══════════════════════════════════════════════════════════════
+// 
+//  LEADERBOARD PANEL FUNCTIONS - view the hall of champions
+// 
 
 // Show the leaderboard panel
 function showLeaderboardPanel() {
@@ -489,7 +489,7 @@ async function refreshLeaderboardPanel() {
         }
 
     } catch (error) {
-        // 🖤 Network error - show user-friendly message instead
+        // Network error - show user-friendly message instead
         console.warn('⚠️ Hall of Champions load failed:', error.message);
         content.innerHTML = `
             <div class="leaderboard-empty">
@@ -508,9 +508,9 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 🎮 GAME OVER SCREEN BUTTON HANDLERS
-// ═══════════════════════════════════════════════════════════════
+// 
+//  GAME OVER SCREEN BUTTON HANDLERS
+// 
 
 function closeGameOverAndRestart() {
     GameOverSystem.resetAndRestart();
@@ -524,9 +524,9 @@ function showLeaderboardFromGameOver() {
     showLeaderboardPanel();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY
-// ═══════════════════════════════════════════════════════════════
+// 
+//  EXPOSE GLOBALLY
+// 
 
 window.GameOverSystem = GameOverSystem;
 window.showLeaderboardPanel = showLeaderboardPanel;
@@ -543,4 +543,4 @@ if (document.readyState === 'loading') {
     GameOverSystem.init();
 }
 
-console.log('✅ Game Over System loaded!');
+console.log('Game Over System loaded!');

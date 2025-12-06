@@ -1,15 +1,15 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // TRAVEL SYSTEM - wandering from one mistake to another
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 //
-// 🖤 LOGGING APPROACH 💀
+//  LOGGING APPROACH 
 // This file uses extensive console.log statements for debugging and state tracking.
-// Logs include emojis (🗺️, 🛤️, 🌑, 🌍) to distinguish different world states and path discovery events.
+// Logs include emojis (, , , ) to distinguish different world states and path discovery events.
 // All logs are kept intentionally verbose to track world transitions, path discoveries, and travel state.
 
 const TravelSystem = {
@@ -54,18 +54,18 @@ const TravelSystem = {
     // points of interest - allegedly interesting, probably disappointing
     pointsOfInterest: [],
 
-    // 🛤️ DISCOVERED PATHS - roads you've walked, secrets you've learned 💀
+    //  DISCOVERED PATHS - roads you've walked, secrets you've learned 
     // Paths are stored as "fromId->toId" keys (sorted alphabetically for consistency)
     // Only discovered paths show travel time, distance, and path type info in tooltips
     discoveredPaths: new Set(),
     DISCOVERED_PATHS_KEY: 'trader-claude-discovered-paths',
 
-    // 🖤 DOOM WORLD DISCOVERY - separate tracking for the apocalyptic reality 💀
+    //  DOOM WORLD DISCOVERY - separate tracking for the apocalyptic reality 
     // When you portal to doom world, you start fresh - all paths unexplored except entry point
     doomDiscoveredPaths: new Set(),
     DOOM_DISCOVERED_PATHS_KEY: 'trader-claude-doom-discovered-paths',
 
-    // 🌑 CURRENT WORLD - which reality you're trapped in
+    //  CURRENT WORLD - which reality you're trapped in
     // 'normal' = regular game world, 'doom' = apocalyptic alternate reality
     currentWorld: 'normal',
     CURRENT_WORLD_KEY: 'trader-claude-current-world',
@@ -73,7 +73,7 @@ const TravelSystem = {
     // travel history - everywhere we've been, nowhere we belong
     travelHistory: [],
 
-    // 🖤 ENCOUNTER LIMITS - max 2 per game day, only during travel 💀
+    //  ENCOUNTER LIMITS - max 2 per game day, only during travel 
     _encountersToday: 0,
     _lastEncounterDay: -1,
     MAX_ENCOUNTERS_PER_DAY: 2,
@@ -109,8 +109,8 @@ const TravelSystem = {
         console.log('🌍 Current world:', this.currentWorld);
     },
 
-    // 🛤️ PATH DISCOVERY SYSTEM - only show path info after you've walked the road 💀
-    // ═══════════════════════════════════════════════════════════════
+    //  PATH DISCOVERY SYSTEM - only show path info after you've walked the road 
+    // 
 
     // Generate consistent path key (alphabetically sorted for bidirectional paths)
     getPathKey(fromId, toId) {
@@ -181,8 +181,8 @@ const TravelSystem = {
         }
     },
 
-    // 🖤 DOOM WORLD DISCOVERY FUNCTIONS 💀
-    // ═══════════════════════════════════════════════════════════════
+    //  DOOM WORLD DISCOVERY FUNCTIONS 
+    // 
 
     // Save doom discovered paths to localStorage
     saveDoomDiscoveredPaths() {
@@ -230,7 +230,7 @@ const TravelSystem = {
         }
     },
 
-    // 🌑 Portal to Doom World - called when player uses portal after defeating boss
+    //  Portal to Doom World - called when player uses portal after defeating boss
     // entryLocationId is the dungeon they defeated the boss in (shadow_dungeon or forest_dungeon)
     portalToDoomWorld(entryLocationId) {
         console.log('🌑 Portaling to Doom World from', entryLocationId);
@@ -263,7 +263,7 @@ const TravelSystem = {
         return true;
     },
 
-    // 🌍 Portal back to Normal World - called when player uses boatman portal in doom
+    //  Portal back to Normal World - called when player uses boatman portal in doom
     portalToNormalWorld(exitLocationId) {
         console.log('🌍 Portaling back to Normal World from', exitLocationId);
 
@@ -274,17 +274,17 @@ const TravelSystem = {
         // Player returns to the same location in normal world
         this.playerPosition.currentLocation = exitLocationId;
 
-        // 🖤 Get the FULL normal world location object
+        //  Get the FULL normal world location object
         const normalLocation = GameWorld?.locations?.[exitLocationId];
         const normalName = normalLocation?.name || exitLocationId;
 
-        // 🖤💀 MARK EXIT LOCATION AS VISITED in normal world so it shows on map!
+        //  MARK EXIT LOCATION AS VISITED in normal world so it shows on map!
         if (typeof GameWorld !== 'undefined') {
             if (!GameWorld.visitedLocations.includes(exitLocationId)) {
                 GameWorld.visitedLocations.push(exitLocationId);
                 console.log('🌅 Added exit location to normal world visited:', exitLocationId);
             }
-            // 🖤 Also discover paths to connected locations
+            //  Also discover paths to connected locations
             if (normalLocation?.connections) {
                 normalLocation.connections.forEach(connId => {
                     this.discoverPath(exitLocationId, connId);
@@ -292,42 +292,42 @@ const TravelSystem = {
             }
         }
 
-        // 🖤💀 PROPERLY SET game.currentLocation to FULL normal world location object
+        //  PROPERLY SET game.currentLocation to FULL normal world location object
         if (typeof game !== 'undefined') {
             if (normalLocation) {
                 game.currentLocation = { ...normalLocation };
             }
             game.inDoomWorld = false;
-            // 🖤 Also sync game.visitedLocations if it exists
+            //  Also sync game.visitedLocations if it exists
             if (game.visitedLocations && !game.visitedLocations.includes(exitLocationId)) {
                 game.visitedLocations.push(exitLocationId);
             }
             console.log('🌅 game.currentLocation set to:', game.currentLocation?.name, game.currentLocation?.id);
         }
 
-        // 🖤 Remove doom effects
+        //  Remove doom effects
         document.body.classList.remove('doom-world');
 
-        // 🖤 Restore normal weather
+        //  Restore normal weather
         if (typeof WeatherSystem !== 'undefined') {
             WeatherSystem.changeWeather('clear');
         }
 
-        // 🖤💀 Restore normal world backdrop/background based on current season
+        //  Restore normal world backdrop/background based on current season
         if (typeof GameWorldRenderer !== 'undefined') {
-            // 🖤 Force exit dungeon mode flag
+            //  Force exit dungeon mode flag
             GameWorldRenderer.isInDungeonMode = false;
 
-            // 🖤 Get current season and load that backdrop
+            //  Get current season and load that backdrop
             let currentSeason = 'summer';
             if (typeof TimeSystem !== 'undefined' && TimeSystem.getSeason) {
                 currentSeason = TimeSystem.getSeason().toLowerCase();
             }
 
-            // 🖤💀 FORCE clear currentSeason so loadSeasonalBackdrop doesn't skip reload
+            //  FORCE clear currentSeason so loadSeasonalBackdrop doesn't skip reload
             GameWorldRenderer.currentSeason = null;
 
-            // 🖤 Load seasonal backdrop directly
+            //  Load seasonal backdrop directly
             if (GameWorldRenderer.loadSeasonalBackdrop) {
                 GameWorldRenderer.loadSeasonalBackdrop(currentSeason);
                 console.log(`🌅 Normal world ${currentSeason} backdrop restored`);
@@ -345,14 +345,14 @@ const TravelSystem = {
 
         console.log('🌍 Back in Normal World. Normal paths discovered:', this.discoveredPaths.size);
 
-        // 🦇 Refresh ALL panels to show normal world data
+        //  Refresh ALL panels to show normal world data
         if (typeof TravelPanelMap !== 'undefined') {
             TravelPanelMap.render();
         }
         if (typeof GameWorldRenderer !== 'undefined') {
             GameWorldRenderer.render?.();
             GameWorldRenderer.updatePlayerMarker?.();
-            // 🖤💀 CENTER MAP ON PLAYER LOCATION
+            //  CENTER MAP ON PLAYER LOCATION
             if (GameWorldRenderer.centerOnLocation) {
                 GameWorldRenderer.centerOnLocation(exitLocationId);
             } else if (GameWorldRenderer.centerOnPlayer) {
@@ -1114,7 +1114,7 @@ const TravelSystem = {
         ];
     },
 
-    // 🦇 FIX: Path types with improved speed multipliers for reasonable travel times
+    //  FIX: Path types with improved speed multipliers for reasonable travel times
     // Base walking speed is 3 mph, these multipliers adjust effective speed
     // Starting area paths should be ~30min-2hrs, max any path is 6hrs
     PATH_TYPES: {
@@ -1220,7 +1220,7 @@ const TravelSystem = {
                 const pathInfo = this.PATH_TYPES[pathType] || this.PATH_TYPES.trail;
 
                 // math out how far we need to suffer
-                // 🦇 FIX: coordinates are 10x scaled, divide by 500 for reasonable mile distances
+                //  FIX: coordinates are 10x scaled, divide by 500 for reasonable mile distances
                 const dx = targetLocation.x - location.x;
                 const dy = targetLocation.y - location.y;
                 const distance = Math.sqrt(dx * dx + dy * dy) / 500; // scaled coords to miles
@@ -1447,7 +1447,7 @@ const TravelSystem = {
             content += `<p class="description">${location.description}</p>`;
         }
 
-        // 🖤💀 Add tracked quest info if this location is a quest target
+        //  Add tracked quest info if this location is a quest target
         if (typeof QuestSystem !== 'undefined' && QuestSystem.getQuestInfoForLocation) {
             const quest = QuestSystem.getQuestInfoForLocation(location.id);
             if (quest) {
@@ -1652,7 +1652,7 @@ const TravelSystem = {
             }
         }
 
-        // 🖤 Apply weather and seasonal speed modifiers from TimeMachine/WeatherSystem 💀
+        //  Apply weather and seasonal speed modifiers from TimeMachine/WeatherSystem 
         // These systems are the source of truth for ALL time calculations
         let weatherSpeedMod = 1.0;
         let seasonalSpeedMod = 1.0;
@@ -1662,7 +1662,7 @@ const TravelSystem = {
             weatherSpeedMod = WeatherSystem.getTravelSpeedModifier() || 1.0;
         }
 
-        // 🖤 Get seasonal modifier from TimeMachine - using getSeasonData() not getCurrentSeason() 💀
+        //  Get seasonal modifier from TimeMachine - using getSeasonData() not getCurrentSeason() 
         if (typeof TimeMachine !== 'undefined' && TimeMachine.getSeasonData) {
             const seasonData = TimeMachine.getSeasonData();
             if (seasonData && seasonData.effects && seasonData.effects.travelSpeed) {
@@ -1681,7 +1681,7 @@ const TravelSystem = {
             totalTimeHours = totalTimeHours / combinedSpeedMod;
         }
 
-        // 🦇 FIX: Cap max travel time at 6 hours - no path should take longer
+        //  FIX: Cap max travel time at 6 hours - no path should take longer
         const MAX_TRAVEL_HOURS = 6;
         totalTimeHours = Math.min(totalTimeHours, MAX_TRAVEL_HOURS);
 
@@ -1713,7 +1713,7 @@ const TravelSystem = {
             routeDescription: routeDescription,
             segments: segmentTimes,
             isWilderness: path.isWilderness || false,
-            // 🖤 Include modifiers for transparency 💀
+            //  Include modifiers for transparency 
             weatherSpeedMod: weatherSpeedMod,
             seasonalSpeedMod: seasonalSpeedMod,
             eventSpeedMod: eventSpeedMod,
@@ -1724,7 +1724,7 @@ const TravelSystem = {
     // Calculate distance between locations
     // Note: TravelSystem coordinates are 10x scaled from mapPosition, so we divide by 100
     // to get the same miles value as GameWorldRenderer (which uses mapPosition / 10)
-    // 🦇 FIX: Distance calculation - coordinates are 10x scaled from GameWorld
+    //  FIX: Distance calculation - coordinates are 10x scaled from GameWorld
     // With 10x scale, adjacent locations are ~1000-2000 units apart
     // Divide by 500 to get reasonable mile distances (2-4 miles between nearby locations)
     // This ensures starting area paths take ~30min-2hrs and max travel is ~6hrs
@@ -1800,7 +1800,7 @@ const TravelSystem = {
 
         // Priority queue (using array with sorting - not optimal but works)
         const openSet = [startId];
-        const closedSet = new Set(); // 🖤 Track visited nodes to prevent infinite loops 💀
+        const closedSet = new Set(); // ��� Track visited nodes to prevent infinite loops 💀
         const cameFrom = {};
         const gScore = { [startId]: 0 };
         const fScore = { [startId]: this.heuristicDistance(startId, goalId) };
@@ -1810,7 +1810,7 @@ const TravelSystem = {
             openSet.sort((a, b) => (fScore[a] || Infinity) - (fScore[b] || Infinity));
             const current = openSet.shift();
 
-            // 🖤 Skip if already processed - prevents infinite loop with bidirectional paths 💀
+            //  Skip if already processed - prevents infinite loop with bidirectional paths 
             if (closedSet.has(current)) continue;
             closedSet.add(current);
 
@@ -1830,7 +1830,7 @@ const TravelSystem = {
             const neighbors = currentLoc?.connections || [];
 
             for (const neighborId of neighbors) {
-                // 🖤 Skip already visited nodes and invalid locations 💀
+                //  Skip already visited nodes and invalid locations 
                 if (!locations[neighborId] || closedSet.has(neighborId)) continue;
 
                 // Calculate cost to reach neighbor
@@ -2033,7 +2033,7 @@ const TravelSystem = {
             travelInfo.timeDisplay = '30 minutes';
         }
 
-        // 🖤 CHECK FOR UNEXPLORED LOCATIONS IN PATH - can't travel through the unknown! 💀
+        //  CHECK FOR UNEXPLORED LOCATIONS IN PATH - can't travel through the unknown! 
         // Players must explore each location in order - no skipping through unvisited areas
         if (travelInfo.route && travelInfo.route.length > 2) {
             const visitedLocations = typeof GameWorld !== 'undefined' && Array.isArray(GameWorld.visitedLocations)
@@ -2075,7 +2075,7 @@ const TravelSystem = {
             estimatedArrival: this.playerPosition.travelStartTime + this.playerPosition.travelDuration,
             hops: travelInfo.hops,
             route: travelInfo.route,
-            // 🖤 Speed modifiers from TimeMachine/WeatherSystem 💀
+            //  Speed modifiers from TimeMachine/WeatherSystem 
             weatherMod: travelInfo.weatherSpeedMod,
             seasonMod: travelInfo.seasonalSpeedMod,
             eventMod: travelInfo.eventSpeedMod,
@@ -2095,7 +2095,7 @@ const TravelSystem = {
         }
         addMessage(`⏱️ Estimated travel time: ${travelInfo.timeDisplay} | Distance: ${travelInfo.distance} miles`);
 
-        // 🖤 Track journey start for achievements (Start Your Journey!)
+        //  Track journey start for achievements (Start Your Journey!)
         if (typeof AchievementSystem !== 'undefined' && AchievementSystem.trackJourneyStart) {
             AchievementSystem.trackJourneyStart(destination.id);
         }
@@ -2119,7 +2119,7 @@ const TravelSystem = {
         if (typeof GameWorldRenderer !== 'undefined') {
             GameWorldRenderer.recordLocationDeparture();
             GameWorldRenderer.setDestination(destination.id);
-            // Trigger map marker animation - 🖤 FIX: Pass full route for multi-hop path animation 💀
+            // Trigger map marker animation -  FIX: Pass full route for multi-hop path animation 
             if (GameWorldRenderer.onTravelStart) {
                 GameWorldRenderer.onTravelStart(currentLoc.id, destination.id, travelInfo.timeHours * 60, travelInfo.route);
             }
@@ -2128,7 +2128,7 @@ const TravelSystem = {
         // Update UI
         this.updateTravelUI();
 
-        // 🖤 Update location panel to show we're now traveling 💀
+        //  Update location panel to show we're now traveling 
         if (typeof updateLocationInfo === 'function') {
             updateLocationInfo();
         }
@@ -2156,20 +2156,20 @@ const TravelSystem = {
         const oldProgress = this.playerPosition.travelProgress;
         this.playerPosition.travelProgress = Math.min(1.0, elapsed / duration);
 
-        // debooger log 💀 every ~10% progress (for the curious and the damned)
+        // debooger log  every ~10% progress (for the curious and the damned)
         const progressPct = Math.floor(this.playerPosition.travelProgress * 100);
         const oldProgressPct = Math.floor(oldProgress * 100);
         if (progressPct > oldProgressPct && progressPct % 10 === 0) {
             console.log(`🚶 journey progress: ${progressPct}% (${elapsed}/${duration} mins elapsed)`);
         }
 
-        // 🖤 game.js processPlayerStatsOverTime() handles ALL vital decay 💀
+        //  game.js processPlayerStatsOverTime() handles ALL vital decay 
         // Travel advances game time, which naturally triggers the unified decay system
 
         // Update player position along path
         this.updatePlayerPositionAlongPath();
 
-        // 🖤 Update location panel to show travel progress 💀
+        //  Update location panel to show travel progress 
         if (typeof updateLocationInfo === 'function') {
             updateLocationInfo();
         }
@@ -2184,7 +2184,7 @@ const TravelSystem = {
             return; // exit early, we're done wandering
         }
 
-        // 🖤 Check for random encounters - TimeMachine controlled, max 2 per game day 💀
+        //  Check for random encounters - TimeMachine controlled, max 2 per game day 
         if (this.playerPosition.isTraveling &&
             typeof game !== 'undefined' &&
             game.state &&
@@ -2210,14 +2210,14 @@ const TravelSystem = {
         this.updateTravelUI();
     },
     
-    // 🖤 Track last travel drain time to prevent multi-frame drain 💀
+    //  Track last travel drain time to prevent multi-frame drain 
     _lastTravelDrainMinute: -1,
 
     // Apply stat drain during travel
     applyTravelStatDrain(elapsedMinutes) {
         if (!game.player || !game.player.stats) return;
 
-        // 🖤 FIX: Prevent multi-frame drain - only drain ONCE per 30-minute mark 💀
+        //  FIX: Prevent multi-frame drain - only drain ONCE per 30-minute mark 
         const drainMark = Math.floor(elapsedMinutes / 30) * 30;
         if (drainMark === 0 || drainMark === this._lastTravelDrainMinute) return;
         this._lastTravelDrainMinute = drainMark;
@@ -2243,7 +2243,7 @@ const TravelSystem = {
             }
         }
 
-        // 🦇 FIX: Reduced travel stat drain - these are ADDITIONAL to normal decay
+        //  FIX: Reduced travel stat drain - these are ADDITIONAL to normal decay
         // Only apply small extra drain during travel, not massive amounts
         // Apply stat drain every 30 minutes of travel (check already done above)
         {
@@ -2341,7 +2341,7 @@ const TravelSystem = {
             timestamp: TimeSystem.getTotalMinutes()
         });
 
-        // 🛤️ DISCOVER PATHS - mark all paths in the route as discovered 💀
+        //  DISCOVER PATHS - mark all paths in the route as discovered 
         // Players now know travel times, distances, and path types for roads they've walked
         const route = this.playerPosition.route;
         if (route && route.length >= 2) {
@@ -2350,7 +2350,7 @@ const TravelSystem = {
                 addMessage(`🛤️ Discovered ${newlyDiscovered.length} new path${newlyDiscovered.length > 1 ? 's' : ''}! Road information now available.`);
             }
         } else if (currentLoc && currentLoc.id && destination && destination.id) {
-            // 🖤 Guard against null currentLoc.id - prevents crash 💀
+            //  Guard against null currentLoc.id - prevents crash 
             // Direct travel - discover single path
             if (this.discoverPath(currentLoc.id, destination.id)) {
                 addMessage(`🛤️ Path discovered! You now know the road from ${currentLoc.name} to ${destination.name}.`);
@@ -2358,7 +2358,7 @@ const TravelSystem = {
         }
 
         // Update game state
-        // 🖤 Include description so updateLocationInfo() can display it 💀
+        //  Include description so updateLocationInfo() can display it 
         game.currentLocation = {
             id: destination.id,
             name: destination.name,
@@ -2366,7 +2366,7 @@ const TravelSystem = {
             description: destination.description || ''
         };
 
-        // 🖤💀 CRITICAL: Mark location as VISITED/EXPLORED so tooltips and panels update 💀
+        //  CRITICAL: Mark location as VISITED/EXPLORED so tooltips and panels update 
         // Uses world-aware helper for doom/normal world separation!
         let wasFirstVisit = false;
         if (typeof GameWorld !== 'undefined') {
@@ -2386,7 +2386,7 @@ const TravelSystem = {
             console.log('🖤 Location discovered:', destination.id, '- Total visited:', activeVisited.length);
         }
 
-        // 🔔 RING THE BELL OF ARRIVAL - let the realm know we survived
+        //  RING THE BELL OF ARRIVAL - let the realm know we survived
         this.showArrivalNotification(destination);
 
         addMessage(`🔔 Arrived at ${destination.name}!`);
@@ -2403,11 +2403,11 @@ const TravelSystem = {
             AchievementSystem.trackJourney(distance);
         }
 
-        // 🖤 Wrap arrival sequence in try/catch - arrival MUST complete even if UI fails 💀
+        //  Wrap arrival sequence in try/catch - arrival MUST complete even if UI fails 
         try {
             // Record arrival in location history and update player marker
             if (typeof GameWorldRenderer !== 'undefined') {
-                // 🖤 Use wasFirstVisit from earlier check (we already added to visitedLocations) 💀
+                //  Use wasFirstVisit from earlier check (we already added to visitedLocations) 
                 if (GameWorldRenderer.recordLocationVisit) {
                     GameWorldRenderer.recordLocationVisit(destination.id, {
                         isFirstVisit: wasFirstVisit
@@ -2427,7 +2427,7 @@ const TravelSystem = {
                 if (GameWorldRenderer.completeTravelAnimation) {
                     GameWorldRenderer.completeTravelAnimation();
                 }
-                // 🖤 Re-render map AFTER game.currentLocation is set (lines 2263-2267 above)
+                //  Re-render map AFTER game.currentLocation is set (lines 2263-2267 above)
                 // This ensures new location shows as explored and connected locations as discovered
                 if (GameWorldRenderer.render) {
                     GameWorldRenderer.render();
@@ -2443,7 +2443,7 @@ const TravelSystem = {
         // Trigger location-specific events (already has try/catch inside)
         this.triggerLocationEvents(destination);
 
-        // 🖤 DISPATCH LOCATION CHANGE EVENT - let ALL panels know we've moved 💀
+        //  DISPATCH LOCATION CHANGE EVENT - let ALL panels know we've moved 
         // Market, People, Location panel - everyone needs to update their souls
         try {
             this.dispatchLocationChangeEvent(destination);
@@ -2468,22 +2468,22 @@ const TravelSystem = {
         }
     },
 
-    // ❌ Cancel ongoing travel - delegate to TravelPanelMap which handles the turn-around logic 🖤💀
+    // Cancel ongoing travel - delegate to TravelPanelMap which handles the turn-around logic 
     cancelTravel() {
-        // 🖤 TravelPanelMap has the full logic for turning around and heading back 💀
+        //  TravelPanelMap has the full logic for turning around and heading back 
         if (typeof TravelPanelMap !== 'undefined' && TravelPanelMap.cancelTravel) {
             TravelPanelMap.cancelTravel();
             return;
         }
 
-        // 🖤 Fallback if TravelPanelMap not available - reverse direction in-place 💀
+        //  Fallback if TravelPanelMap not available - reverse direction in-place 
         if (this.playerPosition.isTraveling) {
             const currentProgress = this.playerPosition.travelProgress || 0;
             const originalDuration = this.playerPosition.travelDuration || 30;
             const currentDestination = this.playerPosition.destination;
             const startLocId = this.playerPosition.currentLocation;
 
-            // 🖤 Calculate return journey - proportional time based on distance traveled 💀
+            //  Calculate return journey - proportional time based on distance traveled 
             const returnDuration = Math.max(1, Math.round(originalDuration * currentProgress));
             const startLoc = this.locations[startLocId];
 
@@ -2492,7 +2492,7 @@ const TravelSystem = {
                     addMessage(`🔙 Turning back to ${startLoc.name}... (${returnDuration} min)`);
                 }
 
-                // 🖤 REVERSE DIRECTION - swap destination, reset progress 💀
+                //  REVERSE DIRECTION - swap destination, reset progress 
                 this.playerPosition.destination = startLoc;
                 this.playerPosition.travelDuration = returnDuration;
                 this.playerPosition.travelProgress = 0;
@@ -2513,7 +2513,7 @@ const TravelSystem = {
         }
     },
 
-    // 🔔 Show arrival notification - the bell tolls for thee (in a good way this time)
+    //  Show arrival notification - the bell tolls for thee (in a good way this time)
     showArrivalNotification(destination) {
         // play the sacred bell sound if audio system exists
         if (typeof AudioSystem !== 'undefined' && AudioSystem.playSound) {
@@ -2823,13 +2823,13 @@ const TravelSystem = {
             },
 
             // --- WEATHER & ENVIRONMENTAL ---
-            // 🖤 Weather events now check actual WeatherSystem state! 💀
+            //  Weather events now check actual WeatherSystem state! 
             {
                 type: 'storm',
                 rarity: 'common',
                 regions: ['all'],
                 message: 'A sudden storm slows your progress.',
-                // 🦇 Only trigger if weather is actually stormy
+                //  Only trigger if weather is actually stormy
                 condition: () => {
                     if (typeof WeatherSystem === 'undefined') return true;
                     const stormyWeather = ['storm', 'rain', 'blizzard', 'thundersnow'];
@@ -2845,7 +2845,7 @@ const TravelSystem = {
                 rarity: 'common',
                 regions: ['all'],
                 message: 'Thick fog rolls in, obscuring the path.',
-                // 🦇 Only trigger if weather is actually foggy/misty
+                //  Only trigger if weather is actually foggy/misty
                 condition: () => {
                     if (typeof WeatherSystem === 'undefined') return true;
                     const foggyWeather = ['fog', 'rain', 'snow'];
@@ -2861,7 +2861,7 @@ const TravelSystem = {
                 rarity: 'common',
                 regions: ['all'],
                 message: 'Perfect weather makes for excellent traveling conditions!',
-                // 🖤 Only trigger if weather is actually good! No sunny messages in thunderstorms 💀
+                //  Only trigger if weather is actually good! No sunny messages in thunderstorms 
                 condition: () => {
                     if (typeof WeatherSystem === 'undefined') return true;
                     const goodWeather = ['clear', 'cloudy', 'windy'];
@@ -2946,13 +2946,13 @@ const TravelSystem = {
         ];
 
         // Filter encounters based on region (if specified) and condition
-        // 🖤 Now also checks the condition function if present (for weather-aware events) 💀
+        //  Now also checks the condition function if present (for weather-aware events) 
         let availableEncounters = encounters.filter(enc => {
             // Check region
             const regionMatch = !enc.regions || enc.regions.includes('all') || enc.regions.includes(region);
             if (!regionMatch) return false;
 
-            // 🦇 Check condition function if present (e.g., weather checks)
+            //  Check condition function if present (e.g., weather checks)
             if (enc.condition && typeof enc.condition === 'function') {
                 return enc.condition();
             }
@@ -2985,7 +2985,7 @@ const TravelSystem = {
 
     // Trigger location-specific events
     triggerLocationEvents(location) {
-        // 🖤 Guard against undefined systems - prevents crash on arrival 💀
+        //  Guard against undefined systems - prevents crash on arrival 
         if (!location || !location.id) return;
 
         try {
@@ -3014,7 +3014,7 @@ const TravelSystem = {
         }
     },
 
-    // 🖤 Dispatch location change event to update ALL relevant panels 💀
+    //  Dispatch location change event to update ALL relevant panels 
     // When you arrive somewhere new, everything must know about it
     dispatchLocationChangeEvent(destination) {
         // Dispatch custom event for any listeners
@@ -3026,7 +3026,7 @@ const TravelSystem = {
             }
         }));
 
-        // 🏪 Update Market Panel - new location = new prices
+        //  Update Market Panel - new location = new prices
         if (typeof MarketSystem !== 'undefined' && MarketSystem.updateMarketDisplay) {
             MarketSystem.updateMarketDisplay();
         }
@@ -3035,7 +3035,7 @@ const TravelSystem = {
             updateMarketDisplay();
         }
 
-        // 👥 Update People Panel - new faces in new places
+        //  Update People Panel - new faces in new places
         if (typeof PeoplePanel !== 'undefined' && PeoplePanel.refresh) {
             PeoplePanel.refresh();
         }
@@ -3043,8 +3043,8 @@ const TravelSystem = {
             NPCSystem.updateNPCsForLocation(destination.id);
         }
 
-        // 📍 Update Location Panel - show the new location info
-        // 🖤 Call the ACTUAL global functions from game.js that update the location panel 💀
+        //  Update Location Panel - show the new location info
+        //  Call the ACTUAL global functions from game.js that update the location panel 
         if (typeof updateLocationInfo === 'function') {
             updateLocationInfo();
         }
@@ -3064,18 +3064,18 @@ const TravelSystem = {
             locationTypeEl.textContent = destination.type.charAt(0).toUpperCase() + destination.type.slice(1);
         }
 
-        // 🎯 Update Travel Panel Map - sync the destination display
+        //  Update Travel Panel Map - sync the destination display
         if (typeof TravelPanelMap !== 'undefined') {
             TravelPanelMap.onTravelComplete();
             TravelPanelMap.render();
         }
 
-        // 🏠 Update Property Panel if player owns property here
+        //  Update Property Panel if player owns property here
         if (typeof PropertyUI !== 'undefined' && PropertyUI.refresh) {
             PropertyUI.refresh();
         }
 
-        // 📜 Update Quest Tracker if quests are location-specific
+        //  Update Quest Tracker if quests are location-specific
         if (typeof QuestSystem !== 'undefined' && QuestSystem.checkLocationQuests) {
             QuestSystem.checkLocationQuests(destination.id);
         }
@@ -3084,16 +3084,16 @@ const TravelSystem = {
     },
 
     // Update travel UI
-    // 🖤 FIX: Don't destroy the entire travel panel - update only the destination display area 💀
+    //  FIX: Don't destroy the entire travel panel - update only the destination display area 
     // This allows the panel tabs and structure to remain intact during travel
     updateTravelUI() {
-        // 🖤 Prefer TravelPanelMap's display update if available - it's more sophisticated 💀
+        //  Prefer TravelPanelMap's display update if available - it's more sophisticated 
         if (typeof TravelPanelMap !== 'undefined' && TravelPanelMap.updateTravelProgressDisplay) {
             TravelPanelMap.updateTravelProgressDisplay();
             return;
         }
 
-        // 🖤 Fallback: Update ONLY the destination display, NOT the entire panel 💀
+        //  Fallback: Update ONLY the destination display, NOT the entire panel 
         const displayEl = document.getElementById('current-destination-display');
         if (!displayEl) return;
 
@@ -3133,7 +3133,7 @@ const TravelSystem = {
                 </div>
             `;
 
-            // 🖤 Switch to the Destination tab to show progress 💀
+            //  Switch to the Destination tab to show progress 
             const destTab = document.getElementById('destination-tab');
             const destBtn = document.querySelector('[data-travel-tab="destination"]');
             if (destTab && destBtn) {
@@ -3144,7 +3144,7 @@ const TravelSystem = {
                 destBtn.classList.add('active');
             }
         } else {
-            // 🖤 Not traveling - show "No Destination" message 💀
+            //  Not traveling - show "No Destination" message 
             displayEl.innerHTML = `
                 <div class="no-destination">
                     <span class="no-dest-icon">🎯</span>
@@ -3193,7 +3193,7 @@ const TravelSystem = {
 
     // Get current location
     getCurrentLocation() {
-        // 🖤 First check TravelSystem's playerPosition.currentLocation
+        //  First check TravelSystem's playerPosition.currentLocation
         if (this.playerPosition.currentLocation) {
             const loc = this.locations[this.playerPosition.currentLocation] ||
                    this.resourceNodes.find(n => n.id === this.playerPosition.currentLocation) ||
@@ -3201,7 +3201,7 @@ const TravelSystem = {
             if (loc) return loc;
         }
 
-        // 🖤 CRITICAL: Also check game.currentLocation - this is often set but playerPosition isn't synced
+        //  CRITICAL: Also check game.currentLocation - this is often set but playerPosition isn't synced
         if (typeof game !== 'undefined' && game.currentLocation?.id) {
             const loc = this.locations[game.currentLocation.id] ||
                    this.resourceNodes.find(n => n.id === game.currentLocation.id) ||
@@ -3228,7 +3228,7 @@ const TravelSystem = {
             }
         }
 
-        // 🖤 If no location found, return starting location to prevent null crashes 💀
+        //  If no location found, return starting location to prevent null crashes 
         if (!nearestLocation && this.locations) {
             // Try to find starting location or first available location
             nearestLocation = this.locations['driftwood_crossing'] ||
@@ -3338,7 +3338,7 @@ const TravelSystem = {
     getResourceIcon(type) {
         const icons = {
             forest: '🌲',
-            mine: '⛏️',
+            mine: '',
             herb: '🌿'
         };
         return icons[type] || '💎';
@@ -3413,7 +3413,7 @@ const TravelSystem = {
             village: '🏠',
             capital: '👑',
             port: '⚓',
-            mine: '⛏️',
+            mine: '',
             forest: '🌲',
             farm: '🌾',
             inn: '🍺',
@@ -3777,7 +3777,7 @@ const TravelSystem = {
             game.player.inventory[resourceType] = 0;
         }
         game.player.inventory[resourceType] += yield;
-        // 🖤 Emit item-received for quest progress tracking 💀
+        //  Emit item-received for quest progress tracking 
         document.dispatchEvent(new CustomEvent('item-received', {
             detail: { item: resourceType, quantity: yield, source: 'travel_forage' }
         }));
@@ -3854,11 +3854,11 @@ const TravelSystem = {
             favoriteRoutes: this.favoriteRoutes,
             resourceNodes: this.resourceNodes,
             pointsOfInterest: this.pointsOfInterest,
-            // 🖤 Doom World state 💀
+            //  Doom World state 
             currentWorld: this.currentWorld,
             discoveredPaths: Array.from(this.discoveredPaths),
             doomDiscoveredPaths: Array.from(this.doomDiscoveredPaths),
-            // 🖤 Encounter daily limits - persist across saves 💀
+            //  Encounter daily limits - persist across saves 
             _encountersToday: this._encountersToday,
             _lastEncounterDay: this._lastEncounterDay
         };
@@ -3881,7 +3881,7 @@ const TravelSystem = {
         if (state.pointsOfInterest) {
             this.pointsOfInterest = state.pointsOfInterest;
         }
-        // 🖤 Load Doom World state 💀
+        //  Load Doom World state 
         if (state.currentWorld) {
             this.currentWorld = state.currentWorld;
             this.saveCurrentWorld(); // Sync to localStorage
@@ -3894,7 +3894,7 @@ const TravelSystem = {
             this.doomDiscoveredPaths = new Set(state.doomDiscoveredPaths);
             this.saveDoomDiscoveredPaths(); // Sync to localStorage
         }
-        // 🖤 Load encounter daily limits - no more save/load exploits! 💀
+        //  Load encounter daily limits - no more save/load exploits! 
         if (typeof state._encountersToday === 'number') {
             this._encountersToday = state._encountersToday;
         }
@@ -3927,15 +3927,15 @@ TravelSystem.showTravelPanel = function() {
     if (travelPanel) {
         travelPanel.classList.remove('hidden');
 
-        // 🖤 Smart tab selection: show destinations if we have one, otherwise map 💀
-        // The void guides the traveler to choose their fate first ⚰️
+        //  Smart tab selection: show destinations if we have one, otherwise map 
+        // The void guides the traveler to choose their fate first
         // Check both TravelPanelMap and GameWorldRenderer for destination (they sync with each other)
         const hasDestinationInPanel = typeof TravelPanelMap !== 'undefined' && TravelPanelMap.currentDestination;
         const hasDestinationInWorld = typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.currentDestination;
         const hasDestination = hasDestinationInPanel || hasDestinationInWorld;
         const defaultTab = hasDestination ? 'destinations' : 'map';
 
-        // Update tab buttons 🦇
+        // Update tab buttons 
         document.querySelectorAll('.travel-tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -3944,7 +3944,7 @@ TravelSystem.showTravelPanel = function() {
             activeBtn.classList.add('active');
         }
 
-        // Update tab content visibility 🗡️
+        // Update tab content visibility 
         document.querySelectorAll('.travel-tab-content').forEach(content => {
             content.classList.remove('active');
         });
@@ -3953,11 +3953,11 @@ TravelSystem.showTravelPanel = function() {
             activeTab.classList.add('active');
         }
 
-        // Render the mini map (needed for map tab, and keeps it ready) 🌙
+        // Render the mini map (needed for map tab, and keeps it ready) 
         if (typeof TravelPanelMap !== 'undefined' && TravelPanelMap.render) {
             setTimeout(() => {
                 TravelPanelMap.render();
-                // 🔮 Center on player when opening map tab
+                //  Center on player when opening map tab
                 if (defaultTab === 'map' && TravelPanelMap.centerOnPlayer) {
                     TravelPanelMap.centerOnPlayer();
                 }

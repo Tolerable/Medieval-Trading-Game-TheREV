@@ -1,7 +1,7 @@
 # 🖤 DEBOOGER README - The Secret Arts of Game Manipulation 🖤🐛
 ## Medieval Trading Game - Debooger Console Documentation
 
-**Version:** 0.90.00 - The Unified Dialogue Update
+**Version:** 0.90.01 - The Unified Dialogue Update
 **Last Updated:** 2025-12-05
 **Access:** Click the 🐛 Debooger button (bottom-right) OR set `GameConfig.debooger.enabled = true`
 **Total Commands:** 47

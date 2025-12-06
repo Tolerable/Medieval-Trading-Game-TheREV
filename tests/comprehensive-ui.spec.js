@@ -1,8 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-// 🖤 COMPREHENSIVE UI TESTS - Testing the darkness thoroughly
+// COMPREHENSIVE UI TESTS - Testing the darkness thoroughly
 // ═══════════════════════════════════════════════════════════════
 // Additional Playwright tests for uncovered UI elements
 // Made by Unity AI Lab - Hackall360, Sponge, GFourteen
+// Version: 0.90.01
 // ═══════════════════════════════════════════════════════════════
 
 const { test, expect } = require('@playwright/test');
@@ -10,13 +11,13 @@ const config = require('./config/test-config');
 const { startGameAndSkipIntro, openDeboogerConsole, runDeboogerCommand } = require('./helpers/test-helpers');
 
 // ═══════════════════════════════════════════════════════════════
-// 🗺️ MAP CONTROLS TESTS
+// MAP CONTROLS TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Map Controls', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Use new helper that handles ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Use new helper that handles ALL intro modals
   });
 
   test('Zoom buttons exist and are functional on map', async ({ page }) => {
@@ -142,13 +143,13 @@ test.describe('Map Controls', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 💾 SAVE/LOAD SYSTEM TESTS
+// SAVE/LOAD SYSTEM TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Save/Load System', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Save button exists and SaveManager has save functionality', async ({ page }) => {
@@ -236,19 +237,18 @@ test.describe('Save/Load System', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🚗 TRANSPORTATION SYSTEM TESTS
+// TRANSPORTATION SYSTEM TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Transportation System', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Transportation button exists and is functional', async ({ page }) => {
     const result = await page.evaluate(() => {
       const transportBtn = document.getElementById('bottom-transport-btn') ||
-                          document.querySelector('button:has-text("🚗")') ||
                           document.querySelector('button:has-text("Transport")');
 
       const hasBtn = transportBtn !== null;
@@ -324,13 +324,13 @@ test.describe('Transportation System', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🏠 PROPERTY SYSTEM TESTS
+// PROPERTY SYSTEM TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Property System', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Property system exists with purchase and income capabilities', async ({ page }) => {
@@ -436,13 +436,13 @@ test.describe('Property System', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🎒 INVENTORY ADVANCED TESTS
+// INVENTORY ADVANCED TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Inventory Advanced Features', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Inventory has sort button and functionality', async ({ page }) => {
@@ -509,12 +509,12 @@ test.describe('Inventory Advanced Features', () => {
   });
 
   test('Item details panel can display item information', async ({ page }) => {
-    // 🖤 Give item via debooger command 💀
+    // Give item via debooger command
     await openDeboogerConsole(page);
     await runDeboogerCommand(page, 'giveitem bread 5');
     await page.waitForTimeout(300);
 
-    // Close debooger console 🦇
+    // Close debooger console
     await page.evaluate(() => {
       const dc = document.getElementById('debooger-console');
       if (dc) dc.style.display = 'none';
@@ -569,13 +569,13 @@ test.describe('Inventory Advanced Features', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🏪 MARKET ADVANCED TESTS
+// MARKET ADVANCED TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Market Advanced Features', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Market tabs exist and can switch between buy/sell', async ({ page }) => {
@@ -693,13 +693,13 @@ test.describe('Market Advanced Features', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// ⚔️ EQUIPMENT SYSTEM TESTS
+// EQUIPMENT SYSTEM TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Equipment System', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('EquipmentSystem exists with equip/unequip functionality', async ({ page }) => {
@@ -789,13 +789,13 @@ test.describe('Equipment System', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🎭 NPC INTERACTION TESTS
+// NPC INTERACTION TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('NPC Interactions', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('NPC systems exist with dialogue and merchant capabilities', async ({ page }) => {
@@ -873,13 +873,13 @@ test.describe('NPC Interactions', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🎨 UI POLISH SYSTEM TESTS
+// UI POLISH SYSTEM TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('UI Polish Features', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Tooltip system exists', async ({ page }) => {
@@ -907,13 +907,13 @@ test.describe('UI Polish Features', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🌤️ WEATHER SYSTEM TESTS
+// WEATHER SYSTEM TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Weather System', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('WeatherSystem exists', async ({ page }) => {
@@ -930,13 +930,13 @@ test.describe('Weather System', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// ⚙️ CRAFTING SYSTEM TESTS
+// CRAFTING SYSTEM TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Crafting System', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
   });
 
   test('Crafting/Economy System exists', async ({ page }) => {
@@ -960,7 +960,7 @@ test.describe('Crafting System', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🏆 LEADERBOARD TESTS
+// LEADERBOARD TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Leaderboard System', () => {
@@ -993,7 +993,7 @@ test.describe('Leaderboard System', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🔊 AUDIO SYSTEM TESTS
+// AUDIO SYSTEM TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Audio System', () => {
@@ -1024,16 +1024,16 @@ test.describe('Audio System', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🎮 KEYBOARD SHORTCUTS TESTS
+// KEYBOARD SHORTCUTS TESTS
 // ═══════════════════════════════════════════════════════════════
 
 test.describe('Keyboard Shortcuts', () => {
-  // 💔 Keyboard events don't work reliably in Playwright test context
+  // Keyboard events don't work reliably in Playwright test context
   // Use direct function calls as primary method, keyboard as secondary
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await startGameAndSkipIntro(page);  // 🖤 Handles loading, setup, and ALL intro modals 💀
+    await startGameAndSkipIntro(page);  // Handles loading, setup, and ALL intro modals
     // Ensure game is in PLAYING state for keyboard shortcuts to work
     await page.evaluate(() => {
       if (typeof game !== 'undefined' && typeof GameState !== 'undefined') {
@@ -1064,7 +1064,7 @@ test.describe('Keyboard Shortcuts', () => {
   });
 
   test('I key opens inventory and shows inventory items', async ({ page }) => {
-    // 🖤 Use direct function call since keyboard events are unreliable in Playwright
+    // Use direct function call since keyboard events are unreliable in Playwright
     const result = await page.evaluate(() => {
       // First try keyboard simulation via KeyBindings
       if (typeof KeyBindings !== 'undefined' && KeyBindings.openInventory) {
@@ -1088,7 +1088,7 @@ test.describe('Keyboard Shortcuts', () => {
   });
 
   test('M key opens market (only at Royal Capital) or shows message', async ({ page }) => {
-    // 🖤 GAME DESIGN: Market (M key) only works at Royal Capital
+    // GAME DESIGN: Market (M key) only works at Royal Capital
     // In other locations, it shows a message "There is no grand market here"
     // This test verifies the KeyBindings.openMarket function exists and responds correctly
 
@@ -1118,7 +1118,7 @@ test.describe('Keyboard Shortcuts', () => {
       };
     });
 
-    // 🖤 Test passes if:
+    // Test passes if:
     // 1. KeyBindings.openMarket exists AND
     // 2. If at Royal Capital: market opens with tabs
     // 3. If NOT at Royal Capital: market stays closed (correct behavior)
@@ -1135,7 +1135,7 @@ test.describe('Keyboard Shortcuts', () => {
   });
 
   test('T key opens travel panel with destinations', async ({ page }) => {
-    // 🖤 Use direct function call
+    // Use direct function call
     const result = await page.evaluate(() => {
       if (typeof KeyBindings !== 'undefined' && KeyBindings.openTravel) {
         KeyBindings.openTravel();
