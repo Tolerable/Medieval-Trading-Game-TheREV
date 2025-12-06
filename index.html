@@ -238,10 +238,12 @@
         <!-- 🖤 TOP BAR - Time controls, title, and info widgets -->
         <div id="top-bar">
             <div class="time-controls-top">
-                <button id="pause-btn" class="time-btn active" title="Pause game time">⏸️</button>
-                <button id="normal-speed-btn" class="time-btn" title="Set time to normal speed (1x)">▶️</button>
-                <button id="fast-speed-btn" class="time-btn" title="Set time to fast speed (2x)">⏩</button>
-                <button id="very-fast-speed-btn" class="time-btn" title="Set time to very fast speed (3x)">⏭️</button>
+                <button id="pause-btn" class="time-btn" title="Pause/Resume game time">⏸️</button>
+                <select id="speed-selector" class="speed-dropdown" title="Select game speed multiplier">
+                    <option value="NORMAL">1x Normal</option>
+                    <option value="FAST">2x Fast</option>
+                    <option value="VERY_FAST">4x Faster</option>
+                </select>
             </div>
             <div class="top-bar-title" id="top-bar-title">Medieval Trading Game</div>
             <div class="top-bar-widgets" id="top-bar-widgets">

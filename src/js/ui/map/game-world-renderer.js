@@ -1900,6 +1900,18 @@ const GameWorldRenderer = {
         // Update marker position (pass alreadyScaled=true since travel coords are pre-scaled)
         this.updatePlayerMarker(currentX, currentY, true);
 
+        // Mirror the walking emoji based on travel direction
+        // Default emoji faces left, so mirror when moving right (increasing X)
+        if (this.playerMarker) {
+            const tack = this.playerMarker.querySelector('.marker-tack');
+            if (tack && travel.lastX !== undefined) {
+                const movingRight = currentX > travel.lastX;
+                // scaleX(-1) mirrors horizontally for right-facing movement
+                tack.style.transform = movingRight ? 'scaleX(-1)' : 'scaleX(1)';
+            }
+            travel.lastX = currentX;
+        }
+
         // Update travel progress display if paused (so player sees where they are)
         if (isPaused && this.playerMarker) {
             const label = this.playerMarker.querySelector('.marker-label');

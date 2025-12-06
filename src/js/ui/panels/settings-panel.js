@@ -2268,6 +2268,10 @@ const SettingsPanel = {
             voiceEnabled.addEventListener('change', (e) => {
                 if (typeof NPCVoiceChatSystem !== 'undefined') {
                     NPCVoiceChatSystem.updateSetting('voiceEnabled', e.target.checked);
+                    // When toggling voice OFF, immediately stop any playing voice
+                    if (!e.target.checked) {
+                        NPCVoiceChatSystem.stopVoicePlayback();
+                    }
                 }
             });
         }

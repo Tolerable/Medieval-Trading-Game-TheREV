@@ -42,7 +42,7 @@ const TravelPanelMap = {
     //  Uses shared styles from MapRendererBase.LOCATION_STYLES with 0.8x size multiplier
     get locationStyles() {
         const styles = {};
-        const sizeMultiplier = 0.8; // ü¶á Mini map uses smaller icons
+        const sizeMultiplier = 0.8; // ÔøΩÔøΩÔøΩ Mini map uses smaller icons
         if (typeof MapRendererBase !== 'undefined') {
             Object.entries(MapRendererBase.LOCATION_STYLES).forEach(([type, base]) => {
                 styles[type] = {
@@ -1233,28 +1233,28 @@ const TravelPanelMap = {
         this.updateDestinationDisplay();
         this.render();
 
-        //  CHECK IF GAME IS PAUSED - only auto-start if unpaused 
-        // If paused, player must unpause to begin journey (no Begin Journey button needed)
-        const isPaused = typeof TimeSystem !== 'undefined' &&
-                        (TimeSystem.isPaused || TimeSystem.currentSpeed === 'PAUSED');
+        // Auto-unpause and start travel when clicking a destination
+        // Uses player's selected speed from dropdown
+        const destName = isDiscovered ? 'Unknown Location' : location.name;
 
-        if (isPaused) {
-            // Game is paused - show message and wait for unpause
-            if (typeof addMessage === 'function') {
-                const destName = isDiscovered ? 'Unknown Location' : location.name;
-                addMessage(`üéØ Destination set: ${destName}`);
-                addMessage(`‚è∏Ô∏è Game paused - unpause to begin journey automatically`);
-            }
-            // Register listener to auto-start when unpaused
-            this.waitingToTravel = true;
-        } else {
-            // Game is running - start travel immediately
-            if (typeof addMessage === 'function') {
-                const destName = isDiscovered ? 'Unknown Location' : location.name;
-                addMessage(`üö∂ Setting off for ${destName}...`);
-            }
-            this.travelToDestination();
+        if (typeof addMessage === 'function') {
+            addMessage(`üö∂ Setting off for ${destName}...`);
         }
+
+        // If game is paused, auto-unpause with user's preferred speed
+        const isPaused = typeof TimeMachine !== 'undefined' &&
+                        (TimeMachine.isPaused || TimeMachine.currentSpeed === 'PAUSED');
+
+        if (isPaused && typeof TimeMachine !== 'undefined') {
+            // Get user's preferred speed from dropdown selection
+            const preferredSpeed = TimeMachine.userPreferredSpeed || 'NORMAL';
+            const speedLabel = TimeMachine.SPEED_LABELS?.[preferredSpeed] || preferredSpeed;
+            console.log(`Auto-resuming at ${speedLabel} speed for travel`);
+            TimeMachine.setSpeed(preferredSpeed);
+        }
+
+        // Start travel immediately
+        this.travelToDestination();
     },
 
     //  Flag to track if we're waiting to start travel when unpaused
@@ -1816,10 +1816,13 @@ const TravelPanelMap = {
         this.travelMarker.style.top = currentY + 'px';
         this.travelMarker.style.display = 'block';
 
-        // Flip direction if moving left
-        if (endLoc.mapPosition.x < startLoc.mapPosition.x) {
+        // Flip direction based on travel direction
+        // The walking emoji faces LEFT by default, so mirror when moving RIGHT
+        if (endLoc.mapPosition.x > startLoc.mapPosition.x) {
+            // Moving right - flip to face right
             this.travelMarker.style.transform = 'translate(-50%, -50%) scaleX(-1)';
         } else {
+            // Moving left - default emoji orientation
             this.travelMarker.style.transform = 'translate(-50%, -50%)';
         }
     },

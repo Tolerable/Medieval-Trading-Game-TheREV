@@ -35,12 +35,20 @@ const TimeMachine = {
     // 🗡️ Days per month (February handled dynamically for leap years)
     DAYS_IN_MONTH: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
 
-    // ⚡ Speed settings - game minutes per real second
+    // Speed settings - game minutes per real second (actual multipliers)
+    // Base rate is 2 game minutes per real second at 1x
     SPEEDS: {
-        PAUSED: 0,        // 💀 frozen in time
-        NORMAL: 2,        // 🦇 2 game minutes per real second
-        FAST: 10,         // 🗡️ 10 game minutes per real second
-        VERY_FAST: 30     // ⚰️ 30 game minutes per real second
+        PAUSED: 0,        // Frozen in time
+        NORMAL: 2,        // 1x speed - 2 game minutes per real second
+        FAST: 4,          // 2x speed - 4 game minutes per real second
+        VERY_FAST: 8      // 4x speed - 8 game minutes per real second
+    },
+
+    // Speed multiplier labels for UI
+    SPEED_LABELS: {
+        NORMAL: '1x',
+        FAST: '2x',
+        VERY_FAST: '4x'
     },
 
     // 🌙 Season definitions with gameplay effects
@@ -960,66 +968,75 @@ const TimeMachine = {
         }
     },
 
-    // ⏯️ Update time control button states
+    // Update time control UI states (pause button + speed dropdown)
     updateTimeControlButtons() {
         const speed = this.currentSpeed;
+        const isPaused = speed === 'PAUSED';
 
-        const buttons = {
-            'pause-btn': 'PAUSED',
-            'normal-speed-btn': 'NORMAL',
-            'fast-speed-btn': 'FAST',
-            'very-fast-speed-btn': 'VERY_FAST'
-        };
-
-        Object.entries(buttons).forEach(([btnId, btnSpeed]) => {
-            const btn = document.getElementById(btnId);
-            if (btn) {
-                if (speed === btnSpeed) {
-                    btn.classList.add('active');
-                    btn.style.background = 'rgba(76, 175, 80, 0.8)';
-                } else {
-                    btn.classList.remove('active');
-                    btn.style.background = '';
-                }
+        // Update pause button appearance
+        const pauseBtn = document.getElementById('pause-btn');
+        if (pauseBtn) {
+            if (isPaused) {
+                pauseBtn.classList.add('active');
+                pauseBtn.textContent = '▶️'; // Show play icon when paused
+                pauseBtn.title = 'Resume game time';
+            } else {
+                pauseBtn.classList.remove('active');
+                pauseBtn.textContent = '⏸️'; // Show pause icon when running
+                pauseBtn.title = 'Pause game time';
             }
-        });
+        }
+
+        // Update speed dropdown selection (only if not paused)
+        const speedSelector = document.getElementById('speed-selector');
+        if (speedSelector && !isPaused) {
+            speedSelector.value = speed;
+        }
     },
 
-    // ⏯️ Setup time control button handlers
+    // Setup time control handlers (pause button + speed dropdown)
     setupTimeControls() {
-        console.log('⏰ Setting up time controls...');
+        console.log('Setting up time controls...');
 
         const self = this;
 
-        const createHandler = (speed) => {
-            return function(e) {
+        // Pause button - toggles pause/resume
+        const pauseBtn = document.getElementById('pause-btn');
+        if (pauseBtn) {
+            pauseBtn.onclick = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log(`⏰ Speed button: ${speed}`);
-                self.setSpeed(speed);
-                // 🖤💀 Track user's preferred speed (not PAUSED) for interrupt restoration 💀
-                if (speed !== 'PAUSED') {
-                    self.setUserPreferredSpeed(speed);
+                if (self.isPaused) {
+                    // Resume at user's preferred speed
+                    const speed = self.userPreferredSpeed || 'NORMAL';
+                    console.log(`Resuming at ${speed} (${self.SPEED_LABELS[speed] || speed})`);
+                    self.setSpeed(speed);
+                } else {
+                    console.log('Pausing game');
+                    self.setSpeed('PAUSED');
                 }
             };
-        };
+            console.log('Pause button ready');
+        }
 
-        const buttons = [
-            { id: 'pause-btn', speed: 'PAUSED' },
-            { id: 'normal-speed-btn', speed: 'NORMAL' },
-            { id: 'fast-speed-btn', speed: 'FAST' },
-            { id: 'very-fast-speed-btn', speed: 'VERY_FAST' }
-        ];
+        // Speed dropdown - changes speed multiplier
+        const speedSelector = document.getElementById('speed-selector');
+        if (speedSelector) {
+            speedSelector.onchange = function(e) {
+                const speed = e.target.value;
+                console.log(`Speed selected: ${speed} (${self.SPEED_LABELS[speed] || speed})`);
+                self.setUserPreferredSpeed(speed);
+                // If game is running, apply the new speed immediately
+                if (!self.isPaused) {
+                    self.setSpeed(speed);
+                }
+            };
+            // Set initial value from user preference
+            speedSelector.value = self.userPreferredSpeed || 'NORMAL';
+            console.log('Speed selector ready');
+        }
 
-        buttons.forEach(({ id, speed }) => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                btn.onclick = createHandler(speed);
-                console.log(`⏰ ${speed} button ready`);
-            }
-        });
-
-        console.log('⏰ Time controls ready');
+        console.log('Time controls ready');
     },
 
     // ═══════════════════════════════════════════════════════════════
