@@ -1650,12 +1650,12 @@ const GameWorldRenderer = {
                         animation: tack-walk-right 0.4s ease-in-out infinite;
                     }
                     @keyframes tack-walk-left {
-                        0%, 100% { transform: translateY(-8px) rotate(-5deg) scaleX(1); }
-                        50% { transform: translateY(-12px) rotate(5deg) scaleX(1); }
-                    }
-                    @keyframes tack-walk-right {
                         0%, 100% { transform: translateY(-8px) rotate(-5deg) scaleX(-1); }
                         50% { transform: translateY(-12px) rotate(5deg) scaleX(-1); }
+                    }
+                    @keyframes tack-walk-right {
+                        0%, 100% { transform: translateY(-8px) rotate(-5deg) scaleX(1); }
+                        50% { transform: translateY(-12px) rotate(5deg) scaleX(1); }
                     }
                     /* 💀 July 18th Dungeon Bonanza pulse effect */
                     @keyframes bonanza-pulse {
@@ -1774,8 +1774,10 @@ const GameWorldRenderer = {
             // Set initial direction via CSS class - emoji faces LEFT by default
             if (this.currentTravel.movingRight) {
                 this.playerMarker.classList.add('moving-right');
+                console.log('🚶 MOVING RIGHT - added moving-right class, startX:', this.currentTravel.startX, 'endX:', this.currentTravel.endX);
             } else {
                 this.playerMarker.classList.remove('moving-right');
+                console.log('🚶 MOVING LEFT - removed moving-right class, startX:', this.currentTravel.startX, 'endX:', this.currentTravel.endX);
             }
             // Update label to show "TRAVELING..."
             const label = this.playerMarker.querySelector('.marker-label');
