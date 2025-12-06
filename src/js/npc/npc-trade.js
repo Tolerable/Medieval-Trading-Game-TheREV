@@ -1133,9 +1133,17 @@ const NPCTradeWindow = {
             }
         }));
 
+        // 📡 Fire item-purchased events for items player received
         for (const itemId of Object.keys(this.npcOffer.items)) {
             document.dispatchEvent(new CustomEvent('item-purchased', {
                 detail: { itemId, npc: this.currentNPC }
+            }));
+        }
+
+        // 📡 Fire item-sold events for items player gave away (for quest tracking)
+        for (const [itemId, quantity] of Object.entries(this.playerOffer.items)) {
+            document.dispatchEvent(new CustomEvent('item-sold', {
+                detail: { item: itemId, quantity: quantity, gold: 0 }
             }));
         }
 
