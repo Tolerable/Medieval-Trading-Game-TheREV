@@ -764,7 +764,9 @@ const PeoplePanel = {
         const description = this.escapeHtml(npc.description || this.getNPCDescription(npc.type || npc.id));
 
         // 🖤💀 WOW-STYLE QUEST MARKERS - Check for quest status 💀
-        const questMarker = this.getQuestMarker(npc.type || npc.id);
+        const npcTypeForQuest = npc.type || npc.id;
+        console.log(`🎴 createNPCCard: NPC "${name}" (id: ${npc.id}, type: ${npc.type}, using: ${npcTypeForQuest})`);
+        const questMarker = this.getQuestMarker(npcTypeForQuest);
         const hasDelivery = this.npcHasDeliveryForThem(npc.type || npc.id);
         // 🖤💀 Also check npc.canTrade for random encounters (smuggler, courier, pilgrim) 💀
         const canTrade = this.npcCanTrade(npc.type || npc.id) || npc.canTrade;
@@ -1310,12 +1312,15 @@ const PeoplePanel = {
         if (typeof QuestSystem === 'undefined') return [];
 
         const location = game?.currentLocation?.id;
+        console.log(`  📋 getQuestsReadyToComplete('${npcType}') at '${location}'`);
 
         // 🖤💀 Get quests where this NPC is the GIVER
         const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType, location);
+        console.log(`    activeFromNPC:`, activeFromNPC.map(q => `${q.id} (giver:${q.giver})`));
 
         // 🖤💀 ALSO get quests where this NPC is the TURN-IN target (might be different from giver!)
         const allActive = Object.values(QuestSystem.activeQuests || {});
+        console.log(`    allActive:`, allActive.map(q => `${q.id} (turnIn:${q.turnInNpc}, loc:${q.turnInLocation})`))
 
         const turnInQuests = allActive.filter(q => {
             // 🖤💀 FIX: More precise matching for turn-in NPCs 💀
@@ -1331,12 +1336,14 @@ const PeoplePanel = {
 
             return (turnInMatches || talkMatches) && locationMatches;
         });
+        console.log(`    turnInQuests:`, turnInQuests.map(q => q.id));
 
         // 🦇 Combine and dedupe
         const combined = [...activeFromNPC, ...turnInQuests];
         const uniqueQuests = [...new Map(combined.map(q => [q.id, q])).values()];
+        console.log(`    uniqueQuests (before ready filter):`, uniqueQuests.map(q => q.id));
 
-        return uniqueQuests.filter(q => {
+        const result = uniqueQuests.filter(q => {
             const progress = QuestSystem.checkProgress(q.id);
 
             // 🖤💀 Standard check - all objectives complete
@@ -1369,6 +1376,8 @@ const PeoplePanel = {
 
             return false;
         });
+        console.log(`    FINAL result:`, result.map(q => `${q.id} (status: ${QuestSystem.checkProgress(q.id).status})`));
+        return result;
     },
 
     // 📦 GET DELIVERIES FOR NPC - where this NPC is the RECIPIENT (not the giver)
@@ -2727,9 +2736,11 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         if (typeof QuestSystem === 'undefined') return null;
 
         const location = typeof game !== 'undefined' ? game.currentLocation?.id : null;
+        console.log(`🔍 getQuestMarker('${npcType}') at location '${location}'`);
 
         // 🖤 PRIORITY 1: Quest ready to turn in (? markers)
         const readyToComplete = this.getQuestsReadyToComplete(npcType);
+        console.log(`  readyToComplete:`, readyToComplete.map(q => q.id));
         if (readyToComplete.length > 0) {
             // Find the highest priority quest to show
             const mainQuest = readyToComplete.find(q => q.type === 'main');
