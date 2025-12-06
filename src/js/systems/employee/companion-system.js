@@ -346,10 +346,8 @@ const CompanionSystem = {
 
     // Update party display
     updatePartyDisplay() {
-        // Will be called when Party UI panel is created
-        const partyPanel = document.getElementById('party-panel');
-        if (partyPanel && typeof this.renderPartyPanel === 'function') {
-            this.renderPartyPanel();
+        if (typeof PartyPanel !== 'undefined' && PartyPanel.updatePanel) {
+            PartyPanel.updatePanel();
         }
     },
 
