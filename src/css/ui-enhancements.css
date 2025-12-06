@@ -45,7 +45,7 @@
     top: 6px;
 }
 
-/* 🖤 Enhanced tooltips - unified definition (merged from duplicate at line 893) */
+/* Enhanced tooltips - unified definition (merged from duplicate at line 893) */
 .tooltip {
     position: absolute;
     background: var(--bg-primary, rgba(0, 0, 0, 0.9));
@@ -161,7 +161,7 @@ input:focus, textarea:focus, select:focus {
     outline: none;
 }
 
-/* 🖤 High contrast mode - unified (direct styles + CSS variables) */
+/* High contrast mode - unified (direct styles + CSS variables) */
 .high-contrast {
     background: #000000 !important;
     color: #ffffff !important;
@@ -1279,7 +1279,7 @@ textarea:focus {
     display: flex;
 }
 
-/* 🖤 Hidden state - higher specificity to override .active/.show */
+/* Hidden state - higher specificity to override .active/.show */
 .overlay.hidden,
 .overlay.active.hidden,
 .overlay.show.hidden {

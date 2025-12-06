@@ -1,12 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME - medieval trading where capitalism meets darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
 // ═══════════════════════════════════════════════════════════════
-// this whole file is basically my 3am coding aesthetic
+// this whole file is basically my 3 AM coding aesthetic
 // if you're reading this during normal human hours, i'm judging you
 
 // 🖤 IMMEDIATE GLOBAL EXPORTS - ensure functions are available for onclick handlers
@@ -168,7 +168,7 @@ document.addEventListener('input', function(e) {
     }
 }, { passive: true });
 
-// 🦇 Expose for manual deboogering 💀
+// 🦇 Expose for manual deboogering
 window.DeboogerSystem = DeboogerSystem;
 
 // 🖤 NOTE: CurrentTaskSystem is defined in current-task-system.js (loaded before this file)
@@ -423,7 +423,7 @@ const LeaderboardFeatures = {
         }
     },
 
-    // Clear all active high scores 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+    // Clear all active high scores  FIXED: Use modal instead of browser confirm()
     clearActiveScores() {
         const doClear = () => {
             localStorage.removeItem(this.ACTIVE_SCORES_KEY);
@@ -442,8 +442,8 @@ const LeaderboardFeatures = {
                 title: '🗑️ Clear High Scores',
                 content: '<p>Are you sure you want to clear all active high scores?</p><p style="color: #f44336; font-size: 12px;">This cannot be undone.</p>',
                 buttons: [
-                    { label: '❌ Cancel', type: 'secondary', action: () => ModalSystem.hide() },
-                    { label: '🗑️ Clear', type: 'danger', action: () => { ModalSystem.hide(); doClear(); } }
+                    { text: '❌ Cancel', className: 'secondary', onClick: () => ModalSystem.hide() },
+                    { text: '🗑️ Clear', className: 'danger', onClick: () => { ModalSystem.hide(); doClear(); } }
                 ]
             });
         } else {
@@ -524,678 +524,10 @@ const LeaderboardFeatures = {
 // Expose globally
 window.LeaderboardFeatures = LeaderboardFeatures;
 
-// 🖤 KEYBOARD BINDINGS - MOVED TO src/js/ui/key-bindings.js 💀
+// 🖤 KEYBOARD BINDINGS - MOVED TO src/js/ui/key-bindings.js 
 // 🦇 800+ lines of dead code removed by Unity on 2025-12-01
 // Keyboard bindings live in src/js/ui/key-bindings.js now
-// ⚰️ RIP dead code - 750+ lines removed here 💀
-
-/* 🖤 ORPHANED CODE BLOCK - COMMENTING OUT TO FIX SYNTAX ERROR 💀
-// Setup the global key listener - the all-seeing keyboard eye
-    setupGlobalKeyListener() {
-        document.addEventListener('keydown', (event) => {
-            // 🖤 Don't intercept if typing in any text input
-            const target = event.target;
-            const isTyping = target.tagName === 'INPUT' ||
-                           target.tagName === 'TEXTAREA' ||
-                           target.isContentEditable ||
-                           target.closest('[contenteditable="true"]');
-
-            if (isTyping) {
-                return; // let them type in peace
-            }
-
-            // Handle rebinding mode
-            if (this.isRebinding) {
-                event.preventDefault();
-                this.completeRebind(event.key);
-                return;
-            }
-
-            // Process key bindings based on game state
-            this.processKeyPress(event);
-        });
-    },
-
-    // Process a key press - the moment of truth
-    processKeyPress(event) {
-        // Escape always works - the universal exit
-        if (this.matches(event, 'escape')) {
-            event.preventDefault();
-            this.handleEscape();
-            return;
-        }
-
-        // Space for pause/resume - works in playing state
-        if (this.matches(event, 'pause')) {
-            if (game.state === GameState.PLAYING) {
-                event.preventDefault();
-                this.handlePause();
-                return;
-            }
-        }
-
-        // 🖤 WASD for map panning - works in PLAYING state or when map overlay is open
-        // This should work anytime except during typing
-        if (this.matches(event, 'mapUp') || this.matches(event, 'mapDown') ||
-            this.matches(event, 'mapLeft') || this.matches(event, 'mapRight')) {
-            // Check if we're in a valid state for map panning
-            const mapOverlay = document.getElementById('world-map-overlay');
-            const isMapOpen = mapOverlay && mapOverlay.classList.contains('active');
-
-            if (game.state === GameState.PLAYING || isMapOpen) {
-                this.handleMapPan(event);
-                return;
-            }
-        }
-
-        // Only process other panel shortcuts in PLAYING state
-        if (game.state !== GameState.PLAYING) return;
-
-        // Zoom controls
-        if (this.matches(event, 'zoomIn')) {
-            event.preventDefault();
-            if (typeof GameWorldRenderer !== 'undefined') GameWorldRenderer.zoomIn();
-            return;
-        }
-        if (this.matches(event, 'zoomOut')) {
-            event.preventDefault();
-            if (typeof GameWorldRenderer !== 'undefined') GameWorldRenderer.zoomOut();
-            return;
-        }
-
-        // Panel shortcuts
-        if (this.matches(event, 'inventory')) {
-            event.preventDefault();
-            openInventory();
-            addMessage('📦 Inventory opened [I]');
-            return;
-        }
-        if (this.matches(event, 'character')) {
-            event.preventDefault();
-            this.openCharacterSheet();
-            return;
-        }
-        if (this.matches(event, 'financial')) {
-            event.preventDefault();
-            this.openFinancialSheet();
-            return;
-        }
-        if (this.matches(event, 'market')) {
-            event.preventDefault();
-            openMarket();
-            addMessage('🏪 Market opened [M]');
-            return;
-        }
-        if (this.matches(event, 'travel')) {
-            event.preventDefault();
-            openTravel();
-            addMessage('🗺️ Travel panel opened [T]');
-            return;
-        }
-        if (this.matches(event, 'map')) {
-            event.preventDefault();
-            game.showOverlay('world-map-overlay');
-            addMessage('🌍 World map opened [W]');
-            return;
-        }
-        if (this.matches(event, 'properties')) {
-            event.preventDefault();
-            game.showOverlay('property-employee-panel');
-            addMessage('🏠 Properties opened [P]');
-            return;
-        }
-        if (this.matches(event, 'achievements')) {
-            event.preventDefault();
-            if (typeof openAchievementPanel === 'function') openAchievementPanel();
-            addMessage('🏆 Achievements opened [H]');
-            return;
-        }
-        if (this.matches(event, 'settings')) {
-            event.preventDefault();
-            if (typeof SettingsPanel !== 'undefined' && SettingsPanel.show) SettingsPanel.show();
-            addMessage('⚙️ Settings opened [,]');
-            return;
-        }
-        if (this.matches(event, 'quests')) {
-            event.preventDefault();
-            if (typeof QuestSystem !== 'undefined') QuestSystem.toggleQuestLog();
-            addMessage('📜 Quest log opened [Q]');
-            return;
-        }
-
-        // Quick save/load
-        if (this.matches(event, 'quickSave')) {
-            event.preventDefault();
-            if (typeof SaveLoadSystem !== 'undefined') {
-                SaveLoadSystem.quickSave();
-                addMessage('💾 Quick saved! [F5]');
-            }
-            return;
-        }
-        if (this.matches(event, 'quickLoad')) {
-            event.preventDefault();
-            if (typeof SaveLoadSystem !== 'undefined') {
-                SaveLoadSystem.quickLoad();
-                addMessage('📂 Quick loaded! [F9]');
-            }
-            return;
-        }
-    },
-
-    // Handle escape key - the great closer
-    handleEscape() {
-        // Check for fullscreen first
-        if (document.fullscreenElement) {
-            document.exitFullscreen();
-            addMessage('🖥️ Exited fullscreen');
-            return;
-        }
-
-        // Close any open overlay
-        if (typeof game !== 'undefined' && game.hideAllOverlays) {
-            const overlays = document.querySelectorAll('.overlay.active');
-            if (overlays.length > 0) {
-                game.hideAllOverlays();
-                addMessage('✖️ Closed overlay');
-                return;
-            }
-        }
-
-        // Close panels or toggle menu
-        if (game.state === GameState.PLAYING) {
-            toggleMenu();
-        } else if (game.state !== GameState.MENU) {
-            hideAllPanels();
-            changeState(GameState.PLAYING);
-        }
-    },
-
-    // Handle pause/resume
-    handlePause() {
-        if (typeof TimeSystem !== 'undefined') {
-            if (TimeSystem.isPaused) {
-                TimeSystem.setSpeed('NORMAL');
-                addMessage('▶️ Time resumed [Space]');
-            } else {
-                TimeSystem.setSpeed('PAUSED');
-                addMessage('⏸️ Time paused [Space]');
-            }
-            if (typeof game !== 'undefined' && game.updateTimeControls) {
-                game.updateTimeControls();
-            }
-        }
-    },
-
-    // Handle map panning with WASD - works everywhere except input fields
-    handleMapPan(event) {
-        event.preventDefault(); // 🖤 prevent default browser behavior
-
-        const panAmount = 50;
-        let dx = 0, dy = 0;
-
-        if (this.matches(event, 'mapUp')) dy = panAmount;
-        if (this.matches(event, 'mapDown')) dy = -panAmount;
-        if (this.matches(event, 'mapLeft')) dx = panAmount;
-        if (this.matches(event, 'mapRight')) dx = -panAmount;
-
-        // Pan the GameWorldRenderer map
-        if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.mapState) {
-            GameWorldRenderer.mapState.offsetX += dx;
-            GameWorldRenderer.mapState.offsetY += dy;
-            GameWorldRenderer.render();
-
-            // Also update transform if method exists (for HTML-based map)
-            if (GameWorldRenderer.updateTransform) {
-                GameWorldRenderer.updateTransform();
-            }
-        }
-    },
-
-    // Open character sheet (we'll create this panel)
-    openCharacterSheet() {
-        if (typeof showCharacterSheet === 'function') {
-            showCharacterSheet();
-        } else {
-            // Create the character sheet if it doesn't exist
-            this.createCharacterSheetOverlay();
-        }
-        addMessage('👤 Character sheet opened [C]');
-    },
-
-    // Create character sheet overlay dynamically
-    createCharacterSheetOverlay() {
-        let overlay = document.getElementById('character-sheet-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'character-sheet-overlay';
-            overlay.className = 'overlay';
-            overlay.innerHTML = `
-                <div class="overlay-content character-sheet-content">
-                    <button class="overlay-close" data-close-overlay="character-sheet-overlay">×</button>
-                    <h2>👤 Character Sheet</h2>
-                    <div id="character-sheet-body"></div>
-                </div>
-            `;
-            document.getElementById('overlay-container').appendChild(overlay);
-
-            // Add close handler
-            overlay.querySelector('.overlay-close').addEventListener('click', () => {
-                overlay.classList.remove('active');
-                overlay.style.display = 'none';
-            });
-        }
-
-        // Populate the character sheet
-        this.populateCharacterSheet();
-
-        // Show the overlay
-        overlay.style.display = 'flex';
-        overlay.classList.add('active');
-    },
-
-    // Populate character sheet with all player info
-    populateCharacterSheet() {
-        const body = document.getElementById('character-sheet-body');
-        if (!body || !game.player) return;
-
-        const player = game.player;
-        const stats = player.stats || {};
-        const attrs = player.attributes || {};
-
-        body.innerHTML = `
-            <div class="char-sheet-section current-task-section">
-                <h3>🎯 Current Activity</h3>
-                <div id="current-task-display" class="current-task-display">
-                    ${this.getCurrentTaskHTML()}
-                </div>
-            </div>
-
-            <div class="char-sheet-section">
-                <h3>🏷️ Identity</h3>
-                <div class="char-info-row"><span>Name:</span><span class="char-value">${escapeHtml(player.name || 'Unknown')}</span></div>
-                <div class="char-info-row"><span>Gold:</span><span class="char-value gold">💰 ${(player.gold || 0).toLocaleString()}</span></div>
-                <div class="char-info-row"><span>Location:</span><span class="char-value">${escapeHtml(game.currentLocation?.name || 'Unknown')}</span></div>
-            </div>
-
-            <div class="char-sheet-section">
-                <h3>📊 Attributes</h3>
-                <div class="char-attrs-grid">
-                    <div class="char-attr"><span>💪 Strength</span><span>${attrs.strength || 5}</span></div>
-                    <div class="char-attr"><span>🧠 Intelligence</span><span>${attrs.intelligence || 5}</span></div>
-                    <div class="char-attr"><span>😊 Charisma</span><span>${attrs.charisma || 5}</span></div>
-                    <div class="char-attr"><span>🏃 Endurance</span><span>${attrs.endurance || 5}</span></div>
-                    <div class="char-attr"><span>🍀 Luck</span><span>${attrs.luck || 5}</span></div>
-                </div>
-            </div>
-
-            <div class="char-sheet-section">
-                <h3>❤️ Vitals</h3>
-                <div class="char-vitals">
-                    <div class="char-vital"><span>Health</span><div class="vital-bar-inline"><div style="width: ${(stats.health / stats.maxHealth) * 100}%; background: #e53935;"></div></div><span>${Math.round(stats.health)}/${Math.round(stats.maxHealth)}</span></div>
-                    <div class="char-vital"><span>Hunger</span><div class="vital-bar-inline"><div style="width: ${(stats.hunger / stats.maxHunger) * 100}%; background: #ff9800;"></div></div><span>${Math.round(stats.hunger)}/${Math.round(stats.maxHunger)}</span></div>
-                    <div class="char-vital"><span>Thirst</span><div class="vital-bar-inline"><div style="width: ${(stats.thirst / stats.maxThirst) * 100}%; background: #2196f3;"></div></div><span>${Math.round(stats.thirst)}/${Math.round(stats.maxThirst)}</span></div>
-                    <div class="char-vital"><span>Stamina</span><div class="vital-bar-inline"><div style="width: ${(stats.stamina / stats.maxStamina) * 100}%; background: #9c27b0;"></div></div><span>${Math.round(stats.stamina)}/${Math.round(stats.maxStamina)}</span></div>
-                    <div class="char-vital"><span>Happiness</span><div class="vital-bar-inline"><div style="width: ${(stats.happiness / stats.maxHappiness) * 100}%; background: #4caf50;"></div></div><span>${Math.round(stats.happiness)}/${Math.round(stats.maxHappiness)}</span></div>
-                </div>
-            </div>
-
-            <div class="char-sheet-section">
-                <h3>⚡ Active Effects</h3>
-                <div class="char-effects" id="char-effects-list">
-                    ${this.getActiveEffectsHTML()}
-                </div>
-            </div>
-
-            <div class="char-sheet-section">
-                <h3>🎒 Equipment</h3>
-                <div class="char-equipment" id="char-equipment-list">
-                    ${this.getEquipmentHTML()}
-                </div>
-            </div>
-
-            <div class="char-sheet-section">
-                <h3>⭐ Perks</h3>
-                <div class="char-perks" id="char-perks-list">
-                    ${this.getPerksHTML()}
-                </div>
-            </div>
-
-            <div class="char-sheet-section leaderboard-section">
-                <h3>🏆 Leaderboard</h3>
-                <div class="leaderboard-actions">
-                    <button class="char-action-btn preview-score-btn" onclick="LeaderboardFeatures.showScorePreview()">
-                        👁️ Preview Score
-                    </button>
-                    <button class="char-action-btn active-scores-btn" onclick="LeaderboardFeatures.showActiveHighScores()">
-                        📊 Active High Scores
-                    </button>
-                    <button class="char-action-btn retire-btn" onclick="LeaderboardFeatures.confirmRetire()">
-                        🏖️ Retire Character
-                    </button>
-                </div>
-                <p class="leaderboard-hint">Retire to immortalize your run on the Hall of Champions!</p>
-            </div>
-        `;
-    },
-
-    // Get active effects HTML
-    getActiveEffectsHTML() {
-        if (!game.player || !game.player.temporaryEffects) {
-            return '<div class="no-effects">No active effects</div>';
-        }
-        const effects = Object.entries(game.player.temporaryEffects);
-        if (effects.length === 0) {
-            return '<div class="no-effects">No active effects</div>';
-        }
-        return effects.map(([stat, effect]) => `
-            <div class="effect-item ${effect.value > 0 ? 'buff' : 'debuff'}">
-                <span>${stat}: ${effect.value > 0 ? '+' : ''}${effect.value}</span>
-                <span class="effect-duration">${effect.duration}min left</span>
-            </div>
-        `).join('');
-    },
-
-    // Get equipment HTML - now uses EquipmentSystem
-    getEquipmentHTML() {
-        // use EquipmentSystem if available
-        if (typeof EquipmentSystem !== 'undefined') {
-            return EquipmentSystem.createEquipmentHTML();
-        }
-
-        // fallback for old equipment format
-        if (!game.player || !game.player.equipment) {
-            return '<div class="no-equipment">No equipment - visit a merchant to buy gear!</div>';
-        }
-        const equipment = Object.entries(game.player.equipment).filter(([_, itemId]) => itemId);
-        if (equipment.length === 0) {
-            return '<div class="no-equipment">No equipment - visit a merchant to buy gear!</div>';
-        }
-        return equipment.map(([slot, itemId]) => {
-            const item = ItemDatabase?.items?.[itemId];
-            return `
-                <div class="equipment-slot">
-                    <span class="slot-icon">${item?.icon || '📦'}</span>
-                    <span class="slot-name">${slot}:</span>
-                    <span class="item-name">${item?.name || itemId}</span>
-                </div>
-            `;
-        }).join('');
-    },
-
-    // Get perks HTML - translating your tragic backstory into displayable form
-    getPerksHTML() {
-        console.log('🖤 getPerksHTML called, game.player.perks:', game.player?.perks);
-
-        if (!game.player || !game.player.perks || game.player.perks.length === 0) {
-            return '<div class="no-perks">no perks selected... a blank slate of mediocrity</div>';
-        }
-
-        // ensure we have access to the perks database
-        const perksDB = typeof perks !== 'undefined' ? perks : window.perks;
-        console.log('🖤 perksDB available:', !!perksDB, 'keys:', perksDB ? Object.keys(perksDB).slice(0, 5) : 'none');
-
-        return game.player.perks.map(perkIdOrObj => {
-            // handle both string IDs and full perk objects (because consistency is for the weak)
-            let perkData = null;
-            let perkId = null;
-
-            if (typeof perkIdOrObj === 'string') {
-                // it's just an ID, look up the full perk definition
-                perkId = perkIdOrObj;
-                perkData = perksDB ? perksDB[perkIdOrObj] : null;
-                console.log(`🖤 looking up perk '${perkIdOrObj}':`, perkData ? 'found' : 'NOT FOUND');
-            } else if (typeof perkIdOrObj === 'object' && perkIdOrObj !== null) {
-                // it's already an object, use it directly
-                perkData = perkIdOrObj;
-                perkId = perkIdOrObj.id || 'unknown';
-                console.log(`🖤 perk is object with id '${perkId}':`, perkData.name);
-            }
-
-            // if we still cant find the perk, show what we know
-            if (!perkData) {
-                console.warn(`🖤 perk data not found for: ${perkIdOrObj}, type: ${typeof perkIdOrObj}`);
-                return `
-                    <div class="perk-item unknown" title="perk data not found for: ${perkIdOrObj}">
-                        <span class="perk-name">❓ ${perkIdOrObj || 'Unknown Perk'}</span>
-                        <span class="perk-desc">mysterious origins... even we dont know what this does</span>
-                    </div>
-                `;
-            }
-
-            // build the tooltip with all the juicy details
-            const effectsList = perkData.effects ? Object.entries(perkData.effects)
-                .map(([key, val]) => `${key}: ${typeof val === 'number' ? (val > 0 ? '+' : '') + (val * 100).toFixed(0) + '%' : val}`)
-                .join(', ') : '';
-
-            const negativesList = perkData.negativeEffects ? Object.entries(perkData.negativeEffects)
-                .map(([key, val]) => `${key}: ${typeof val === 'number' ? '-' + (val * 100).toFixed(0) + '%' : val}`)
-                .join(', ') : '';
-
-            const tooltip = `${perkData.description || ''}${effectsList ? '\\n\\n✨ Bonuses: ' + effectsList : ''}${negativesList ? '\\n\\n💀 Drawbacks: ' + negativesList : ''}`;
-
-            return `
-                <div class="perk-item ${perkData.type || ''}" title="${tooltip.replace(/"/g, '&quot;')}">
-                    <span class="perk-icon">${perkData.icon || '⭐'}</span>
-                    <div class="perk-info">
-                        <span class="perk-name">${perkData.name || perkIdOrObj}</span>
-                        <span class="perk-desc">${perkData.description || 'no description available'}</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    },
-
-    // Get current task HTML - what is the player doing right now?
-    getCurrentTaskHTML() {
-        const task = CurrentTaskSystem.getCurrentTask();
-        const taskClass = task.type || 'idle';
-
-        return `
-            <div class="current-task ${taskClass}">
-                <span class="task-icon">${task.icon}</span>
-                <div class="task-details">
-                    <span class="task-action">${task.action}</span>
-                    ${task.detail ? `<span class="task-detail">${task.detail}</span>` : ''}
-                </div>
-            </div>
-        `;
-    },
-
-    // Open financial sheet
-    openFinancialSheet() {
-        console.log('🖤 openFinancialSheet called');
-        this.createFinancialSheetOverlay();
-        addMessage('💰 Financial sheet opened [F]');
-    },
-
-    // Create financial sheet overlay
-    createFinancialSheetOverlay() {
-        console.log('🖤 createFinancialSheetOverlay called');
-        let overlay = document.getElementById('financial-sheet-overlay');
-        if (!overlay) {
-            console.log('🖤 creating new financial sheet overlay');
-            overlay = document.createElement('div');
-            overlay.id = 'financial-sheet-overlay';
-            overlay.className = 'overlay';
-            overlay.innerHTML = `
-                <div class="overlay-content financial-sheet-content">
-                    <button class="overlay-close" data-close-overlay="financial-sheet-overlay">×</button>
-                    <h2>💰 Financial Report</h2>
-                    <div id="financial-sheet-body"></div>
-                </div>
-            `;
-            const container = document.getElementById('overlay-container');
-            console.log('🖤 overlay-container found:', !!container);
-            if (container) {
-                container.appendChild(overlay);
-            } else {
-                gameDeboogerWarn('🖤 overlay-container NOT FOUND - appending to body');
-                document.body.appendChild(overlay);
-            }
-
-            // Add close handler
-            overlay.querySelector('.overlay-close').addEventListener('click', () => {
-                overlay.classList.remove('active');
-                overlay.style.display = 'none';
-            });
-        }
-
-        // Populate the financial sheet
-        this.populateFinancialSheet();
-
-        // Show the overlay
-        console.log('🖤 showing financial overlay');
-        overlay.style.display = 'flex';
-        overlay.classList.add('active');
-        overlay.classList.remove('hidden');
-        console.log('🖤 financial overlay classes:', overlay.className);
-    },
-
-    // Populate financial sheet
-    populateFinancialSheet() {
-        const body = document.getElementById('financial-sheet-body');
-        if (!body) return;
-
-        const gold = game.player?.gold || 0;
-        const properties = typeof PropertySystem !== 'undefined' ? PropertySystem.getProperties() : [];
-        const employees = typeof EmployeeSystem !== 'undefined' ? EmployeeSystem.getEmployees() : [];
-        const tradeRoutes = typeof TradeRouteSystem !== 'undefined' ? TradeRouteSystem.getTradeRoutes() : [];
-
-        // Calculate income/expenses
-        let dailyIncome = 0;
-        let weeklyWages = 0;
-        properties.forEach(p => { dailyIncome += p.income || 0; });
-        employees.forEach(e => { weeklyWages += e.wage || 0; });
-
-        body.innerHTML = `
-            <div class="fin-section">
-                <h3>💎 Current Assets</h3>
-                <div class="fin-row main"><span>Gold on Hand:</span><span class="gold-value">💰 ${gold.toLocaleString()}</span></div>
-            </div>
-
-            <div class="fin-section">
-                <h3>📈 Income</h3>
-                <div class="fin-row"><span>Daily Property Income:</span><span class="positive">+${dailyIncome.toLocaleString()}/day</span></div>
-                <div class="fin-row"><span>Active Trade Routes:</span><span>${tradeRoutes.length}</span></div>
-            </div>
-
-            <div class="fin-section">
-                <h3>📉 Expenses</h3>
-                <div class="fin-row"><span>Weekly Employee Wages:</span><span class="negative">-${weeklyWages.toLocaleString()}/week</span></div>
-            </div>
-
-            <div class="fin-section">
-                <h3>🏠 Properties (${properties.length})</h3>
-                ${properties.length > 0 ? properties.map(p => `
-                    <div class="fin-property">
-                        <span>${p.name || 'Property'}</span>
-                        <span class="positive">+${(p.income || 0).toLocaleString()}/day</span>
-                    </div>
-                `).join('') : '<div class="no-data">No properties owned</div>'}
-            </div>
-
-            <div class="fin-section">
-                <h3>👥 Employees (${employees.length})</h3>
-                ${employees.length > 0 ? employees.map(e => `
-                    <div class="fin-employee">
-                        <span>${e.name || 'Employee'} - ${e.role || 'Worker'}</span>
-                        <span class="negative">-${(e.wage || 0).toLocaleString()}/week</span>
-                    </div>
-                `).join('') : '<div class="no-data">No employees hired</div>'}
-            </div>
-
-            <div class="fin-section summary">
-                <h3>📊 Summary</h3>
-                <div class="fin-row"><span>Est. Daily Profit:</span><span class="${dailyIncome - (weeklyWages / 7) >= 0 ? 'positive' : 'negative'}">${(dailyIncome - (weeklyWages / 7)).toFixed(0)}/day</span></div>
-                <div class="fin-row"><span>Est. Weekly Profit:</span><span class="${(dailyIncome * 7) - weeklyWages >= 0 ? 'positive' : 'negative'}">${((dailyIncome * 7) - weeklyWages).toLocaleString()}/week</span></div>
-            </div>
-        `;
-    },
-
-    // Start rebinding a key
-    startRebind(action) {
-        this.isRebinding = true;
-        this.rebindingAction = action;
-        addMessage(`⌨️ Press any key to bind to "${this.descriptions[action]}"...`);
-    },
-
-    // Complete rebinding
-    completeRebind(key) {
-        if (this.rebindingAction) {
-            this.setKey(this.rebindingAction, key);
-        }
-        this.isRebinding = false;
-        this.rebindingAction = null;
-
-        // Refresh the settings UI if open
-        if (typeof SettingsPanel !== 'undefined' && SettingsPanel.refreshKeyBindingsUI) {
-            SettingsPanel.refreshKeyBindingsUI();
-        }
-    },
-
-    // Get all bindings for settings UI
-    getAllBindings() {
-        return Object.entries(this.current).map(([action, key]) => ({
-            action,
-            key,
-            description: this.descriptions[action] || action,
-            displayKey: this.formatKey(key)
-        }));
-    },
-
-    // Open Market panel
-    openMarket() {
-        if (typeof openMarket === 'function') {
-            openMarket();
-        } else {
-            game.showOverlay('market-panel');
-        }
-    },
-
-    // Open Travel panel
-    openTravel() {
-        if (typeof openTravel === 'function') {
-            openTravel();
-        } else {
-            game.showOverlay('travel-panel');
-        }
-    },
-
-    // Open Transportation panel
-    openTransportation() {
-        if (typeof openTransportation === 'function') {
-            openTransportation();
-        } else {
-            game.showOverlay('transportation-panel');
-        }
-    },
-
-    // Open Inventory panel
-    openInventory() {
-        if (typeof openInventory === 'function') {
-            openInventory();
-        } else {
-            game.showOverlay('inventory-panel');
-        }
-    },
-
-    // Open Properties/Employee panel
-    openProperties() {
-        game.showOverlay('property-employee-panel');
-        if (typeof PropertyEmployeeUI !== 'undefined' && PropertyEmployeeUI.refresh) {
-            PropertyEmployeeUI.refresh();
-        }
-    },
-
-    // Open Quest Log - where all your suffering is documented
-    openQuests() {
-        if (typeof QuestSystem !== 'undefined') {
-            QuestSystem.toggleQuestLog();
-            addMessage('📜 Quest log opened [Q]');
-        }
-    }
-};
-END OF ORPHANED CODE BLOCK 💀 */
+// ⚰️ RIP dead code - 750+ lines removed here 
 
 // ═══════════════════════════════════════════════════════════════
 // 📝 GAME LOG MANAGER - tracking everything for deboogering 🦇
@@ -1428,251 +760,12 @@ const GameState = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🖤 TIME SYSTEM - EXTRACTED TO src/js/core/time-system.js
+// 🖤 TIME SYSTEM - EXTRACTED TO src/js/core/time-machine.js
 // ═══════════════════════════════════════════════════════════════
 // ⚰️ RIP inline TimeSystem - you've been promoted to your own file
 // 🦇 The darkness demanded better code organization
 // 💀 If TimeSystem is undefined, something's wrong with script loading
 // ═══════════════════════════════════════════════════════════════
-
-/* 🖤💀 ARCHIVED TimeSystem - MUST REMAIN COMMENTED OUT! 💀🖤
- * The REAL TimeSystem is defined in time-machine.js (loaded earlier as alias to TimeMachine)
- * This duplicate was OVERWRITING the time-machine.js version and causing bugs:
- *   - Vitals (hunger/thirst) decaying even when game was paused!
- *   - TimeMachine.isPaused was true, but this TimeSystem.isPaused started as false
- *   - processPlayerStatsOverTime() checked the WRONG object
- * Commented out 2025-12-05 by Unity to fix the vitals decay when paused issue
- *
- * EXTRACTED - TimeSystem now lives at src/js/core/time-machine.js
- * ⏰ TIME MANAGEMENT - aka "time is a construct but we need it anyway"
- * fun fact: time moves differently when you're coding at night
- * (spoiler: it moves FAST and suddenly it's 4am and you haven't eaten)
-
-const TimeSystem_DEAD_CODE = {
-    // these are just... time being time, nothing poetic here
-    MINUTES_PER_HOUR: 60,
-    HOURS_PER_DAY: 24,
-    DAYS_PER_WEEK: 7,
-    DAYS_PER_MONTH: 30,  // medieval calendar says screw accuracy
-    MONTHS_PER_YEAR: 12,
-
-    // ⚡ speed settings - 2 game minutes = 1 real second at NORMAL
-    SPEEDS: {
-        PAUSED: 0,        // frozen like my heart
-        NORMAL: 2,        // 2 game minutes per real second (1 hour = 30 real seconds)
-        FAST: 10,         // 10 game minutes per real second (1 hour = 6 real seconds)
-        VERY_FAST: 30     // 30 game minutes per real second (1 hour = 2 real seconds)
-    },
-
-    // the actual time variables living rent-free in memory
-    currentTime: {
-        day: 1,
-        hour: 8,
-        minute: 0,
-        year: 1,
-        month: 1,
-        week: 1
-    },
-
-    // control variables (because we're control freaks but like, in a time way)
-    currentSpeed: 'NORMAL',
-    isPaused: false,
-    lastUpdateTime: 0,
-    accumulatedTime: 0,
-
-    // 🌙 init - where time begins its dark journey
-    init() {
-        this.currentTime = {
-            day: 1,
-            hour: 8,
-            minute: 0,
-            year: 1,
-            month: 1,
-            week: 1
-        };
-        // Game starts PAUSED so player can read the intro
-        this.currentSpeed = 'PAUSED';
-        this.isPaused = true;
-        this.lastUpdateTime = Date.now();
-        this.accumulatedTime = 0;
-        console.log('⏸️ Game starting PAUSED - press play when ready!');
-    },
-
-    // ⚙️ update - making time move like the existential dread that it is
-    update(deltaTime) {
-        if (this.isPaused || this.currentSpeed === 'PAUSED') {
-            return false;  // time stands still (wouldn't that be nice?)
-        }
-
-        const speedMultiplier = this.SPEEDS[this.currentSpeed];
-        if (speedMultiplier === 0) return false;
-
-        // converting real time to game time (basically time travel but boring)
-        const gameMinutesPassed = (deltaTime / 1000) * speedMultiplier;
-        this.accumulatedTime += gameMinutesPassed;
-
-        // only process whole minutes cause we're not THAT precise
-        const minutesToProcess = Math.floor(this.accumulatedTime);
-        if (minutesToProcess > 0) {
-            this.accumulatedTime -= minutesToProcess;
-            this.addMinutes(minutesToProcess);
-            return true;  // ✨ time marches on, as it does ✨
-        }
-
-        return false;
-    },
-
-    // 📅 addMinutes - the cascade of time's cruel progression
-    addMinutes(minutes) {
-        this.currentTime.minute += minutes;
-
-        // when minutes overflow into hours (just like my emotions)
-        while (this.currentTime.minute >= this.MINUTES_PER_HOUR) {
-            this.currentTime.minute -= this.MINUTES_PER_HOUR;
-            this.currentTime.hour++;
-
-            // hours overflow into days... the cycle continues
-            if (this.currentTime.hour >= this.HOURS_PER_DAY) {
-                this.currentTime.hour -= this.HOURS_PER_DAY;
-                this.currentTime.day++;
-                this.currentTime.week = Math.ceil(this.currentTime.day / this.DAYS_PER_WEEK);
-
-
-                // days roll into months (the calendar doesn't care about your feelings)
-                if (this.currentTime.day > this.DAYS_PER_MONTH) {
-                    this.currentTime.day = 1;
-                    this.currentTime.month++;
-
-                    // months become years and suddenly we're all older
-                    if (this.currentTime.month > this.MONTHS_PER_YEAR) {
-                        this.currentTime.month = 1;
-                        this.currentTime.year++;
-                    }
-                }
-            }
-        }
-    },
-
-    // ⚡ setSpeed - controlling how fast we spiral through time
-    setSpeed(speed) {
-        if (this.SPEEDS.hasOwnProperty(speed)) {
-            const wasAtDestinationReady = this.isPaused && speed !== 'PAUSED';
-            this.currentSpeed = speed;
-            this.isPaused = (speed === 'PAUSED');
-
-            // 🚶 AUTO-TRAVEL: when unpausing with a destination set, begin the journey
-            // because clicking play should actually DO something when you've got somewhere to go
-            if (wasAtDestinationReady && !this.isPaused) {
-                this.checkAndStartPendingTravel();
-            }
-
-            return true;
-        }
-        return false;
-    },
-
-    // 🎯 Check for pending destination and start travel if player isn't already traveling
-    checkAndStartPendingTravel() {
-        // Dont start travel if already traveling - that would be... problematic
-        if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling) {
-            return;
-        }
-
-        // 🖤 First try TravelPanelMap's onGameUnpaused (handles the full travel flow)
-        if (typeof TravelPanelMap !== 'undefined' && TravelPanelMap.currentDestination && TravelPanelMap.onGameUnpaused) {
-            TravelPanelMap.onGameUnpaused();
-            return; // TravelPanelMap handles everything, don't double-call
-        }
-
-        // 🔮 Fallback: Check GameWorldRenderer for pending destination only
-        let destinationId = null;
-
-        if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.currentDestination) {
-            destinationId = GameWorldRenderer.currentDestination.id;
-        }
-
-        // Got somewhere to go? lets roll - use startTravel not travelTo
-        if (destinationId && typeof TravelSystem !== 'undefined' && TravelSystem.startTravel) {
-            // Make sure its not our current location (that would be silly)
-            if (typeof game !== 'undefined' && game.currentLocation?.id !== destinationId) {
-                console.log(`🚶 Auto-starting travel to ${destinationId} - time waits for no one`);
-                TravelSystem.startTravel(destinationId);
-            }
-        }
-    },
-
-    // ⏸️ togglePause - freezing time like a dramatic movie scene
-    togglePause() {
-        this.isPaused = !this.isPaused;
-        if (this.isPaused) {
-            this.currentSpeed = 'PAUSED';
-        } else {
-            this.currentSpeed = 'NORMAL';
-        }
-        return this.isPaused;
-    },
-
-    // 🕰️ getFormattedTime - making time pretty for the UI (AM/PM format)
-    getFormattedTime() {
-        const hour = this.currentTime.hour;
-        const minute = this.currentTime.minute;
-        const period = hour >= 12 ? 'PM' : 'AM';
-        const hour12 = hour % 12 || 12;
-        const minuteStr = minute.toString().padStart(2, '0');
-        return `Day ${this.currentTime.day}, ${hour12}:${minuteStr} ${period}`;
-    },
-
-    // 📊 getTimeInfo - all the time data your dark heart desires
-    getTimeInfo() {
-        return {
-            ...this.currentTime,
-            formatted: this.getFormattedTime(),
-            speed: this.currentSpeed,
-            isPaused: this.isPaused,
-            isDaytime: this.currentTime.hour >= 6 && this.currentTime.hour < 20,
-            isMorning: this.currentTime.hour >= 6 && this.currentTime.hour < 12,
-            isAfternoon: this.currentTime.hour >= 12 && this.currentTime.hour < 18,
-            isEvening: this.currentTime.hour >= 18 && this.currentTime.hour < 22,
-            isNight: this.currentTime.hour >= 22 || this.currentTime.hour < 6  // best time tbh
-        };
-    },
-
-    // ⏳ time calculations because math is inevitable
-    getMinutesUntilHour(targetHour) {
-        let minutes = 0;
-        let currentHour = this.currentTime.hour;
-        let currentMinute = this.currentTime.minute;
-        
-        if (targetHour > currentHour) {
-            minutes = (targetHour - currentHour) * this.MINUTES_PER_HOUR - currentMinute;
-        } else if (targetHour < currentHour) {
-            minutes = ((this.HOURS_PER_DAY - currentHour) + targetHour) * this.MINUTES_PER_HOUR - currentMinute;
-        } else {
-            minutes = currentMinute === 0 ? 0 : this.HOURS_PER_DAY * this.MINUTES_PER_HOUR - currentMinute;
-        }
-        
-        return minutes;
-    },
-
-    // 🧮 getTotalMinutes - converting all of existence into one big number
-    // (this is how the universe tracks its pain)
-    getTotalMinutes() {
-        return this.currentTime.minute +
-               (this.currentTime.hour * this.MINUTES_PER_HOUR) +
-               (this.currentTime.day * this.HOURS_PER_DAY * this.MINUTES_PER_HOUR) +
-               (this.currentTime.month * this.DAYS_PER_MONTH * this.HOURS_PER_DAY * this.MINUTES_PER_HOUR) +
-               (this.currentTime.year * this.MONTHS_PER_YEAR * this.DAYS_PER_MONTH * this.HOURS_PER_DAY * this.MINUTES_PER_HOUR);
-    },
-
-    // 🖤 getTotalDays - how many sunsets have we witnessed in this dark world
-    // (needed by achievements to track your suffering in day-sized chunks)
-    getTotalDays() {
-        return this.currentTime.day +
-               (this.currentTime.month * this.DAYS_PER_MONTH) +
-               (this.currentTime.year * this.MONTHS_PER_YEAR * this.DAYS_PER_MONTH);
-    }
-};
- * END OF ARCHIVED TimeSystem - THE REAL ONE IS IN time-machine.js! 🖤💀 */
 
 // ═══════════════════════════════════════════════════════════════
 // 🎲 EVENT SYSTEM - because chaos is more fun than order
@@ -5958,6 +5051,9 @@ function initializeCharacterCreation(difficulty = 'normal') {
     // Calculate stats AFTER setting initial gold (this will recalculate with perks)
     calculateCharacterStats();
 
+    // 🖤💀 Ensure START button is properly disabled on init (no perks selected yet) 💀
+    updateStartGameButton();
+
     console.log('=== Character Creation Initialized ===');
 }
 
@@ -6259,6 +5355,7 @@ function confirmPerkSelection() {
     updatePerkSelection(); // Update the perk counter badge
     displaySelectedPerks(); // Show selected perks in the UI
     calculateCharacterStats(); // Recalculate stats with perk bonuses
+    updateStartGameButton(); // 🖤💀 Check if START button should be enabled 💀
     addMessage(`Selected ${selectedPerks.length} perk(s).`);
 }
 
@@ -6302,6 +5399,7 @@ function removePerk(perkId) {
     updatePerkSelection();
     displaySelectedPerks();
     calculateCharacterStats();
+    updateStartGameButton(); // 🖤💀 Check if START button should be disabled 💀
     addMessage(`Removed perk: ${perks[perkId]?.name || perkId}`);
 }
 
@@ -6574,15 +5672,26 @@ function updateStartGameButton() {
     // Check if all attribute points are spent
     const allPointsSpent = characterCreationState.availableAttributePoints === 0;
 
-    // Enable button only if all points are spent
-    startGameBtn.disabled = !allPointsSpent;
+    // Check if exactly 2 perks are selected
+    const hasRequiredPerks = selectedPerks && selectedPerks.length === 2;
 
-    if (!allPointsSpent) {
+    // Enable button only if all points are spent AND 2 perks selected
+    const canStart = allPointsSpent && hasRequiredPerks;
+    startGameBtn.disabled = !canStart;
+
+    // Set appropriate tooltip message
+    if (!allPointsSpent && !hasRequiredPerks) {
+        startGameBtn.title = `You must spend all ${characterCreationState.availableAttributePoints} attribute points and select 2 character perks before starting`;
+        console.log('Start Game button disabled - points remaining:', characterCreationState.availableAttributePoints, '| perks selected:', selectedPerks?.length || 0);
+    } else if (!allPointsSpent) {
         startGameBtn.title = `You must spend all ${characterCreationState.availableAttributePoints} remaining attribute points before starting`;
         console.log('Start Game button disabled - points remaining:', characterCreationState.availableAttributePoints);
+    } else if (!hasRequiredPerks) {
+        startGameBtn.title = `You must select exactly 2 character perks before starting (${selectedPerks?.length || 0}/2 selected)`;
+        console.log('Start Game button disabled - perks selected:', selectedPerks?.length || 0, '/ 2 required');
     } else {
         startGameBtn.title = 'Start your adventure!';
-        console.log('Start Game button enabled - all points spent');
+        console.log('Start Game button enabled - all requirements met');
     }
 }
 
@@ -7871,9 +6980,10 @@ const LocationPanelStack = {
                 </div>
             `;
         } else {
-            // Full exploration panel with survival preview and begin button
+            // Full exploration panel with manual encounter selection + random option
             const diffColors = { easy: '#4caf50', medium: '#ff9800', hard: '#f44336', deadly: '#9c27b0', unknown: '#888' };
             const diffColor = diffColors[difficulty] || '#888';
+            const canSurvive = survival.canSurvive || false;
 
             mainContent = `
                 <div style="margin-bottom: 15px;">
@@ -7895,18 +7005,55 @@ const LocationPanelStack = {
                         <div style="background: rgba(0,0,0,0.3); height: 8px; border-radius: 4px; overflow: hidden;">
                             <div style="background: ${survival.tierColor}; height: 100%; width: ${survival.chance || 50}%; transition: width 0.3s;"></div>
                         </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.85em; margin-top: 8px;">
+                            <span>❤️ ${game?.player?.health || 0}/${survival.requirements?.minHealth || 50}</span>
+                            <span>⚡ ${game?.player?.stamina || 0}/${survival.requirements?.minStamina || 50}</span>
+                            <span>🛡️ ${game?.player?.armor || 0}/${survival.requirements?.recommendedArmor || 0}</span>
+                            <span>⚔️ ${game?.player?.weapon || 0}/${survival.requirements?.recommendedWeapon || 0}</span>
+                        </div>
                     </div>
                 </div>
-                <div style="margin-bottom: 15px; padding: 10px; background: rgba(79, 195, 247, 0.1); border-radius: 6px;">
-                    <div style="color: #888; font-size: 0.9em; margin-bottom: 6px;">Available Encounters:</div>
-                    <div style="color: #e0e0e0; font-weight: bold;">${availableEvents.length} types of encounters</div>
+                <div style="margin-bottom: 10px;">
+                    <div style="color: #4fc3f7; font-size: 0.95em; font-weight: bold; margin-bottom: 8px;">📍 Choose Encounter or Random Explore:</div>
+                    <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(79, 195, 247, 0.2); border-radius: 6px;">
+                        ${availableEvents.map((event, idx) => {
+                            const eventDiffColors = { easy: '#4caf50', medium: '#ff9800', hard: '#f44336', deadly: '#9c27b0' };
+                            const eventDiffColor = eventDiffColors[event.difficulty] || '#888';
+                            return `
+                                <div class="exploration-encounter-item" data-event-id="${event.id}"
+                                     style="padding: 10px 12px; border-bottom: ${idx < availableEvents.length - 1 ? '1px solid rgba(79, 195, 247, 0.1)' : 'none'};
+                                            display: flex; justify-content: space-between; align-items: center;
+                                            cursor: ${canSurvive ? 'pointer' : 'not-allowed'}; opacity: ${canSurvive ? '1' : '0.5'};
+                                            transition: background 0.2s ease;"
+                                     onmouseenter="if(${canSurvive}) this.style.background='rgba(79, 195, 247, 0.1)'"
+                                     onmouseleave="this.style.background='transparent'"
+                                     onclick="if(${canSurvive}) DungeonExplorationSystem.showSpecificExplorationPanel('${locationId}', '${event.id}')">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-size: 1.3em;">${event.icon}</span>
+                                        <div>
+                                            <div style="font-weight: bold; color: #e0e0e0;">${event.name}</div>
+                                            <div style="font-size: 0.8em; color: #888; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                ${event.description.substring(0, 50)}...
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span style="padding: 2px 8px; border-radius: 4px; font-size: 0.75em; background: ${eventDiffColor}30; color: ${eventDiffColor}; border: 1px solid ${eventDiffColor}50;">
+                                        ${(event.difficulty || 'easy').toUpperCase()}
+                                    </span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
-                <button class="explore-full-btn"
-                    style="width: 100%; padding: 15px; background: linear-gradient(135deg, #ff8c00 0%, #cc5500 100%);
-                           border: none; border-radius: 8px; color: white; font-size: 1.1em;
-                           font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
-                    onclick="DungeonExplorationSystem.showExplorationPanel('${locationId}')">
-                    ⚔️ Begin Exploration
+                <button class="explore-random-btn"
+                    style="width: 100%; padding: 15px; background: ${canSurvive ? 'linear-gradient(135deg, #ff8c00 0%, #cc5500 100%)' : '#333'};
+                           border: 1px solid ${canSurvive ? '#ff8c00' : '#555'}; border-radius: 8px;
+                           color: ${canSurvive ? 'white' : '#666'}; font-size: 1.1em;
+                           font-weight: bold; cursor: ${canSurvive ? 'pointer' : 'not-allowed'};
+                           display: flex; align-items: center; justify-content: center; gap: 8px;"
+                    onclick="${canSurvive ? `DungeonExplorationSystem.showExplorationPanel('${locationId}')` : ''}"
+                    ${canSurvive ? '' : 'disabled'}>
+                    ${canSurvive ? '🎲 Random Exploration' : '💀 Too Weak to Explore'}
                 </button>
             `;
         }
@@ -7977,8 +7124,17 @@ function updateLocationPanelMain() {
     // Update location name and description
     const h2 = locationPanel.querySelector('h2');
     if (h2) h2.textContent = locationName;
-    const descElement = locationPanel.querySelector('#location-description');
-    if (descElement) {
+
+    // 🖤💀 If description element is missing, rebuild the entire content structure! 💀
+    // This happens when exploration/gathering views wipe the content div
+    let descElement = locationPanel.querySelector('#location-description');
+    if (!descElement) {
+        const content = locationPanel.querySelector('#location-panel-content');
+        if (content) {
+            content.innerHTML = `<p id="location-description">${locationDesc}</p>`;
+            descElement = content.querySelector('#location-description');
+        }
+    } else {
         descElement.textContent = locationDesc;
     }
     
@@ -8118,6 +7274,50 @@ function updateLocationPanelMain() {
     }
 
     actionsSection.innerHTML = navButtonsHTML;
+
+    // 🖤💀 RESTORE LOCATION ACTION BUTTONS if they're missing! 💀
+    // These are the Visit Market, Travel, People buttons
+    // They get wiped when exploration/gathering views take over
+    let actionsDiv = locationPanel.querySelector('#location-actions');
+    if (!actionsDiv) {
+        actionsDiv = document.createElement('div');
+        actionsDiv.id = 'location-actions';
+        // Insert at the end of location-panel-content
+        const content = locationPanel.querySelector('#location-panel-content');
+        if (content) {
+            content.appendChild(actionsDiv);
+        }
+    }
+
+    // Always rebuild the action buttons to ensure they're present
+    actionsDiv.innerHTML = `
+        <button id="visit-market-btn" title="Visit the local market">Visit Market</button>
+        <button id="travel-btn" title="Toggle travel panel">Travel</button>
+        <button id="people-btn" title="Toggle people panel">People</button>
+    `;
+
+    // 🖤💀 RE-ATTACH EVENT LISTENERS to the new buttons! 💀
+    // The old buttons were cached in elements object, but we just created new ones
+    // Need to re-cache them and re-attach their event listeners
+    const newVisitMarketBtn = document.getElementById('visit-market-btn');
+    const newTravelBtn = document.getElementById('travel-btn');
+    const newPeopleBtn = document.getElementById('people-btn');
+
+    if (newVisitMarketBtn && typeof EventManager !== 'undefined' && typeof openMarket === 'function') {
+        EventManager.addEventListener(newVisitMarketBtn, 'click', openMarket);
+        elements.visitMarketBtn = newVisitMarketBtn; // Update cache
+    }
+    if (newTravelBtn && typeof EventManager !== 'undefined' && typeof toggleTravel === 'function') {
+        EventManager.addEventListener(newTravelBtn, 'click', toggleTravel);
+        elements.travelBtn = newTravelBtn; // Update cache
+    }
+    if (newPeopleBtn && typeof EventManager !== 'undefined' && typeof togglePeople === 'function') {
+        EventManager.addEventListener(newPeopleBtn, 'click', togglePeople);
+        elements.peopleBtn = newPeopleBtn; // Update cache
+    }
+
+    // Update market button visibility based on location
+    updateMarketButtonVisibility();
 
     // 🎵 Update music based on location type
     if (typeof MusicSystem !== 'undefined') {
@@ -10120,11 +9320,11 @@ function toggleMenu() {
                     title: '🚪 Quit Game',
                     content: '<p>Are you sure you want to quit?</p><p style="color: #f44336; font-size: 12px;">Unsaved progress will be lost.</p>',
                     buttons: [
-                        { label: '❌ Cancel', type: 'secondary', action: () => ModalSystem.hide() },
+                        { text: '❌ Cancel', className: 'secondary', onClick: () => ModalSystem.hide() },
                         {
-                            label: '🚪 Quit',
-                            type: 'danger',
-                            action: () => {
+                            text: '🚪 Quit',
+                            className: 'danger',
+                            onClick: () => {
                                 ModalSystem.hide();
                                 menuOverlay.classList.remove('active');
                                 menuOverlay.style.display = 'none';

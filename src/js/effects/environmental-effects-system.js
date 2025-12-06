@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // ENVIRONMENTAL EFFECTS - weather that matches my mood (dark)
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -558,7 +558,7 @@ const EnvironmentalEffectsSystem = {
         return raindrop;
     },
     
-    // ⛈️ Apply storm - when the universe is as angry as i am
+    // Apply storm - when the universe is as angry as i am
     applyStormWeather(intensity) {
         this.applyRainWeather(intensity * 1.5);
         this.applyCloudyWeather(intensity);
@@ -598,7 +598,7 @@ const EnvironmentalEffectsSystem = {
         }
     },
     
-    // ❄️ Apply snow - frozen tears from heaven
+    // Apply snow - frozen tears from heaven
     applySnowWeather(intensity) {
         const snowCount = Math.floor(50 * intensity);
         

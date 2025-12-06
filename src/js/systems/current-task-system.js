@@ -1,18 +1,18 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // CURRENT TASK SYSTEM - tracking your existential crisis
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const CurrentTaskSystem = {
-    // 🖤 Current task state ⚰️
+    //  Current task state
     currentTask: null,
     lastUpdate: 0,
 
-    // 😴 Idle messages - because doing nothing deserves variety 🦇
+    //  Idle messages - because doing nothing deserves variety 
     idleMessages: [
         { action: "Contemplating existence", icon: "🤔" },
         { action: "Staring into the void", icon: "👁️" },
@@ -34,7 +34,7 @@ const CurrentTaskSystem = {
         { action: "Standing dramatically", icon: "🗡️" },
     ],
 
-    // 🎯 Set current task 🗡️
+    //  Set current task 
     setTask(type, action, detail = null, icon = null) {
         this.currentTask = {
             type: type,
@@ -47,7 +47,7 @@ const CurrentTaskSystem = {
         this.updateTaskDisplays();
     },
 
-    // 🎨 Get icon based on task type 🌙
+    //  Get icon based on task type 
     getIconForType(type) {
         const icons = {
             'traveling': '🚶',
@@ -55,10 +55,10 @@ const CurrentTaskSystem = {
             'drinking': '🍺',
             'crafting': '🔨',
             'farming': '🌾',
-            'mining': '⛏️',
+            'mining': '',
             'trading': '💱',
             'resting': '😴',
-            'fighting': '⚔️',
+            'fighting': '',
             'exploring': '🧭',
             'gathering': '🧺',
             'fishing': '🎣',
@@ -69,15 +69,15 @@ const CurrentTaskSystem = {
         return icons[type] || '❓';
     },
 
-    // 🔄 Clear current task (revert to idle) 🔮
+    //  Clear current task (revert to idle) 
     clearTask() {
         this.currentTask = null;
         this.updateTaskDisplays();
     },
 
-    // 📊 Get current task (determines what player is doing) 💀
+    //  Get current task (determines what player is doing) 
     getCurrentTask() {
-        // 🚶 Check if traveling 🖤
+        //  Check if traveling 
         if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling) {
             const dest = TravelSystem.playerPosition.destination;
             const progress = Math.round((TravelSystem.playerPosition.travelProgress || 0) * 100);
@@ -89,7 +89,7 @@ const CurrentTaskSystem = {
             };
         }
 
-        // 🔨 Check for active crafting ⚰️
+        //  Check for active crafting
         if (typeof CraftingSystem !== 'undefined' && CraftingSystem.currentCrafting) {
             const craft = CraftingSystem.currentCrafting;
             return {
@@ -100,7 +100,7 @@ const CurrentTaskSystem = {
             };
         }
 
-        // 🧺 Check for active gathering 🦇
+        //  Check for active gathering 
         if (typeof ResourceGatheringSystem !== 'undefined' && ResourceGatheringSystem.isGathering) {
             const resource = ResourceGatheringSystem.currentResource;
             return {
@@ -111,7 +111,7 @@ const CurrentTaskSystem = {
             };
         }
 
-        // 💱 Check for active trading 🗡️
+        //  Check for active trading 
         if (typeof TradingSystem !== 'undefined' && TradingSystem.isTrading) {
             return {
                 type: 'trading',
@@ -121,20 +121,20 @@ const CurrentTaskSystem = {
             };
         }
 
-        // 🎯 Check if there's a manually set task 🌙
+        //  Check if there's a manually set task 
         if (this.currentTask && (Date.now() - this.currentTask.startTime < 30000)) {
             return this.currentTask;
         }
 
-        // 😴 Default to idle 🔮
+        //  Default to idle 
         return this.getIdleTask();
     },
 
-    // 🧺 Get gathering icon based on resource type 💀
+    //  Get gathering icon based on resource type 
     getGatheringIcon(resourceType) {
         const icons = {
             'wood': '🪓',
-            'ore': '⛏️',
+            'ore': '',
             'herb': '🌿',
             'fish': '🎣',
             'stone': '🪨',
@@ -144,7 +144,7 @@ const CurrentTaskSystem = {
         return icons[resourceType] || '🧺';
     },
 
-    // 😴 Get a random idle task 🖤
+    //  Get a random idle task 
     getIdleTask() {
         const seed = Math.floor(Date.now() / 30000);
         const index = seed % this.idleMessages.length;
@@ -157,7 +157,7 @@ const CurrentTaskSystem = {
         };
     },
 
-    // 🔄 Update all task displays on the page ⚰️
+    //  Update all task displays on the page
     updateTaskDisplays() {
         const charTaskDisplay = document.getElementById('current-task-display');
         if (charTaskDisplay && typeof game !== 'undefined' && game.getCurrentTaskHTML) {
@@ -171,7 +171,7 @@ const CurrentTaskSystem = {
         }
     },
 
-    // 🍖 Convenience methods for common actions 🦇
+    //  Convenience methods for common actions 
 
     startEating(itemName) {
         this.setTask('eating', 'Eating', itemName, '🍖');
@@ -188,7 +188,7 @@ const CurrentTaskSystem = {
     },
 
     startMining(resourceName) {
-        this.setTask('mining', 'Mining', resourceName, '⛏️');
+        this.setTask('mining', 'Mining', resourceName, '');
     },
 
     startFarming(cropName) {
@@ -204,10 +204,10 @@ const CurrentTaskSystem = {
     },
 
     startFighting(enemyName) {
-        this.setTask('fighting', 'Fighting', enemyName, '⚔️');
+        this.setTask('fighting', 'Fighting', enemyName, '');
     },
 
-    // 🎯 Initialize - start periodic updates 🗡️
+    //  Initialize - start periodic updates 
     init() {
         setInterval(() => {
             this.updateTaskDisplays();
@@ -217,12 +217,12 @@ const CurrentTaskSystem = {
     }
 };
 
-// 🌙 Initialize when DOM is ready 🦇
+//  Initialize when DOM is ready 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => CurrentTaskSystem.init());
 } else {
     CurrentTaskSystem.init();
 }
 
-// 🔮 expose to global scope 💀
+//  expose to global scope 
 window.CurrentTaskSystem = CurrentTaskSystem;

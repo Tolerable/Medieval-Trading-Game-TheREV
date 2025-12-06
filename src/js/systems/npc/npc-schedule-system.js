@@ -696,7 +696,7 @@ const NPCScheduleSystem = {
         }
     },
 
-    // Alias for updateAllNPCs - used by NPCManager.update() 🦇
+    // Alias for updateAllNPCs - used by NPCManager.update() 
     update() {
         this.updateAllNPCs();
     }

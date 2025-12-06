@@ -1,21 +1,21 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // INITIAL ENCOUNTER - where your nightmare begins
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const InitialEncounterSystem = {
-    // 🔧 CONFIG
+    //  CONFIG
     hasShownEncounter: false,
-    hasShownTutorialChoice: false, // 🖤 Track if we've shown the tutorial Yes/No popup
-    hasAcceptedInitialQuest: false, // 🖤💀 Track if player accepted the initial quest
-    strangerSpawnedAtLocation: null, // 🖤 Track where we spawned the stranger as fallback NPC
-    encounterDelay: 500, // 🖤💀 FAST - show encounter quickly after game start!
+    hasShownTutorialChoice: false, // ��� Track if we've shown the tutorial Yes/No popup
+    hasAcceptedInitialQuest: false, // ���💀 Track if player accepted the initial quest
+    strangerSpawnedAtLocation: null, // ��� Track where we spawned the stranger as fallback NPC
+    encounterDelay: 500, // ���💀 FAST - show encounter quickly after game start!
 
-    // 📖 THE MYSTERIOUS STRANGER - your first encounter in this world
+    //  THE MYSTERIOUS STRANGER - your first encounter in this world
     mysteriousStranger: {
         id: 'mysterious_stranger_intro',
         name: 'Hooded Stranger',
@@ -34,15 +34,15 @@ const InitialEncounterSystem = {
         ]
     },
 
-    // 🚀 INITIALIZE - called when game starts
+    //  INITIALIZE - called when game starts
     init() {
         console.log('🌟 InitialEncounterSystem: Awakened from the void, ready to haunt new souls... 🖤');
     },
 
-    // 🎭 TRIGGER INITIAL ENCOUNTER - called after character creation
-    // 🖤 Now shows Tutorial Yes/No popup FIRST (if enabled in settings) 💀
+    //  TRIGGER INITIAL ENCOUNTER - called after character creation
+    //  Now shows Tutorial Yes/No popup FIRST (if enabled in settings) 
     triggerInitialEncounter(playerName, startLocation) {
-        // 🖤 only trigger ONCE per new game
+        //  only trigger ONCE per new game
         if (this.hasShownEncounter) {
             console.log('🌟 Initial encounter already shown this session - no repeats, this darkness only strikes once 💀');
             return;
@@ -51,22 +51,22 @@ const InitialEncounterSystem = {
         this.hasShownEncounter = true;
         console.log(`🌟 Preparing initial encounter for ${playerName} at ${startLocation}... destiny calls 🦇`);
 
-        // 🖤 Store params for later use
+        //  Store params for later use
         this._pendingPlayerName = playerName;
         this._pendingStartLocation = startLocation;
 
-        // 🖤 Check if tutorial popup should be shown FIRST (before anything else) 💀
+        //  Check if tutorial popup should be shown FIRST (before anything else) 
         if (this._shouldShowTutorialOnStart()) {
             console.log('🌟 Tutorial popup enabled - showing FIRST before anything else 📚');
             this._showTutorialChoiceFirst();
         } else {
             console.log('🌟 Tutorial popup disabled in settings - skipping directly to game 💀');
-            // 🦇 Wait for rank-up celebration to finish BEFORE showing intro
+            //  Wait for rank-up celebration to finish BEFORE showing intro
             this._waitForRankUpThenShowIntro();
         }
     },
 
-    // 🖤 Check if we should show the tutorial popup on start 💀
+    //  Check if we should show the tutorial popup on start 
     _shouldShowTutorialOnStart() {
         // Check SettingsPanel settings first
         if (typeof SettingsPanel !== 'undefined' && SettingsPanel.currentSettings?.gameplay) {
@@ -88,15 +88,19 @@ const InitialEncounterSystem = {
         return true;
     },
 
-    // 🖤 Show tutorial Yes/No choice FIRST before rank celebration 💀
+    //  Show tutorial Yes/No choice FIRST before rank celebration 
     _showTutorialChoiceFirst() {
         if (this.hasShownTutorialChoice) return;
         this.hasShownTutorialChoice = true;
 
-        // Pause time during this choice (🖤 store previous speed for proper restoration 💀)
-        if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
-            this._previousSpeedForTutorial = TimeSystem.currentSpeed || 'NORMAL';
-            TimeSystem.setSpeed('PAUSED');
+        //  Pause time during this choice using interrupt system 
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.pauseForInterrupt) {
+                TimeSystem.pauseForInterrupt('tutorial_choice');
+            } else if (!TimeSystem.isPaused) {
+                this._previousSpeedForTutorial = TimeSystem.currentSpeed || 'NORMAL';
+                TimeSystem.setSpeed('PAUSED');
+            }
         }
 
         if (typeof ModalSystem !== 'undefined') {
@@ -112,25 +116,25 @@ const InitialEncounterSystem = {
                         </p>
                     </div>
                 `,
-                closeable: false, // 🖤 Must choose - no escape from this decision
+                closeable: false, // ��� Must choose - no escape from this decision
                 buttons: [
                     {
-                        text: '❌ No, Just Start',
+                        text: 'No, Just Start',
                         className: 'secondary',
                         onClick: () => {
                             ModalSystem.hide();
                             console.log('🌟 Player chose NO tutorial - diving straight into the chaos 💀');
-                            // 🖤 Proceed with normal flow (rank celebration, then intro)
+                            //  Proceed with normal flow (rank celebration, then intro)
                             this._proceedAfterTutorialChoice();
                         }
                     },
                     {
-                        text: '✅ Yes, Show Tutorial',
+                        text: 'Yes, Show Tutorial',
                         className: 'primary',
                         onClick: () => {
                             ModalSystem.hide();
                             console.log('🌟 Player chose YES to tutorial - enlightening the newbie 📚');
-                            // 🖤 Show tutorial, then proceed
+                            //  Show tutorial, then proceed
                             this._showQuickTutorial(() => {
                                 this._proceedAfterTutorialChoice();
                             });
@@ -139,12 +143,12 @@ const InitialEncounterSystem = {
                 ]
             });
         } else {
-            // 🖤 No ModalSystem - proceed directly
+            //  No ModalSystem - proceed directly
             this._proceedAfterTutorialChoice();
         }
     },
 
-    // 🖤 Quick tutorial content (shown if player says Yes) 💀
+    //  Quick tutorial content (shown if player says Yes) 
     _showQuickTutorial(onComplete) {
         if (typeof ModalSystem !== 'undefined') {
             ModalSystem.show({
@@ -195,31 +199,35 @@ const InitialEncounterSystem = {
         }
     },
 
-    // 🖤 Proceed after tutorial choice - resume normal game flow 💀
+    //  Proceed after tutorial choice - resume normal game flow 
     _proceedAfterTutorialChoice() {
-        // Resume time to previous speed if we paused it (🖤 restore actual speed, not just 'NORMAL' 💀)
-        if (this._previousSpeedForTutorial && typeof TimeSystem !== 'undefined') {
-            TimeSystem.setSpeed(this._previousSpeedForTutorial);
-            this._previousSpeedForTutorial = null;
+        //  Resume time using interrupt system - restores user's preferred speed 
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.resumeFromInterrupt) {
+                TimeSystem.resumeFromInterrupt('tutorial_choice');
+            } else if (this._previousSpeedForTutorial) {
+                TimeSystem.setSpeed(this._previousSpeedForTutorial);
+                this._previousSpeedForTutorial = null;
+            }
         }
 
-        // 🦇 Wait for rank-up celebration to finish BEFORE showing intro
+        //  Wait for rank-up celebration to finish BEFORE showing intro
         this._waitForRankUpThenShowIntro();
     },
 
-    // 🖤 Wait for rank-up overlay to be dismissed, then show intro 💀
+    //  Wait for rank-up overlay to be dismissed, then show intro 
     _waitForRankUpThenShowIntro() {
         const rankUpOverlay = document.querySelector('.rank-up-celebration');
 
         if (rankUpOverlay) {
             console.log('🌟 Rank-up celebration active - waiting before showing intro... 🕯️');
 
-            // 🖤 Watch for the overlay to be removed from DOM
+            //  Watch for the overlay to be removed from DOM
             const observer = new MutationObserver((mutations, obs) => {
                 if (!document.querySelector('.rank-up-celebration')) {
                     obs.disconnect();
                     console.log('🌟 Rank-up dismissed - now showing intro sequence 💀');
-                    // 🦇 Small delay for smooth transition after rank-up fades
+                    //  Small delay for smooth transition after rank-up fades
                     setTimeout(() => {
                         this.showIntroductionSequence(this._pendingPlayerName, this._pendingStartLocation);
                     }, 800);
@@ -228,7 +236,7 @@ const InitialEncounterSystem = {
 
             observer.observe(document.body, { childList: true, subtree: true });
 
-            // 🖤 Fallback: if observer fails, show intro after 5 seconds anyway
+            //  Fallback: if observer fails, show intro after 5 seconds anyway
             setTimeout(() => {
                 observer.disconnect();
                 if (!document.querySelector('.initial-encounter-shown')) {
@@ -237,32 +245,36 @@ const InitialEncounterSystem = {
                 }
             }, 5500);
         } else {
-            // 🖤 No rank-up showing - use normal delay
+            //  No rank-up showing - use normal delay
             setTimeout(() => {
                 this.showIntroductionSequence(this._pendingPlayerName, this._pendingStartLocation);
             }, this.encounterDelay);
         }
     },
 
-    // 📖 INTRODUCTION SEQUENCE - the story begins
-    // 🖤💀 Now uses unified PeoplePanel - combines location intro with stranger encounter in ONE panel! 💀
+    //  INTRODUCTION SEQUENCE - the story begins
+    //  Now uses unified PeoplePanel - combines location intro with stranger encounter in ONE panel! 
     showIntroductionSequence(playerName, startLocation) {
-        // Pause time during this sequence (🖤 store previous speed for proper restoration 💀)
-        if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
-            this._previousSpeedForIntro = TimeSystem.currentSpeed || 'NORMAL';
-            TimeSystem.setSpeed('PAUSED');
+        //  Pause time during this sequence using interrupt system 
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.pauseForInterrupt) {
+                TimeSystem.pauseForInterrupt('intro_sequence');
+            } else if (!TimeSystem.isPaused) {
+                this._previousSpeedForIntro = TimeSystem.currentSpeed || 'NORMAL';
+                TimeSystem.setSpeed('PAUSED');
+            }
         }
 
-        // 🖤 Build the combined narrative (location intro + stranger approach)
+        //  Build the combined narrative (location intro + stranger approach)
         const locationIntro = this.getLocationIntro(startLocation);
         const fullNarrative = `${locationIntro}\n\nYou arrived here with little more than the clothes on your back and a handful of coins. The road behind you holds nothing but memories; the road ahead holds... everything.\n\nAs you take your first steps into the village square, you notice a hooded figure watching you from the shadows...`;
 
-        // 🖤💀 Skip the "A New Dawn" modal - go straight to Hooded Stranger encounter! 💀
+        //  Skip the "A New Dawn" modal - go straight to Hooded Stranger encounter! 
         // The narrative text will appear in the People Panel before the stranger speaks
         this.showStrangerEncounter(playerName);
     },
 
-    // 📍 Get location-specific intro text
+    //  Get location-specific intro text
     getLocationIntro(locationId) {
         const intros = {
             greendale: "The morning sun breaks through the mist over Greendale, a humble farming village nestled in the valley. Merchants have gathered in the small market square, their voices mingling with the bleating of sheep and the creak of wagon wheels.",
@@ -276,33 +288,33 @@ const InitialEncounterSystem = {
         return intros[locationId] || intros.default;
     },
 
-    // 🎭 STRANGER ENCOUNTER - the mysterious figure speaks
-    // 🖤💀 INSTANT - uses pre-written dialogue, NO API WAIT! 💀
+    //  STRANGER ENCOUNTER - the mysterious figure speaks
+    //  INSTANT - uses pre-written dialogue, NO API WAIT! 
     showStrangerEncounter(playerName) {
         const stranger = this.mysteriousStranger;
         const greeting = stranger.greetings[Math.floor(Math.random() * stranger.greetings.length)];
 
-        // 🖤💀 Use pre-written dialogue for INSTANT loading - no API wait! 💀
+        //  Use pre-written dialogue for INSTANT loading - no API wait! 
         // The initial encounter MUST be fast - first impression matters!
         const strangerDialogue = this._getDefaultStrangerDialogue(playerName, greeting);
         console.log('🎭 Using instant pre-written dialogue for hooded stranger (no API wait)');
 
-        // 🖤💀 Use unified PeoplePanel for the intro encounter!
+        //  Use unified PeoplePanel for the intro encounter!
         if (typeof PeoplePanel !== 'undefined' && PeoplePanel.showSpecialEncounter) {
             const introNarrative = `A figure in a dark cloak steps forward from the shadows. You cannot see their face beneath the hood, but you sense ancient eyes studying you...`;
 
             PeoplePanel.showSpecialEncounter(stranger, {
                 introText: introNarrative,
                 greeting: strangerDialogue,
-                disableChat: true,  // 🖤 No freeform chat during intro
-                disableBack: true,  // 🖤 No escape from destiny
+                disableChat: true,  // ��� No freeform chat during intro
+                disableBack: true,  // ��� No escape from destiny
                 playVoice: true,
                 customActions: [
                     {
-                        label: '✅ Accept Quest: First Steps',
+                        label: 'Accept Quest: First Steps',
                         action: () => {
                             console.log('🎭 Player accepted quest from Hooded Stranger');
-                            this.hasAcceptedInitialQuest = true; // 🖤💀 Mark quest accepted!
+                            this.hasAcceptedInitialQuest = true; // ���💀 Mark quest accepted!
                             this.showQuestAcceptedThenTutorialOption(playerName);
                         },
                         primary: true,
@@ -312,7 +324,7 @@ const InitialEncounterSystem = {
                     {
                         label: '❓ Who are you?',
                         action: () => {
-                            // 🖤 Add mysterious response to chat
+                            //  Add mysterious response to chat
                             PeoplePanel.addChatMessage("*asks* Who... who are you?", 'player');
                             setTimeout(() => {
                                 PeoplePanel.addChatMessage("*The hood tilts slightly* I am but a watcher. A keeper of memories. I have seen empires rise and fall... When you have proven yourself worthy, we shall meet again.", 'npc');
@@ -323,14 +335,14 @@ const InitialEncounterSystem = {
                 ],
                 onClose: () => {
                     console.log('🎭 Stranger encounter closed');
-                    // 🖤💀 If player closed without accepting quest, spawn stranger as fallback NPC! 💀
+                    //  If player closed without accepting quest, spawn stranger as fallback NPC! 
                     if (!this.hasAcceptedInitialQuest) {
                         this._spawnStrangerAsFallbackNPC();
                     }
                 }
             });
         } else {
-            // 🖤 Fallback to old ModalSystem if PeoplePanel unavailable
+            //  Fallback to old ModalSystem if PeoplePanel unavailable
             console.warn('🎭 PeoplePanel not available, using ModalSystem fallback');
             if (typeof ModalSystem !== 'undefined') {
                 ModalSystem.show({
@@ -343,7 +355,7 @@ const InitialEncounterSystem = {
                     closeable: false,
                     buttons: [
                         {
-                            text: '✅ Accept Quest',
+                            text: 'Accept Quest',
                             className: 'primary',
                             onClick: () => {
                                 ModalSystem.hide();
@@ -356,29 +368,29 @@ const InitialEncounterSystem = {
         }
     },
 
-    // 🖤💀 Fallback dialogue if API fails
+    //  Fallback dialogue if API fails
     _getDefaultStrangerDialogue(playerName, greeting) {
         return `${greeting} Listen well, ${playerName}... Darkness gathers in the north. The Shadow Tower, long dormant, stirs once more. The wizard Malachar... he has returned. You are more than a simple trader, young one. Fate has brought you here for a reason. Seek out the village Elder here in Greendale. He will guide your first steps on this path.`;
     },
 
-    // 🖤 Accept quest and show quest panel (tutorial already shown at game start) 💀
+    //  Accept quest and show quest panel (tutorial already shown at game start) 
     showQuestAcceptedThenTutorialOption(playerName) {
-        // 🖤 Actually start the quest NOW
+        //  Actually start the quest NOW
         this.completeEncounter(true);
 
-        // 🖤 Use unified QuestInfoPanel if available 💀
+        //  Use unified QuestInfoPanel if available 
         // NOTE: Tutorial prompt no longer shows here - it's now shown FIRST at game start
         if (typeof QuestSystem !== 'undefined' && QuestSystem.showQuestInfoPanel) {
             // Show unified quest panel for act1_quest1 (First Steps - the new starting quest)
             QuestSystem.showQuestInfoPanel('act1_quest1', {
                 isNewQuest: true
-                // 🖤 No onClose callback needed - tutorial was already offered at start
+                //  No onClose callback needed - tutorial was already offered at start
             });
         }
-        // 🖤 No more tutorial prompt here - it's handled by _showTutorialChoiceFirst() at game start
+        //  No more tutorial prompt here - it's handled by _showTutorialChoiceFirst() at game start
     },
 
-    // 🖤 Show tutorial Yes/No prompt 💀
+    //  Show tutorial Yes/No prompt 
     _showTutorialPrompt(playerName) {
         if (typeof ModalSystem !== 'undefined') {
             ModalSystem.show({
@@ -390,19 +402,19 @@ const InitialEncounterSystem = {
                 closeable: true,
                 buttons: [
                     {
-                        text: '❌ No Thanks',
+                        text: 'No Thanks',
                         className: 'secondary',
                         onClick: () => {
                             ModalSystem.hide();
-                            // 🖤 Just close - player can start playing
+                            //  Just close - player can start playing
                         }
                     },
                     {
-                        text: '✅ Yes Please',
+                        text: 'Yes Please',
                         className: 'primary',
                         onClick: () => {
                             ModalSystem.hide();
-                            // 🖤 Tutorial not implemented yet - just show a message 💀
+                            //  Tutorial not implemented yet - just show a message 
                             if (typeof addMessage === 'function') {
                                 addMessage('📚 Tutorial coming soon! For now, explore the game and have fun! 🖤', 'info');
                             }
@@ -413,8 +425,8 @@ const InitialEncounterSystem = {
         }
     },
 
-    // 📚 TUTORIAL - teach the player the basics
-    // 🖤 Now shown AFTER quest is accepted, just shows tips then closes 💀
+    //  TUTORIAL - teach the player the basics
+    //  Now shown AFTER quest is accepted, just shows tips then closes 
     showTutorial(playerName) {
         if (typeof ModalSystem !== 'undefined') {
             ModalSystem.show({
@@ -442,7 +454,7 @@ const InitialEncounterSystem = {
                         <p style="color: #a0a0c0; font-style: italic; font-size: 0.9em;">Tip: Look for the Elder in the village. NPCs with quests have a 📜 icon. Press 'Q' to open your Quest Log.</p>
                     </div>
                 `,
-                closeable: true, // 🖤 Quest already accepted, can close anytime
+                closeable: true, // ��� Quest already accepted, can close anytime
                 buttons: [
                     {
                         text: '🎮 Begin Adventure',
@@ -456,7 +468,7 @@ const InitialEncounterSystem = {
         }
     },
 
-    // 🎭 STRANGER REVEAL - who is this mysterious figure? (legacy - kept for story flow)
+    //  STRANGER REVEAL - who is this mysterious figure? (legacy - kept for story flow)
     showStrangerReveal(playerName) {
         if (typeof ModalSystem !== 'undefined') {
             ModalSystem.show({
@@ -468,10 +480,10 @@ const InitialEncounterSystem = {
                     <p style="font-style: italic; color: #c0a0ff; font-size: 1.1em; margin-bottom: 1rem;">"Perhaps when you have proven yourself worthy, we shall meet again. Until then... trade well, ${playerName}. Build your fortune. You will need it for what is to come."</p>
                     <p style="color: #a0a0c0; font-style: italic;">Before you can respond, the stranger melts back into the shadows as if they were never there.</p>
                 `,
-                closeable: false, // 🖤 Must accept quest - no escape
+                closeable: false, // ��� Must accept quest - no escape
                 buttons: [
                     {
-                        text: '✅ Accept Quest',
+                        text: 'Accept Quest',
                         className: 'primary',
                         onClick: () => {
                             ModalSystem.hide();
@@ -483,9 +495,9 @@ const InitialEncounterSystem = {
         }
     },
 
-    // 📜 QUEST ACCEPTED - show confirmation and clear next steps
+    //  QUEST ACCEPTED - show confirmation and clear next steps
     showQuestAccepted(playerName) {
-        // 🖤 Actually start the quest now
+        //  Actually start the quest now
         this.completeEncounter(true);
 
         if (typeof ModalSystem !== 'undefined') {
@@ -517,20 +529,24 @@ const InitialEncounterSystem = {
         }
     },
 
-    // ✅ COMPLETE ENCOUNTER - unlock the main quest and resume game
+    // COMPLETE ENCOUNTER - unlock the main quest and resume game
     completeEncounter(talkedToStranger) {
         console.log('🌟 Initial encounter complete - you chose your path, stranger talk:', talkedToStranger, '💀');
 
-        // 📜 Unlock the main quest
+        //  Unlock the main quest
         this.unlockMainQuest();
 
-        // 🖤 Resume time to previous speed if we paused it (restore actual speed, not just 'NORMAL' 💀)
-        if (this._previousSpeedForIntro && typeof TimeSystem !== 'undefined') {
-            TimeSystem.setSpeed(this._previousSpeedForIntro);
-            this._previousSpeedForIntro = null;
+        //  Resume time using interrupt system - restores user's preferred speed 
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.resumeFromInterrupt) {
+                TimeSystem.resumeFromInterrupt('intro_sequence');
+            } else if (this._previousSpeedForIntro) {
+                TimeSystem.setSpeed(this._previousSpeedForIntro);
+                this._previousSpeedForIntro = null;
+            }
         }
 
-        // 📝 Add journal entry based on choice
+        //  Add journal entry based on choice
         if (typeof addMessage === 'function') {
             if (talkedToStranger) {
                 addMessage('📜 Quest Available: "First Steps" - Speak with the Village Elder');
@@ -540,7 +556,7 @@ const InitialEncounterSystem = {
             }
         }
 
-        // 🏆 Track this moment for achievements
+        //  Track this moment for achievements
         if (typeof AchievementSystem !== 'undefined' && AchievementSystem.trackEvent) {
             AchievementSystem.trackEvent('initial_encounter_complete', { talkedToStranger });
         }
@@ -548,27 +564,27 @@ const InitialEncounterSystem = {
         console.log('🌟 Initial encounter ritual complete - main quest unlocked, your fate sealed 🖤');
     },
 
-    // 📜 UNLOCK MAIN QUEST - actually START the prologue quest (not just discover it)
-    // 🖤 Waits for rank-up celebration to be dismissed first so popups don't overlap 💀
+    //  UNLOCK MAIN QUEST - actually START the prologue quest (not just discover it)
+    //  Waits for rank-up celebration to be dismissed first so popups don't overlap 
     unlockMainQuest() {
-        // 🦇 Check if rank-up celebration is showing - wait for it to be dismissed
+        //  Check if rank-up celebration is showing - wait for it to be dismissed
         const rankUpOverlay = document.querySelector('.rank-up-celebration');
         if (rankUpOverlay) {
             console.log('🌟 Rank-up celebration active - waiting for dismissal before showing quest... 🕯️');
 
-            // 🖤 Watch for the overlay to be removed from DOM
+            //  Watch for the overlay to be removed from DOM
             const observer = new MutationObserver((mutations, obs) => {
                 if (!document.querySelector('.rank-up-celebration')) {
                     obs.disconnect();
                     console.log('🌟 Rank-up dismissed - now showing main quest 💀');
-                    // 🦇 Small delay for smooth transition
+                    //  Small delay for smooth transition
                     setTimeout(() => this._doUnlockMainQuest(), 500);
                 }
             });
 
             observer.observe(document.body, { childList: true, subtree: true });
 
-            // 🖤 Fallback: if somehow observer fails, unlock after 5 seconds anyway
+            //  Fallback: if somehow observer fails, unlock after 5 seconds anyway
             setTimeout(() => {
                 observer.disconnect();
                 if (!this._mainQuestUnlocked) {
@@ -577,30 +593,30 @@ const InitialEncounterSystem = {
                 }
             }, 5000);
         } else {
-            // 🖤 No rank-up showing - proceed immediately
+            //  No rank-up showing - proceed immediately
             this._doUnlockMainQuest();
         }
     },
 
-    // 🖤 Internal: Actually unlock the main quest 💀
+    //  Internal: Actually unlock the main quest 
     _doUnlockMainQuest() {
-        if (this._mainQuestUnlocked) return; // 🦇 Prevent double-unlock
+        if (this._mainQuestUnlocked) return; // ��� Prevent double-unlock
         this._mainQuestUnlocked = true;
 
         if (typeof QuestSystem !== 'undefined') {
-            // 🖤 Actually ASSIGN the quest so it becomes active, not just discovered
-            // 🦇 act1_quest1 is "First Steps" - the new starting quest from MainQuests
+            //  Actually ASSIGN the quest so it becomes active, not just discovered
+            //  act1_quest1 is "First Steps" - the new starting quest from MainQuests
             if (QuestSystem.assignQuest) {
                 const result = QuestSystem.assignQuest('act1_quest1', { name: 'Elder Morin' });
                 if (result.success) {
                     console.log('🌟 act1_quest1 (First Steps) quest STARTED - the darkness beckons 🦇');
-                    // 🖤 Auto-track main quest so wayfinder shows where to go 💀
+                    //  Auto-track main quest so wayfinder shows where to go 
                     if (QuestSystem.trackQuest) {
                         QuestSystem.trackQuest('act1_quest1');
                         console.log('🎯 act1_quest1 auto-tracked - wayfinder activated');
                     }
                 } else {
-                    // 🖤 If quest is already active, that's fine - just track it for wayfinder! 💀
+                    //  If quest is already active, that's fine - just track it for wayfinder! 
                     if (result.error === 'Quest already active') {
                         console.log('🌟 act1_quest1 already active - just need to track it 🦇');
                         if (QuestSystem.trackQuest) {
@@ -608,7 +624,7 @@ const InitialEncounterSystem = {
                             console.log('🎯 act1_quest1 tracked - wayfinder activated');
                         }
                     } else {
-                        // 🖤 Actual error - log it
+                        //  Actual error - log it
                         console.warn('🌟 act1_quest1 assignment failed:', result.error);
                         if (QuestSystem.discoverQuest) {
                             QuestSystem.discoverQuest('act1_quest1');
@@ -630,13 +646,13 @@ const InitialEncounterSystem = {
         }
     },
 
-    // 🎮 FOR TESTING - manually trigger the encounter
+    //  FOR TESTING - manually trigger the encounter
     testEncounter(playerName = 'Test Trader') {
         this.hasShownEncounter = false;
         this.triggerInitialEncounter(playerName, 'greendale');
     },
 
-    // 🖤💀 FALLBACK QUEST GIVER - spawn the Hooded Stranger at player's location if they close without accepting 💀
+    //  FALLBACK QUEST GIVER - spawn the Hooded Stranger at player's location if they close without accepting 
     _spawnStrangerAsFallbackNPC() {
         // Get current location
         const currentLocationId = typeof game !== 'undefined' && game.currentLocation?.id;
@@ -653,7 +669,7 @@ const InitialEncounterSystem = {
 
         this.strangerSpawnedAtLocation = currentLocationId;
 
-        // 🖤 Add "hooded_stranger" to the location's NPC list dynamically
+        //  Add "hooded_stranger" to the location's NPC list dynamically
         if (typeof GameWorld !== 'undefined' && GameWorld.locations[currentLocationId]) {
             const location = GameWorld.locations[currentLocationId];
             if (!location.npcs) location.npcs = [];
@@ -665,19 +681,23 @@ const InitialEncounterSystem = {
             }
         }
 
-        // 🦇 Show message to player
+        //  Show message to player
         if (typeof addMessage === 'function') {
             addMessage('🎭 The hooded stranger lingers in the shadows... perhaps you should speak with them.', 'info');
         }
 
-        // 🖤 Resume time if it was paused
-        if (this._previousSpeedForIntro && typeof TimeSystem !== 'undefined') {
-            TimeSystem.setSpeed(this._previousSpeedForIntro);
-            this._previousSpeedForIntro = null;
+        //  Resume time using interrupt system 
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.resumeFromInterrupt) {
+                TimeSystem.resumeFromInterrupt('intro_sequence');
+            } else if (this._previousSpeedForIntro) {
+                TimeSystem.setSpeed(this._previousSpeedForIntro);
+                this._previousSpeedForIntro = null;
+            }
         }
     },
 
-    // 🖤💀 Check if player needs the initial quest (for stranger NPC dialogue) 💀
+    //  Check if player needs the initial quest (for stranger NPC dialogue) 
     needsInitialQuest() {
         // Check if act1_quest1 is active or completed
         if (typeof QuestSystem !== 'undefined') {
@@ -689,7 +709,7 @@ const InitialEncounterSystem = {
         return !this.hasAcceptedInitialQuest;
     },
 
-    // 🖤💀 Offer initial quest again when talking to spawned stranger 💀
+    //  Offer initial quest again when talking to spawned stranger 
     offerInitialQuestFromStranger() {
         if (this.hasAcceptedInitialQuest) {
             // Quest already accepted - stranger has different dialogue
@@ -711,15 +731,15 @@ const InitialEncounterSystem = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// 🌍 GLOBAL ACCESS - for testing and debooger commands 🦇
-// ═══════════════════════════════════════════════════════════════
+// 
+//  GLOBAL ACCESS - for testing and debooger commands 
+// 
 window.InitialEncounterSystem = InitialEncounterSystem;
 window.testInitialEncounter = function(name) {
     InitialEncounterSystem.testEncounter(name);
 };
 
-// 🚀 INITIALIZE - awaken the system
+//  INITIALIZE - awaken the system
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         InitialEncounterSystem.init();

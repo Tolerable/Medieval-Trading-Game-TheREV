@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    CSS VARIABLES - the dark palette of our design system
    ═══════════════════════════════════════════════════════════════
-   Version: 0.90.00 | Unity AI Lab
+   Version: 0.90.01 | Unity AI Lab
    Creators: Hackall360, Sponge, GFourteen
    www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
    unityailabcontact@gmail.com
@@ -151,7 +151,7 @@
     --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 
     /* ═══════════════════════════════════════════════════════════
-       ⚡ TRANSITIONS - Smooth movements through time
+       TRANSITIONS - Smooth movements through time
        ═══════════════════════════════════════════════════════════ */
 
     --transition-fast: 0.15s ease;
@@ -243,7 +243,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ♿ ACCESSIBILITY - Reduced motion preference
+   ACCESSIBILITY - Reduced motion preference
    ═══════════════════════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {

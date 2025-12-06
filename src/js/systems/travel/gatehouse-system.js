@@ -1,11 +1,11 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // GATEHOUSE SYSTEM - pay to escape your current hell
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const GatehouseSystem = {
     // Track which gatehouses have been paid for (unlocked)
@@ -35,26 +35,26 @@ const GatehouseSystem = {
             description: 'Cold northern lands with valuable furs and minerals. A harsh realm for seasoned traders.',
             accessible: false,
             gatehouse: 'northern_outpost',
-            fee: 10000 // 💀 Mid-game barrier - 10k gold to brave the frozen north
+            fee: 10000 // ��� Mid-game barrier - 10k gold to brave the frozen north
         },
         eastern: {
             name: 'Eastern Reaches',
             description: 'Prosperous trading regions to the east. Rich markets await those who can afford entry.',
             accessible: false,
             gatehouse: 'eastern_gate',
-            fee: 1000 // 🦇 Early-mid game - 1k gold OR sneak through south
+            fee: 1000 // ��� Early-mid game - 1k gold OR sneak through south
         },
         western: {
             name: 'Western Wilds',
             description: 'Untamed western frontier with rare resources. Only the wealthiest merchants dare enter.',
             accessible: false,
             gatehouse: 'western_outpost',
-            fee: 50000 // ⚰️ Late-game barrier - 50k gold for the endgame zone
+            fee: 50000 // Late-game barrier - 50k gold for the endgame zone
         },
         southern: {
             name: 'Southern Coast',
             description: 'The Glendale region - a natural expansion from the starter area. Free passage for all traders.',
-            accessible: true, // 🖤 FREE! Natural progression from starter
+            accessible: true, // ��� FREE! Natural progression from starter
             gatehouse: null, // No gatehouse - always open
             fee: 0
         },
@@ -77,7 +77,7 @@ const GatehouseSystem = {
             type: 'gatehouse',
             icon: '🏰',
             description: 'Military outpost controlling access to the Northern Territories. Only seasoned traders with 10,000 gold may pass.',
-            fee: 10000, // 💀 Mid-game barrier
+            fee: 10000, // ��� Mid-game barrier
             unlocksZone: 'northern',
             guards: 'Northern Guard',
             services: ['passage', 'supplies', 'weapons'],
@@ -105,7 +105,7 @@ const GatehouseSystem = {
             type: 'gatehouse',
             icon: '🏰',
             description: 'Frontier outpost marking the edge of civilized lands. Only the wealthiest merchants (50,000 gold) may enter the Western Wilds.',
-            fee: 50000, // ⚰️ Late-game barrier - endgame zone
+            fee: 50000, // Late-game barrier - endgame zone
             unlocksZone: 'western',
             guards: 'Frontier Rangers',
             services: ['passage', 'supplies', 'bounties'],
@@ -135,7 +135,7 @@ const GatehouseSystem = {
             type: 'gatehouse',
             icon: '🏰',
             description: 'The checkpoint to the prosperous Eastern Kingdoms. Pay 1,000 gold for direct access, or find the back path through the south.',
-            fee: 1000, // 🦇 Early-mid game - can bypass via south
+            fee: 1000, // ��� Early-mid game - can bypass via south
             unlocksZone: 'eastern',
             guards: 'Eastern Merchants Guild',
             services: ['passage', 'trade_permits'],
@@ -143,17 +143,17 @@ const GatehouseSystem = {
             virtualGate: true,
             nearLocation: 'jade_harbor'
         }
-        // 🖤 Southern/Glendale has NO gatehouse - FREE access from starter!
+        //  Southern/Glendale has NO gatehouse - FREE access from starter!
     },
 
     // Map zones to their controlling gatehouses
-    // 🖤 Progression: starter → south (FREE) → east (1k or back path) → north (10k) → west (50k)
+    //  Progression: starter  south (FREE)  east (1k or back path)  north (10k)  west (50k)
     ZONE_GATEHOUSES: {
-        'northern': 'northern_outpost',    // 💀 10,000g - mid game
+        'northern': 'northern_outpost',    // ��� 10,000g - mid game
         'northern_deep': 'winterwatch_outpost',
-        'western': 'western_outpost',      // ⚰️ 50,000g - late game
-        'eastern': 'eastern_gate',         // 🦇 1,000g - early-mid (bypassable via south)
-        'southern': null,                  // 🖤 FREE! No gatehouse - natural expansion
+        'western': 'western_outpost',      // 50,000g - late game
+        'eastern': 'eastern_gate',         // ��� 1,000g - early-mid (bypassable via south)
+        'southern': null,                  // ��� FREE! No gatehouse - natural expansion
         'capital': null,                   // Capital ALWAYS accessible
         'starter': 'starter_gate'
     },
@@ -344,7 +344,7 @@ const GatehouseSystem = {
     },
 
     // Check if a location is accessible
-    // 🖤 Back path logic: if you can reach a location through connected FREE zones, you can access it
+    //  Back path logic: if you can reach a location through connected FREE zones, you can access it
     canAccessLocation(locationId, fromLocationId = null) {
         // Get location zone using our mapping first
         const zone = this.LOCATION_ZONES[locationId] || this.getLocationZone(locationId);
@@ -359,7 +359,7 @@ const GatehouseSystem = {
             return { accessible: true, reason: null };
         }
 
-        // 🦇 Southern zone is ALWAYS FREE - no gatehouse!
+        //  Southern zone is ALWAYS FREE - no gatehouse!
         if (zone === 'southern') {
             return { accessible: true, reason: null };
         }
@@ -387,8 +387,8 @@ const GatehouseSystem = {
             return { accessible: true, reason: null };
         }
 
-        // 💀 BACK PATH CHECK: If traveling from a connected accessible location, allow it!
-        // This enables: starter → south (free) → coastal_cave → smugglers_cove (eastern)
+        //  BACK PATH CHECK: If traveling from a connected accessible location, allow it!
+        // This enables: starter  south (free)  coastal_cave  smugglers_cove (eastern)
         if (fromLocationId) {
             const fromZone = this.LOCATION_ZONES[fromLocationId] || this.getLocationZone(fromLocationId);
             const fromZoneInfo = this.ZONES[fromZone];
@@ -406,7 +406,7 @@ const GatehouseSystem = {
             }
         }
 
-        // 🖤 Also check if player is currently IN the zone (already snuck in via back path)
+        //  Also check if player is currently IN the zone (already snuck in via back path)
         if (typeof game !== 'undefined' && game.currentLocation) {
             const currentZone = this.LOCATION_ZONES[game.currentLocation.id] || this.getLocationZone(game.currentLocation.id);
             if (currentZone === zone) {
@@ -516,7 +516,7 @@ const GatehouseSystem = {
 
         if (originalStartTravel) {
             TravelSystem.startTravel = function(destinationId) {
-                // 🖤 Get current location for back path check
+                //  Get current location for back path check
                 const fromLocationId = game?.currentLocation?.id || null;
 
                 // Check zone access (with back path support)
@@ -712,10 +712,10 @@ const GatehouseSystem = {
         return { accessible, locked };
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 💰 ZONE-BASED PRICE MODIFIERS - balanced trade route profits
-    // ═══════════════════════════════════════════════════════════════
-    // 🖤 Each zone has specialty items that are cheaper to BUY there
+    // 
+    //  ZONE-BASED PRICE MODIFIERS - balanced trade route profits
+    // 
+    //  Each zone has specialty items that are cheaper to BUY there
     // and items that are in demand (higher SELL price)
     // This creates natural trade routes without one trade = millionaire
     ZONE_TRADE_BONUSES: {
@@ -769,7 +769,7 @@ const GatehouseSystem = {
         }
     },
 
-    // 💀 Get price modifier for an item at a location
+    //  Get price modifier for an item at a location
     getZonePriceModifier(locationId, itemId, isBuying) {
         const zone = this.LOCATION_ZONES[locationId] || this.getLocationZone(locationId);
         const zoneBonus = this.ZONE_TRADE_BONUSES[zone];
@@ -791,7 +791,7 @@ const GatehouseSystem = {
         return 1.0; // No special modifier
     },
 
-    // 🦇 Get trade route suggestion for a zone
+    //  Get trade route suggestion for a zone
     getTradeRouteSuggestion(fromZone) {
         const routes = {
             starter: { to: 'southern', buy: 'wheat/grain', sell: 'fish/wine', profit: '~20-30%' },

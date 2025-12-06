@@ -375,7 +375,7 @@ const MountSystem = {
         }
 
         const stats = this.mountStats[instanceId];
-        // 🖤 Validate mountStats exists before accessing health 💀
+        //  Validate mountStats exists before accessing health 
         if (!stats) {
             this.showNotification('Mount stats not found!', 'error');
             return false;

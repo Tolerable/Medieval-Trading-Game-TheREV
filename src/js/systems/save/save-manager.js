@@ -1,13 +1,13 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // SAVE MANAGER - preserving your descent into capitalism
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
-// 🖤 Custom error types for save/load operations - differentiate error handling 💀
+//  Custom error types for save/load operations - differentiate error handling 
 class SaveError extends Error {
     constructor(message, code, details = {}) {
         super(message);
@@ -17,7 +17,7 @@ class SaveError extends Error {
     }
 }
 
-// 🖤 Error codes for save operations 💀
+//  Error codes for save operations 
 const SaveErrorCodes = {
     INVALID_SLOT: 'INVALID_SLOT',
     STORAGE_FULL: 'STORAGE_FULL',
@@ -33,24 +33,24 @@ const SaveErrorCodes = {
 };
 
 const SaveManager = {
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // CONFIGURATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     maxSaveSlots: 10,
     maxAutoSaveSlots: 10,
     autoSaveInterval: 900000, // 15 minutes (real time) - configurable in settings
     compressionEnabled: true,
 
-    // 🖤 SAVE FORMAT VERSIONING - for migrations 💀
+    //  SAVE FORMAT VERSIONING - for migrations 
     // Increment SAVE_FORMAT when save structure changes
     // Add migration handler in MIGRATIONS for backward compatibility
     SAVE_FORMAT: 2,  // Current format version (integer for easy comparison)
     saveVersion: '1.0.0',  // Legacy - kept for backward compat
 
-    // 🖤 Migration handlers: { fromFormat: migrationFunction } 💀
+    //  Migration handlers: { fromFormat: migrationFunction } 
     // Each migration transforms save data from version N to N+1
     MIGRATIONS: {
-        // Format 1 → 2: Added questItems, doomVisitedLocations, questMetrics
+        // Format 1  2: Added questItems, doomVisitedLocations, questMetrics
         1: (saveData) => {
             console.log('💾 Migrating save from format 1 → 2...');
             const gd = saveData.gameData;
@@ -79,15 +79,15 @@ const SaveManager = {
             return saveData;
         }
         // Future migrations go here:
-        // 2: (saveData) => { /* migrate format 2 → 3 */ }
+        // 2: (saveData) => { /* migrate format 2  3 */ }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // STATE
-    // ═══════════════════════════════════════════════════════════════
+    // 
     saveSlots: {},
 
-    // 🖤 Escape HTML - sanitize save names or die 💀
+    //  Escape HTML - sanitize save names or die 
     escapeHtml(text) {
         if (text == null) return '';
         const div = document.createElement('div');
@@ -104,9 +104,9 @@ const SaveManager = {
     _selectedLoadType: 'manual',
     _wasGamePaused: false,
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // INITIALIZATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     init() {
         console.log('💾 SaveManager: Initializing unified save system...');
 
@@ -117,14 +117,14 @@ const SaveManager = {
         this.setupEventListeners();
         this.createUI();
 
-        // 🏆 Initialize Hall of Champions on main menu
+        //  Initialize Hall of Champions on main menu
         setTimeout(() => {
             if (typeof SaveUISystem !== 'undefined') {
                 SaveUISystem.init();
             }
         }, 100);
 
-        // 🖤 Refresh Load button state now that SaveManager is ready 💀
+        //  Refresh Load button state now that SaveManager is ready 
         if (typeof refreshLoadButtonState === 'function') {
             refreshLoadButtonState();
         }
@@ -138,7 +138,7 @@ const SaveManager = {
             try {
                 this.saveSlots = JSON.parse(metadata);
             } catch (e) {
-                // 🦇 Corrupt metadata - silently reset to empty, not worth screaming about
+                //  Corrupt metadata - silently reset to empty, not worth screaming about
                 console.warn('💀 Save slots metadata corrupt, resetting...');
                 localStorage.removeItem('tradingGameSaveSlots');
                 this.saveSlots = {};
@@ -169,7 +169,7 @@ const SaveManager = {
         }
     },
 
-    // 🕐 Load autosave interval from localStorage
+    //  Load autosave interval from localStorage
     loadAutoSaveIntervalSetting() {
         const savedInterval = localStorage.getItem('tradingGameAutoSaveInterval');
         if (savedInterval) {
@@ -183,7 +183,7 @@ const SaveManager = {
         }
     },
 
-    // 🕐 Set and save autosave interval
+    //  Set and save autosave interval
     setAutoSaveInterval(intervalMs) {
         const validIntervals = [300000, 900000, 1800000, 3600000]; // 5m, 15m, 30m, 1hr
         if (!validIntervals.includes(intervalMs)) {
@@ -212,7 +212,7 @@ const SaveManager = {
                 currentIndex: this.currentAutoSaveIndex
             }));
         } catch (e) {
-            // 🦇 localStorage might be full - warn but don't scream, game still works
+            //  localStorage might be full - warn but don't scream, game still works
             console.warn('💀 Failed to save slots metadata (storage full?):', e.message);
         }
     },
@@ -266,9 +266,9 @@ const SaveManager = {
         });
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // CORE SAVE/LOAD LOGIC
-    // ═══════════════════════════════════════════════════════════════
+    // 
 
     getCompleteGameState() {
         const safeCall = (fn, fallback = null) => {
@@ -286,20 +286,20 @@ const SaveManager = {
 
         return {
             version: this.saveVersion,
-            _saveFormat: this.SAVE_FORMAT,  // 🖤 Track format for migrations 💀
+            _saveFormat: this.SAVE_FORMAT,  // ��� Track format for migrations 💀
             timestamp: Date.now(),
             gameData: {
                 state: game.state,
                 gameTick: game.gameTick,
                 player: game.player ? {
-                    characterId: game.player.characterId, // 🏆 Unique ID for leaderboard deduplication
+                    characterId: game.player.characterId, // ��� Unique ID for leaderboard deduplication
                     name: game.player.name,
                     class: game.player.class,
                     difficulty: game.player.difficulty,
                     gold: game.player.gold,
                     inventory: game.player.inventory,
                     equipment: game.player.equipment,
-                    stats: game.player.stats, // 🖤 Contains health, hunger, thirst, stamina, happiness + max values 💀
+                    stats: game.player.stats, // ��� Contains health, hunger, thirst, stamina, happiness + max values 💀
                     attributes: game.player.attributes,
                     skills: game.player.skills,
                     perks: game.player.perks,
@@ -315,15 +315,15 @@ const SaveManager = {
                     level: game.player.level,
                     experience: game.player.experience,
                     tradeRoutes: game.player.tradeRoutes,
-                    questItems: game.player.questItems || {}, // 🖤 Quest items for delivery quests 💀
-                    // 🖤 Additional player state that was missing 💀
+                    questItems: game.player.questItems || {}, // ��� Quest items for delivery quests 💀
+                    //  Additional player state that was missing 
                     ownedTools: game.player.ownedTools || [],
                     toolDurability: game.player.toolDurability || {},
                     ownsHouse: game.player.ownsHouse || false,
                     lastRestTime: game.player.lastRestTime || 0
                 } : null,
                 currentLocation: game.currentLocation,
-                // 🖤 Use TimeMachine's getSaveData for complete time state
+                //  Use TimeMachine's getSaveData for complete time state
                 timeState: typeof TimeMachine !== 'undefined' && TimeMachine.getSaveData
                     ? TimeMachine.getSaveData()
                     : (typeof TimeSystem !== 'undefined' ? {
@@ -338,7 +338,7 @@ const SaveManager = {
                 worldState: typeof GameWorld !== 'undefined' ? {
                     unlockedRegions: GameWorld.unlockedRegions || ['starter'],
                     visitedLocations: GameWorld.visitedLocations || [],
-                    doomVisitedLocations: GameWorld.doomVisitedLocations || [] // 🖤💀 Separate doom world progress!
+                    doomVisitedLocations: GameWorld.doomVisitedLocations || [] // ���💀 Separate doom world progress!
                 } : null,
                 questState: typeof QuestSystem !== 'undefined' ? {
                     activeQuests: QuestSystem.activeQuests || {},
@@ -347,7 +347,8 @@ const SaveManager = {
                     discoveredQuests: QuestSystem.discoveredQuests || [],
                     questCompletionTimes: QuestSystem.questCompletionTimes || {},
                     trackedQuestId: QuestSystem.trackedQuestId || null,
-                    // 🖤 v0.90+ Quest metrics for leaderboard
+                    trackerHidden: QuestSystem.trackerHidden || false,
+                    //  v0.90+ Quest metrics for leaderboard
                     questMetrics: {
                         mainQuestsCompleted: QuestSystem.completedQuests?.filter(q => q.startsWith('act'))?.length || 0,
                         sideQuestsCompleted: QuestSystem.completedQuests?.filter(q =>
@@ -360,11 +361,11 @@ const SaveManager = {
                         totalQuestsCompleted: QuestSystem.completedQuests?.length || 0
                     }
                 } : null,
-                // 🖤 Faction reputation - the void remembers who you served 💀
+                //  Faction reputation - the void remembers who you served 
                 factionState: typeof FactionSystem !== 'undefined' && FactionSystem.getState
                     ? FactionSystem.getState()
                     : null,
-                // 🖤 NPC relationships - per-slot isolation (fixes global localStorage bug) 💀
+                //  NPC relationships - per-slot isolation (fixes global localStorage bug) 
                 npcRelationships: typeof NPCRelationshipSystem !== 'undefined' && NPCRelationshipSystem.getSaveData
                     ? NPCRelationshipSystem.getSaveData()
                     : null,
@@ -373,9 +374,9 @@ const SaveManager = {
                     marketPriceModifier: game.marketPriceModifier || 1
                 },
                 settings: game.settings || {},
-                // 🖤 Panel positions - save player's custom panel layout
+                //  Panel positions - save player's custom panel layout
                 panelPositions: typeof DraggablePanels !== 'undefined' ? DraggablePanels.getAllPositions() : {},
-                // 🖤 Additional systems that need state persistence 💀
+                //  Additional systems that need state persistence 
                 doomWorldState: typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.getSaveData
                     ? DoomWorldSystem.getSaveData()
                     : null,
@@ -397,18 +398,18 @@ const SaveManager = {
                 achievementState: typeof AchievementSystem !== 'undefined' && AchievementSystem.getProgress
                     ? AchievementSystem.getProgress()
                     : null,
-                // 🖤 Travel system state - includes doom path discovery 💀
+                //  Travel system state - includes doom path discovery 
                 travelState: typeof TravelSystem !== 'undefined' ? {
                     isInDoomWorld: TravelSystem.isInDoomWorld?.() || false,
                     doomDiscoveredPaths: TravelSystem.doomDiscoveredPaths || [],
                     isTraveling: TravelSystem.isTraveling || false,
                     currentTravelRoute: TravelSystem.currentTravelRoute || null
                 } : null,
-                // 🖤 NPC Merchant economy state - per-slot isolation (no more exploit!) 💀
+                //  NPC Merchant economy state - per-slot isolation (no more exploit!) 
                 merchantEconomyState: typeof NPCMerchantSystem !== 'undefined' && NPCMerchantSystem.getSaveData
                     ? NPCMerchantSystem.getSaveData()
                     : null,
-                // 🖤 NPC Schedule state - registered NPC schedules persist 💀
+                //  NPC Schedule state - registered NPC schedules persist 
                 npcScheduleState: typeof NPCScheduleSystem !== 'undefined' && NPCScheduleSystem.getSaveData
                     ? NPCScheduleSystem.getSaveData()
                     : null
@@ -416,7 +417,7 @@ const SaveManager = {
         };
     },
 
-    // 🖤 SAVE DATA SCHEMA - defines expected structure for validation 💀
+    //  SAVE DATA SCHEMA - defines expected structure for validation 
     SAVE_SCHEMA: {
         version: { type: 'string', required: true },
         _saveFormat: { type: 'number', required: false },
@@ -425,7 +426,7 @@ const SaveManager = {
             type: 'object',
             required: true,
             properties: {
-                // 🖤 GameState is a string enum ('menu', 'playing', etc.), not a number 💀
+                //  GameState is a string enum ('menu', 'playing', etc.), not a number 
                 state: { type: 'string', required: false },
                 gameTick: { type: 'number', required: false },
                 currentLocation: { type: 'object', required: false },
@@ -435,7 +436,7 @@ const SaveManager = {
                     properties: {
                         name: { type: 'string', required: true },
                         gold: { type: 'number', required: true },
-                        // 🖤 Inventory is an OBJECT {itemId: count}, not an array 💀
+                        //  Inventory is an OBJECT {itemId: count}, not an array 
                         inventory: { type: 'object', required: false },
                         stats: { type: 'object', required: false },
                         level: { type: 'number', required: false }
@@ -460,10 +461,10 @@ const SaveManager = {
             return { valid: false, errors, warnings };
         }
 
-        // 🖤 Recursive schema validation 💀
+        //  Recursive schema validation 
         this._validateAgainstSchema(saveData, this.SAVE_SCHEMA, '', errors, warnings);
 
-        // 🖤 Additional semantic validation 💀
+        //  Additional semantic validation 
         if (saveData.gameData?.player) {
             const player = saveData.gameData.player;
 
@@ -495,7 +496,7 @@ const SaveManager = {
         };
     },
 
-    // 🖤 Helper: Validate object against schema recursively 💀
+    //  Helper: Validate object against schema recursively 
     _validateAgainstSchema(data, schema, path, errors, warnings) {
         for (const [key, rules] of Object.entries(schema)) {
             const fullPath = path ? `${path}.${key}` : key;
@@ -526,7 +527,7 @@ const SaveManager = {
         }
     },
 
-    // 🖤 Migrate save data from older formats to current 💀
+    //  Migrate save data from older formats to current 
     migrateSaveData(saveData) {
         // Determine format version (old saves without _saveFormat are format 1)
         let currentFormat = saveData._saveFormat || 1;
@@ -567,7 +568,7 @@ const SaveManager = {
             const compressed = this.unicodeCompress(jsonString);
             return 'UC:' + compressed;
         } catch (e) {
-            // 🦇 Compression failed - fallback to uncompressed, no big deal
+            //  Compression failed - fallback to uncompressed, no big deal
             console.warn('💾 Compression failed, using uncompressed save');
             return JSON.stringify(saveData);
         }
@@ -597,7 +598,7 @@ const SaveManager = {
             }
             return JSON.parse(compressedData);
         } catch (e) {
-            // 🦇 Corrupt save data - return null, caller handles the fallback
+            //  Corrupt save data - return null, caller handles the fallback
             console.warn('💾 Decompression failed - save may be corrupt');
             return null;
         }
@@ -629,9 +630,9 @@ const SaveManager = {
         return result.substring(0, originalLen);
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // SAVE OPERATIONS
-    // ═══════════════════════════════════════════════════════════════
+    // 
 
     saveToSlot(slotNumber, customName = null) {
         if (slotNumber < 1 || slotNumber > this.maxSaveSlots) {
@@ -676,7 +677,7 @@ const SaveManager = {
                 this.submitToLeaderboard(gameState);
             }
 
-            // 🖤 Refresh main menu Load button state after save 💀
+            //  Refresh main menu Load button state after save 
             if (typeof refreshLoadButtonState === 'function') {
                 refreshLoadButtonState();
             }
@@ -690,7 +691,7 @@ const SaveManager = {
     },
 
     loadFromSlot(slotNumber) {
-        // 🖤 Use typed errors for better error differentiation 💀
+        //  Use typed errors for better error differentiation 
         try {
             if (slotNumber < 1 || slotNumber > this.maxSaveSlots) {
                 throw new SaveError('Invalid save slot!', SaveErrorCodes.INVALID_SLOT, { slotNumber });
@@ -715,12 +716,12 @@ const SaveManager = {
                 });
             }
 
-            // 🖤 Log warnings but continue loading 💀
+            //  Log warnings but continue loading 
             if (validation.warnings?.length > 0) {
                 console.warn('💾 Save data warnings:', validation.warnings);
             }
 
-            // 🖤 Apply migrations if needed 💀
+            //  Apply migrations if needed 
             saveData = this.migrateSaveData(saveData);
 
             this.loadGameState(saveData.gameData);
@@ -731,7 +732,7 @@ const SaveManager = {
             }
             return true;
         } catch (e) {
-            // 🖤 Log with error code for debugging 💀
+            //  Log with error code for debugging 
             const errorCode = e instanceof SaveError ? e.code : 'UNKNOWN';
             console.error(`Load failed [${errorCode}]:`, e.message, e.details || {});
             if (typeof addMessage === 'function') addMessage(e.message, 'error');
@@ -765,7 +766,7 @@ const SaveManager = {
             game.player = { ...game.player, ...gameData.player };
         }
 
-        // 🖤 Use TimeMachine's loadSaveData for complete time restoration
+        //  Use TimeMachine's loadSaveData for complete time restoration
         if (gameData.timeState) {
             if (typeof TimeMachine !== 'undefined' && TimeMachine.loadSaveData) {
                 TimeMachine.loadSaveData(gameData.timeState);
@@ -779,35 +780,114 @@ const SaveManager = {
         if (gameData.worldState && typeof GameWorld !== 'undefined') {
             GameWorld.unlockedRegions = gameData.worldState.unlockedRegions || ['starter'];
             GameWorld.visitedLocations = gameData.worldState.visitedLocations || [];
-            GameWorld.doomVisitedLocations = gameData.worldState.doomVisitedLocations || []; // 🖤💀 Separate doom world progress!
+            GameWorld.doomVisitedLocations = gameData.worldState.doomVisitedLocations || []; // ���💀 Separate doom world progress!
         }
 
         if (gameData.questState && typeof QuestSystem !== 'undefined') {
             QuestSystem.activeQuests = gameData.questState.activeQuests || {};
             QuestSystem.completedQuests = gameData.questState.completedQuests || [];
-            // 🖤 Restore failed quests too - the void remembers ALL your failures 💀
+            //  Restore failed quests too - the void remembers ALL your failures 
             QuestSystem.failedQuests = gameData.questState.failedQuests || [];
-            // 🖤 Restore quest completion times for cooldowns 💀
+            //  Restore quest completion times for cooldowns 
             QuestSystem.questCompletionTimes = gameData.questState.questCompletionTimes || {};
             QuestSystem.discoveredQuests = gameData.questState.discoveredQuests || [];
             QuestSystem.trackedQuestId = gameData.questState.trackedQuestId || null;
-            // 🦇 Restore quest metrics for leaderboard
+            //  Restore quest tracker visibility state
+            QuestSystem.trackerHidden = gameData.questState.trackerHidden || false;
+            //  Restore quest metrics for leaderboard
             if (gameData.questState.questMetrics) {
                 QuestSystem.questMetrics = gameData.questState.questMetrics;
             }
+
+            //  MIGRATION: Patch Strange Cargo quest with new talk objective 
+            // Quest was updated to require returning to Harbormaster after finding manifest
+            if (QuestSystem.activeQuests['act1_quest5']) {
+                const quest = QuestSystem.activeQuests['act1_quest5'];
+                const hasTalkObjective = quest.objectives && quest.objectives.some(o => o.type === 'talk' && o.npc === 'harbormaster');
+
+                if (!hasTalkObjective) {
+                    console.log('🔧 Migrating Strange Cargo quest: adding return to Harbormaster objective');
+                    if (!quest.objectives) quest.objectives = [];
+                    quest.objectives.push({
+                        type: 'talk',
+                        npc: 'harbormaster',
+                        location: 'sunhaven',
+                        completed: false,
+                        description: 'Return to Harbormaster Elena'
+                    });
+                }
+            }
+
+            //  MIGRATION: Restructure Missing Trader quest entirely 
+            // Old: talk to innkeeper + collect journal (no source for journal!)
+            // New: talk to innkeeper (gives journal) + return to guard
+            if (QuestSystem.activeQuests['act1_quest6']) {
+                const quest = QuestSystem.activeQuests['act1_quest6'];
+                console.log('🔧 Migrating Missing Trader quest to new structure');
+
+                // Check if player has the journal (if so, they already talked to innkeeper)
+                const hasJournal = (game.player?.questItems?.traders_journal || 0) > 0;
+
+                quest.objectives = [
+                    {
+                        type: 'talk',
+                        npc: 'innkeeper',
+                        location: 'lighthouse_inn',
+                        completed: hasJournal, // Only mark complete if player already has journal
+                        description: 'Ask the innkeeper about the missing trader',
+                        givesItem: 'traders_journal'
+                    },
+                    {
+                        type: 'talk',
+                        npc: 'guard',
+                        location: 'sunhaven',
+                        completed: false,
+                        description: 'Return to Guard Captain Theron'
+                    }
+                ];
+
+                    // If player doesn't have journal yet, they still need to talk to innkeeper
+                // Don't give it automatically - let them get it from the conversation
+                if (hasJournal) {
+                    console.log('🔧 Player already has journal, marked innkeeper talk complete');
+                } else {
+                    console.log('🔧 Player needs to talk to innkeeper to get journal');
+                }
+            }
+
+            //  MIGRATION: Add turn-in objective to Eastern Expansion quest 
+            // Quest was missing final "talk to Forgemaster" objective
+            if (QuestSystem.activeQuests['act2_quest1']) {
+                const quest = QuestSystem.activeQuests['act2_quest1'];
+                const hasTurnInObjective = quest.objectives && quest.objectives.some(o =>
+                    o.type === 'talk' && o.npc === 'blacksmith' && o.location === 'ironforge_city'
+                );
+
+                if (!hasTurnInObjective) {
+                    console.log('🔧 Migrating Eastern Expansion: adding turn-in objective');
+                    if (!quest.objectives) quest.objectives = [];
+                    quest.objectives.push({
+                        type: 'talk',
+                        npc: 'blacksmith',
+                        location: 'ironforge_city',
+                        completed: false,
+                        description: 'Report to Forgemaster Grimjaw'
+                    });
+                }
+            }
         }
 
-        // 🖤 Restore faction reputation - alliances from the darkness 💀
+        //  Restore faction reputation - alliances from the darkness 
         if (gameData.factionState && typeof FactionSystem !== 'undefined' && FactionSystem.loadState) {
             FactionSystem.loadState(gameData.factionState);
         }
 
-        // 🖤 Restore NPC relationships - per-slot isolation 💀
+        //  Restore NPC relationships - per-slot isolation 
         if (gameData.npcRelationships && typeof NPCRelationshipSystem !== 'undefined' && NPCRelationshipSystem.loadSaveData) {
             NPCRelationshipSystem.loadSaveData(gameData.npcRelationships);
         }
 
-        // 🖤 Restore EventSystem events - fixes events lost after reload 💀
+        //  Restore EventSystem events - fixes events lost after reload 
         if (gameData.eventState && typeof EventSystem !== 'undefined' && EventSystem.loadSaveData) {
             EventSystem.loadSaveData(gameData.eventState);
         }
@@ -855,7 +935,7 @@ const SaveManager = {
             }
         }, 150);
 
-        // 🖤 Restore panel positions from save
+        //  Restore panel positions from save
         if (gameData.panelPositions && typeof DraggablePanels !== 'undefined') {
             try {
                 // Save to localStorage so DraggablePanels can load them
@@ -868,7 +948,7 @@ const SaveManager = {
             }
         }
 
-        // 🖤 Restore additional system states 💀
+        //  Restore additional system states 
         // Doom World
         if (gameData.doomWorldState && typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.loadSaveData) {
             try {
@@ -954,7 +1034,7 @@ const SaveManager = {
             }
         }
 
-        // 🖤 NPC Merchant economy state - per-slot isolation (no more exploit!) 💀
+        //  NPC Merchant economy state - per-slot isolation (no more exploit!) 
         if (gameData.merchantEconomyState && typeof NPCMerchantSystem !== 'undefined' && NPCMerchantSystem.loadSaveData) {
             try {
                 NPCMerchantSystem.loadSaveData(gameData.merchantEconomyState);
@@ -964,7 +1044,7 @@ const SaveManager = {
             }
         }
 
-        // 🖤 NPC Schedule state - registered NPC schedules persist 💀
+        //  NPC Schedule state - registered NPC schedules persist 
         if (gameData.npcScheduleState && typeof NPCScheduleSystem !== 'undefined' && NPCScheduleSystem.loadSaveData) {
             try {
                 NPCScheduleSystem.loadSaveData(gameData.npcScheduleState);
@@ -975,9 +1055,9 @@ const SaveManager = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // AUTO-SAVE & QUICK SAVE
-    // ═══════════════════════════════════════════════════════════════
+    // 
 
     autoSave(silent = false) {
         const now = Date.now();
@@ -1036,7 +1116,7 @@ const SaveManager = {
 
         try {
             let parsed = this.decompressSaveData(saveData);
-            // 🖤 Apply migrations if needed 💀
+            //  Apply migrations if needed 
             parsed = this.migrateSaveData(parsed);
             this.loadGameState(parsed.gameData);
             if (typeof addMessage === 'function') addMessage('Auto-save loaded!', 'success');
@@ -1080,13 +1160,13 @@ const SaveManager = {
             };
             localStorage.setItem('tradingGameEmergencySave', JSON.stringify(saveData));
         } catch (e) {
-            // 🦇 Already in emergency mode - screaming won't help, stay silent
+            //  Already in emergency mode - screaming won't help, stay silent
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // UTILITY FUNCTIONS
-    // ═══════════════════════════════════════════════════════════════
+    // 
 
     deleteSave(slotNumber) {
         if (slotNumber < 1 || slotNumber > this.maxSaveSlots) return false;
@@ -1118,15 +1198,21 @@ const SaveManager = {
     },
 
     calculateDaysSurvived(saveData) {
-        if (!saveData.gameData?.timeState?.currentTime) return 0;
+        if (!saveData.gameData?.timeState?.currentTime) {
+            console.warn('💾 calculateDaysSurvived: No timeState.currentTime found!');
+            return 0;
+        }
         const t = saveData.gameData.timeState.currentTime;
-        // 🖤 Get starting date from config - the single source of truth
+        //  Get starting date from config - the single source of truth
         const startDate = typeof GameConfig !== 'undefined' ? GameConfig.time.startingDate : { year: 1111, month: 4, day: 1 };
 
         const startDays = startDate.day + (startDate.month - 1) * 30 + (startDate.year - 1) * 360;
         const currentDays = t.day + (t.month - 1) * 30 + (t.year - 1) * 360;
+        const daysSurvived = Math.max(0, currentDays - startDays);
 
-        return Math.max(0, currentDays - startDays);
+        console.log(`💾 calculateDaysSurvived: Start ${JSON.stringify(startDate)}, Current ${JSON.stringify(t)}, Days: ${daysSurvived}`);
+
+        return daysSurvived;
     },
 
     getSaveSlotInfo(slotNumber) {
@@ -1172,7 +1258,7 @@ const SaveManager = {
 
             const scoreData = {
                 playerName: player.name || 'Unknown',
-                characterId: player.characterId || null, // 🏆 CRITICAL: Prevents duplicate leaderboard entries 💀
+                characterId: player.characterId || null, // ��� CRITICAL: Prevents duplicate leaderboard entries 💀
                 score,
                 gold: player.gold || 0,
                 daysSurvived,
@@ -1182,15 +1268,15 @@ const SaveManager = {
 
             return await GlobalLeaderboardSystem.submitScore(scoreData);
         } catch (e) {
-            // 🦇 Leaderboard is optional - don't spam console for network issues
+            //  Leaderboard is optional - don't spam console for network issues
             console.warn('🏆 Leaderboard submission failed (network?)');
             return false;
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // UI CREATION - Consolidated from SaveLoadUI and SaveUISystem
-    // ═══════════════════════════════════════════════════════════════
+    // 
 
     createUI() {
         this.injectStyles();
@@ -1212,7 +1298,7 @@ const SaveManager = {
                 height: 100%;
                 background: rgba(0, 0, 0, 0.85);
                 backdrop-filter: blur(5px);
-                z-index: 700; /* Z-INDEX STANDARD: System modals */
+                z-index: 3100; /* Z-INDEX FIX: Above .screen (3000) so LOAD GAME dialog is visible from main menu */
                 display: none;
                 align-items: center;
                 justify-content: center;
@@ -1507,9 +1593,9 @@ const SaveManager = {
         document.body.appendChild(overlay);
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // UI OPERATIONS
-    // ═══════════════════════════════════════════════════════════════
+    // 
 
     openSaveDialog() {
         if (typeof game === 'undefined' || game.state !== GameState.PLAYING) {
@@ -1545,6 +1631,9 @@ const SaveManager = {
     },
 
     openLoadDialog() {
+        //  FIX: Reload metadata from localStorage to show latest saves
+        this.loadSaveSlotsMetadata();
+
         this._selectedLoadSlot = null;
         this._selectedLoadType = 'manual';
         this.renderLoadSlots();
@@ -1719,7 +1808,7 @@ const SaveManager = {
         }
     },
 
-    // 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+    //  FIXED: Use modal instead of browser confirm() 
     deleteSelectedLoad() {
         if (this._selectedLoadSlot === null) return;
 
@@ -1743,8 +1832,8 @@ const SaveManager = {
                 title: '🗑️ Delete Save',
                 content: '<p>Delete this save?</p><p style="color: #f44336; font-size: 12px;">This cannot be undone!</p>',
                 buttons: [
-                    { label: '❌ Cancel', type: 'secondary', action: () => ModalSystem.hide() },
-                    { label: '🗑️ Delete', type: 'danger', action: () => { ModalSystem.hide(); doDelete(); } }
+                    { text: 'Cancel', className: 'secondary', onClick: () => ModalSystem.hide() },
+                    { text: '🗑️ Delete', className: 'danger', onClick: () => { ModalSystem.hide(); doDelete(); } }
                 ]
             });
         } else {
@@ -1753,9 +1842,9 @@ const SaveManager = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
+// 
 // BACKWARD COMPATIBILITY - Aliases for old systems
-// ═══════════════════════════════════════════════════════════════
+// 
 
 // Map old SaveLoadSystem calls to SaveManager
 window.SaveLoadSystem = SaveManager;
@@ -1770,20 +1859,20 @@ window.SaveUISystem = {
     closeLoadGameDialog: () => SaveManager.closeLoadDialog(),
     init: () => {
         SaveUISystem.createLeaderboardDisplay();
-        // 🖤 Initial update - may show empty if JSONBin fetch still in progress 💀
+        //  Initial update - may show empty if JSONBin fetch still in progress 
         SaveUISystem.updateLeaderboard();
-        // 🦇 Retry after 2 seconds in case initial fetch was slow (deployed version)
+        //  Retry after 2 seconds in case initial fetch was slow (deployed version)
         setTimeout(() => SaveUISystem.updateLeaderboard(), 2000);
-        // 🦇 And again at 5 seconds for really slow connections
+        //  And again at 5 seconds for really slow connections
         setTimeout(() => SaveUISystem.updateLeaderboard(), 5000);
     },
 
-    // 🏆 Create Hall of Champions display on main menu
-    // 🖤 FIX: Added retry logic for race condition with DOM loading 💀
+    //  Create Hall of Champions display on main menu
+    //  FIX: Added retry logic for race condition with DOM loading 
     createLeaderboardDisplay: (retryCount = 0) => {
         const mainMenu = document.getElementById('main-menu');
         if (!mainMenu) {
-            // 🦇 Retry up to 5 times if DOM not ready yet
+            //  Retry up to 5 times if DOM not ready yet
             if (retryCount < 5) {
                 setTimeout(() => SaveUISystem.createLeaderboardDisplay(retryCount + 1), 500);
             }
@@ -1792,7 +1881,7 @@ window.SaveUISystem = {
 
         const menuContent = mainMenu.querySelector('.menu-content');
         if (!menuContent) {
-            // 🦇 Retry if menu-content not found yet
+            //  Retry if menu-content not found yet
             if (retryCount < 5) {
                 setTimeout(() => SaveUISystem.createLeaderboardDisplay(retryCount + 1), 500);
             }
@@ -1827,8 +1916,8 @@ window.SaveUISystem = {
         }
     },
 
-    // 🏆 Update leaderboard entries display
-    // 🖤 FIX: Added logging for debugging Hall of Champions display issues 💀
+    //  Update leaderboard entries display
+    //  FIX: Added logging for debugging Hall of Champions display issues 
     updateLeaderboard: () => {
         const container = document.getElementById('leaderboard-entries');
         if (!container) {
@@ -1837,7 +1926,7 @@ window.SaveUISystem = {
             return;
         }
 
-        // 🖤 Helper to render scores to the container 💀
+        //  Helper to render scores to the container 
         const renderScores = (scores) => {
             if (!scores || scores.length === 0) {
                 container.innerHTML = '<div class="leaderboard-empty">No champions have risen yet...</div>';
@@ -1885,15 +1974,15 @@ window.SaveUISystem = {
             container.innerHTML = html;
         };
 
-        // 🖤 Check if GlobalLeaderboardSystem is available and has data 💀
+        //  Check if GlobalLeaderboardSystem is available and has data 
         if (typeof GlobalLeaderboardSystem !== 'undefined') {
-            // 🦇 First try to use cached data directly (no network call)
+            //  First try to use cached data directly (no network call)
             if (GlobalLeaderboardSystem.leaderboard && GlobalLeaderboardSystem.leaderboard.length > 0) {
                 renderScores(GlobalLeaderboardSystem.leaderboard);
                 return;
             }
 
-            // 🦇 If no cached data, wait for fetch (or trigger one if needed)
+            //  If no cached data, wait for fetch (or trigger one if needed)
             GlobalLeaderboardSystem.fetchLeaderboard().then(scores => {
                 renderScores(scores);
             }).catch(err => {
@@ -1904,13 +1993,13 @@ window.SaveUISystem = {
         }
     },
 
-    // 🏆 Open full Hall of Champions overlay
+    //  Open full Hall of Champions overlay
     openHallOfChampions: () => {
         const overlay = document.getElementById('leaderboard-overlay');
         const content = document.getElementById('leaderboard-panel-content');
 
         if (!overlay) {
-            // 🦇 DOM not ready yet - not an error, just skip
+            //  DOM not ready yet - not an error, just skip
             console.warn('🏆 leaderboard-overlay not in DOM yet');
             return;
         }
@@ -1927,7 +2016,7 @@ window.SaveUISystem = {
             GlobalLeaderboardSystem.fetchLeaderboard().then(() => {
                 GlobalLeaderboardSystem.renderFullHallOfChampions('leaderboard-panel-content');
             }).catch(err => {
-                // 🦇 Network issue - try cached data or show friendly message
+                //  Network issue - try cached data or show friendly message
                 if (content && GlobalLeaderboardSystem.leaderboard?.length > 0) {
                     GlobalLeaderboardSystem.renderFullHallOfChampions('leaderboard-panel-content');
                 } else if (content) {
@@ -1939,7 +2028,7 @@ window.SaveUISystem = {
         }
     },
 
-    // 🏆 Close Hall of Champions overlay
+    //  Close Hall of Champions overlay
     closeHallOfChampions: () => {
         const overlay = document.getElementById('leaderboard-overlay');
         if (overlay) {

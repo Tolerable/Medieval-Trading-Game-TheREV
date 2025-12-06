@@ -1,13 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════
    Z-INDEX SYSTEM - the dark tower of stacking contexts
    ═══════════════════════════════════════════════════════════════
-   Version: 0.90.00 | Unity AI Lab
+   Version: 0.90.01 | Unity AI Lab
    Creators: Hackall360, Sponge, GFourteen
    www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
    unityailabcontact@gmail.com
    ═══════════════════════════════════════════════════════════════
 
-   🖤 MASTER Z-INDEX HIERARCHY (Gee's Order) 💀
+   MASTER Z-INDEX HIERARCHY (Gee's Order)
 
    LAYER 0     : Background Image (terrain, map base)
    LAYER 1-5   : Weather Effects (rain, snow, fog - DIRECTLY above background)
@@ -23,16 +23,16 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-    /* 🖤 LAYER 0: Background Image / Game Map Base */
+    /* LAYER 0: Background Image / Game Map Base */
     --z-background-image: 0;
     --z-game-map: 0;
 
-    /* 🌧️ LAYER 1-5: Weather Effects (DIRECTLY above background, below EVERYTHING else) */
+    /* LAYER 1-5: Weather Effects (DIRECTLY above background, below EVERYTHING else) */
     --z-weather-overlay: 2;
     --z-day-night-overlay: 3;
     --z-menu-weather: 1;
 
-    /* 📍 LAYER 10-40: Game World UI Elements (ABOVE weather) */
+    /* LAYER 10-40: Game World UI Elements (ABOVE weather) */
     --z-map-connections: 10;      /* Path lines between locations */
     --z-map-locations: 15;        /* Location icons */
     --z-map-labels: 18;           /* Location names */
@@ -40,50 +40,50 @@
     --z-quest-wayfinder: 25;      /* Quest objective glow */
     --z-traveling-indicator: 28;  /* Traveling... animation */
 
-    /* 📦 LAYER 50-99: Core UI Panels (ABOVE game world) */
+    /* LAYER 50-99: Core UI Panels (ABOVE game world) */
     --z-side-panel: 50;
     --z-location-panel: 55;
     --z-message-log: 60;
     --z-top-bar: 70;
     --z-bottom-bar: 70;
 
-    /* 🎛️ LAYER 100-199: Floating/Draggable Panels */
+    /* LAYER 100-199: Floating/Draggable Panels */
     --z-quest-tracker: 100;
     --z-people-panel: 110;
     --z-draggable-panel: 120;
     --z-setup-panel: 150;
 
-    /* 💬 LAYER 200-499: Tooltips & Dropdowns */
+    /* LAYER 200-499: Tooltips & Dropdowns */
     --z-tooltip: 200;
     --z-dropdown: 250;
     --z-popover: 300;
     --z-context-menu: 350;
 
-    /* 🎭 LAYER 500-999: Modal Backdrops */
+    /* LAYER 500-999: Modal Backdrops */
     --z-modal-backdrop: 500;
     --z-overlay-container: 600;
 
-    /* 📋 LAYER 1000-1999: Modals */
+    /* LAYER 1000-1999: Modals */
     --z-modal: 1000;
     --z-modal-content: 1001;
     --z-perk-modal: 1100;
     --z-npc-chat: 1200;
 
-    /* ⚠️ LAYER 2000+: Critical/System UI */
+    /* LAYER 2000+: Critical/System UI */
     --z-loading-screen: 2000;
     --z-error-modal: 2500;
 
-    /* 🖤 LAYER 3000+: Main Menu & Settings */
+    /* LAYER 3000+: Main Menu & Settings */
     --z-main-menu: 3001;
     --z-settings-panel: 3100;
 
-    /* 🦇 LAYER 999999: Debooger (absolute top) */
+    /* LAYER 999999: Debooger (absolute top) */
     --z-debooger-console: 999998;
     --z-debooger-toggle: 999999;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🌧️ WEATHER - Layer 1-5 (DIRECTLY above background, below everything else)
+   WEATHER - Layer 1-5 (DIRECTLY above background, below everything else)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Weather overlay in-game */
@@ -117,7 +117,7 @@ body > #menu-weather-container {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   📍 GAME WORLD UI - Layer 10-40 (ABOVE weather)
+   GAME WORLD UI - Layer 10-40 (ABOVE weather)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Map container - creates stacking context */

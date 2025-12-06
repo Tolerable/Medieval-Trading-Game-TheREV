@@ -1,11 +1,11 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // PROPERTY & EMPLOYEE UI - interface for digital feudalism
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const PropertyEmployeeUI = {
     // track current UI state
@@ -26,9 +26,9 @@ const PropertyEmployeeUI = {
         this.setupPropertyEmployeeEventListeners();
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🏠 PROPERTY ACQUISITION MODAL - rent/buy/build interface
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  PROPERTY ACQUISITION MODAL - rent/buy/build interface
+    // 
     setupAcquisitionModal() {
         // Check if modal already exists
         if (document.getElementById('property-acquisition-modal')) return;
@@ -263,7 +263,7 @@ const PropertyEmployeeUI = {
 
         const price = PropertySystem.calculatePropertyPrice(propertyId, acquisitionType);
 
-        // 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+        //  FIXED: Use modal instead of browser confirm() 
         let contentHtml = `<p>Are you sure you want to <strong>${acquisitionType}</strong> a <strong>${propertyType.name}</strong> for <strong>${price} gold</strong>?</p>`;
 
         if (acquisitionType === 'rent') {
@@ -289,8 +289,8 @@ const PropertyEmployeeUI = {
                 title: `🏠 ${acquisitionType.charAt(0).toUpperCase() + acquisitionType.slice(1)} Property`,
                 content: contentHtml,
                 buttons: [
-                    { label: '❌ Cancel', type: 'secondary', action: () => ModalSystem.hide() },
-                    { label: `✅ ${acquisitionType.charAt(0).toUpperCase() + acquisitionType.slice(1)}`, type: 'primary', action: () => { ModalSystem.hide(); doPurchase(); } }
+                    { text: 'Cancel', className: 'secondary', onClick: () => ModalSystem.hide() },
+                    { text: `${acquisitionType.charAt(0).toUpperCase() + acquisitionType.slice(1)}`, className: 'primary', onClick: () => { ModalSystem.hide(); doPurchase(); } }
                 ]
             });
         } else {
@@ -338,7 +338,7 @@ const PropertyEmployeeUI = {
         }).join('');
     },
 
-    // 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+    //  FIXED: Use modal instead of browser confirm() 
     selectLocationForProperty(locationId) {
         const location = GameWorld.locations[locationId];
         if (!location) return;
@@ -358,8 +358,8 @@ const PropertyEmployeeUI = {
                     title: '🗺️ Travel Required',
                     content: `<p>You must travel to <strong>${location.name}</strong> to acquire property there.</p><p>Would you like to set it as your destination?</p>`,
                     buttons: [
-                        { label: '❌ Cancel', type: 'secondary', action: () => ModalSystem.hide() },
-                        { label: '🗺️ Set Destination', type: 'primary', action: () => { ModalSystem.hide(); setDestination(); } }
+                        { text: 'Cancel', className: 'secondary', onClick: () => ModalSystem.hide() },
+                        { text: '🗺️ Set Destination', className: 'primary', onClick: () => { ModalSystem.hide(); setDestination(); } }
                     ]
                 });
             }
@@ -870,7 +870,7 @@ const PropertyEmployeeUI = {
                             ` : ''}
                             ${upgrade.projectedBenefits.productionIncrease ? `
                             <div class="benefit-item">
-                                <span class="benefit-icon">⚡</span>
+                                <span class="benefit-icon"></span>
                                 <span class="benefit-text">+${upgrade.projectedBenefits.productionIncrease} production</span>
                             </div>
                             ` : ''}
@@ -981,7 +981,7 @@ const PropertyEmployeeUI = {
                     ` : ''}
                     ${benefits.reputationBonus ? `
                     <div class="benefit-item">
-                        <span class="benefit-icon">⭐</span>
+                        <span class="benefit-icon"></span>
                         <span class="benefit-text">+${benefits.reputationBonus} reputation/day</span>
                     </div>
                     ` : ''}
@@ -1053,11 +1053,11 @@ const PropertyEmployeeUI = {
         }
     },
     
-    // 💰 Sell selected property - with proper warning about 50% value loss 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+    //  Sell selected property - with proper warning about 50% value loss  FIXED: Use modal instead of browser confirm() 
     sellSelectedProperty() {
         if (!this.selectedPropertyId) return;
 
-        // 🖤 Get the sell value so player knows what they're getting
+        //  Get the sell value so player knows what they're getting
         const sellValue = PropertySystem.calculateSellValue(this.selectedPropertyId);
         const property = PropertySystem.getProperty(this.selectedPropertyId);
         const propertyName = property?.type ? (window.propertyTypes?.[property.type]?.name || property.type) : 'property';
@@ -1078,8 +1078,8 @@ const PropertyEmployeeUI = {
                     <p style="color: #f44336; font-size: 12px;">This action cannot be undone!</p>
                 `,
                 buttons: [
-                    { label: '❌ Cancel', type: 'secondary', action: () => ModalSystem.hide() },
-                    { label: '💰 Sell', type: 'danger', action: () => { ModalSystem.hide(); doSell(); } }
+                    { text: 'Cancel', className: 'secondary', onClick: () => ModalSystem.hide() },
+                    { text: '💰 Sell', className: 'danger', onClick: () => { ModalSystem.hide(); doSell(); } }
                 ]
             });
         } else {
@@ -1137,7 +1137,7 @@ const PropertyEmployeeUI = {
                         <div class="assignment-item">
                             <span class="assignment-label">Property:</span>
                             <span class="assignment-value">${propertyType.icon} ${propertyType.name}</span>
-                            <span class="assignment-status ${isOptimal ? 'optimal' : 'standard'}">${isOptimal ? '⭐ Optimal' : 'Standard'}</span>
+                            <span class="assignment-status ${isOptimal ? 'optimal' : 'standard'}">${isOptimal ? 'Optimal' : 'Standard'}</span>
                         </div>
                         <div class="assignment-item">
                             <span class="assignment-label">Location:</span>
@@ -1171,7 +1171,7 @@ const PropertyEmployeeUI = {
             const canAccept = PropertySystem.canAcceptEmployee(property.id, employee.type);
             const isOptimal = EmployeeSystem.isOptimalAssignment(employee.type, property.type);
             
-            option.textContent = `${propertyType.icon} ${propertyType.name} (${isCompatible ? (canAccept ? (isOptimal ? '⭐ Optimal' : '✓ Compatible') : '🔒 Full') : '✗ Incompatible'})`;
+            option.textContent = `${propertyType.icon} ${propertyType.name} (${isCompatible ? (canAccept ? (isOptimal ? 'Optimal' : '✓ Compatible') : '🔒 Full') : '✗ Incompatible'})`;
             option.disabled = !isCompatible || !canAccept;
             
             assignmentSelect.appendChild(option);
@@ -1248,7 +1248,7 @@ const PropertyEmployeeUI = {
                         <div class="events-list">
                             ${employee.recentEvents.slice(-5).map(event => `
                                 <div class="event-item ${event.type}">
-                                    <span class="event-icon">${event.type === 'achievement' ? '🏆' : event.type === 'mistake' ? '❌' : '📝'}</span>
+                                    <span class="event-icon">${event.type === 'achievement' ? '🏆' : event.type === 'mistake' ? '' : '📝'}</span>
                                     <span class="event-description">${event.description}</span>
                                     <span class="event-time">${this.formatEventTime(event.timestamp)}</span>
                                 </div>
@@ -1310,7 +1310,7 @@ const PropertyEmployeeUI = {
         this.showEmployeeDetails(this.selectedEmployeeId); // Refresh display
     },
     
-    // Fire selected employee 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+    // Fire selected employee  FIXED: Use modal instead of browser confirm() 
     fireSelectedEmployee() {
         if (!this.selectedEmployeeId) return;
 
@@ -1328,8 +1328,8 @@ const PropertyEmployeeUI = {
                 title: '🔥 Fire Employee',
                 content: `<p>Are you sure you want to fire <strong>${employeeName}</strong>?</p><p style="color: #f44336; font-size: 12px;">This will permanently dismiss them.</p>`,
                 buttons: [
-                    { label: '❌ Cancel', type: 'secondary', action: () => ModalSystem.hide() },
-                    { label: '🔥 Fire', type: 'danger', action: () => { ModalSystem.hide(); doFire(); } }
+                    { text: 'Cancel', className: 'secondary', onClick: () => ModalSystem.hide() },
+                    { text: '🔥 Fire', className: 'danger', onClick: () => { ModalSystem.hide(); doFire(); } }
                 ]
             });
         } else {

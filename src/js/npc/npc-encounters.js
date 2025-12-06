@@ -326,26 +326,37 @@ const NPCEncounterSystem = {
     },
 
     // ⏸️ Halt the march of time - give this encounter your full attention 💀
-    // 🦇 FIX: Use setSpeed() instead of direct isPaused assignment to maintain state consistency
+    // 🖤💀 FIX: Use interrupt system to properly save and restore user's preferred speed 💀
     pauseTimeForEncounter() {
-        if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
-            this.wasTimePaused = false;
-            this.previousSpeed = TimeSystem.currentSpeed; // Save speed to restore later
-            TimeSystem.setSpeed('PAUSED');
-            console.log('🎭 Time paused for encounter');
-        } else {
-            this.wasTimePaused = true;
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.pauseForInterrupt) {
+                // 🖤 New interrupt system - handles nested interrupts and user preferred speed
+                TimeSystem.pauseForInterrupt('encounter');
+            } else if (!TimeSystem.isPaused) {
+                // Fallback for old API
+                this.wasTimePaused = false;
+                this.previousSpeed = TimeSystem.currentSpeed;
+                TimeSystem.setSpeed('PAUSED');
+                console.log('🎭 Time paused for encounter');
+            } else {
+                this.wasTimePaused = true;
+            }
         }
     },
 
     // ▶️ Release time from its cage - the encounter has ended 🕰️
-    // 🦇 FIX: Use setSpeed() to properly resume time with correct engine state
+    // 🖤💀 FIX: Use interrupt system to restore user's preferred speed 💀
     resumeTimeAfterEncounter() {
-        if (typeof TimeSystem !== 'undefined' && !this.wasTimePaused) {
-            // Restore previous speed, default to NORMAL if not saved
-            const speedToRestore = this.previousSpeed || 'NORMAL';
-            TimeSystem.setSpeed(speedToRestore);
-            console.log('🎭 Time resumed after encounter, speed:', speedToRestore);
+        if (typeof TimeSystem !== 'undefined') {
+            if (TimeSystem.resumeFromInterrupt) {
+                // 🖤 New interrupt system - restores previous speed from stack
+                TimeSystem.resumeFromInterrupt('encounter');
+            } else if (!this.wasTimePaused) {
+                // Fallback for old API
+                const speedToRestore = this.previousSpeed || 'NORMAL';
+                TimeSystem.setSpeed(speedToRestore);
+                console.log('🎭 Time resumed after encounter, speed:', speedToRestore);
+            }
         }
     },
 

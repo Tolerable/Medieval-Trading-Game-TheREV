@@ -1,30 +1,30 @@
 // ═══════════════════════════════════════════════════════════════
 // PROPERTY PURCHASE - acquiring your empire piece by piece in darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
 // ═══════════════════════════════════════════════════════════════
 
 const PropertyPurchase = {
-    // 💰 Calculate property price with all modifiers ⚰️
+    // Calculate property price with all modifiers
     calculatePrice(propertyId, acquisitionType = 'buy') {
         const propertyType = PropertyTypes.get(propertyId);
         if (!propertyType) return 0;
 
-        // 🖤 Guard against null currentLocation - don't crash if player hasn't moved yet 💀
+        // Guard against null currentLocation - don't crash if player hasn't moved yet
         const location = GameWorld.locations[game?.currentLocation?.id];
         if (!location) return propertyType.basePrice;
 
         let price = propertyType.basePrice;
 
-        // 🌙 Location type modifier 🦇
-        // 🖤 Added capital and port modifiers - prime real estate costs more 💀
+        // Location type modifier
+        // Added capital and port modifiers - prime real estate costs more
         const locationModifiers = { village: 0.8, town: 1.0, city: 1.3, capital: 1.5, port: 1.2 };
         price *= locationModifiers[location.type] || 1.0;
 
-        // 🔑 Acquisition type modifier 🗡️
+        // Acquisition type modifier
         const acquisitionModifiers = {
             buy: 1.0,      // full price to own outright
             rent: 0.2,     // deposit is 20% of value
@@ -32,14 +32,14 @@ const PropertyPurchase = {
         };
         price *= acquisitionModifiers[acquisitionType] || 1.0;
 
-        // ⭐ Reputation modifier 🔮
+        // Reputation modifier
         if (typeof CityReputationSystem !== 'undefined') {
             const reputation = CityReputationSystem.getReputation(game.currentLocation.id);
             const reputationModifier = 1 - (reputation * 0.002);
             price *= Math.max(0.7, reputationModifier);
         }
 
-        // 📊 Merchant rank bonus 💀
+        // Merchant rank bonus
         if (typeof MerchantRankSystem !== 'undefined') {
             const bonus = MerchantRankSystem.getTradingBonus();
             price *= (1 - bonus);
@@ -48,7 +48,7 @@ const PropertyPurchase = {
         return Math.round(price);
     },
 
-    // 📈 Calculate projected income for preview 🖤
+    // Calculate projected income for preview
     calculateProjectedIncome(propertyId) {
         const propertyType = PropertyTypes.get(propertyId);
         if (!propertyType) return 0;
@@ -60,13 +60,13 @@ const PropertyPurchase = {
         return Math.max(0, Math.round(income - maintenance - tax));
     },
 
-    // 💵 Check if player can afford property ⚰️
+    // Check if player can afford property
     canAfford(propertyId, acquisitionType = 'buy') {
         const price = this.calculatePrice(propertyId, acquisitionType);
         return game.player.gold >= price;
     },
 
-    // 📋 Get property requirements 🦇
+    // Get property requirements
     getRequirements(propertyId) {
         const propertyType = PropertyTypes.get(propertyId);
         if (!propertyType) return [];
@@ -74,7 +74,7 @@ const PropertyPurchase = {
         const requirements = [];
         const price = this.calculatePrice(propertyId);
 
-        // 💰 Gold requirement 🗡️
+        // Gold requirement
         requirements.push({
             type: 'gold',
             amount: price,
@@ -82,7 +82,7 @@ const PropertyPurchase = {
             description: `${price} gold`
         });
 
-        // 🏙️ Location requirement 🌙
+        // Location requirement
         const location = GameWorld.locations[game.currentLocation.id];
         if (location) {
             const allowedInLocation = PropertyTypes.getLocationProperties(location.type).includes(propertyId);
@@ -94,7 +94,7 @@ const PropertyPurchase = {
             });
         }
 
-        // 🛤️ Road adjacency requirement for building 🖤
+        // Road adjacency requirement for building
         const hasRoadAccess = this.checkRoadAdjacency();
         requirements.push({
             type: 'road_access',
@@ -103,7 +103,7 @@ const PropertyPurchase = {
             description: 'Road access required (own property in connected location or at capital)'
         });
 
-        // ⚒️ Skill requirements 🔮
+        // Skill requirements
         if (propertyId === 'mine') {
             const miningSkill = game.player.skills?.mining || 0;
             requirements.push({
@@ -127,27 +127,27 @@ const PropertyPurchase = {
         return requirements;
     },
 
-    // 🛤️ Check if current location has road adjacency to owned property 🖤
+    // Check if current location has road adjacency to owned property
     checkRoadAdjacency() {
         const currentLocationId = game.currentLocation?.id;
         if (!currentLocationId) return false;
 
-        // 🏰 Capital always has road access 💀
+        // Capital always has road access
         const currentLocation = GameWorld.locations[currentLocationId];
         if (currentLocation?.type === 'capital') return true;
 
-        // 🏠 Already own property here = road established ⚰️
+        // Already own property here = road established
         const ownedHere = game.player.ownedProperties?.some(p => p.location === currentLocationId);
         if (ownedHere) return true;
 
-        // 🛤️ Check if connected to any location where we own property 🦇
+        // Check if connected to any location where we own property
         if (!currentLocation?.connections) return false;
 
         for (const connectedId of currentLocation.connections) {
             const ownsInConnected = game.player.ownedProperties?.some(p => p.location === connectedId);
             if (ownsInConnected) return true;
 
-            // 🏰 Connected to capital also grants access 🗡️
+            // Connected to capital also grants access
             const connectedLocation = GameWorld.locations[connectedId];
             if (connectedLocation?.type === 'capital') return true;
         }
@@ -155,25 +155,25 @@ const PropertyPurchase = {
         return false;
     },
 
-    // 🗺️ Get all locations where player can build (has road access) 🌙
+    // Get all locations where player can build (has road access)
     getBuildableLocations() {
         const buildable = [];
 
         for (const [locationId, location] of Object.entries(GameWorld.locations)) {
-            // 🏰 Capital always buildable 💀
+            // Capital always buildable
             if (location.type === 'capital') {
                 buildable.push(locationId);
                 continue;
             }
 
-            // 🏠 Already own here ⚰️
+            // Already own here
             const ownedHere = game.player.ownedProperties?.some(p => p.location === locationId);
             if (ownedHere) {
                 buildable.push(locationId);
                 continue;
             }
 
-            // 🛤️ Connected to owned property or capital 🦇
+            // Connected to owned property or capital
             if (location.connections) {
                 for (const connectedId of location.connections) {
                     const ownsInConnected = game.player.ownedProperties?.some(p => p.location === connectedId);
@@ -190,7 +190,7 @@ const PropertyPurchase = {
         return buildable;
     },
 
-    // 🔨 Check if player has construction tool 💀
+    // Check if player has construction tool
     hasConstructionTool() {
         // check equipped tool first
         if (typeof EquipmentSystem !== 'undefined') {
@@ -218,7 +218,7 @@ const PropertyPurchase = {
         return false;
     },
 
-    // 🪵 Check if player has required materials ⚰️
+    // Check if player has required materials
     checkMaterials(materialsNeeded) {
         const missing = [];
         for (const [material, amount] of Object.entries(materialsNeeded)) {
@@ -230,7 +230,7 @@ const PropertyPurchase = {
         return missing;
     },
 
-    // 🔥 Consume materials for building 🦇
+    // Consume materials for building
     consumeMaterials(materialsNeeded) {
         for (const [material, amount] of Object.entries(materialsNeeded)) {
             if (game.player.inventory?.[material]) {
@@ -242,14 +242,14 @@ const PropertyPurchase = {
         }
     },
 
-    // 🛒 Get acquisition options for a property type 🗡️
+    // Get acquisition options for a property type
     getAcquisitionOptions(propertyId) {
         const propertyType = PropertyTypes.get(propertyId);
         if (!propertyType) return [];
 
         const options = [];
 
-        // 🏠 BUY - always available 🌙
+        // BUY - always available
         options.push({
             type: 'buy',
             name: 'Purchase',
@@ -260,7 +260,7 @@ const PropertyPurchase = {
             materials: null
         });
 
-        // 📝 RENT - cheaper upfront 🔮
+        // RENT - cheaper upfront
         options.push({
             type: 'rent',
             name: 'Rent',
@@ -272,7 +272,7 @@ const PropertyPurchase = {
             materials: null
         });
 
-        // 🔨 BUILD - requires materials and time 💀
+        // BUILD - requires materials and time
         const materials = PropertyTypes.getBuildingMaterials(propertyId);
         const constructionDays = Math.ceil(PropertyTypes.getConstructionTime(propertyId) / (24 * 60));
         options.push({
@@ -288,7 +288,7 @@ const PropertyPurchase = {
         return options;
     },
 
-    // 🏠 Purchase property - the main event 🖤
+    // Purchase property - the main event
     purchase(propertyId, acquisitionType = 'buy') {
         const propertyType = PropertyTypes.get(propertyId);
         if (!propertyType) {
@@ -296,7 +296,7 @@ const PropertyPurchase = {
             return false;
         }
 
-        // 📊 Check merchant rank limit ⚰️
+        // Check merchant rank limit
         if (typeof MerchantRankSystem !== 'undefined') {
             const canPurchase = MerchantRankSystem.canPurchaseProperty();
             if (!canPurchase.allowed) {
@@ -308,13 +308,13 @@ const PropertyPurchase = {
 
         const price = this.calculatePrice(propertyId, acquisitionType);
 
-        // 💵 Check gold 🦇
+        // Check gold
         if (game.player.gold < price) {
             addMessage(`You need ${price} gold to ${acquisitionType} a ${propertyType.name}!`);
             return false;
         }
 
-        // 🏘️ Check if already owned at this location 🗡️
+        // Check if already owned at this location
         const existingProperty = game.player.ownedProperties.find(
             p => p.type === propertyId && p.location === game.currentLocation.id
         );
@@ -324,7 +324,7 @@ const PropertyPurchase = {
             return false;
         }
 
-        // 🔨 For building, check materials and tools 🌙
+        // For building, check materials and tools
         if (acquisitionType === 'build') {
             if (!this.hasConstructionTool()) {
                 addMessage(`🔨 You need a hammer to build! Equip one or have it in your inventory.`, 'warning');
@@ -340,15 +340,15 @@ const PropertyPurchase = {
             this.consumeMaterials(materialsNeeded);
         }
 
-        // 💰 Deduct gold 🔮
+        // Deduct gold
         game.player.gold -= price;
 
-        // 🏗️ Construction time 💀
+        // Construction time
         const constructionTime = acquisitionType === 'build' ? PropertyTypes.getConstructionTime(propertyId) : 0;
         const isUnderConstruction = constructionTime > 0;
 
-        // 🏠 Create new property object 🖤
-        // 💀 Use timestamp + random suffix to prevent ID collision
+        // Create new property object
+        // Use timestamp + random suffix to prevent ID collision
         const newProperty = {
             id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: propertyId,
@@ -379,14 +379,14 @@ const PropertyPurchase = {
             monthlyRent: acquisitionType === 'rent' ? Math.round(price * 0.1) : 0
         };
 
-        // 📦 Initialize storage ⚰️
+        // Initialize storage
         PropertyStorage.initialize(newProperty.id);
         game.player.ownedProperties.push(newProperty);
 
-        // 🎉 Fire event 🦇
+        // Fire event
         document.dispatchEvent(new CustomEvent('property-purchased', { detail: { property: newProperty } }));
 
-        // 📢 Message based on acquisition type 🗡️
+        // Message based on acquisition type
         if (acquisitionType === 'build') {
             const days = Math.ceil(constructionTime / (24 * 60));
             addMessage(`🔨 Started building ${propertyType.name} in ${game.currentLocation.name}! Ready in ${days} days.`, 'success');
@@ -396,14 +396,14 @@ const PropertyPurchase = {
             addMessage(`🏠 Purchased ${propertyType.name} in ${game.currentLocation.name} for ${price} gold!`, 'success');
         }
 
-        // 🔄 Update UI 🌙
+        // Update UI
         if (typeof updatePlayerInfo === 'function') updatePlayerInfo();
         if (typeof PropertySystem !== 'undefined') PropertySystem.updatePropertyDisplay();
 
         return true;
     },
 
-    // 💰 Sell property 🔮
+    // Sell property
     sell(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) {
@@ -417,7 +417,7 @@ const PropertyPurchase = {
             return false;
         }
 
-        // 💵 Calculate sell value: 50% of investment 💀
+        // Calculate sell value: 50% of investment
         let totalInvestment = property.purchasePrice || propertyType.basePrice;
 
         // Add upgrade costs
@@ -435,7 +435,7 @@ const PropertyPurchase = {
 
         const sellValue = Math.round(totalInvestment * 0.5);
 
-        // 👥 Fire employees 🖤
+        // Fire employees
         if (typeof EmployeeSystem !== 'undefined') {
             const assignedEmployees = EmployeeSystem.getEmployeesAtProperty(propertyId);
             if (assignedEmployees && assignedEmployees.length > 0) {
@@ -444,7 +444,7 @@ const PropertyPurchase = {
             }
         }
 
-        // 📦 Return items from storage ⚰️
+        // Return items from storage
         if (property.storage && Object.keys(property.storage).length > 0) {
             let itemsReturned = 0;
             for (const [itemId, quantity] of Object.entries(property.storage)) {
@@ -459,23 +459,23 @@ const PropertyPurchase = {
             }
         }
 
-        // 🗑️ Remove property 🦇
+        // Remove property
         const propertyIndex = game.player.ownedProperties.findIndex(p => p.id === propertyId);
         if (propertyIndex !== -1) {
             game.player.ownedProperties.splice(propertyIndex, 1);
         }
 
-        // 💰 Give player gold 🗡️
+        // Give player gold
         game.player.gold += sellValue;
 
-        // 🎉 Fire event 🌙
+        // Fire event
         document.dispatchEvent(new CustomEvent('property-sold', {
             detail: { propertyId, propertyType: property.type, sellValue, location: property.location }
         }));
 
         addMessage(`🏠 Sold ${propertyType.name} for ${sellValue} gold! (50% of ${totalInvestment} gold investment)`);
 
-        // 🔄 Update UI 🔮
+        // Update UI
         if (typeof updatePlayerInfo === 'function') updatePlayerInfo();
         if (typeof PropertySystem !== 'undefined') PropertySystem.updatePropertyDisplay();
         if (typeof MerchantRankSystem !== 'undefined') MerchantRankSystem.checkForRankUp();
@@ -483,7 +483,7 @@ const PropertyPurchase = {
         return { success: true, sellValue, totalInvestment };
     },
 
-    // 💵 Calculate sell value preview 💀
+    // Calculate sell value preview
     calculateSellValue(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return 0;
@@ -508,5 +508,5 @@ const PropertyPurchase = {
     }
 };
 
-// 🌙 expose to global scope 🦇
+// expose to global scope
 window.PropertyPurchase = PropertyPurchase;

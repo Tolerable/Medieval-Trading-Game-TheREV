@@ -1,14 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
-// DOOM WORLD NPC SYSTEM - Where hope went to die 💀🔥
+// DOOM WORLD NPC SYSTEM - Where hope went to die
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // The apocalypse changed everything. Same faces, different souls.
 // Gold is worthless. Food is gold. Survival is all that matters.
 // ═══════════════════════════════════════════════════════════════
 
 const DoomWorldNPCs = {
     // ═══════════════════════════════════════════════════════════════
-    // 🔥 DOOM LOCATION NAMES - Everything burns
+    // DOOM LOCATION NAMES - Everything burns
     // ═══════════════════════════════════════════════════════════════
     locationNames: {
         royal_capital: 'The Fallen Throne',
@@ -61,12 +61,12 @@ const DoomWorldNPCs = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💀 DOOM NPC ARRAYS - Same people, shattered souls
+    // DOOM NPC ARRAYS - Same people, shattered souls
     // All NPCs from normal world exist here, but changed by the apocalypse
     // ═══════════════════════════════════════════════════════════════
     locationNPCs: {
         // ═══════════════════════════════════════════════════════════
-        // 👑 THE FALLEN THRONE (Royal Capital)
+        // THE FALLEN THRONE (Royal Capital)
         // ═══════════════════════════════════════════════════════════
         royal_capital: {
             npcs: ['fallen_noble', 'desperate_guard', 'mad_captain', 'starving_jeweler', 'ragged_tailor', 'ruined_banker', 'doomsayer', 'scavenger_merchant', 'grief_stricken_elder'],
@@ -75,7 +75,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🏰 RUINED CITIES
+        // RUINED CITIES
         // ═══════════════════════════════════════════════════════════
         ironforge_city: {
             npcs: ['crazed_blacksmith', 'hollow_guard', 'broken_captain', 'plague_apothecary', 'desperate_merchant', 'trapped_miner'],
@@ -109,7 +109,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🏘️ DEVASTATED VILLAGES
+        // DEVASTATED VILLAGES
         // ═══════════════════════════════════════════════════════════
         frostholm_village: {
             npcs: ['frozen_elder', 'frostbitten_merchant', 'shellshocked_guard', 'desperate_hunter', 'starving_trapper'],
@@ -143,7 +143,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // ⛏️ COLLAPSED MINES
+        // COLLAPSED MINES
         // ═══════════════════════════════════════════════════════════
         iron_mines: {
             npcs: ['buried_miner', 'frantic_foreman', 'scavenging_merchant'],
@@ -162,7 +162,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🌲 CORRUPTED FORESTS
+        // CORRUPTED FORESTS
         // ═══════════════════════════════════════════════════════════
         ancient_forest: {
             npcs: ['poisoned_herbalist', 'hunted_hunter', 'mad_forager'],
@@ -181,7 +181,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🌾 BLIGHTED FARMS
+        // BLIGHTED FARMS
         // ═══════════════════════════════════════════════════════════
         wheat_farm: {
             npcs: ['starving_farmer', 'desperate_miller', 'hollow_farmhand'],
@@ -205,7 +205,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 💀 DUNGEONS OF DESPAIR
+        // DUNGEONS OF DESPAIR
         // ═══════════════════════════════════════════════════════════
         shadow_dungeon: {
             npcs: ['corrupted_adventurer', 'doomed_treasure_hunter'],
@@ -224,7 +224,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🦇 HAUNTED CAVES
+        // HAUNTED CAVES
         // ═══════════════════════════════════════════════════════════
         deep_cavern: {
             npcs: ['cave_dweller', 'hidden_miner'],
@@ -258,7 +258,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🍺 DESPERATE INNS
+        // DESPERATE INNS
         // ═══════════════════════════════════════════════════════════
         kings_inn: {
             npcs: ['surviving_innkeeper', 'fallen_noble', 'shell_shocked_traveler', 'silenced_bard'],
@@ -297,7 +297,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // ⚔️ FALLEN OUTPOSTS
+        // FALLEN OUTPOSTS
         // ═══════════════════════════════════════════════════════════
         northern_outpost: {
             npcs: ['last_guard', 'dying_captain', 'wounded_sergeant', 'desperate_blacksmith'],
@@ -316,7 +316,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // ⚓ PORTS OF THE DEAD
+        // PORTS OF THE DEAD
         // ═══════════════════════════════════════════════════════════
         fishermans_port: {
             npcs: ['plague_fisherman', 'ghost_sailor', 'mad_harbormaster', 'hoarding_merchant'],
@@ -330,7 +330,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // 🔮 CORRUPTED SPECIAL LOCATIONS
+        // CORRUPTED SPECIAL LOCATIONS
         // ═══════════════════════════════════════════════════════════
         hermit_grove: {
             npcs: ['insane_hermit', 'prophetic_sage'],
@@ -350,7 +350,7 @@ const DoomWorldNPCs = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔥 DOOM NPC TYPES - What they've become
+    // DOOM NPC TYPES - What they've become
     // ═══════════════════════════════════════════════════════════════
     npcTypes: {
         // Transformed versions of normal NPCs
@@ -379,7 +379,7 @@ const DoomWorldNPCs = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💀 DOOM ECONOMY VALUES - What matters now
+    // DOOM ECONOMY VALUES - What matters now
     // ═══════════════════════════════════════════════════════════════
     economyModifiers: {
         // Survival essentials - EXTREMELY valuable
@@ -430,7 +430,7 @@ const DoomWorldNPCs = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔧 UTILITY FUNCTIONS
+    // UTILITY FUNCTIONS
     // ═══════════════════════════════════════════════════════════════
 
     // Get doom location name
@@ -442,7 +442,7 @@ const DoomWorldNPCs = {
     getNPCsForLocation(locationId) {
         const locationData = this.locationNPCs[locationId];
         if (!locationData) {
-            console.warn(`⚠️ Doom location "${locationId}" not found!`);
+            console.warn(`Doom location "${locationId}" not found!`);
             return [];
         }
         return locationData.npcs || [];
@@ -477,4 +477,4 @@ const DoomWorldNPCs = {
 // ═══════════════════════════════════════════════════════════════
 window.DoomWorldNPCs = DoomWorldNPCs;
 
-console.log('💀 DoomWorldNPCs loaded - The apocalypse awaits...');
+console.log('DoomWorldNPCs loaded - The apocalypse awaits...');

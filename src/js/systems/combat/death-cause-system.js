@@ -1,18 +1,18 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // DEATH CAUSE SYSTEM - chronicling your inevitable demise
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 console.log('💀 Death Cause System awakening from the grave...');
 
 const DeathCauseSystem = {
-    // ═══════════════════════════════════════════════════════════
-    // 📊 DEATH TRACKING STATE
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  DEATH TRACKING STATE
+    // 
 
     // Current pending death cause (set before death is triggered)
     pendingDeathCause: null,
@@ -21,9 +21,9 @@ const DeathCauseSystem = {
     recentEvents: [],
     maxRecentEvents: 10,
 
-    // ═══════════════════════════════════════════════════════════
-    // 💀 DEATH CAUSE CATEGORIES
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  DEATH CAUSE CATEGORIES
+    // 
 
     categories: {
         STARVATION: 'starvation',
@@ -39,9 +39,9 @@ const DeathCauseSystem = {
         UNKNOWN: 'unknown'
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 🎭 DEATH MESSAGES - flavorful descriptions of demise
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  DEATH MESSAGES - flavorful descriptions of demise
+    // 
 
     deathMessages: {
         // Starvation deaths
@@ -228,9 +228,9 @@ const DeathCauseSystem = {
         ]
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 🔧 CORE FUNCTIONS
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  CORE FUNCTIONS
+    // 
 
     // Record an event that could contribute to death
     recordEvent(category, subtype = null, details = null) {
@@ -373,9 +373,9 @@ const DeathCauseSystem = {
         return arr[Math.floor(Math.random() * arr.length)];
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 🎮 GAME INTEGRATION HELPERS
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  GAME INTEGRATION HELPERS
+    // 
 
     // Call when player takes damage from combat
     recordCombatDamage(enemyType = 'generic', damage = 0) {
@@ -426,9 +426,9 @@ const DeathCauseSystem = {
         this.setPendingCause(this.categories.EXHAUSTION);
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 🔄 RESET
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  RESET
+    // 
 
     reset() {
         this.pendingDeathCause = null;
@@ -437,7 +437,7 @@ const DeathCauseSystem = {
     }
 };
 
-// 🌐 Expose globally
+//  Expose globally
 window.DeathCauseSystem = DeathCauseSystem;
 
-console.log('✅ Death Cause System loaded! Your deaths will now be properly documented.');
+console.log('Death Cause System loaded! Your deaths will now be properly documented.');

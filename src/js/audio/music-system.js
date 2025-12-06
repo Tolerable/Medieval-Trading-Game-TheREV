@@ -1,14 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
-// MUSIC SYSTEM - melodies from the abyss 🖤💀🎵
+// MUSIC SYSTEM - melodies from the abyss
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
 // ═══════════════════════════════════════════════════════════════
 
 const MusicSystem = {
-    // 🎵 Music tracks by category
+    // Music tracks by category
     // Volume multipliers now come from GameConfig.settings.audio.trackVolumeMultipliers
     TRACKS: {
         menu: [
@@ -35,8 +35,8 @@ const MusicSystem = {
         ]
     },
 
-    // 🎚️ Get the volume multiplier for current category from GameConfig
-    // 🖤💀 Edit GameConfig.settings.audio.trackVolumeMultipliers to adjust 💀
+    // Get the volume multiplier for current category from GameConfig
+    // Edit GameConfig.settings.audio.trackVolumeMultipliers to adjust
     getCategoryVolumeMult(category = null) {
         const cat = category || this.currentCategory;
         if (!cat) return 1.0;
@@ -51,12 +51,12 @@ const MusicSystem = {
         return defaults[cat] || 1.0;
     },
 
-    // 🎚️ Get effective volume (master volume * category multiplier)
+    // Get effective volume (master volume * category multiplier)
     getEffectiveVolume(category = null) {
         return this.settings.volume * this.getCategoryVolumeMult(category);
     },
 
-    // 🎧 Current state
+    // Current state
     currentAudio: null,
     currentCategory: null,
     currentTrackIndex: 0,
@@ -64,8 +64,8 @@ const MusicSystem = {
     isPaused: false,
     gapTimeout: null,
 
-    // ⚙️ Settings - defaults pulled from GameConfig if available
-    // 🖤💀 Edit GameConfig.settings.audio for master control 💀
+    // Settings - defaults pulled from GameConfig if available
+    // Edit GameConfig.settings.audio for master control
     settings: {
         enabled: true,
         volume: 0.3,  // Will be overwritten by GameConfig on init
@@ -74,7 +74,7 @@ const MusicSystem = {
         fadeInDuration: 500
     },
 
-    // 🎚️ Load settings from GameConfig
+    // Load settings from GameConfig
     loadConfigDefaults() {
         if (typeof GameConfig !== 'undefined' && GameConfig.settings?.audio) {
             const audioConfig = GameConfig.settings.audio;
@@ -86,19 +86,19 @@ const MusicSystem = {
         }
     },
 
-    // 🖤 Track if user has interacted (browsers block autoplay until interaction)
+    // Track if user has interacted (browsers block autoplay until interaction)
     userHasInteracted: false,
     pendingPlayCategory: null,
 
-    // 🖤💀 Preloaded audio buffers - loaded during page init 💀
+    // Preloaded audio buffers - loaded during page init
     preloadedAudio: {},
     preloadProgress: { loaded: 0, total: 0 },
 
-    // 🎮 Initialize the music system
+    // Initialize the music system
     init() {
         console.log('🎵 MusicSystem: Awakening from the sonic void...');
 
-        // 🖤💀 Load defaults from GameConfig first, then override with saved settings 💀
+        // Load defaults from GameConfig first, then override with saved settings
         this.loadConfigDefaults();
 
         // Load saved settings (overrides config defaults if user changed them)
@@ -118,16 +118,16 @@ const MusicSystem = {
             this.scheduleNextTrack();
         });
 
-        // 🖤 Listen for first user interaction to unlock audio
+        // Listen for first user interaction to unlock audio
         this.setupUserInteractionListener();
 
-        // 🖤💀 Note: preloadAllTracks() is called immediately when script loads 💀
+        // Note: preloadAllTracks() is called immediately when script loads
         // This happens BEFORE DOMContentLoaded so audio buffers during loading screen
 
         console.log('🎵 MusicSystem: Ready to haunt your ears 🖤💀');
     },
 
-    // 🖤💀 Preload all audio tracks during page load 💀
+    // Preload all audio tracks during page load
     preloadAllTracks() {
         console.log('🎵 MusicSystem: Preloading all audio tracks...');
 
@@ -154,7 +154,7 @@ const MusicSystem = {
                 audio.addEventListener('error', (e) => {
                     this.preloadProgress.loaded++;
                     const fileName = trackPath.split('/').pop();
-                    // 🖤💀 Check for CORS errors and provide helpful guidance 💀
+                    // Check for CORS errors and provide helpful guidance
                     if (window.location.protocol === 'file:') {
                         console.warn(`🎵 Audio failed: ${fileName} - CORS blocked. Run game via local server (npx serve or python -m http.server)`);
                     } else {
@@ -170,12 +170,12 @@ const MusicSystem = {
         });
     },
 
-    // 🖤💀 Get preloaded audio for current track (or null if not ready) 💀
+    // Get preloaded audio for current track (or null if not ready)
     getPreloadedAudio(category, trackIndex) {
         return this.preloadedAudio[category]?.[trackIndex] || null;
     },
 
-    // 🖤 Setup listener for first user interaction (unlocks audio autoplay)
+    // Setup listener for first user interaction (unlocks audio autoplay)
     setupUserInteractionListener() {
         const unlockAudio = () => {
             if (this.userHasInteracted) return;
@@ -229,7 +229,7 @@ const MusicSystem = {
     setVolume(volume) {
         this.settings.volume = Math.max(0, Math.min(1, volume));
         if (this.currentAudio) {
-            // 🖤💀 Use effective volume (master * track multiplier) 💀
+            // Use effective volume (master * track multiplier)
             this.currentAudio.volume = this.getEffectiveVolume();
         }
         this.saveSettings();
@@ -247,13 +247,13 @@ const MusicSystem = {
         console.log(`🎵 MusicSystem: Music ${enabled ? 'enabled' : 'disabled'}`);
     },
 
-    // 🎵 Pending category change (wait for current track to finish)
+    // Pending category change (wait for current track to finish)
     pendingCategory: null,
 
-    // 🎵 Crossfade audio element for smooth transitions
+    // Crossfade audio element for smooth transitions
     crossfadeAudio: null,
 
-    // 🎵 Play music for a category (menu, normal, dungeon, doom)
+    // Play music for a category (menu, normal, dungeon, doom)
     // Uses crossfade when changing categories during playback
     playCategory(category, forceCrossfade = false) {
         if (!this.settings.enabled) {
@@ -267,7 +267,7 @@ const MusicSystem = {
             return;
         }
 
-        // 🖤 If user hasn't interacted yet, queue this for later (browser autoplay policy)
+        // If user hasn't interacted yet, queue this for later (browser autoplay policy)
         if (!this.userHasInteracted) {
             console.log(`🎵 MusicSystem: Queuing ${category} music (waiting for user interaction)`);
             this.pendingPlayCategory = category;
@@ -276,7 +276,7 @@ const MusicSystem = {
 
         // If already playing this category, don't restart
         if (this.currentCategory === category && this.isPlaying) {
-            // 🖤💀 Only log once per second to prevent spam 💀
+            // Only log once per second to prevent spam
             if (!this._lastAlreadyPlayingLog || Date.now() - this._lastAlreadyPlayingLog > 1000) {
                 console.log(`🎵 MusicSystem: Already playing ${category} music`);
                 this._lastAlreadyPlayingLog = Date.now();
@@ -285,7 +285,7 @@ const MusicSystem = {
             return;
         }
 
-        // 🖤💀 If crossfading TO this category, don't start another crossfade! 💀
+        // If crossfading TO this category, don't start another crossfade!
         if (this._crossfadingToCategory === category) {
             return; // Silent return - crossfade already in progress
         }
@@ -296,10 +296,10 @@ const MusicSystem = {
             this.gapTimeout = null;
         }
 
-        // 🎵 If music is currently playing, do a crossfade transition
+        // If music is currently playing, do a crossfade transition
         if (this.isPlaying && this.currentAudio && !this.currentAudio.paused) {
-            console.log(`🎵 MusicSystem: Crossfading to ${category} music...`);
-            this._crossfadingToCategory = category; // 🖤 Track that we're crossfading
+            console.log(`MusicSystem: Crossfading to ${category} music...`);
+            this._crossfadingToCategory = category; // Track that we're crossfading
             this.crossfadeToCategory(category);
             return;
         }
@@ -309,14 +309,14 @@ const MusicSystem = {
         this.startCategory(category);
     },
 
-    // 🎵 Crossfade from current track to new category
+    // Crossfade from current track to new category
     crossfadeToCategory(newCategory) {
         const tracks = this.TRACKS[newCategory];
         if (!tracks || tracks.length === 0) return;
 
         // Pick a random track from the new category
         const newTrackIndex = newCategory === 'menu' ? 0 : Math.floor(Math.random() * tracks.length);
-        const newTrackPath = tracks[newTrackIndex];  // 🖤💀 Tracks are just path strings now 💀
+        const newTrackPath = tracks[newTrackIndex];  // Tracks are just path strings now
 
         console.log(`🎵 MusicSystem: Crossfading to ${newTrackPath.split('/').pop()}`);
 
@@ -337,13 +337,13 @@ const MusicSystem = {
         }
     },
 
-    // 🎵 Perform the actual crossfade
+    // Perform the actual crossfade
     performCrossfade(newCategory, newTrackIndex) {
         const fadeDuration = 2000; // 2 second crossfade
         const stepTime = 50; // Update every 50ms
         const steps = fadeDuration / stepTime;
 
-        // 🖤💀 Get target volume for new category (master * category multiplier from GameConfig) 💀
+        // Get target volume for new category (master * category multiplier from GameConfig)
         const targetVolume = this.getEffectiveVolume(newCategory);
         const volumeStep = targetVolume / steps;
 
@@ -385,7 +385,7 @@ const MusicSystem = {
                 // Set up ended listener for new track
                 this.currentAudio.addEventListener('ended', () => this.onTrackEnd(), { once: true });
 
-                // 🖤💀 Clear crossfade tracking flag 💀
+                // Clear crossfade tracking flag
                 this._crossfadingToCategory = null;
 
                 console.log(`🎵 MusicSystem: Crossfade complete, now playing ${newCategory}`);
@@ -393,7 +393,7 @@ const MusicSystem = {
         }, stepTime);
     },
 
-    // 🎵 Internal: Start playing a category
+    // Internal: Start playing a category
     startCategory(category) {
         this.currentCategory = category;
         this.currentTrackIndex = 0;
@@ -419,7 +419,7 @@ const MusicSystem = {
     playCurrentTrack() {
         if (!this.settings.enabled || !this.currentCategory) return;
 
-        // 🖤💀 Ensure audio element exists - recreate if null 💀
+        // Ensure audio element exists - recreate if null
         if (!this.currentAudio) {
             console.log('🎵 MusicSystem: Audio element was null, recreating...');
             this.currentAudio = new Audio();
@@ -433,12 +433,12 @@ const MusicSystem = {
         const tracks = this.TRACKS[this.currentCategory];
         if (!tracks || tracks.length === 0) return;
 
-        // 🖤💀 Tracks are just path strings, volume mult comes from GameConfig 💀
+        // Tracks are just path strings, volume mult comes from GameConfig
         const trackPath = tracks[this.currentTrackIndex];
         const volumeMult = this.getCategoryVolumeMult();
         console.log(`🎵 MusicSystem: Loading ${this.currentCategory} track ${this.currentTrackIndex + 1}/${tracks.length}: ${trackPath.split('/').pop()} (vol mult: ${volumeMult})`);
 
-        // 🖤💀 Wait for audio to be ready before playing - fixes Firefox/slow connection issues 💀
+        // Wait for audio to be ready before playing - fixes Firefox/slow connection issues
         const audio = this.currentAudio;
         audio.volume = 0; // Start silent for fade in
 
@@ -450,7 +450,7 @@ const MusicSystem = {
         audio.oncanplaythrough = () => {
             audio.oncanplaythrough = null; // Remove listener after first trigger
 
-            // 🖤💀 Safety check - audio element may have changed during load 💀
+            // Safety check - audio element may have changed during load
             if (audio !== this.currentAudio) {
                 console.log('🎵 MusicSystem: Audio element changed during load, aborting play');
                 return;
@@ -475,7 +475,7 @@ const MusicSystem = {
         audio.onerror = (e) => {
             audio.onerror = null;
             const fileName = trackPath.split('/').pop();
-            // 🖤💀 Check for CORS errors and provide helpful guidance 💀
+            // Check for CORS errors and provide helpful guidance
             if (window.location.protocol === 'file:') {
                 console.warn(`🎵 Audio failed: ${fileName} - CORS blocked. Run game via local server (npx serve)`);
             } else {
@@ -489,12 +489,12 @@ const MusicSystem = {
         audio.load(); // Explicitly start loading
     },
 
-    // 🎵 Called when a track ends
+    // Called when a track ends
     onTrackEnd() {
         console.log('🎵 MusicSystem: Track ended');
         this.isPlaying = false;
 
-        // 🎵 Check if there's a pending category change
+        // Check if there's a pending category change
         if (this.pendingCategory && this.pendingCategory !== this.currentCategory) {
             console.log(`🎵 MusicSystem: Switching to pending category: ${this.pendingCategory}`);
             const newCategory = this.pendingCategory;
@@ -537,13 +537,13 @@ const MusicSystem = {
     fadeIn() {
         if (!this.currentAudio) return;
 
-        // 🖤💀 Use effective volume (master * track multiplier) 💀
+        // Use effective volume (master * track multiplier)
         const targetVolume = this.getEffectiveVolume();
         const step = targetVolume / (this.settings.fadeInDuration / 50);
         let currentVolume = 0;
 
         this._fadeInInterval = setInterval(() => {
-            // 🖤💀 Safety check - audio may have been nulled 💀
+            // Safety check - audio may have been nulled
             if (!this.currentAudio) {
                 clearInterval(this._fadeInInterval);
                 this._fadeInInterval = null;
@@ -572,9 +572,9 @@ const MusicSystem = {
         const step = startVolume / (this.settings.fadeOutDuration / 50);
         let currentVolume = startVolume;
 
-        // 🖤💀 Track fade interval so we can clear it on cleanup 💀
+        // Track fade interval so we can clear it on cleanup
         this._fadeInterval = setInterval(() => {
-            // 🖤💀 Safety check - audio may have been nulled during cleanup 💀
+            // Safety check - audio may have been nulled during cleanup
             if (!this.currentAudio) {
                 clearInterval(this._fadeInterval);
                 this._fadeInterval = null;
@@ -634,7 +634,7 @@ const MusicSystem = {
         }
     },
 
-    // 🎮 Play menu music (for main menu screen)
+    // Play menu music (for main menu screen)
     playMenuMusic() {
         this.playCategory('menu');
     },
@@ -649,12 +649,12 @@ const MusicSystem = {
         this.playCategory('dungeon');
     },
 
-    // 💀 Play doom world music
+    // Play doom world music
     playDoomMusic() {
         this.playCategory('doom');
     },
 
-    // 🎮 Update music based on game state
+    // Update music based on game state
     updateForGameState(gameState, isDoomWorld = false, inDungeon = false) {
         if (!this.settings.enabled) return;
 
@@ -672,7 +672,7 @@ const MusicSystem = {
 
     // 🧹 Cleanup
     cleanup() {
-        // 🖤💀 Clear any running fade intervals FIRST to prevent null access 💀
+        // Clear any running fade intervals FIRST to prevent null access
         if (this._fadeInterval) {
             clearInterval(this._fadeInterval);
             this._fadeInterval = null;
@@ -686,7 +686,7 @@ const MusicSystem = {
             this.gapTimeout = null;
         }
 
-        // 🖤💀 Don't call stop() here - it starts a new fadeOut which causes race condition 💀
+        // Don't call stop() here - it starts a new fadeOut which causes race condition
         // Just directly clean up the audio element
         if (this.currentAudio) {
             try {
@@ -705,9 +705,9 @@ const MusicSystem = {
     }
 };
 
-// 🎵 Auto-initialize when script loads
+// Auto-initialize when script loads
 if (typeof window !== 'undefined') {
-    // 🖤💀 START PRELOADING IMMEDIATELY when script loads (before DOMContentLoaded) 💀
+    // START PRELOADING IMMEDIATELY when script loads (before DOMContentLoaded)
     // This allows audio to buffer during the loading screen
     MusicSystem.preloadAllTracks();
 
@@ -721,4 +721,4 @@ if (typeof window !== 'undefined') {
     });
 }
 
-console.log('🎵 MusicSystem loaded - preloading audio for the abyss... 🖤💀');
+console.log('MusicSystem loaded - preloading audio for the abyss...');

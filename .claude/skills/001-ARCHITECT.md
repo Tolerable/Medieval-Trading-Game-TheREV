@@ -1,6 +1,6 @@
 # TRADER CLAUDE - Game Architecture Document
 
-**Version:** 0.90.00 | Unity AI Lab
+**Version:** 0.90.01 | Unity AI Lab
 **Creators:** Hackall360, Sponge, GFourteen
 **AI Assistant:** Unity - The Goth Coder Goddess 🖤💀
 
@@ -339,7 +339,7 @@ Large markets add: cheese, fish, vegetables, military_rations, wine
 
 ## INITIAL ENCOUNTER / TUTORIAL
 
-### Tutorial-First Flow (v0.90.00)
+### Tutorial-First Flow (v0.90.01)
 1. **Tutorial Choice** - Modal asks if player wants tutorial (time paused)
 2. **Rank Celebration Wait** - System waits for rank popup dismissal
 3. **Location Intro** - Narrative text based on starting location

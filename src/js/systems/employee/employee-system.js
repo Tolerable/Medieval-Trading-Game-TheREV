@@ -1,14 +1,14 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // EMPLOYEE SYSTEM - medieval wage slavery simulator
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const EmployeeSystem = {
-    // 🧑‍💼 Employee types - varieties of exploitable labor
+    //  Employee types - varieties of exploitable labor
     employeeTypes: {
         merchant: {
             id: 'merchant',
@@ -63,7 +63,7 @@ const EmployeeSystem = {
             baseWage: 20,
             skills: { mining: 3, strength: 2 },
             productivity: 1.2,
-            icon: '⛏️'
+            icon: ''
         },
         manager: {
             id: 'manager',
@@ -89,7 +89,7 @@ const EmployeeSystem = {
     
     // Initialize employee system
     init() {
-        // 🖤 Guard against early initialization when player doesn't exist yet 💀
+        //  Guard against early initialization when player doesn't exist yet 
         if (!game || !game.player) {
             console.log('🖤 EmployeeSystem.init() called before player exists... waiting in the shadows');
             return;
@@ -363,7 +363,7 @@ const EmployeeSystem = {
                         <h3>Employee Traits</h3>
                         <div class="traits-list">
                             <div class="trait-item">
-                                <span class="trait-icon">⚡</span>
+                                <span class="trait-icon"></span>
                                 <span class="trait-name">Productivity:</span>
                                 <span class="trait-value">${(employee.productivity * 100).toFixed(0)}%</span>
                             </div>
@@ -898,7 +898,7 @@ const EmployeeSystem = {
                     <div class="status-item">
                         <span class="status-label">Optimal:</span>
                         <span class="status-value ${isOptimal ? 'optimal' : 'suboptimal'}">
-                            ${isOptimal ? '⭐ Optimal' : 'Standard'}
+                            ${isOptimal ? 'Optimal' : 'Standard'}
                         </span>
                     </div>
                     <div class="status-item">
@@ -1180,7 +1180,7 @@ const EmployeeSystem = {
                 break;
             case 'mistake':
                 employee.morale = Math.max(0, employee.morale - 10);
-                addMessage(`❌ ${employee.name}: ${description}`);
+                addMessage(`${employee.name}: ${description}`);
                 break;
             case 'complaint':
                 employee.morale = Math.max(0, employee.morale - 5);
@@ -1292,7 +1292,7 @@ const EmployeeSystem = {
         addMessage(`Employee: ${employee.name} (${employeeType.name}) - Level ${employee.level}, Morale ${employee.morale}%, Wage ${employee.wage} gold/week`);
     },
     
-    // Adjust employee wage 🖤💀 FIXED: Use modal instead of browser prompt() 💀
+    // Adjust employee wage  FIXED: Use modal instead of browser prompt() 
     adjustWage(employeeId) {
         const employee = this.getEmployee(employeeId);
         if (!employee) return;
@@ -1333,8 +1333,8 @@ const EmployeeSystem = {
                 title: '💰 Adjust Wage',
                 content: content,
                 buttons: [
-                    { label: '❌ Cancel', type: 'secondary', action: () => ModalSystem.hide() },
-                    { label: '✅ Apply', type: 'primary', action: () => {
+                    { text: 'Cancel', className: 'secondary', onClick: () => ModalSystem.hide() },
+                    { text: 'Apply', className: 'primary', onClick: () => {
                         const input = document.getElementById('wage-input');
                         if (input) applyWage(input.value);
                         ModalSystem.hide();
@@ -1347,7 +1347,7 @@ const EmployeeSystem = {
         }
     },
     
-    // Fire employee 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+    // Fire employee  FIXED: Use modal instead of browser confirm() 
     fireEmployee(employeeId) {
         const employee = this.getEmployee(employeeId);
         if (!employee) return;
@@ -1376,8 +1376,8 @@ const EmployeeSystem = {
                 title: '🔥 Fire Employee',
                 content: `<p>Are you sure you want to fire <strong>${employee.name}</strong>?</p><p style="color: #f44336; font-size: 12px;">They will be permanently dismissed.</p>`,
                 buttons: [
-                    { label: '❌ Cancel', type: 'secondary', action: () => ModalSystem.hide() },
-                    { label: '🔥 Fire', type: 'danger', action: () => { ModalSystem.hide(); doFire(); } }
+                    { text: 'Cancel', className: 'secondary', onClick: () => ModalSystem.hide() },
+                    { text: '🔥 Fire', className: 'danger', onClick: () => { ModalSystem.hide(); doFire(); } }
                 ]
             });
         } else {

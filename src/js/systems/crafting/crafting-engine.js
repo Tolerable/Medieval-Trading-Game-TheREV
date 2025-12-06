@@ -1,11 +1,11 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // CRAFTING ENGINE - turning failure into profit
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const CraftingEngine = {
     // Active crafting jobs
@@ -19,9 +19,9 @@ const CraftingEngine = {
         itemsCrafted: {} // { itemId: count }
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 🚀 INITIALIZATION
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  INITIALIZATION
+    // 
 
     init() {
         console.log('🔨 CraftingEngine: Firing up the forge...');
@@ -37,9 +37,9 @@ const CraftingEngine = {
         console.log('🔨 CraftingEngine: Ready to craft');
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 🔍 CAN CRAFT CHECK
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  CAN CRAFT CHECK
+    // 
 
     /**
      * Check if player can craft a recipe
@@ -117,9 +117,9 @@ const CraftingEngine = {
         return { hasAll, missing };
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 🔨 START CRAFTING
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  START CRAFTING
+    // 
 
     /**
      * Start crafting an item
@@ -210,9 +210,9 @@ const CraftingEngine = {
         return { success: true };
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // ⏰ UPDATE / PROGRESS
-    // ═══════════════════════════════════════════════════════════
+    // 
+    // UPDATE / PROGRESS
+    // 
 
     /**
      * Update crafting progress (called each game tick)
@@ -291,7 +291,7 @@ const CraftingEngine = {
         if (!recipe.skillType) return 0;
 
         const skillLevel = this.getPlayerSkillLevel(recipe.skillType);
-        // 🦇 Diminishing returns: 3% per level, capped at 30% max chance (not 50% at lvl 10)
+        //  Diminishing returns: 3% per level, capped at 30% max chance (not 50% at lvl 10)
         const baseChance = Math.min(0.03 * skillLevel, 0.30);
 
         let bonus = 0;
@@ -301,14 +301,14 @@ const CraftingEngine = {
             }
         }
 
-        // 🖤 Cap total bonus to 25% of original quantity - no infinite duplication 💀
+        //  Cap total bonus to 25% of original quantity - no infinite duplication 
         const maxBonus = Math.floor(quantity * 0.25);
         return Math.min(bonus, maxBonus);
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 📋 RECIPE & ITEM HELPERS
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  RECIPE & ITEM HELPERS
+    // 
 
     /**
      * Get a recipe by ID
@@ -397,9 +397,9 @@ const CraftingEngine = {
         return facility.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 🏭 FACILITY ACCESS
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  FACILITY ACCESS
+    // 
 
     /**
      * Check if player has access to a facility
@@ -457,9 +457,9 @@ const CraftingEngine = {
         return defaults[propertyType] || [];
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 🎒 INVENTORY INTERFACE
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  INVENTORY INTERFACE
+    // 
 
     getPlayerItemCount(itemId) {
         // Try InventorySystem
@@ -482,7 +482,7 @@ const CraftingEngine = {
         // Try game.player.inventory
         if (typeof game !== 'undefined' && game.player?.inventory) {
             game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + quantity;
-            // 🖤 Emit item-received for quest progress tracking 💀
+            //  Emit item-received for quest progress tracking 
             document.dispatchEvent(new CustomEvent('item-received', {
                 detail: { item: itemId, quantity: quantity, source: 'crafting' }
             }));
@@ -505,9 +505,9 @@ const CraftingEngine = {
         console.warn('🔨 CraftingEngine: No inventory system found to remove item');
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 📊 SKILL INTERFACE
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  SKILL INTERFACE
+    // 
 
     getPlayerSkillLevel(skillType) {
         // Try SkillSystem
@@ -544,9 +544,9 @@ const CraftingEngine = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 🌍 GAME STATE INTERFACE
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  GAME STATE INTERFACE
+    // 
 
     getCurrentGameTime() {
         // Try TimeSystem
@@ -570,9 +570,9 @@ const CraftingEngine = {
         return null;
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 💬 UI INTERFACE
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  UI INTERFACE
+    // 
 
     showMessage(message, type = 'info') {
         // Try addMessage
@@ -601,9 +601,9 @@ const CraftingEngine = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 💾 SAVE / LOAD
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  SAVE / LOAD
+    // 
 
     getState() {
         return {
@@ -625,9 +625,9 @@ const CraftingEngine = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════
-    // 📊 QUEUE INFO
-    // ═══════════════════════════════════════════════════════════
+    // 
+    //  QUEUE INFO
+    // 
 
     /**
      * Get current crafting queue
@@ -659,9 +659,9 @@ const CraftingEngine = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY
-// ═══════════════════════════════════════════════════════════════
+// 
+//  EXPOSE GLOBALLY
+// 
 
 window.CraftingEngine = CraftingEngine;
 

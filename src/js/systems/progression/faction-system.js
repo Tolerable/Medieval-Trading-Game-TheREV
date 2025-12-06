@@ -1,34 +1,34 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // FACTION SYSTEM - loyalty is a currency here
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const FactionSystem = {
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // CONFIGURATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     playerFactionRep: {},
 
-    // 🦇 Reputation thresholds - scaled to -100 to +100 for sanity
-    // the void operates on simple numbers, not your overcomplicated bullshit 🖤
+    //  Reputation thresholds - scaled to -100 to +100 for sanity
+    // the void operates on simple numbers, not your overcomplicated bullshit 
     repLevels: {
         hated: { min: -100, max: -75, name: 'Hated', icon: '💀', color: '#8b0000' },
-        hostile: { min: -75, max: -50, name: 'Hostile', icon: '⚔️', color: '#ff0000' },
+        hostile: { min: -75, max: -50, name: 'Hostile', icon: '', color: '#ff0000' },
         unfriendly: { min: -50, max: -25, name: 'Unfriendly', icon: '😠', color: '#ff6600' },
         neutral: { min: -25, max: 25, name: 'Neutral', icon: '😐', color: '#888888' },
         friendly: { min: 25, max: 50, name: 'Friendly', icon: '😊', color: '#66bb66' },
         honored: { min: 50, max: 75, name: 'Honored', icon: '🤝', color: '#44aa44' },
-        revered: { min: 75, max: 90, name: 'Revered', icon: '⭐', color: '#22cc22' },
+        revered: { min: 75, max: 90, name: 'Revered', icon: '', color: '#22cc22' },
         exalted: { min: 90, max: 101, name: 'Exalted', icon: '👑', color: '#ffd700' }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // FACTION DEFINITIONS
-    // ═══════════════════════════════════════════════════════════════
+    // 
     factions: {
         merchants_guild: {
             id: 'merchants_guild',
@@ -178,16 +178,16 @@ const FactionSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // INITIALIZATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     init() {
         console.log('🏛️ FactionSystem: Establishing allegiances... choose your enemies wisely 🗡️');
 
-        // 💀 Initialize faction reputations - everyone starts neutral (won't last)
+        //  Initialize faction reputations - everyone starts neutral (won't last)
         for (const factionId of Object.keys(this.factions)) {
             if (this.playerFactionRep[factionId] === undefined) {
-                this.playerFactionRep[factionId] = 0; // 🦇 Start neutral - for now
+                this.playerFactionRep[factionId] = 0; // ��� Start neutral - for now
             }
         }
 
@@ -210,9 +210,9 @@ const FactionSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // REPUTATION MANAGEMENT
-    // ═══════════════════════════════════════════════════════════════
+    // 
     getReputation(factionId) {
         return this.playerFactionRep[factionId] || 0;
     },
@@ -236,7 +236,7 @@ const FactionSystem = {
         const oldRep = this.playerFactionRep[factionId] || 0;
         const oldLevel = this.getReputationLevel(factionId);
 
-        // 🖤 Clamp to -100 to +100 - everyone can be redeemed... or damned
+        //  Clamp to -100 to +100 - everyone can be redeemed... or damned
         this.playerFactionRep[factionId] = Math.max(-100, Math.min(100, oldRep + amount));
 
         const newLevel = this.getReputationLevel(factionId);
@@ -312,32 +312,32 @@ const FactionSystem = {
         this.updateFactionBenefits(factionId);
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🦇 EVENT HANDLERS - the void watches all your actions... and judges 🖤
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  EVENT HANDLERS - the void watches all your actions... and judges 
+    // 
     onTradeCompleted(data) {
-        // 💰 TRADING IS THE PRIMARY WAY TO GAIN REP - make it meaningful
+        //  TRADING IS THE PRIMARY WAY TO GAIN REP - make it meaningful
         const location = data.location || game?.currentLocation?.id;
         const value = data.totalValue || 0;
         const npcType = data.npcType || data.merchantType;
 
-        // 🖤 Base rep from trade value (scaled for -100 to 100 system)
+        //  Base rep from trade value (scaled for -100 to 100 system)
         // Every 50g traded = +1 rep with merchants guild (main source)
         if (value >= 50) {
             const repGain = Math.min(5, Math.floor(value / 50)); // Cap at 5 per trade
             this.modifyReputation('merchants_guild', repGain, 'successful trade');
         }
 
-        // 🦇 Trading with specific NPC types affects their faction
+        //  Trading with specific NPC types affects their faction
         if (npcType) {
             this.onTradeWithNPCType(npcType, value);
         }
 
-        // 💀 Location-based faction rep
+        //  Location-based faction rep
         this.onTradeAtLocation(location, value);
     },
 
-    // 🛒 Trading with specific NPC types
+    //  Trading with specific NPC types
     onTradeWithNPCType(npcType, value) {
         if (value < 25) return; // minimum trade value for rep
 
@@ -362,7 +362,7 @@ const FactionSystem = {
                 break;
             case 'ferryman':
             case 'sailor':
-                // 🏴‍☠️ These folks know the smugglers...
+                //  These folks know the smugglers...
                 if (Math.random() < 0.3) {
                     this.modifyReputation('smugglers', 1, 'dockside dealings');
                 }
@@ -375,13 +375,13 @@ const FactionSystem = {
         }
     },
 
-    // 📍 Location-based faction rep gains
+    //  Location-based faction rep gains
     onTradeAtLocation(location, value) {
         if (value < 100) return;
 
         const repGain = Math.min(2, Math.floor(value / 150));
 
-        // 🏰 Trading in major cities helps that region's faction
+        //  Trading in major cities helps that region's faction
         const locationFactions = {
             'royal_capital': ['noble_houses', 'merchants_guild'],
             'jade_harbor': ['merchants_guild', 'smugglers'],
@@ -401,21 +401,21 @@ const FactionSystem = {
     },
 
     onQuestCompleted(data) {
-        // 📜 Quest completion - significant rep gains
+        //  Quest completion - significant rep gains
         if (data.factionRewards) {
             for (const [factionId, amount] of Object.entries(data.factionRewards)) {
                 this.modifyReputation(factionId, amount, 'quest completed');
             }
         }
 
-        // 🖤 Default rep gain for any quest completion
+        //  Default rep gain for any quest completion
         const questGiver = data.quest?.giver;
         if (questGiver) {
             this.onQuestForNPCType(questGiver, data.quest);
         }
     },
 
-    // 📜 Quest completion for specific NPC types
+    //  Quest completion for specific NPC types
     onQuestForNPCType(npcType, quest) {
         const difficulty = quest?.difficulty || 'easy';
         const repGain = { easy: 2, medium: 4, hard: 6, legendary: 10 }[difficulty] || 3;
@@ -449,7 +449,7 @@ const FactionSystem = {
     onCrimeCommitted(data) {
         const crimeType = data.type;
 
-        // 💀 Crimes affect factions (scaled for -100 to 100)
+        //  Crimes affect factions (scaled for -100 to 100)
         switch (crimeType) {
             case 'theft':
                 this.modifyReputation('city_guard', -5, 'theft');
@@ -470,12 +470,12 @@ const FactionSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🔄 REPUTATION RECOVERY - because everyone deserves a second chance
+    // 
+    //  REPUTATION RECOVERY - because everyone deserves a second chance
     // (or they just pay enough gold to make people forget)
-    // ═══════════════════════════════════════════════════════════════
+    // 
 
-    // 💰 Bribe to recover rep (costs gold, recovers negative rep)
+    //  Bribe to recover rep (costs gold, recovers negative rep)
     bribeFaction(factionId, goldAmount) {
         const faction = this.factions[factionId];
         if (!faction) return { success: false, error: 'Invalid faction' };
@@ -490,7 +490,7 @@ const FactionSystem = {
                 return { success: false, error: 'Not enough gold' };
             }
 
-            // 🖤 Bribe efficiency: 100g = +5 rep (but only for negative rep recovery)
+            //  Bribe efficiency: 100g = +5 rep (but only for negative rep recovery)
             const repGain = Math.min(Math.abs(currentRep), Math.floor(goldAmount / 20));
             game.player.gold -= goldAmount;
             this.modifyReputation(factionId, repGain, 'bribe');
@@ -501,11 +501,11 @@ const FactionSystem = {
         return { success: false, error: 'Game not available' };
     },
 
-    // 🎁 Gift items to recover rep
+    //  Gift items to recover rep
     giftToFaction(factionId, itemValue) {
         const currentRep = this.getReputation(factionId);
 
-        // 🖤 Gifts work even for positive rep, just less effective
+        //  Gifts work even for positive rep, just less effective
         const multiplier = currentRep < 0 ? 1.5 : 0.5;
         const repGain = Math.floor((itemValue / 50) * multiplier);
 
@@ -517,9 +517,9 @@ const FactionSystem = {
         return { success: false, error: 'Gift value too low' };
     },
 
-    // ⏰ Daily rep decay/recovery (call this each game day)
+    // Daily rep decay/recovery (call this each game day)
     applyDailyRepChanges() {
-        // 🖤 Extreme rep slowly moves toward neutral over time
+        //  Extreme rep slowly moves toward neutral over time
         // This ensures no permanent lock-out
         for (const factionId of Object.keys(this.factions)) {
             const rep = this.getReputation(factionId);
@@ -536,15 +536,15 @@ const FactionSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🦇 BENEFITS/PENALTIES API - rewards for the loyal, suffering for the hated
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  BENEFITS/PENALTIES API - rewards for the loyal, suffering for the hated
+    // 
     getFactionBenefits(factionId) {
         const faction = this.factions[factionId];
         const level = this.getReputationLevel(factionId);
         if (!faction) return null;
 
-        // 🖤 Benefits start at 25+ rep (friendly)
+        //  Benefits start at 25+ rep (friendly)
         if (level.currentRep >= 25 && faction.benefits) {
             const tiers = ['exalted', 'revered', 'honored', 'friendly'];
             for (const tier of tiers) {
@@ -562,7 +562,7 @@ const FactionSystem = {
         const level = this.getReputationLevel(factionId);
         if (!faction) return null;
 
-        // 💀 Penalties start at -25 rep (unfriendly)
+        //  Penalties start at -25 rep (unfriendly)
         if (level.currentRep < -25 && faction.penalties) {
             const tiers = ['hated', 'hostile', 'unfriendly'];
             for (const tier of tiers) {
@@ -608,9 +608,9 @@ const FactionSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // UI
-    // ═══════════════════════════════════════════════════════════════
+    // 
     showFactionPanel() {
         const existing = document.getElementById('faction-panel-overlay');
         if (existing) {
@@ -650,7 +650,7 @@ const FactionSystem = {
                     <div class="faction-progress-bar">
                         <div class="faction-progress-fill" style="width: ${Math.max(0, Math.min(100, progress))}%; background: ${level.color}"></div>
                     </div>
-                    ${benefits ? `<div class="faction-benefit">✅ ${benefits.description}</div>` : ''}
+                    ${benefits ? `<div class="faction-benefit">${benefits.description}</div>` : ''}
                     ${penalties ? `<div class="faction-penalty">⚠️ ${penalties.description}</div>` : ''}
                 </div>
             `;
@@ -799,9 +799,9 @@ const FactionSystem = {
         document.head.appendChild(style);
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // SAVE/LOAD
-    // ═══════════════════════════════════════════════════════════════
+    // 
     getState() {
         return {
             playerFactionRep: { ...this.playerFactionRep }
@@ -814,9 +814,9 @@ const FactionSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🐛 DEBOOGER & CHEATS 🦇 - for testing, not for casuals 🖤
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DEBOOGER & CHEATS  - for testing, not for casuals 
+    // 
     setReputation(factionId, amount) {
         if (this.factions[factionId]) {
             this.playerFactionRep[factionId] = Math.max(-100, Math.min(100, amount));
@@ -826,7 +826,7 @@ const FactionSystem = {
         return false;
     },
 
-    // 🔧 Set ALL factions to a specific value
+    //  Set ALL factions to a specific value
     setAllRep(amount) {
         const clamped = Math.max(-100, Math.min(100, amount));
         for (const factionId of Object.keys(this.factions)) {
@@ -836,17 +836,17 @@ const FactionSystem = {
         return true;
     },
 
-    // 💀 Max negative rep with everyone (for testing recovery)
+    //  Max negative rep with everyone (for testing recovery)
     maxHated() {
         return this.setAllRep(-100);
     },
 
-    // 👑 Max positive rep with everyone
+    //  Max positive rep with everyone
     maxExalted() {
         return this.setAllRep(100);
     },
 
-    // 🎲 Random rep values for testing
+    //  Random rep values for testing
     randomizeRep() {
         for (const factionId of Object.keys(this.factions)) {
             this.playerFactionRep[factionId] = Math.floor(Math.random() * 201) - 100;
@@ -855,7 +855,7 @@ const FactionSystem = {
         return true;
     },
 
-    // 📊 Show all rep values
+    //  Show all rep values
     showAllRep() {
         console.log('═══ FACTION REPUTATION ═══');
         for (const [factionId, faction] of Object.entries(this.factions)) {
@@ -866,7 +866,7 @@ const FactionSystem = {
         return this.playerFactionRep;
     },
 
-    // 🔄 Test recovery from -100 (simulate playing)
+    //  Test recovery from -100 (simulate playing)
     simulateRecovery(factionId, days = 50) {
         const startRep = this.getReputation(factionId);
         console.log(`🔄 Simulating ${days} days of recovery for ${factionId} (start: ${startRep})`);
@@ -888,9 +888,9 @@ const FactionSystem = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
+// 
 // GLOBAL EXPOSURE
-// ═══════════════════════════════════════════════════════════════
+// 
 window.FactionSystem = FactionSystem;
 
 // Initialize when DOM ready

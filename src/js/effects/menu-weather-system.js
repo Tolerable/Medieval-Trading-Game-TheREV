@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // MENU WEATHER SYSTEM - seasonal magic greets you differently
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -22,16 +22,16 @@ const MenuWeatherSystem = {
     seasons: {
         storm: { weight: 25, name: 'Stormy Night' },      // Rain + Lightning
         winter: { weight: 18, name: 'Winter Snow' },      // Snowflakes
-        thundersnow: { weight: 8, name: 'Lightning Blizzard' }, // 🖤 Rare! Snow + Lightning
+        thundersnow: { weight: 8, name: 'Lightning Blizzard' }, // Rare! Snow + Lightning
         autumn: { weight: 20, name: 'Autumn Winds' },     // Falling leaves
         spring: { weight: 18, name: 'Spring Blossoms' },  // Cherry petals
         summer: { weight: 11, name: 'Summer Dusk' },      // Dust motes + sun rays
-        apocalypse: { weight: 3, name: 'The Dark Convergence' } // ☄️ Meteors & doom - EASTER EGG! 🦇
-        // 💀 Note: apocalypse weather is an easter egg on menu screen only -
+        apocalypse: { weight: 3, name: 'The Dark Convergence' } // Meteors & doom - EASTER EGG!
+        // Note: apocalypse weather is an easter egg on menu screen only -
         // it will NOT persist into the game world (see setInitialWeatherFromMenu)
     },
 
-    // 🎲 Select random season based on weights
+    // Select random season based on weights
     selectRandomSeason() {
         const totalWeight = Object.values(this.seasons).reduce((sum, s) => sum + s.weight, 0);
         let random = Math.random() * totalWeight;
@@ -45,9 +45,9 @@ const MenuWeatherSystem = {
         return 'storm'; // fallback
     },
 
-    // 🚀 Initialize the weather system
+    // Initialize the weather system
     init() {
-        // 🖤 Prevent double initialization - no duplicate weather effects!
+        // Prevent double initialization - no duplicate weather effects!
         if (this.isActive) {
             console.log('🌦️ MenuWeatherSystem: Already active, skipping init...');
             return;
@@ -55,7 +55,7 @@ const MenuWeatherSystem = {
         console.log('🌦️ MenuWeatherSystem.init() called');
         this.container = document.getElementById('menu-weather-container');
         if (!this.container) {
-            // 🖤 Check retry counter to prevent infinite loop 💀
+            // Check retry counter to prevent infinite loop
             this._initRetries++;
             if (this._initRetries >= this._maxInitRetries) {
                 console.warn(`🌦️ Menu weather container not found after ${this._maxInitRetries} retries - giving up`);
@@ -65,13 +65,13 @@ const MenuWeatherSystem = {
             setTimeout(() => this.init(), 500);
             return;
         }
-        // 🖤 Reset retry counter on success 💀
+        // Reset retry counter on success
         this._initRetries = 0;
 
-        // 🖤 Inject keyframe animations if not already done
+        // Inject keyframe animations if not already done
         this.injectKeyframes();
 
-        // 🖤 Clear any existing content
+        // Clear any existing content
         this.container.innerHTML = '';
 
         // Select random season
@@ -90,24 +90,24 @@ const MenuWeatherSystem = {
         this.startEffect();
     },
 
-    // ⚡ Inject keyframe animations for lightning effects
+    // Inject keyframe animations for lightning effects
     injectKeyframes() {
         if (document.getElementById('menu-weather-keyframes')) return;
 
         const style = document.createElement('style');
         style.id = 'menu-weather-keyframes';
         style.textContent = `
-            /* ⚡ Menu lightning bolt strike animation */
+            /* Menu lightning bolt strike animation */
             @keyframes menu-bolt-strike {
                 0% { height: 0; opacity: 1; }
                 100% { height: var(--bolt-height, 60%); opacity: 1; }
             }
-            /* 🔥 Menu fire flicker animation */
+            /* Menu fire flicker animation */
             @keyframes menu-fire-flicker {
                 0% { transform: scale(1); opacity: 0.9; }
                 100% { transform: scale(1.15); opacity: 1; }
             }
-            /* ✦ Menu spark pulse animation */
+            /* Menu spark pulse animation */
             @keyframes menu-spark-pulse {
                 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.7; }
                 100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
@@ -116,7 +116,7 @@ const MenuWeatherSystem = {
         document.head.appendChild(style);
     },
 
-    // 🎬 Start the weather effect for current season
+    // Start the weather effect for current season
     startEffect() {
         if (this.isActive) return;
         this.isActive = true;
@@ -146,7 +146,7 @@ const MenuWeatherSystem = {
         }
     },
 
-    // ☄️ APOCALYPSE - Meteors, red sky, doom
+    // APOCALYPSE - Meteors, red sky, doom
     startApocalypse() {
         // Add red pulsing sky overlay
         const skyOverlay = document.createElement('div');
@@ -165,7 +165,7 @@ const MenuWeatherSystem = {
         this.container.appendChild(skyOverlay);
 
         // Add apocalypse keyframes if not exists
-        // 🖤 Removed duplicate menu-bolt-strike, menu-fire-flicker, menu-spark-pulse - already in injectKeyframes() 💀
+        // Removed duplicate menu-bolt-strike, menu-fire-flicker, menu-spark-pulse - already in injectKeyframes()
         if (!document.getElementById('apocalypse-keyframes')) {
             const style = document.createElement('style');
             style.id = 'apocalypse-keyframes';
@@ -182,12 +182,12 @@ const MenuWeatherSystem = {
                     0% { transform: translateY(0) scale(1); opacity: 0.8; }
                     100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
                 }
-                /* ☄️ Menu meteor fire flicker animation */
+                /* Menu meteor fire flicker animation */
                 @keyframes menu-meteor-fire-flicker {
                     0% { transform: scale(1) rotate(0deg); opacity: 0.85; }
                     100% { transform: scale(1.15) rotate(5deg); opacity: 1; }
                 }
-                /* ☄️ Menu meteor spark pulse animation */
+                /* Menu meteor spark pulse animation */
                 @keyframes menu-meteor-spark-pulse {
                     0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; }
                     100% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
@@ -228,14 +228,14 @@ const MenuWeatherSystem = {
         this.createFog(2);
     },
 
-    // ☄️ Meteor shower effect
+    // Meteor shower effect
     startMeteorShower() {
         const spawnMeteor = () => {
             if (!this.isActive) return;
 
             const startX = Math.random() * 80;
 
-            // 🔥 80% land on screen, 20% go off screen (like game weather)
+            // 80% land on screen, 20% go off screen (like game weather)
             const goesOffScreen = Math.random() < 0.2;
             const landX = 150 + Math.random() * 150; // 150-300px horizontal travel
             const landY = goesOffScreen ? (100 + Math.random() * 20) : (40 + Math.random() * 50); // 40-90vh on screen, 100-120vh off
@@ -296,7 +296,7 @@ const MenuWeatherSystem = {
         spawnMeteor();
     },
 
-    // 🔥 Create persistent meteor fire effect at impact location
+    // Create persistent meteor fire effect at impact location
     createMenuMeteorFire(x, landY) {
         if (!this.container) return;
 
@@ -355,7 +355,7 @@ const MenuWeatherSystem = {
         }, burnDuration);
     },
 
-    // ⛈️ STORM - Rain with lightning
+    // STORM - Rain with lightning
     startStorm() {
         // Create rain
         this.createRain(80);
@@ -455,7 +455,7 @@ const MenuWeatherSystem = {
         this.lightningInterval = setTimeout(triggerLightning, 2000 + Math.random() * 3000);
     },
 
-    // 🔥 Create fire effect for menu lightning
+    // Create fire effect for menu lightning
     createMenuLightningFire(x, y) {
         if (!this.container) return;
 
@@ -508,7 +508,7 @@ const MenuWeatherSystem = {
         }, burnDuration);
     },
 
-    // ⚡❄️ THUNDERSNOW - Lightning Blizzard (rare and terrifying!)
+    // THUNDERSNOW - Lightning Blizzard (rare and terrifying!)
     startThundersnow() {
         // Heavy, fast snowfall
         const snowflakes = ['❄', '❅', '❆', '✦', '✧'];
@@ -607,7 +607,7 @@ const MenuWeatherSystem = {
         this.lightningInterval = setTimeout(triggerLightning, 1500 + Math.random() * 2000);
     },
 
-    // 🔥❄️ Create ice-fire effect for thundersnow lightning
+    // Create ice-fire effect for thundersnow lightning
     createMenuThundersnowFire(x, y) {
         if (!this.container) return;
 
@@ -660,7 +660,7 @@ const MenuWeatherSystem = {
         }, burnDuration);
     },
 
-    // ❄️ WINTER - Gentle snowfall
+    // WINTER - Gentle snowfall
     startWinter() {
         const snowflakes = ['❄', '❅', '❆', '✦', '✧', '·'];
         const sizes = ['small', 'medium', 'large'];
@@ -683,7 +683,7 @@ const MenuWeatherSystem = {
         this.createFog(1);
     },
 
-    // 🍂 AUTUMN - Falling leaves
+    // AUTUMN - Falling leaves
     startAutumn() {
         const leaves = ['🍂', '🍁', '🍃', '🌿'];
 
@@ -705,7 +705,7 @@ const MenuWeatherSystem = {
         this.createFog(1);
     },
 
-    // 🌸 SPRING - Cherry blossom petals
+    // SPRING - Cherry blossom petals
     startSpring() {
         this.particleInterval = setInterval(() => {
             if (!this.isActive) return;
@@ -722,7 +722,7 @@ const MenuWeatherSystem = {
         }, 200);
     },
 
-    // ☀️ SUMMER - Dust motes in warm light
+    // SUMMER - Dust motes in warm light
     startSummer() {
         // Create sun rays
         for (let i = 0; i < 5; i++) {
@@ -750,7 +750,7 @@ const MenuWeatherSystem = {
         }, 300);
     },
 
-    // 🌫️ Create fog layers
+    // Create fog layers
     createFog(layers) {
         for (let i = 0; i < layers; i++) {
             const fog = document.createElement('div');
@@ -762,7 +762,7 @@ const MenuWeatherSystem = {
         }
     },
 
-    // 🛑 Stop all effects
+    // Stop all effects
     stop() {
         this.isActive = false;
 
@@ -786,7 +786,7 @@ const MenuWeatherSystem = {
         }
     },
 
-    // 🔄 Change to a different season
+    // Change to a different season
     changeSeason(newSeason) {
         if (!this.seasons[newSeason]) {
             console.warn(`🌦️ Unknown season: ${newSeason}`);
@@ -807,7 +807,7 @@ const MenuWeatherSystem = {
     }
 };
 
-// 🌙 Auto-initialize when DOM is ready
+// Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         // Small delay to ensure main menu is visible

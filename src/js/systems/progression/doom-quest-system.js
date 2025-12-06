@@ -1,20 +1,20 @@
-// ═══════════════════════════════════════════════════════════════
-// DOOM QUEST SYSTEM - Tales of tragedy and survival 💀🔥
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// DOOM QUEST SYSTEM - Tales of tragedy and survival 
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Every quest is a story of loss. Every victory comes with grief.
 // The doom broke the world - these quests reflect that horror.
 // Unlocked after defeating the first boss and meeting the Ferryman.
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const DoomQuestSystem = {
-    // ═══════════════════════════════════════════════════════════════
-    // 💀 DOOM MAIN STORY QUESTS
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DOOM MAIN STORY QUESTS
+    // 
     mainQuests: {
-        // ═══════════════════════════════════════════════════════════
+        // 
         // ACT 1: ARRIVAL IN THE DOOM
-        // ═══════════════════════════════════════════════════════════
+        // 
         doom_arrival: {
             id: 'doom_arrival',
             name: 'Through the Veil',
@@ -82,9 +82,9 @@ const DoomQuestSystem = {
             questLine: 'doom_main'
         },
 
-        // ═══════════════════════════════════════════════════════════
+        // 
         // ACT 2: SURVIVAL AND SACRIFICE
-        // ═══════════════════════════════════════════════════════════
+        // 
         doom_supply_run: {
             id: 'doom_supply_run',
             name: 'The Last Harvest',
@@ -157,9 +157,9 @@ const DoomQuestSystem = {
             majorChoice: true
         },
 
-        // ═══════════════════════════════════════════════════════════
+        // 
         // ACT 3: STRIKING BACK
-        // ═══════════════════════════════════════════════════════════
+        // 
         doom_aftermath: {
             id: 'doom_aftermath',
             name: 'Bury the Dead',
@@ -265,13 +265,13 @@ const DoomQuestSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 💔 DOOM SIDE QUESTS - Tales of personal tragedy
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DOOM SIDE QUESTS - Tales of personal tragedy
+    // 
     sideQuests: {
-        // ═══════════════════════════════════════════════════════════
+        // 
         // GREENDALE ASHES - Farm tragedy
-        // ═══════════════════════════════════════════════════════════
+        // 
         doom_lost_children: {
             id: 'doom_lost_children',
             name: 'Empty Cradles',
@@ -312,9 +312,9 @@ const DoomQuestSystem = {
             rewards: { experience: 150, karma: 'varies' }
         },
 
-        // ═══════════════════════════════════════════════════════════
+        // 
         // IRONFORGE RUINS - Forge of despair
-        // ═══════════════════════════════════════════════════════════
+        // 
         doom_the_last_sword: {
             id: 'doom_the_last_sword',
             name: 'The Last Sword',
@@ -341,9 +341,9 @@ const DoomQuestSystem = {
             }
         },
 
-        // ═══════════════════════════════════════════════════════════
+        // 
         // FALLEN THRONE - Nobility's fall
-        // ═══════════════════════════════════════════════════════════
+        // 
         doom_crown_of_thorns: {
             id: 'doom_crown_of_thorns',
             name: 'The Crown of Thorns',
@@ -362,9 +362,9 @@ const DoomQuestSystem = {
             aftermath: 'prince_suicide' // Tragic consequence
         },
 
-        // ═══════════════════════════════════════════════════════════
+        // 
         // FROSTHOLM GRAVES - Frozen tragedy
-        // ═══════════════════════════════════════════════════════════
+        // 
         doom_frozen_family: {
             id: 'doom_frozen_family',
             name: 'Ice and Ashes',
@@ -386,9 +386,9 @@ const DoomQuestSystem = {
             rewards: { items: { furs: 5 }, experience: 250 }
         },
 
-        // ═══════════════════════════════════════════════════════════
+        // 
         // SMUGGLER'S SANCTUARY - Underground deals
-        // ═══════════════════════════════════════════════════════════
+        // 
         doom_the_traitor: {
             id: 'doom_the_traitor',
             name: 'The Informant',
@@ -407,9 +407,9 @@ const DoomQuestSystem = {
             twist: 'traitor_is_saving_family' // The traitor is trading info to protect their captive family
         },
 
-        // ═══════════════════════════════════════════════════════════
+        // 
         // DRUID GROVE - Nature's corruption
-        // ═══════════════════════════════════════════════════════════
+        // 
         doom_last_seed: {
             id: 'doom_last_seed',
             name: 'The Last Seed',
@@ -429,9 +429,9 @@ const DoomQuestSystem = {
             aftermath: 'sage_willow_death' // She dies peacefully after passing on the seed
         },
 
-        // ═══════════════════════════════════════════════════════════
+        // 
         // LIGHTHOUSE INN - Coastal horror
-        // ═══════════════════════════════════════════════════════════
+        // 
         doom_what_the_light_showed: {
             id: 'doom_what_the_light_showed',
             name: 'What the Light Revealed',
@@ -455,9 +455,9 @@ const DoomQuestSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🔧 QUEST SYSTEM UTILITIES
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  QUEST SYSTEM UTILITIES
+    // 
 
     isInDoomWorld() {
         return (typeof game !== 'undefined' && game.inDoomWorld === true) ||
@@ -517,11 +517,11 @@ const DoomQuestSystem = {
         return dialogueStages[stage] || dialogueStages.offer;
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🔗 QUEST SYSTEM INTEGRATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  QUEST SYSTEM INTEGRATION
+    // 
 
-    // 🖤 Register all doom quests with the main QuestSystem
+    //  Register all doom quests with the main QuestSystem
     // Called when entering doom world for the first time
     registerDoomQuests() {
         if (typeof QuestSystem === 'undefined') {
@@ -553,7 +553,7 @@ const DoomQuestSystem = {
         console.log(`💀 Registered ${Object.keys(allDoomQuests).length} doom quests`);
     },
 
-    // 🖤 Get quests for a specific NPC (for People Panel)
+    //  Get quests for a specific NPC (for People Panel)
     getQuestsForNPC(npcType, locationId) {
         if (!this.isInDoomWorld()) return [];
 
@@ -589,14 +589,14 @@ const DoomQuestSystem = {
         return quests;
     },
 
-    // 🖤 Start the intro doom quest (from Boatman)
+    //  Start the intro doom quest (from Boatman)
     startIntroQuest() {
         if (typeof QuestSystem === 'undefined') return false;
 
         // Register quests first if not done
         this.registerDoomQuests();
 
-        // 🖤💀 Start the intro quest - use assignQuest, not startQuest!
+        //  Start the intro quest - use assignQuest, not startQuest!
         const result = QuestSystem.assignQuest('doom_arrival');
         if (result && result.success) {
             QuestSystem.trackQuest('doom_arrival');
@@ -609,7 +609,7 @@ const DoomQuestSystem = {
         return false;
     },
 
-    // 🖤 Get quest context for NPC instruction templates (API TTS)
+    //  Get quest context for NPC instruction templates (API TTS)
     getQuestContextForNPC(npcType, locationId) {
         const context = {
             availableQuests: [],
@@ -681,9 +681,9 @@ const DoomQuestSystem = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY
-// ═══════════════════════════════════════════════════════════════
+// 
+//  EXPOSE GLOBALLY
+// 
 window.DoomQuestSystem = DoomQuestSystem;
 
 console.log('💀 DoomQuestSystem loaded - Tales of tragedy await...');

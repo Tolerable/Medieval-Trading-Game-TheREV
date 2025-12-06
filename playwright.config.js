@@ -2,10 +2,11 @@
 const { defineConfig, devices } = require('@playwright/test');
 
 /**
- * 🖤 Playwright Configuration for Medieval Trading Game
+ * Playwright Configuration for Medieval Trading Game
  * Tests run against a local server or GitHub Pages deployment
  *
  * Optimized for faster CI runs with increased timeouts
+ * Version: 0.90.01
  */
 
 module.exports = defineConfig({

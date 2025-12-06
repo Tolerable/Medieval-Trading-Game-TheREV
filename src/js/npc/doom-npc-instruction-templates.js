@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
-// DOOM NPC INSTRUCTION TEMPLATES - Voices from the apocalypse 💀🔥
+// DOOM NPC INSTRUCTION TEMPLATES - Voices from the apocalypse
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Every NPC has been broken by the doom. Their responses reflect
 // desperation, trauma, survival instinct, and loss.
 // ═══════════════════════════════════════════════════════════════
@@ -9,7 +9,7 @@
 const DoomNPCInstructionTemplates = {
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔥 CORE DOOM CONTEXT - Added to every NPC
+    // CORE DOOM CONTEXT - Added to every NPC
     // ═══════════════════════════════════════════════════════════════
     _doomContext: `THE WORLD HAS ENDED. The Shadow Throne awakened and darkness consumed the land.
 Gold is WORTHLESS - survival items are the only currency. Food and water are more precious than any gem.
@@ -17,7 +17,7 @@ Everyone has lost someone. Trust is rare. Hope is rarer. You speak in short, des
 NEVER be cheerful. NEVER offer false hope. Show your trauma through your words.`,
 
     // ═══════════════════════════════════════════════════════════════
-    // 💀 DOOM DEMEANOR MODIFIERS
+    // DOOM DEMEANOR MODIFIERS
     // ═══════════════════════════════════════════════════════════════
     demeanors: {
         broken: 'You have given up. Speak in hollow, defeated tones. Nothing matters anymore.',
@@ -41,7 +41,7 @@ NEVER be cheerful. NEVER offer false hope. Show your trauma through your words.`
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🗣️ ACTION-SPECIFIC DOOM INSTRUCTIONS
+    // ACTION-SPECIFIC DOOM INSTRUCTIONS
     // ═══════════════════════════════════════════════════════════════
 
     // GREETING in the doom
@@ -218,7 +218,7 @@ Remember: Gold is worthless. Hope is dead. Survival is all that matters.`;
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💀 NPC TYPE SPECIFIC DOOM TEMPLATES
+    // NPC TYPE SPECIFIC DOOM TEMPLATES
     // ═══════════════════════════════════════════════════════════════
 
     doomNPCTemplates: {
@@ -317,7 +317,7 @@ Remember: Gold is worthless. Hope is dead. Survival is all that matters.`;
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔧 MAIN BUILD FUNCTION
+    // MAIN BUILD FUNCTION
     // ═══════════════════════════════════════════════════════════════
 
     buildDoomInstruction(npcType, action, context = {}) {
@@ -379,8 +379,8 @@ Remember: Gold is worthless. Hope is dead. Survival is all that matters.`;
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY
+// EXPOSE GLOBALLY
 // ═══════════════════════════════════════════════════════════════
 window.DoomNPCInstructionTemplates = DoomNPCInstructionTemplates;
 
-console.log('💀 DoomNPCInstructionTemplates loaded - The dead speak through the living...');
+console.log('DoomNPCInstructionTemplates loaded - The dead speak through the living...');

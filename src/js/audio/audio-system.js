@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // AUDIO SYSTEM - sounds echoing through the darkness
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -14,7 +14,7 @@ const AudioSystem = {
     musicGainNode: null,
     sfxGainNode: null,
     
-    // Audio settings - 🖤 NUKED: disabled by default cuz it was making unholy buzzing noises
+    // Audio settings - NUKED: disabled by default cuz it was making unholy buzzing noises
     settings: {
         masterVolume: 0,  // silence is golden
         musicVolume: 0,  // the void speaks louder
@@ -22,7 +22,7 @@ const AudioSystem = {
         isMuted: true,
         isMusicMuted: true,
         isSfxMuted: true,
-        audioEnabled: false  // 🖤 audio system disabled - was causing nonstop buzzing hell
+        audioEnabled: false  // audio system disabled - was causing nonstop buzzing hell
     },
     
     // Current audio state
@@ -30,7 +30,7 @@ const AudioSystem = {
     musicNodes: [],
     ambientNodes: [],
 
-    // 🖤 Track active oscillators for cleanup 💀
+    // Track active oscillators for cleanup
     _activeOscillators: [],
 
     // Sound definitions
@@ -38,14 +38,14 @@ const AudioSystem = {
     musicTracks: {},
     ambientSounds: {},
 
-    // 🖤 Noise buffer cache - avoid regenerating the same buffers 💀
+    // Noise buffer cache - avoid regenerating the same buffers
     _noiseBufferCache: {},
     
     // Initialize audio system
     init() {
-        // 🖤 NUKED - audio disabled because it was spawning demons (buzzing noises)
+        // NUKED - audio disabled because it was spawning demons (buzzing noises)
         if (!this.settings.audioEnabled) {
-            console.log('🖤 AudioSystem disabled - silence reigns supreme');
+            console.log('AudioSystem disabled - silence reigns supreme');
             return;
         }
 
@@ -74,7 +74,7 @@ const AudioSystem = {
             
             console.log('Audio system initialized successfully');
         } catch (error) {
-            // 🦇 Audio init failed - disable audio silently
+            // Audio init failed - disable audio silently
             this.settings.audioEnabled = false;
         }
     },
@@ -152,7 +152,7 @@ const AudioSystem = {
         try {
             this.sounds[soundName]();
         } catch (error) {
-            // 🦇 Sound playback failed - browser may have blocked it
+            // Sound playback failed - browser may have blocked it
         }
     },
     
@@ -169,7 +169,7 @@ const AudioSystem = {
             this.currentMusic = trackName;
             this.musicTracks[trackName](loop);
         } catch (error) {
-            // 🦇 Music playback failed - browser may have blocked it
+            // Music playback failed - browser may have blocked it
         }
     },
     
@@ -198,30 +198,30 @@ const AudioSystem = {
         try {
             this.ambientSounds[ambientName](loop);
         } catch (error) {
-            // 🦇 Ambient audio failed - browser may have blocked it
+            // Ambient audio failed - browser may have blocked it
         }
     },
     
     // Stop all ambient sounds
-    // 🖤 Fixed: ambient nodes are objects like { oscillator, gainNode } or { noise, gainNode } 💀
+    // Fixed: ambient nodes are objects like { oscillator, gainNode } or { noise, gainNode }
     stopAmbient() {
         this.ambientNodes.forEach(node => {
             try {
-                // 🦇 Stop oscillator if present (mines, cities)
+                // Stop oscillator if present (mines, cities)
                 if (node.oscillator) {
                     node.oscillator.stop();
                     node.oscillator.disconnect();
                 }
-                // 🦇 Stop noise source if present (forests)
+                // Stop noise source if present (forests)
                 if (node.noise) {
                     node.noise.stop();
                     node.noise.disconnect();
                 }
-                // 🗡️ Disconnect gain node
+                // Disconnect gain node
                 if (node.gainNode) {
                     node.gainNode.disconnect();
                 }
-                // ⚰️ Disconnect filter if present
+                // Disconnect filter if present
                 if (node.filter) {
                     node.filter.disconnect();
                 }
@@ -231,7 +231,7 @@ const AudioSystem = {
         });
         this.ambientNodes = [];
 
-        // 🖤 Clear ambient interval if running 💀
+        // Clear ambient interval if running
         if (this.ambientInterval) {
             TimerManager.clearInterval(this.ambientInterval);
             this.ambientInterval = null;
@@ -249,10 +249,10 @@ const AudioSystem = {
         oscillator.connect(gainNode);
         gainNode.connect(this.sfxGainNode);
 
-        // 🖤 Track oscillator for cleanup 💀
+        // Track oscillator for cleanup
         this._activeOscillators.push(oscillator);
 
-        // 🖤 Auto-remove from tracking when oscillator ends 💀
+        // Auto-remove from tracking when oscillator ends
         oscillator.onended = () => {
             const idx = this._activeOscillators.indexOf(oscillator);
             if (idx > -1) this._activeOscillators.splice(idx, 1);
@@ -262,7 +262,7 @@ const AudioSystem = {
     },
     
     createNoiseBuffer(duration = 0.1, type = 'white') {
-        // 🖤 Check cache first - avoid regenerating identical buffers 💀
+        // Check cache first - avoid regenerating identical buffers
         const cacheKey = `${type}_${duration}`;
         if (this._noiseBufferCache[cacheKey]) {
             return this._noiseBufferCache[cacheKey];
@@ -280,7 +280,7 @@ const AudioSystem = {
             }
         }
 
-        // 🖤 Cache the buffer 💀
+        // Cache the buffer
         this._noiseBufferCache[cacheKey] = buffer;
         return buffer;
     },
@@ -664,9 +664,9 @@ const AudioSystem = {
     },
     
     playTavernAmbient(loop = true) {
-        // 🖤 DISABLED - this was causing a loud buzzing noise
+        // DISABLED - this was causing a loud buzzing noise
         // The oscillator at 110Hz with no stop time was droning forever
-        console.log('🖤 Tavern ambient disabled (was causing buzz)');
+        console.log('Tavern ambient disabled (was causing buzz)');
         return;
 
         // Original code (commented out):
@@ -831,16 +831,16 @@ const AudioSystem = {
     
     // Music Methods
     playMenuMusic(loop = true) {
-        // 🖤 DISABLED - don't auto-play music on startup
+        // DISABLED - don't auto-play music on startup
         // Browser policies often block auto-play anyway
-        console.log('🖤 Menu music disabled (requires user interaction)');
+        console.log('Menu music disabled (requires user interaction)');
         return;
     },
 
     playGameplayMusic(loop = true) {
-        // 🖤 DISABLED - don't auto-play ambient on gameplay start
+        // DISABLED - don't auto-play ambient on gameplay start
         // Can be re-enabled when user explicitly enables audio
-        console.log('🖤 Gameplay music disabled');
+        console.log('Gameplay music disabled');
         return;
     },
     
@@ -868,7 +868,7 @@ const AudioSystem = {
                 this.settings = { ...this.settings, ...settings };
                 this.updateVolumes();
             } catch (error) {
-                // 🖤 Silent fallback - corrupt data just means we use defaults
+                // Silent fallback - corrupt data just means we use defaults
                 localStorage.removeItem('tradingGameAudioSettings');
             }
         }
@@ -1006,7 +1006,7 @@ const AudioSystem = {
         }
     },
     
-    // 🖤 Stop all active oscillators 💀
+    // Stop all active oscillators
     stopAllOscillators() {
         this._activeOscillators.forEach(osc => {
             try {
@@ -1023,7 +1023,7 @@ const AudioSystem = {
     cleanup() {
         this.stopMusic();
         this.stopAmbient();
-        // 🖤 Stop all tracked oscillators 💀
+        // Stop all tracked oscillators
         this.stopAllOscillators();
 
         if (this.musicLoopInterval) {
@@ -1045,7 +1045,7 @@ const AudioSystem = {
         }
     },
 
-    // 🔥 MEMORY LEAK FIX: Full destroy method for cleanup
+    // MEMORY LEAK FIX: Full destroy method for cleanup
     // Call this when the game is unloading or audio system needs to be completely reset
     destroy() {
         // Stop all playback first

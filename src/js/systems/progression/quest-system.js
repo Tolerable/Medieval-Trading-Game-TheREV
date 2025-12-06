@@ -1,21 +1,21 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // QUEST SYSTEM - tasks that pretend to matter
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 // QUEST FILES:
 // - main-quests.js: 35 Main Story Quests (The Shadow Rising & Black Ledger)
 // - side-quests.js: 50 Regional Side Quests (Combat & Trade Chains)
 // - doom-quests.js: 15 Doom World Quests + Greedy Won Boss
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const QuestSystem = {
-    // ═══════════════════════════════════════════════════════════════
-    // 📋 QUEST METADATA CATEGORIES - for classification and filtering 💀
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  QUEST METADATA CATEGORIES - for classification and filtering 
+    // 
     QUEST_TYPES: Object.freeze({
         MAIN: 'main',     // Main story quests (35 total across 5 acts)
         SIDE: 'side',     // Regional side quests (50 total, 2 chains per region)
@@ -40,7 +40,7 @@ const QuestSystem = {
         NIGHTMARE: 'nightmare' // Doom world end-game
     }),
 
-    // 🖤 Helper: Get quest category info 💀
+    //  Helper: Get quest category info 
     getQuestCategory(quest) {
         return {
             type: quest?.type || this.QUEST_TYPES.SIDE,
@@ -52,9 +52,9 @@ const QuestSystem = {
         };
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📋 STATE - tracking your endless servitude
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  STATE - tracking your endless servitude
+    // 
     initialized: false,
     activeQuests: {},
     completedQuests: [],
@@ -63,25 +63,26 @@ const QuestSystem = {
     questCompletionTimes: {}, // when quests were completed (for cooldowns and display)
     questLogOpen: false,
 
-    // 🖤 TRACKED QUEST - the one quest to rule them all (only one at a time)
+    //  TRACKED QUEST - the one quest to rule them all (only one at a time)
     trackedQuestId: null,
     questMarkerElement: null,
+    trackerHidden: false, // ���💀 Track if user manually hid the tracker widget 💀
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎒 QUEST ITEMS - special items that exist only for quests
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  QUEST ITEMS - special items that exist only for quests
+    // 
     // these weigh nothing and can't be dropped because we're not monsters
     questItems: {
         // delivery packages
         greendale_package: { name: 'Package for Ironforge', description: 'Sealed merchant goods', quest: 'delivery_ironforge', icon: '📦' },
-        ironforge_ore_sample: { name: 'Ore Sample', description: 'High quality iron ore sample', quest: 'ore_quality_check', icon: '⛏️' },
+        ironforge_ore_sample: { name: 'Ore Sample', description: 'High quality iron ore sample', quest: 'ore_quality_check', icon: '' },
         silk_shipment: { name: 'Silk Shipment', description: 'Delicate silk fabric from Jade Harbor', quest: 'silk_delivery', icon: '🧵' },
         medicine_bundle: { name: 'Medicine Bundle', description: 'Urgently needed medical supplies', quest: 'urgent_medicine', icon: '💊' },
         secret_letter: { name: 'Sealed Letter', description: 'A letter with a wax seal - do not open', quest: 'secret_message', icon: '✉️' },
         royal_decree: { name: 'Royal Decree', description: 'Official document from the Capital', quest: 'royal_summons', icon: '📜' },
 
         // dungeon artifacts
-        blade_of_virtue: { name: 'Blade of Virtue', description: 'A legendary sword pulled from the Shadow Tower', quest: 'retrieve_blade', icon: '⚔️' },
+        blade_of_virtue: { name: 'Blade of Virtue', description: 'A legendary sword pulled from the Shadow Tower', quest: 'retrieve_blade', icon: '' },
         crystal_heart: { name: 'Crystal Heart', description: 'A pulsing gem from the Crystal Cave', quest: 'crystal_retrieval', icon: '💎' },
         ancient_tome: { name: 'Ancient Tome', description: 'Forbidden knowledge from the ruins', quest: 'forbidden_knowledge', icon: '📕' },
         dragon_scale: { name: 'Dragon Scale', description: 'Proof of a legendary kill', quest: 'dragon_slayer', icon: '🐉' },
@@ -96,12 +97,16 @@ const QuestSystem = {
         // special quest keys
         shadow_key: { name: 'Shadow Key', description: 'Opens the inner sanctum', quest: 'shadow_tower_chain', icon: '🗝️' },
         mine_pass: { name: 'Mining Pass', description: 'Authorization to enter deep mines', quest: 'deep_mine_access', icon: '🎫' },
-        guild_token: { name: 'Guild Token', description: 'Proof of guild membership', quest: 'join_guild', icon: '🏅' }
+        guild_token: { name: 'Guild Token', description: 'Proof of guild membership', quest: 'join_guild', icon: '🏅' },
+
+        // main story quest items (Act 1: The Shadow Rising)
+        shipping_manifest: { name: 'Shipping Manifest', description: 'Coded manifest revealing suspicious cargo shipments', quest: 'act1_quest5', icon: '📋' },
+        traders_journal: { name: "Trader's Journal", description: 'Final entries mention the Shadow Tower and The Black Ledger', quest: 'act1_quest6', icon: '📖' }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 💰 REWARD BALANCING TIERS - so players don't get rich too fast
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  REWARD BALANCING TIERS - so players don't get rich too fast
+    // 
     // These define acceptable reward ranges by difficulty tier
     // Quests should stay within these bounds for balanced progression
     rewardTiers: {
@@ -212,17 +217,17 @@ const QuestSystem = {
         return scaled;
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📚 QUEST DATABASE - every damn task in this godforsaken realm
-    // ═══════════════════════════════════════════════════════════════
-    // 🖤 Main story quests (35 quests) are loaded from main-quests.js via loadExternalQuests() 💀
-    // 🖤 Side quests (50 quests) are loaded from side-quests.js via loadExternalQuests() 💀
-    // 🖤 Doom quests (15 quests) are loaded from doom-quests.js via loadExternalQuests() 💀
-    // 🖤 Only LOCATION-SPECIFIC quests remain hardcoded below 💀
+    // 
+    //  QUEST DATABASE - every damn task in this godforsaken realm
+    // 
+    //  Main story quests (35 quests) are loaded from main-quests.js via loadExternalQuests() 
+    //  Side quests (50 quests) are loaded from side-quests.js via loadExternalQuests() 
+    //  Doom quests (15 quests) are loaded from doom-quests.js via loadExternalQuests() 
+    //  Only LOCATION-SPECIFIC quests remain hardcoded below 
     quests: {
-        // ═══════════════════════════════════════════════════════════
-        // 🌾 GREENDALE QUESTS - starter zone, farming community
-        // ═══════════════════════════════════════════════════════════
+        // 
+        //  GREENDALE QUESTS - starter zone, farming community
+        // 
         greendale_herbs: {
             id: 'greendale_herbs',
             name: 'Healing Herbs',
@@ -304,7 +309,7 @@ const QuestSystem = {
             description: 'Giant rats infest the inn storehouse. Clear them out.',
             giver: 'innkeeper',
             giverName: 'Martha the Innkeep',
-            location: 'riverside_inn', // 🖤💀 Fixed: Innkeeper is at the inn!
+            location: 'riverside_inn', // ���💀 Fixed: Innkeeper is at the inn!
             type: 'combat',
             difficulty: 'easy',
             objectives: [
@@ -322,9 +327,9 @@ const QuestSystem = {
             }
         },
 
-        // ═══════════════════════════════════════════════════════════
-        // ⚒️ IRONFORGE CITY QUESTS - mining/smithing hub
-        // ═══════════════════════════════════════════════════════════
+        // 
+        //  IRONFORGE CITY QUESTS - mining/smithing hub
+        // 
         ironforge_ore: {
             id: 'ironforge_ore',
             name: 'Iron in the Fire',
@@ -398,12 +403,12 @@ const QuestSystem = {
             }
         },
 
-        // ═══════════════════════════════════════════════════════════
-        // 🌊 JADE HARBOR QUESTS - exotic trade hub
-        // ═══════════════════════════════════════════════════════════
+        // 
+        //  JADE HARBOR QUESTS - exotic trade hub
+        // 
         jade_silk_delivery: {
             id: 'jade_silk_delivery',
-            name: 'Silk Road Express',
+            name: 'Silk Delivery',
             description: 'Deliver precious silk to the Royal Capital.',
             giver: 'merchant',
             giverName: 'Mei Lin',
@@ -434,7 +439,7 @@ const QuestSystem = {
             description: 'The inn is hosting a feast. They need fresh fish from Jade Harbor.',
             giver: 'innkeeper',
             giverName: 'Madame Chen',
-            location: 'silk_road_inn', // 🖤💀 Fixed: Innkeeper is at Silk Road Inn (connects to jade_harbor)
+            location: 'silk_road_inn', // ���💀 Fixed: Innkeeper is at Silk Road Inn (connects to jade_harbor)
             type: 'collect',
             difficulty: 'easy',
             objectives: [
@@ -477,9 +482,9 @@ const QuestSystem = {
             }
         },
 
-        // ═══════════════════════════════════════════════════════════
-        // 👑 ROYAL CAPITAL QUESTS - political intrigue
-        // ═══════════════════════════════════════════════════════════
+        // 
+        //  ROYAL CAPITAL QUESTS - political intrigue
+        // 
         capital_royal_delivery: {
             id: 'capital_royal_delivery',
             name: 'Royal Summons',
@@ -532,9 +537,9 @@ const QuestSystem = {
             }
         },
 
-        // ═══════════════════════════════════════════════════════════
-        // ☀️ SUNHAVEN QUESTS - wine country, coastal
-        // ═══════════════════════════════════════════════════════════
+        // 
+        //  SUNHAVEN QUESTS - wine country, coastal
+        // 
         sunhaven_harvest: {
             id: 'sunhaven_harvest',
             name: 'Harvest Help',
@@ -583,9 +588,9 @@ const QuestSystem = {
             }
         },
 
-        // ═══════════════════════════════════════════════════════════
-        // ❄️ FROSTHOLM QUESTS - northern frontier
-        // ═══════════════════════════════════════════════════════════
+        // 
+        //  FROSTHOLM QUESTS - northern frontier
+        // 
         frostholm_furs: {
             id: 'frostholm_furs',
             name: 'Winter Pelts',
@@ -662,9 +667,9 @@ const QuestSystem = {
             }
         },
 
-        // ═══════════════════════════════════════════════════════════
-        // 🏗️ STONEBRIDGE QUESTS - construction/quarry town
-        // ═══════════════════════════════════════════════════════════
+        // 
+        //  STONEBRIDGE QUESTS - construction/quarry town
+        // 
         stonebridge_quarry: {
             id: 'stonebridge_quarry',
             name: 'Stone for the Bridge',
@@ -714,9 +719,9 @@ const QuestSystem = {
             }
         },
 
-        // ═══════════════════════════════════════════════════════════
-        // 🏰 DUNGEON QUESTS - special dungeon-related missions
-        // ═══════════════════════════════════════════════════════════
+        // 
+        //  DUNGEON QUESTS - special dungeon-related missions
+        // 
         dungeon_ancient_tome: {
             id: 'dungeon_ancient_tome',
             name: 'Forbidden Knowledge',
@@ -770,9 +775,9 @@ const QuestSystem = {
             }
         },
 
-        // ═══════════════════════════════════════════════════════════
-        // 🔁 REPEATABLE DAILY/WEEKLY QUESTS
-        // ═══════════════════════════════════════════════════════════
+        // 
+        //  REPEATABLE DAILY/WEEKLY QUESTS
+        // 
         daily_trade_route: {
             id: 'daily_trade_route',
             name: 'Trade Route Runner',
@@ -822,9 +827,9 @@ const QuestSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🚀 INITIALIZATION - waking up this beast
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  INITIALIZATION - waking up this beast
+    // 
     init() {
         if (this.initialized) {
             console.log('📜 QuestSystem already awake and judging you');
@@ -833,13 +838,18 @@ const QuestSystem = {
 
         console.log('📜 QuestSystem dragging itself out of bed...');
 
-        // 🖤 LOAD EXTERNAL QUEST FILES (v0.90+)
+        //  LOAD EXTERNAL QUEST FILES (v0.90+)
         this.loadExternalQuests();
 
         this.loadQuestProgress();
         this.createQuestLogUI();
         this.setupEventListeners();
         this.initialized = true;
+
+        //  CRITICAL: Initialize quest tracker to ensure visibility on page load! 
+        setTimeout(() => {
+            this.updateQuestTracker();
+        }, 500);
 
         // Count quests by type
         const mainCount = Object.values(this.quests).filter(q => q.type === 'main').length;
@@ -852,13 +862,13 @@ const QuestSystem = {
         return this;
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📦 LOAD EXTERNAL QUEST FILES - The Great Quest Unification
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  LOAD EXTERNAL QUEST FILES - The Great Quest Unification
+    // 
     loadExternalQuests() {
         console.log('📦 Loading external quest files...');
 
-        // 🎭 MAIN QUESTS (35 quests - The Shadow Rising & Black Ledger)
+        //  MAIN QUESTS (35 quests - The Shadow Rising & Black Ledger)
         if (typeof MainQuests !== 'undefined') {
             let mainLoaded = 0;
             // Load all acts
@@ -879,7 +889,7 @@ const QuestSystem = {
             console.warn('   ⚠️ MainQuests not found - main story quests unavailable');
         }
 
-        // 🗺️ SIDE QUESTS (50 quests - Regional Combat & Trade Chains)
+        //  SIDE QUESTS (50 quests - Regional Combat & Trade Chains)
         if (typeof SideQuests !== 'undefined') {
             let sideLoaded = 0;
             const sideQuestsList = SideQuests.getAllQuests?.() || [];
@@ -894,7 +904,7 @@ const QuestSystem = {
             console.warn('   ⚠️ SideQuests not found - regional side quests unavailable');
         }
 
-        // 💀 DOOM QUESTS (15 quests + Greedy Won Boss)
+        //  DOOM QUESTS (15 quests + Greedy Won Boss)
         if (typeof DoomQuests !== 'undefined') {
             let doomLoaded = 0;
             const doomQuestsList = DoomQuests.getAllQuests?.() || [];
@@ -916,11 +926,11 @@ const QuestSystem = {
         console.log('📦 External quest loading complete');
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 💾 PERSISTENCE - because losing progress would be too merciful
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  PERSISTENCE - because losing progress would be too merciful
+    // 
 
-    // 🖤💀 RESET ALL QUEST STATE - called on New Game to clear old data 💀
+    //  RESET ALL QUEST STATE - called on New Game to clear old data 
     resetAllQuests() {
         console.log('📜 Resetting all quest state for new game...');
         this.activeQuests = {};
@@ -958,13 +968,14 @@ const QuestSystem = {
             discoveredQuests: this.discoveredQuests,
             questCompletionTimes: this.questCompletionTimes,
             questItemInventory: this.getQuestItemInventory(),
-            // 🖤 v0.90+ Save tracked quest
+            //  v0.90+ Save tracked quest
             trackedQuestId: this.trackedQuestId
+            //  DON'T save trackerHidden - tracker should always show on load 
         };
         try {
             localStorage.setItem('medievalTradingGameQuests', JSON.stringify(saveData));
         } catch (e) {
-            // 🖤 Storage full or blocked - quest save will retry next time
+            //  Storage full or blocked - quest save will retry next time
         }
     },
 
@@ -978,11 +989,13 @@ const QuestSystem = {
                 this.failedQuests = data.failedQuests || [];
                 this.discoveredQuests = data.discoveredQuests || [];
                 this.questCompletionTimes = data.questCompletionTimes || {};
-                // 🖤 v0.90+ Restore tracked quest
+                //  Tracker always shows on load - user can hide it manually if desired 
+                this.trackerHidden = false;
+                //  v0.90+ Restore tracked quest
                 if (data.trackedQuestId && this.activeQuests[data.trackedQuestId]) {
                     this.trackedQuestId = data.trackedQuestId;
                     console.log(`🎯 Restored tracked quest: ${this.activeQuests[data.trackedQuestId].name}`);
-                    // 🖤 Schedule marker update after maps are rendered 💀
+                    //  Schedule marker update after maps are rendered 
                     setTimeout(() => {
                         this.updateQuestMapMarker();
                         this.updateQuestTracker();
@@ -1004,14 +1017,14 @@ const QuestSystem = {
                 console.log(`   🎭 Main: ${mainCount}/35 | 🗺️ Side: ${sideCount}/50 | 💀 Doom: ${doomCount}/15`);
             }
         } catch (e) {
-            // 🖤 Corrupt quest data - nuke and start fresh
+            //  Corrupt quest data - nuke and start fresh
             localStorage.removeItem('medievalTradingGameQuests');
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎒 QUEST ITEM HANDLING - weightless burdens
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  QUEST ITEM HANDLING - weightless burdens
+    // 
     getQuestItemInventory() {
         const items = {};
         for (const questId in this.activeQuests) {
@@ -1047,14 +1060,14 @@ const QuestSystem = {
             const itemId = quest.givesQuestItem;
             const itemInfo = this.questItems[itemId];
 
-            // 🖤 Actually ADD the quest item to player's quest inventory! 💀
+            //  Actually ADD the quest item to player's quest inventory! 
             if (typeof game !== 'undefined' && game.player) {
                 if (!game.player.questItems) {
                     game.player.questItems = {};
                 }
                 game.player.questItems[itemId] = (game.player.questItems[itemId] || 0) + 1;
 
-                // 🖤 Emit item-received for consistency 💀
+                //  Emit item-received for consistency 
                 document.dispatchEvent(new CustomEvent('item-received', {
                     detail: { item: itemId, quantity: 1, isQuestItem: true }
                 }));
@@ -1073,7 +1086,7 @@ const QuestSystem = {
         if (quest?.givesQuestItem) {
             const itemId = quest.givesQuestItem;
 
-            // 🖤 Actually REMOVE the quest item from player's quest inventory! 💀
+            //  Actually REMOVE the quest item from player's quest inventory! 
             if (typeof game !== 'undefined' && game.player?.questItems?.[itemId]) {
                 delete game.player.questItems[itemId];
             }
@@ -1082,7 +1095,7 @@ const QuestSystem = {
         return false;
     },
 
-    // 🖤 Helper: Check if NPC type matches objective (handles arrays) 💀
+    //  Helper: Check if NPC type matches objective (handles arrays) 
     _npcMatchesObjective(npcType, objectiveNpc) {
         if (Array.isArray(objectiveNpc)) {
             return objectiveNpc.includes(npcType);
@@ -1090,9 +1103,9 @@ const QuestSystem = {
         return objectiveNpc === npcType;
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📜 QUEST MANAGEMENT - the bureaucracy of adventure
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  QUEST MANAGEMENT - the bureaucracy of adventure
+    // 
     assignQuest(questId, giverNPC = null) {
         const quest = this.quests[questId];
         if (!quest) {
@@ -1123,18 +1136,24 @@ const QuestSystem = {
             }
         }
 
-        // 🖤 Clone the quest into existence - it lives in your log now, forever
+        //  Clone the quest into existence - it lives in your log now, forever
         const activeQuest = {
             ...JSON.parse(JSON.stringify(quest)),
             assignedAt: Date.now(),
             assignedBy: giverNPC?.name || quest.giverName || quest.giver
-            // 💀 No expiresAt - quests don't expire, take your sweet time loser
+            //  No expiresAt - quests don't expire, take your sweet time loser
         };
 
-        // 🖤 Handle dynamic location quests - use player's current location 💀
+        //  Handle dynamic location quests - use player's current location 
         if (quest.dynamicLocation && typeof game !== 'undefined' && game.currentLocation) {
             activeQuest.location = game.currentLocation.id;
             console.log(`📜 Dynamic quest location set to: ${activeQuest.location}`);
+        }
+
+        //  Null check - objectives might be fucked up 
+        if (!activeQuest.objectives || !Array.isArray(activeQuest.objectives)) {
+            console.warn(`⚠️ Quest ${questId} has invalid objectives array`);
+            activeQuest.objectives = [];
         }
 
         activeQuest.objectives.forEach(obj => {
@@ -1159,7 +1178,7 @@ const QuestSystem = {
         }
 
         document.dispatchEvent(new CustomEvent('quest-started', { detail: { quest: activeQuest } }));
-        // 🖤 Also emit quest-assigned - PeoplePanel waits for this 💀
+        //  Also emit quest-assigned - PeoplePanel waits for this 
         document.dispatchEvent(new CustomEvent('quest-assigned', { detail: { quest: activeQuest, questId } }));
         this.updateQuestLogUI();
 
@@ -1178,7 +1197,7 @@ const QuestSystem = {
         const totalObjectives = quest.objectives.length;
 
         quest.objectives.forEach(obj => {
-            if (obj.type === 'collect' || obj.type === 'defeat' || obj.type === 'buy' || obj.type === 'trade') {
+            if (obj.type === 'collect' || obj.type === 'defeat' || obj.type === 'buy' || obj.type === 'trade' || obj.type === 'sell') {
                 if ((obj.current || 0) >= obj.count) completedObjectives++;
             } else if (obj.type === 'explore') {
                 if ((obj.current || 0) >= obj.rooms) completedObjectives++;
@@ -1222,7 +1241,7 @@ const QuestSystem = {
                         break;
 
                     case 'trade':
-                        // 🖤 FIX: Check minValue requirement if specified 💀
+                        //  FIX: Check minValue requirement if specified 
                         const tradeValue = data.value || 0;
                         const minValue = objective.minValue || 0;
                         if (tradeValue >= minValue) {
@@ -1242,8 +1261,8 @@ const QuestSystem = {
                         break;
 
                     case 'visit':
-                    case 'travel': // 🖤💀 Travel is alias for visit - doom quests use this 💀
-                        // 🖤 Support both 'location' and 'to' properties for objectives 💀
+                    case 'travel': // ���💀 Travel is alias for visit - doom quests use this 💀
+                        //  Support both 'location' and 'to' properties for objectives 
                         const targetLocation = objective.location || objective.to;
                         if (data.location === targetLocation) {
                             objective.completed = true;
@@ -1255,13 +1274,31 @@ const QuestSystem = {
                         if (data.npc === objective.npc || data.npcType === objective.npc) {
                             objective.completed = true;
                             updated = true;
-                            // 🖤💀 If this talk objective gives an item, add it to player inventory 💀
+                            //  If this talk objective gives an item, add it to correct inventory 
                             if (objective.givesItem && typeof game !== 'undefined' && game.player) {
-                                if (!game.player.inventory) game.player.inventory = {};
-                                game.player.inventory[objective.givesItem] = (game.player.inventory[objective.givesItem] || 0) + 1;
-                                if (typeof addMessage === 'function') {
-                                    addMessage(`📜 Received: ${objective.givesItem.replace(/_/g, ' ')}`, 'quest');
+                                const isQuestItemGiven = this.isQuestItem(objective.givesItem);
+                                const itemName = isQuestItemGiven && this.questItems[objective.givesItem]?.name
+                                    ? this.questItems[objective.givesItem].name
+                                    : objective.givesItem.replace(/_/g, ' ');
+
+                                if (isQuestItemGiven) {
+                                    // Quest item goes to questItems
+                                    if (!game.player.questItems) game.player.questItems = {};
+                                    game.player.questItems[objective.givesItem] = (game.player.questItems[objective.givesItem] || 0) + 1;
+                                } else {
+                                    // Regular item goes to inventory
+                                    if (!game.player.inventory) game.player.inventory = {};
+                                    game.player.inventory[objective.givesItem] = (game.player.inventory[objective.givesItem] || 0) + 1;
                                 }
+
+                                if (typeof addMessage === 'function') {
+                                    addMessage(`📜 Received: ${itemName}`, 'quest');
+                                }
+
+                                //  Dispatch item-received event for quest progress tracking
+                                document.dispatchEvent(new CustomEvent('item-received', {
+                                    detail: { item: objective.givesItem, quantity: 1, source: 'quest_talk', isQuestItem: isQuestItemGiven }
+                                }));
                             }
                         }
                         break;
@@ -1273,12 +1310,12 @@ const QuestSystem = {
                         }
                         break;
 
-                    // 🖤💀 Investigate objective - search a location, may give items 💀
+                    //  Investigate objective - search a location, may give items 
                     case 'investigate':
                         if (data.location === objective.location) {
                             objective.completed = true;
                             updated = true;
-                            // 🖤💀 If investigating gives an item, add to inventory 💀
+                            //  If investigating gives an item, add to inventory 
                             if (objective.givesItem && typeof game !== 'undefined' && game.player) {
                                 if (!game.player.inventory) game.player.inventory = {};
                                 game.player.inventory[objective.givesItem] = (game.player.inventory[objective.givesItem] || 0) + 1;
@@ -1298,7 +1335,7 @@ const QuestSystem = {
                         }
                         break;
 
-                    // 🖤 Gold objective - check if player has accumulated enough wealth 💀
+                    //  Gold objective - check if player has accumulated enough wealth 
                     case 'gold':
                         if (typeof game !== 'undefined' && game.player) {
                             const playerGold = game.player.gold || 0;
@@ -1312,7 +1349,7 @@ const QuestSystem = {
                         }
                         break;
 
-                    // 🖤 Sell objective - track items sold 💀
+                    //  Sell objective - track items sold 
                     case 'sell':
                         if (data.item === objective.item || !objective.item) {
                             objective.current = Math.min((objective.current || 0) + (data.count || 1), objective.count);
@@ -1320,7 +1357,7 @@ const QuestSystem = {
                         }
                         break;
 
-                    // 🖤 Decision objective - player made a choice 💀
+                    //  Decision objective - player made a choice 
                     case 'decision':
                         if (objective.choices && objective.choices.includes(data.choice)) {
                             objective.completed = true;
@@ -1340,7 +1377,8 @@ const QuestSystem = {
         if (questUpdated) {
             this.saveQuestProgress();
             this.updateQuestLogUI();
-            this.updateQuestTracker(); // 🖤 FIX: Update tracker widget when progress changes 💀
+            this.updateQuestTracker(); // ��� FIX: Update tracker widget when progress changes 💀
+            this.updateQuestMapMarker(); // ��� FIX: Update map marker when objectives complete - moves to next objective location! 💀
             this.checkForAutoComplete();
         }
     },
@@ -1351,7 +1389,7 @@ const QuestSystem = {
             if (progress.status === 'ready_to_complete') {
                 const quest = this.activeQuests[questId];
 
-                // 🖤 Track which quests were already marked ready to avoid spam 💀
+                //  Track which quests were already marked ready to avoid spam 
                 if (!quest._wasReadyNotified) {
                     quest._wasReadyNotified = true;
 
@@ -1359,7 +1397,7 @@ const QuestSystem = {
                         addMessage(`Quest "${quest.name}" ready to turn in!`, 'info');
                     }
 
-                    // 🖤 Emit quest-ready event for NPCVoice to extend conversation 💀
+                    //  Emit quest-ready event for NPCVoice to extend conversation 
                     document.dispatchEvent(new CustomEvent('quest-ready', {
                         detail: { quest, questId }
                     }));
@@ -1377,12 +1415,30 @@ const QuestSystem = {
             return { success: false, error: 'Objectives not complete', progress };
         }
 
-        // Validate all collection objectives have items BEFORE completing
-        // This prevents NPCs from completing quests when player doesn't have items
+        //  Validate collection objectives - but SKIP if quest requires selling/trading those items! 
+        // This prevents false "missing items" errors when quest asked player to sell the items
         for (const obj of quest.objectives || []) {
             if (obj.type === 'collect' && obj.item) {
-                const playerHas = game?.player?.inventory?.[obj.item] || 0;
+                //  Check if quest has sell/trade objective for the SAME item
+                const hasSellObjective = quest.objectives.some(o =>
+                    (o.type === 'sell' || o.type === 'trade') && o.item === obj.item
+                );
+
+                //  If quest requires selling/trading the item, don't check inventory!
+                if (hasSellObjective) {
+                    console.log(`🎯 Quest has sell/trade objective for ${obj.item} - skipping inventory check`);
+                    continue;
+                }
+
+                //  Normal collection quest - verify player has items
+                //  Quest items are in questItems inventory, regular items in inventory
+                const isQuestItemCheck = this.isQuestItem(obj.item);
+                const playerHas = isQuestItemCheck
+                    ? (game?.player?.questItems?.[obj.item] || 0)
+                    : (game?.player?.inventory?.[obj.item] || 0);
+
                 if (playerHas < obj.count) {
+                    console.log(`Quest validation failed: need ${obj.count}x ${obj.item}, player has ${playerHas} (isQuestItem: ${isQuestItemCheck})`);
                     return {
                         success: false,
                         error: 'missing_collection_items',
@@ -1404,7 +1460,7 @@ const QuestSystem = {
 
         if (typeof game !== 'undefined' && game.player) {
             if (rewards.gold) {
-                // 🖤💀 Use GoldManager to sync ALL gold displays across the game! 💰
+                //  Use GoldManager to sync ALL gold displays across the game! 
                 const newGold = (game.player.gold || 0) + rewards.gold;
                 if (typeof GoldManager !== 'undefined' && GoldManager.setGold) {
                     GoldManager.setGold(newGold, `Quest reward: ${quest.name}`);
@@ -1420,7 +1476,7 @@ const QuestSystem = {
                     if (!this.isQuestItem(item)) {
                         game.player.inventory = game.player.inventory || {};
                         game.player.inventory[item] = (game.player.inventory[item] || 0) + qty;
-                        // 🖤 Emit item-received for quest progress tracking 💀
+                        //  Emit item-received for quest progress tracking 
                         document.dispatchEvent(new CustomEvent('item-received', {
                             detail: { item, quantity: qty, source: 'quest_reward' }
                         }));
@@ -1457,42 +1513,42 @@ const QuestSystem = {
             addMessage(`Quest Complete: ${quest.name}!`, 'success');
             if (rewardsGiven.gold) addMessage(`+${rewardsGiven.gold} gold`, 'success');
             if (rewardsGiven.experience) addMessage(`+${rewardsGiven.experience} XP`, 'success');
-            if (rewardsGiven.reputation) addMessage(`+${rewardsGiven.reputation} reputation`, 'success'); // 🖤💀 FIXED: Show rep reward message
+            if (rewardsGiven.reputation) addMessage(`+${rewardsGiven.reputation} reputation`, 'success'); // ���💀 FIXED: Show rep reward message
             for (const [item, qty] of Object.entries(rewardsGiven.items)) {
                 addMessage(`+${qty}x ${item}`, 'success');
             }
-            // 🖤💀 SEGWAY: Show completion dialogue to explain what happens next! 💀
+            //  SEGWAY: Show completion dialogue to explain what happens next! 
             if (quest.dialogue?.complete) {
                 addMessage(`💬 "${quest.dialogue.complete}"`, 'info');
             }
         }
 
         document.dispatchEvent(new CustomEvent('quest-completed', { detail: { quest, rewards: rewardsGiven } }));
-        // 🖤 Bridge to EventBus - FactionSystem and ReputationSystem listen here 💀
+        //  Bridge to EventBus - FactionSystem and ReputationSystem listen here 
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('quest-completed', { quest, rewards: rewardsGiven });
             EventBus.emit('quest:completed', { quest, rewards: rewardsGiven });
         }
         this.updateQuestLogUI();
 
-        // 🖤 Auto-offer next quest in chain - keep the story moving! 💀
+        //  Auto-offer next quest in chain - keep the story moving! 
         if (quest.nextQuest && this.quests[quest.nextQuest]) {
             const nextQuest = this.quests[quest.nextQuest];
             console.log(`📜 Next quest in chain: ${quest.nextQuest} (${nextQuest.name})`);
 
-            // 🦇 Auto-start the next quest if it's a main story quest
+            //  Auto-start the next quest if it's a main story quest
             if (nextQuest.type === 'main' || quest.type === 'main') {
-                // 🖤💀 Use assignQuest, not startQuest (which doesn't exist!)
+                //  Use assignQuest, not startQuest (which doesn't exist!)
                 const startResult = this.assignQuest(quest.nextQuest);
                 if (startResult && startResult.success) {
-                    // 🖤 Auto-track main story quests so wayfinder always points the way
+                    //  Auto-track main story quests so wayfinder always points the way
                     this.trackQuest(quest.nextQuest);
                     if (typeof addMessage === 'function') {
                         addMessage(`📜 New Quest: ${nextQuest.name}`, 'info');
                     }
                 }
             } else {
-                // 🦇 Side quests - just notify player it's available
+                //  Side quests - just notify player it's available
                 if (typeof addMessage === 'function') {
                     addMessage(`📜 New quest available: ${nextQuest.name}`, 'info');
                 }
@@ -1519,7 +1575,7 @@ const QuestSystem = {
         }
 
         document.dispatchEvent(new CustomEvent('quest-failed', { detail: { quest } }));
-        // 🖤 Bridge to EventBus - ReputationSystem listens for quest:failed 💀
+        //  Bridge to EventBus - ReputationSystem listens for quest:failed 
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('quest-failed', { quest });
             EventBus.emit('quest:failed', { quest });
@@ -1529,8 +1585,8 @@ const QuestSystem = {
         return { success: true, quest };
     },
 
-    // ⚰️ abandonQuest() RIP - quests are ETERNAL, no backing out now
-    // 🖤 you signed up for this shit, now finish it... eventually
+    // abandonQuest() RIP - quests are ETERNAL, no backing out now
+    //  you signed up for this shit, now finish it... eventually
 
     // cooldown tracking - stores in both localStorage and questCompletionTimes
     getLastCompletionTime(questId) {
@@ -1558,46 +1614,49 @@ const QuestSystem = {
             times[questId] = now;
             localStorage.setItem('questCompletionTimes', JSON.stringify(times));
         } catch (e) {
-            // 🖤 Storage full or blocked - completion time lost but not critical
+            //  Storage full or blocked - completion time lost but not critical
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🤖 NPC/API INTEGRATION - what the AI needs to know
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  NPC/API INTEGRATION - what the AI needs to know
+    // 
     getQuestsForNPC(npcType, location) {
-        // 🖤 Check if in doom world for doom quest visibility 💀
+        //  Check if in doom world for doom quest visibility 
         const inDoom = (typeof game !== 'undefined' && game.inDoomWorld) ||
                        (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
                        (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive);
 
         return Object.values(this.quests).filter(quest => {
-            // 🖤💀 Use _npcMatchesObjective for flexible NPC matching (handles arrays too!)
+            //  Use _npcMatchesObjective for flexible NPC matching (handles arrays too!)
             if (!this._npcMatchesObjective(npcType, quest.giver)) return false;
             if (quest.location && quest.location !== location && quest.location !== 'any') return false;
             if (this.activeQuests[quest.id]) return false;
             if (this.completedQuests.includes(quest.id) && !quest.repeatable) return false;
             if (quest.prerequisite && !this.completedQuests.includes(quest.prerequisite)) return false;
 
-            // 🖤💀 DOOM QUEST VISIBILITY - Hide doom quests when not in doom world
+            //  DOOM QUEST VISIBILITY - Hide doom quests when not in doom world
             if (quest.isDoom && !inDoom) return false;
-            // 🖤💀 Hide normal quests when IN doom world (only doom quests available there)
+            //  Hide normal quests when IN doom world (only doom quests available there)
             if (!quest.isDoom && inDoom) return false;
 
             return true;
         });
     },
 
-    getActiveQuestsForNPC(npcType) {
+    getActiveQuestsForNPC(npcType, location = null) {
         return Object.values(this.activeQuests).filter(quest => {
-            // 🖤💀 Use _npcMatchesObjective for flexible NPC matching
-            return this._npcMatchesObjective(npcType, quest.giver);
+            //  Use _npcMatchesObjective for flexible NPC matching
+            if (!this._npcMatchesObjective(npcType, quest.giver)) return false;
+            //  LOCATION CHECK: Only show quests from NPCs at THIS location (fixes multiple merchants issue)
+            if (location && quest.location && quest.location !== location && quest.location !== 'any') return false;
+            return true;
         });
     },
 
     getQuestContextForNPC(npcType, location) {
         const available = this.getQuestsForNPC(npcType, location);
-        const active = this.getActiveQuestsForNPC(npcType);
+        const active = this.getActiveQuestsForNPC(npcType, location);
         const readyToComplete = active.filter(q => this.checkProgress(q.id).status === 'ready_to_complete');
 
         // also find quests where this NPC is the delivery TARGET (not the giver)
@@ -1729,7 +1788,7 @@ const QuestSystem = {
                 } else if (q.type === 'combat') {
                     const defeatObj = q.objectives?.find(o => o.type === 'defeat');
                     if (defeatObj) {
-                        context += `⚔️ COMBAT QUEST - They must defeat: ${defeatObj.count}x ${defeatObj.enemy}\n`;
+                        context += `COMBAT QUEST - They must defeat: ${defeatObj.count}x ${defeatObj.enemy}\n`;
                     }
                 } else if (q.type === 'boss') {
                     context += `👹 BOSS QUEST - Dangerous dungeon mission\n`;
@@ -1747,7 +1806,7 @@ const QuestSystem = {
                 if (q.rewards.items) context += `, items: ${Object.entries(q.rewards.items).map(([k,v]) => `${v}x ${k}`).join(', ')}`;
                 context += '\n';
 
-                // 🦇 timeLimit is DEAD - take your damn time
+                //  timeLimit is DEAD - take your damn time
                 if (q.prerequisite) {
                     const prereq = this.quests[q.prerequisite];
                     context += `⚠️ Requires completing "${prereq?.name || q.prerequisite}" first\n`;
@@ -1765,9 +1824,9 @@ const QuestSystem = {
         return context;
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎨 UI - because even suffering needs a pretty interface
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  UI - because even suffering needs a pretty interface
+    // 
 
     // discover a quest (makes it visible in the log with details)
     discoverQuest(questId) {
@@ -1803,7 +1862,7 @@ const QuestSystem = {
 
     getChainDisplayName(chainId) {
         const chainNames = {
-            'shadow_rising': '⭐ The Shadow Rising',
+            'shadow_rising': 'The Shadow Rising',
             'greendale': '🌾 Greendale Tales',
             'ironforge': '⚒️ Ironforge Duties',
             'jade_harbor': '🚢 Jade Harbor Intrigue',
@@ -1866,6 +1925,8 @@ const QuestSystem = {
             </div>
         `;
 
+        //  CRITICAL: Ensure overlay is HIDDEN by default! 
+        overlay.style.display = 'none';
         document.body.appendChild(overlay);
         this.updateQuestLogUI();
     },
@@ -1909,12 +1970,12 @@ const QuestSystem = {
         const chains = this.getQuestChains();
         let questsToShow = [];
 
-        // 🖤 O(1) lookups - convert arrays to Sets for this loop (performance fix)
+        //  O(1) lookups - convert arrays to Sets for this loop (performance fix)
         const completedSet = new Set(this.completedQuests);
         const failedSet = new Set(this.failedQuests);
         const discoveredSet = new Set(this.discoveredQuests);
 
-        // 🖤💀 Check if player has EVER entered doom world - hide doom quests until then (NO SPOILERS!)
+        //  Check if player has EVER entered doom world - hide doom quests until then (NO SPOILERS!)
         const hasEnteredDoom = this._hasEnteredDoomWorld ||
                                (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.hasEverEntered) ||
                                localStorage.getItem('mtg_hasEnteredDoom') === 'true';
@@ -1922,7 +1983,7 @@ const QuestSystem = {
         // filter based on category
         Object.entries(chains).forEach(([chainId, chain]) => {
             chain.quests.forEach(quest => {
-                // 🖤💀 HIDE DOOM QUESTS until player has entered doom world - no spoilers!
+                //  HIDE DOOM QUESTS until player has entered doom world - no spoilers!
                 const isDoomQuest = quest.isDoom || quest.id?.startsWith('doom_');
                 if (isDoomQuest && !hasEnteredDoom) {
                     return; // Skip this quest entirely - player hasn't discovered doom yet
@@ -1934,7 +1995,7 @@ const QuestSystem = {
                 const isDiscovered = discoveredSet.has(quest.id) || isActive || isCompleted;
                 const isMain = quest.type === 'main';
 
-                // 🖤 filter logic - sorting through the chaos
+                //  filter logic - sorting through the chaos
                 let show = false;
                 const hasMetGiver = this.hasMetNPC(quest.giver);
                 const isAvailable = !isActive && !isCompleted && !isFailed && hasMetGiver && this.canStartQuest(quest.id);
@@ -1947,7 +2008,7 @@ const QuestSystem = {
                         show = isActive;
                         break;
                     case 'available':
-                        // 🦇 only show quests from NPCs we've actually met, you antisocial loser
+                        //  only show quests from NPCs we've actually met, you antisocial loser
                         show = isAvailable;
                         break;
                     case 'main':
@@ -1971,7 +2032,7 @@ const QuestSystem = {
                         isFailed,
                         isDiscovered,
                         isMain,
-                        isAvailable // 🖤 track if quest is actually available from a met NPC
+                        isAvailable // ��� track if quest is actually available from a met NPC
                     });
                 }
             });
@@ -1990,7 +2051,7 @@ const QuestSystem = {
             return (a.quest.chainOrder || 999) - (b.quest.chainOrder || 999);
         });
 
-        // 🖤 render cards - birthing quest UI into existence
+        //  render cards - birthing quest UI into existence
         questsToShow.forEach(({ quest, chainName, isActive, isCompleted, isFailed, isDiscovered, isMain, isAvailable }) => {
             const card = this.createQuestCard(quest, chainName, isActive, isCompleted, isFailed, isDiscovered, isMain, isAvailable);
             grid.appendChild(card);
@@ -2004,17 +2065,17 @@ const QuestSystem = {
     createQuestCard(quest, chainName, isActive, isCompleted, isFailed, isDiscovered, isMain, isAvailable) {
         const card = document.createElement('div');
 
-        // 🦇 determine card state class - what sad state is this quest in?
+        //  determine card state class - what sad state is this quest in?
         let stateClass = 'undiscovered';
         if (isActive) stateClass = 'active';
         else if (isCompleted) stateClass = 'completed';
         else if (isFailed) stateClass = 'failed';
-        else if (isAvailable) stateClass = 'available'; // 🖤 actually available from a met NPC
-        else if (isDiscovered) stateClass = 'discovered'; // 💀 discovered but not available yet
+        else if (isAvailable) stateClass = 'available'; // ��� actually available from a met NPC
+        else if (isDiscovered) stateClass = 'discovered'; // ��� discovered but not available yet
 
         card.className = `quest-card ${stateClass} ${isMain ? 'main-quest' : ''} ${quest.difficulty || ''}`;
 
-        // 🖤 Add click handler to open unified quest info panel 💀
+        //  Add click handler to open unified quest info panel 
         if (isActive || isCompleted || isDiscovered || isAvailable) {
             card.style.cursor = 'pointer';
             card.addEventListener('click', () => {
@@ -2028,7 +2089,7 @@ const QuestSystem = {
         // undiscovered quests show minimal info
         if (!isDiscovered && !isActive && !isCompleted) {
             card.innerHTML = `
-                <div class="quest-card-icon">${isMain ? '⭐' : '❓'}</div>
+                <div class="quest-card-icon">${isMain ? '' : '❓'}</div>
                 <div class="quest-card-name">${chainName}</div>
                 <div class="quest-card-description">??? Undiscovered ???</div>
                 <div class="quest-card-footer">
@@ -2064,7 +2125,7 @@ const QuestSystem = {
 
             card.innerHTML = `
                 <div class="quest-card-icon">${icon}</div>
-                <div class="quest-card-name">${isMain ? '⭐ ' : ''}${quest.name}</div>
+                <div class="quest-card-name">${isMain ? '' : ''}${quest.name}</div>
                 <div class="quest-card-description">${quest.description}</div>
                 <div class="quest-objectives-mini">${objectivesHTML}</div>
                 <div class="quest-card-footer">
@@ -2074,7 +2135,7 @@ const QuestSystem = {
                         : '<div class="quest-active-badge">IN PROGRESS</div>'
                     }
                 </div>
-                ${activeQuest.expiresAt ? `<div class="quest-timer">⏰ ${this.formatTimeRemaining(activeQuest.expiresAt - Date.now())}</div>` : ''}
+                ${activeQuest.expiresAt ? `<div class="quest-timer">${this.formatTimeRemaining(activeQuest.expiresAt - Date.now())}</div>` : ''}
             `;
             return card;
         }
@@ -2086,7 +2147,7 @@ const QuestSystem = {
 
             card.innerHTML = `
                 <div class="quest-card-icon">${icon}</div>
-                <div class="quest-card-name">${isMain ? '⭐ ' : ''}${quest.name}</div>
+                <div class="quest-card-name">${isMain ? '' : ''}${quest.name}</div>
                 <div class="quest-card-description">${quest.description}</div>
                 <div class="quest-card-footer">
                     <div class="quest-rarity rarity-${quest.difficulty || 'easy'}">${(quest.difficulty || 'EASY').toUpperCase()}</div>
@@ -2101,7 +2162,7 @@ const QuestSystem = {
         if (isFailed) {
             card.innerHTML = `
                 <div class="quest-card-icon">${icon}</div>
-                <div class="quest-card-name">${isMain ? '⭐ ' : ''}${quest.name}</div>
+                <div class="quest-card-name">${isMain ? '' : ''}${quest.name}</div>
                 <div class="quest-card-description">${quest.description}</div>
                 <div class="quest-card-footer">
                     <div class="quest-rarity rarity-${quest.difficulty || 'easy'}">${(quest.difficulty || 'EASY').toUpperCase()}</div>
@@ -2117,7 +2178,7 @@ const QuestSystem = {
 
         card.innerHTML = `
             <div class="quest-card-icon">${icon}</div>
-            <div class="quest-card-name">${isMain ? '⭐ ' : ''}${quest.name}</div>
+            <div class="quest-card-name">${isMain ? '' : ''}${quest.name}</div>
             <div class="quest-card-description">${quest.description}</div>
             <div class="quest-info-mini">
                 <span>📍 ${this.getLocationDisplayName(quest.location)}</span>
@@ -2125,7 +2186,7 @@ const QuestSystem = {
             </div>
             <div class="quest-rewards-mini">
                 ${quest.rewards.gold ? `<span>💰 ${quest.rewards.gold}g</span>` : ''}
-                ${quest.rewards.experience ? `<span>⭐ ${quest.rewards.experience} XP</span>` : ''}
+                ${quest.rewards.experience ? `<span>${quest.rewards.experience} XP</span>` : ''}
             </div>
             <div class="quest-card-footer">
                 <div class="quest-rarity rarity-${quest.difficulty || 'easy'}">${(quest.difficulty || 'EASY').toUpperCase()}</div>
@@ -2141,10 +2202,10 @@ const QuestSystem = {
 
     getQuestIcon(quest) {
         const icons = {
-            'main': '⭐',
+            'main': '',
             'delivery': '📦',
             'collect': '🎒',
-            'combat': '⚔️',
+            'combat': '',
             'boss': '👹',
             'exploration': '🗺️',
             'talk': '💬',
@@ -2171,10 +2232,10 @@ const QuestSystem = {
         return names[locationId] || locationId;
     },
 
-    // 🖤 Get icon for quest type 💀
+    //  Get icon for quest type 
     getQuestTypeIcon(questType) {
         const icons = {
-            'main': '⚔️',
+            'main': '',
             'side': '📜',
             'doom': '💀',
             'trade': '💰',
@@ -2194,13 +2255,13 @@ const QuestSystem = {
             case 'collect': return `Collect ${objective.item}`;
             case 'defeat': return `Defeat ${objective.enemy}`;
             case 'visit': return `Visit ${objective.location}`;
-            case 'travel': return `Travel to ${objective.to || objective.location}`; // 🖤💀 Doom quests use travel 💀
+            case 'travel': return `Travel to ${objective.to || objective.location}`; // ���💀 Doom quests use travel 💀
             case 'talk': return `Talk to ${objective.npc}`;
             case 'buy': return 'Make a purchase';
             case 'trade': return 'Complete a trade';
             case 'carry': return `Carry ${objective.item}`;
             case 'explore': return `Explore ${objective.dungeon}`;
-            case 'investigate': return `Search ${objective.location}`; // 🖤💀 Investigation objectives 💀
+            case 'investigate': return `Search ${objective.location}`; // ���💀 Investigation objectives 💀
             default: return objective.type;
         }
     },
@@ -2214,8 +2275,7 @@ const QuestSystem = {
         return `${hours}h ${minutes}m`;
     },
 
-    // 🖤💀 QUEST TRACKER STATE - track expanded/minimized mode 💀
-    trackerExpanded: false,
+    //  QUEST TRACKER STATE 
     expandedChains: {}, // Track which chains are expanded in chain view
 
     updateQuestTracker() {
@@ -2229,7 +2289,7 @@ const QuestSystem = {
 
         const activeQuestCount = Object.keys(this.activeQuests).length;
 
-        // 🖤 Don't show if user manually hid it
+        //  Don't show if user manually hid it
         if (this.trackerHidden) {
             tracker.classList.add('hidden');
             return;
@@ -2237,7 +2297,7 @@ const QuestSystem = {
 
         tracker.classList.remove('hidden');
 
-        // 🖤 Position quest tracker below player info panel (side-panel) - ONLY if not dragged 💀
+        //  Position quest tracker below player info panel (side-panel) - ONLY if not dragged 
         const sidePanel = document.getElementById('side-panel');
         if (sidePanel && !tracker.dataset.userDragged) {
             const sidePanelRect = sidePanel.getBoundingClientRect();
@@ -2246,35 +2306,32 @@ const QuestSystem = {
             tracker.style.left = 'auto';
         }
 
-        // 🖤💀 BUILD THE QUEST CHAIN VIEW 💀
+        //  BUILD THE QUEST CHAIN VIEW 
         const chainHTML = this.buildQuestChainView();
 
         tracker.innerHTML = `
             <div class="tracker-header">
                 <span class="drag-grip">⋮⋮</span>
                 <span class="tracker-title">Quest Chain 🔗</span>
-                <button class="tracker-expand-btn" onclick="QuestSystem.toggleTrackerExpand()" title="${this.trackerExpanded ? 'Minimize' : 'Expand'}">
-                    ${this.trackerExpanded ? '▼' : '▲'}
-                </button>
                 <button class="tracker-close" onclick="QuestSystem.hideQuestTracker()" title="Close">×</button>
             </div>
-            <div class="tracker-content ${this.trackerExpanded ? 'expanded' : 'minimized'}">
+            <div class="tracker-content">
                 ${chainHTML}
             </div>
         `;
 
-        // 🖤 Setup dragging - must re-attach after innerHTML changes
+        //  Setup dragging - must re-attach after innerHTML changes
         if (typeof DraggablePanels !== 'undefined') {
             this.setupTrackerDragging(tracker);
         }
 
-        // 🎯 Add tracker styles
+        //  Add tracker styles
         this.addTrackerStyles();
     },
 
-    // 🖤💀 BUILD QUEST CHAIN VISUALIZATION 💀
+    //  BUILD QUEST CHAIN VISUALIZATION 
     buildQuestChainView() {
-        // 🦇 Group quests intelligently
+        //  Group quests intelligently
         const chains = {
             'shadow_rising': [],  // Main story
             'doom_world': [],     // Doom quests
@@ -2292,7 +2349,7 @@ const QuestSystem = {
 
         // Build chain structure
         for (const [questId, quest] of Object.entries(allQuests)) {
-            // 🖤 Priority: explicit chain > location-based > repeatable > misc
+            //  Priority: explicit chain > location-based > repeatable > misc
             if (quest.chain === 'shadow_rising') {
                 chains['shadow_rising'].push({ ...quest, id: questId });
             } else if (quest.chain === 'doom_world' || quest.isDoom || questId.startsWith('doom_')) {
@@ -2339,7 +2396,7 @@ const QuestSystem = {
             chains[loc].sort((a, b) => a.name.localeCompare(b.name));
         }
 
-        // 🖤 Build HTML for each non-empty chain
+        //  Build HTML for each non-empty chain
         let html = '';
         const chainOrder = ['shadow_rising', 'doom_world', 'greendale', 'ironforge', 'jade_harbor', 'sunhaven', 'frostholm', 'royal_capital', 'repeatable'];
 
@@ -2347,17 +2404,17 @@ const QuestSystem = {
             const quests = chains[chainName];
             if (quests.length === 0) continue;
 
-            // 🖤💀 FIX: Only show chains that have at least one ACTIVE or COMPLETED quest 💀
+            //  FIX: Only show chains that have at least one ACTIVE or COMPLETED quest 
             // NO "discovered but not started" - Gee doesn't want those as they're still spoilers!
             // Only show quests the player is WORKING ON or HAS FINISHED.
             const engagedQuests = quests.filter(quest => {
                 const isCompleted = this.completedQuests.includes(quest.id);
                 const isActive = !!this.activeQuests[quest.id];
-                // 🖤 STRICT: Only active or completed - NOT just discovered! 💀
+                //  STRICT: Only active or completed - NOT just discovered! 
                 return isCompleted || isActive;
             });
 
-            // 🖤 Skip chains where player has NO engaged quests 💀
+            //  Skip chains where player has NO engaged quests 
             if (engagedQuests.length === 0) continue;
 
             const chainExpanded = this.expandedChains[chainName] || false;
@@ -2368,7 +2425,7 @@ const QuestSystem = {
             const activeCount = engagedQuests.filter(q => this.activeQuests[q.id]).length;
             const totalCount = engagedQuests.length;
 
-            // 🖤 Auto-expand chains with active quests
+            //  Auto-expand chains with active quests
             const hasActiveQuest = activeCount > 0;
 
             html += `
@@ -2388,23 +2445,23 @@ const QuestSystem = {
         return html || '<div class="no-quests">No active quests</div>';
     },
 
-    // 🖤💀 BUILD QUEST LIST FOR A CHAIN 💀
+    //  BUILD QUEST LIST FOR A CHAIN 
     // NOTE: Only receives ENGAGED quests (completed or active) - NO discovered-only spoilers!
     buildChainQuestList(quests) {
         return quests.map((quest, index) => {
             const isCompleted = this.completedQuests.includes(quest.id);
             const isActive = !!this.activeQuests[quest.id];
             const isTracked = this.trackedQuestId === quest.id;
-            const isExpanded = this._expandedQuestId === quest.id; // 🖤💀 NEW: Check if this quest is expanded
+            const isExpanded = this._expandedQuestId === quest.id; // ���💀 NEW: Check if this quest is expanded
 
-            // 🦇 Determine quest status for styling - only active or completed possible here!
+            //  Determine quest status for styling - only active or completed possible here!
             let status = 'active';
             let statusIcon = '📍';
             let statusClass = 'quest-active';
 
             if (isCompleted) {
                 status = 'completed';
-                statusIcon = '✅';
+                statusIcon = '';
                 statusClass = 'quest-completed';
             } else if (isActive) {
                 const progress = this.checkProgress(quest.id);
@@ -2416,27 +2473,34 @@ const QuestSystem = {
                 // else: uses default active status set above
             }
 
-            // 🖤 Build connector line (except for first quest)
+            //  Build connector line (except for first quest)
             const connector = index > 0 ? '<div class="quest-connector">│</div>' : '';
 
-            // 🖤💀 FIX: Show details INLINE when this specific quest is clicked/expanded 💀
+            //  FIX: Show details INLINE when this specific quest is clicked/expanded 
             const showDetails = isExpanded && (isActive || isCompleted);
 
-            // 🖤💀 Build quest row with expand arrow indicator
+            //  Build quest row with expand arrow indicator for inline details
             const isRepeatable = quest.repeatable;
-            const expandArrow = (isActive || isCompleted) ? `<span class="quest-expand-arrow">${isExpanded ? '▼' : '▶'}</span>` : '';
+            const expandArrow = (isActive || isCompleted) ? `<span class="quest-expand-arrow" onclick="event.stopPropagation(); QuestSystem.handleChainQuestExpand('${quest.id}')">${isExpanded ? '▼' : '▶'}</span>` : '';
+
+            //  Bullseye badge toggles tracking - ALWAYS visible, different action based on tracked state 
+            const trackingBadge = (isActive || isCompleted)
+                ? (isTracked
+                    ? `<span class="tracked-badge clickable" onclick="event.stopPropagation(); QuestSystem.untrackQuest(); QuestSystem.updateQuestTracker();" title="Untrack quest">🎯</span>`
+                    : `<span class="untracked-badge clickable" onclick="event.stopPropagation(); QuestSystem.trackQuest('${quest.id}'); QuestSystem.updateQuestTracker();" title="Track quest">⭕</span>`)
+                : '';
 
             return `
                 ${connector}
                 <div class="chain-quest ${statusClass} ${isTracked ? 'tracked' : ''} ${isRepeatable ? 'repeatable' : ''} ${isExpanded ? 'expanded' : ''}"
-                     onclick="event.stopPropagation(); QuestSystem.handleChainQuestClick('${quest.id}', '${status}')"
+                     onclick="event.stopPropagation(); QuestSystem.showQuestInfoPanel('${quest.id}')"
                      data-quest-id="${quest.id}">
                     <div class="quest-row-header">
                         ${expandArrow}
                         <span class="quest-status-icon">${statusIcon}</span>
                         <span class="quest-chain-name">${quest.name}</span>
                         ${isRepeatable && !isActive && !isCompleted ? '<span class="repeat-icon">🔄</span>' : ''}
-                        ${isTracked ? '<span class="tracked-badge">🎯</span>' : ''}
+                        ${trackingBadge}
                     </div>
                     ${showDetails ? this.buildQuestDetailsInline(quest) : ''}
                 </div>
@@ -2444,7 +2508,7 @@ const QuestSystem = {
         }).join('');
     },
 
-    // 🖤💀 BUILD INLINE QUEST DETAILS (shows inside tracker, not overlay) 💀
+    //  BUILD INLINE QUEST DETAILS (shows inside tracker, not overlay) 
     buildQuestDetailsInline(quest) {
         const activeQuest = this.activeQuests[quest.id];
         const isCompleted = this.completedQuests.includes(quest.id);
@@ -2461,31 +2525,45 @@ const QuestSystem = {
 
         // Active quest - show objectives + actions
         const objectives = activeQuest.objectives || [];
-        const objHTML = objectives.map(obj => {
+        const objHTML = objectives.map((obj, index) => {
             const isCountBased = ['collect', 'defeat', 'buy', 'trade', 'sell'].includes(obj.type);
             const isExplore = obj.type === 'explore';
             const isComplete = isCountBased ? (obj.current || 0) >= obj.count :
                                isExplore ? (obj.current || 0) >= obj.rooms :
                                obj.completed;
-            const icon = isComplete ? '✅' : '⬜';
+
+            //  Check if previous objectives are complete (sequential validation) 
+            let previousComplete = true;
+            for (let i = 0; i < index; i++) {
+                const prevObj = objectives[i];
+                const prevCountBased = ['collect', 'defeat', 'buy', 'trade', 'sell'].includes(prevObj.type);
+                const prevExplore = prevObj.type === 'explore';
+                const prevComplete = prevCountBased ? (prevObj.current || 0) >= prevObj.count :
+                                     prevExplore ? (prevObj.current || 0) >= prevObj.rooms :
+                                     prevObj.completed;
+                if (!prevComplete) {
+                    previousComplete = false;
+                    break;
+                }
+            }
+
+            const isLocked = !previousComplete && !isComplete;
+            const isActive = previousComplete && !isComplete;
+            const icon = isComplete ? '' : (isLocked ? '🔒' : '⬜');
+            const cssClass = isComplete ? 'done' : (isLocked ? 'locked' : (isActive ? 'active' : ''));
             const countText = obj.count ? ` (${obj.current || 0}/${obj.count})` :
                               obj.rooms ? ` (${obj.current || 0}/${obj.rooms})` : '';
-            return `<div class="detail-objective ${isComplete ? 'done' : ''}">${icon} ${obj.description}${countText}</div>`;
+            return `<div class="detail-objective ${cssClass}">${icon} ${obj.description}${countText}</div>`;
         }).join('');
 
-        // 🖤 Add Track/Untrack button inline
-        const isTracked = this.trackedQuestId === quest.id;
-        const trackBtn = isTracked
-            ? `<button class="inline-track-btn untrack" onclick="event.stopPropagation(); QuestSystem.untrackQuest(); QuestSystem.updateQuestTracker();">🚫 Untrack</button>`
-            : `<button class="inline-track-btn track" onclick="event.stopPropagation(); QuestSystem.trackQuest('${quest.id}'); QuestSystem.updateQuestTracker();">🎯 Track</button>`;
+        //  NO TRACK BUTTON - bullseye badge handles tracking! 
 
         return `<div class="quest-details-inline">
             <div class="detail-objectives">${objHTML}</div>
-            <div class="detail-actions">${trackBtn}</div>
         </div>`;
     },
 
-    // 🖤💀 BUILD QUEST DETAILS (for expanded view) 💀
+    //  BUILD QUEST DETAILS (for expanded view) 
     buildQuestDetails(quest) {
         const activeQuest = this.activeQuests[quest.id];
         if (!activeQuest) {
@@ -2512,10 +2590,15 @@ const QuestSystem = {
         return `<div class="quest-details">${objHTML}</div>`;
     },
 
-    // 🖤💀 HANDLE CLICK ON QUEST IN CHAIN VIEW 💀
-    // 🖤💀 FIX: Toggle inline details instead of opening a full overlay panel 💀
+    //  HANDLE CLICK ON QUEST CARD - Opens full quest details panel 
     handleChainQuestClick(questId, status) {
-        // 🖤 Toggle this quest's expanded state INLINE (no overlay!)
+        // This function is no longer used - clicking quest card calls showQuestInfo directly
+        this.showQuestInfo(questId);
+    },
+
+    //  HANDLE CLICK ON EXPAND ARROW - Toggles inline details 
+    handleChainQuestExpand(questId) {
+        //  Toggle this quest's expanded state INLINE (no overlay!)
         if (this._expandedQuestId === questId) {
             // Clicking same quest - collapse it
             this._expandedQuestId = null;
@@ -2527,22 +2610,17 @@ const QuestSystem = {
         this.updateQuestTracker();
     },
 
-    // 🖤💀 TOGGLE CHAIN EXPAND/COLLAPSE 💀
+    //  TOGGLE CHAIN EXPAND/COLLAPSE 
     toggleChainExpand(chainName) {
         this.expandedChains[chainName] = !this.expandedChains[chainName];
         this.updateQuestTracker();
     },
 
-    // 🖤💀 TOGGLE TRACKER EXPAND/MINIMIZE 💀
-    toggleTrackerExpand() {
-        this.trackerExpanded = !this.trackerExpanded;
-        this.updateQuestTracker();
-    },
 
-    // 🖤💀 GET DISPLAY NAME FOR CHAIN 💀
+    //  GET DISPLAY NAME FOR CHAIN 
     getChainDisplayName(chainName) {
         const names = {
-            'shadow_rising': '⚔️ Shadow Rising (Main Story)',
+            'shadow_rising': 'Shadow Rising (Main Story)',
             'doom_world': '💀 Doom World',
             'greendale': '🌾 Greendale',
             'ironforge': '⚒️ Ironforge City',
@@ -2559,37 +2637,34 @@ const QuestSystem = {
         return names[chainName] || `📜 ${chainName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`;
     },
 
-    // 🖤 Add styles for the improved tracker
+    //  Add styles for the improved tracker
     addTrackerStyles() {
         if (document.getElementById('quest-tracker-styles')) return;
 
         const style = document.createElement('style');
         style.id = 'quest-tracker-styles';
-        // 🖤💀 QUEST CHAIN TRACKER STYLES 💀
+        //  QUEST CHAIN TRACKER STYLES 
         style.textContent = `
-            /* 🖤 Expand button */
-            .tracker-expand-btn {
-                background: rgba(79, 195, 247, 0.2);
-                border: none;
-                border-radius: 3px;
-                color: #4fc3f7;
-                cursor: pointer;
-                padding: 2px 6px;
-                font-size: 10px;
-                margin-right: 4px;
+            /* 🖤 Tracker content area */
+            .tracker-content {
+                max-height: 500px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                box-sizing: border-box;
+                padding: 4px;
             }
-            .tracker-expand-btn:hover {
+            .tracker-content::-webkit-scrollbar {
+                width: 6px;
+            }
+            .tracker-content::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.2);
+            }
+            .tracker-content::-webkit-scrollbar-thumb {
                 background: rgba(79, 195, 247, 0.4);
+                border-radius: 3px;
             }
-
-            /* 🖤 Content modes */
-            .tracker-content.minimized {
-                max-height: 200px;
-                overflow-y: auto;
-            }
-            .tracker-content.expanded {
-                max-height: 400px;
-                overflow-y: auto;
+            .tracker-content::-webkit-scrollbar-thumb:hover {
+                background: rgba(79, 195, 247, 0.6);
             }
 
             /* 🔗 Chain Section */
@@ -2651,10 +2726,7 @@ const QuestSystem = {
 
             /* 📜 Individual Quest in Chain */
             .chain-quest {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: 6px;
+                display: block;
                 padding: 4px 8px;
                 margin: 2px 0;
                 border-radius: 4px;
@@ -2715,6 +2787,9 @@ const QuestSystem = {
             .quest-chain-name {
                 font-size: 11px;
                 flex: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
 
             /* Quest details (expanded view) */
@@ -2731,6 +2806,14 @@ const QuestSystem = {
                 color: #81c784;
                 text-decoration: line-through;
                 opacity: 0.7;
+            }
+            .detail-objective.active {
+                color: #4fc3f7;
+                font-weight: bold;
+            }
+            .detail-objective.locked {
+                color: #666;
+                opacity: 0.6;
             }
             .detail-complete-msg {
                 color: #81c784;
@@ -2766,6 +2849,9 @@ const QuestSystem = {
                 align-items: center;
                 gap: 4px;
                 width: 100%;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+                overflow: hidden;
             }
             .quest-expand-arrow {
                 font-size: 8px;
@@ -2785,6 +2871,7 @@ const QuestSystem = {
                 background: rgba(0, 0, 0, 0.3);
                 border-radius: 4px;
                 border-left: 2px solid #4fc3f7;
+                box-sizing: border-box;
             }
             .quest-details-inline .detail-objectives {
                 margin-bottom: 8px;
@@ -2798,6 +2885,14 @@ const QuestSystem = {
                 color: #81c784;
                 text-decoration: line-through;
                 opacity: 0.7;
+            }
+            .quest-details-inline .detail-objective.active {
+                color: #4fc3f7;
+                font-weight: bold;
+            }
+            .quest-details-inline .detail-objective.locked {
+                color: #666;
+                opacity: 0.6;
             }
             .quest-details-inline .detail-complete-msg {
                 color: #81c784;
@@ -2855,6 +2950,7 @@ const QuestSystem = {
         }
         const overlay = document.getElementById('quest-overlay');
         if (overlay) {
+            overlay.style.display = 'flex'; // ���💀 SHOW overlay 💀
             overlay.classList.add('active');
             this.questLogOpen = true;
             this.updateQuestLogUI();
@@ -2864,12 +2960,13 @@ const QuestSystem = {
     hideQuestLog() {
         const overlay = document.getElementById('quest-overlay');
         if (overlay) {
+            overlay.style.display = 'none'; // ���💀 HIDE overlay 💀
             overlay.classList.remove('active');
             this.questLogOpen = false;
         }
     },
 
-    // 🖤 Hide the quest tracker widget (user can reopen via panel toolbar or Q key)
+    //  Hide the quest tracker widget (user can reopen via panel toolbar or Q key)
     hideQuestTracker() {
         const tracker = document.getElementById('quest-tracker');
         if (tracker) {
@@ -2879,14 +2976,14 @@ const QuestSystem = {
         }
     },
 
-    // 🖤 Show the quest tracker widget
+    //  Show the quest tracker widget
     showQuestTracker() {
         this.trackerHidden = false;
         this.updateQuestTracker(); // This will recreate/show it
         console.log('🖤 Quest tracker revealed from the shadows');
     },
 
-    // 🖤 Toggle quest tracker visibility
+    //  Toggle quest tracker visibility
     toggleQuestTracker() {
         const tracker = document.getElementById('quest-tracker');
         if (tracker && !tracker.classList.contains('hidden') && !this.trackerHidden) {
@@ -2905,18 +3002,18 @@ const QuestSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎯 QUEST TRACKING - one quest to rule them all
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  QUEST TRACKING - one quest to rule them all
+    // 
 
-    // 🖤 Track a quest - shows it in the widget and on the map
+    //  Track a quest - shows it in the widget and on the map
     trackQuest(questId) {
         if (!this.activeQuests[questId]) {
             console.warn(`🖤 Can't track quest ${questId} - not active`);
             return false;
         }
 
-        // 💀 Untrack current quest first
+        //  Untrack current quest first
         if (this.trackedQuestId && this.trackedQuestId !== questId) {
             this.untrackQuest();
         }
@@ -2924,13 +3021,13 @@ const QuestSystem = {
         this.trackedQuestId = questId;
         console.log(`🎯 Now tracking quest: ${this.activeQuests[questId].name}`);
 
-        // 🦇 Update the tracker widget to show only this quest
+        //  Update the tracker widget to show only this quest
         this.updateQuestTracker();
 
-        // 🖤 Add glowing marker on map for quest destination
+        //  Add glowing marker on map for quest destination
         this.updateQuestMapMarker();
 
-        // 💀 Fire event for other systems
+        //  Fire event for other systems
         document.dispatchEvent(new CustomEvent('quest-tracked', {
             detail: { questId, quest: this.activeQuests[questId] }
         }));
@@ -2938,17 +3035,17 @@ const QuestSystem = {
         return true;
     },
 
-    // 🖤 Untrack current quest
+    //  Untrack current quest
     untrackQuest() {
         if (!this.trackedQuestId) return;
 
         const oldQuestId = this.trackedQuestId;
         this.trackedQuestId = null;
 
-        // 💀 Remove the map marker
+        //  Remove the map marker
         this.removeQuestMapMarker();
 
-        // 🦇 Update tracker widget
+        //  Update tracker widget
         this.updateQuestTracker();
 
         console.log(`🎯 Stopped tracking quest`);
@@ -2958,7 +3055,7 @@ const QuestSystem = {
         }));
     },
 
-    // 🖤 Toggle tracking for a quest
+    //  Toggle tracking for a quest
     toggleTrackQuest(questId) {
         if (this.trackedQuestId === questId) {
             this.untrackQuest();
@@ -2967,49 +3064,62 @@ const QuestSystem = {
         }
     },
 
-    // 🎯 Get the target location for the tracked quest
+    //  Get the target location for the tracked quest
     getTrackedQuestLocation() {
         if (!this.trackedQuestId) return null;
 
         const quest = this.activeQuests[this.trackedQuestId];
         if (!quest || !quest.objectives) return null;
 
-        // 🖤 Find the first incomplete objective with a location
+        //  Check if ALL objectives are complete - if so, point to turn-in location
+        const progress = this.checkProgress(this.trackedQuestId);
+        if (progress.status === 'ready_to_complete') {
+            // Quest ready to turn in - go to turn-in location!
+            return quest.turnInLocation || quest.location;
+        }
+
+        //  Find the first incomplete objective with a location
         for (const obj of quest.objectives) {
             if (obj.completed) continue;
 
-            // 💀 Visit objective has direct location
-            if (obj.type === 'visit' && obj.location) {
+            //  PRIORITY 1: If objective has explicit location field, use it (works for ANY type!)
+            if (obj.location) {
                 return obj.location;
             }
 
-            // 🦇 Talk objective - need to find where that NPC is
+            //  Visit/travel objective has direct location
+            if ((obj.type === 'visit' || obj.type === 'travel') && obj.location) {
+                return obj.location;
+            }
+
+            //  Talk objective - need to find where that NPC is
             if (obj.type === 'talk' && obj.npc) {
-                // NPCs are typically at the quest giver location or specific spots
-                // Use quest location, or if null (dynamic), use player's current location
-                if (quest.location) {
+                // Use objective's location if specified, otherwise quest location
+                if (obj.location) {
+                    return obj.location;
+                } else if (quest.location) {
                     return quest.location;
                 } else if (typeof game !== 'undefined' && game.currentLocation) {
                     return game.currentLocation.id;
                 }
             }
 
-            // 💀 Explore dungeon - return the dungeon location
+            //  Explore dungeon - return the dungeon location
             if (obj.type === 'explore' && obj.dungeon) {
                 return obj.dungeon;
             }
 
-            // 🖤 Collect items - player needs to find them, maybe at quest location
-            if (obj.type === 'collect') {
-                return quest.location;
+            //  Collect/buy/sell/trade - use objective location if specified, otherwise quest location
+            if (obj.type === 'collect' || obj.type === 'buy' || obj.type === 'sell' || obj.type === 'trade') {
+                return obj.location || quest.location;
             }
         }
 
-        // 💀 Fallback to quest giver location for turn-in
-        return quest.location;
+        //  Fallback to quest giver location for turn-in
+        return quest.turnInLocation || quest.location;
     },
 
-    // 🖤 Get quest info for a specific location (for tooltips) 💀
+    //  Get quest info for a specific location (for tooltips) 
     getQuestInfoForLocation(locationId) {
         if (!this.trackedQuestId) return null;
 
@@ -3019,11 +3129,11 @@ const QuestSystem = {
         const targetLocation = this.getTrackedQuestLocation();
         if (targetLocation !== locationId) return null;
 
-        // 🖤 Find the current objective description 💀
+        //  Find the current objective description 
         let currentObjective = null;
         for (const obj of quest.objectives) {
             if (!obj.completed) {
-                // 🖤 Use description if available, otherwise fall back to getObjectiveText
+                //  Use description if available, otherwise fall back to getObjectiveText
                 currentObjective = obj.description || this.getObjectiveText(obj);
                 break;
             }
@@ -3034,13 +3144,13 @@ const QuestSystem = {
             questId: quest.id,
             objective: currentObjective,
             isTracked: true,
-            isDoom: quest.isDoom || quest.id?.startsWith('doom_') // 🖤💀 Flag for doom quest styling
+            isDoom: quest.isDoom || quest.id?.startsWith('doom_') // ���💀 Flag for doom quest styling
         };
     },
 
-    // 🖤 Update the glowing quest marker on the map
+    //  Update the glowing quest marker on the map
     updateQuestMapMarker() {
-        // 💀 Remove old marker first
+        //  Remove old marker first
         this.removeQuestMapMarker();
 
         const targetLocation = this.getTrackedQuestLocation();
@@ -3050,21 +3160,21 @@ const QuestSystem = {
             return;
         }
 
-        // 🖤 Add animation styles first - needed either way 💀
+        //  Add animation styles first - needed either way 
         this.addQuestMarkerStyles();
 
-        // 🦇 Get the location element on BOTH maps (main world map AND travel panel mini-map)
+        //  Get the location element on BOTH maps (main world map AND travel panel mini-map)
         // Main map uses .map-location, travel panel uses .mini-map-location
         const mainMapLocationEl = document.querySelector(`.map-location[data-location-id="${targetLocation}"]`);
         const miniMapLocationEl = document.querySelector(`.mini-map-location[data-location-id="${targetLocation}"]`);
 
-        // 🖤 Debug: Check if map containers exist 💀
+        //  Debug: Check if map containers exist 
         const mainMapContainer = document.getElementById('world-map-html');
         const miniMapContainer = document.getElementById('travel-mini-map');
         console.log(`🎯 Map containers: main=${!!mainMapContainer}, mini=${!!miniMapContainer}`);
         console.log(`🎯 Location elements found: main=${!!mainMapLocationEl}, mini=${!!miniMapLocationEl}`);
 
-        // 🖤 Add marker to MAIN WORLD MAP if location is visible 💀
+        //  Add marker to MAIN WORLD MAP if location is visible 
         if (mainMapLocationEl) {
             this.addQuestMarkerToElement(mainMapLocationEl, 'main');
             console.log(`🎯 Quest marker attached to main map location: ${targetLocation}`);
@@ -3074,7 +3184,7 @@ const QuestSystem = {
             this.createFloatingQuestMarker(targetLocation, 'main');
         }
 
-        // 🖤 Add marker to TRAVEL PANEL MINI-MAP if location is visible 💀
+        //  Add marker to TRAVEL PANEL MINI-MAP if location is visible 
         if (miniMapLocationEl) {
             this.addQuestMarkerToElement(miniMapLocationEl, 'mini');
             console.log(`🎯 Quest marker attached to mini map location: ${targetLocation}`);
@@ -3085,14 +3195,14 @@ const QuestSystem = {
         }
     },
 
-    // 🖤 Add quest marker to a specific location element 💀
+    //  Add quest marker to a specific location element 
     // Gold for normal quests, ORANGE for doom quests
     addQuestMarkerToElement(locationEl, mapType = 'main') {
         const marker = document.createElement('div');
         marker.className = `quest-target-marker quest-marker-${mapType}`;
         marker.innerHTML = '🎯';
 
-        // 🖤💀 Check if tracked quest is a doom quest - use ORANGE instead of gold
+        //  Check if tracked quest is a doom quest - use ORANGE instead of gold
         const trackedQuest = this.activeQuests[this.trackedQuestId];
         const isDoomQuest = trackedQuest?.isDoom || this.trackedQuestId?.startsWith('doom_');
         const glowColor = isDoomQuest ? 'orange' : 'gold';
@@ -3113,13 +3223,13 @@ const QuestSystem = {
             z-index: 100;
         `;
 
-        // 🦇 Add glow effect to the location itself - orange for doom, gold for normal
+        //  Add glow effect to the location itself - orange for doom, gold for normal
         locationEl.classList.add('quest-target-glow');
         locationEl.classList.toggle('doom-quest-glow', isDoomQuest);
         locationEl.style.boxShadow = `0 0 20px 10px ${glowRgba}0.6), 0 0 40px 20px ${glowRgba}0.3)`;
         locationEl.style.animation = isDoomQuest ? 'doom-quest-location-pulse 2s ease-in-out infinite' : 'quest-location-pulse 2s ease-in-out infinite';
 
-        // 💀 Append marker to the location
+        //  Append marker to the location
         locationEl.style.position = 'absolute';
         locationEl.appendChild(marker);
 
@@ -3131,7 +3241,7 @@ const QuestSystem = {
         }
     },
 
-    // 🖤 Create a floating quest marker for unexplored locations 💀
+    //  Create a floating quest marker for unexplored locations 
     createFloatingQuestMarker(locationId, mapType = 'main') {
         // Get location data from GameWorld
         const location = typeof GameWorld !== 'undefined' ? GameWorld.locations?.[locationId] : null;
@@ -3140,13 +3250,13 @@ const QuestSystem = {
             return;
         }
 
-        // 🦇 Find the correct map container based on mapType
+        //  Find the correct map container based on mapType
         let mapContainer;
         if (mapType === 'mini') {
             mapContainer = document.getElementById('travel-mini-map') ||
                           document.querySelector('.travel-mini-map');
         } else {
-            // 🖤 Main map uses world-map-html as the container 💀
+            //  Main map uses world-map-html as the container 
             mapContainer = document.getElementById('world-map-html') ||
                           document.querySelector('.world-map-html');
         }
@@ -3156,7 +3266,7 @@ const QuestSystem = {
             return;
         }
 
-        // 🖤 Scale position based on map type 💀
+        //  Scale position based on map type 
         let scaledPos = { ...location.mapPosition };
 
         if (mapType === 'main') {
@@ -3165,7 +3275,7 @@ const QuestSystem = {
                 scaledPos = GameWorldRenderer.scalePosition(location.mapPosition);
             }
         } else {
-            // 🖤 Mini map uses RAW coordinates directly - no scaling needed! 💀
+            //  Mini map uses RAW coordinates directly - no scaling needed! 
             // TravelPanelMap.createLocationElement uses location.mapPosition.x/y directly
             // The map container size is 800x600 and coordinates fit within that range
             scaledPos = { ...location.mapPosition };
@@ -3174,17 +3284,17 @@ const QuestSystem = {
 
         if (!scaledPos) return;
 
-        // 🖤💀 Check if tracked quest is a doom quest - use ORANGE instead of gold
+        //  Check if tracked quest is a doom quest - use ORANGE instead of gold
         const trackedQuest = this.activeQuests[this.trackedQuestId];
         const isDoomQuest = trackedQuest?.isDoom || this.trackedQuestId?.startsWith('doom_');
         const glowColor = isDoomQuest ? 'orange' : 'gold';
         const glowRgba = isDoomQuest ? 'rgba(255, 140, 0, ' : 'rgba(255, 215, 0, ';
 
-        // 🦇 Determine sizes based on map type
+        //  Determine sizes based on map type
         const fontSize = mapType === 'mini' ? '18px' : '28px';
         const glowSize = mapType === 'mini' ? '25px' : '40px';
 
-        // 🦇 Create floating marker element
+        //  Create floating marker element
         const marker = document.createElement('div');
         marker.className = `quest-target-marker floating-quest-marker floating-quest-marker-${mapType}`;
         if (isDoomQuest) marker.classList.add('doom-quest-marker');
@@ -3201,7 +3311,7 @@ const QuestSystem = {
             z-index: 150;
         `;
 
-        // 🖤 Create a glowing circle underneath to show the unexplored destination 💀
+        //  Create a glowing circle underneath to show the unexplored destination 
         const glow = document.createElement('div');
         glow.className = `quest-target-glow-circle quest-glow-${mapType}`;
         if (isDoomQuest) glow.classList.add('doom-quest-glow');
@@ -3235,36 +3345,36 @@ const QuestSystem = {
         console.log(`🎯 Floating quest marker (${mapType}) created at unexplored location: ${locationId} (${scaledPos.x}, ${scaledPos.y})`);
     },
 
-    // 💀 Remove the quest map marker from BOTH maps
+    //  Remove the quest map marker from BOTH maps
     removeQuestMapMarker() {
-        // 🦇 Remove the MAIN map marker element
+        //  Remove the MAIN map marker element
         if (this.questMarkerElement && this.questMarkerElement.parentNode) {
             this.questMarkerElement.remove();
         }
         this.questMarkerElement = null;
 
-        // 🖤 Remove MAIN map floating glow circle (for unexplored locations) 💀
+        //  Remove MAIN map floating glow circle (for unexplored locations) 
         if (this.questGlowElement && this.questGlowElement.parentNode) {
             this.questGlowElement.remove();
         }
         this.questGlowElement = null;
 
-        // 🦇 Remove the MINI map marker element
+        //  Remove the MINI map marker element
         if (this.questMiniMarkerElement && this.questMiniMarkerElement.parentNode) {
             this.questMiniMarkerElement.remove();
         }
         this.questMiniMarkerElement = null;
 
-        // 🖤 Remove MINI map floating glow circle 💀
+        //  Remove MINI map floating glow circle 
         if (this.questMiniGlowElement && this.questMiniGlowElement.parentNode) {
             this.questMiniGlowElement.remove();
         }
         this.questMiniGlowElement = null;
 
-        // 🦇 Also clean up any orphaned floating markers from BOTH maps
+        //  Also clean up any orphaned floating markers from BOTH maps
         document.querySelectorAll('.floating-quest-marker, .quest-target-glow-circle, .quest-target-marker').forEach(el => el.remove());
 
-        // 🖤 Remove glow from all location elements (both .map-location and .mini-map-location)
+        //  Remove glow from all location elements (both .map-location and .mini-map-location)
         document.querySelectorAll('.quest-target-glow').forEach(el => {
             el.classList.remove('quest-target-glow');
             el.style.boxShadow = '';
@@ -3272,7 +3382,7 @@ const QuestSystem = {
         });
     },
 
-    // 🖤 Add CSS for quest marker animations
+    //  Add CSS for quest marker animations
     addQuestMarkerStyles() {
         if (document.getElementById('quest-marker-styles')) return;
 
@@ -3337,7 +3447,7 @@ const QuestSystem = {
         document.head.appendChild(style);
     },
 
-    // 🎯 Unified Quest Info Panel - used for ALL quest displays 🖤💀
+    //  Unified Quest Info Panel - used for ALL quest displays 
     // Options: { isNewQuest: bool, onClose: function, showTrackButton: bool }
     showQuestInfoPanel(questId = null, options = {}) {
         const qId = questId || this.trackedQuestId;
@@ -3346,34 +3456,34 @@ const QuestSystem = {
         const quest = this.activeQuests[qId] || this.quests[qId];
         if (!quest) return;
 
-        // 🖤 Store onClose callback for later
+        //  Store onClose callback for later
         this._questInfoPanelOnClose = options.onClose || null;
 
-        // 💀 Remove existing panel
+        //  Remove existing panel
         const existing = document.getElementById('quest-info-panel');
         if (existing) existing.remove();
 
         const progress = this.checkProgress(qId);
-        // 🖤 Get location from quest data, not just tracked quest 💀
+        //  Get location from quest data, not just tracked quest 
         const targetLocation = quest.location || this.getTrackedQuestLocation();
 
-        // 🖤 Store the displayed quest's target location for "Show on Map" button 💀
+        //  Store the displayed quest's target location for "Show on Map" button 
         this._displayedQuestTargetLocation = targetLocation;
         const locationName = targetLocation ? this.getLocationDisplayName(targetLocation) : 'Unknown';
 
-        // 🖤 Determine header based on context
+        //  Determine header based on context
         const isNewQuest = options.isNewQuest || false;
         const headerTitle = isNewQuest ? '📜 New Quest!' : quest.name;
         const headerClass = isNewQuest ? 'quest-info-header new-quest' : 'quest-info-header';
 
-        // 🖤 Build rewards string
+        //  Build rewards string
         const rewardParts = [];
         if (quest.rewards?.gold) rewardParts.push(`💰 ${quest.rewards.gold}g`);
-        if (quest.rewards?.experience) rewardParts.push(`⭐ ${quest.rewards.experience}xp`);
+        if (quest.rewards?.experience) rewardParts.push(`${quest.rewards.experience}xp`);
         if (quest.rewards?.reputation) rewardParts.push(`👑 +${quest.rewards.reputation} rep`);
         const rewardsStr = rewardParts.length > 0 ? rewardParts.join(' • ') : 'None';
 
-        // 🖤 Create the unified info panel
+        //  Create the unified info panel
         const panel = document.createElement('div');
         panel.id = 'quest-info-panel';
         panel.className = 'quest-info-panel' + (isNewQuest ? ' new-quest-panel' : '');
@@ -3396,7 +3506,7 @@ const QuestSystem = {
                     <ul class="quest-info-objectives">
                         ${quest.objectives.map(obj => `
                             <li class="${obj.completed ? 'completed' : ''}">
-                                ${obj.completed ? '✅' : '⬜'} ${obj.description}
+                                ${obj.completed ? '' : '⬜'} ${obj.description}
                                 ${obj.count ? ` (${obj.current || 0}/${obj.count})` : ''}
                             </li>
                         `).join('')}
@@ -3416,11 +3526,11 @@ const QuestSystem = {
                     : `<button class="quest-action-btn primary" onclick="QuestSystem.trackQuest('${qId}'); QuestSystem.hideQuestInfoPanel();">🎯 Track Quest</button>`
                 }
                 <button class="quest-action-btn" onclick="QuestSystem.showOnMapAndClose();">🗺️ Show on Map</button>
-                ${isNewQuest ? `<button class="quest-action-btn primary" onclick="QuestSystem.hideQuestInfoPanel();">✅ Got it!</button>` : ''}
+                ${isNewQuest ? `<button class="quest-action-btn primary" onclick="QuestSystem.hideQuestInfoPanel();">Got it!</button>` : ''}
             </div>
         `;
 
-        // 🦇 Style the panel
+        //  Style the panel
         panel.style.cssText = `
             position: fixed;
             top: 50%;
@@ -3441,16 +3551,16 @@ const QuestSystem = {
 
         document.body.appendChild(panel);
 
-        // 🖤 Add panel styles
+        //  Add panel styles
         this.addQuestInfoPanelStyles();
     },
 
-    // 💀 Hide the quest info panel and call onClose callback if set
+    //  Hide the quest info panel and call onClose callback if set
     hideQuestInfoPanel() {
         const panel = document.getElementById('quest-info-panel');
         if (panel) panel.remove();
 
-        // 🖤 Call onClose callback if it was set 💀
+        //  Call onClose callback if it was set 
         if (this._questInfoPanelOnClose) {
             const callback = this._questInfoPanelOnClose;
             this._questInfoPanelOnClose = null; // Clear it first to prevent loops
@@ -3458,7 +3568,7 @@ const QuestSystem = {
         }
     },
 
-    // 🖤 Center the map on the quest target location
+    //  Center the map on the quest target location
     centerMapOnQuestTarget() {
         const targetLocation = this.getTrackedQuestLocation();
         if (!targetLocation) {
@@ -3472,15 +3582,15 @@ const QuestSystem = {
         }
     },
 
-    // 🖤 Show on Map button - centers map and closes panel WITHOUT triggering onClose callback 💀
+    //  Show on Map button - centers map and closes panel WITHOUT triggering onClose callback 
     showOnMapAndClose() {
-        // 🖤 Clear the callback BEFORE closing so it doesn't trigger
+        //  Clear the callback BEFORE closing so it doesn't trigger
         this._questInfoPanelOnClose = null;
 
-        // 🖤 Get the displayed quest's target location (stored when panel was opened)
+        //  Get the displayed quest's target location (stored when panel was opened)
         const targetLocation = this._displayedQuestTargetLocation;
 
-        // 🖤 Center map on the quest's location (not just tracked quest!)
+        //  Center map on the quest's location (not just tracked quest!)
         if (targetLocation && typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.centerOnLocation) {
             GameWorldRenderer.centerOnLocation(targetLocation);
             console.log(`🗺️ Centered map on quest location: ${targetLocation} 💀`);
@@ -3488,25 +3598,25 @@ const QuestSystem = {
             console.log('🗺️ No target location to center on');
         }
 
-        // 🖤 Clear the stored location
+        //  Clear the stored location
         this._displayedQuestTargetLocation = null;
 
-        // 🖤 Close the panel (callback already cleared, won't trigger)
+        //  Close the panel (callback already cleared, won't trigger)
         const panel = document.getElementById('quest-info-panel');
         if (panel) panel.remove();
     },
 
-    // 🦇 Get display name for a location
+    //  Get display name for a location
     getLocationDisplayName(locationId) {
         if (typeof GameWorld !== 'undefined' && GameWorld.locations) {
             const loc = GameWorld.locations[locationId];
             if (loc) return loc.name;
         }
-        // 💀 Fallback: prettify the ID
+        //  Fallback: prettify the ID
         return locationId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     },
 
-    // 🖤 Add styles for quest info panel
+    //  Add styles for quest info panel
     addQuestInfoPanelStyles() {
         if (document.getElementById('quest-info-panel-styles')) return;
 
@@ -3657,11 +3767,11 @@ const QuestSystem = {
         document.head.appendChild(style);
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎧 EVENT LISTENERS - watching your every move
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  EVENT LISTENERS - watching your every move
+    // 
     setupEventListeners() {
-        // 🖤 Fixed: accept both 'item' and 'itemId' for backwards compatibility 💀
+        //  Fixed: accept both 'item' and 'itemId' for backwards compatibility 
         document.addEventListener('item-received', (e) => {
             const itemId = e.detail.item || e.detail.itemId;
             this.updateProgress('collect', { item: itemId, count: e.detail.quantity || 1 });
@@ -3672,7 +3782,7 @@ const QuestSystem = {
         });
 
         document.addEventListener('trade-completed', (e) => {
-            // 🖤 FIX: trade-cart-panel dispatches 'total' not 'value' 💀
+            //  FIX: trade-cart-panel dispatches 'total' not 'value' 
             this.updateProgress('trade', { value: e.detail.total || e.detail.value || 100 });
         });
 
@@ -3680,17 +3790,23 @@ const QuestSystem = {
             this.updateProgress('defeat', { enemy: e.detail.enemyType, count: 1 });
         });
 
-        // 🖤 Fixed: was 'location-changed' but travel fires 'player-location-changed' 💀
+        //  Fixed: was 'location-changed' but travel fires 'player-location-changed' 
         document.addEventListener('player-location-changed', (e) => {
-            this.updateProgress('visit', { location: e.detail.location });
-            this.updateProgress('travel', { location: e.detail.location }); // 🖤💀 Also trigger travel objectives 💀
+            //  CRITICAL FIX: Event detail uses locationId, not location!
+            this.updateProgress('visit', { location: e.detail.locationId });
+            this.updateProgress('travel', { location: e.detail.locationId }); // ���💀 Also trigger travel objectives 💀
         });
 
+        //  NPC interaction event - DON'T auto-complete talk objectives just from opening chat! 
+        // Talk objectives should only complete when player performs quest action (turn-in, accept, etc.)
         document.addEventListener('npc-interaction', (e) => {
-            this.updateProgress('talk', { npc: e.detail.npcType });
+            //  Only complete talk objectives if this is a quest-related interaction
+            // For now, we'll let quest actions (askAboutQuest, completeQuest, etc.) handle completion
+            // This event can be used for other tracking purposes
+            console.log(`👥 NPC interaction: ${e.detail.npcType} (${e.detail.npcName})`);
         });
 
-        // 🖤💀 Investigation events - searching areas for clues/items 💀
+        //  Investigation events - searching areas for clues/items 
         document.addEventListener('area-investigated', (e) => {
             this.updateProgress('investigate', { location: e.detail.location || e.detail.area });
         });
@@ -3699,22 +3815,22 @@ const QuestSystem = {
             this.updateProgress('explore', { dungeon: e.detail.dungeon, rooms: 1 });
         });
 
-        // 🖤 Gold changes - check wealth gate objectives 💀
+        //  Gold changes - check wealth gate objectives 
         document.addEventListener('gold-changed', (e) => {
             this.updateProgress('gold', { amount: e.detail.newAmount || e.detail.gold });
         });
 
-        // 🖤 Item sold - for sell objectives 💀
+        //  Item sold - for sell objectives 
         document.addEventListener('item-sold', (e) => {
             this.updateProgress('sell', { item: e.detail.itemId || e.detail.item, count: e.detail.quantity || 1 });
         });
 
-        // 🖤 Player made a decision - for choice quests 💀
+        //  Player made a decision - for choice quests 
         document.addEventListener('player-decision', (e) => {
             this.updateProgress('decision', { choice: e.detail.choice });
         });
 
-        // 🖤 Refresh quest markers when world map overlay is shown 💀
+        //  Refresh quest markers when world map overlay is shown 
         const worldMapOverlay = document.getElementById('world-map-overlay');
         if (worldMapOverlay) {
             const observer = new MutationObserver((mutations) => {
@@ -3722,7 +3838,7 @@ const QuestSystem = {
                     if (mutation.attributeName === 'class') {
                         const isActive = worldMapOverlay.classList.contains('active');
                         if (isActive && this.trackedQuestId) {
-                            // 🎯 Map is now visible - refresh markers
+                            //  Map is now visible - refresh markers
                             setTimeout(() => this.updateQuestMapMarker(), 100);
                         }
                     }
@@ -3731,15 +3847,15 @@ const QuestSystem = {
             observer.observe(worldMapOverlay, { attributes: true });
         }
 
-        // 💀 No expiration check - quests are IMMORTAL, unlike my sleep schedule
+        //  No expiration check - quests are IMMORTAL, unlike my sleep schedule
     },
 
-    // 🖤 Setup dragging for the quest tracker panel
+    //  Setup dragging for the quest tracker panel
     setupTrackerDragging(tracker) {
         const header = tracker.querySelector('.tracker-header');
         if (!header) return;
 
-        // 🦇 Always re-attach listeners since innerHTML destroys them
+        //  Always re-attach listeners since innerHTML destroys them
         header.onmousedown = (e) => {
             // Don't drag if clicking buttons
             if (e.target.tagName === 'BUTTON' || e.target.classList.contains('tracker-expand') || e.target.classList.contains('tracker-close')) return;
@@ -3755,7 +3871,7 @@ const QuestSystem = {
             DraggablePanels.startDrag(e, tracker);
         };
 
-        // 💀 Load saved position ONLY on first setup
+        //  Load saved position ONLY on first setup
         if (!tracker.dataset.draggable) {
             tracker.dataset.draggable = 'true';
             const positions = DraggablePanels.getAllPositions();
@@ -3766,16 +3882,16 @@ const QuestSystem = {
                 tracker.style.top = pos.top;
                 tracker.style.right = 'auto';
                 tracker.style.bottom = 'auto';
-                // 🖤 If there's a saved position, user dragged it before - respect that 💀
+                //  If there's a saved position, user dragged it before - respect that 
                 tracker.dataset.userDragged = 'true';
             }
             console.log('🖤 Quest tracker drag setup complete');
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🔧 UTILITIES - misc bullshit
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  UTILITIES - misc bullshit
+    // 
     getStatus() {
         return {
             active: Object.keys(this.activeQuests).length,
@@ -3795,24 +3911,24 @@ const QuestSystem = {
         };
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🦇 NPC MET CHECK - have you even talked to this person, you hermit?
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  NPC MET CHECK - have you even talked to this person, you hermit?
+    // 
     hasMetNPC(npcId) {
-        // 🖤 Check if player has interacted with this NPC via relationships
+        //  Check if player has interacted with this NPC via relationships
         if (typeof NPCRelationshipSystem !== 'undefined') {
             const rel = NPCRelationshipSystem.relationships?.[npcId];
             if (rel) return true;
         }
 
-        // 🦇 fallback - check if we've discovered any quests from this NPC
+        //  fallback - check if we've discovered any quests from this NPC
         // (means we must have talked to them at some point)
         for (const questId of this.discoveredQuests) {
             const quest = this.quests[questId];
             if (quest && quest.giver === npcId) return true;
         }
 
-        // 💀 also check active and completed quests
+        //  also check active and completed quests
         for (const questId of [...Object.keys(this.activeQuests), ...this.completedQuests]) {
             const quest = this.quests[questId] || this.activeQuests[questId];
             if (quest && quest.giver === npcId) return true;
@@ -3821,21 +3937,21 @@ const QuestSystem = {
         return false;
     },
 
-    // 🔮 Check if player can actually start this quest (prereqs met, not already done)
+    //  Check if player can actually start this quest (prereqs met, not already done)
     canStartQuest(questId) {
         const quest = this.quests[questId];
         if (!quest) return false;
 
-        // 💀 already active or completed? nope
+        //  already active or completed? nope
         if (this.activeQuests[questId]) return false;
         if (this.completedQuests.includes(questId) && !quest.repeatable) return false;
 
-        // 🖤 check prerequisites - did you do the homework?
+        //  check prerequisites - did you do the homework?
         if (quest.prerequisite) {
             if (!this.completedQuests.includes(quest.prerequisite)) return false;
         }
 
-        // 🦇 check required quests array
+        //  check required quests array
         if (quest.requiredQuests) {
             for (const reqId of quest.requiredQuests) {
                 if (!this.completedQuests.includes(reqId)) return false;
@@ -3846,9 +3962,9 @@ const QuestSystem = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// 🌍 GLOBAL BINDING - infecting the window object
-// ═══════════════════════════════════════════════════════════════
+// 
+//  GLOBAL BINDING - infecting the window object
+// 
 if (typeof window !== 'undefined') {
     window.QuestSystem = QuestSystem;
 }

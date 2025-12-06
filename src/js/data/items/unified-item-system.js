@@ -1,13 +1,13 @@
 // ═══════════════════════════════════════════════════════════════
 // UNIFIED ITEM SYSTEM - master database of dark economy
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
 // ═══════════════════════════════════════════════════════════════
 
-console.log('📦 Unified Item System initializing...');
+console.log(' Unified Item System initializing...');
 
 const UnifiedItemSystem = {
     // ═══════════════════════════════════════════════════════════════
@@ -93,7 +93,7 @@ const UnifiedItemSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📊 ITEM METADATA - Enhanced item definitions
+    //  ITEM METADATA - Enhanced item definitions
     // ═══════════════════════════════════════════════════════════════
 
     // This extends ItemDatabase with additional metadata
@@ -266,7 +266,7 @@ const UnifiedItemSystem = {
             craftTime: 30,
             facility: 'sawmill'
         },
-        // 🖤 Construction materials - Planks → Building Materials 💀
+        //  Construction materials - Planks → Building Materials 
         crate: {
             actionType: 'none',
             stackable: true,
@@ -816,7 +816,7 @@ const UnifiedItemSystem = {
             skillGain: 1
         },
 
-        // 🖤 Construction Materials - Planks → Building Items 💀
+        //  Construction Materials - Planks → Building Items 
         crate: {
             output: { item: 'crate', quantity: 1 },
             inputs: [
@@ -955,7 +955,7 @@ const UnifiedItemSystem = {
             skillRequired: 1,
             skillGain: 2
         },
-        // 🖤💀 Bread-based stew alternative - for when vegetables are scarce!
+        //  Bread-based stew alternative - for when vegetables are scarce!
         hearty_stew: {
             output: { item: 'stew', quantity: 2 },
             inputs: [
@@ -1514,7 +1514,7 @@ const UnifiedItemSystem = {
         mine_iron: {
             name: 'Mine Iron Ore',
             description: 'Extract iron ore from rocks.',
-            icon: '⛏️',
+            icon: '',
             gatherType: 'mining',
             outputItem: 'iron_ore',
             baseTime: 60,
@@ -1596,7 +1596,7 @@ const UnifiedItemSystem = {
         harvest_timber: {
             name: 'Harvest Timber',
             description: 'Fell large trees for timber.',
-            icon: '🌲',
+            icon: '',
             gatherType: 'woodcutting',
             outputItem: 'timber',
             baseTime: 45,
@@ -1614,7 +1614,7 @@ const UnifiedItemSystem = {
         harvest_wheat: {
             name: 'Harvest Wheat',
             description: 'Collect ripe wheat from fields.',
-            icon: '🌾',
+            icon: '',
             gatherType: 'farming',
             outputItem: 'wheat',
             baseTime: 40,
@@ -1822,20 +1822,20 @@ const UnifiedItemSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎮 PLAYER SKILLS - Track progression
+    //  PLAYER SKILLS - Track progression
     // ═══════════════════════════════════════════════════════════════
 
     skills: {
-        mining: { name: 'Mining', icon: '⛏️', maxLevel: 10 },
+        mining: { name: 'Mining', icon: '', maxLevel: 10 },
         woodcutting: { name: 'Woodcutting', icon: '🪓', maxLevel: 10 },
-        farming: { name: 'Farming', icon: '🌾', maxLevel: 10 },
+        farming: { name: 'Farming', icon: '', maxLevel: 10 },
         fishing: { name: 'Fishing', icon: '🎣', maxLevel: 10 },
         herbalism: { name: 'Herbalism', icon: '🌿', maxLevel: 10 },
         hunting: { name: 'Hunting', icon: '🏹', maxLevel: 10 },
         smithing: { name: 'Smithing', icon: '🔨', maxLevel: 10 },
         crafting: { name: 'Crafting', icon: '🛠️', maxLevel: 10 },
         cooking: { name: 'Cooking', icon: '🍳', maxLevel: 10 },
-        brewing: { name: 'Brewing', icon: '🍺', maxLevel: 10 },
+        brewing: { name: 'Brewing', icon: '', maxLevel: 10 },
         medicine: { name: 'Medicine', icon: '💊', maxLevel: 10 }
     },
 
@@ -1848,7 +1848,7 @@ const UnifiedItemSystem = {
 
     // Initialize the system
     init() {
-        console.log('📦 Unified Item System initialized');
+        console.log(' Unified Item System initialized');
         console.log(`   - ${Object.keys(this.itemMetadata).length} items with metadata`);
         console.log(`   - ${Object.keys(this.recipes).length} crafting recipes`);
         console.log(`   - ${Object.keys(this.gatheringActions).length} gathering actions`);
@@ -2037,16 +2037,16 @@ const UnifiedItemSystem = {
     },
 
     // Get equipment bonuses for a slot
-    // 🖤💀 FIXED: Now checks BOTH itemMetadata AND ItemDatabase.items! 💀
+    //  FIXED: Now checks BOTH itemMetadata AND ItemDatabase.items! 
     getEquipmentBonuses(itemId) {
         const meta = this.itemMetadata[itemId];
         const bonuses = {};
 
-        // 🖤💀 CRITICAL: Also check ItemDatabase.items for bonuses and stats! 💀
+        //  CRITICAL: Also check ItemDatabase.items for bonuses and stats! 
         // Items like walking_staff have stats/bonuses directly on them
         const itemDef = typeof ItemDatabase !== 'undefined' ? ItemDatabase.items?.[itemId] : null;
 
-        // 🦇 Merge bonuses from itemMetadata (legacy system)
+        //  Merge bonuses from itemMetadata (legacy system)
         if (meta) {
             if (meta.combatBonus) {
                 Object.assign(bonuses, meta.combatBonus);
@@ -2068,7 +2068,7 @@ const UnifiedItemSystem = {
             }
         }
 
-        // 🖤💀 Merge bonuses from ItemDatabase.items (new system) 💀
+        //  Merge bonuses from ItemDatabase.items (new system) 
         if (itemDef) {
             // Direct bonuses property (pickaxe, sword, etc.)
             if (itemDef.bonuses) {
@@ -2166,7 +2166,7 @@ const UnifiedItemSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔍 CHAIN VERIFICATION - Ensure circular economy is complete
+    //  CHAIN VERIFICATION - Ensure circular economy is complete
     // ═══════════════════════════════════════════════════════════════
 
     // Verify a complete production chain
@@ -2221,7 +2221,7 @@ const UnifiedItemSystem = {
             results.steps.push(stepResult);
         }
 
-        console.log(`🔍 Chain '${chainName}': ${results.valid ? '✅ VALID' : '❌ INVALID'}`);
+        console.log(` Chain '${chainName}': ${results.valid ? ' VALID' : ' INVALID'}`);
         return results;
     },
 
@@ -2378,17 +2378,17 @@ const UnifiedItemSystem = {
             if (!result.valid) report.valid = false;
         }
 
-        console.log(`\n📊 CIRCULAR ECONOMY VERIFICATION: ${report.valid ? '✅ ALL VALID' : '❌ ISSUES FOUND'}`);
+        console.log(`\n CIRCULAR ECONOMY VERIFICATION: ${report.valid ? ' ALL VALID' : ' ISSUES FOUND'}`);
         return report;
     },
 
-    // Debooger helper 💀 - print item chain
+    // Debooger helper  - print item chain
     deboogerItemChain(itemId) {
         const chain = this.getItemChain(itemId);
         console.log(`\n🔗 Item Chain for '${itemId}':`);
 
         if (chain.gatherFrom) {
-            console.log(`  📍 Can be gathered via: ${chain.gatherFrom.actionId}`);
+            console.log(`   Can be gathered via: ${chain.gatherFrom.actionId}`);
         }
 
         if (chain.craftedFrom.length > 0) {
@@ -2400,7 +2400,7 @@ const UnifiedItemSystem = {
         }
 
         if (chain.usedFor.length > 0) {
-            console.log(`  ✅ Used for: ${chain.usedFor.join(', ')}`);
+            console.log(`   Used for: ${chain.usedFor.join(', ')}`);
         }
 
         return chain;
@@ -2417,7 +2417,7 @@ if (document.readyState === 'loading') {
     UnifiedItemSystem.init();
 }
 
-console.log('📦 Unified Item System loaded!');
+console.log(' Unified Item System loaded!');
 
 // ═══════════════════════════════════════════════════════════════
 // 🏭 PRODUCTION QUEUE SYSTEM - Build queues and progress tracking
@@ -2773,7 +2773,7 @@ const ProductionQueueSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // ⚔️ EQUIPMENT METHODS
+    //  EQUIPMENT METHODS
     // ═══════════════════════════════════════════════════════════════
 
     // Equip an item
@@ -2810,7 +2810,7 @@ const ProductionQueueSystem = {
             InventorySystem.removeItem(itemId, 1);
         }
 
-        console.log(`⚔️ Equipped: ${itemId} in ${slot}`);
+        console.log(` Equipped: ${itemId} in ${slot}`);
 
         // Dispatch event
         if (typeof EventManager !== 'undefined') {
@@ -2834,7 +2834,7 @@ const ProductionQueueSystem = {
 
         this.equippedItems[slot] = null;
 
-        console.log(`⚔️ Unequipped: ${itemId} from ${slot}`);
+        console.log(` Unequipped: ${itemId} from ${slot}`);
 
         // Dispatch event
         if (typeof EventManager !== 'undefined') {
@@ -2902,7 +2902,7 @@ const ProductionQueueSystem = {
         if (!itemId) return;
 
         // For now just log - full durability tracking would need item instance data
-        console.log(`🔧 Durability reduced on ${itemId}: -${amount}`);
+        console.log(` Durability reduced on ${itemId}: -${amount}`);
     },
 
     // ═══════════════════════════════════════════════════════════════
@@ -3028,7 +3028,7 @@ const ProductionQueueSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📊 SKILL METHODS
+    //  SKILL METHODS
     // ═══════════════════════════════════════════════════════════════
 
     // Add XP to a skill
@@ -3042,7 +3042,7 @@ const ProductionQueueSystem = {
         const newLevel = this.getSkillLevel(skillType);
 
         if (newLevel > oldLevel) {
-            console.log(`📊 Level up! ${skillType}: ${oldLevel} → ${newLevel}`);
+            console.log(` Level up! ${skillType}: ${oldLevel} → ${newLevel}`);
             if (typeof EventManager !== 'undefined') {
                 EventManager.emit('skillLevelUp', {
                     skillType,
@@ -3129,7 +3129,7 @@ const ProductionQueueSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💾 SAVE/LOAD
+    //  SAVE/LOAD
     // ═══════════════════════════════════════════════════════════════
 
     getSaveData() {

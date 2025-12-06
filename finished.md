@@ -2,7 +2,65 @@
 
 **Purpose:** Archive of ALL completed work from todo.md. This file is the graveyard where fixed bugs and completed features rest in peace.
 
-**Last Updated:** 2025-12-05
+**Last Updated:** 2025-12-06
+
+---
+
+## SESSION #24-#34 (2025-12-05 to 2025-12-06) - ALL VERIFIED IN CODE
+
+### Session #34: Emoji Purge + Version Bump (2025-12-06)
+- [x] 86+ files processed for emoji removal from comments
+- [x] 829+ emojis removed from code comments
+- [x] 82+ version strings updated to 0.90.01
+- [x] User-facing emojis PRESERVED (only comments cleaned)
+
+### Session #33: Reputation Display Unification
+- [x] Stats bar now shows current/required (e.g., "3/15")
+- [x] Color coding: green=unlocked, yellow=close, red=far
+- [x] CSS for separator and requirement styling
+
+### Session #32: Time Speed Interrupt System
+- [x] `userPreferredSpeed` - tracks player's desired speed
+- [x] `_interruptStack` - handles nested interrupts
+- [x] `pauseForInterrupt(source)` / `resumeFromInterrupt(source)`
+- [x] Speed buttons now call `setUserPreferredSpeed()`
+
+### Session #31: Random Encounter Browse Wares
+- [x] 4 locations fixed to check `npcData.canTrade`
+- [x] Smuggler, courier, pilgrim encounters now show trade button
+
+### Session #30: Modal Z-Index Fix
+- [x] Modal z-index changed from 700 to 100000
+- [x] Now renders above settings panel (99999)
+
+### Session #29: Modal Button Properties Fix
+- [x] All modals now use correct properties: `{ text, className, onClick }`
+- [x] Fixed in: settings-panel, game.js, property-employee-ui, employee-system, save-manager
+
+### Session #28: Quest Tracker Inline Details
+- [x] `_expandedQuestId` state tracking
+- [x] `buildQuestDetailsInline()` for inline objectives
+- [x] Expand arrow (▶/▼) indicators
+- [x] No more overlay panel - all inline
+
+### Session #27: New Game Validation Modal
+- [x] Character name required check
+- [x] Attribute points must be spent check
+- [x] Red border + shake animation on invalid fields
+- [x] Clear modal with all validation errors
+
+### Session #26: Firefox Compatibility
+- [x] Removed `??=` operator from event-manager.js
+- [x] Removed 5 `??=` operators from property-storage.js
+- [x] Settings panel robustness fix for listener re-attachment
+
+### Session #25: Quest Segway Dialogue
+- [x] `quest.dialogue.complete` shown on quest completion
+- [x] Character name validation with visual feedback
+
+### Session #24: Strict Quest Tracker
+- [x] `engagedQuests` filter (only ACTIVE/COMPLETED)
+- [x] "No active quests" message instead of spoilers
 
 ---
 

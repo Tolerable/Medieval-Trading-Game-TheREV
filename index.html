@@ -4,27 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medieval Trading Game</title>
-    <!-- 🖤 CSS Variables (must load first) -->
-    <link rel="stylesheet" href="src/css/base/variables.css?v=0.90.00">
-    <!-- Main stylesheets 🖤 -->
-    <link rel="stylesheet" href="src/css/styles.css?v=0.90.00">
-    <link rel="stylesheet" href="src/css/ui-enhancements.css?v=0.90.00">
-    <link rel="stylesheet" href="src/css/npc-systems.css?v=0.90.00">
-    <!-- 🖤 Z-Index System - MUST be last to override everything -->
-    <link rel="stylesheet" href="src/css/z-index-system.css?v=0.90.00">
-    <!-- ⚙️ CONFIG MUST LOAD FIRST - All other scripts depend on it -->
-    <script src="config.js?v=0.90.00"></script>
-    <!-- 🖤 Z-INDEX CONSTANTS - JS mirror of z-index-system.css 💀 -->
-    <script src="src/js/config/z-index-constants.js?v=0.90.00"></script>
+    <!-- CSS Variables (must load first) -->
+    <link rel="stylesheet" href="src/css/base/variables.css?v=0.90.01">
+    <!-- Main stylesheets -->
+    <link rel="stylesheet" href="src/css/styles.css?v=0.90.01">
+    <link rel="stylesheet" href="src/css/ui-enhancements.css?v=0.90.01">
+    <link rel="stylesheet" href="src/css/npc-systems.css?v=0.90.01">
+    <!-- Z-Index System - MUST be last to override everything -->
+    <link rel="stylesheet" href="src/css/z-index-system.css?v=0.90.01">
+    <!-- CONFIG MUST LOAD FIRST - All other scripts depend on it -->
+    <script src="config.js?v=0.90.01"></script>
+    <!-- Z-INDEX CONSTANTS - JS mirror of z-index-system.css -->
+    <script src="src/js/config/z-index-constants.js?v=0.90.01"></script>
     <script>
         // Update document title from config immediately
         if (typeof GameConfig !== 'undefined') {
             document.title = GameConfig.game.name;
         }
     </script>
-    <!-- 🖤💀 Debooger visibility controlled by config -->
+    <!-- Debooger visibility controlled by config -->
     <script>
-        // 🖤💀 NUCLEAR OPTION - Remove debooger elements entirely when disabled
+        // NUCLEAR OPTION - Remove debooger elements entirely when disabled
         (function() {
             var deboogerEnabled = (typeof GameConfig !== 'undefined' && GameConfig.debooger && GameConfig.debooger.enabled === true);
             console.log('🔒 Debooger config check: enabled =', deboogerEnabled);

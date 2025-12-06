@@ -1,25 +1,25 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // SKILL SYSTEM - power through practice and pain
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 //
-// 🗡️ THE SACRED TREES:
+//  THE SACRED TREES:
 // - Trading: The art of turning copper into gold
 // - Combat: When words fail, steel speaks
 // - Crafting: Creation from destruction
 // - Exploration: The world reveals its secrets to the worthy
 // - Social: Manipulation wrapped in velvet words
 //
-// ⚰️ DEPENDENCIES (The chains that bind):
+// DEPENDENCIES (The chains that bind):
 // - EventBus (optional): For the whispers between systems
 // - game.player: The vessel of all progression
 // - AudioSystem (optional): The sounds of triumph
 //
-// 🌙 INTEGRATION POINTS:
+//  INTEGRATION POINTS:
 // - Character Creation: Starting skills feed into this system
 // - Combat System: getCombatBonuses() fuels the violence
 // - Trading: getBuyPriceModifier() / getSellPriceModifier()
@@ -28,7 +28,7 @@
 //
 // @author Unity AI Lab by Hackall360 Sponge GFourteen www.unityailab.com
 // @version 0.90.00
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const SkillSystem = {
     /**
@@ -37,19 +37,19 @@ const SkillSystem = {
      * toward mastery... or oblivion.
      */
     skillTrees: {
-        // 💰 THE MERCHANT'S PATH - Where gold flows like water
+        //  THE MERCHANT'S PATH - Where gold flows like water
         trading: {
             name: 'Trading',
             icon: '💰',
             description: 'Master the art of commerce',
             color: '#ffd700',
-            // 🗡️ Skills within this dark art
+            //  Skills within this dark art
             skills: {
                 bargaining: {
                     name: 'Bargaining',
                     description: 'Reduce buy prices by 2% per level',
                     maxLevel: 5,
-                    cost: [1, 2, 3, 5, 8], // 🦇 Fibonacci-inspired costs - nature's cruelty
+                    cost: [1, 2, 3, 5, 8], // ��� Fibonacci-inspired costs - nature's cruelty
                     requires: null,
                     effect: (level) => ({ buyDiscount: level * 0.02 })
                 },
@@ -66,7 +66,7 @@ const SkillSystem = {
                     description: 'See price trends and predictions',
                     maxLevel: 3,
                     cost: [3, 5, 8],
-                    requires: { bargaining: 2, salesmanship: 2 }, // 🖤 The price of knowledge
+                    requires: { bargaining: 2, salesmanship: 2 }, // ��� The price of knowledge
                     effect: (level) => ({ pricePrediction: level })
                 },
                 bulkTrading: {
@@ -81,17 +81,17 @@ const SkillSystem = {
                     name: 'Master Merchant',
                     description: 'Unlock exclusive merchant deals',
                     maxLevel: 1,
-                    cost: [20], // 🗡️ The ultimate sacrifice
+                    cost: [20], // ���️ The ultimate sacrifice
                     requires: { bulkTrading: 3, marketAnalysis: 3 },
                     effect: () => ({ exclusiveDeals: true })
                 }
             }
         },
 
-        // ⚔️ THE WARRIOR'S PATH - Blood and steel
+        // THE WARRIOR'S PATH - Blood and steel
         combat: {
             name: 'Combat',
-            icon: '⚔️',
+            icon: '',
             description: 'Defend yourself on dangerous roads',
             color: '#dc3545',
             skills: {
@@ -138,7 +138,7 @@ const SkillSystem = {
             }
         },
 
-        // 🔨 THE MAKER'S PATH - Creation from chaos
+        //  THE MAKER'S PATH - Creation from chaos
         crafting: {
             name: 'Crafting',
             icon: '🔨',
@@ -188,7 +188,7 @@ const SkillSystem = {
             }
         },
 
-        // 🗺️ THE WANDERER'S PATH - The world is vast and unforgiving
+        //  THE WANDERER'S PATH - The world is vast and unforgiving
         exploration: {
             name: 'Exploration',
             icon: '🗺️',
@@ -238,7 +238,7 @@ const SkillSystem = {
             }
         },
 
-        // 🎭 THE MANIPULATOR'S PATH - Words sharper than swords
+        //  THE MANIPULATOR'S PATH - Words sharper than swords
         social: {
             name: 'Social',
             icon: '🎭',
@@ -295,7 +295,7 @@ const SkillSystem = {
      * "Every journey begins with a single step... choose wisely"
      */
     startingSkillMappings: {
-        // 🗡️ Maps game.player.skills to our skill trees
+        //  Maps game.player.skills to our skill trees
         trading: { tree: 'trading', skill: 'bargaining' },
         negotiation: { tree: 'social', skill: 'charm' },
         perception: { tree: 'exploration', skill: 'pathfinding' },
@@ -304,7 +304,7 @@ const SkillSystem = {
         stealth: { tree: 'social', skill: 'intimidation' }
     },
 
-    // 🦇 Player's learned skills - the fruit of their labors
+    //  Player's learned skills - the fruit of their labors
     playerSkills: {},
     skillPoints: 0,
     totalSkillPoints: 0,
@@ -318,14 +318,14 @@ const SkillSystem = {
         this.createStyles();
         this.integrateStartingSkills();
 
-        // 🗡️ Listen for level ups - the universe grants power to the worthy
+        //  Listen for level ups - the universe grants power to the worthy
         if (typeof EventBus !== 'undefined') {
             EventBus.on('player:levelUp', (data) => {
                 this.grantSkillPoints(2);
                 this.showNotification(`Level Up! +2 Skill Points`);
             });
 
-            // 🦇 Listen for character creation completion
+            //  Listen for character creation completion
             EventBus.on('character:created', () => {
                 this.integrateStartingSkills();
             });
@@ -346,16 +346,16 @@ const SkillSystem = {
 
         const startingSkills = game.player.skills;
 
-        // 🗡️ Convert old skill format to new tree format
+        //  Convert old skill format to new tree format
         for (const [skillName, level] of Object.entries(startingSkills)) {
             const mapping = this.startingSkillMappings[skillName];
             if (mapping && level > 0) {
-                // 🦇 Grant skill levels based on starting skill values
+                //  Grant skill levels based on starting skill values
                 if (!this.playerSkills[mapping.tree]) {
                     this.playerSkills[mapping.tree] = {};
                 }
 
-                // 🖤 Starting skills translate to initial tree progress
+                //  Starting skills translate to initial tree progress
                 const currentLevel = this.playerSkills[mapping.tree][mapping.skill] || 0;
                 if (level > currentLevel) {
                     this.playerSkills[mapping.tree][mapping.skill] = Math.min(level,
@@ -364,9 +364,9 @@ const SkillSystem = {
             }
         }
 
-        // 🗡️ Grant initial skill points based on character creation
+        //  Grant initial skill points based on character creation
         if (this.totalSkillPoints === 0) {
-            this.grantSkillPoints(3); // 🖤 Three points to begin the journey
+            this.grantSkillPoints(3); // ��� Three points to begin the journey
         }
 
         this.saveSkills();
@@ -406,7 +406,7 @@ const SkillSystem = {
         this.totalSkillPoints += amount;
         this.saveSkills();
 
-        // 🦇 Whisper to other systems
+        //  Whisper to other systems
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('skills:pointsChanged', { points: this.skillPoints });
         }
@@ -428,18 +428,18 @@ const SkillSystem = {
 
         const currentLevel = this.getSkillLevel(treeId, skillId);
 
-        // 🗡️ Check if already maxed - even gods have limits
+        //  Check if already maxed - even gods have limits
         if (currentLevel >= skill.maxLevel) {
             return { can: false, reason: 'Skill maxed out' };
         }
 
-        // 🦇 Check the cost - power demands sacrifice
+        //  Check the cost - power demands sacrifice
         const cost = skill.cost[currentLevel];
         if (this.skillPoints < cost) {
             return { can: false, reason: `Need ${cost} skill points` };
         }
 
-        // 🖤 Check prerequisites - wisdom builds upon wisdom
+        //  Check prerequisites - wisdom builds upon wisdom
         if (skill.requires) {
             for (const [reqSkillId, reqLevel] of Object.entries(skill.requires)) {
                 if (this.getSkillLevel(treeId, reqSkillId) < reqLevel) {
@@ -471,20 +471,20 @@ const SkillSystem = {
         const currentLevel = this.getSkillLevel(treeId, skillId);
         const cost = skill.cost[currentLevel];
 
-        // 🗡️ The price is paid
+        //  The price is paid
         this.skillPoints -= cost;
 
-        // 🦇 The skill is learned
+        //  The skill is learned
         if (!this.playerSkills[treeId]) {
             this.playerSkills[treeId] = {};
         }
         this.playerSkills[treeId][skillId] = currentLevel + 1;
 
-        // 🖤 Persist the growth
+        //  Persist the growth
         this.saveSkills();
         this.updateUI();
 
-        // 🗡️ Announce to the world
+        //  Announce to the world
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('skills:learned', {
                 tree: treeId,
@@ -495,7 +495,7 @@ const SkillSystem = {
 
         this.showNotification(`Learned ${skill.name} (Level ${currentLevel + 1})!`, 'success');
 
-        // 🦇 The sound of progress
+        //  The sound of progress
         if (typeof AudioSystem !== 'undefined') {
             AudioSystem.playSound('levelUp');
         }
@@ -519,13 +519,13 @@ const SkillSystem = {
     getTotalEffects() {
         const effects = {};
 
-        // 🗡️ Iterate through every learned skill
+        //  Iterate through every learned skill
         for (const [treeId, tree] of Object.entries(this.skillTrees)) {
             for (const [skillId, skill] of Object.entries(tree.skills)) {
                 const level = this.getSkillLevel(treeId, skillId);
                 if (level > 0) {
                     const skillEffects = skill.effect(level);
-                    // 🦇 Accumulate numerical effects, override booleans
+                    //  Accumulate numerical effects, override booleans
                     for (const [key, value] of Object.entries(skillEffects)) {
                         if (typeof value === 'number') {
                             effects[key] = (effects[key] || 0) + value;
@@ -552,7 +552,7 @@ const SkillSystem = {
         if (effects.fearDiscount) modifier -= effects.fearDiscount;
         if (effects.bulkDiscount) modifier -= effects.bulkDiscount;
 
-        return Math.max(0.5, modifier); // 🗡️ Floor at 50% - merchants must survive
+        return Math.max(0.5, modifier); // ���️ Floor at 50% - merchants must survive
     },
 
     getSellPriceModifier() {
@@ -631,7 +631,7 @@ const SkillSystem = {
     show() {
         this.loadSkills();
 
-        // 🗡️ Destroy any existing panel
+        //  Destroy any existing panel
         const existingPanel = document.getElementById('skill-panel');
         if (existingPanel) {
             existingPanel.remove();
@@ -645,7 +645,7 @@ const SkillSystem = {
             <div class="skill-panel-header">
                 <h2>🎓 Skill Trees</h2>
                 <div class="skill-points-display">
-                    <span class="skill-points-icon">⭐</span>
+                    <span class="skill-points-icon"></span>
                     <span class="skill-points-value">${this.skillPoints}</span>
                     <span class="skill-points-label">Skill Points</span>
                 </div>
@@ -671,7 +671,7 @@ const SkillSystem = {
 
         document.body.appendChild(panel);
 
-        // 🦇 Animate from the shadows
+        //  Animate from the shadows
         requestAnimationFrame(() => {
             panel.classList.add('visible');
         });
@@ -693,12 +693,12 @@ const SkillSystem = {
      * 🖤 DISPLAY A SPECIFIC TREE 🖤
      */
     showTree(treeId) {
-        // 🗡️ Update tab states
+        //  Update tab states
         document.querySelectorAll('.skill-tree-tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.tree === treeId);
         });
 
-        // 🦇 Render the chosen tree
+        //  Render the chosen tree
         const display = document.getElementById('skill-tree-display');
         if (display) {
             display.innerHTML = this.renderSkillTree(treeId);
@@ -715,15 +715,15 @@ const SkillSystem = {
 
         const skills = Object.entries(tree.skills);
 
-        // 🗡️ Organize skills into tiers based on prerequisites
+        //  Organize skills into tiers based on prerequisites
         const tiers = [[], [], []];
         skills.forEach(([skillId, skill]) => {
             if (!skill.requires) {
-                tiers[0].push([skillId, skill]); // 🦇 Foundation skills
+                tiers[0].push([skillId, skill]); // ��� Foundation skills
             } else if (Object.values(skill.requires).some(r => r >= 3)) {
-                tiers[2].push([skillId, skill]); // 🖤 Master skills
+                tiers[2].push([skillId, skill]); // ��� Master skills
             } else {
-                tiers[1].push([skillId, skill]); // 🗡️ Intermediate skills
+                tiers[1].push([skillId, skill]); // ���️ Intermediate skills
             }
         });
 
@@ -762,7 +762,7 @@ const SkillSystem = {
         const isMaxed = currentLevel >= skill.maxLevel;
         const cost = isMaxed ? 0 : skill.cost[currentLevel];
 
-        // 🗡️ Determine visual state
+        //  Determine visual state
         let statusClass = 'locked';
         if (isMaxed) {
             statusClass = 'maxed';
@@ -772,7 +772,7 @@ const SkillSystem = {
             statusClass = 'available';
         }
 
-        // 🦇 Calculate effect previews
+        //  Calculate effect previews
         const currentEffect = currentLevel > 0 ? skill.effect(currentLevel) : null;
         const nextEffect = !isMaxed ? skill.effect(currentLevel + 1) : null;
 
@@ -867,7 +867,7 @@ const SkillSystem = {
         if (typeof NotificationSystem !== 'undefined') {
             NotificationSystem.show(message, type);
         } else {
-            // 🦇 Fallback notification from the shadows
+            //  Fallback notification from the shadows
             const notification = document.createElement('div');
             notification.className = `skill-notification skill-notification-${type}`;
             notification.textContent = message;
@@ -1092,7 +1092,7 @@ const SkillSystem = {
             this.skillPoints = data.skillPoints || 0;
             this.totalSkillPoints = data.totalSkillPoints || 0;
 
-            // 🖤 Sync skills back to game.player for other systems 💀
+            //  Sync skills back to game.player for other systems 
             this._syncSkillsToPlayer();
 
             this.saveSkills();
@@ -1106,12 +1106,12 @@ const SkillSystem = {
     _syncSkillsToPlayer() {
         if (typeof game === 'undefined' || !game.player) return;
 
-        // 🦇 Ensure game.player.skills exists
+        //  Ensure game.player.skills exists
         if (!game.player.skills) {
             game.player.skills = {};
         }
 
-        // 🗡️ Map skill levels back to game.player.skills format
+        //  Map skill levels back to game.player.skills format
         for (const [skillId, level] of Object.entries(this.playerSkills)) {
             game.player.skills[skillId] = level;
         }
@@ -1120,14 +1120,14 @@ const SkillSystem = {
     }
 };
 
-// 🖤 AWAKEN WHEN THE DOM IS READY 🖤
+//  AWAKEN WHEN THE DOM IS READY 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => SkillSystem.init());
 } else {
     SkillSystem.init();
 }
 
-// 🦇 Export for module systems
+//  Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = SkillSystem;
 }

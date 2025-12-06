@@ -1,19 +1,19 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // DAY/NIGHT CYCLE - time's cruel march continues
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const DayNightCycle = {
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // CONFIGURATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     currentPhase: 'day',
     transitionProgress: 0,
-    _updateIntervalId: null, // 🖤 Store interval ID for cleanup 💀
+    _updateIntervalId: null, // ��� Store interval ID for cleanup 💀
 
     // Time phases (24-hour format)
     phases: {
@@ -122,9 +122,9 @@ const DayNightCycle = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // INITIALIZATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
     init() {
         console.log('🌅 DayNightCycle: The sun rises on a new adventure...');
 
@@ -146,7 +146,7 @@ const DayNightCycle = {
         }
 
         // Also use interval as backup
-        // 🖤 Store interval ID for proper cleanup 💀
+        //  Store interval ID for proper cleanup 
         if (typeof TimerManager !== 'undefined') {
             this._updateIntervalId = TimerManager.setInterval(() => {
                 if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
@@ -156,7 +156,7 @@ const DayNightCycle = {
         }
     },
 
-    // 🖤 Cleanup method for proper resource management 💀
+    //  Cleanup method for proper resource management 
     cleanup() {
         if (this._updateIntervalId && typeof TimerManager !== 'undefined') {
             TimerManager.clearInterval(this._updateIntervalId);
@@ -164,9 +164,9 @@ const DayNightCycle = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // PHASE LOGIC
-    // ═══════════════════════════════════════════════════════════════
+    // 
     getCurrentHour() {
         if (typeof TimeSystem === 'undefined') return 12;
         return TimeSystem.currentTime?.hour || 12;
@@ -262,9 +262,9 @@ const DayNightCycle = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // EFFECTS API
-    // ═══════════════════════════════════════════════════════════════
+    // 
     getPhaseEffects() {
         const phase = this.phases[this.currentPhase];
         return phase?.effects || this.phases.morning.effects;
@@ -311,13 +311,13 @@ const DayNightCycle = {
         };
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // VISUAL EFFECTS
-    // ═══════════════════════════════════════════════════════════════
+    // 
     createOverlay() {
         if (document.getElementById('daynight-overlay')) return;
 
-        // 🖤 Day/night overlay goes in map-container, NOT body - so it doesn't cover panels! 💀
+        //  Day/night overlay goes in map-container, NOT body - so it doesn't cover panels! 
         const mapContainer = document.getElementById('map-container');
         if (!mapContainer) {
             console.warn('🌅 DayNightCycle: map-container not found, delaying overlay creation');
@@ -330,12 +330,12 @@ const DayNightCycle = {
         overlay.className = 'daynight-overlay';
         mapContainer.appendChild(overlay);
 
-        // 🖤 Stars container is SEPARATE and goes on body but BEHIND everything 💀
+        //  Stars container is SEPARATE and goes on body but BEHIND everything 
         // Stars/moon should only be visible in the outer margins, not over the game world
         const stars = document.createElement('div');
         stars.id = 'stars-container';
         stars.className = 'stars-container';
-        document.body.insertBefore(stars, document.body.firstChild); // 🖤 Very back of body
+        document.body.insertBefore(stars, document.body.firstChild); // ��� Very back of body
 
         // Time phase indicator is now created in top-bar by WeatherSystem
     },
@@ -405,7 +405,7 @@ const DayNightCycle = {
             star.style.top = `${Math.random() * 60}%`;
             star.style.animationDelay = `${Math.random() * 3}s`;
             star.style.fontSize = `${8 + Math.random() * 8}px`;
-            star.textContent = Math.random() > 0.7 ? '✨' : '⭐';
+            star.textContent = Math.random() > 0.7 ? '✨' : '';
             container.appendChild(star);
         }
 
@@ -474,9 +474,9 @@ const DayNightCycle = {
         document.head.appendChild(style);
     },
 
-    // ═══════════════════════════════════════════════════════════════
+    // 
     // SAVE/LOAD
-    // ═══════════════════════════════════════════════════════════════
+    // 
     getState() {
         return {
             currentPhase: this.currentPhase,
@@ -492,9 +492,9 @@ const DayNightCycle = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // DEBOOGER 🦇
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    // DEBOOGER 
+    // 
     setPhase(phaseId) {
         if (this.phases[phaseId]) {
             this.currentPhase = phaseId;
@@ -509,9 +509,9 @@ const DayNightCycle = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
+// 
 // GLOBAL EXPOSURE
-// ═══════════════════════════════════════════════════════════════
+// 
 window.DayNightCycle = DayNightCycle;
 
 // Initialize when DOM ready

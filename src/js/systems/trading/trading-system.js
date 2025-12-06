@@ -1,20 +1,20 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // TRADING SYSTEM - where greed becomes gameplay
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const TradingSystem = {
-    // ⚙️ Config - how we're gonna hustle today
+    //  Config - how we're gonna hustle today
     tradeMode: 'single', // 'single' or 'bulk' (for the ambitious)
     selectedTradeItems: new Map(),
     tradeHistory: [],
     priceAlerts: [],
 
-    // 🖤 Escape HTML to prevent XSS - sanitize or die 💀
+    //  Escape HTML to prevent XSS - sanitize or die 
     _escapeHTML(str) {
         if (str == null) return '';
         return String(str)
@@ -25,14 +25,14 @@ const TradingSystem = {
             .replace(/'/g, '&#039;');
     },
     
-    // 🌙 Initialize - let the exploitation begin
+    //  Initialize - let the exploitation begin
     init() {
         this.setupEventListeners();
         this.updateTradeHistoryDisplay();
         this.updatePriceAlertsDisplay();
     },
     
-    // 👂 Setup event listeners - watching for opportunities (and mistakes)
+    //  Setup event listeners - watching for opportunities (and mistakes)
     setupEventListeners() {
         // trade mode toggle - single item or going full hoarder
         const singleBtn = document.getElementById('single-trade-btn');
@@ -80,7 +80,7 @@ const TradingSystem = {
         }
     },
     
-    // 🔀 Set trade mode - choosing your flavor of capitalism
+    //  Set trade mode - choosing your flavor of capitalism
     setTradeMode(mode) {
         this.tradeMode = mode;
         
@@ -111,7 +111,7 @@ const TradingSystem = {
         updateMarketDisplay();
     },
     
-    // 🛒 Select all buy items - going full shopaholic
+    //  Select all buy items - going full shopaholic
     selectAllBuyItems() {
         const buyItems = document.querySelectorAll('#buy-items .market-item');
         buyItems.forEach(itemElement => {
@@ -124,7 +124,7 @@ const TradingSystem = {
         this.updateTradeSummary();
     },
     
-    // 💸 Select all sell items - liquidating the hoard
+    //  Select all sell items - liquidating the hoard
     selectAllSellItems() {
         const sellItems = document.querySelectorAll('#sell-items .market-item');
         sellItems.forEach(itemElement => {
@@ -137,7 +137,7 @@ const TradingSystem = {
         this.updateTradeSummary();
     },
     
-    // 🧹 Clear selection - buyer's remorse prevention
+    //  Clear selection - buyer's remorse prevention
     clearSelection(type) {
         this.selectedTradeItems.clear();
         
@@ -150,7 +150,7 @@ const TradingSystem = {
         this.updateTradeSummary();
     },
     
-    // 🛍️ Buy selected items - spending money we may not have
+    //  Buy selected items - spending money we may not have
     buySelectedItems() {
         if (this.selectedTradeItems.size === 0) {
             addMessage('No items selected for purchase!');
@@ -164,7 +164,7 @@ const TradingSystem = {
         this.clearSelection('buy');
     },
     
-    // 💰 Sell selected items - parting with our precious belongings
+    //  Sell selected items - parting with our precious belongings
     sellSelectedItems() {
         if (this.selectedTradeItems.size === 0) {
             addMessage('No items selected for sale!');
@@ -178,7 +178,7 @@ const TradingSystem = {
         this.clearSelection('sell');
     },
     
-    // 📊 Update trade summary - tallying the damage
+    //  Update trade summary - tallying the damage
     updateTradeSummary() {
         const totalElement = document.getElementById('trade-total');
         const profitElement = document.getElementById('trade-profit');
@@ -210,7 +210,7 @@ const TradingSystem = {
         profitElement.textContent = `Profit: ${totalProfit} gold`;
     },
     
-    // 👁️ Update trade preview - see the pain before committing
+    //  Update trade preview - see the pain before committing
     updateTradePreview(itemId, quantity) {
         const previewElement = document.getElementById('trade-preview');
         if (!previewElement) return;
@@ -251,8 +251,8 @@ const TradingSystem = {
         }
     },
     
-    // 📜 Record trade - documenting our financial journey
-    recordTrade(type, items) {
+    //  Record trade - documenting our financial journey
+    recordTrade(type, items, price) {
         const trade = {
             type: type, // 'buy' or 'sell'
             timestamp: Date.now(),
@@ -261,7 +261,9 @@ const TradingSystem = {
                 itemId: id,
                 quantity: qty,
                 itemName: ItemDatabase.getItemName(id)
-            }))
+            })),
+            //  Track price to remember what we paid/earned 
+            price: price || 0
         };
         
         this.tradeHistory.unshift(trade);
@@ -274,7 +276,7 @@ const TradingSystem = {
         this.updateTradeHistoryDisplay();
     },
     
-    // 📋 Update trade history - a gallery of past choices
+    //  Update trade history - a gallery of past choices
     updateTradeHistoryDisplay() {
         const historyContainer = document.getElementById('trade-history');
         if (!historyContainer) return;
@@ -284,7 +286,7 @@ const TradingSystem = {
             return;
         }
         
-        // 🖤 Escape all user-facing data to prevent XSS 💀
+        //  Escape all user-facing data to prevent XSS 
         historyContainer.innerHTML = this.tradeHistory.map(trade => `
             <div class="trade-history-item">
                 <div class="trade-type">${this._escapeHTML(trade.type).toUpperCase()}</div>
@@ -295,7 +297,7 @@ const TradingSystem = {
         `).join('');
     },
     
-    // 🔔 Add price alert - notifying us when the market moves
+    //  Add price alert - notifying us when the market moves
     addPriceAlert(itemId, targetPrice, type) {
         this.priceAlerts.push({
             itemId: itemId,
@@ -308,13 +310,13 @@ const TradingSystem = {
         this.updatePriceAlertsDisplay();
     },
     
-    // 🗑️ Remove price alert - giving up on that dream
+    //  Remove price alert - giving up on that dream
     removePriceAlert(itemId) {
         this.priceAlerts = this.priceAlerts.filter(alert => alert.itemId !== itemId);
         this.updatePriceAlertsDisplay();
     },
     
-    // 👀 Check price alerts - stalking the market like an ex
+    //  Check price alerts - stalking the market like an ex
     checkPriceAlerts() {
         if (game.state !== GameState.PLAYING) return;
         
@@ -342,7 +344,7 @@ const TradingSystem = {
         });
     },
     
-    // 📱 Update price alerts - our market stalker list
+    //  Update price alerts - our market stalker list
     updatePriceAlertsDisplay() {
         const alertsContainer = document.getElementById('price-alerts');
         if (!alertsContainer) return;
@@ -364,14 +366,14 @@ const TradingSystem = {
         `).join('');
     },
 
-    // 🧹 Clear trade history - erasing the evidence
+    //  Clear trade history - erasing the evidence
     clearTradeHistory() {
         this.tradeHistory = [];
         this.updateTradeHistoryDisplay();
         addMessage('Trade history cleared!');
     },
     
-    // 📤 Export trade history - keeping receipts like a true adult
+    //  Export trade history - keeping receipts like a true adult
     exportTradeHistory() {
         if (this.tradeHistory.length === 0) {
             addMessage('No trade history to export!');

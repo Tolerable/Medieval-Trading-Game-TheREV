@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // 👥 UNIFIED PEOPLE PANEL - talk, trade, quest, exist... all in one dark place
 // ═══════════════════════════════════════════════════════════════
-// File Version: GameConfig.version.file
+// File Version: 0.90.01
 // conjured by Unity AI Lab - every soul, every transaction, every whisper
 // the NPC list + embedded chat + trade + quest items in seamless harmony
 // ═══════════════════════════════════════════════════════════════
@@ -84,9 +84,9 @@ const PeoplePanel = {
                         <span class="stat-icon" id="npc-relation-icon">😐</span>
                         <span class="stat-label" id="npc-relation-label">Neutral</span>
                     </div>
-                    <div class="npc-stat-item" title="Reputation">
+                    <div class="npc-stat-item" title="Reputation (current / trade requirement)">
                         <span class="stat-icon">⭐</span>
-                        <span class="stat-value" id="npc-reputation-value">0</span>
+                        <span class="stat-value" id="npc-reputation-value">0</span><span class="stat-sep">/</span><span class="stat-value stat-req" id="npc-rep-required">0</span>
                     </div>
                     <div class="npc-stat-item" title="Trades Completed">
                         <span class="stat-icon">🤝</span>
@@ -346,6 +346,16 @@ const PeoplePanel = {
                 font-weight: bold;
                 white-space: nowrap;
             }
+            .npc-stat-item .stat-sep {
+                font-size: 0.7em;
+                color: #666;
+                margin: 0 1px;
+            }
+            .npc-stat-item .stat-req {
+                font-size: 0.75em;
+                color: #888;
+                font-weight: normal;
+            }
 
             .chat-content {
                 flex: 1;
@@ -579,13 +589,23 @@ const PeoplePanel = {
         });
 
         // 🖤 listen for quest updates
-        document.addEventListener('quest-assigned', () => this.updateQuestItems());
+        document.addEventListener('quest-assigned', () => {
+            this.updateQuestItems();
+            // 🖤💀 CRITICAL: Refresh NPC list to update quest markers (! and ?) on portraits
+            if (this.viewMode === 'list') {
+                this.showNPCList(); // Rebuild cards with updated markers
+            }
+        });
         document.addEventListener('quest-completed', () => {
             this.updateQuestItems();
             // 🖤💀 Also refresh stats bar AND trade section to show updated reputation after quest reward
             if (this.currentNPC && this.viewMode === 'chat') {
                 this.updateNPCStatsBar(this.currentNPC);
                 this.updateTradeSection(this.currentNPC); // 🖤💀 FIXED: Refresh trade section too!
+            }
+            // 🖤💀 CRITICAL: Refresh NPC list to update quest markers (! and ?) on portraits
+            if (this.viewMode === 'list') {
+                this.showNPCList(); // Rebuild cards with updated markers
             }
         });
 
@@ -744,9 +764,12 @@ const PeoplePanel = {
         const description = this.escapeHtml(npc.description || this.getNPCDescription(npc.type || npc.id));
 
         // 🖤💀 WOW-STYLE QUEST MARKERS - Check for quest status 💀
-        const questMarker = this.getQuestMarker(npc.type || npc.id);
+        const npcTypeForQuest = npc.type || npc.id;
+        console.log(`🎴 createNPCCard: NPC "${name}" (id: ${npc.id}, type: ${npc.type}, using: ${npcTypeForQuest})`);
+        const questMarker = this.getQuestMarker(npcTypeForQuest);
         const hasDelivery = this.npcHasDeliveryForThem(npc.type || npc.id);
-        const canTrade = this.npcCanTrade(npc.type || npc.id);
+        // 🖤💀 Also check npc.canTrade for random encounters (smuggler, courier, pilgrim) 💀
+        const canTrade = this.npcCanTrade(npc.type || npc.id) || npc.canTrade;
 
         let badges = '';
         if (questMarker) {
@@ -878,7 +901,8 @@ const PeoplePanel = {
         if (this.npcHasDeliveryForThem(npcData.type || npcData.id)) {
             badges.innerHTML += '<span class="badge badge-delivery">📦 Delivery</span>';
         }
-        if (this.npcCanTrade(npcData.type || npcData.id)) {
+        // 🖤💀 Also check npcData.canTrade for random encounters (smuggler, courier, pilgrim) 💀
+        if (this.npcCanTrade(npcData.type || npcData.id) || npcData.canTrade) {
             badges.innerHTML += '<span class="badge badge-trade">💰 Trade</span>';
         }
     },
@@ -913,16 +937,37 @@ const PeoplePanel = {
         const icon = levelInfo?.icon || '😐';
         const label = levelInfo?.label || 'Neutral';
 
+        // 🖤💀 Get the trade requirement for this NPC type 💀
+        const npcType = npcData.type || npcData.id;
+        const repRequired = this.getTradeRepRequirement(npcType);
+        const canTrade = this.npcCanTrade(npcType) || npcData.canTrade;
+
         // 🖤 Update UI elements
         const relationIcon = document.getElementById('npc-relation-icon');
         const relationLabel = document.getElementById('npc-relation-label');
         const reputationValue = document.getElementById('npc-reputation-value');
+        const repRequiredEl = document.getElementById('npc-rep-required');
         const tradesValue = document.getElementById('npc-trades-value');
         const goldTradedValue = document.getElementById('npc-gold-traded-value');
 
         if (relationIcon) relationIcon.textContent = icon;
         if (relationLabel) relationLabel.textContent = label;
-        if (reputationValue) reputationValue.textContent = relationship.reputation;
+        if (reputationValue) {
+            reputationValue.textContent = relationship.reputation;
+            // 🖤💀 Color code: green if trade unlocked, yellow if close, red if far 💀
+            if (canTrade) {
+                reputationValue.style.color = '#4a9';
+            } else if (relationship.reputation >= repRequired * 0.5) {
+                reputationValue.style.color = '#da4';
+            } else {
+                reputationValue.style.color = '#c66';
+            }
+        }
+        if (repRequiredEl) {
+            repRequiredEl.textContent = repRequired;
+            // 🖤 Show requirement in muted color, or green if already met
+            repRequiredEl.style.color = canTrade ? '#4a9' : '#888';
+        }
         if (tradesValue) tradesValue.textContent = tradeStats.timesTraded;
         if (goldTradedValue) goldTradedValue.textContent = tradeStats.totalGoldTraded.toLocaleString();
     },
@@ -1126,27 +1171,85 @@ const PeoplePanel = {
                 });
             }
 
+            // 💬 COMPLETE TALK OBJECTIVE - Player needs to talk to this NPC for quest progress
+            // 🖤💀 CRITICAL: Only show if ALL PREVIOUS objectives are complete! 💀
+            const allActiveQuests = Object.values(QuestSystem.activeQuests || {});
+            allActiveQuests.forEach(quest => {
+                const talkObjectiveIndex = quest.objectives?.findIndex(o =>
+                    o.type === 'talk' &&
+                    !o.completed &&
+                    o.npc === npcType &&
+                    (!o.location || o.location === location || o.location === 'any')
+                );
+
+                if (talkObjectiveIndex >= 0) {
+                    const talkObjective = quest.objectives[talkObjectiveIndex];
+
+                    // 🖤💀 Check if ALL previous objectives are complete
+                    let previousObjectivesComplete = true;
+                    for (let i = 0; i < talkObjectiveIndex; i++) {
+                        const prevObj = quest.objectives[i];
+                        // Check completion based on objective type
+                        if (prevObj.type === 'collect' || prevObj.type === 'buy' || prevObj.type === 'sell' || prevObj.type === 'trade' || prevObj.type === 'defeat') {
+                            if ((prevObj.current || 0) < prevObj.count) {
+                                previousObjectivesComplete = false;
+                                break;
+                            }
+                        } else if (prevObj.type === 'visit' || prevObj.type === 'talk' || prevObj.type === 'explore' || prevObj.type === 'investigate') {
+                            if (!prevObj.completed) {
+                                previousObjectivesComplete = false;
+                                break;
+                            }
+                        } else if (prevObj.type === 'gold') {
+                            if (!prevObj.completed) {
+                                previousObjectivesComplete = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Show talk button, but disable it if previous objectives aren't done
+                    actions.push({
+                        label: `💬 ${talkObjective.description || 'Talk about quest'}`,
+                        action: previousObjectivesComplete
+                            ? () => this.completeTalkObjective(quest, talkObjective)
+                            : null, // No action if locked
+                        priority: 1.5, // High priority - between turn-in and other actions
+                        questRelated: true,
+                        disabled: !previousObjectivesComplete,
+                        lockedReason: !previousObjectivesComplete ? 'Complete previous objectives first' : null
+                    });
+                }
+            });
+
             // ⏳ CHECK PROGRESS - Player has active quests from this NPC
             // 🖤💀 Show INDIVIDUAL buttons for each quest, not one generic button!
-            const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType);
+            const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType, location);
             const inProgress = activeFromNPC.filter(q => {
                 const progress = QuestSystem.checkProgress(q.id);
                 return progress.status === 'in_progress';
             });
             if (inProgress.length > 0) {
                 inProgress.forEach(quest => {
-                    actions.push({
-                        label: `⏳ Progress: ${quest.name}`,
-                        action: () => this.askQuestProgressSpecific(quest),
-                        priority: 4,
-                        questRelated: true
-                    });
+                    // 🖤💀 Don't show progress button if there's already a talk objective button for this quest
+                    const hasTalkButton = actions.some(a =>
+                        a.questRelated && a.label.includes(quest.name) && a.label.startsWith('💬')
+                    );
+                    if (!hasTalkButton) {
+                        actions.push({
+                            label: `⏳ Progress: ${quest.name}`,
+                            action: () => this.askQuestProgressSpecific(quest),
+                            priority: 4,
+                            questRelated: true
+                        });
+                    }
                 });
             }
         }
 
         // 🖤 Trade-related actions - vendors and service NPCs
-        if (this.npcCanTrade(npcType)) {
+        // 🖤💀 Also check npcData.canTrade for random encounters (smuggler, courier, pilgrim) 💀
+        if (this.npcCanTrade(npcType) || npcData.canTrade) {
             actions.push({ label: '💰 Browse wares', action: () => this.askAboutWares(), priority: 10 });
 
             // 🖤💀 "Open market" button ONLY at Royal Capital with merchant NPC 💀
@@ -1253,8 +1356,15 @@ const PeoplePanel = {
             const btn = document.createElement('button');
             btn.className = 'quick-action-btn';
             if (a.questRelated) btn.classList.add('quest-action-btn');
+            if (a.disabled) {
+                btn.classList.add('disabled');
+                btn.disabled = true;
+                if (a.lockedReason) btn.title = a.lockedReason;
+            }
             btn.textContent = a.label;
-            btn.addEventListener('click', a.action);
+            if (a.action) {
+                btn.addEventListener('click', a.action);
+            }
             container.appendChild(btn);
         });
 
@@ -1265,29 +1375,41 @@ const PeoplePanel = {
     getQuestsReadyToComplete(npcType) {
         if (typeof QuestSystem === 'undefined') return [];
 
+        const location = game?.currentLocation?.id;
+        console.log(`  📋 getQuestsReadyToComplete('${npcType}') at '${location}'`);
+
         // 🖤💀 Get quests where this NPC is the GIVER
-        const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType);
+        const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType, location);
+        console.log(`    activeFromNPC:`, activeFromNPC.map(q => `${q.id} (giver:${q.giver})`));
 
         // 🖤💀 ALSO get quests where this NPC is the TURN-IN target (might be different from giver!)
         const allActive = Object.values(QuestSystem.activeQuests || {});
+        console.log(`    allActive:`, allActive.map(q => `${q.id} (turnIn:${q.turnInNpc}, loc:${q.turnInLocation})`))
 
         const turnInQuests = allActive.filter(q => {
             // 🖤💀 FIX: More precise matching for turn-in NPCs 💀
             // Check if turnInNpc EXACTLY matches (use strict comparison)
             const turnInMatches = q.turnInNpc && q.turnInNpc === npcType;
-            // Check if final talk objective EXACTLY targets this NPC type
+            // Check if final talk objective EXACTLY targets this NPC type AND location
             const talkObj = q.objectives?.find(o => o.type === 'talk' && !o.completed);
-            const talkMatches = talkObj && talkObj.npc === npcType;
+            const talkNpcMatches = talkObj && talkObj.npc === npcType;
+            const talkLocationMatches = !talkObj || !talkObj.location || talkObj.location === location || talkObj.location === 'any';
+            const talkMatches = talkNpcMatches && talkLocationMatches;
+            // 🖤 LOCATION CHECK: Ensure turn-in is at THIS location
+            const locationMatches = !location || !q.turnInLocation || q.turnInLocation === location || q.turnInLocation === 'any';
 
-            return turnInMatches || talkMatches;
+            return (turnInMatches || talkMatches) && locationMatches;
         });
+        console.log(`    turnInQuests:`, turnInQuests.map(q => q.id));
 
         // 🦇 Combine and dedupe
         const combined = [...activeFromNPC, ...turnInQuests];
         const uniqueQuests = [...new Map(combined.map(q => [q.id, q])).values()];
+        console.log(`    uniqueQuests (before ready filter):`, uniqueQuests.map(q => q.id));
 
-        return uniqueQuests.filter(q => {
+        const result = uniqueQuests.filter(q => {
             const progress = QuestSystem.checkProgress(q.id);
+            console.log(`    ${q.id} progress:`, progress.status, 'objectives:', q.objectives?.map(o => `${o.type}:${o.completed}`));
 
             // 🖤💀 Standard check - all objectives complete
             if (progress.status === 'ready_to_complete') return true;
@@ -1304,10 +1426,40 @@ const PeoplePanel = {
                     return !o.completed;
                 }) || [];
 
-                // If only 1 incomplete objective AND it's a talk to THIS NPC
+                // If only 1 incomplete objective AND it's a talk to THIS NPC at THIS location
                 if (incompleteObjs.length === 1 && incompleteObjs[0].type === 'talk') {
-                    const talkTarget = incompleteObjs[0].npc;
-                    if (QuestSystem._npcMatchesObjective?.(npcType, talkTarget)) {
+                    const talkObj = incompleteObjs[0];
+                    const talkTarget = talkObj.npc;
+                    const talkLocation = talkObj.location;
+                    const npcMatches = QuestSystem._npcMatchesObjective?.(npcType, talkTarget);
+                    const locationMatches = !talkLocation || talkLocation === location || talkLocation === 'any';
+
+                    // 🖤💀 SEQUENTIAL CHECK: Ensure all PREVIOUS objectives are complete! 💀
+                    const talkObjIndex = q.objectives?.indexOf(talkObj) ?? -1;
+                    let previousObjectivesComplete = true;
+                    if (talkObjIndex > 0) {
+                        for (let i = 0; i < talkObjIndex; i++) {
+                            const prevObj = q.objectives[i];
+                            if (prevObj.type === 'collect' || prevObj.type === 'buy' || prevObj.type === 'sell' || prevObj.type === 'trade' || prevObj.type === 'defeat') {
+                                if ((prevObj.current || 0) < prevObj.count) {
+                                    previousObjectivesComplete = false;
+                                    break;
+                                }
+                            } else if (prevObj.type === 'explore') {
+                                if ((prevObj.current || 0) < prevObj.rooms) {
+                                    previousObjectivesComplete = false;
+                                    break;
+                                }
+                            } else if (prevObj.type === 'visit' || prevObj.type === 'talk' || prevObj.type === 'investigate' || prevObj.type === 'gold') {
+                                if (!prevObj.completed) {
+                                    previousObjectivesComplete = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (npcMatches && locationMatches && previousObjectivesComplete) {
                         return true; // 🖤 Talking to them IS the completion action!
                     }
                 }
@@ -1315,6 +1467,8 @@ const PeoplePanel = {
 
             return false;
         });
+        console.log(`    FINAL result:`, result.map(q => `${q.id} (status: ${QuestSystem.checkProgress(q.id).status})`));
+        return result;
     },
 
     // 📦 GET DELIVERIES FOR NPC - where this NPC is the RECIPIENT (not the giver)
@@ -1435,6 +1589,80 @@ const PeoplePanel = {
             npcResponse = `*looks at your hands* You don't have the items I need. Come back when you have them.`;
         } else {
             npcResponse = `*looks confused* I'm not sure what you mean. Do you have a quest to turn in?`;
+        }
+
+        this.addChatMessage(npcResponse, 'npc');
+        this.chatHistory.push({ role: 'assistant', content: npcResponse });
+
+        // 🔊 Play TTS
+        if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
+            const voice = this.getNPCVoice(this.currentNPC);
+            NPCVoiceChatSystem.playVoice(npcResponse, voice);
+        }
+
+        // 🖤 Update UI
+        this.updateQuestItems();
+        this.updateQuickActions(this.currentNPC);
+    },
+
+    // 💬 COMPLETE TALK OBJECTIVE - Player talks to NPC for mid-quest progression
+    async completeTalkObjective(quest, talkObjective) {
+        const questId = quest.id || quest.questId;
+        const npcType = this.currentNPC?.type || 'stranger';
+
+        // 🖤💀 VALIDATE: Check that ALL previous objectives are complete! 💀
+        const talkObjectiveIndex = quest.objectives?.indexOf(talkObjective) || 0;
+        for (let i = 0; i < talkObjectiveIndex; i++) {
+            const prevObj = quest.objectives[i];
+            let isComplete = false;
+
+            if (prevObj.type === 'collect' || prevObj.type === 'buy' || prevObj.type === 'sell' || prevObj.type === 'trade' || prevObj.type === 'defeat') {
+                isComplete = (prevObj.current || 0) >= prevObj.count;
+            } else if (prevObj.type === 'visit' || prevObj.type === 'talk' || prevObj.type === 'explore' || prevObj.type === 'investigate' || prevObj.type === 'gold') {
+                isComplete = prevObj.completed || false;
+            }
+
+            if (!isComplete) {
+                // Previous objective not complete - can't proceed!
+                const errorMsg = `*shakes head* You haven't completed the previous tasks yet. Come back when you've finished them.`;
+                this.addChatMessage(errorMsg, 'npc');
+                this.chatHistory.push({ role: 'assistant', content: errorMsg });
+                if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
+                    const voice = this.getNPCVoice(this.currentNPC);
+                    NPCVoiceChatSystem.playVoice(errorMsg, voice);
+                }
+                return;
+            }
+        }
+
+        // 🖤 Display player message
+        const message = talkObjective.description || `I need to talk to you about "${quest.name}".`;
+        this.addChatMessage(message, 'player');
+        this.chatHistory.push({ role: 'user', content: message });
+
+        // 🖤💀 CRITICAL: Complete the talk objective using QuestSystem 💀
+        if (typeof QuestSystem !== 'undefined') {
+            QuestSystem.updateProgress('talk', { npc: npcType, npcType: npcType });
+            console.log(`💬 Completed talk objective for ${questId} with ${npcType}`);
+        }
+
+        // 🖤 Generate NPC response
+        const questName = quest.name || 'the task';
+        const itemName = talkObjective.givesItem
+            ? (QuestSystem.questItems?.[talkObjective.givesItem]?.name || talkObjective.givesItem.replace(/_/g, ' '))
+            : null;
+
+        let npcResponse = `*nods thoughtfully* Ah, about "${questName}". `;
+
+        if (itemName) {
+            npcResponse += `Here, take this - you'll need it. *hands you ${itemName}* `;
+        }
+
+        // Use quest dialogue if available
+        if (quest.dialogue?.progress) {
+            npcResponse += quest.dialogue.progress;
+        } else {
+            npcResponse += `Continue with your task. You're doing well.`;
         }
 
         this.addChatMessage(npcResponse, 'npc');
@@ -1791,12 +2019,14 @@ const PeoplePanel = {
         if (!container || !preview) return;
 
         const npcType = npcData.type || npcData.id;
-        const canTrade = this.npcCanTrade(npcType);
+        // 🖤💀 Also check npcData.canTrade for random encounters (smuggler, courier, pilgrim) 💀
+        const canTrade = this.npcCanTrade(npcType) || npcData.canTrade;
         const repRequired = this.getTradeRepRequirement(npcType);
         const currentRep = this.getNPCReputation(npcType);
 
         // 🖤 Always show trade section for potential traders, but indicate locked status
-        const potentialTrader = repRequired > 0 || ['merchant', 'innkeeper', 'general_store', 'baker',
+        // 🖤💀 Also include NPCs with canTrade flag from encounters 💀
+        const potentialTrader = npcData.canTrade || repRequired > 0 || ['merchant', 'innkeeper', 'general_store', 'baker',
             'farmer', 'fisherman', 'ferryman', 'traveler', 'blacksmith', 'apothecary',
             'tailor', 'herbalist', 'miner', 'jeweler', 'banker', 'guild_master', 'noble'].includes(npcType);
 
@@ -2671,9 +2901,11 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         if (typeof QuestSystem === 'undefined') return null;
 
         const location = typeof game !== 'undefined' ? game.currentLocation?.id : null;
+        console.log(`🔍 getQuestMarker('${npcType}') at location '${location}'`);
 
         // 🖤 PRIORITY 1: Quest ready to turn in (? markers)
         const readyToComplete = this.getQuestsReadyToComplete(npcType);
+        console.log(`  readyToComplete:`, readyToComplete.map(q => q.id));
         if (readyToComplete.length > 0) {
             // Find the highest priority quest to show
             const mainQuest = readyToComplete.find(q => q.type === 'main');
@@ -2689,7 +2921,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         }
 
         // 🖤 PRIORITY 2: Quest in progress from this NPC (grey ? markers)
-        const activeFromNPC = QuestSystem.getActiveQuestsForNPC?.(npcType) || [];
+        const activeFromNPC = QuestSystem.getActiveQuestsForNPC?.(npcType, location) || [];
         const inProgress = activeFromNPC.filter(q => {
             const progress = QuestSystem.checkProgress?.(q.id);
             return progress?.status === 'in_progress';
@@ -2697,9 +2929,30 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
 
         // 🦇 Also check if this NPC is the turn-in target for any active quest
         const turnInQuests = Object.values(QuestSystem.activeQuests || {}).filter(q => {
-            if (q.turnInNpc === npcType) return true;
-            const talkObj = q.objectives?.find(o => o.type === 'talk' && !o.completed);
-            return talkObj?.npc === npcType;
+            // 🖤 Check if NPC type matches AND location matches (for multiple merchants/NPCs of same type)
+            const turnInNpcMatches = q.turnInNpc === npcType;
+
+            // 🖤💀 Check for ANY talk objectives to this NPC (even if locked by previous objectives) 💀
+            // This shows the grey ? marker indicating they're involved in an active quest
+            const hasTalkObjective = q.objectives?.some(o =>
+                o.type === 'talk' &&
+                !o.completed &&
+                o.npc === npcType &&
+                (!o.location || o.location === location || o.location === 'any')
+            );
+
+            // 🖤💀 If this NPC has a talk objective in this quest, show the marker 💀
+            if (hasTalkObjective) {
+                return true;
+            }
+
+            // For turn-in NPCs, check the quest's turn-in location
+            if (turnInNpcMatches) {
+                const locationMatches = !location || !q.turnInLocation || q.turnInLocation === location || q.turnInLocation === 'any';
+                return locationMatches;
+            }
+
+            return false;
         });
 
         if (inProgress.length > 0 || turnInQuests.length > 0) {

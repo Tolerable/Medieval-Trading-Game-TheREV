@@ -1,5 +1,5 @@
 /**
- * 🖤 PLAYWRIGHT TEST CONFIGURATION
+ * PLAYWRIGHT TEST CONFIGURATION
  * Toggle which test suites run with simple true/false flags
  *
  * ALL TESTS DISABLED FOR CI/CD - Deploy only, no testing
@@ -8,16 +8,16 @@
 
 module.exports = {
   // ═══════════════════════════════════════════════════════════════
-  // 🎮 CORE GAME TESTS - ALL DISABLED
+  // CORE GAME TESTS - ALL DISABLED
   // ═══════════════════════════════════════════════════════════════
 
   loadingTests: false,
   newGameTests: false,
   mainMenuTests: false,
-  gameFlowTests: true,  // 🖤 Enabled - tests now handle full intro sequence
+  gameFlowTests: true,  // Enabled - tests now handle full intro sequence
 
   // ═══════════════════════════════════════════════════════════════
-  // 🐛 DEBOOGER & CHEAT COMMAND TESTS - ALL DISABLED
+  // DEBOOGER & CHEAT COMMAND TESTS - ALL DISABLED
   // ═══════════════════════════════════════════════════════════════
 
   deboogerCommandTests: false,
@@ -31,7 +31,7 @@ module.exports = {
   achievementCommands: false,
 
   // ═══════════════════════════════════════════════════════════════
-  // 📋 PANEL TESTS - ALL DISABLED
+  // PANEL TESTS - ALL DISABLED
   // ═══════════════════════════════════════════════════════════════
 
   panelTests: false,
@@ -53,13 +53,13 @@ module.exports = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // ⌨️ KEYBINDING TESTS - DISABLED
+  // KEYBINDING TESTS - DISABLED
   // ═══════════════════════════════════════════════════════════════
 
   keybindingTests: false,
 
   // ═══════════════════════════════════════════════════════════════
-  // 🎯 FEATURE TESTS - ALL DISABLED
+  // FEATURE TESTS - ALL DISABLED
   // ═══════════════════════════════════════════════════════════════
 
   tradingTests: false,
@@ -71,7 +71,7 @@ module.exports = {
   timeSystemTests: false,
 
   // ═══════════════════════════════════════════════════════════════
-  // 🔧 ADDITIONAL TEST SUITES - ALL DISABLED
+  // ADDITIONAL TEST SUITES - ALL DISABLED
   // ═══════════════════════════════════════════════════════════════
 
   settingsTests: false,
@@ -79,7 +79,7 @@ module.exports = {
   comprehensiveUiTests: false,
 
   // ═══════════════════════════════════════════════════════════════
-  // 🔧 TEST SETTINGS
+  // TEST SETTINGS
   // ═══════════════════════════════════════════════════════════════
 
   loadTimeout: 30000,

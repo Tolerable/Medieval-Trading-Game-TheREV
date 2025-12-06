@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // ANIMATION SYSTEM - commanding pixels to dance at my will
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -49,7 +49,7 @@ const AnimationSystem = {
         this.loadSettings();
         this.setupEventListeners();
         this.startAnimationLoop();
-        console.log('🎬 Animation system awakened... pixels tremble before me 🖤');
+        console.log('Animation system awakened... pixels tremble before me');
     },
     
     // load settings - digging up preferences from digital graves
@@ -59,7 +59,7 @@ const AnimationSystem = {
             try {
                 this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
             } catch (error) {
-                // 🖤 Silent fallback - corrupt data just means we use defaults
+                // Silent fallback - corrupt data just means we use defaults
                 localStorage.removeItem('tradingGameAnimationSettings');
             }
         }
@@ -81,11 +81,11 @@ const AnimationSystem = {
         EventManager.addEventListener(document, 'loadingStart', (e) => this.animateLoadingStart(e.detail));
         EventManager.addEventListener(document, 'loadingComplete', (e) => this.animateLoadingComplete(e.detail));
 
-        // 🖤 Cleanup on page unload to prevent memory leak
+        // Cleanup on page unload to prevent memory leak
         window.addEventListener('beforeunload', () => this.cleanup());
     },
     
-    // 🔁 Start animation loop - the eternal dance begins... never stopping, never resting
+    // Start animation loop - the eternal dance begins... never stopping, never resting
     startAnimationLoop() {
         const animate = () => {
             this.updateAnimations();
@@ -94,7 +94,7 @@ const AnimationSystem = {
         animate();
     },
     
-    // ✨ Update all active animations - weaving the threads of motion through time
+    // Update all active animations - weaving the threads of motion through time
     updateAnimations() {
         const now = Date.now();
         
@@ -102,7 +102,7 @@ const AnimationSystem = {
             const elapsed = now - animation.startTime;
             const progress = Math.min(elapsed / animation.duration, 1);
             
-            // 🎨 Update animation based on type - each spell needs its own incantation
+            // Update animation based on type - each spell needs its own incantation
             switch (animation.type) {
                 case 'character':
                     this.updateCharacterAnimation(animation, progress);
@@ -121,7 +121,7 @@ const AnimationSystem = {
                     break;
             }
             
-            // ⏱️ Check if animation is complete - has this spell run its course?
+            // Check if animation is complete - has this spell run its course?
             if (progress >= 1 && !animation.loop) {
                 if (animation.onComplete) {
                     animation.onComplete();
@@ -129,7 +129,7 @@ const AnimationSystem = {
                 return false;
             }
             
-            // 🔄 Handle looping animations - some spells must echo eternally
+            // Handle looping animations - some spells must echo eternally
             if (progress >= 1 && animation.loop) {
                 animation.startTime = now;
             }
@@ -138,7 +138,7 @@ const AnimationSystem = {
         });
     },
     
-    // 🌟 Create animation object - forging a new spell from the void
+    // Create animation object - forging a new spell from the void
     createAnimation(type, element, options = {}) {
         if (!this.settings.animationsEnabled) {
             return null;
@@ -159,7 +159,7 @@ const AnimationSystem = {
         return animation;
     },
     
-    // 🚶 Character movement animations - commanding souls to traverse the digital realm
+    // Character movement animations - commanding souls to traverse the digital realm
     animateCharacterMovement(data) {
         const { character, fromX, fromY, toX, toY, speed = 'walk' } = data;
         const characterElement = document.getElementById(character);
@@ -186,19 +186,19 @@ const AnimationSystem = {
         
         switch (animationType) {
             case 'move':
-                // 🌊 Smooth movement - gliding through space like a shadow
+                // Smooth movement - gliding through space like a shadow
                 const easeProgress = this.easeInOutQuad(progress);
                 const currentX = fromX + (toX - fromX) * easeProgress;
                 const currentY = fromY + (toY - fromY) * easeProgress;
                 
                 element.style.transform = `translate(${currentX}px, ${currentY}px)`;
                 
-                // 🎭 Update sprite based on movement - shifting faces of our digital actors
+                // Update sprite based on movement - shifting faces of our digital actors
                 this.updateCharacterSprite(element, speed, progress);
                 break;
                 
             case 'action':
-                // ⚔️ Action-specific animation - the dramatic flourish of doing things
+                // Action-specific animation - the dramatic flourish of doing things
                 this.updateCharacterActionAnimation(element, progress, speed);
                 break;
         }
@@ -224,7 +224,7 @@ const AnimationSystem = {
         element.style.backgroundPosition = `-${frameIndex * 64}px 0`;
     },
     
-    // 🎁 Item usage animations - the magic of wielding objects upon reality
+    // Item usage animations - the magic of wielding objects upon reality
     animateItemUsage(data) {
         const { item, user, target, type } = data;
         const userElement = document.getElementById(user);
@@ -232,14 +232,14 @@ const AnimationSystem = {
         
         if (!userElement) return;
         
-        // 🎬 Animate user action - the wielder moves first
+        // Animate user action - the wielder moves first
         this.createAnimation('character', userElement, {
             animationType: 'action',
             speed: 'use',
             duration: 400 / this.settings.animationSpeed
         });
         
-        // ✨ Create item effect - then the magic flows forth
+        // Create item effect - then the magic flows forth
         if (targetElement) {
             this.createItemEffect(userElement, targetElement, item, type);
         }
@@ -317,7 +317,7 @@ const AnimationSystem = {
         });
     },
     
-    // 🏗️ Building animations - watching structures live, breathe, and sometimes die
+    // Building animations - watching structures live, breathe, and sometimes die
     animateBuilding(data) {
         const { building, action, level } = data;
         const buildingElement = document.getElementById(building);
@@ -339,33 +339,33 @@ const AnimationSystem = {
         
         switch (animationType) {
             case 'construction':
-                // 🏗️ Gradual building appearance - rising from nothingness
+                // Gradual building appearance - rising from nothingness
                 const scale = progress;
                 element.style.transform = `scale(${scale})`;
                 element.style.opacity = progress;
                 break;
                 
             case 'upgrade':
-                // 🔮 Pulsing effect during upgrade - transformation is never painless
+                // Pulsing effect during upgrade - transformation is never painless
                 const pulseScale = 1 + Math.sin(progress * Math.PI * 4) * 0.1;
                 element.style.transform = `scale(${pulseScale})`;
                 element.style.filter = `brightness(${1 + Math.sin(progress * Math.PI * 2) * 0.3})`;
                 break;
                 
             case 'active':
-                // 💫 Gentle bobbing when active - the building breathes with life
+                // Gentle bobbing when active - the building breathes with life
                 const bobY = Math.sin(progress * Math.PI * 2) * 2;
                 element.style.transform = `translateY(${bobY}px)`;
                 break;
                 
             case 'damaged':
-                // 💥 Shake effect when damaged - pain manifests as trembling
+                // Shake effect when damaged - pain manifests as trembling
                 const shakeX = Math.sin(progress * Math.PI * 8) * 2;
                 element.style.transform = `translateX(${shakeX}px)`;
                 break;
         }
         
-        // 🖼️ Update building sprite if applicable - shifting the visual manifestation
+        // Update building sprite if applicable - shifting the visual manifestation
         this.updateBuildingSprite(element, animationType, progress, level);
     },
     
@@ -377,20 +377,20 @@ const AnimationSystem = {
         element.style.backgroundPosition = `-${frameIndex * 128}px -${level * 128}px`;
     },
     
-    // 🌀 Travel animations - teleportation across the void between worlds
+    // Travel animations - teleportation across the void between worlds
     animateTravelStart(data) {
         const { character, destination } = data;
         const characterElement = document.getElementById(character);
         
         if (!characterElement) return;
         
-        // 👻 Fade out character - becoming one with the shadows
+        // Fade out character - becoming one with the shadows
         this.createAnimation('travel', characterElement, {
             animationType: 'fadeOut',
             duration: 800 / this.settings.animationSpeed
         });
         
-        // ✨ Create travel effect - the portal's embrace
+        // Create travel effect - the portal's embrace
         this.createTravelEffect(characterElement, destination);
     },
     
@@ -400,13 +400,13 @@ const AnimationSystem = {
         
         if (!characterElement) return;
         
-        // 🌟 Fade in character - materializing from the ether
+        // Fade in character - materializing from the ether
         this.createAnimation('travel', characterElement, {
             animationType: 'fadeIn',
             duration: 800 / this.settings.animationSpeed
         });
         
-        // 💫 Create arrival effect - announcing their presence to this realm
+        // Create arrival effect - announcing their presence to this realm
         this.createArrivalEffect(characterElement, destination);
     },
     
@@ -460,7 +460,7 @@ const AnimationSystem = {
         });
     },
     
-    // 🏪 Market stall animations - capitalism with style
+    // Market stall animations - capitalism with style
     animateMarketStall(data) {
         const { stall, action, item } = data;
         const stallElement = document.getElementById(stall);
@@ -495,7 +495,7 @@ const AnimationSystem = {
     },
     
     animateStallTransaction(stallElement, item) {
-        // ✨ Create sparkle effect - money makes everything magical
+        // Create sparkle effect - money makes everything magical
         for (let i = 0; i < 6; i++) {
             const sparkle = document.createElement('div');
             sparkle.className = 'sparkle';
@@ -520,7 +520,7 @@ const AnimationSystem = {
         }
     },
     
-    // ⏳ Loading animations - the purgatory between states
+    // Loading animations - the purgatory between states
     animateLoadingStart(data) {
         const { message = 'Loading...' } = data;
         
@@ -550,12 +550,12 @@ const AnimationSystem = {
         
         document.body.appendChild(loadingElement);
         
-        // 🌑 Fade in - darkness descends
+        // Fade in - darkness descends
         setTimeout(() => {
             loadingElement.style.opacity = '1';
         }, 10);
         
-        // 🌀 Animate spinner - the hypnotic wheel of waiting
+        // Animate spinner - the hypnotic wheel of waiting
         const spinner = loadingElement.querySelector('.loading-spinner');
         this.createAnimation('ui', spinner, {
             animationType: 'spinner',
@@ -568,14 +568,14 @@ const AnimationSystem = {
         const loadingElement = document.getElementById('loading-overlay');
         if (!loadingElement) return;
         
-        // 🌅 Fade out - the darkness lifts... for now
+        // Fade out - the darkness lifts... for now
         loadingElement.style.opacity = '0';
         TimerManager.setTimeout(() => {
             loadingElement.remove();
         }, 300);
     },
     
-    // 🎨 UI animation updates - painting motion onto the interface
+    // UI animation updates - painting motion onto the interface
     updateUIAnimation(animation, progress) {
         const { element, animationType } = animation;
         
@@ -628,7 +628,7 @@ const AnimationSystem = {
         }
     },
     
-    // 🌌 Travel animation updates - the void between places
+    // Travel animation updates - the void between places
     updateTravelAnimation(animation, progress) {
         const { element, animationType } = animation;
         
@@ -647,7 +647,7 @@ const AnimationSystem = {
         }
     },
     
-    // 💫 Particle animation updates - tiny pieces of magic floating through space
+    // Particle animation updates - tiny pieces of magic floating through space
     updateParticleAnimation(animation, progress) {
         const { element, fromX, fromY, toX, toY, animationType } = animation;
         
@@ -664,7 +664,7 @@ const AnimationSystem = {
         }
     },
     
-    // 📐 Easing functions - the mathematical poetry of motion
+    // Easing functions - the mathematical poetry of motion
     easeInOutQuad(t) {
         return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
     },
@@ -685,7 +685,7 @@ const AnimationSystem = {
         }
     },
     
-    // 🔘 Button press animations - giving tactile feedback to the intangible
+    // Button press animations - giving tactile feedback to the intangible
     animateButtonPress(button, options = {}) {
         if (!button || !this.settings.animationsEnabled) return;
         
@@ -712,7 +712,7 @@ const AnimationSystem = {
         }, config.duration);
     },
     
-    // 📊 Progress bar animations - watching time crystallize into visual form
+    // Progress bar animations - watching time crystallize into visual form
     animateProgressBar(progressBar, currentProgress, targetProgress, duration = 1000) {
         if (!progressBar || !this.settings.animationsEnabled) return;
         
@@ -737,7 +737,7 @@ const AnimationSystem = {
         animateProgress();
     },
     
-    // 📜 Text scrolling animation - words emerging from the void, one character at a time
+    // Text scrolling animation - words emerging from the void, one character at a time
     animateTextScroll(element, text, speed = 50) {
         if (!element || !this.settings.animationsEnabled) return;
         
@@ -755,7 +755,7 @@ const AnimationSystem = {
         typeChar();
     },
     
-    // 🎯 Icon animations - making symbols dance for attention
+    // Icon animations - making symbols dance for attention
     animateIcon(icon, animationType = 'bounce', duration = 1000) {
         if (!icon || !this.settings.animationsEnabled) return;
         
@@ -770,7 +770,7 @@ const AnimationSystem = {
         }, duration);
     },
     
-    // ⚙️ Settings management - tuning the engine of visual chaos
+    // Settings management - tuning the engine of visual chaos
     setAnimationSpeed(speed) {
         this.settings.animationSpeed = Math.max(0.1, Math.min(3.0, speed));
         this.saveSettings();
@@ -779,16 +779,16 @@ const AnimationSystem = {
     setQuality(quality) {
         this.settings.quality = quality;
         
-        // 🎛️ Adjust animation quality based on setting - finding the perfect darkness level
+        // Adjust animation quality based on setting - finding the perfect darkness level
         switch (quality) {
             case 'low':
-                // 🔽 Reduce animation complexity - minimalist darkness
+                // Reduce animation complexity - minimalist darkness
                 break;
             case 'medium':
-                // ⚖️ Balanced animation quality - the sweet spot of aesthetic suffering
+                // Balanced animation quality - the sweet spot of aesthetic suffering
                 break;
             case 'high':
-                // ⚡ Maximum animation quality - unleash ALL the dark magic
+                // Maximum animation quality - unleash ALL the dark magic
                 break;
         }
         
@@ -806,7 +806,7 @@ const AnimationSystem = {
     toggleReducedMotion() {
         this.settings.reducedMotion = !this.settings.reducedMotion;
         if (this.settings.reducedMotion) {
-            // 🛡️ Apply reduced motion styles - accessibility is goth too
+            // Apply reduced motion styles - accessibility is goth too
             document.documentElement.style.setProperty('--animation-duration', '0.01ms');
         } else {
             document.documentElement.style.setProperty('--animation-duration', '');
@@ -814,51 +814,51 @@ const AnimationSystem = {
         this.saveSettings();
     },
     
-    // 🛑 Stop all animations - silencing the chaos, freezing reality
+    // Stop all animations - silencing the chaos, freezing reality
     stopAllAnimations() {
         this.activeAnimations = [];
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
-            this.animationFrame = null; // 🖤 Clear reference after cancel 💀
+            this.animationFrame = null; // Clear reference after cancel
         }
     },
 
-    // 🧹 Cleanup - erasing all traces of our dark enchantments
+    // Cleanup - erasing all traces of our dark enchantments
     cleanup() {
         this.stopAllAnimations();
 
-        // 💀 Remove any animation-related elements - cleaning up the corpses
+        // Remove any animation-related elements - cleaning up the corpses
         const animationElements = document.querySelectorAll('.item-effect, .impact-effect, .travel-effect, .arrival-effect, .sparkle');
         animationElements.forEach(element => element.remove());
 
-        // 🌑 Remove loading overlay - dispelling the darkness
+        // Remove loading overlay - dispelling the darkness
         const loadingOverlay = document.getElementById('loading-overlay');
         if (loadingOverlay) loadingOverlay.remove();
     },
 
-    // 💀 Full destroy - complete teardown for memory leak prevention 🖤
+    // Full destroy - complete teardown for memory leak prevention
     destroy() {
-        // 🛑 Cancel the animation frame loop
+        // Cancel the animation frame loop
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
         }
 
-        // 🧹 Clear all active animations
+        // Clear all active animations
         this.activeAnimations = [];
 
-        // 💀 Remove all animation DOM elements
+        // Remove all animation DOM elements
         const animationElements = document.querySelectorAll('.item-effect, .impact-effect, .travel-effect, .arrival-effect, .sparkle, #loading-overlay');
         animationElements.forEach(element => element.remove());
 
-        // 🖤 Reset animation ID counter
+        // Reset animation ID counter
         this.animationId = 0;
 
-        console.log('🎬 Animation system destroyed... the dance ends 💀');
+        console.log('Animation system destroyed... the dance ends');
     }
 };
 
-// 📤 Export for use in other modules - sharing our dark arts with the world
+// Export for use in other modules - sharing our dark arts with the world
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AnimationSystem;
 }

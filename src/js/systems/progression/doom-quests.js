@@ -1,16 +1,16 @@
-// ═══════════════════════════════════════════════════════════════
-// 🖤 DOOM WORLD QUESTS - The Apocalyptic Reality 💀
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+//  DOOM WORLD QUESTS - The Apocalyptic Reality 
+// 
+// Version: 0.90.01 | Unity AI Lab
 // 15 Doom World Exclusive Quests + Greedy Won Boss
 // Survival, Resistance, and Boss arcs
 // Access via defeating dungeon bosses (Shadow Tower/Ruins of Malachar)
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const DoomQuests = {
-    // ═══════════════════════════════════════════════════════════════
-    // 📊 DOOM WORLD METADATA
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DOOM WORLD METADATA
+    // 
     doomInfo: {
         name: 'The Doom World',
         description: 'An apocalyptic alternate reality where Malachar won and the world fell to darkness. Only the strongest survive.',
@@ -22,9 +22,9 @@ const DoomQuests = {
         exitMethod: 'Return to dungeon safe zones'
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 💰 DOOM WORLD ECONOMY
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DOOM WORLD ECONOMY
+    // 
     doomEconomy: {
         // Price multipliers in Doom World
         priceMultipliers: {
@@ -58,9 +58,9 @@ const DoomQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🗺️ DOOM WORLD LOCATIONS
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DOOM WORLD LOCATIONS
+    // 
     doomLocations: {
         doom_greendale: {
             normalName: 'Greendale',
@@ -145,9 +145,9 @@ const DoomQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // ☠️ DOOM WORLD EXCLUSIVE ITEMS
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DOOM WORLD EXCLUSIVE ITEMS
+    // 
     doomItems: {
         doom_rations: {
             id: 'doom_rations',
@@ -215,10 +215,10 @@ const DoomQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🏃 SURVIVAL ARC (5 Quests)
+    // 
+    //  SURVIVAL ARC (5 Quests)
     // Theme: Learn to survive in the apocalypse
-    // ═══════════════════════════════════════════════════════════════
+    // 
     survivalArc: {
         arcName: 'Survival',
         arcDescription: 'Learn the basics of staying alive in the Doom World.',
@@ -391,10 +391,10 @@ const DoomQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // ⚔️ RESISTANCE ARC (5 Quests)
+    // 
+    // RESISTANCE ARC (5 Quests)
     // Theme: Join the fight against the doom
-    // ═══════════════════════════════════════════════════════════════
+    // 
     resistanceArc: {
         arcName: 'Resistance',
         arcDescription: 'Join the underground resistance fighting against the doom.',
@@ -567,10 +567,10 @@ const DoomQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 👹 BOSS ARC (5 Quests) - Culminating in GREEDY WON
+    // 
+    //  BOSS ARC (5 Quests) - Culminating in GREEDY WON
     // Theme: Prepare for and defeat the doom's master
-    // ═══════════════════════════════════════════════════════════════
+    // 
     bossArc: {
         arcName: 'The Final Battle',
         arcDescription: 'Prepare for the assault on Greedy Won and end the doom.',
@@ -748,9 +748,9 @@ const DoomQuests = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 👹 GREEDY WON - CENTRAL DOOM BOSS
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  GREEDY WON - CENTRAL DOOM BOSS
+    // 
     greedyWon: {
         id: 'greedy_won',
         name: 'Greedy Won',
@@ -850,9 +850,9 @@ Kill him, and the doom ends. Fail, and it spreads forever.`,
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🛠️ UTILITY METHODS
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  UTILITY METHODS
+    // 
 
     /**
      * Get all doom quests as a flat array

@@ -1,7 +1,7 @@
-// ═══════════════════════════════════════════════════════════════
-// 🖤 DOOM WORLD SYSTEM - The Apocalypse Controller 💀🔥
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+//  DOOM WORLD SYSTEM - The Apocalypse Controller 
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Master controller that coordinates all doom world systems:
 // - World state switching (normal <-> doom)
 // - Boatman NPC spawning after boss defeat
@@ -9,57 +9,57 @@
 // - Location name corruption
 // - NPC demeanor changes
 // - UI atmosphere effects
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const DoomWorldSystem = {
-    // ═══════════════════════════════════════════════════════════════
-    // 💀 STATE TRACKING
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  STATE TRACKING
+    // 
     isActive: false,
     entryDungeon: null, // 'shadow_dungeon' or 'forest_dungeon'
-    hasEverEntered: false, // 🖤 Track if player has ever entered doom world (no spoilers!)
+    hasEverEntered: false, // ��� Track if player has ever entered doom world (no spoilers!)
 
-    // 🦇 Boss defeat tracking
+    //  Boss defeat tracking
     bossesDefeated: {
         shadow_guardian: false,
         ruins_guardian: false
     },
 
-    // 💀 Boss respawn tracking - bosses respawn after 1 day UNLESS Greedy Won is dead
+    //  Boss respawn tracking - bosses respawn after 1 day UNLESS Greedy Won is dead
     bossDefeatTime: {
         shadow_guardian: null, // Timestamp when boss was killed
         ruins_guardian: null
     },
     BOSS_RESPAWN_DAYS: 1, // Bosses respawn after this many game days
 
-    // 🔥 GREEDY WON - Final doom boss. When defeated, dungeon bosses die PERMANENTLY
+    //  GREEDY WON - Final doom boss. When defeated, dungeon bosses die PERMANENTLY
     greedyWonDefeated: false,
 
-    // 🦇 Boatman spawning state
+    //  Boatman spawning state
     boatmanLocations: new Set(), // Locations where boatman is available
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🔧 INITIALIZATION
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  INITIALIZATION
+    // 
     init() {
         console.log('💀 DoomWorldSystem: Initializing the apocalypse controller...');
 
-        // 🖤 Load saved state
+        //  Load saved state
         this._loadState();
 
-        // 🦇 Listen for boss defeat events
+        //  Listen for boss defeat events
         if (typeof EventBus !== 'undefined') {
             EventBus.on('boss:defeated', (data) => this._onBossDefeated(data));
             EventBus.on('quest:completed', (data) => this._onQuestCompleted(data));
             EventBus.on('worldChanged', (data) => this._onWorldChanged(data));
-            // 🖤 Check for boss respawns every game day
+            //  Check for boss respawns every game day
             EventBus.on('time:dayChanged', () => this.checkBossRespawns());
         }
 
-        // 💀 Check boss respawns on init (in case time passed while game was closed)
+        //  Check boss respawns on init (in case time passed while game was closed)
         this.checkBossRespawns();
 
-        // 🖤 Sync with TravelSystem if doom world is active
+        //  Sync with TravelSystem if doom world is active
         if (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld()) {
             this.isActive = true;
             this._applyDoomEffects();
@@ -70,17 +70,17 @@ const DoomWorldSystem = {
         console.log('💀 DoomWorldSystem: Greedy Won defeated:', this.greedyWonDefeated);
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎯 BOSS DEFEAT HANDLING
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  BOSS DEFEAT HANDLING
+    // 
     _onBossDefeated(data) {
         const { bossId, location, questId } = data;
         console.log(`💀 DoomWorldSystem: Boss defeated! ${bossId} at ${location}`);
 
-        // 🖤 Get current game time for respawn tracking
+        //  Get current game time for respawn tracking
         const currentTime = this._getCurrentGameTime();
 
-        // 🖤 Check if this is a guardian boss that unlocks the boatman
+        //  Check if this is a guardian boss that unlocks the boatman
         if (bossId === 'shadow_guardian' || questId === 'act5_quest2') {
             this.bossesDefeated.shadow_guardian = true;
             this.bossDefeatTime.shadow_guardian = currentTime;
@@ -97,16 +97,16 @@ const DoomWorldSystem = {
             console.log('💀 Boatman now available at Ruins of Malachar!');
         }
 
-        // 🔥 GREEDY WON defeated = ALL dungeon bosses PERMANENTLY DEAD
+        //  GREEDY WON defeated = ALL dungeon bosses PERMANENTLY DEAD
         if (bossId === 'greedy_won' || questId === 'doom_final_boss') {
             this.greedyWonDefeated = true;
-            // 🖤 Mark both bosses as permanently defeated
+            //  Mark both bosses as permanently defeated
             this.bossesDefeated.shadow_guardian = true;
             this.bossesDefeated.ruins_guardian = true;
-            // 🖤 Clear respawn timers - they never respawn now
+            //  Clear respawn timers - they never respawn now
             this.bossDefeatTime.shadow_guardian = 'permanent';
             this.bossDefeatTime.ruins_guardian = 'permanent';
-            // 🖤 Boatman always available at both dungeons forever
+            //  Boatman always available at both dungeons forever
             this.boatmanLocations.add('shadow_dungeon');
             this.boatmanLocations.add('forest_dungeon');
             this._spawnBoatman('shadow_dungeon');
@@ -122,7 +122,7 @@ const DoomWorldSystem = {
         this._saveState();
     },
 
-    // 🖤 Get current game time in total minutes
+    //  Get current game time in total minutes
     _getCurrentGameTime() {
         if (typeof TimeMachine !== 'undefined' && TimeMachine.getTotalMinutes) {
             return TimeMachine.getTotalMinutes();
@@ -134,9 +134,9 @@ const DoomWorldSystem = {
         return Date.now();
     },
 
-    // 💀 Check if a boss has respawned (1 day since defeat, unless Greedy Won is dead)
+    //  Check if a boss has respawned (1 day since defeat, unless Greedy Won is dead)
     hasBossRespawned(bossId) {
-        // 🔥 If Greedy Won is defeated, bosses NEVER respawn - they're permanently dead
+        //  If Greedy Won is defeated, bosses NEVER respawn - they're permanently dead
         if (this.greedyWonDefeated) {
             return false; // Boss is permanently dead, hasn't "respawned"
         }
@@ -161,9 +161,9 @@ const DoomWorldSystem = {
         return currentTime >= respawnTime;
     },
 
-    // 💀 Check if boatman is available (boss dead and not respawned yet, OR Greedy Won dead)
+    //  Check if boatman is available (boss dead and not respawned yet, OR Greedy Won dead)
     isBoatmanAvailable(dungeonId) {
-        // 🔥 Greedy Won dead = always available
+        //  Greedy Won dead = always available
         if (this.greedyWonDefeated) {
             return true;
         }
@@ -183,9 +183,9 @@ const DoomWorldSystem = {
         return true; // Boss dead and hasn't respawned yet
     },
 
-    // 💀 Check boss respawns on game load and time passage
+    //  Check boss respawns on game load and time passage
     checkBossRespawns() {
-        // 🔥 Skip if Greedy Won is dead
+        //  Skip if Greedy Won is dead
         if (this.greedyWonDefeated) return;
 
         const bossesToCheck = ['shadow_guardian', 'ruins_guardian'];
@@ -196,7 +196,7 @@ const DoomWorldSystem = {
 
         bossesToCheck.forEach(bossId => {
             if (this.bossesDefeated[bossId] && this.hasBossRespawned(bossId)) {
-                // 💀 Boss has respawned! Mark as alive, remove boatman
+                //  Boss has respawned! Mark as alive, remove boatman
                 console.log(`💀 ${bossId} has respawned! Boatman access blocked.`);
                 this.bossesDefeated[bossId] = false;
                 this.bossDefeatTime[bossId] = null;
@@ -206,7 +206,7 @@ const DoomWorldSystem = {
 
                 if (typeof addMessage === 'function') {
                     const bossName = bossId === 'shadow_guardian' ? 'Shadow Guardian' : 'Ruins Guardian';
-                    addMessage(`⚔️ The ${bossName} has reformed from the darkness...`, 'warning');
+                    addMessage(`The ${bossName} has reformed from the darkness...`, 'warning');
                 }
             }
         });
@@ -215,13 +215,13 @@ const DoomWorldSystem = {
     },
 
     _onQuestCompleted(data) {
-        // 🖤 Quest data comes as { quest, rewards } from QuestSystem
+        //  Quest data comes as { quest, rewards } from QuestSystem
         const questId = data.quest?.id || data.questId;
         if (!questId) return;
 
         console.log(`💀 DoomWorldSystem: Quest completed: ${questId}`);
 
-        // 🖤 Act 5 Quest 2 completion = Shadow Guardian defeated
+        //  Act 5 Quest 2 completion = Shadow Guardian defeated
         if (questId === 'act5_quest2') {
             this.bossesDefeated.shadow_guardian = true;
             this.boatmanLocations.add('shadow_dungeon');
@@ -232,7 +232,7 @@ const DoomWorldSystem = {
             }
         }
 
-        // 🖤 Act 5 Quest 5 completion = Ruins Guardian defeated
+        //  Act 5 Quest 5 completion = Ruins Guardian defeated
         if (questId === 'act5_quest5') {
             this.bossesDefeated.ruins_guardian = true;
             this.boatmanLocations.add('forest_dungeon');
@@ -246,13 +246,13 @@ const DoomWorldSystem = {
         this._saveState();
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // ⛵ BOATMAN NPC SYSTEM
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  BOATMAN NPC SYSTEM
+    // 
     _spawnBoatman(dungeonLocation) {
         console.log(`💀 Spawning Boatman at ${dungeonLocation}...`);
 
-        // 🖤 Emit event so NPCManager can add the boatman
+        //  Emit event so NPCManager can add the boatman
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('npc:spawn', {
                 npcId: 'boatman',
@@ -269,7 +269,7 @@ const DoomWorldSystem = {
             });
         }
 
-        // 🖤 Also add to GameWorld location if possible
+        //  Also add to GameWorld location if possible
         if (typeof GameWorld !== 'undefined' && GameWorld.locations[dungeonLocation]) {
             const location = GameWorld.locations[dungeonLocation];
             if (!location.npcs) location.npcs = [];
@@ -279,14 +279,14 @@ const DoomWorldSystem = {
         }
     },
 
-    // 🦇 Check if boatman is at current location
+    //  Check if boatman is at current location
     isBoatmanHere(locationId) {
-        // 🖤💀 In DOOM WORLD - Boatman is always at both dungeons (only way out!)
+        //  In DOOM WORLD - Boatman is always at both dungeons (only way out!)
         if (this.isActive) {
             return locationId === 'shadow_dungeon' || locationId === 'forest_dungeon';
         }
 
-        // 🖤 In NORMAL WORLD - check boss defeat status and respawn timers
+        //  In NORMAL WORLD - check boss defeat status and respawn timers
         // Boatman only available if boss is dead AND hasn't respawned (or Greedy Won is dead)
         if (locationId === 'shadow_dungeon' || locationId === 'forest_dungeon') {
             return this.isBoatmanAvailable(locationId);
@@ -295,7 +295,7 @@ const DoomWorldSystem = {
         return false;
     },
 
-    // 🦇 Get boatman NPC data for people panel
+    //  Get boatman NPC data for people panel
     getBoatmanNPC() {
         return {
             id: 'boatman',
@@ -304,7 +304,7 @@ const DoomWorldSystem = {
             title: 'Ferryman of Worlds',
             description: 'A cloaked figure stands beside a shimmering portal. His face is hidden, but you sense ancient power.',
             portrait: 'boatman',
-            voice: 'ash', // 🖤💀 Deep, mysterious voice for the Boatman
+            voice: 'ash', // ���💀 Deep, mysterious voice for the Boatman
             personality: 'mysterious',
             speakingStyle: 'cryptic',
             voiceInstructions: 'Speak slowly and ominously. Your voice echoes as if from beyond the veil. Pause between sentences.',
@@ -322,7 +322,7 @@ const DoomWorldSystem = {
         };
     },
 
-    // 🖤💀 Play Boatman voice with API TTS
+    //  Play Boatman voice with API TTS
     async playBoatmanVoice(action = 'greeting') {
         const boatman = this.getBoatmanNPC();
 
@@ -358,7 +358,7 @@ const DoomWorldSystem = {
         return fallback;
     },
 
-    // 🖤💀 Play arrival voice when entering doom world
+    //  Play arrival voice when entering doom world
     async playDoomArrivalVoice() {
         try {
             if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
@@ -384,44 +384,44 @@ const DoomWorldSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🌍 WORLD SWITCHING
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  WORLD SWITCHING
+    // 
     enterDoomWorld(fromLocation) {
         console.log(`💀 Entering Doom World from ${fromLocation}...`);
 
         this.isActive = true;
         this.entryDungeon = fromLocation;
 
-        // 🖤💀 Mark that player has entered doom world (unlocks doom quests in quest log - NO SPOILERS!)
+        //  Mark that player has entered doom world (unlocks doom quests in quest log - NO SPOILERS!)
         this.hasEverEntered = true;
         if (typeof QuestSystem !== 'undefined') {
             QuestSystem._hasEnteredDoomWorld = true;
         }
         localStorage.setItem('mtg_hasEnteredDoom', 'true');
 
-        // 🖤 Use TravelSystem's portal function
+        //  Use TravelSystem's portal function
         if (typeof TravelSystem !== 'undefined') {
             TravelSystem.portalToDoomWorld(fromLocation);
         }
 
-        // 🖤💀 BOATMAN MUST BE AT BOTH DUNGEONS IN DOOM WORLD - only way out!
+        //  BOATMAN MUST BE AT BOTH DUNGEONS IN DOOM WORLD - only way out!
         // The Boatman is the ONLY way to exit doom world (no debooger cheats in real gameplay)
         this.boatmanLocations.add('shadow_dungeon');
         this.boatmanLocations.add('forest_dungeon');
         this._spawnBoatman('shadow_dungeon');
         this._spawnBoatman('forest_dungeon');
 
-        // 🖤 Apply doom effects
+        //  Apply doom effects
         this._applyDoomEffects();
 
-        // 🖤 Register doom quests with main quest system
+        //  Register doom quests with main quest system
         if (typeof DoomQuestSystem !== 'undefined') {
             DoomQuestSystem.registerDoomQuests();
             DoomQuestSystem.startIntroQuest();
         }
 
-        // 🖤 Emit world change event
+        //  Emit world change event
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('doom:entered', {
                 entryLocation: fromLocation,
@@ -431,23 +431,23 @@ const DoomWorldSystem = {
 
         this._saveState();
 
-        // 🖤 Show atmospheric message
+        //  Show atmospheric message
         if (typeof game !== 'undefined' && game.addMessage) {
             game.addMessage('💀 The world twists and darkens. You have entered the Doom World.', 'danger');
             game.addMessage('⚠️ Gold is nearly worthless here. Survival items are the true currency.', 'warning');
         }
 
-        // 🖤💀 Play doom arrival narration with API TTS
+        //  Play doom arrival narration with API TTS
         setTimeout(() => {
             this.playDoomArrivalVoice();
         }, 1500); // Delay for dramatic effect after portal
 
-        // 🖤 Update quest log to now show doom quests
+        //  Update quest log to now show doom quests
         if (typeof QuestSystem !== 'undefined') {
             QuestSystem.updateQuestLogUI?.();
         }
 
-        // 🖤💀 CENTER MAP ON PLAYER LOCATION
+        //  CENTER MAP ON PLAYER LOCATION
         if (typeof GameWorldRenderer !== 'undefined') {
             if (GameWorldRenderer.centerOnLocation) {
                 GameWorldRenderer.centerOnLocation(fromLocation);
@@ -458,7 +458,7 @@ const DoomWorldSystem = {
     },
 
     exitDoomWorld(toLocation = null) {
-        // 🖤 If no location specified, use CURRENT location (wherever player is now)
+        //  If no location specified, use CURRENT location (wherever player is now)
         const exitLocation = toLocation ||
                              game?.currentLocation?.id ||
                              TravelSystem?.playerPosition?.currentLocation ||
@@ -468,24 +468,24 @@ const DoomWorldSystem = {
 
         this.isActive = false;
 
-        // 🖤 Get the FULL normal world location object
+        //  Get the FULL normal world location object
         const normalLocation = GameWorld?.locations?.[exitLocation];
         const normalName = normalLocation?.name || exitLocation;
 
-        // 🖤 Switch TravelSystem back to normal world
+        //  Switch TravelSystem back to normal world
         if (typeof TravelSystem !== 'undefined') {
             TravelSystem.currentWorld = 'normal';
             TravelSystem.saveCurrentWorld();
             TravelSystem.playerPosition.currentLocation = exitLocation;
         }
 
-        // 🖤💀 MARK EXIT LOCATION AS VISITED in normal world so it shows on map!
+        //  MARK EXIT LOCATION AS VISITED in normal world so it shows on map!
         if (typeof GameWorld !== 'undefined') {
             if (!GameWorld.visitedLocations.includes(exitLocation)) {
                 GameWorld.visitedLocations.push(exitLocation);
                 console.log('🌅 Added exit location to normal world visited:', exitLocation);
             }
-            // 🖤 Also discover paths to connected locations
+            //  Also discover paths to connected locations
             if (normalLocation?.connections && typeof TravelSystem !== 'undefined') {
                 normalLocation.connections.forEach(connId => {
                     TravelSystem.discoverPath(exitLocation, connId);
@@ -493,50 +493,50 @@ const DoomWorldSystem = {
             }
         }
 
-        // 🖤💀 PROPERLY SET game.currentLocation to FULL normal world location object
+        //  PROPERLY SET game.currentLocation to FULL normal world location object
         if (typeof game !== 'undefined') {
             if (normalLocation) {
                 game.currentLocation = { ...normalLocation };
             }
             game.inDoomWorld = false;
-            // 🖤 Also sync game.visitedLocations if it exists
+            //  Also sync game.visitedLocations if it exists
             if (game.visitedLocations && !game.visitedLocations.includes(exitLocation)) {
                 game.visitedLocations.push(exitLocation);
             }
             console.log('🌅 game.currentLocation set to:', game.currentLocation?.name, game.currentLocation?.id);
         }
 
-        // 🖤 Remove doom effects
+        //  Remove doom effects
         this._removeDoomEffects();
         document.body.classList.remove('doom-world');
 
-        // 🖤 Restore normal weather
+        //  Restore normal weather
         if (typeof WeatherSystem !== 'undefined') {
             WeatherSystem.changeWeather('clear');
         }
 
-        // 🖤💀 Restore normal world backdrop/background based on current season
+        //  Restore normal world backdrop/background based on current season
         if (typeof GameWorldRenderer !== 'undefined') {
-            // 🖤 Force exit dungeon mode flag
+            //  Force exit dungeon mode flag
             GameWorldRenderer.isInDungeonMode = false;
 
-            // 🖤 Get current season and load that backdrop
+            //  Get current season and load that backdrop
             let currentSeason = 'summer';
             if (typeof TimeSystem !== 'undefined' && TimeSystem.getSeason) {
                 currentSeason = TimeSystem.getSeason().toLowerCase();
             }
 
-            // 🖤💀 FORCE clear currentSeason so loadSeasonalBackdrop doesn't skip reload
+            //  FORCE clear currentSeason so loadSeasonalBackdrop doesn't skip reload
             GameWorldRenderer.currentSeason = null;
 
-            // 🖤 Load seasonal backdrop directly
+            //  Load seasonal backdrop directly
             if (GameWorldRenderer.loadSeasonalBackdrop) {
                 GameWorldRenderer.loadSeasonalBackdrop(currentSeason);
                 console.log(`🌅 Normal world ${currentSeason} backdrop restored`);
             }
         }
 
-        // 🖤 Emit world change event
+        //  Emit world change event
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('worldChanged', { world: 'normal', exitLocation: exitLocation });
             EventBus.emit('doom:exited', { exitLocation: exitLocation });
@@ -544,19 +544,19 @@ const DoomWorldSystem = {
 
         this._saveState();
 
-        // 🖤 Show atmospheric message
+        //  Show atmospheric message
         if (typeof game !== 'undefined' && game.addMessage) {
             game.addMessage('🌅 The darkness fades. You have returned to the normal world.', 'success');
             game.addMessage(`📍 You are now at ${normalName}.`, 'info');
         }
 
-        // 🦇 Refresh ALL panels to show normal world data
+        //  Refresh ALL panels to show normal world data
         if (typeof PeoplePanel !== 'undefined') PeoplePanel.refresh?.();
         if (typeof TravelPanelMap !== 'undefined') TravelPanelMap.render?.();
         if (typeof GameWorldRenderer !== 'undefined') {
             GameWorldRenderer.render?.();
             GameWorldRenderer.updatePlayerMarker?.();
-            // 🖤💀 CENTER MAP ON PLAYER LOCATION
+            //  CENTER MAP ON PLAYER LOCATION
             if (GameWorldRenderer.centerOnLocation) {
                 GameWorldRenderer.centerOnLocation(exitLocation);
             } else if (GameWorldRenderer.centerOnPlayer) {
@@ -579,23 +579,23 @@ const DoomWorldSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎨 DOOM EFFECTS
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DOOM EFFECTS
+    // 
     _applyDoomEffects() {
-        // 🖤 Add CSS class for doom styling
+        //  Add CSS class for doom styling
         document.body.classList.add('doom-world');
 
-        // 🦇 Apply doom color scheme
+        //  Apply doom color scheme
         const root = document.documentElement;
         root.style.setProperty('--doom-bg', '#1a0a0a');
         root.style.setProperty('--doom-text', '#8b0000');
         root.style.setProperty('--doom-accent', '#ff4444');
 
-        // 🖤💀 INJECT DOOM INDICATOR INTO TOP-BAR-WIDGETS (next to time widget)
+        //  INJECT DOOM INDICATOR INTO TOP-BAR-WIDGETS (next to time widget)
         this._showDoomIndicator();
 
-        // 🖤 Update DoomWorldConfig if available
+        //  Update DoomWorldConfig if available
         if (typeof DoomWorldConfig !== 'undefined') {
             DoomWorldConfig.activate();
         }
@@ -611,7 +611,7 @@ const DoomWorldSystem = {
         root.style.removeProperty('--doom-text');
         root.style.removeProperty('--doom-accent');
 
-        // 🖤💀 REMOVE DOOM INDICATOR FROM TOP-BAR-WIDGETS
+        //  REMOVE DOOM INDICATOR FROM TOP-BAR-WIDGETS
         this._hideDoomIndicator();
 
         if (typeof DoomWorldConfig !== 'undefined') {
@@ -621,7 +621,7 @@ const DoomWorldSystem = {
         console.log('💀 Doom effects removed');
     },
 
-    // 🖤💀 SHOW DOOM INDICATOR - Injects into top-bar-widgets (left of time widget) 💀
+    //  SHOW DOOM INDICATOR - Injects into top-bar-widgets (left of time widget) 
     _showDoomIndicator() {
         // Don't duplicate
         if (document.getElementById('doom-world-indicator')) return;
@@ -632,7 +632,7 @@ const DoomWorldSystem = {
             return;
         }
 
-        // 🖤 Create the indicator element matching other top-bar-indicator widgets
+        //  Create the indicator element matching other top-bar-indicator widgets
         const indicator = document.createElement('div');
         indicator.id = 'doom-world-indicator';
         indicator.className = 'top-bar-indicator';
@@ -641,12 +641,12 @@ const DoomWorldSystem = {
             <span class="indicator-text">DOOM WORLD</span>
         `;
 
-        // 🖤 Prepend to put it FIRST (left of all other widgets including time)
+        //  Prepend to put it FIRST (left of all other widgets including time)
         widgetsContainer.prepend(indicator);
         console.log('💀 Doom indicator injected into top-bar-widgets');
     },
 
-    // 🖤💀 HIDE DOOM INDICATOR - Removes from DOM 💀
+    //  HIDE DOOM INDICATOR - Removes from DOM 
     _hideDoomIndicator() {
         const indicator = document.getElementById('doom-world-indicator');
         if (indicator) {
@@ -655,26 +655,26 @@ const DoomWorldSystem = {
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 📍 LOCATION NAME CORRUPTION
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  LOCATION NAME CORRUPTION
+    // 
     getDoomLocationName(normalLocationId) {
-        // 🖤 First check DoomWorldNPCs for full mapping
+        //  First check DoomWorldNPCs for full mapping
         if (typeof DoomWorldNPCs !== 'undefined' && DoomWorldNPCs.locationNames[normalLocationId]) {
             return DoomWorldNPCs.locationNames[normalLocationId];
         }
 
-        // 🖤 Then check DoomQuests for simpler mapping
+        //  Then check DoomQuests for simpler mapping
         if (typeof DoomQuests !== 'undefined') {
             const doomLoc = DoomQuests.doomLocations['doom_' + normalLocationId];
             if (doomLoc) return doomLoc.doomName;
         }
 
-        // 🦇 Fallback: add a doom prefix
+        //  Fallback: add a doom prefix
         const prefixes = ['Burned', 'Ruined', 'Destroyed', 'Fallen', 'Blighted', 'Corrupted'];
         const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
 
-        // 🖤 Get normal name from GameWorld
+        //  Get normal name from GameWorld
         if (typeof GameWorld !== 'undefined' && GameWorld.locations[normalLocationId]) {
             return `${prefix} ${GameWorld.locations[normalLocationId].name}`;
         }
@@ -682,7 +682,7 @@ const DoomWorldSystem = {
         return `${prefix} ${normalLocationId}`;
     },
 
-    // 🦇 Get current location name (doom or normal based on state)
+    //  Get current location name (doom or normal based on state)
     getCurrentLocationName(locationId) {
         if (this.isActive) {
             return this.getDoomLocationName(locationId);
@@ -695,23 +695,23 @@ const DoomWorldSystem = {
         return locationId;
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 💰 DOOM ECONOMY
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DOOM ECONOMY
+    // 
     getDoomPrice(basePrice, itemType) {
         if (!this.isActive) return basePrice;
 
-        // 🖤 Use DoomQuests economy if available
+        //  Use DoomQuests economy if available
         if (typeof DoomQuests !== 'undefined' && DoomQuests.doomEconomy) {
             return DoomQuests.doomEconomy.getDoomPrice(basePrice, itemType);
         }
 
-        // 🖤 Use DoomWorldConfig as fallback
+        //  Use DoomWorldConfig as fallback
         if (typeof DoomWorldConfig !== 'undefined') {
             return DoomWorldConfig.getDoomPrice(itemType, basePrice);
         }
 
-        // 🦇 Hard fallback based on item type
+        //  Hard fallback based on item type
         const multipliers = {
             food: 10, water: 15, medicine: 12, weapons: 3,
             luxury: 0.1, jewelry: 0.1, silk: 0.2, gold: 0.01
@@ -720,7 +720,7 @@ const DoomWorldSystem = {
         return Math.floor(basePrice * (multipliers[itemType] || 1));
     },
 
-    // 🦇 Get gold purchasing power in doom
+    //  Get gold purchasing power in doom
     getGoldValue(goldAmount) {
         if (!this.isActive) return goldAmount;
 
@@ -728,28 +728,28 @@ const DoomWorldSystem = {
             return DoomQuests.doomEconomy.getGoldValue(goldAmount);
         }
 
-        // 🖤 Gold is worth 30% of normal
+        //  Gold is worth 30% of normal
         return Math.floor(goldAmount * 0.3);
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 👥 NPC INSTRUCTIONS FOR DOOM
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  NPC INSTRUCTIONS FOR DOOM
+    // 
     getNPCInstruction(npcType, action, context = {}) {
         if (!this.isActive) return null; // Use normal instructions
 
-        // 🖤 Use DoomNPCInstructionTemplates if available
+        //  Use DoomNPCInstructionTemplates if available
         if (typeof DoomNPCInstructionTemplates !== 'undefined') {
             return DoomNPCInstructionTemplates.buildDoomInstruction(npcType, action, context);
         }
 
-        // 🦇 Fallback doom context
+        //  Fallback doom context
         return `THE WORLD HAS ENDED. You are a ${npcType} surviving in the apocalypse.
 Gold is worthless - only survival items matter. Speak with desperation and trauma.
 ${action}: Be brief, desperate, and never cheerful.`;
     },
 
-    // 🦇 Get boatman-specific instruction
+    //  Get boatman-specific instruction
     getBoatmanInstruction(action, context = {}) {
         const baseContext = `You are the Boatman, a mysterious ferryman who transports souls between worlds.
 You speak in riddles and cryptic phrases. You know the doom world intimately.
@@ -771,9 +771,9 @@ Example: "The veil parts for you... ${this.isActive ? 'return to what was' : 'em
         return baseContext;
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 💾 STATE PERSISTENCE
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  STATE PERSISTENCE
+    // 
     _saveState() {
         try {
             const state = {
@@ -809,7 +809,7 @@ Example: "The veil parts for you... ${this.isActive ? 'return to what was' : 'em
         }
     },
 
-    // 🦇 Get/load save data for SaveManager
+    //  Get/load save data for SaveManager
     getSaveData() {
         return {
             bossesDefeated: this.bossesDefeated,
@@ -833,7 +833,7 @@ Example: "The veil parts for you... ${this.isActive ? 'return to what was' : 'em
         this.entryDungeon = data.entryDungeon || null;
         this.isActive = data.isActive || false;
 
-        // 🖤 Sync hasEnteredDoom flag to QuestSystem
+        //  Sync hasEnteredDoom flag to QuestSystem
         if (this.hasEverEntered && typeof QuestSystem !== 'undefined') {
             QuestSystem._hasEnteredDoomWorld = true;
         }
@@ -842,10 +842,10 @@ Example: "The veil parts for you... ${this.isActive ? 'return to what was' : 'em
             this._applyDoomEffects();
         }
 
-        // 💀 Check for boss respawns after loading
+        //  Check for boss respawns after loading
         this.checkBossRespawns();
 
-        // 🖤 Re-spawn boatmen at saved locations (only if still available)
+        //  Re-spawn boatmen at saved locations (only if still available)
         if (this.greedyWonDefeated) {
             // Greedy Won dead = always spawn at both
             this._spawnBoatman('shadow_dungeon');
@@ -859,9 +859,9 @@ Example: "The veil parts for you... ${this.isActive ? 'return to what was' : 'em
         }
     },
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🎮 DEBOOGER COMMANDS
-    // ═══════════════════════════════════════════════════════════════
+    // 
+    //  DEBOOGER COMMANDS
+    // 
     _registerDeboogerCommands() {
         if (typeof DeboogerCommandSystem === 'undefined') return;
 
@@ -897,12 +897,12 @@ Example: "The veil parts for you... ${this.isActive ? 'return to what was' : 'em
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY + AUTO-INIT
-// ═══════════════════════════════════════════════════════════════
+// 
+//  EXPOSE GLOBALLY + AUTO-INIT
+// 
 window.DoomWorldSystem = DoomWorldSystem;
 
-// 🖤 Initialize when DOM ready
+//  Initialize when DOM ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => DoomWorldSystem.init(), 1000);

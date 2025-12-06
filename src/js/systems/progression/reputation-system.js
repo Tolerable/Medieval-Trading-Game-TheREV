@@ -1,11 +1,11 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // REPUTATION SYSTEM - what others think you're worth
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const ReputationSystem = {
     // Reputation tiers with thresholds and effects
@@ -131,7 +131,7 @@ const ReputationSystem = {
             min: 500,
             max: 999,
             color: '#ffd700',
-            icon: '⭐',
+            icon: '',
             effects: {
                 priceModifier: 0.85,
                 questAccess: 'elite',
@@ -204,7 +204,7 @@ const ReputationSystem = {
     // Per-location reputation modifiers
     locationReputation: {},
 
-    // 🖤 LRU tracking for location reputation cleanup 💀
+    //  LRU tracking for location reputation cleanup 
     _locationAccessOrder: [],
     _maxLocationRepEntries: 50, // Keep reputation for last 50 visited locations
 
@@ -310,7 +310,7 @@ const ReputationSystem = {
         // Update location-specific reputation
         if (locationId) {
             this.locationReputation[locationId] = (this.locationReputation[locationId] || 0) + finalChange;
-            // 🖤 LRU tracking - move this location to end of access order 💀
+            //  LRU tracking - move this location to end of access order 
             this._updateLocationAccessOrder(locationId);
         }
 
@@ -395,7 +395,7 @@ const ReputationSystem = {
         return modifier;
     },
 
-    // 🖤 LRU tracking for locationReputation cleanup 💀
+    //  LRU tracking for locationReputation cleanup 
     _updateLocationAccessOrder(locationId) {
         // Remove if already in list
         const idx = this._locationAccessOrder.indexOf(locationId);

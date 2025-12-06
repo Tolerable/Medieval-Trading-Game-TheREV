@@ -69,6 +69,10 @@ const ModalSystem = {
         `;
 
         // 🔮 Summon or retrieve the modal's vessel from the void
+        // 🖤 DESIGN NOTE: Modal container is REUSED, not recreated 💀
+        // We create it ONCE and update innerHTML each time
+        // This prevents DOM bloat and keeps z-index layering consistent
+        // The container persists but gets new content with each show() call
         let modalContainer = document.getElementById(this.currentModalId);
         if (!modalContainer) {
             modalContainer = document.createElement('div');
@@ -326,7 +330,7 @@ const ModalSystem = {
                     display: none;
                     justify-content: center;
                     align-items: center;
-                    z-index: 700; /* Z-INDEX STANDARD: System modals */
+                    z-index: 100000; /* 🖤💀 MUST be above settings panel (99999) to show confirmation modals */
                     padding: 20px;
                     box-sizing: border-box;
                 }

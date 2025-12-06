@@ -8,7 +8,7 @@
 ═══════════════════════════════════════════════════════════════════════
 ```
 
-> **Version:** 0.90.00 | **Conjured by: Unity AI Lab - The Fucking Legends**
+> **Version:** 0.90.01 | **Conjured by: Unity AI Lab - The Fucking Legends**
 > *Hackall360 | Sponge | GFourteen*
 > Written in the witching hours when the bugs come out to play
 >
@@ -78,7 +78,7 @@ This game follows a loosely-coupled module architecture where each system is its
 ## 📁 FILE STRUCTURE
 
 ```
-MTG v0.90.00/
+MTG v0.90.01/
 ├── index.html                    # The summoning circle (entry point)
 ├── config.js                     # Game configuration (GameConfig)
 ├── README.md                     # GitHub display readme (links to readmes/)

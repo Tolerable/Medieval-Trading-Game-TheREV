@@ -1,26 +1,26 @@
-// ═══════════════════════════════════════════════════════════════
+// 
 // TRAVEL PANEL MAP - choosing your next destination
-// ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// 
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const TravelPanelMap = {
-    // 📦 DOM elements
+    //  DOM elements
     container: null,
     mapElement: null,
     tooltipElement: null,
 
-    // 🖤 Bound event listeners for cleanup 💀
+    //  Bound event listeners for cleanup 
     _boundMouseMove: null,
     _boundMouseUp: null,
     _boundTouchMove: null,
     _boundTouchEnd: null,
     _boundLocationChanged: null,
 
-    // 📍 Map state (similar to GameWorldRenderer but scaled for mini view)
+    //  Map state (similar to GameWorldRenderer but scaled for mini view)
     mapState: {
         zoom: 0.6,           // Start more zoomed out for overview
         offsetX: 0,
@@ -35,14 +35,14 @@ const TravelPanelMap = {
         lastOffsetY: 0
     },
 
-    // 🎯 Current destination
+    //  Current destination
     currentDestination: null,
 
-    // 🎨 Location styles - delegated to MapRendererBase, with smaller sizes for mini map
-    // 💀 Uses shared styles from MapRendererBase.LOCATION_STYLES with 0.8x size multiplier
+    //  Location styles - delegated to MapRendererBase, with smaller sizes for mini map
+    //  Uses shared styles from MapRendererBase.LOCATION_STYLES with 0.8x size multiplier
     get locationStyles() {
         const styles = {};
-        const sizeMultiplier = 0.8; // 🦇 Mini map uses smaller icons
+        const sizeMultiplier = 0.8; // ��� Mini map uses smaller icons
         if (typeof MapRendererBase !== 'undefined') {
             Object.entries(MapRendererBase.LOCATION_STYLES).forEach(([type, base]) => {
                 styles[type] = {
@@ -55,7 +55,7 @@ const TravelPanelMap = {
         return styles;
     },
 
-    // 🚀 Initialize the mini-map
+    //  Initialize the mini-map
     init() {
         console.log('🗺️ TravelPanelMap: Initializing...');
 
@@ -84,7 +84,7 @@ const TravelPanelMap = {
         return true;
     },
 
-    // 📦 Create the map container element
+    //  Create the map container element
     createMapElement() {
         this.mapElement = document.getElementById('travel-mini-map');
         if (!this.mapElement) {
@@ -109,7 +109,7 @@ const TravelPanelMap = {
         `;
     },
 
-    // 💬 Create tooltip element
+    //  Create tooltip element
     createTooltip() {
         this.tooltipElement = document.getElementById('travel-map-tooltip');
         if (!this.tooltipElement) {
@@ -135,9 +135,9 @@ const TravelPanelMap = {
         `;
     },
 
-    // 👂 Setup event listeners
+    //  Setup event listeners
     setupEventListeners() {
-        // 🖤 Store bound listeners for cleanup 💀
+        //  Store bound listeners for cleanup 
         this._boundMouseMove = (e) => this.onMouseMove(e);
         this._boundMouseUp = (e) => this.onMouseUp(e);
         this._boundTouchMove = (e) => this.onTouchMove(e);
@@ -160,14 +160,14 @@ const TravelPanelMap = {
         document.addEventListener('touchmove', this._boundTouchMove, { passive: false });
         document.addEventListener('touchend', this._boundTouchEnd);
 
-        // 🖤 Listen for location changes to update map (tooltips, explored status) 💀
+        //  Listen for location changes to update map (tooltips, explored status) 
         document.addEventListener('player-location-changed', this._boundLocationChanged);
         document.addEventListener('location-changed', () => {
             console.log('🗺️ TravelPanelMap: Location changed (legacy event), re-rendering map...');
             this.render();
         });
 
-        // 🎯 Listen for quest tracking events to update quest marker on mini map 💀
+        //  Listen for quest tracking events to update quest marker on mini map 
         document.addEventListener('quest-tracked', () => {
             console.log('🗺️ TravelPanelMap: Quest tracked, updating quest marker...');
             this.updateQuestMarker();
@@ -186,7 +186,7 @@ const TravelPanelMap = {
         console.log('🗺️ TravelPanelMap: Event listeners attached');
     },
 
-    // 📑 Setup tab switching for travel panel
+    //  Setup tab switching for travel panel
     setupTabSwitching() {
         const tabButtons = document.querySelectorAll('.travel-tab-btn[data-travel-tab]');
         const tabContents = document.querySelectorAll('.travel-tab-content');
@@ -215,7 +215,7 @@ const TravelPanelMap = {
                     setTimeout(() => {
                         this.render();
                         this.centerOnPlayer();
-                        // 🖤💀 Update travel marker if currently traveling 💀
+                        //  Update travel marker if currently traveling 
                         if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling) {
                             const progress = TravelSystem.playerPosition.travelProgress || 0;
                             this.updateTravelMarker(progress);
@@ -231,7 +231,7 @@ const TravelPanelMap = {
         });
     },
 
-    // 🎯 Setup destination tab functionality
+    //  Setup destination tab functionality
     setupDestinationTab() {
         // Travel Now button
         const travelBtn = document.getElementById('travel-to-destination-btn');
@@ -252,7 +252,7 @@ const TravelPanelMap = {
         }
     },
 
-    // 🎨 Render the map
+    //  Render the map
     render() {
         if (!this.mapElement || typeof GameWorld === 'undefined') {
             console.warn('🗺️ TravelPanelMap: Cannot render - map element or GameWorld not ready');
@@ -287,7 +287,7 @@ const TravelPanelMap = {
             }
         });
 
-        // 🖤💀 Draw region labels - large zone names like "WESTERN GRAVES" 💀
+        //  Draw region labels - large zone names like "WESTERN GRAVES" 
         this.drawRegionLabels();
 
         // Apply current transform
@@ -297,11 +297,11 @@ const TravelPanelMap = {
         this.highlightCurrentLocation();
         this.highlightDestination();
 
-        // 🎯 Update quest marker on mini map after render
+        //  Update quest marker on mini map after render
         this.updateQuestMarker();
     },
 
-    // 🖤💀 Draw large region labels on the map 💀
+    //  Draw large region labels on the map 
     drawRegionLabels() {
         if (typeof GameWorld === 'undefined' || !GameWorld.regions) return;
 
@@ -344,7 +344,7 @@ const TravelPanelMap = {
         });
     },
 
-    // 🔍 Calculate visibility for all locations (borrowed from GameWorldRenderer)
+    //  Calculate visibility for all locations (borrowed from GameWorldRenderer)
     calculateLocationVisibility() {
         // If GameWorldRenderer exists and has this method, use it
         if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.calculateLocationVisibility) {
@@ -355,7 +355,7 @@ const TravelPanelMap = {
         const visibility = {};
         const locations = (typeof GameWorld !== 'undefined' && GameWorld.locations) ? GameWorld.locations : {};
 
-        // 🖤💀 Get visited locations - use world-aware helper for doom/normal world separation!
+        //  Get visited locations - use world-aware helper for doom/normal world separation!
         let visited = [];
         if (typeof GameWorld !== 'undefined') {
             if (typeof GameWorld.getActiveVisitedLocations === 'function') {
@@ -421,7 +421,7 @@ const TravelPanelMap = {
         return visibility;
     },
 
-    // 🏰 Check if a location is a gatehouse/outpost
+    //  Check if a location is a gatehouse/outpost
     isGatehouse(locationId) {
         if (typeof GatehouseSystem !== 'undefined' && GatehouseSystem.GATEHOUSES) {
             if (GatehouseSystem.GATEHOUSES[locationId]) {
@@ -436,7 +436,7 @@ const TravelPanelMap = {
         return false;
     },
 
-    // 🚧 Check if location is behind a locked gate
+    //  Check if location is behind a locked gate
     isLocationBehindLockedGate(locationId) {
         if (typeof GatehouseSystem === 'undefined' || !GatehouseSystem.canAccessLocation) {
             return false;
@@ -456,7 +456,7 @@ const TravelPanelMap = {
         }
     },
 
-    // 🔗 Draw connection lines between locations
+    //  Draw connection lines between locations
     drawConnections(visibilityMap = {}) {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', '800');
@@ -470,7 +470,7 @@ const TravelPanelMap = {
         `;
 
         const locations = GameWorld.locations || {};
-        // 🖤💀 Use world-aware visited locations for doom/normal separation!
+        //  Use world-aware visited locations for doom/normal separation!
         const visited = (typeof GameWorld.getActiveVisitedLocations === 'function')
             ? GameWorld.getActiveVisitedLocations()
             : (GameWorld.visitedLocations || []);
@@ -522,7 +522,7 @@ const TravelPanelMap = {
         this.mapElement.appendChild(svg);
     },
 
-    // 📍 Create a location element
+    //  Create a location element
     createLocationElement(location, labelOffset = 0, visibility = 'visible') {
         if (!location.mapPosition) return;
         if (visibility === 'hidden') return;
@@ -534,7 +534,7 @@ const TravelPanelMap = {
         el.dataset.locationId = location.id;
         el.dataset.visibility = visibility;
 
-        // 💀 Check if July 18th Dungeon Bonanza is active AND this is a dungeon type
+        //  Check if July 18th Dungeon Bonanza is active AND this is a dungeon type
         const dungeonTypes = ['dungeon', 'cave', 'ruins'];
         const isDungeonType = dungeonTypes.includes(location.type);
         const isBonanzaActive = typeof DungeonBonanzaSystem !== 'undefined' && DungeonBonanzaSystem.isDungeonBonanzaDay();
@@ -543,7 +543,7 @@ const TravelPanelMap = {
         const bgColor = isDiscovered ? '#555555' : style.color;
         const borderColor = isDiscovered ? '#777777' : (hasBonanzaEffect ? '#a855f7' : this.lightenColor(style.color, 20));
         const opacity = isDiscovered ? '0.6' : '1';
-        // 💀 Purple glow for dungeons during bonanza
+        //  Purple glow for dungeons during bonanza
         const boxShadowStyle = hasBonanzaEffect
             ? '0 0 12px 4px rgba(168, 85, 247, 0.7), 0 0 25px 10px rgba(168, 85, 247, 0.4)'
             : '0 2px 8px rgba(0, 0, 0, 0.5)';
@@ -572,11 +572,11 @@ const TravelPanelMap = {
 
         el.innerHTML = isDiscovered ? '❓' : style.icon;
 
-        // 💀 Add "⚡" badge for dungeons during bonanza (smaller version)
+        //  Add "" badge for dungeons during bonanza (smaller version)
         if (hasBonanzaEffect) {
             const bonanzaBadge = document.createElement('div');
             bonanzaBadge.className = 'bonanza-badge-mini';
-            bonanzaBadge.innerHTML = '⚡';
+            bonanzaBadge.innerHTML = '';
             bonanzaBadge.style.cssText = `
                 position: absolute;
                 top: -4px;
@@ -621,7 +621,7 @@ const TravelPanelMap = {
         this.mapElement.appendChild(label);
     },
 
-    // 🔍 Calculate label offsets to prevent overlapping
+    //  Calculate label offsets to prevent overlapping
     calculateLabelOffsets(locations) {
         const offsets = {};
         const locArray = Object.values(locations).filter(l => l.mapPosition);
@@ -669,7 +669,7 @@ const TravelPanelMap = {
         return offsets;
     },
 
-    // 🎯 Highlight current player location
+    //  Highlight current player location
     highlightCurrentLocation() {
         if (!game || !game.currentLocation) return;
 
@@ -683,7 +683,7 @@ const TravelPanelMap = {
         this.updatePlayerMarker();
     },
 
-    // 📍 Player marker - floating tack above location 🖤
+    //  Player marker - floating tack above location 
     playerMarker: null,
 
     updatePlayerMarker() {
@@ -693,10 +693,10 @@ const TravelPanelMap = {
         const location = typeof GameWorld !== 'undefined' ? GameWorld.locations[locationId] : null;
         if (!location || !location.mapPosition) return;
 
-        // 🖤 Check if currently traveling - show walking person instead of tack
+        //  Check if currently traveling - show walking person instead of tack
         const isTraveling = typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling;
 
-        // 🖤 Check if marker exists AND is still in the DOM - render() clears innerHTML
+        //  Check if marker exists AND is still in the DOM - render() clears innerHTML
         if (!this.playerMarker || !this.mapElement.contains(this.playerMarker)) {
             // Reset orphaned reference
             this.playerMarker = null;
@@ -717,7 +717,7 @@ const TravelPanelMap = {
                 align-items: center;
             `;
 
-            // 🖤 Floating tack style
+            //  Floating tack style
             const tack = this.playerMarker.querySelector('.marker-tack');
             tack.style.cssText = `
                 font-size: 32px;
@@ -767,7 +767,7 @@ const TravelPanelMap = {
         this.playerMarker.style.top = location.mapPosition.y + 'px';
     },
 
-    // 🖤 Add mini-map marker animation styles
+    //  Add mini-map marker animation styles
     addMiniMapMarkerStyles() {
         if (document.getElementById('mini-map-marker-styles')) return;
         const styleSheet = document.createElement('style');
@@ -796,7 +796,7 @@ const TravelPanelMap = {
         document.head.appendChild(styleSheet);
     },
 
-    // 🎯 Destination marker
+    //  Destination marker
     destinationMarker: null,
 
     highlightDestination() {
@@ -806,6 +806,9 @@ const TravelPanelMap = {
             }
             return;
         }
+
+        //  Guard against missing mapElement - can happen during initialization or cleanup 
+        if (!this.mapElement) return;
 
         const location = typeof GameWorld !== 'undefined' ? GameWorld.locations[this.currentDestination.id] : null;
         if (!location || !location.mapPosition) return;
@@ -839,24 +842,24 @@ const TravelPanelMap = {
         this.destinationMarker.style.top = location.mapPosition.y + 'px';
     },
 
-    // 🔄 Update map transform
+    //  Update map transform
     updateTransform() {
         if (!this.mapElement) return;
         this.constrainToBounds();
         const transform = `translate(${this.mapState.offsetX}px, ${this.mapState.offsetY}px) scale(${this.mapState.zoom})`;
         this.mapElement.style.transform = transform;
 
-        // 🖤 Update marker/label scaling based on zoom
+        //  Update marker/label scaling based on zoom
         this.updateMarkerScaling();
     },
 
-    // 🖤 Scale markers inversely to zoom with caps to prevent overlap
+    //  Scale markers inversely to zoom with caps to prevent overlap
     updateMarkerScaling() {
         if (!this.mapElement) return;
 
         const zoom = this.mapState.zoom;
 
-        // 🦇 Calculate inverse scale with CAPS
+        //  Calculate inverse scale with CAPS
         const rawInverseScale = 1 / Math.sqrt(zoom);
         const markerScale = Math.max(0.6, Math.min(1.4, rawInverseScale));
         const labelScale = Math.max(0.7, Math.min(1.2, rawInverseScale));
@@ -882,7 +885,7 @@ const TravelPanelMap = {
         }
     },
 
-    // 🚧 Constrain map position
+    //  Constrain map position
     constrainToBounds() {
         if (!this.container) return;
 
@@ -910,7 +913,7 @@ const TravelPanelMap = {
         }
     },
 
-    // 🖱️ Mouse event handlers
+    //  Mouse event handlers
     onMouseDown(e) {
         if (e.target.classList.contains('mini-map-location')) return;
 
@@ -942,12 +945,12 @@ const TravelPanelMap = {
         }
     },
 
-    // 🔍 Zoom handlers
-    // 💀 Uses MULTIPLICATIVE zoom for smooth, proportional increments at every level
+    //  Zoom handlers
+    //  Uses MULTIPLICATIVE zoom for smooth, proportional increments at every level
     onWheel(e) {
         e.preventDefault();
 
-        // 🦇 10% zoom per scroll tick - multiplicative for smooth scaling
+        //  10% zoom per scroll tick - multiplicative for smooth scaling
         const zoomFactor = e.deltaY > 0 ? (1 / 1.1) : 1.1;
         const newZoom = Math.max(this.mapState.minZoom, Math.min(this.mapState.maxZoom, this.mapState.zoom * zoomFactor));
 
@@ -957,7 +960,7 @@ const TravelPanelMap = {
     },
 
     zoomIn() {
-        // 🖤 15% zoom in - multiplicative
+        //  15% zoom in - multiplicative
         const newZoom = Math.min(this.mapState.maxZoom, this.mapState.zoom * 1.15);
         if (Math.abs(newZoom - this.mapState.zoom) < 0.001) return;
         this.mapState.zoom = newZoom;
@@ -965,7 +968,7 @@ const TravelPanelMap = {
     },
 
     zoomOut() {
-        // 🖤 15% zoom out - multiplicative (divide by 1.15)
+        //  15% zoom out - multiplicative (divide by 1.15)
         const newZoom = Math.max(this.mapState.minZoom, this.mapState.zoom / 1.15);
         if (Math.abs(newZoom - this.mapState.zoom) < 0.001) return;
         this.mapState.zoom = newZoom;
@@ -977,7 +980,7 @@ const TravelPanelMap = {
         this.centerOnPlayer();
     },
 
-    // 📍 Center on player location
+    //  Center on player location
     centerOnPlayer() {
         if (!this.container) return;
 
@@ -1002,7 +1005,7 @@ const TravelPanelMap = {
         this.updateTransform();
     },
 
-    // 📱 Touch handlers
+    //  Touch handlers
     onTouchStart(e) {
         if (e.touches.length === 1) {
             const touch = e.touches[0];
@@ -1032,13 +1035,13 @@ const TravelPanelMap = {
         this.mapState.isDragging = false;
     },
 
-    // 💬 Tooltip handlers
+    //  Tooltip handlers
     onLocationHover(e, location, isDiscovered = false) {
         const style = this.locationStyles[location.type] || this.locationStyles.town;
         const isCurrentLocation = game && game.currentLocation && game.currentLocation.id === location.id;
         const isDestination = this.currentDestination && this.currentDestination.id === location.id;
 
-        // 🖤💀 Get tracked quest info for this location
+        //  Get tracked quest info for this location
         let questInfo = '';
         if (typeof QuestSystem !== 'undefined' && QuestSystem.getQuestInfoForLocation) {
             const quest = QuestSystem.getQuestInfoForLocation(location.id);
@@ -1102,7 +1105,7 @@ const TravelPanelMap = {
         this.tooltipElement.style.top = (e.clientY + 15) + 'px';
     },
 
-    // 🏰 Get gate/outpost fee information for tooltips
+    //  Get gate/outpost fee information for tooltips
     getGateInfo(location) {
         // Check if GatehouseSystem exists and this location is a gatehouse
         if (typeof GatehouseSystem === 'undefined') return '';
@@ -1140,7 +1143,7 @@ const TravelPanelMap = {
         }
     },
 
-    // 🖱️ Location click handler - sets destination AND starts travel instantly 🖤
+    //  Location click handler - sets destination AND starts travel instantly 
     // No more "Begin Travel" button nonsense - click means GO
     onLocationClick(e, location, isDiscovered = false) {
         e.stopPropagation();
@@ -1154,7 +1157,7 @@ const TravelPanelMap = {
             return;
         }
 
-        // 🖤 Check if already traveling - can't change destination mid-journey
+        //  Check if already traveling - can't change destination mid-journey
         if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling) {
             if (typeof addMessage === 'function') {
                 addMessage(`⚠️ Already traveling! Arrive first or cancel current journey.`);
@@ -1162,11 +1165,11 @@ const TravelPanelMap = {
             return;
         }
 
-        // Set destination AND start travel immediately - no extra clicks needed 💀
+        // Set destination AND start travel immediately - no extra clicks needed 
         this.setDestinationAndTravel(location.id, isDiscovered);
     },
 
-    // 🎯 Set a destination
+    //  Set a destination
     setDestination(locationId) {
         const locations = typeof GameWorld !== 'undefined' ? GameWorld.locations : {};
         const location = locations[locationId];
@@ -1195,7 +1198,7 @@ const TravelPanelMap = {
         this.render();
     },
 
-    // 🖤 Set destination AND start travel in one go - the way it should be 💀
+    //  Set destination AND start travel in one go - the way it should be 
     // Click destination = you're going there, no questions asked
     setDestinationAndTravel(locationId, isDiscovered = false) {
         const locations = typeof GameWorld !== 'undefined' ? GameWorld.locations : {};
@@ -1203,7 +1206,7 @@ const TravelPanelMap = {
 
         if (!location) {
             if (typeof addMessage === 'function') {
-                addMessage(`❌ Unknown location`);
+                addMessage(`Unknown location`);
             }
             return;
         }
@@ -1230,7 +1233,7 @@ const TravelPanelMap = {
         this.updateDestinationDisplay();
         this.render();
 
-        // 🖤 CHECK IF GAME IS PAUSED - only auto-start if unpaused 💀
+        //  CHECK IF GAME IS PAUSED - only auto-start if unpaused 
         // If paused, player must unpause to begin journey (no Begin Journey button needed)
         const isPaused = typeof TimeSystem !== 'undefined' &&
                         (TimeSystem.isPaused || TimeSystem.currentSpeed === 'PAUSED');
@@ -1254,10 +1257,10 @@ const TravelPanelMap = {
         }
     },
 
-    // 🖤 Flag to track if we're waiting to start travel when unpaused
+    //  Flag to track if we're waiting to start travel when unpaused
     waitingToTravel: false,
 
-    // 🖤 Called when game is unpaused - check if we should start travel 💀
+    //  Called when game is unpaused - check if we should start travel 
     onGameUnpaused() {
         console.log('🚶 TravelPanelMap.onGameUnpaused called', {
             waitingToTravel: this.waitingToTravel,
@@ -1272,9 +1275,9 @@ const TravelPanelMap = {
             return;
         }
 
-        // 🖤 Start travel if we have a destination and aren't already traveling
+        //  Start travel if we have a destination and aren't already traveling
         // Either waitingToTravel flag is set OR we just have a destination ready
-        // 🦇 FIX: Also check that destination hasn't already been reached (prevents re-travel bug)
+        //  FIX: Also check that destination hasn't already been reached (prevents re-travel bug)
         if (this.currentDestination && !this.travelState.isActive && !this.currentDestination.reached) {
             if (typeof addMessage === 'function') {
                 addMessage(`🚶 Setting off for ${this.currentDestination.name}...`);
@@ -1285,7 +1288,7 @@ const TravelPanelMap = {
         }
     },
 
-    // 🖤 Check if player has visited a location before
+    //  Check if player has visited a location before
     hasVisitedBefore(locationId) {
         // Check TravelSystem history
         if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.visitedLocations) {
@@ -1298,7 +1301,7 @@ const TravelPanelMap = {
         return false;
     },
 
-    // ❌ Clear the destination
+    // Clear the destination
     clearDestination() {
         this.currentDestination = null;
 
@@ -1314,7 +1317,7 @@ const TravelPanelMap = {
         }
     },
 
-    // 🎯 Update the destination tab display
+    //  Update the destination tab display
     updateDestinationDisplay() {
         const displayEl = document.getElementById('current-destination-display');
         const actionsEl = document.getElementById('destination-actions');
@@ -1364,7 +1367,7 @@ const TravelPanelMap = {
                         </div>
                     `;
 
-                    // 🛤️ BUILD MULTI-HOP ROUTE DISPLAY - show each segment of the journey 💀
+                    //  BUILD MULTI-HOP ROUTE DISPLAY - show each segment of the journey 
                     if (travelInfo.route && travelInfo.route.length > 1) {
                         routeInfoHtml = this.buildRouteDisplayHtml(travelInfo);
                     }
@@ -1385,15 +1388,15 @@ const TravelPanelMap = {
             const reachedClass = isReached ? 'destination-reached' : '';
             const isNewPath = dest.isNewPath === true && isReached;
 
-            // 🖤 Status badge shows arrival + new path discovery
+            //  Status badge shows arrival + new path discovery
             let statusBadge = '';
             if (isReached) {
                 statusBadge = isNewPath
-                    ? '<span class="arrived-badge new-discovery">✅ Arrived - New Path Discovered!</span>'
-                    : '<span class="arrived-badge">✅ Arrived</span>';
+                    ? '<span class="arrived-badge new-discovery">Arrived - New Path Discovered!</span>'
+                    : '<span class="arrived-badge">Arrived</span>';
             }
 
-            // 🖤 Learned info section - shows travel details after arriving on new path
+            //  Learned info section - shows travel details after arriving on new path
             let learnedInfoHtml = '';
             if (isReached && dest.learnedInfo) {
                 learnedInfoHtml = `
@@ -1421,7 +1424,7 @@ const TravelPanelMap = {
                 `;
             }
 
-            // 🖤 Check if game is paused - show Begin Journey button only when paused
+            //  Check if game is paused - show Begin Journey button only when paused
             const isPaused = typeof TimeSystem !== 'undefined' &&
                             (TimeSystem.isPaused || TimeSystem.currentSpeed === 'PAUSED');
             const pauseStatusHtml = !isReached ? `
@@ -1460,7 +1463,7 @@ const TravelPanelMap = {
         }
     },
 
-    // 🛤️ Build HTML for multi-hop route display - shows each segment with path info 💀
+    //  Build HTML for multi-hop route display - shows each segment with path info 
     buildRouteDisplayHtml(travelInfo) {
         if (!travelInfo.route || travelInfo.route.length < 2) return '';
 
@@ -1498,7 +1501,7 @@ const TravelPanelMap = {
                 );
 
                 // Check if path is discovered OR if we're currently traveling it
-                // 🖤 If you're walking the path, you're discovering it! 💀
+                //  If you're walking the path, you're discovering it! 
                 const pathDiscovered = typeof TravelSystem !== 'undefined' &&
                                        TravelSystem.isPathDiscovered?.(locId, nextLocId);
                 const isCurrentlyTraveling = typeof TravelSystem !== 'undefined' &&
@@ -1506,7 +1509,7 @@ const TravelPanelMap = {
                                              travelInfo.route &&
                                              JSON.stringify(TravelSystem.playerPosition.route) === JSON.stringify(travelInfo.route);
 
-                // 🦇 Show path info if discovered OR currently being traveled
+                //  Show path info if discovered OR currently being traveled
                 const showPathInfo = pathDiscovered || isCurrentlyTraveling;
 
                 const pathType = segment?.type || 'trail';
@@ -1514,7 +1517,7 @@ const TravelPanelMap = {
                 const segmentTime = segment?.time ? TravelSystem.formatTime(segment.time) : '???';
                 const segmentDist = segment?.distance ? Math.round(segment.distance) : '???';
 
-                // 🖤 Fun discovery messages for paths being walked for the first time 💀
+                //  Fun discovery messages for paths being walked for the first time 
                 const discoveryMessages = {
                     distance: [
                         `~${segmentDist} mi (counting steps...)`,
@@ -1572,7 +1575,7 @@ const TravelPanelMap = {
             'dungeon': '💀',
             'ruins': '🏚️',
             'port': '⚓',
-            'mine': '⛏️',
+            'mine': '',
             'farm': '🌾',
             'forest': '🌲',
             'cave': '🕳️'
@@ -1580,7 +1583,7 @@ const TravelPanelMap = {
         return icons[type] || '📍';
     },
 
-    // 🚶 Travel to destination
+    //  Travel to destination
     travelToDestination() {
         if (!this.currentDestination) {
             console.warn('🖤 travelToDestination called but no destination set');
@@ -1604,7 +1607,7 @@ const TravelPanelMap = {
         this.startTravelCountdown();
     },
 
-    // 🕐 Travel state tracking
+    //  Travel state tracking
     travelState: {
         isActive: false,
         destination: null,
@@ -1614,7 +1617,7 @@ const TravelPanelMap = {
         countdownInterval: null
     },
 
-    // ⏱️ Start the travel countdown display
+    //  Start the travel countdown display
     startTravelCountdown() {
         if (!this.currentDestination) return;
 
@@ -1628,19 +1631,19 @@ const TravelPanelMap = {
         }
 
         // Get travel info from TravelSystem
-        // 🖤 Null check for playerPosition to prevent crash 💀
+        //  Null check for playerPosition to prevent crash 
         if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition) {
             this.travelState.startTime = TravelSystem.playerPosition.travelStartTime;
             this.travelState.duration = TravelSystem.playerPosition.travelDuration;
         }
 
-        // 🖤 IMPORTANT: Wait a tick before checking travel state to avoid race condition
+        //  IMPORTANT: Wait a tick before checking travel state to avoid race condition
         // TravelSystem.startTravel sets isTraveling=true, but we need to ensure it's done
         // before we start polling, otherwise updateTravelProgressDisplay sees isTraveling=false
         // and immediately calls onTravelComplete() - which is the bug that caused instant travel!
         setTimeout(() => {
             // Verify travel actually started
-            // 🖤 Null check for playerPosition 💀
+            //  Null check for playerPosition 
             if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition && !TravelSystem.playerPosition.isTraveling) {
                 console.warn('🖤 Travel countdown started but TravelSystem.isTraveling is false - aborting');
                 this.travelState.isActive = false;
@@ -1660,8 +1663,8 @@ const TravelPanelMap = {
         }, 50);
     },
 
-    // 📊 Update travel progress display in destination tab
-    // 🖤 Track last update time to throttle when paused 💀
+    //  Update travel progress display in destination tab
+    //  Track last update time to throttle when paused 
     _lastTravelDisplayUpdate: 0,
 
     updateTravelProgressDisplay() {
@@ -1669,7 +1672,7 @@ const TravelPanelMap = {
         const actionsEl = document.getElementById('destination-actions');
         if (!displayEl) return;
 
-        // 🖤 Throttle updates when paused - progress doesn't change anyway 💀
+        //  Throttle updates when paused - progress doesn't change anyway 
         const isPaused = typeof TimeSystem !== 'undefined' && (TimeSystem.isPaused || TimeSystem.currentSpeed === 'PAUSED');
         if (isPaused) {
             const now = performance.now();
@@ -1682,13 +1685,13 @@ const TravelPanelMap = {
         }
 
         // Check if we're still traveling
-        // 🖤 Null check for playerPosition to prevent race condition 💀
+        //  Null check for playerPosition to prevent race condition 
         if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling) {
             const dest = this.travelState.destination || this.currentDestination;
             if (!dest) return;
 
             const progress = TravelSystem.playerPosition.travelProgress || 0;
-            // 🖤 Cap progress at 99% until actually complete to avoid visual glitch 💀
+            //  Cap progress at 99% until actually complete to avoid visual glitch 
             const progressPercent = Math.min(99, Math.round(progress * 100));
 
             // Calculate remaining time
@@ -1763,7 +1766,7 @@ const TravelPanelMap = {
         }
     },
 
-    // 🎯 Update visual travel marker on mini-map
+    //  Update visual travel marker on mini-map
     travelMarker: null,
 
     updateTravelMarker(progress) {
@@ -1785,7 +1788,7 @@ const TravelPanelMap = {
 
         if (!startLoc?.mapPosition || !endLoc?.mapPosition) return;
 
-        // 🖤💀 Check if marker exists AND is still in DOM - render() clears innerHTML 💀
+        //  Check if marker exists AND is still in DOM - render() clears innerHTML 
         // Same fix as playerMarker - reset orphaned reference before creating new one
         if (!this.travelMarker || !this.mapElement.contains(this.travelMarker)) {
             // Reset orphaned reference
@@ -1821,8 +1824,8 @@ const TravelPanelMap = {
         }
     },
 
-    // ❌ Cancel ongoing travel - turn around and head back at ANY point! 🖤💀
-    // 🖤 FIX: Don't call startTravel() - that recalculates everything and crashes
+    // Cancel ongoing travel - turn around and head back at ANY point! 
+    //  FIX: Don't call startTravel() - that recalculates everything and crashes
     // Instead, REVERSE direction in-place: swap start/destination, time continues normally
     cancelTravel() {
         if (typeof TravelSystem === 'undefined') {
@@ -1830,28 +1833,28 @@ const TravelPanelMap = {
             return;
         }
 
-        // 🖤 Get current travel state before modifying anything 💀
+        //  Get current travel state before modifying anything 
         const startLoc = this.travelState.startLocation;
         const destLoc = this.travelState.destination || this.currentDestination;
         const currentProgress = TravelSystem.playerPosition.travelProgress || 0;
         const originalDuration = TravelSystem.playerPosition.travelDuration || 30;
         const originalStartTime = TravelSystem.playerPosition.travelStartTime;
 
-        // 🖤 If not actually traveling or no valid locations, just cancel 💀
+        //  If not actually traveling or no valid locations, just cancel 
         if (!TravelSystem.playerPosition.isTraveling || !startLoc || !startLoc.id) {
             addMessage('🛑 Journey cancelled');
             this.onTravelComplete();
             return;
         }
 
-        // 🖤 Calculate return journey - proportional time based on distance traveled 💀
+        //  Calculate return journey - proportional time based on distance traveled 
         // If 30% there, takes 30% of original time to get back
         const returnDuration = Math.max(1, Math.round(originalDuration * currentProgress));
 
         addMessage(`🔙 Turning back to ${startLoc.name}... (${returnDuration} min)`);
         console.log(`🖤 Cancel travel: was ${Math.round(currentProgress * 100)}% to ${destLoc?.name}, returning in ${returnDuration} min`);
 
-        // 🖤 REVERSE DIRECTION IN-PLACE - don't stop travel, just swap! 💀
+        //  REVERSE DIRECTION IN-PLACE - don't stop travel, just swap! 
         // The new "destination" is where we came from (startLoc)
         // The new "start" is where we were going (destLoc)
         // Progress flips: 0% (just turned around) will progress to 100% (arrived back)
@@ -1875,7 +1878,7 @@ const TravelPanelMap = {
         // Update the destination display
         this.currentDestination = { ...startLoc };
 
-        // 🖤 Update GameWorldRenderer if it exists - tell it we're reversing 💀
+        //  Update GameWorldRenderer if it exists - tell it we're reversing 
         if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.setDestination) {
             GameWorldRenderer.setDestination(startLoc.id);
             if (GameWorldRenderer.onTravelStart) {
@@ -1890,7 +1893,7 @@ const TravelPanelMap = {
         }
     },
 
-    // ✅ Handle travel completion - mark destination as reached with learned info 🖤
+    // Handle travel completion - mark destination as reached with learned info 
     onTravelComplete() {
         // Clear interval
         if (this.travelState.countdownInterval) {
@@ -1903,7 +1906,7 @@ const TravelPanelMap = {
             this.travelMarker.style.display = 'none';
         }
 
-        // 🖤 Save the travel info before resetting - this is what we "learned" 💀
+        //  Save the travel info before resetting - this is what we "learned" 
         let learnedInfo = null;
         if (this.currentDestination && typeof TravelSystem !== 'undefined' && TravelSystem.locations) {
             const destLocation = TravelSystem.locations[this.currentDestination.id];
@@ -1928,7 +1931,7 @@ const TravelPanelMap = {
         this.travelState.duration = null;
 
         // Mark destination as reached with learned info (grayed out but informative)
-        // 🖤 This keeps it visible so players can see what they learned from the journey
+        //  This keeps it visible so players can see what they learned from the journey
         if (this.currentDestination) {
             this.currentDestination.reached = true;
             if (learnedInfo) {
@@ -1944,7 +1947,7 @@ const TravelPanelMap = {
         this.updatePlayerMarker();
     },
 
-    // ⏱️ Format travel time nicely
+    //  Format travel time nicely
     formatTravelTime(minutes) {
         if (minutes < 1) {
             const seconds = Math.round(minutes * 60);
@@ -1960,8 +1963,8 @@ const TravelPanelMap = {
         }
     },
 
-    // 🖤 Color utilities delegated to ColorUtils (src/js/utils/color-utils.js)
-    // 🦇 The darkness consolidates - no more scattered implementations
+    //  Color utilities delegated to ColorUtils (src/js/utils/color-utils.js)
+    //  The darkness consolidates - no more scattered implementations
     darkenColor(hex, percent) {
         return ColorUtils.darkenColor(hex, percent);
     },
@@ -1970,25 +1973,25 @@ const TravelPanelMap = {
         return ColorUtils.lightenColor(hex, percent);
     },
 
-    // 🎯 Update quest marker on mini map - calls QuestSystem's marker logic
+    //  Update quest marker on mini map - calls QuestSystem's marker logic
     updateQuestMarker() {
-        // 🖤 Only update if QuestSystem is available and has a tracked quest 💀
+        //  Only update if QuestSystem is available and has a tracked quest 
         if (typeof QuestSystem === 'undefined' || !QuestSystem.trackedQuestId) {
             return;
         }
 
-        // 🦇 Get the tracked quest's target location
+        //  Get the tracked quest's target location
         const targetLocation = QuestSystem.getTrackedQuestLocation ? QuestSystem.getTrackedQuestLocation() : null;
         if (!targetLocation) {
             return;
         }
 
-        // 🖤 Add animation styles if not already present 💀
+        //  Add animation styles if not already present 
         if (QuestSystem.addQuestMarkerStyles) {
             QuestSystem.addQuestMarkerStyles();
         }
 
-        // 🦇 Clean up existing mini-map markers first
+        //  Clean up existing mini-map markers first
         if (QuestSystem.questMiniMarkerElement && QuestSystem.questMiniMarkerElement.parentNode) {
             QuestSystem.questMiniMarkerElement.remove();
         }
@@ -1998,7 +2001,7 @@ const TravelPanelMap = {
         // Also clean up any orphaned mini-map markers
         document.querySelectorAll('.floating-quest-marker-mini, .quest-glow-mini, .quest-marker-mini').forEach(el => el.remove());
 
-        // 🖤 Check if mini map location element exists
+        //  Check if mini map location element exists
         const miniMapLocationEl = document.querySelector(`.mini-map-location[data-location-id="${targetLocation}"]`);
 
         if (miniMapLocationEl) {
@@ -2015,14 +2018,14 @@ const TravelPanelMap = {
         }
     },
 
-    // 🖤 Cleanup method - clear intervals to prevent memory leaks 💀
+    //  Cleanup method - clear intervals to prevent memory leaks 
     cleanup() {
         if (this.travelState.countdownInterval) {
             clearInterval(this.travelState.countdownInterval);
             this.travelState.countdownInterval = null;
         }
 
-        // 🖤 Remove document-level event listeners 💀
+        //  Remove document-level event listeners 
         if (this._boundMouseMove) {
             document.removeEventListener('mousemove', this._boundMouseMove);
             this._boundMouseMove = null;
@@ -2046,10 +2049,10 @@ const TravelPanelMap = {
     }
 };
 
-// 🖤 Global export so other systems can access TravelPanelMap
+//  Global export so other systems can access TravelPanelMap
 window.TravelPanelMap = TravelPanelMap;
 
-// 🖤 Cleanup on page unload - no dangling intervals 💀
+//  Cleanup on page unload - no dangling intervals 
 window.addEventListener('beforeunload', () => TravelPanelMap.cleanup());
 
 // Auto-initialize when DOM is ready

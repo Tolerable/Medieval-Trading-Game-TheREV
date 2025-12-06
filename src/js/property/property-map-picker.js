@@ -1,35 +1,35 @@
 // ═══════════════════════════════════════════════════════════════
-// PROPERTY MAP PICKER - choose where to build your empire 🖤💀
+// PROPERTY MAP PICKER - choose where to build your empire
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
 // ═══════════════════════════════════════════════════════════════
 
 const PropertyMapPicker = {
-    // 📦 DOM elements
+    // DOM elements
     overlay: null,
     mapContainer: null,
     mapElement: null,
     tooltipElement: null,
     infoPanel: null,
 
-    // 🖤 State
+    // State
     isOpen: false,
     selectedLocation: null,
     buildableLocations: [],
     onLocationSelected: null, // callback
 
-    // 🗺️ Map state - using MapRendererBase patterns
+    // Map state - using MapRendererBase patterns
     mapState: null,
 
-    // 🖤 Bound event listeners for cleanup 💀
+    // Bound event listeners for cleanup
     _boundMouseMove: null,
     _boundMouseUp: null,
     _boundKeyDown: null,
 
-    // 🎨 Location styles from base - with property-specific modifications
+    // Location styles from base - with property-specific modifications
     get locationStyles() {
         const styles = {};
         if (typeof MapRendererBase !== 'undefined') {
@@ -37,7 +37,7 @@ const PropertyMapPicker = {
                 styles[type] = {
                     color: base.color,
                     icon: base.icon,
-                    size: Math.round(base.baseSize * 1.2) // 🦇 Slightly larger for easier clicking
+                    size: Math.round(base.baseSize * 1.2) // Slightly larger for easier clicking
                 };
             });
         }
@@ -45,11 +45,11 @@ const PropertyMapPicker = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🚀 INITIALIZATION - Setting up the dark portal
+    // INITIALIZATION - Setting up the dark portal
     // ═══════════════════════════════════════════════════════════════
 
     init() {
-        console.log('🏘️ PropertyMapPicker: Initializing...');
+        console.log('PropertyMapPicker: Initializing...');
         this.mapState = MapRendererBase?.createDefaultMapState({
             zoom: 0.8,
             minZoom: 0.4,
@@ -61,15 +61,15 @@ const PropertyMapPicker = {
             isDragging: false, dragStartX: 0, dragStartY: 0,
             lastOffsetX: 0, lastOffsetY: 0
         };
-        console.log('🏘️ PropertyMapPicker: Ready!');
+        console.log('PropertyMapPicker: Ready!');
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🌙 OPEN/CLOSE - The dark portal beckons
+    // OPEN/CLOSE - The dark portal beckons
     // ═══════════════════════════════════════════════════════════════
 
     /**
-     * 🖤 Open the property map picker overlay
+     * Open the property map picker overlay
      * @param {Function} onSelect - Callback when location is selected (receives locationId)
      */
     open(onSelect = null) {
@@ -78,16 +78,16 @@ const PropertyMapPicker = {
         this.onLocationSelected = onSelect;
         this.selectedLocation = null;
 
-        // 🦇 Get buildable locations
+        // Get buildable locations
         this.buildableLocations = PropertyPurchase?.getBuildableLocations() || [];
-        console.log('🏘️ PropertyMapPicker: Buildable locations:', this.buildableLocations);
+        console.log('PropertyMapPicker: Buildable locations:', this.buildableLocations);
 
         this.createOverlay();
         this.setupEventListeners();
         this.render();
         this.centerOnCurrentLocation();
 
-        // 🖤 Pause game time while browsing map 💀
+        // Pause game time while browsing map
         if (typeof TimeMachine !== 'undefined' && !TimeMachine.isPaused) {
             this._wasTimePaused = false;
             TimeMachine.pause();
@@ -95,7 +95,7 @@ const PropertyMapPicker = {
             this._wasTimePaused = true;
         }
 
-        console.log('🏘️ PropertyMapPicker: Opened');
+        console.log('PropertyMapPicker: Opened');
     },
 
     close() {
@@ -112,20 +112,20 @@ const PropertyMapPicker = {
             this.tooltipElement = null;
         }
 
-        // 🖤 Resume time if we paused it 💀
+        // Resume time if we paused it
         if (!this._wasTimePaused && typeof TimeMachine !== 'undefined') {
             TimeMachine.resume();
         }
 
-        console.log('🏘️ PropertyMapPicker: Closed');
+        console.log('PropertyMapPicker: Closed');
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🏗️ DOM CREATION - Building the dark interface
+    // DOM CREATION - Building the dark interface
     // ═══════════════════════════════════════════════════════════════
 
     createOverlay() {
-        // 🖤 Create main overlay
+        // Create main overlay
         this.overlay = document.createElement('div');
         this.overlay.id = 'property-map-picker-overlay';
         this.overlay.className = 'property-map-picker-overlay';
@@ -170,15 +170,15 @@ const PropertyMapPicker = {
 
         document.body.appendChild(this.overlay);
 
-        // 🦇 Get references
+        // Get references
         this.mapContainer = document.getElementById('property-map-container');
         this.mapElement = document.getElementById('property-map');
         this.infoPanel = document.getElementById('property-map-info');
 
-        // 🖤 Create tooltip
+        // Create tooltip
         this.tooltipElement = MapRendererBase?.createTooltip('property-map-tooltip') || this._createFallbackTooltip();
 
-        // 🖤 Attach button handlers
+        // Attach button handlers
         this.overlay.querySelectorAll('[data-action]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const action = e.target.dataset.action;
@@ -211,7 +211,7 @@ const PropertyMapPicker = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 👂 EVENT HANDLING - Listening to the darkness
+    // EVENT HANDLING - Listening to the darkness
     // ═══════════════════════════════════════════════════════════════
 
     setupEventListeners() {
@@ -221,15 +221,15 @@ const PropertyMapPicker = {
             if (e.key === 'Escape') this.close();
         };
 
-        // 🖤 Map dragging
+        // Map dragging
         this.mapElement?.addEventListener('mousedown', (e) => this.onMouseDown(e));
         document.addEventListener('mousemove', this._boundMouseMove);
         document.addEventListener('mouseup', this._boundMouseUp);
 
-        // 🦇 Zoom
+        // Zoom
         this.mapContainer?.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
 
-        // 💀 Escape to close
+        // Escape to close
         document.addEventListener('keydown', this._boundKeyDown);
     },
 
@@ -297,19 +297,19 @@ const PropertyMapPicker = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎨 RENDERING - Painting the dark world
+    // RENDERING - Painting the dark world
     // ═══════════════════════════════════════════════════════════════
 
     render() {
         if (!this.mapElement) return;
 
-        // 🖤 Clear existing content
+        // Clear existing content
         this.mapElement.innerHTML = '';
 
-        // 🦇 Render paths first (background)
+        // Render paths first (background)
         this.renderPaths();
 
-        // 💀 Render locations on top
+        // Render locations on top
         this.renderLocations();
 
         this.updateTransform();
@@ -323,7 +323,7 @@ const PropertyMapPicker = {
 
         if (typeof GameWorld === 'undefined') return;
 
-        // 🖤 Render all discovered paths
+        // Render all discovered paths
         const discoveredPaths = TravelSystem?.discoveredPaths || new Set();
 
         Object.entries(GameWorld.locations).forEach(([locId, location]) => {
@@ -333,7 +333,7 @@ const PropertyMapPicker = {
                 const conn = GameWorld.locations[connId];
                 if (!conn) return;
 
-                // 🦇 Check if path is discovered
+                // Check if path is discovered
                 const pathKey1 = `${locId}->${connId}`;
                 const pathKey2 = `${connId}->${locId}`;
                 const isDiscovered = discoveredPaths.has(pathKey1) || discoveredPaths.has(pathKey2);
@@ -362,7 +362,7 @@ const PropertyMapPicker = {
         const discoveredLocations = TravelSystem?.discoveredLocations || new Set();
 
         Object.entries(GameWorld.locations).forEach(([locId, location]) => {
-            // 🖤 Only show discovered locations
+            // Only show discovered locations
             if (!discoveredLocations.has(locId) && locId !== currentLocationId) return;
 
             const isBuildable = this.buildableLocations.includes(locId);
@@ -376,7 +376,7 @@ const PropertyMapPicker = {
             marker.className = 'property-location-marker';
             marker.dataset.locationId = locId;
 
-            // 🦇 Add state classes
+            // Add state classes
             if (isBuildable) marker.classList.add('buildable');
             if (isOwned) marker.classList.add('owned');
             if (isCurrent) marker.classList.add('current');
@@ -405,7 +405,7 @@ const PropertyMapPicker = {
             marker.innerHTML = style.icon;
             marker.title = location.name;
 
-            // 🖤 Event handlers
+            // Event handlers
             marker.addEventListener('mouseenter', (e) => this.showLocationTooltip(e, locId, location));
             marker.addEventListener('mouseleave', () => this.hideTooltip());
             marker.addEventListener('click', () => {
@@ -414,7 +414,7 @@ const PropertyMapPicker = {
 
             this.mapElement.appendChild(marker);
 
-            // 🦇 Add name label below
+            // Add name label below
             const label = document.createElement('div');
             label.className = 'property-location-label';
             label.textContent = location.name;
@@ -435,7 +435,7 @@ const PropertyMapPicker = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💬 TOOLTIPS & INFO - Whispering secrets
+    // TOOLTIPS & INFO - Whispering secrets
     // ═══════════════════════════════════════════════════════════════
 
     showLocationTooltip(e, locationId, location) {
@@ -477,13 +477,13 @@ const PropertyMapPicker = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎯 SELECTION - Choosing your domain
+    // SELECTION - Choosing your domain
     // ═══════════════════════════════════════════════════════════════
 
     selectLocation(locationId) {
         this.selectedLocation = locationId;
 
-        // 🖤 Update visual selection
+        // Update visual selection
         this.mapElement.querySelectorAll('.property-location-marker').forEach(m => {
             m.classList.remove('selected');
             m.style.boxShadow = '';
@@ -495,17 +495,17 @@ const PropertyMapPicker = {
             selectedMarker.style.boxShadow = '0 0 20px #FFD700, 0 0 40px #FFD700';
         }
 
-        // 🦇 Update info panel
+        // Update info panel
         this.updateInfoPanel(locationId);
 
-        // 💀 Enable confirm button
+        // Enable confirm button
         const confirmBtn = document.getElementById('property-map-confirm-btn');
         if (confirmBtn) {
             confirmBtn.disabled = false;
             confirmBtn.textContent = `Select ${GameWorld.locations[locationId]?.name || 'Location'}`;
         }
 
-        console.log('🏘️ PropertyMapPicker: Selected', locationId);
+        console.log('PropertyMapPicker: Selected', locationId);
     },
 
     updateInfoPanel(locationId) {
@@ -567,7 +567,7 @@ const PropertyMapPicker = {
     },
 
     calculatePriceForLocation(propertyId, locationId) {
-        // 🖤 Calculate price as if we were at that location 💀
+        // Calculate price as if we were at that location
         const propertyType = PropertyTypes?.get(propertyId);
         if (!propertyType) return 0;
 
@@ -597,16 +597,16 @@ const PropertyMapPicker = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // ✅ CONFIRMATION - Sealing the deal
+    // CONFIRMATION - Sealing the deal
     // ═══════════════════════════════════════════════════════════════
 
     confirmSelection() {
         if (!this.selectedLocation) return;
 
         const locationId = this.selectedLocation;
-        console.log('🏘️ PropertyMapPicker: Confirmed selection:', locationId);
+        console.log('PropertyMapPicker: Confirmed selection:', locationId);
 
-        // 🖤 Call the callback with selected location
+        // Call the callback with selected location
         if (this.onLocationSelected) {
             this.onLocationSelected(locationId);
         }
@@ -615,7 +615,7 @@ const PropertyMapPicker = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎯 HELPERS - Dark utilities
+    // HELPERS - Dark utilities
     // ═══════════════════════════════════════════════════════════════
 
     centerOnCurrentLocation() {
@@ -636,7 +636,7 @@ const PropertyMapPicker = {
     }
 };
 
-// 🖤 Initialize on DOM ready
+// Initialize on DOM ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => PropertyMapPicker.init());
 } else {
