@@ -1384,10 +1384,22 @@ const QuestSystem = {
             return { success: false, error: 'Objectives not complete', progress };
         }
 
-        // Validate all collection objectives have items BEFORE completing
-        // This prevents NPCs from completing quests when player doesn't have items
+        // 🖤 Validate collection objectives - but SKIP if quest requires selling/trading those items! 💀
+        // This prevents false "missing items" errors when quest asked player to sell the items
         for (const obj of quest.objectives || []) {
             if (obj.type === 'collect' && obj.item) {
+                // 🎯 Check if quest has sell/trade objective for the SAME item
+                const hasSellObjective = quest.objectives.some(o =>
+                    (o.type === 'sell' || o.type === 'trade') && o.item === obj.item
+                );
+
+                // 💀 If quest requires selling/trading the item, don't check inventory!
+                if (hasSellObjective) {
+                    console.log(`🎯 Quest has sell/trade objective for ${obj.item} - skipping inventory check`);
+                    continue;
+                }
+
+                // 🖤 Normal collection quest - verify player has items
                 const playerHas = game?.player?.inventory?.[obj.item] || 0;
                 if (playerHas < obj.count) {
                     return {
