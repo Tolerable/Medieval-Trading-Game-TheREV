@@ -39,6 +39,23 @@ const DraggablePanels = {
         'settings-panel': '.settings-header, h2'
     },
 
+    // Overlays that can be closed by clicking outside (non-essential popups)
+    // Excludes: settings, NPC chat (response needed), combat, game setup
+    clickOutsideCloseableOverlays: [
+        'achievement-overlay',
+        'character-sheet-overlay',
+        'quest-overlay',
+        'financial-sheet-overlay',
+        'inventory-overlay',
+        'market-overlay',
+        'world-map-overlay',
+        'travel-progress-overlay',
+        'people-panel',
+        'random-event-panel',
+        'leaderboard-overlay',
+        'help-overlay'
+    ],
+
     init() {
         console.log('🖤 DraggablePanels: Initializing (drag-only mode)...');
 
@@ -47,6 +64,9 @@ const DraggablePanels = {
 
         // Setup global drag events
         this.setupGlobalEvents();
+
+        // Setup click-outside-to-close for overlays
+        this.setupClickOutsideClose();
 
         // Setup draggables on all panels
         this.setupAllDraggables();
@@ -58,6 +78,81 @@ const DraggablePanels = {
         this.loadPositions();
 
         console.log('🖤 DraggablePanels: Ready');
+    },
+
+    // Setup click-outside-to-close for overlay panels
+    setupClickOutsideClose() {
+        document.addEventListener('mousedown', (e) => {
+            // Find if we clicked on an overlay backdrop (not the content)
+            const clickedOverlay = e.target.closest('.overlay, .achievement-overlay, .leaderboard-overlay, .overlay-panel');
+
+            if (!clickedOverlay) return;
+
+            // Check if we clicked directly on the overlay backdrop (not inner content)
+            const clickedOnBackdrop = e.target === clickedOverlay ||
+                                      e.target.classList.contains('overlay') ||
+                                      e.target.classList.contains('achievement-overlay') ||
+                                      e.target.classList.contains('leaderboard-overlay');
+
+            if (!clickedOnBackdrop) return;
+
+            // Get overlay ID
+            const overlayId = clickedOverlay.id;
+            if (!overlayId) return;
+
+            // Check if this overlay should close on outside click
+            if (!this.clickOutsideCloseableOverlays.includes(overlayId)) return;
+
+            // Check if overlay is actually visible
+            const isVisible = clickedOverlay.classList.contains('active') ||
+                             (clickedOverlay.style.display !== 'none' && !clickedOverlay.classList.contains('hidden'));
+
+            if (!isVisible) return;
+
+            // Close the overlay
+            this.closeOverlay(overlayId);
+        });
+    },
+
+    // Close an overlay by ID using appropriate method
+    closeOverlay(overlayId) {
+        console.log(`🖤 Closing overlay via click-outside: ${overlayId}`);
+
+        // Special close functions for specific overlays
+        if (overlayId === 'achievement-overlay' && typeof closeAchievementPanel === 'function') {
+            closeAchievementPanel();
+            return;
+        }
+        if (overlayId === 'leaderboard-overlay') {
+            if (typeof SaveUISystem !== 'undefined' && SaveUISystem.closeHallOfChampions) {
+                SaveUISystem.closeHallOfChampions();
+            } else if (typeof closeLeaderboardPanel === 'function') {
+                closeLeaderboardPanel();
+            }
+            return;
+        }
+        if (overlayId === 'people-panel' && typeof PeoplePanel !== 'undefined') {
+            PeoplePanel.hide();
+            return;
+        }
+        if (overlayId === 'random-event-panel' && typeof RandomEventPanel !== 'undefined') {
+            RandomEventPanel.hide();
+            return;
+        }
+
+        // Generic close via PanelManager
+        if (typeof PanelManager !== 'undefined' && PanelManager.closePanel) {
+            PanelManager.closePanel(overlayId);
+            return;
+        }
+
+        // Fallback: hide directly
+        const overlay = document.getElementById(overlayId);
+        if (overlay) {
+            overlay.classList.remove('active');
+            overlay.classList.add('hidden');
+            overlay.style.display = 'none';
+        }
     },
 
     // Bring a panel to the front of the stack (highest z-index in gameplay range)
