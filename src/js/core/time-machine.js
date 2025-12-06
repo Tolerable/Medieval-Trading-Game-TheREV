@@ -192,10 +192,12 @@ const TimeMachine = {
         this.userPreferredSpeed = 'NORMAL';
         this._interruptStack = []; // Track nested interrupts (achievement during encounter, etc.)
 
-        // ⚡ Setup UI controls
+        // Setup UI controls
         this.setupTimeControls();
+        // Update button state to show play icon (game starts paused)
+        this.updateTimeControlButtons();
 
-        console.log('⏰ TIME MACHINE ready - April 1st, 1111, 8:00 AM');
+        console.log('TIME MACHINE ready - April 1st, 1111, 8:00 AM');
         console.log(`⏰ Season: ${this.getSeason()} ${this.SEASONS[this.getSeason()].icon}`);
 
         return true;

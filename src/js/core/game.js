@@ -4543,11 +4543,18 @@ function changeState(newState) {
             } else {
                 gameDeboogerWarn('🖤 GameWorldRenderer not found');
             }
-            // 🎮 Start the GameEngine for time and travel management
+            // Start the GameEngine for time and travel management
             if (typeof GameEngine !== 'undefined') {
                 GameEngine.init();
                 GameEngine.start();
-                console.log('🎮 GameEngine started - time flows once more');
+                console.log('GameEngine started - time flows once more');
+            }
+            // Re-setup time controls now that game-container is visible
+            // This ensures the pause/play button toggle works
+            if (typeof TimeMachine !== 'undefined') {
+                TimeMachine.setupTimeControls();
+                TimeMachine.updateTimeControlButtons();
+                console.log('TimeMachine controls re-initialized');
             }
             break;
         case GameState.PAUSED:
