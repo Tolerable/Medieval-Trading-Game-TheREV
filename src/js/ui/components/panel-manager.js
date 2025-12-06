@@ -41,8 +41,9 @@ const PanelManager = {
         'inventory-panel': { name: 'Inventory', icon: '🎒', shortcut: 'I' },
         'character-sheet-overlay': { name: 'Character', icon: '👤', shortcut: 'C', useActiveClass: true },
         'people-panel': { name: 'People', icon: '👥', shortcut: 'O', customToggle: 'KeyBindings.openPeople()' },  // 🖤💀 ADDED 💀
+        'party-panel': { name: 'Party', icon: '🤝', shortcut: 'Y', customToggle: 'PartyPanel.togglePanel()' },  // 🤝 PARTY MANAGEMENT 💀
         'financial-sheet-overlay': { name: 'Finances', icon: '💰', shortcut: 'F', useActiveClass: true },
-        'quest-log-panel': { name: 'Quests', icon: '📜', shortcut: 'Q', customToggle: 'KeyBindings.openQuests()' },
+        'quest-overlay': { name: 'Quests', icon: '📜', shortcut: 'Q', customToggle: 'KeyBindings.openQuests()', useActiveClass: true },
         'achievement-overlay': { name: 'Achievements', icon: '🏆', shortcut: 'A', useActiveClass: true },
         'settings-panel': { name: 'Settings', icon: '⚙️', shortcut: ',' },
         'property-employee-panel': { name: 'Properties', icon: '🏠', shortcut: 'P', useActiveClass: true },
@@ -302,8 +303,9 @@ const PanelManager = {
             'inventory-panel',        // 🎒 Inventory [I]
             'character-sheet-overlay', // 👤 Character [C]
             'people-panel',           // 👥 People [O] - 🖤 ADDED 💀
+            'party-panel',            // 🤝 Party [Y] - 🤝 COMPANION MANAGEMENT 💀
             'financial-sheet-overlay', // 💰 Finances [F]
-            'quest-log-panel',        // 📜 Quests [Q]
+            'quest-overlay',          // 📜 Quests [Q]
             'achievement-overlay',    // 🏆 Achievements [A]
             'settings-panel',         // ⚙️ Settings [,]
             'message-log',            // 💬 Messages

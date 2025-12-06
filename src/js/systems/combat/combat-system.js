@@ -396,21 +396,54 @@ const CombatSystem = {
             this.addCombatLog(`🩹 The ${combat.enemy.name} regenerates ${heal} HP!`);
         }
 
-        // Enemy attacks
+        // Enemy attacks - distribute among party members
+        const aliveCompanions = combat.player.companions?.filter(c => c.health > 0) || [];
+        const alivePartyMembers = aliveCompanions.length + 1; // +1 for player
+
+        let target = 'player';
+        let targetName = game.player?.name || 'You';
+        let targetDefense = combat.player.defense;
+
+        // Random target selection: 50% player, 50% companions
+        if (aliveCompanions.length > 0 && Math.random() < 0.5) {
+            const randomCompanion = aliveCompanions[Math.floor(Math.random() * aliveCompanions.length)];
+            target = randomCompanion.id;
+            targetName = randomCompanion.name;
+            targetDefense = Math.floor(combat.player.defense / 2) + (randomCompanion.defense || 0);
+        }
+
         const enemyDamage = this.calculateDamage(
             combat.enemy.attack,
-            combat.player.defense,
+            targetDefense,
             false
         );
 
-        // Apply damage to player
-        game.player.stats.health -= enemyDamage.damage;
-        combat.player.health = game.player.stats.health;
+        // Apply damage to target
+        if (target === 'player') {
+            game.player.stats.health -= enemyDamage.damage;
+            combat.player.health = game.player.stats.health;
+        } else {
+            // Find companion in actual game data and apply damage
+            if (typeof CompanionSystem !== 'undefined') {
+                const companion = CompanionSystem.getCompanion(target);
+                if (companion) {
+                    companion.health = Math.max(0, companion.health - enemyDamage.damage);
+
+                    // Check if companion died
+                    if (companion.health <= 0) {
+                        this.addCombatLog(`💀 ${companion.name} has fallen in battle!`);
+                    }
+
+                    // Recalculate player stats (companions may have died)
+                    combat.player = this.getPlayerCombatStats();
+                }
+            }
+        }
 
         if (enemyDamage.crit) {
-            this.addCombatLog(`💀 ${combat.enemy.name} lands a CRITICAL HIT for ${enemyDamage.damage} damage!`);
+            this.addCombatLog(`💀 ${combat.enemy.name} lands a CRITICAL HIT on ${targetName} for ${enemyDamage.damage} damage!`);
         } else {
-            this.addCombatLog(`🔪 ${combat.enemy.name} attacks for ${enemyDamage.damage} damage.`);
+            this.addCombatLog(`🔪 ${combat.enemy.name} attacks ${targetName} for ${enemyDamage.damage} damage.`);
         }
 
         // Check if player is dead
