@@ -1644,11 +1644,18 @@ const GameWorldRenderer = {
                         100% { transform: translate(-50%, -100%) scale(1); }
                     }
                     .player-marker.traveling .marker-tack {
-                        animation: tack-walk 0.4s ease-in-out infinite !important;
+                        animation: tack-walk-left 0.4s ease-in-out infinite;
                     }
-                    @keyframes tack-walk {
-                        0%, 100% { transform: translateY(-8px) rotate(-5deg); }
-                        50% { transform: translateY(-12px) rotate(5deg); }
+                    .player-marker.traveling.moving-right .marker-tack {
+                        animation: tack-walk-right 0.4s ease-in-out infinite;
+                    }
+                    @keyframes tack-walk-left {
+                        0%, 100% { transform: translateY(-8px) rotate(-5deg) scaleX(1); }
+                        50% { transform: translateY(-12px) rotate(5deg) scaleX(1); }
+                    }
+                    @keyframes tack-walk-right {
+                        0%, 100% { transform: translateY(-8px) rotate(-5deg) scaleX(-1); }
+                        50% { transform: translateY(-12px) rotate(5deg) scaleX(-1); }
                     }
                     /* 💀 July 18th Dungeon Bonanza pulse effect */
                     @keyframes bonanza-pulse {
@@ -1763,8 +1770,12 @@ const GameWorldRenderer = {
             const tack = this.playerMarker.querySelector('.marker-tack');
             if (tack) {
                 tack.textContent = '🚶'; // Walking person while traveling
-                // Set initial direction - mirror if moving right (emoji faces left by default)
-                tack.style.transform = this.currentTravel.movingRight ? 'scaleX(-1)' : 'scaleX(1)';
+            }
+            // Set initial direction via CSS class - emoji faces LEFT by default
+            if (this.currentTravel.movingRight) {
+                this.playerMarker.classList.add('moving-right');
+            } else {
+                this.playerMarker.classList.remove('moving-right');
             }
             // Update label to show "TRAVELING..."
             const label = this.playerMarker.querySelector('.marker-label');
@@ -1905,18 +1916,18 @@ const GameWorldRenderer = {
         this.updatePlayerMarker(currentX, currentY, true);
 
         // Mirror the walking emoji based on travel direction
-        // Default emoji faces left, so mirror when moving right
+        // Emoji faces LEFT by default, so add moving-right class when moving RIGHT
         if (this.playerMarker) {
-            const tack = this.playerMarker.querySelector('.marker-tack');
-            if (tack) {
-                // Use overall direction (end vs start) for consistent facing
-                // Update direction if it changes (e.g. via waypoints or cancel)
-                const currentMovingRight = currentX > travel.lastX;
-                if (travel.lastX !== undefined && currentMovingRight !== travel.movingRight) {
-                    travel.movingRight = currentMovingRight;
+            // Update direction if it changes (e.g. via waypoints or cancel)
+            const currentMovingRight = currentX > travel.lastX;
+            if (travel.lastX !== undefined && currentMovingRight !== travel.movingRight) {
+                travel.movingRight = currentMovingRight;
+                // Update CSS class for animation direction
+                if (travel.movingRight) {
+                    this.playerMarker.classList.add('moving-right');
+                } else {
+                    this.playerMarker.classList.remove('moving-right');
                 }
-                // scaleX(-1) mirrors horizontally for right-facing movement
-                tack.style.transform = travel.movingRight ? 'scaleX(-1)' : 'scaleX(1)';
             }
             travel.lastX = currentX;
         }
