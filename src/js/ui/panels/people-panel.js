@@ -1161,7 +1161,7 @@ const PeoplePanel = {
 
             // ⏳ CHECK PROGRESS - Player has active quests from this NPC
             // 🖤💀 Show INDIVIDUAL buttons for each quest, not one generic button!
-            const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType);
+            const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType, location);
             const inProgress = activeFromNPC.filter(q => {
                 const progress = QuestSystem.checkProgress(q.id);
                 return progress.status === 'in_progress';
@@ -1299,8 +1299,10 @@ const PeoplePanel = {
     getQuestsReadyToComplete(npcType) {
         if (typeof QuestSystem === 'undefined') return [];
 
+        const location = game?.currentLocation?.id;
+
         // 🖤💀 Get quests where this NPC is the GIVER
-        const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType);
+        const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType, location);
 
         // 🖤💀 ALSO get quests where this NPC is the TURN-IN target (might be different from giver!)
         const allActive = Object.values(QuestSystem.activeQuests || {});
@@ -1312,8 +1314,10 @@ const PeoplePanel = {
             // Check if final talk objective EXACTLY targets this NPC type
             const talkObj = q.objectives?.find(o => o.type === 'talk' && !o.completed);
             const talkMatches = talkObj && talkObj.npc === npcType;
+            // 🖤 LOCATION CHECK: Ensure turn-in is at THIS location
+            const locationMatches = !location || !q.turnInLocation || q.turnInLocation === location || q.turnInLocation === 'any';
 
-            return turnInMatches || talkMatches;
+            return (turnInMatches || talkMatches) && locationMatches;
         });
 
         // 🦇 Combine and dedupe
@@ -2725,7 +2729,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         }
 
         // 🖤 PRIORITY 2: Quest in progress from this NPC (grey ? markers)
-        const activeFromNPC = QuestSystem.getActiveQuestsForNPC?.(npcType) || [];
+        const activeFromNPC = QuestSystem.getActiveQuestsForNPC?.(npcType, location) || [];
         const inProgress = activeFromNPC.filter(q => {
             const progress = QuestSystem.checkProgress?.(q.id);
             return progress?.status === 'in_progress';
@@ -2733,9 +2737,10 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
 
         // 🦇 Also check if this NPC is the turn-in target for any active quest
         const turnInQuests = Object.values(QuestSystem.activeQuests || {}).filter(q => {
-            if (q.turnInNpc === npcType) return true;
-            const talkObj = q.objectives?.find(o => o.type === 'talk' && !o.completed);
-            return talkObj?.npc === npcType;
+            // 🖤 Check if NPC type matches AND location matches (for multiple merchants/NPCs of same type)
+            const npcMatches = (q.turnInNpc === npcType) || q.objectives?.some(o => o.type === 'talk' && !o.completed && o.npc === npcType);
+            const locationMatches = !location || !q.turnInLocation || q.turnInLocation === location || q.turnInLocation === 'any';
+            return npcMatches && locationMatches;
         });
 
         if (inProgress.length > 0 || turnInQuests.length > 0) {
