@@ -1594,16 +1594,19 @@ const QuestSystem = {
         });
     },
 
-    getActiveQuestsForNPC(npcType) {
+    getActiveQuestsForNPC(npcType, location = null) {
         return Object.values(this.activeQuests).filter(quest => {
             // 🖤💀 Use _npcMatchesObjective for flexible NPC matching
-            return this._npcMatchesObjective(npcType, quest.giver);
+            if (!this._npcMatchesObjective(npcType, quest.giver)) return false;
+            // 🖤 LOCATION CHECK: Only show quests from NPCs at THIS location (fixes multiple merchants issue)
+            if (location && quest.location && quest.location !== location && quest.location !== 'any') return false;
+            return true;
         });
     },
 
     getQuestContextForNPC(npcType, location) {
         const available = this.getQuestsForNPC(npcType, location);
-        const active = this.getActiveQuestsForNPC(npcType);
+        const active = this.getActiveQuestsForNPC(npcType, location);
         const readyToComplete = active.filter(q => this.checkProgress(q.id).status === 'ready_to_complete');
 
         // also find quests where this NPC is the delivery TARGET (not the giver)
