@@ -19,6 +19,18 @@ const DraggablePanels = {
     Z_INDEX_MAX: 199,       // Maximum z-index for gameplay panels (below tooltips at 200)
     panelStack: [],         // Array of panel IDs in focus order (last = topmost)
 
+    // Panels excluded from dynamic z-index (they have fixed z-index above all gameplay panels)
+    // These are modals, settings, and critical overlays that must always be on top
+    excludeFromZIndexStack: [
+        'settings-panel',
+        'npc-chat-modal',
+        'combat-modal',
+        'main-menu',
+        'loading-screen',
+        'game-setup-panel',
+        'debooger-console'
+    ],
+
     // Map of panel IDs/classes to their drag handle selectors
     // If not listed, will try common header selectors
     panelDragHandles: {
@@ -162,6 +174,11 @@ const DraggablePanels = {
         const panelId = element.id || element.className.split(' ')[0];
         if (!panelId) return;
 
+        // Skip excluded panels - they have fixed z-index above all gameplay panels
+        if (this.excludeFromZIndexStack.includes(panelId)) {
+            return;
+        }
+
         // Remove from current position in stack (if present)
         const existingIndex = this.panelStack.indexOf(panelId);
         if (existingIndex !== -1) {
@@ -176,6 +193,7 @@ const DraggablePanels = {
     },
 
     // Update z-indices for all panels based on their stack position
+    // Uses setProperty with 'important' to override any CSS !important rules
     updateAllPanelZIndices() {
         const maxPanels = this.Z_INDEX_MAX - this.Z_INDEX_BASE;
 
@@ -186,11 +204,12 @@ const DraggablePanels = {
         }
 
         // Assign z-indices based on stack position
+        // Use setProperty with 'important' to override CSS !important rules
         this.panelStack.forEach((panelId, index) => {
             const panel = document.getElementById(panelId) ||
                           document.querySelector(`.${panelId}`);
             if (panel) {
-                panel.style.zIndex = this.Z_INDEX_BASE + index;
+                panel.style.setProperty('z-index', String(this.Z_INDEX_BASE + index), 'important');
             }
         });
     },
@@ -200,6 +219,13 @@ const DraggablePanels = {
         if (!element || element.dataset.focusSetup) return;
 
         element.dataset.focusSetup = 'true';
+
+        const panelId = element.id || element.className.split(' ')[0];
+
+        // Skip excluded panels - they have fixed z-index above all gameplay panels
+        if (this.excludeFromZIndexStack.includes(panelId)) {
+            return;
+        }
 
         // Use mousedown for immediate response (before drag starts)
         element.addEventListener('mousedown', (e) => {
@@ -211,10 +237,9 @@ const DraggablePanels = {
         }, { passive: true, capture: true });
 
         // Add to stack if not present
-        const panelId = element.id || element.className.split(' ')[0];
         if (panelId && !this.panelStack.includes(panelId)) {
             this.panelStack.push(panelId);
-            element.style.zIndex = this.Z_INDEX_BASE + this.panelStack.length - 1;
+            element.style.setProperty('z-index', String(this.Z_INDEX_BASE + this.panelStack.length - 1), 'important');
         }
     },
 
@@ -446,7 +471,7 @@ const DraggablePanels = {
         element.style.transform = 'none';
         element.style.margin = '0';
         // Use temporary high z-index during drag (within safe range, below tooltips)
-        element.style.zIndex = String(this.Z_INDEX_MAX);
+        element.style.setProperty('z-index', String(this.Z_INDEX_MAX), 'important');
 
         // 🖤 Cache width/height here - no getBoundingClientRect() spam in onDrag()
         // This prevents layout thrashing during drag operations 💀

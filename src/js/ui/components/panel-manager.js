@@ -34,7 +34,7 @@ const PanelManager = {
     // 🖤💀 Order should match bottom action bar for consistency 💀
     panelInfo: {
         'game-setup-panel': { name: 'New Game', icon: '🎮', shortcut: '' },
-        'game-menu-overlay': { name: 'Menu', icon: '📋', shortcut: 'Escape', useActiveClass: true, customToggle: 'KeyBindings.openMenu()' },
+        'game-menu-overlay': { name: 'Menu', icon: '⚙️', shortcut: 'Escape', useActiveClass: true, customToggle: 'KeyBindings.openMenu()' },
         'market-panel': { name: 'Market', icon: '🏪', shortcut: 'M', customToggle: 'openMarket()' },
         'travel-panel': { name: 'Travel', icon: '🗺️', shortcut: 'T' },
         'transportation-panel': { name: 'Transport', icon: '🚗', shortcut: 'W' },
@@ -294,20 +294,20 @@ const PanelManager = {
         `;
 
         // Add buttons for main panels
-        // 🖤💀 Order matches bottom action bar: Menu, Market, Travel, Transport, Inventory, Character, People, Finances, Quests, Achievements, Settings 💀
+        // 🖤💀 Order matches bottom action bar: Menu, Market, Travel, Transport, Inventory, Character, People, Finances, Quests, Achievements 💀
+        // Save/Load/Settings removed - access via Menu button (⚙️)
         const mainPanels = [
-            'game-menu-overlay',      // 📋 Menu [ESC]
+            'game-menu-overlay',      // ⚙️ Menu [ESC]
             'market-panel',           // 🏪 Market [M]
             'travel-panel',           // 🗺️ Travel [T]
             'transportation-panel',   // 🚗 Transport [W]
             'inventory-panel',        // 🎒 Inventory [I]
             'character-sheet-overlay', // 👤 Character [C]
-            'people-panel',           // 👥 People [O] - 🖤 ADDED 💀
-            'party-panel',            // 🤝 Party [Y] - 🤝 COMPANION MANAGEMENT 💀
+            'people-panel',           // 👥 People [O]
+            'party-panel',            // 🤝 Party [Y]
             'financial-sheet-overlay', // 💰 Finances [F]
             'quest-overlay',          // 📜 Quests [Q]
             'achievement-overlay',    // 🏆 Achievements [A]
-            'settings-panel',         // ⚙️ Settings [,]
             'message-log',            // 💬 Messages
             'quest-tracker'           // 📋 Quest Tracker widget
         ];
