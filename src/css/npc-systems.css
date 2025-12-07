@@ -56,7 +56,8 @@
     position: relative;
     width: 90%;
     max-width: 900px;
-    max-height: 85vh;
+    height: 90vh;
+    max-height: 800px;
     background: var(--npc-bg-dark);
     border: 2px solid var(--npc-border);
     border-radius: 12px;
@@ -193,11 +194,13 @@
     line-height: 1.4;
 }
 
-/* Main Content */
+/* Main Content - no outer scroll, inventories scroll themselves */
 .trade-main-content {
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden;
     padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Trade Columns Layout */
@@ -205,7 +208,8 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 15px;
-    min-height: 300px;
+    flex: 1;
+    min-height: 0;
 }
 
 .trade-column {
@@ -214,6 +218,8 @@
     padding: 12px;
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .trade-column h3, .trade-column h4 {
@@ -223,11 +229,11 @@
     text-align: center;
 }
 
-/* Inventory */
+/* Inventory - fills available space, scrolls internally */
 .trade-inventory {
-    max-height: 400px;
-    overflow-y: auto;
     flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .trade-inventory.scrollable {

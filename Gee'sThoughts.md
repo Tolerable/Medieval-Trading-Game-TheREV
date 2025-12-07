@@ -8,7 +8,17 @@
 
 **Request:** Gee said "go workflow go, push to git main" - run the workflow and push current changes to GitHub.
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETE
+
+### Changes Committed & Pushed:
+- `src/css/npc-systems.css` - Trade panel redesign
+- `src/js/npc/npc-trade.js` - Trade panel fixes
+- `src/js/npc/npc-trade-backup.js` - Backup file (new)
+- `src/js/ui/panels/people-panel.js` - Minor updates
+- `Gee'sThoughts.md` - Session log
+
+**Commit:** `644c32e` - Session #44: NPC dialog buttons + faction rep + trade panel redesign
+**Pushed to:** `origin/main`
 
 ---
 
