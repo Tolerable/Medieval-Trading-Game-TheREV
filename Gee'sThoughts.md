@@ -4,6 +4,37 @@
 
 ---
 
+## 2025-12-06 - SESSION #38: REROUTE TRAVEL FIX
+
+**Request:** Reroute travel not working:
+1. Can't reroute to starting location
+2. Rerouting to different location breaks travel (shows "you are here" icon, stops moving)
+
+**Status:** COMPLETE
+
+### Root Causes Found:
+1. **"Already at" check happened BEFORE reroute check** - When traveling, `game.currentLocation` shows the START not current position, so clicking start triggered "You are already at X" before the reroute code ran
+2. **Rerouting back to start caused self-travel** - After clearing state and setting `game.currentLocation` to start, the code tried to travel FROM start TO start, which breaks
+
+### Fixes Implemented:
+
+**1. Reordered checks in `onLocationClick()` (lines 1152-1168)**
+- Moved reroute check BEFORE "already at" check
+- Now correctly detects mid-journey clicks and routes to `rerouteTravel()`
+
+**2. Special handling for "going back to start" (lines 1229-1293)**
+- **Progress < 50%**: Just cancel travel and stay at start (no self-travel)
+- **Progress >= 50%**: Set position to destination, then travel back to start
+
+**3. Created `_startRerouteTravel()` helper (lines 1301-1355)**
+- Internal method that bypasses "already at" check
+- Used after reroute state reset to start fresh travel
+
+### Files Changed:
+- `src/js/systems/travel/travel-panel-map.js` - Reroute logic fix
+
+---
+
 ## 2025-12-06 - SESSION #37: MASSIVE COMBAT SYSTEM OVERHAUL 🖤💀⚔️
 
 **Request:** Gee requested a MASSIVE combat system overhaul:
