@@ -2336,18 +2336,7 @@ svg.map-paths,
     background: linear-gradient(180deg, #81d4fa 0%, #29b6f6 100%);
 }
 
-/* Scroll indicator hint */
-.perks-grid::after {
-    content: '';
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 30px;
-    background: linear-gradient(transparent, rgba(37, 37, 37, 0.9));
-    pointer-events: none;
-    display: block;
-}
+/* Scroll indicator hint - removed ::after as it can cause issues with Safari grid */
 
 /* Safari-specific: ensure scrollbar always shows */
 @supports (-webkit-touch-callout: none) {

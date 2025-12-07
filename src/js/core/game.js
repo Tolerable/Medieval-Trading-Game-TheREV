@@ -5287,6 +5287,15 @@ function createPerkCard(perk) {
     const card = document.createElement('div');
     card.className = 'perk-card';
     card.dataset.perkId = perk.id;
+
+    // Check if this perk is already selected and apply class
+    if (typeof selectedPerks !== 'undefined' && selectedPerks.includes(perk.id)) {
+        card.classList.add('selected');
+    }
+    // Disable if 2 perks selected and this isn't one of them
+    if (typeof selectedPerks !== 'undefined' && selectedPerks.length >= 2 && !selectedPerks.includes(perk.id)) {
+        card.classList.add('disabled');
+    }
     
     // Create header with icon and name
     const header = document.createElement('div');
