@@ -1831,79 +1831,78 @@ const TravelPanelMap = {
         }
     },
 
-    // Cancel ongoing travel - turn around and head back at ANY point!
+    // Cancel ongoing travel - stop and return to origin
     cancelTravel() {
-        if (typeof TravelSystem === 'undefined') {
+        console.log('🖤 cancelTravel called');
+
+        // Get current travel state
+        const startLoc = this.travelState?.startLocation;
+        const isTraveling = typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling;
+
+        if (!isTraveling) {
+            addMessage('🛑 No journey to cancel');
+            return;
+        }
+
+        if (!startLoc || !startLoc.id) {
+            addMessage('🛑 Journey cancelled');
+            // Just stop everything
+            if (typeof TravelSystem !== 'undefined') {
+                TravelSystem.playerPosition.isTraveling = false;
+            }
+            if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.onTravelCancel) {
+                GameWorldRenderer.onTravelCancel();
+            }
             this.onTravelComplete();
             return;
         }
 
-        // Get current travel state before modifying anything
-        const startLoc = this.travelState.startLocation;
-        const destLoc = this.travelState.destination || this.currentDestination;
         const currentProgress = TravelSystem.playerPosition.travelProgress || 0;
         const originalDuration = TravelSystem.playerPosition.travelDuration || 30;
 
-        // If not actually traveling or no valid locations, just cancel
-        if (!TravelSystem.playerPosition.isTraveling || !startLoc || !startLoc.id) {
-            addMessage('🛑 Journey cancelled');
-            this.onTravelComplete();
-            return;
-        }
-
-        // Calculate return journey - proportional time based on distance already traveled
-        // If 30% there, takes 30% of original time to get back
+        // Calculate return time based on distance traveled
         const returnDuration = Math.max(1, Math.round(originalDuration * currentProgress));
 
         addMessage(`🔙 Turning back to ${startLoc.name}... (${returnDuration} min)`);
-        console.log(`🖤 Cancel travel: was ${Math.round(currentProgress * 100)}% to ${destLoc?.name}, returning in ${returnDuration} min`);
+        console.log(`🖤 Cancel: was ${Math.round(currentProgress * 100)}% complete, returning in ${returnDuration} min`);
 
-        // STOP current travel completely first
+        // Stop current travel
         TravelSystem.playerPosition.isTraveling = false;
 
-        // Cancel the animation in GameWorldRenderer
+        // Cancel animation
         if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.onTravelCancel) {
             GameWorldRenderer.onTravelCancel();
         }
 
-        // Get the TravelSystem location object for the return destination
-        const returnDestination = TravelSystem.locations[startLoc.id] || startLoc;
+        // Teleport player back to start location immediately
+        if (typeof game !== 'undefined' && game.currentLocation) {
+            game.currentLocation = { ...startLoc };
+        }
+        TravelSystem.playerPosition.currentLocation = startLoc.id;
 
-        // Small delay to let cancel complete, then start return journey
-        setTimeout(() => {
-            // Start a fresh return journey using TravelSystem.startTravel
-            if (typeof TravelSystem.startTravel === 'function') {
-                // Create a fake "current location" at the interrupted point
-                // For simplicity, we start from current logical position back to start
-                TravelSystem.playerPosition.currentLocation = destLoc?.id || TravelSystem.playerPosition.currentLocation;
-                TravelSystem.startTravel(startLoc.id, returnDuration);
-            } else {
-                // Fallback: Manual state update
-                TravelSystem.playerPosition.isTraveling = true;
-                TravelSystem.playerPosition.destination = returnDestination;
-                TravelSystem.playerPosition.travelDuration = returnDuration;
-                TravelSystem.playerPosition.travelProgress = 0;
-                TravelSystem.playerPosition.travelStartTime = TimeSystem.getTotalMinutes();
-
-                // Update local travel state
-                this.travelState.startLocation = destLoc;
-                this.travelState.destination = startLoc;
-                this.travelState.startTime = TravelSystem.playerPosition.travelStartTime;
-                this.travelState.duration = returnDuration;
-                this.currentDestination = { ...startLoc };
-
-                // Start new animation from current position back to start
-                if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.onTravelStart) {
-                    GameWorldRenderer.onTravelStart(destLoc?.id, startLoc.id, returnDuration);
-                }
+        // Update the map to show player at start
+        if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.updatePlayerMarker) {
+            const loc = typeof GameWorld !== 'undefined' ? GameWorld.locations?.[startLoc.id] : null;
+            if (loc?.mapPosition) {
+                GameWorldRenderer.updatePlayerMarker(loc.mapPosition.x, loc.mapPosition.y);
             }
+        }
 
-            // Refresh the UI
-            this.updateTravelProgressDisplay();
-            if (typeof TravelSystem.updateTravelUI === 'function') {
-                TravelSystem.updateTravelUI();
-            }
-        }, 100);
+        // Clear destination
+        this.currentDestination = null;
+        this.travelState = {
+            isActive: false,
+            startLocation: null,
+            destination: null
+        };
+
+        // Update UI
+        this.updateDestinationDisplay();
+        if (typeof TravelSystem.updateTravelUI === 'function') {
+            TravelSystem.updateTravelUI();
+        }
+
+        addMessage(`📍 Returned to ${startLoc.name}`);
     },
 
     // Handle travel completion - mark destination as reached with learned info 

@@ -35,14 +35,14 @@ const GatehouseSystem = {
             description: 'Cold northern lands with valuable furs and minerals. A harsh realm for seasoned traders.',
             accessible: false,
             gatehouse: 'northern_outpost',
-            fee: 10000 // Ÿ’€ Mid-game barrier - 10k gold to brave the frozen north
+            fee: 10000 // ï¿½ï¿½ï¿½ Mid-game barrier - 10k gold to brave the frozen north
         },
         eastern: {
             name: 'Eastern Reaches',
             description: 'Prosperous trading regions to the east. Rich markets await those who can afford entry.',
             accessible: false,
             gatehouse: 'eastern_gate',
-            fee: 1000 // Ÿ¦‡ Early-mid game - 1k gold OR sneak through south
+            fee: 1000 // ï¿½ï¿½ï¿½ Early-mid game - 1k gold OR sneak through south
         },
         western: {
             name: 'Western Wilds',
@@ -54,7 +54,7 @@ const GatehouseSystem = {
         southern: {
             name: 'Southern Coast',
             description: 'The Glendale region - a natural expansion from the starter area. Free passage for all traders.',
-            accessible: true, // Ÿ–¤ FREE! Natural progression from starter
+            accessible: true, // ï¿½ï¿½ï¿½ FREE! Natural progression from starter
             gatehouse: null, // No gatehouse - always open
             fee: 0
         },
@@ -77,7 +77,7 @@ const GatehouseSystem = {
             type: 'gatehouse',
             icon: 'ðŸ°',
             description: 'Military outpost controlling access to the Northern Territories. Only seasoned traders with 10,000 gold may pass.',
-            fee: 10000, // Ÿ’€ Mid-game barrier
+            fee: 10000, // ï¿½ï¿½ï¿½ Mid-game barrier
             unlocksZone: 'northern',
             guards: 'Northern Guard',
             services: ['passage', 'supplies', 'weapons'],
@@ -135,7 +135,7 @@ const GatehouseSystem = {
             type: 'gatehouse',
             icon: 'ðŸ°',
             description: 'The checkpoint to the prosperous Eastern Kingdoms. Pay 1,000 gold for direct access, or find the back path through the south.',
-            fee: 1000, // Ÿ¦‡ Early-mid game - can bypass via south
+            fee: 1000, // ï¿½ï¿½ï¿½ Early-mid game - can bypass via south
             unlocksZone: 'eastern',
             guards: 'Eastern Merchants Guild',
             services: ['passage', 'trade_permits'],
@@ -149,11 +149,11 @@ const GatehouseSystem = {
     // Map zones to their controlling gatehouses
     //  Progression: starter  south (FREE)  east (1k or back path)  north (10k)  west (50k)
     ZONE_GATEHOUSES: {
-        'northern': 'northern_outpost',    // Ÿ’€ 10,000g - mid game
+        'northern': 'northern_outpost',    // ï¿½ï¿½ï¿½ 10,000g - mid game
         'northern_deep': 'winterwatch_outpost',
         'western': 'western_outpost',      // 50,000g - late game
-        'eastern': 'eastern_gate',         // Ÿ¦‡ 1,000g - early-mid (bypassable via south)
-        'southern': null,                  // Ÿ–¤ FREE! No gatehouse - natural expansion
+        'eastern': 'eastern_gate',         // ï¿½ï¿½ï¿½ 1,000g - early-mid (bypassable via south)
+        'southern': null,                  // ï¿½ï¿½ï¿½ FREE! No gatehouse - natural expansion
         'capital': null,                   // Capital ALWAYS accessible
         'starter': 'starter_gate'
     },
@@ -344,12 +344,12 @@ const GatehouseSystem = {
     },
 
     // Check if a location is accessible
-    //  Back path logic: if you can reach a location through connected FREE zones, you can access it
+    // Gates only block travel INTO locked zones, not OUT of them
     canAccessLocation(locationId, fromLocationId = null) {
         // Get location zone using our mapping first
         const zone = this.LOCATION_ZONES[locationId] || this.getLocationZone(locationId);
 
-        // Capital is ALWAYS accessible from any starting location
+        // Capital is ALWAYS accessible
         if (zone === 'capital') {
             return { accessible: true, reason: null };
         }
@@ -359,15 +359,31 @@ const GatehouseSystem = {
             return { accessible: true, reason: null };
         }
 
-        //  Southern zone is ALWAYS FREE - no gatehouse!
+        // Southern zone is ALWAYS FREE - no gatehouse!
         if (zone === 'southern') {
             return { accessible: true, reason: null };
         }
 
-        // Check if it's a gatehouse (always visible/accessible for interaction)
-        const gatehouse = Object.values(this.GATEHOUSES).find(g => g.id === locationId);
-        if (gatehouse) {
+        // Check if destination is a gatehouse (always accessible for interaction)
+        const destIsGatehouse = Object.values(this.GATEHOUSES).find(g => g.id === locationId);
+        if (destIsGatehouse) {
             return { accessible: true, reason: null, isGatehouse: true };
+        }
+
+        // Get where we're coming from
+        const fromId = fromLocationId || (typeof game !== 'undefined' ? game.currentLocation?.id : null);
+        const fromZone = fromId ? (this.LOCATION_ZONES[fromId] || this.getLocationZone(fromId)) : null;
+
+        // Check if we're AT a gatehouse trying to go BACK (opposite direction from locked zone)
+        const fromIsGatehouse = fromId ? Object.values(this.GATEHOUSES).find(g => g.id === fromId) : null;
+        if (fromIsGatehouse) {
+            // We're at a gatehouse - check if destination is in the direction we came from (not locked zone)
+            const gateUnlocksZone = fromIsGatehouse.unlocksZone;
+            // If destination is NOT in the zone this gate unlocks, allow travel (going back)
+            if (zone !== gateUnlocksZone) {
+                console.log(`ðŸ¦‡ Leaving gate ${fromIsGatehouse.name} - going back to ${zone}, allowed`);
+                return { accessible: true, reason: null, leavingGate: true };
+            }
         }
 
         // Check zone access
@@ -387,26 +403,25 @@ const GatehouseSystem = {
             return { accessible: true, reason: null };
         }
 
-        //  BACK PATH CHECK: If traveling from a connected accessible location, allow it!
-        // This enables: starter  south (free)  coastal_cave  smugglers_cove (eastern)
-        if (fromLocationId) {
-            const fromZone = this.LOCATION_ZONES[fromLocationId] || this.getLocationZone(fromLocationId);
+        // BACK PATH CHECK: If traveling from a connected accessible location, allow it!
+        // This enables: starter -> south (free) -> coastal_cave -> smugglers_cove (eastern)
+        if (fromId) {
             const fromZoneInfo = this.ZONES[fromZone];
 
             // If coming from an accessible zone and locations are connected, allow passage
             if (fromZoneInfo?.accessible || fromZone === this.startingZone || fromZone === 'capital' || fromZone === 'southern') {
                 // Check if locations are actually connected in GameWorld
                 if (typeof GameWorld !== 'undefined' && GameWorld.locations) {
-                    const fromLoc = GameWorld.locations[fromLocationId];
+                    const fromLoc = GameWorld.locations[fromId];
                     if (fromLoc?.connections?.includes(locationId)) {
-                        console.log(`ðŸ¦‡ Back path access granted: ${fromLocationId} â†’ ${locationId}`);
+                        console.log(`ðŸ¦‡ Back path access granted: ${fromId} â†’ ${locationId}`);
                         return { accessible: true, reason: null, backPath: true };
                     }
                 }
             }
         }
 
-        //  Also check if player is currently IN the zone (already snuck in via back path)
+        // Also check if player is currently IN the zone (already inside via back path)
         if (typeof game !== 'undefined' && game.currentLocation) {
             const currentZone = this.LOCATION_ZONES[game.currentLocation.id] || this.getLocationZone(game.currentLocation.id);
             if (currentZone === zone) {
