@@ -7256,14 +7256,13 @@ const LocationPanelStack = {
                             const eventDiffColors = { easy: '#4caf50', medium: '#ff9800', hard: '#f44336', deadly: '#9c27b0' };
                             const eventDiffColor = eventDiffColors[event.difficulty] || '#888';
                             return `
-                                <div class="exploration-encounter-item" data-event-id="${event.id}"
+                                <div class="exploration-encounter-item" data-event-id="${event.id}" data-location-id="${locationId}"
                                      style="padding: 10px 12px; border-bottom: ${idx < availableEvents.length - 1 ? '1px solid rgba(79, 195, 247, 0.1)' : 'none'};
                                             display: flex; justify-content: space-between; align-items: center;
                                             cursor: ${canSurvive ? 'pointer' : 'not-allowed'}; opacity: ${canSurvive ? '1' : '0.5'};
                                             transition: background 0.2s ease;"
                                      onmouseenter="if(${canSurvive}) this.style.background='rgba(79, 195, 247, 0.1)'"
-                                     onmouseleave="this.style.background='transparent'"
-                                     onclick="if(${canSurvive}) DungeonExplorationSystem.showSpecificExplorationPanel('${locationId}', '${event.id}')">
+                                     onmouseleave="this.style.background='transparent'">
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <span style="font-size: 1.3em;">${event.icon}</span>
                                         <div>
@@ -7281,13 +7280,12 @@ const LocationPanelStack = {
                         }).join('')}
                     </div>
                 </div>
-                <button class="explore-random-btn"
+                <button class="explore-random-btn" data-location-id="${locationId}"
                     style="width: 100%; padding: 15px; background: ${canSurvive ? 'linear-gradient(135deg, #ff8c00 0%, #cc5500 100%)' : '#333'};
                            border: 1px solid ${canSurvive ? '#ff8c00' : '#555'}; border-radius: 8px;
                            color: ${canSurvive ? 'white' : '#666'}; font-size: 1.1em;
                            font-weight: bold; cursor: ${canSurvive ? 'pointer' : 'not-allowed'};
                            display: flex; align-items: center; justify-content: center; gap: 8px;"
-                    onclick="${canSurvive ? `DungeonExplorationSystem.showExplorationPanel('${locationId}')` : ''}"
                     ${canSurvive ? '' : 'disabled'}>
                     ${canSurvive ? '🎲 Random Exploration' : '💀 Too Weak to Explore'}
                 </button>
@@ -7304,6 +7302,30 @@ const LocationPanelStack = {
             </button>
             ${mainContent}
         `;
+
+        // Attach event listeners after HTML is in DOM - more reliable than inline onclick
+        const canSurviveNow = survival.canSurvive || false;
+
+        // Attach listeners to exploration encounter items
+        content.querySelectorAll('.exploration-encounter-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (!canSurviveNow) return;
+                const eventId = item.dataset.eventId;
+                if (eventId && typeof DungeonExplorationSystem !== 'undefined') {
+                    DungeonExplorationSystem.showSpecificExplorationPanel(locationId, eventId);
+                }
+            });
+        });
+
+        // Attach listener to random exploration button
+        const randomBtn = content.querySelector('.explore-random-btn');
+        if (randomBtn && canSurviveNow) {
+            randomBtn.addEventListener('click', () => {
+                if (typeof DungeonExplorationSystem !== 'undefined') {
+                    DungeonExplorationSystem.showExplorationPanel(locationId);
+                }
+            });
+        }
     }
 };
 
@@ -7862,6 +7884,10 @@ function updateMerchantInfo() {
 
 function closeMarket() {
     game.hideOverlay('market-panel');
+    // Auto-close trade cart when market closes
+    if (typeof TradeCartPanel !== 'undefined' && TradeCartPanel.isOpen) {
+        TradeCartPanel.close();
+    }
     changeState(GameState.PLAYING);
 }
 

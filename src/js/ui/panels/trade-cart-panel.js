@@ -283,13 +283,13 @@ const TradeCartPanel = {
 
             .cart-item {
                 display: grid;
-                grid-template-columns: auto 1fr auto auto auto;
+                grid-template-columns: 24px 1fr auto auto 20px;
                 align-items: center;
-                gap: 10px;
-                padding: 12px;
+                gap: 6px;
+                padding: 6px 8px;
                 background: rgba(255, 255, 255, 0.05);
-                border-radius: 8px;
-                margin-bottom: 8px;
+                border-radius: 6px;
+                margin-bottom: 4px;
                 border: 1px solid rgba(255, 255, 255, 0.1);
             }
 
@@ -298,15 +298,15 @@ const TradeCartPanel = {
             }
 
             .cart-item-icon {
-                font-size: 24px;
-                width: 32px;
+                font-size: 18px;
+                width: 24px;
                 text-align: center;
             }
 
             .cart-item-info {
                 display: flex;
                 flex-direction: column;
-                gap: 2px;
+                gap: 0;
                 min-width: 0;
                 overflow: hidden;
             }
@@ -314,6 +314,7 @@ const TradeCartPanel = {
             .cart-item-name {
                 color: #e0e0e0;
                 font-weight: 500;
+                font-size: 13px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -321,29 +322,31 @@ const TradeCartPanel = {
 
             .cart-item-price {
                 color: #ffd700;
-                font-size: 12px;
+                font-size: 11px;
             }
 
             .cart-item-stock {
                 color: #888;
-                font-size: 11px;
+                font-size: 10px;
             }
 
             .cart-item-quantity {
                 display: flex;
                 align-items: center;
-                gap: 5px;
+                gap: 2px;
             }
 
             .qty-btn {
-                width: 28px;
-                height: 28px;
+                width: 20px;
+                height: 20px;
                 border: 1px solid rgba(255, 215, 0, 0.3);
                 background: rgba(255, 215, 0, 0.1);
                 color: #ffd700;
-                border-radius: 4px;
+                border-radius: 3px;
                 cursor: pointer;
-                font-size: 16px;
+                font-size: 14px;
+                line-height: 1;
+                padding: 0;
                 transition: all 0.2s;
             }
 
@@ -357,14 +360,14 @@ const TradeCartPanel = {
             }
 
             .qty-input {
-                width: 50px;
+                width: 36px;
                 text-align: center;
                 background: rgba(0, 0, 0, 0.3);
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 color: #fff;
-                border-radius: 4px;
-                padding: 5px;
-                font-size: 14px;
+                border-radius: 3px;
+                padding: 2px;
+                font-size: 12px;
                 -moz-appearance: textfield;
             }
 
@@ -378,7 +381,8 @@ const TradeCartPanel = {
             .cart-item-total {
                 color: #ffd700;
                 font-weight: 600;
-                min-width: 60px;
+                font-size: 12px;
+                min-width: 45px;
                 text-align: right;
             }
 
@@ -387,8 +391,14 @@ const TradeCartPanel = {
                 border: none;
                 color: #ff6b6b;
                 cursor: pointer;
-                font-size: 18px;
-                padding: 5px;
+                font-size: 14px;
+                padding: 0;
+                margin: 0;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 opacity: 0.6;
                 transition: opacity 0.2s;
             }
