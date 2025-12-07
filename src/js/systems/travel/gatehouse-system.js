@@ -39,10 +39,10 @@ const GatehouseSystem = {
         },
         eastern: {
             name: 'Eastern Reaches',
-            description: 'Prosperous trading regions to the east. Accessible via the southern coast.',
-            accessible: true, // FREE - accessible via south path
-            gatehouse: null, // No gatehouse - natural expansion from south
-            fee: 0
+            description: 'Prosperous trading regions to the east. Pay the fee at Jade Harbor to enter.',
+            accessible: false,
+            gatehouse: 'jade_harbor',
+            fee: 1000 // Early-mid game - 1k gold
         },
         western: {
             name: 'Western Wilds',
@@ -112,19 +112,32 @@ const GatehouseSystem = {
             visibleAlways: true,
             useGameWorldLocation: true
         },
+        // Eastern zone gatehouse - Jade Harbor controls access to eastern lands
+        jade_harbor: {
+            id: 'jade_harbor',
+            name: 'Jade Harbor',
+            type: 'gatehouse',
+            icon: '⚓',
+            description: 'The gateway to the prosperous Eastern Reaches. Pay 1,000 gold to the Merchant Guild for passage.',
+            fee: 1000,
+            unlocksZone: 'eastern',
+            guards: 'Merchant Guild',
+            services: ['passage', 'trade', 'shipping'],
+            visibleAlways: true,
+            useGameWorldLocation: true
+        }
         // Southern/Glendale has NO gatehouse - FREE access from starter!
-        // Eastern has NO gatehouse - FREE access via south path!
         // Starter has NO gatehouse - always accessible!
     },
 
     // Map zones to their controlling gatehouses
-    // Progression: starter -> south (FREE) -> east (FREE via south) -> north (10k) -> west (50k)
-    // Only NORTH and WEST are gated - everything else is freely accessible
+    // Progression: starter -> south (FREE) -> east (1k at Jade Harbor) -> north (10k) -> west (50k)
+    // Gates: East (Jade Harbor), North (Northern Outpost), West (Western Outpost)
     ZONE_GATEHOUSES: {
         'northern': 'northern_outpost',    // 10,000g - mid game
         'northern_deep': 'winterwatch_outpost',
         'western': 'western_outpost',      // 50,000g - late game
-        'eastern': null,                   // FREE! Accessible via south path
+        'eastern': 'jade_harbor',          // 1,000g - early-mid game gate
         'southern': null,                  // FREE! No gatehouse - natural expansion
         'capital': null,                   // Capital ALWAYS accessible
         'starter': null                    // Starter always accessible
@@ -147,7 +160,10 @@ const GatehouseSystem = {
         'hunting_lodge': 'starter',
         'river_cave': 'starter',
 
-        // Northern zone locations
+        // Northern Outpost is the GATE to northern - it's in starter zone but controls northern access
+        'northern_outpost': 'starter',
+
+        // Northern zone locations (behind the gate)
         'iron_mines': 'northern',
         'ironforge_city': 'northern',
         'silverkeep': 'northern',
@@ -156,12 +172,14 @@ const GatehouseSystem = {
         'mountain_pass_inn': 'northern',
         'deep_cavern': 'northern',
         'crystal_cave': 'northern',
-        'northern_outpost': 'northern',
         'winterwatch_outpost': 'northern',
         'frozen_cave': 'northern',
         'ruins_of_eldoria': 'northern',
 
-        // Western zone locations
+        // Western Outpost is the GATE to western - it's in starter zone but controls western access
+        'western_outpost': 'starter',
+
+        // Western zone locations (behind the gate)
         'stonebridge': 'western',
         'darkwood_village': 'western',
         'miners_rest': 'western',
@@ -172,10 +190,11 @@ const GatehouseSystem = {
         'stone_quarry': 'western',
         'shadow_dungeon': 'western',
         'forest_dungeon': 'western',
-        'western_outpost': 'western',
 
-        // Eastern zone locations
-        'jade_harbor': 'eastern',
+        // Jade Harbor is the GATE to eastern - it's in southern zone but controls eastern access
+        'jade_harbor': 'southern',
+
+        // Eastern zone locations (behind the gate)
         'hillcrest': 'eastern',
         'whispering_woods': 'eastern',
         'eastern_farm': 'eastern',
@@ -329,7 +348,7 @@ const GatehouseSystem = {
         console.log(`🏰 canAccessLocation check: ${locationId} (zone: ${destZone}) from ${fromId} (zone: ${fromZone})`);
 
         // ALWAYS ACCESSIBLE ZONES - no gates needed
-        // Only NORTH and WEST are gated - everything else is free
+        // Capital, starter, and southern are always free
         if (destZone === 'capital') {
             return { accessible: true, reason: null, zoneType: 'capital' };
         }
@@ -339,9 +358,7 @@ const GatehouseSystem = {
         if (destZone === 'southern') {
             return { accessible: true, reason: null, zoneType: 'free' };
         }
-        if (destZone === 'eastern') {
-            return { accessible: true, reason: null, zoneType: 'free' };
-        }
+        // Eastern, Northern, Western require gate fees
 
         // Check if destination IS a gatehouse/outpost - always accessible so you can interact
         // But the locked zone BEYOND the gatehouse requires payment

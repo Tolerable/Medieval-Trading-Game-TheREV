@@ -4,48 +4,55 @@
 
 ---
 
-## 2025-12-06 - SESSION #40: GATE RESTRICTION FIX
+## 2025-12-06 - SESSION #40: GATE RESTRICTION FIX (v2)
 
-**Request:** Fix gate travel restrictions:
-1. Gates should be accessible (you can travel TO them)
-2. South should NOT be restricted
-3. Only North and West are restricted (require fees)
-4. Locked zones should be HIDDEN until fee is paid
+**Request:** Fix gate travel restrictions properly:
+1. All gates MUST be discoverable and travelable (so player can reach them to pay)
+2. South is FREE (no restrictions)
+3. East (Jade Harbor), North, and West require fees
+4. Can travel TO gates, but can't pass THROUGH without paying
+5. Locked zones hidden until fee paid
 
 **Status:** COMPLETE
 
 ### Changes Made:
 
-**1. Removed Eastern and Starter gates (gatehouse-system.js)**
-- Eastern zone now FREE (accessible via south path)
-- Starter zone always accessible (no gate)
-- Removed `eastern_gate` and `starter_gate` from GATEHOUSES
-- Updated ZONE_GATEHOUSES to have null for eastern/starter
+**1. Restored Eastern gate at Jade Harbor (gatehouse-system.js)**
+- Jade Harbor is the gate to eastern zone (1,000 gold fee)
+- Added `jade_harbor` to GATEHOUSES with fee info
+- Updated ZONE_GATEHOUSES: `'eastern': 'jade_harbor'`
 
-**2. Updated canAccessLocation logic**
-- Added `eastern` to always-accessible zones
-- Changed `startingZone` check to direct `starter` check
-- Only north (10k) and west (50k) require payment
+**2. Fixed gate zone assignments**
+- Gatehouses are in FREE zones so players can travel TO them:
+  - `northern_outpost`: 'starter' (controls access to 'northern')
+  - `western_outpost`: 'starter' (controls access to 'western')
+  - `jade_harbor`: 'southern' (controls access to 'eastern')
+- This prevents the "sameZone" bypass bug
 
-**3. Added isLocationInLockedZone helper**
-- Only returns true for northern/northern_deep/western zones
-- Returns false if gatehouse fee has been paid
-- Gatehouses themselves are never locked (must be reachable)
+**3. Always show gatehouses as discoverable**
+- Added fourth pass in calculateLocationVisibility()
+- All gatehouses in GatehouseSystem.GATEHOUSES are marked 'discovered'
+- Players can see and travel to gates even if zone is locked
 
-**4. Updated visibility calculations**
-- Connected locations in locked zones stay HIDDEN
-- Only gatehouses in locked zones are discoverable
-- Free zones (starter, capital, south, east) always discoverable
+**4. Passage blocking works correctly**
+- At gate trying to enter locked zone = blocked with fee prompt
+- Guard encounter shows on first arrival at locked gate
+- Added call to showGatehouseArrivalPrompt() in completeTravel()
+
+**5. Updated locked zone list**
+- Locked zones: northern, northern_deep, western, eastern
+- Free zones: starter, capital, southern
 
 ### Zone Progression:
 ```
-starter -> south (FREE) -> east (FREE via south) -> north (10k) -> west (50k)
+starter -> south (FREE) -> east (1k at Jade Harbor) -> north (10k) -> west (50k)
 ```
 
 ### Files Changed:
-- `src/js/systems/travel/gatehouse-system.js` - Zone config, gate definitions
-- `src/js/ui/map/game-world-renderer.js` - Visibility with locked zones
-- `src/js/systems/travel/travel-panel-map.js` - Visibility fallback
+- `src/js/systems/travel/gatehouse-system.js` - Zone config, gate zones, Jade Harbor
+- `src/js/ui/map/game-world-renderer.js` - Always show gatehouses, locked zone list
+- `src/js/systems/travel/travel-panel-map.js` - Same visibility updates
+- `src/js/systems/travel/travel-system.js` - Show guard prompt on arrival
 
 ---
 

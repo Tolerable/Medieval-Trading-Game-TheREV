@@ -889,6 +889,17 @@ const GameWorldRenderer = {
             }
         });
 
+        // Fourth pass: ALWAYS show zone gatehouses as discovered
+        // Players need to be able to see and travel to gates to pay fees
+        if (typeof GatehouseSystem !== 'undefined' && GatehouseSystem.GATEHOUSES) {
+            Object.keys(GatehouseSystem.GATEHOUSES).forEach(gatehouseId => {
+                // If gatehouse exists in locations and isn't already visible
+                if (locations[gatehouseId] && visibility[gatehouseId] !== 'visible') {
+                    visibility[gatehouseId] = 'discovered';
+                }
+            });
+        }
+
         // All other locations remain hidden (undefined or 'hidden')
         Object.keys(locations).forEach(locId => {
             if (!visibility[locId]) {
@@ -916,8 +927,9 @@ const GameWorldRenderer = {
         return false;
     },
 
-    // Check if a location is in a LOCKED zone (north or west) that requires payment
+    // Check if a location is in a LOCKED zone that requires payment
     // Returns true if the location is hidden until gatehouse fee is paid
+    // Locked zones: northern, northern_deep, western, eastern
     isLocationInLockedZone(locationId) {
         if (typeof GatehouseSystem === 'undefined') {
             return false; // No gatehouse system, nothing is locked
@@ -927,9 +939,10 @@ const GameWorldRenderer = {
         const zone = GatehouseSystem.LOCATION_ZONES?.[locationId] ||
                      GatehouseSystem.getLocationZone?.(locationId);
 
-        // Only NORTHERN and WESTERN zones are locked
-        // Everything else (starter, capital, southern, eastern) is free
-        if (zone !== 'northern' && zone !== 'northern_deep' && zone !== 'western') {
+        // Check if this is a locked zone (northern, western, eastern)
+        // Starter, capital, and southern are always free
+        const lockedZones = ['northern', 'northern_deep', 'western', 'eastern'];
+        if (!lockedZones.includes(zone)) {
             return false; // Free zone
         }
 

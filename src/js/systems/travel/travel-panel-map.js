@@ -435,6 +435,15 @@ const TravelPanelMap = {
             }
         });
 
+        // ALWAYS show zone gatehouses as discovered - players need to reach them
+        if (typeof GatehouseSystem !== 'undefined' && GatehouseSystem.GATEHOUSES) {
+            Object.keys(GatehouseSystem.GATEHOUSES).forEach(gatehouseId => {
+                if (locations[gatehouseId] && visibility[gatehouseId] !== 'visible') {
+                    visibility[gatehouseId] = 'discovered';
+                }
+            });
+        }
+
         // All others hidden
         Object.keys(locations).forEach(locId => {
             if (!visibility[locId]) {
@@ -460,7 +469,8 @@ const TravelPanelMap = {
         return false;
     },
 
-    // Check if a location is in a LOCKED zone (north or west) that requires payment
+    // Check if a location is in a LOCKED zone that requires payment
+    // Locked zones: northern, northern_deep, western, eastern
     isLocationInLockedZone(locationId) {
         if (typeof GatehouseSystem === 'undefined') {
             return false;
@@ -469,8 +479,9 @@ const TravelPanelMap = {
         const zone = GatehouseSystem.LOCATION_ZONES?.[locationId] ||
                      (GatehouseSystem.getLocationZone ? GatehouseSystem.getLocationZone(locationId) : null);
 
-        // Only NORTHERN and WESTERN zones are locked
-        if (zone !== 'northern' && zone !== 'northern_deep' && zone !== 'western') {
+        // Check if this is a locked zone
+        const lockedZones = ['northern', 'northern_deep', 'western', 'eastern'];
+        if (!lockedZones.includes(zone)) {
             return false;
         }
 
