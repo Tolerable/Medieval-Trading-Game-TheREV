@@ -19,7 +19,7 @@ const SettingsPanel = {
     get defaultSettings() {
         // fallback defaults if GameConfig not loaded yet
         const fallback = {
-            audio: { masterVolume: 0.7, musicVolume: 0.5, sfxVolume: 0.7, isMusicMuted: false, isSfxMuted: false, audioEnabled: true },
+            audio: { masterVolume: 0.7, musicVolume: 0.5, sfxVolume: 0.7, voiceVolume: 70, voiceEnabled: true, isMusicMuted: false, isSfxMuted: false, audioEnabled: true },
             visual: { particlesEnabled: true, screenShakeEnabled: true, animationsEnabled: true, weatherEffectsEnabled: true, quality: 'medium', reducedMotion: false, flashWarnings: true },
             animation: { animationsEnabled: true, animationSpeed: 1.0, reducedMotion: false, quality: 'medium' },
             ui: { animationsEnabled: true, hoverEffectsEnabled: true, transitionsEnabled: true, reducedMotion: false, highContrast: false, fontSize: 'medium', theme: 'default' },
@@ -157,9 +157,20 @@ const SettingsPanel = {
                                     <span class="setting-value">70%</span>
                                 </div>
                                 <div class="setting-item">
+                                    <label for="voice-volume">NPC Voice Volume</label>
+                                    <input type="range" id="voice-volume" min="0" max="100" step="5" value="70">
+                                    <span class="setting-value" id="voice-volume-value">70%</span>
+                                </div>
+                                <div class="setting-item">
                                     <label>
                                         <input type="checkbox" id="audio-enabled" checked>
                                         Enable Audio
+                                    </label>
+                                </div>
+                                <div class="setting-item">
+                                    <label>
+                                        <input type="checkbox" id="voice-enabled" checked>
+                                        Enable NPC Voice (TTS)
                                     </label>
                                 </div>
                                 <div class="setting-item mute-all-container">
@@ -451,27 +462,14 @@ const SettingsPanel = {
                             </div>
 
                             <div class="settings-group">
-                                <h4>🔊 Voice & TTS Settings</h4>
-                                <div class="setting-item">
-                                    <label>
-                                        <input type="checkbox" id="voice-enabled" checked>
-                                        Enable Voice Playback (TTS)
-                                    </label>
-                                </div>
-
-                                <div class="setting-item">
-                                    <label for="voice-volume">Voice Volume</label>
-                                    <input type="range" id="voice-volume" min="0" max="100" step="5" value="70">
-                                    <span class="setting-value" id="voice-volume-value">70%</span>
-                                </div>
-
+                                <h4>🔊 Voice Settings</h4>
                                 <div class="setting-item">
                                     <label for="default-voice">Default Voice</label>
                                     <select id="default-voice">
                                         <!-- 🖤 Voices populated dynamically from GameConfig.api.pollinations.tts.voices -->
                                     </select>
                                 </div>
-                                <p class="settings-description">NPCs have their own assigned voices, but this is the fallback.</p>
+                                <p class="settings-description">NPCs have their own assigned voices, but this is the fallback. Voice volume is in Audio settings.</p>
                             </div>
 
                             <div class="settings-group">
@@ -1848,8 +1846,10 @@ const SettingsPanel = {
         this.setupRangeControl('master-volume', 'audio', 'masterVolume', (value) => `${Math.round(value * 100)}%`);
         this.setupRangeControl('music-volume', 'audio', 'musicVolume', (value) => `${Math.round(value * 100)}%`);
         this.setupRangeControl('sfx-volume', 'audio', 'sfxVolume', (value) => `${Math.round(value * 100)}%`);
+        this.setupVoiceVolumeControl(); // Voice volume with master volume integration
 
         this.setupCheckboxControl('audio-enabled', 'audio', 'audioEnabled');
+        this.setupVoiceEnabledControl(); // Voice enabled checkbox
         this.setupMuteAllControl(); // Special handler for Mute All
         this.setupCheckboxControl('music-mute', 'audio', 'isMusicMuted');
         this.setupCheckboxControl('sfx-mute', 'audio', 'isSfxMuted');
@@ -2155,6 +2155,60 @@ const SettingsPanel = {
         if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.setMasterVolume) {
             NPCVoiceChatSystem.setMasterVolume(master);
         }
+    },
+
+    // Setup voice volume control - integrates with master volume
+    setupVoiceVolumeControl() {
+        const volumeSlider = this.panelElement.querySelector('#voice-volume');
+        const volumeValue = this.panelElement.querySelector('#voice-volume-value');
+        if (!volumeSlider) return;
+
+        // Load initial value from NPCVoiceChatSystem
+        if (typeof NPCVoiceChatSystem !== 'undefined') {
+            volumeSlider.value = NPCVoiceChatSystem.settings.voiceVolume ?? 70;
+            if (volumeValue) volumeValue.textContent = `${volumeSlider.value}%`;
+        }
+
+        // Handle changes
+        volumeSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            if (volumeValue) volumeValue.textContent = `${value}%`;
+
+            // Update NPCVoiceChatSystem
+            if (typeof NPCVoiceChatSystem !== 'undefined') {
+                NPCVoiceChatSystem.updateSetting('voiceVolume', value);
+            }
+
+            // Store in currentSettings for save/load
+            if (!this.currentSettings.audio.voiceVolume) {
+                this.currentSettings.audio.voiceVolume = value;
+            }
+            this.currentSettings.audio.voiceVolume = value;
+        });
+    },
+
+    // Setup voice enabled checkbox
+    setupVoiceEnabledControl() {
+        const checkbox = this.panelElement.querySelector('#voice-enabled');
+        if (!checkbox) return;
+
+        // Load initial value from NPCVoiceChatSystem
+        if (typeof NPCVoiceChatSystem !== 'undefined') {
+            checkbox.checked = NPCVoiceChatSystem.settings.voiceEnabled !== false;
+        }
+
+        // Handle changes
+        checkbox.addEventListener('change', (e) => {
+            const enabled = e.target.checked;
+
+            // Update NPCVoiceChatSystem
+            if (typeof NPCVoiceChatSystem !== 'undefined') {
+                NPCVoiceChatSystem.updateSetting('voiceEnabled', enabled);
+            }
+
+            // Store in currentSettings
+            this.currentSettings.audio.voiceEnabled = enabled;
+        });
     },
 
     // setup select control - dropdowns for the indecisive

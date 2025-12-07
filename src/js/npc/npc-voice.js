@@ -188,16 +188,28 @@ const NPCVoiceChatSystem = {
         }
     },
 
-    // Load master volume from SettingsPanel's saved settings
+    // Load master volume and voice settings from SettingsPanel's saved settings
     loadMasterVolumeFromSettings() {
         try {
             const saved = localStorage.getItem('tradingGameSettings');
             if (saved) {
                 const parsed = JSON.parse(saved);
-                if (parsed.audio && typeof parsed.audio.masterVolume === 'number') {
-                    // Convert 0.0-1.0 to 0-100 for internal use
-                    this.settings.masterVolume = Math.round(parsed.audio.masterVolume * 100);
-                    console.log(`🎙️ Loaded master volume from settings: ${this.settings.masterVolume}%`);
+                if (parsed.audio) {
+                    // Load master volume (convert 0.0-1.0 to 0-100)
+                    if (typeof parsed.audio.masterVolume === 'number') {
+                        this.settings.masterVolume = Math.round(parsed.audio.masterVolume * 100);
+                        console.log(`🎙️ Loaded master volume from settings: ${this.settings.masterVolume}%`);
+                    }
+                    // Load voice volume (already 0-100)
+                    if (typeof parsed.audio.voiceVolume === 'number') {
+                        this.settings.voiceVolume = parsed.audio.voiceVolume;
+                        console.log(`🎙️ Loaded voice volume from settings: ${this.settings.voiceVolume}%`);
+                    }
+                    // Load voice enabled
+                    if (typeof parsed.audio.voiceEnabled === 'boolean') {
+                        this.settings.voiceEnabled = parsed.audio.voiceEnabled;
+                        console.log(`🎙️ Loaded voice enabled from settings: ${this.settings.voiceEnabled}`);
+                    }
                 }
             }
         } catch (e) {
