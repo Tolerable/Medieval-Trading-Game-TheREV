@@ -2386,10 +2386,21 @@ const TravelSystem = {
             console.log('🖤 Location discovered:', destination.id, '- Total visited:', activeVisited.length);
         }
 
-        //  RING THE BELL OF ARRIVAL - let the realm know we survived
+        // RING THE BELL OF ARRIVAL - let the realm know we survived
         this.showArrivalNotification(destination);
 
         addMessage(`🔔 Arrived at ${destination.name}!`);
+
+        // Check if we arrived at a gatehouse - offer to pay the fee
+        if (typeof GatehouseSystem !== 'undefined' && GatehouseSystem.GATEHOUSES) {
+            const gatehouse = GatehouseSystem.GATEHOUSES[destination.id];
+            if (gatehouse && !GatehouseSystem.isGatehouseUnlocked(destination.id)) {
+                // Show gatehouse interaction prompt after a brief delay
+                setTimeout(() => {
+                    GatehouseSystem.showGatehouseArrivalPrompt(destination.id);
+                }, 500);
+            }
+        }
 
         // Update player position to destination coordinates
         if (destination.x !== undefined && destination.y !== undefined) {

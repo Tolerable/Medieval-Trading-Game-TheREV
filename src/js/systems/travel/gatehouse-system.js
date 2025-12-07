@@ -672,6 +672,121 @@ const GatehouseSystem = {
         };
     },
 
+    // Show prompt when player arrives at a gatehouse
+    showGatehouseArrivalPrompt(gatehouseId) {
+        const gatehouse = this.GATEHOUSES[gatehouseId];
+        if (!gatehouse) return;
+
+        // Don't show if already unlocked
+        if (this.unlockedGates.has(gatehouseId)) return;
+
+        const playerGold = game?.player?.gold || 0;
+        const canAfford = playerGold >= gatehouse.fee;
+        const zoneName = this.ZONES[gatehouse.unlocksZone]?.name || 'the region beyond';
+
+        const modal = document.createElement('div');
+        modal.id = 'gatehouse-arrival-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 700;
+        `;
+
+        modal.innerHTML = `
+            <div style="
+                background: linear-gradient(180deg, rgba(50, 40, 30, 0.98) 0%, rgba(35, 28, 20, 0.98) 100%);
+                border: 2px solid rgba(255, 180, 0, 0.6);
+                border-radius: 12px;
+                padding: 28px;
+                max-width: 480px;
+                text-align: center;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+            ">
+                <h2 style="color: #ffb700; margin-bottom: 16px;">🏰 Welcome to ${gatehouse.name}</h2>
+                <p style="color: #e0e0e0; margin-bottom: 12px; line-height: 1.5;">${gatehouse.description}</p>
+                <p style="color: #aaa; margin-bottom: 20px; font-style: italic;">Guarded by: ${gatehouse.guards}</p>
+
+                <div style="
+                    background: rgba(0, 0, 0, 0.4);
+                    border-radius: 8px;
+                    padding: 16px;
+                    margin-bottom: 20px;
+                    border: 1px solid rgba(255, 180, 0, 0.3);
+                ">
+                    <p style="color: #4fc3f7; font-size: 1.1em; margin-bottom: 8px;">
+                        🚧 This gatehouse controls access to <strong style="color: #ffb700;">${zoneName}</strong>
+                    </p>
+                    <p style="color: #ffd700; font-size: 1.2em; margin-bottom: 8px;">
+                        Passage Fee: <strong>${gatehouse.fee} gold</strong>
+                    </p>
+                    <p style="color: ${canAfford ? '#4caf50' : '#f44336'}; font-size: 0.95em;">
+                        Your Gold: ${playerGold} gold ${canAfford ? '✓' : '(insufficient)'}
+                    </p>
+                </div>
+
+                <p style="color: #888; font-size: 0.9em; margin-bottom: 24px;">
+                    Pay once to unlock permanent access through this passage.
+                </p>
+
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button id="gate-arrival-pay-btn" style="
+                        padding: 14px 28px;
+                        background: ${canAfford ? 'linear-gradient(180deg, #4caf50 0%, #388e3c 100%)' : '#555'};
+                        border: none;
+                        border-radius: 8px;
+                        color: white;
+                        font-size: 1em;
+                        font-weight: bold;
+                        cursor: ${canAfford ? 'pointer' : 'not-allowed'};
+                        opacity: ${canAfford ? '1' : '0.6'};
+                    " ${canAfford ? '' : 'disabled'}>
+                        💰 Pay ${gatehouse.fee} Gold
+                    </button>
+                    <button id="gate-arrival-later-btn" style="
+                        padding: 14px 28px;
+                        background: linear-gradient(180deg, #666 0%, #444 100%);
+                        border: none;
+                        border-radius: 8px;
+                        color: white;
+                        font-size: 1em;
+                        cursor: pointer;
+                    ">
+                        Maybe Later
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const self = this;
+
+        document.getElementById('gate-arrival-pay-btn').onclick = () => {
+            if (self.payPassageFee(gatehouseId)) {
+                modal.remove();
+                addMessage(`🎉 ${gatehouse.name} passage unlocked! You can now freely travel to ${zoneName}.`);
+            }
+        };
+
+        document.getElementById('gate-arrival-later-btn').onclick = () => {
+            modal.remove();
+            addMessage(`You can pay the fee later when you're ready to pass through.`);
+        };
+
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        };
+    },
+
     // Get all gatehouses for rendering on map
     getGatehousesForMap() {
         return Object.values(this.GATEHOUSES).map(g => ({

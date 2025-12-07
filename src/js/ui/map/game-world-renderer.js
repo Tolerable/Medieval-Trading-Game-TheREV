@@ -2521,6 +2521,23 @@ const GameWorldRenderer = {
                     <div style="color: #95E77E; margin-top: 5px;">🖱️ Click to travel here</div>
                 `;
             } else {
+                // Check if location is behind a locked gate
+                let accessInfo = '';
+                if (typeof GatehouseSystem !== 'undefined' && GatehouseSystem.canAccessLocation) {
+                    const currentLoc = game?.currentLocation?.id;
+                    const access = GatehouseSystem.canAccessLocation(location.id, currentLoc);
+                    if (!access.accessible && access.gatehouse) {
+                        const gateInfo = GatehouseSystem.GATEHOUSES[access.gatehouse];
+                        accessInfo = `
+                            <div style="margin-top: 8px; padding: 8px; background: rgba(244, 67, 54, 0.2); border-radius: 6px; border-left: 3px solid #f44336;">
+                                <div style="color: #f44336; font-weight: bold; margin-bottom: 4px;">🚫 Restricted Area</div>
+                                <div style="color: #ef9a9a; font-size: 11px;">Requires passage through ${gateInfo?.name || 'a gatehouse'}</div>
+                                <div style="color: #ffb74d; font-size: 11px; margin-top: 4px;">💰 Fee: ${access.fee || gateInfo?.fee || '???'} gold</div>
+                            </div>
+                        `;
+                    }
+                }
+
                 // Regular undiscovered locations show limited info
                 this.tooltipElement.innerHTML = `
                     <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #888;">
@@ -2532,6 +2549,7 @@ const GameWorldRenderer = {
                     <div style="font-size: 12px; line-height: 1.4; color: #888; font-style: italic;">
                         Travel here to discover what lies in this area...
                     </div>
+                    ${accessInfo}
                     ${questInfo}
                     <div style="color: #95E77E; margin-top: 5px;">🖱️ Click to explore</div>
                 `;
