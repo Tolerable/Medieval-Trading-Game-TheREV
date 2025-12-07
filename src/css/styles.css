@@ -9517,10 +9517,12 @@ button,
     width: 90%;
     max-width: 700px;
     max-height: 85vh;
+    min-height: 200px; /* Prevent panel from being too short when empty */
     display: flex;
     flex-direction: column;
     box-shadow: 0 0 40px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.1);
     animation: slideUp 0.4s ease;
+    overflow: hidden; /* Keep close button within border radius */
 }
 
 @keyframes slideUp {
