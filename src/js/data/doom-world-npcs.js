@@ -430,6 +430,246 @@ const DoomWorldNPCs = {
     },
 
     // ═══════════════════════════════════════════════════════════════
+    // DOOM INVENTORY SYSTEM - Survival supplies, not luxury goods
+    // ═══════════════════════════════════════════════════════════════
+
+    // Doom NPC inventory templates - survival focus, no gold value
+    doomInventoryTemplates: {
+        // ═══════════════════════════════════════════════════════════
+        // SURVIVORS - desperate for basics
+        // ═══════════════════════════════════════════════════════════
+        survivor: {
+            common: ['moldy_bread', 'dirty_water', 'tattered_cloth', 'rusty_knife'],
+            uncommon: ['stale_rations', 'crude_bandage', 'salvaged_rope', 'worn_boots'],
+            rare: ['clean_water', 'preserved_meat', 'working_lantern']
+        },
+        desperate_survivor: {
+            common: ['bread_crumbs', 'empty_waterskin', 'rags'],
+            uncommon: ['rusty_dagger', 'moldy_cheese', 'broken_torch'],
+            rare: ['hidden_food_cache', 'stolen_medicine', 'last_hope']
+        },
+        refugee: {
+            common: ['family_photo', 'worn_blanket', 'crust_of_bread', 'dented_cup'],
+            uncommon: ['saved_heirloom', 'child_toy', 'last_coins', 'prayer_beads'],
+            rare: ['hidden_jewelry', 'map_to_safety', 'barter_goods']
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        // CORRUPTED/HOSTILE - dangerous, may have valuable loot
+        // ═══════════════════════════════════════════════════════════
+        blight_creature: {
+            common: ['corrupted_flesh', 'dark_ichor', 'twisted_bone'],
+            uncommon: ['blight_crystal', 'shadow_essence', 'corrupted_organ'],
+            rare: ['heart_of_darkness', 'blight_core', 'doom_fragment']
+        },
+        shadow_beast: {
+            common: ['shadow_wisp', 'dark_fur', 'beast_claw'],
+            uncommon: ['shadow_fang', 'void_essence', 'nightmare_eye'],
+            rare: ['shadow_heart', 'void_crystal', 'terror_essence']
+        },
+        wandering_dead: {
+            common: ['rotting_cloth', 'bone_fragment', 'grave_dirt'],
+            uncommon: ['dead_mans_coin', 'burial_jewelry', 'corpse_tooth'],
+            rare: ['death_relic', 'soul_fragment', 'ancient_burial_goods']
+        },
+        corrupted_wildlife: {
+            common: ['tainted_meat', 'corrupted_hide', 'twisted_antler'],
+            uncommon: ['mutant_organ', 'blight_blood', 'corruption_gland'],
+            rare: ['pure_meat', 'uncorrupted_heart', 'rare_mutation']
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        // DOOM MERCHANTS - trade in survival, not luxury
+        // ═══════════════════════════════════════════════════════════
+        scavenger_merchant: {
+            common: ['salvaged_tools', 'scrap_metal', 'old_rope', 'torn_cloth'],
+            uncommon: ['working_knife', 'intact_waterskin', 'salvaged_armor_piece', 'usable_torch'],
+            rare: ['clean_bandages', 'preserved_food', 'medicine_vial', 'working_weapon']
+        },
+        survival_smuggler: {
+            common: ['smuggled_bread', 'hidden_water', 'black_market_rope', 'stolen_cloth'],
+            uncommon: ['hoarded_medicine', 'weapons_cache', 'preserved_meat', 'clean_water_barrel'],
+            rare: ['plague_cure', 'pristine_armor', 'ancient_weapon', 'escape_map']
+        },
+        desperate_merchant: {
+            common: ['last_stock_bread', 'final_waterskin', 'remaining_rope'],
+            uncommon: ['emergency_rations', 'saved_medicine', 'personal_weapon'],
+            rare: ['family_supplies', 'everything_left', 'survival_kit']
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        // DOOM SERVICE - healers and priests of the apocalypse
+        // ═══════════════════════════════════════════════════════════
+        plague_apothecary: {
+            common: ['makeshift_bandage', 'herbal_paste', 'pain_numbing_draught', 'fever_reducer'],
+            uncommon: ['plague_mask', 'infection_salve', 'blood_purifier', 'cough_suppressant'],
+            rare: ['plague_cure', 'immunity_elixir', 'life_saver']
+        },
+        corrupted_healer: {
+            common: ['tainted_bandage', 'dark_salve', 'numbing_poison'],
+            uncommon: ['corruption_cure', 'sanity_draught', 'mind_shield_potion'],
+            rare: ['purification_elixir', 'soul_mender', 'hope_in_a_bottle']
+        },
+        doomsayer: {
+            common: ['prophecy_scroll', 'doom_scripture', 'ash_covered_candle'],
+            uncommon: ['vision_incense', 'truth_revealing_herbs', 'fate_dice'],
+            rare: ['book_of_endings', 'doom_relic', 'vision_of_salvation']
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        // DOOM MILITARY - warriors of the end times
+        // ═══════════════════════════════════════════════════════════
+        desperate_guard: {
+            common: ['notched_sword', 'dented_shield', 'worn_armor', 'broken_whistle'],
+            uncommon: ['last_rations', 'emergency_bandage', 'signal_torch', 'ammunition'],
+            rare: ['captain_orders', 'escape_route_map', 'final_stand_supplies']
+        },
+        last_guard: {
+            common: ['battle_worn_sword', 'cracked_shield', 'bloodied_armor'],
+            uncommon: ['field_rations', 'battle_medicine', 'courage_flask'],
+            rare: ['legendary_weapon', 'hero_armor', 'final_hope']
+        },
+        hollow_guard: {
+            common: ['empty_sheath', 'discarded_armor', 'abandoned_post_token'],
+            uncommon: ['deserter_supplies', 'stolen_rations', 'guilty_confession'],
+            rare: ['officer_badge', 'last_paycheck', 'farewell_letter']
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        // DOOM CIVILIANS - what remains of normal folk
+        // ═══════════════════════════════════════════════════════════
+        starving_farmer: {
+            common: ['dead_seeds', 'dry_soil', 'broken_hoe', 'empty_basket'],
+            uncommon: ['last_grain', 'preserved_egg', 'hidden_vegetables'],
+            rare: ['seed_vault_key', 'pre_doom_harvest', 'fertile_soil_sample']
+        },
+        haunted_elder: {
+            common: ['memory_token', 'old_photograph', 'worn_book', 'ancestor_prayer'],
+            uncommon: ['elder_wisdom', 'hidden_knowledge', 'family_secret'],
+            rare: ['ancient_remedy', 'survival_lore', 'hope_speech']
+        },
+        mad_ferryman: {
+            common: ['rotting_oar', 'death_toll_coins', 'passenger_manifest'],
+            uncommon: ['ferry_map', 'safe_passage_token', 'river_knowledge'],
+            rare: ['escape_route', 'uncorrupted_waters_location', 'salvation_ferry']
+        },
+        frozen_survivor: {
+            common: ['frostbitten_rations', 'ice_covered_blanket', 'frozen_waterskin'],
+            uncommon: ['fire_starting_kit', 'thermal_clothing', 'frost_salve'],
+            rare: ['eternal_flame', 'warmth_amulet', 'hot_spring_map']
+        },
+
+        // ═══════════════════════════════════════════════════════════
+        // DOOM SPECIALISTS - unique apocalypse roles
+        // ═══════════════════════════════════════════════════════════
+        crazed_blacksmith: {
+            common: ['scrap_iron', 'broken_forge_tool', 'coal_dust', 'bent_nails'],
+            uncommon: ['repaired_weapon', 'makeshift_armor', 'forged_tool', 'weapon_repair_kit'],
+            rare: ['doom_blade', 'salvation_armor', 'masterwork_survival_tool']
+        },
+        hoarding_merchant: {
+            common: ['hidden_bread', 'stashed_water', 'secret_supplies'],
+            uncommon: ['food_cache_map', 'barter_network_contacts', 'price_gouging_ledger'],
+            rare: ['survival_vault_key', 'trade_empire_remnants', 'monopoly_goods']
+        },
+        insane_hermit: {
+            common: ['mad_scribblings', 'paranoid_traps', 'isolation_supplies'],
+            uncommon: ['survival_secrets', 'hidden_cache', 'prophecy_fragments'],
+            rare: ['the_answer', 'sanity_cure', 'salvation_path']
+        }
+    },
+
+    // Generate doom NPC inventory
+    generateDoomInventory(npcType) {
+        // Get base type from doom type mapping
+        const npcData = this.npcTypes[npcType];
+        const baseType = npcData?.base || npcType;
+
+        // Try to find matching doom template
+        let template = this.doomInventoryTemplates[npcType];
+
+        // Fall back to base type template or survivor
+        if (!template) {
+            template = this.doomInventoryTemplates[baseType] || this.doomInventoryTemplates.survivor;
+        }
+
+        const inventory = [];
+
+        // Doom world has fewer items - scarcity is real
+        const commonCount = 1 + Math.floor(Math.random() * 2);
+        for (let i = 0; i < commonCount && template.common.length > 0; i++) {
+            const item = template.common[Math.floor(Math.random() * template.common.length)];
+            inventory.push({
+                id: item,
+                quantity: 1 + Math.floor(Math.random() * 2)
+            });
+        }
+
+        // Uncommon items are truly uncommon in doom (40% chance)
+        if (Math.random() < 0.4 && template.uncommon.length > 0) {
+            const item = template.uncommon[Math.floor(Math.random() * template.uncommon.length)];
+            inventory.push({
+                id: item,
+                quantity: 1
+            });
+        }
+
+        // Rare items are extremely rare in doom (10% chance)
+        if (Math.random() < 0.1 && template.rare.length > 0) {
+            const item = template.rare[Math.floor(Math.random() * template.rare.length)];
+            inventory.push({
+                id: item,
+                quantity: 1
+            });
+        }
+
+        return inventory;
+    },
+
+    // Generate doom NPC "gold" (actually worthless, but they might have some)
+    generateDoomGold(npcType) {
+        // Gold is nearly worthless in doom - NPCs have very little
+        const goldRanges = {
+            // Merchants might have hoarded some
+            scavenger_merchant: { min: 50, max: 200 },
+            survival_smuggler: { min: 100, max: 500 },
+            hoarding_merchant: { min: 200, max: 1000 },
+
+            // Authority figures had some before
+            desperate_guard: { min: 5, max: 30 },
+            last_guard: { min: 10, max: 50 },
+
+            // Civilians have almost nothing
+            survivor: { min: 0, max: 10 },
+            desperate_survivor: { min: 0, max: 5 },
+            refugee: { min: 0, max: 15 },
+            starving_farmer: { min: 0, max: 8 },
+
+            // Creatures have no gold
+            blight_creature: { min: 0, max: 0 },
+            shadow_beast: { min: 0, max: 0 },
+            wandering_dead: { min: 0, max: 20 }, // From their previous life
+            corrupted_wildlife: { min: 0, max: 0 }
+        };
+
+        const range = goldRanges[npcType] || { min: 0, max: 10 };
+        return Math.floor(range.min + Math.random() * (range.max - range.min));
+    },
+
+    // Check if doom NPC can trade
+    canDoomTrade(npcType) {
+        const tradingTypes = [
+            'scavenger_merchant', 'survival_smuggler', 'desperate_merchant', 'hoarding_merchant',
+            'plague_apothecary', 'corrupted_healer',
+            'crazed_blacksmith',
+            'desperate_guard', 'last_guard',
+            'survivor', 'desperate_survivor', 'refugee',
+            'haunted_elder', 'mad_ferryman', 'insane_hermit'
+        ];
+        return tradingTypes.includes(npcType);
+    },
+
+    // ═══════════════════════════════════════════════════════════════
     // UTILITY FUNCTIONS
     // ═══════════════════════════════════════════════════════════════
 

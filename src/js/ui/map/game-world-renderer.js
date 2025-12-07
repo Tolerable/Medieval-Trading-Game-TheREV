@@ -1658,12 +1658,19 @@ const GameWorldRenderer = {
                         50% { transform: translate(-50%, -100%) scale(1.1); }
                         100% { transform: translate(-50%, -100%) scale(1); }
                     }
+                    .player-marker.traveling {
+                        flex-direction: column-reverse !important;
+                    }
+                    .player-marker.traveling .marker-label {
+                        margin-top: 0 !important;
+                        margin-bottom: 4px !important;
+                    }
                     .player-marker.traveling .marker-tack {
                         animation: tack-walk 0.4s ease-in-out infinite;
                     }
                     @keyframes tack-walk {
-                        0%, 100% { transform: translateY(-8px) rotate(-5deg); }
-                        50% { transform: translateY(-12px) rotate(5deg); }
+                        0%, 100% { transform: translateY(-4px) rotate(-5deg); }
+                        50% { transform: translateY(-8px) rotate(5deg); }
                     }
                     /* 💀 July 18th Dungeon Bonanza pulse effect */
                     @keyframes bonanza-pulse {
@@ -1687,15 +1694,19 @@ const GameWorldRenderer = {
             // even though we're mid-travel
             if (this.currentTravel) {
                 this.playerMarker.classList.add('traveling');
-                const tack = this.playerMarker.querySelector('.marker-tack');
-                if (tack) {
-                    tack.textContent = '🚶'; // Walking person while traveling
-                }
-                const label = this.playerMarker.querySelector('.marker-label');
-                if (label) {
-                    label.textContent = 'TRAVELING...';
-                    label.style.background = 'linear-gradient(180deg, #ff8844 0%, #cc4400 100%)';
-                }
+
+                // Use column-reverse so first child (tack) renders at bottom, last child (label) at top
+                this.playerMarker.style.flexDirection = 'column-reverse';
+
+                const movingRight = this.currentTravel.movingRight;
+                const mirrorStyle = movingRight ? '' : 'display:inline-block;transform:scaleX(-1);';
+
+                this.playerMarker.innerHTML = `
+                    <div class="marker-tack" style="font-size: 42px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); animation: tack-walk 0.4s ease-in-out infinite; z-index: 152; transform-origin: bottom center;"><span style="${mirrorStyle}">🚶</span></div>
+                    <div class="marker-shadow" style="position: absolute; bottom: -5px; width: 24px; height: 8px; background: rgba(0, 0, 0, 0.3); border-radius: 50%; animation: shadow-pulse 3s ease-in-out infinite; z-index: 99;"></div>
+                    <div class="marker-pulse" style="position: absolute; bottom: 0px; width: 16px; height: 16px; background: rgba(255, 136, 68, 0.5); border-radius: 50%; animation: marker-pulse 2s ease-out infinite; z-index: 100;"></div>
+                    <div class="marker-label" style="background: linear-gradient(180deg, #ff8844 0%, #cc4400 100%); color: white; font-size: 9px; font-weight: bold; padding: 4px 10px; border-radius: 12px; white-space: nowrap; margin-bottom: 4px; box-shadow: 0 3px 10px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.8); z-index: 151; letter-spacing: 0.5px; text-transform: uppercase;">TRAVELING...</div>
+                `;
             }
         }
 
@@ -1774,21 +1785,21 @@ const GameWorldRenderer = {
         // Now marker is guaranteed to exist after updatePlayerMarker call above
         if (this.playerMarker) {
             this.playerMarker.classList.add('traveling');
-            // Switch to walking animation (defined in CSS above)
-            const tack = this.playerMarker.querySelector('.marker-tack');
-            if (tack) {
-                // Wrap emoji in span for mirroring (animation affects outer, mirror affects inner)
-                const movingRight = this.currentTravel.movingRight;
-                const mirrorStyle = movingRight ? '' : 'display:inline-block;transform:scaleX(-1);';
-                tack.innerHTML = `<span style="${mirrorStyle}">🚶</span>`;
-                console.log(movingRight ? '🚶 MOVING RIGHT' : '🚶 MOVING LEFT (mirrored)');
-            }
-            // Update label to show "TRAVELING..."
-            const label = this.playerMarker.querySelector('.marker-label');
-            if (label) {
-                label.textContent = 'TRAVELING...';
-                label.style.background = 'linear-gradient(180deg, #ff8844 0%, #cc4400 100%)';
-            }
+
+            // Use column-reverse so first child (tack) renders at bottom, last child (label) at top
+            this.playerMarker.style.flexDirection = 'column-reverse';
+
+            const movingRight = this.currentTravel.movingRight;
+            const mirrorStyle = movingRight ? '' : 'display:inline-block;transform:scaleX(-1);';
+
+            this.playerMarker.innerHTML = `
+                <div class="marker-tack" style="font-size: 42px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); animation: tack-walk 0.4s ease-in-out infinite; z-index: 152; transform-origin: bottom center;"><span style="${mirrorStyle}">🚶</span></div>
+                <div class="marker-shadow" style="position: absolute; bottom: -5px; width: 24px; height: 8px; background: rgba(0, 0, 0, 0.3); border-radius: 50%; animation: shadow-pulse 3s ease-in-out infinite; z-index: 99;"></div>
+                <div class="marker-pulse" style="position: absolute; bottom: 0px; width: 16px; height: 16px; background: rgba(255, 136, 68, 0.5); border-radius: 50%; animation: marker-pulse 2s ease-out infinite; z-index: 100;"></div>
+                <div class="marker-label" style="background: linear-gradient(180deg, #ff8844 0%, #cc4400 100%); color: white; font-size: 9px; font-weight: bold; padding: 4px 10px; border-radius: 12px; white-space: nowrap; margin-bottom: 4px; box-shadow: 0 3px 10px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.8); z-index: 151; letter-spacing: 0.5px; text-transform: uppercase;">TRAVELING...</div>
+            `;
+
+            console.log(movingRight ? '🚶 MOVING RIGHT' : '🚶 MOVING LEFT (mirrored)');
         }
 
         console.log('🗺️ animateTravel: Starting travel animation', {
@@ -1975,50 +1986,41 @@ const GameWorldRenderer = {
             this.playerMarker.classList.remove('traveling');
             this.playerMarker.classList.add('arrived');
 
+            // Reset flex-direction back to normal column (was column-reverse during travel)
+            this.playerMarker.style.flexDirection = 'column';
+
             // 🖤 Store reference to marker for setTimeout callbacks - prevents stale reference crash 💀
             const markerRef = this.playerMarker;
 
-            // 🖤 Switch back from walking person to tack/pin
-            const tack = this.playerMarker.querySelector('.marker-tack');
-            if (tack) {
-                tack.textContent = '📌'; // Back to tack after arriving
-                // Play arrival animation then settle into float
-                tack.style.animation = 'marker-arrive 0.6s ease-out forwards';
-                setTimeout(() => {
-                    // 🖤 Check if element still exists in DOM before modifying 💀
-                    if (tack && tack.isConnected) {
-                        tack.style.animation = 'tack-float 3s ease-in-out infinite';
-                    }
-                }, 600);
-            }
+            // Rebuild marker with tack on TOP, label BELOW (normal stationary state)
+            this.playerMarker.innerHTML = `
+                <div class="marker-tack" style="font-size: 42px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); animation: marker-arrive 0.6s ease-out forwards; z-index: 152; transform-origin: bottom center;">📌</div>
+                <div class="marker-shadow" style="position: absolute; bottom: -5px; width: 24px; height: 8px; background: rgba(0, 0, 0, 0.3); border-radius: 50%; animation: shadow-pulse 3s ease-in-out infinite; z-index: 99;"></div>
+                <div class="marker-pulse" style="position: absolute; bottom: 0px; width: 16px; height: 16px; background: rgba(220, 20, 60, 0.5); border-radius: 50%; animation: marker-arrival-pulse 0.8s ease-out; z-index: 100;"></div>
+                <div class="marker-label" style="background: linear-gradient(180deg, #44ff44 0%, #00cc00 100%); color: white; font-size: 9px; font-weight: bold; padding: 4px 10px; border-radius: 12px; white-space: nowrap; margin-top: 2px; box-shadow: 0 3px 10px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.8); z-index: 151; letter-spacing: 0.5px; text-transform: uppercase;">ARRIVED!</div>
+            `;
 
-            // Add pulse effect on arrival
-            const pulse = this.playerMarker.querySelector('.marker-pulse');
-            if (pulse) {
-                pulse.style.animation = 'marker-arrival-pulse 0.8s ease-out';
-                setTimeout(() => {
-                    // 🖤 Check if element still exists in DOM before modifying 💀
-                    if (pulse && pulse.isConnected) {
-                        pulse.style.animation = 'marker-pulse 2s ease-out infinite';
-                    }
-                }, 800);
-            }
+            // After animations complete, switch to normal idle state
+            setTimeout(() => {
+                if (markerRef && markerRef.isConnected) {
+                    const tack = markerRef.querySelector('.marker-tack');
+                    if (tack) tack.style.animation = 'tack-float 3s ease-in-out infinite';
+                    const pulse = markerRef.querySelector('.marker-pulse');
+                    if (pulse) pulse.style.animation = 'marker-pulse 2s ease-out infinite';
+                }
+            }, 800);
 
-            // Reset label with arrival message
-            const label = this.playerMarker.querySelector('.marker-label');
-            if (label) {
-                label.textContent = 'ARRIVED!';
-                label.style.background = 'linear-gradient(180deg, #44ff44 0%, #00cc00 100%)';
-                // After 2 seconds, show normal "YOU ARE HERE"
-                setTimeout(() => {
-                    // 🖤 Check if element still exists in DOM before modifying 💀
-                    if (label && label.isConnected && markerRef && markerRef.isConnected) {
+            // After 2 seconds, show normal "YOU ARE HERE"
+            setTimeout(() => {
+                if (markerRef && markerRef.isConnected) {
+                    const label = markerRef.querySelector('.marker-label');
+                    if (label) {
                         label.textContent = 'YOU ARE HERE';
                         label.style.background = 'linear-gradient(180deg, #dc143c 0%, #8b0000 100%)';
-                        markerRef.classList.remove('arrived');
                     }
-                }, 2000);
-            }
+                    markerRef.classList.remove('arrived');
+                }
+            }, 2000);
         }
 
         // Add arrival animation styles if not already present

@@ -4,6 +4,64 @@
 
 ---
 
+## 2025-12-06 - SESSION #47: MASSIVE ENCOUNTER NPC INVENTORY BUILD-OUT
+
+**Request:** Random encounter NPCs don't have proper inventories based on who they are. Criminals should have stolen goods but little food/water. All encounter NPCs need role-appropriate inventories for both normal world AND doom world.
+
+**Status:** COMPLETE - Session 1 Done
+
+### What Was Built:
+
+**NORMAL WORLD (npc-encounters.js):**
+
+1. **Expanded `canTrade()` function** - Now includes 30+ NPC types:
+   - Original: traveler, merchant, smuggler, courier, pilgrim
+   - Hostile: robber, thief, bandit
+   - Neutral: mercenary, spy, informant
+   - Service: healer, priest, innkeeper, apothecary, general_store
+   - Authority: guard, noble, guild_master, scribe
+   - Civilians: farmer, ferryman, stablemaster, jeweler, blacksmith, herbalist, hunter, fisherman, miner
+
+2. **Expanded `inventoryTemplates`** - 25+ unique inventory sets with common/uncommon/rare items:
+   - Hostile NPCs have stolen goods, weapons, little food
+   - Service NPCs have tools of their trade
+   - Civilians have profession-specific goods
+   - Authority figures have official items and quality gear
+
+3. **Expanded `goldRanges`** - Appropriate gold for all types:
+   - Beggars: 0-5 gold
+   - Nobles: 100-500 gold
+   - Loan sharks: 100-400 gold
+   - Each type has fitting wealth level
+
+**DOOM WORLD (doom-world-npcs.js):**
+
+1. **New `doomInventoryTemplates`** - 20+ doom-specific inventory sets:
+   - Survivors: moldy bread, dirty water, rusty weapons
+   - Blight creatures: corrupted flesh, dark ichor, blight crystals
+   - Shadow beasts: shadow wisps, void essence, nightmare eyes
+   - Doom merchants: salvaged tools, hoarded medicine, survival gear
+   - Doom military: notched swords, dented shields, battle rations
+   - Doom civilians: dead seeds, memory tokens, frozen rations
+
+2. **New `generateDoomInventory(npcType)`** - Generates doom-appropriate items:
+   - Fewer items (scarcity is real)
+   - 40% uncommon chance (down from 70%)
+   - 10% rare chance (down from 20%)
+
+3. **New `generateDoomGold(npcType)`** - Gold is worthless in doom:
+   - Most NPCs have 0-10 gold
+   - Hoarders might have 200-1000 (worthless)
+   - Creatures have no gold
+
+4. **New `canDoomTrade(npcType)`** - Determines tradeable doom NPCs
+
+### Files Modified:
+- `src/js/npc/npc-encounters.js` - Lines 398-704: Massive expansion
+- `src/js/data/doom-world-npcs.js` - Lines 432-670: New inventory system
+
+---
+
 ## 2025-12-06 - SESSION #46: FIX GREENDALE BIDIRECTIONAL CONNECTIONS
 
 **Request:** Gee reported that connectors from Southern Gate (Sunhaven) and Riverwood weren't showing as available to travel to from explored Greendale.

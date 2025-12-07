@@ -397,13 +397,31 @@ const NPCEncounterSystem = {
 
     // 💱 Can this soul engage in capitalism's cold embrace? 💰
     canTrade(type) {
-        const tradingTypes = ['traveler', 'merchant', 'smuggler', 'courier', 'pilgrim'];
+        // Most encounter NPCs can trade - criminals fence stolen goods, service NPCs sell their wares
+        const tradingTypes = [
+            // Original traders
+            'traveler', 'merchant', 'smuggler', 'courier', 'pilgrim',
+            // Hostile (fence stolen goods)
+            'robber', 'thief', 'bandit',
+            // Neutral professionals
+            'mercenary', 'spy', 'informant',
+            // Service providers
+            'healer', 'priest', 'innkeeper', 'apothecary', 'general_store',
+            // Authority (some trade)
+            'guard', 'noble', 'guild_master', 'scribe',
+            // Civilians
+            'farmer', 'ferryman', 'stablemaster', 'jeweler', 'blacksmith',
+            'herbalist', 'hunter', 'fisherman', 'miner'
+        ];
         return tradingTypes.includes(type);
     },
 
     // 🎒 Fill their pockets with survival and sin - what do wanderers carry? 🗡️
     generateTravelerInventory(type) {
         const inventoryTemplates = {
+            // ═══════════════════════════════════════════════════════════
+            // TRAVELERS & MERCHANTS - the original five
+            // ═══════════════════════════════════════════════════════════
             traveler: {
                 common: ['bread', 'water_skin', 'torch', 'rope', 'bandage'],
                 uncommon: ['health_potion', 'rations', 'map_fragment', 'compass'],
@@ -428,6 +446,171 @@ const NPCEncounterSystem = {
                 common: ['holy_water', 'prayer_beads', 'bread', 'candle'],
                 uncommon: ['healing_salve', 'blessed_bandage', 'incense', 'scripture'],
                 rare: ['holy_relic', 'blessed_amulet', 'sacred_text']
+            },
+
+            // ═══════════════════════════════════════════════════════════
+            // HOSTILE - criminals with stolen goods, little survival supplies
+            // ═══════════════════════════════════════════════════════════
+            robber: {
+                common: ['dagger', 'rope', 'dark_cloak', 'lockpick'],
+                uncommon: ['stolen_purse', 'stolen_jewelry', 'iron_sword', 'mask'],
+                rare: ['stolen_gems', 'noble_signet_ring', 'poison_vial']
+            },
+            thief: {
+                common: ['lockpick', 'dagger', 'dark_cloak', 'thieves_tools'],
+                uncommon: ['smoke_bomb', 'grappling_hook', 'stolen_coins', 'forged_key'],
+                rare: ['master_lockpick', 'stolen_artifact', 'invisibility_cloak']
+            },
+            bandit: {
+                common: ['iron_sword', 'leather_armor', 'rope', 'torch'],
+                uncommon: ['stolen_goods', 'ale', 'bandage', 'shield'],
+                rare: ['stolen_treasure', 'bandit_insignia', 'gold_teeth']
+            },
+
+            // ═══════════════════════════════════════════════════════════
+            // NEUTRAL PROFESSIONALS - tools of their trade
+            // ═══════════════════════════════════════════════════════════
+            mercenary: {
+                common: ['iron_sword', 'shield', 'bandage', 'rations'],
+                uncommon: ['steel_sword', 'chainmail', 'health_potion', 'whetstone'],
+                rare: ['battle_trophy', 'mercenary_contract', 'fine_armor']
+            },
+            spy: {
+                common: ['dark_cloak', 'dagger', 'coded_notes', 'ink'],
+                uncommon: ['forged_documents', 'poison', 'disguise_kit', 'cipher_wheel'],
+                rare: ['secret_orders', 'noble_seal', 'assassination_contract']
+            },
+            informant: {
+                common: ['parchment', 'ink', 'candle', 'bread'],
+                uncommon: ['coded_message', 'city_map', 'bribe_coins', 'whistle'],
+                rare: ['blackmail_evidence', 'secret_ledger', 'noble_correspondence']
+            },
+
+            // ═══════════════════════════════════════════════════════════
+            // SERVICE PROVIDERS - tools and supplies of their trade
+            // ═══════════════════════════════════════════════════════════
+            healer: {
+                common: ['bandage', 'healing_herbs', 'clean_cloth', 'water_skin'],
+                uncommon: ['health_potion', 'antidote', 'healing_salve', 'splint'],
+                rare: ['rare_medicine', 'surgical_tools', 'plague_cure']
+            },
+            priest: {
+                common: ['holy_water', 'prayer_beads', 'candle', 'scripture'],
+                uncommon: ['incense', 'blessed_oil', 'holy_symbol', 'healing_salve'],
+                rare: ['holy_relic', 'sacred_text', 'blessed_amulet']
+            },
+            innkeeper: {
+                common: ['ale', 'bread', 'cheese', 'candle'],
+                uncommon: ['wine', 'meat', 'room_key', 'lantern'],
+                rare: ['fine_wine', 'secret_ledger', 'hidden_key']
+            },
+            apothecary: {
+                common: ['healing_herbs', 'mortar_pestle', 'vial', 'bandage'],
+                uncommon: ['health_potion', 'antidote', 'sleeping_draught', 'pain_killer'],
+                rare: ['rare_medicine', 'plague_cure', 'elixir_of_life']
+            },
+            general_store: {
+                common: ['rope', 'torch', 'candle', 'soap', 'salt'],
+                uncommon: ['lantern', 'backpack', 'bedroll', 'cooking_pot'],
+                rare: ['fine_tools', 'rare_goods', 'imported_items']
+            },
+
+            // ═══════════════════════════════════════════════════════════
+            // AUTHORITY FIGURES - official items, quality gear
+            // ═══════════════════════════════════════════════════════════
+            guard: {
+                common: ['iron_sword', 'shield', 'torch', 'whistle'],
+                uncommon: ['chainmail', 'handcuffs', 'city_badge', 'rations'],
+                rare: ['guard_captain_seal', 'steel_sword', 'fine_armor']
+            },
+            noble: {
+                common: ['fine_clothes', 'perfume', 'wine', 'jewelry'],
+                uncommon: ['gold_coins', 'silk_handkerchief', 'signet_ring', 'letter_of_credit'],
+                rare: ['noble_seal', 'land_deed', 'family_heirloom']
+            },
+            guild_master: {
+                common: ['guild_badge', 'parchment', 'ink', 'seal_wax'],
+                uncommon: ['guild_contract', 'gold_coins', 'fine_clothes', 'ledger'],
+                rare: ['guild_charter', 'master_tools', 'trade_license']
+            },
+            scribe: {
+                common: ['parchment', 'ink', 'quill', 'candle'],
+                uncommon: ['seal_wax', 'magnifying_glass', 'blank_book', 'letter_case'],
+                rare: ['rare_manuscript', 'ancient_text', 'coded_cipher']
+            },
+
+            // ═══════════════════════════════════════════════════════════
+            // CIVILIANS - poor supplies, trade goods of their profession
+            // ═══════════════════════════════════════════════════════════
+            beggar: {
+                common: ['worn_clothes', 'begging_cup', 'crust_of_bread'],
+                uncommon: ['copper_coins', 'found_trinket', 'tattered_blanket'],
+                rare: ['hidden_coins', 'stolen_item', 'lucky_charm']
+            },
+            drunk: {
+                common: ['ale', 'empty_bottle', 'bread_crumbs'],
+                uncommon: ['wine', 'flask', 'gambling_dice', 'copper_coins'],
+                rare: ['fine_wine', 'lost_jewelry', 'drunken_confession']
+            },
+            farmer: {
+                common: ['bread', 'vegetables', 'eggs', 'grain'],
+                uncommon: ['cheese', 'milk_jug', 'seeds', 'farm_tools'],
+                rare: ['prize_animal', 'rare_seeds', 'land_deed']
+            },
+            ferryman: {
+                common: ['rope', 'oar', 'lantern', 'fish'],
+                uncommon: ['boat_ticket', 'navigation_chart', 'fishing_net'],
+                rare: ['ancient_coin', 'treasure_map', 'smuggled_goods']
+            },
+            stablemaster: {
+                common: ['horse_brush', 'oats', 'rope', 'horseshoe'],
+                uncommon: ['saddle', 'bridle', 'horse_medicine', 'carrot'],
+                rare: ['fine_saddle', 'horse_deed', 'racing_trophy']
+            },
+            jeweler: {
+                common: ['magnifying_glass', 'small_gems', 'silver_wire', 'polishing_cloth'],
+                uncommon: ['gold_ring', 'gemstone', 'jewelry_tools', 'silver_chain'],
+                rare: ['rare_gem', 'masterwork_jewelry', 'diamond']
+            },
+            blacksmith: {
+                common: ['iron_bar', 'coal', 'tongs', 'hammer'],
+                uncommon: ['steel_bar', 'iron_sword', 'horseshoe', 'nails'],
+                rare: ['fine_steel', 'masterwork_blade', 'rare_ore']
+            },
+            herbalist: {
+                common: ['healing_herbs', 'mushrooms', 'berries', 'roots'],
+                uncommon: ['rare_herbs', 'herbal_tea', 'poultice', 'herb_guide'],
+                rare: ['magical_herb', 'ancient_remedy', 'herb_of_immortality']
+            },
+            hunter: {
+                common: ['bow', 'arrows', 'skinning_knife', 'rope'],
+                uncommon: ['furs', 'meat', 'animal_trap', 'tracking_guide'],
+                rare: ['rare_pelt', 'trophy_antlers', 'beast_fang']
+            },
+            fisherman: {
+                common: ['fishing_rod', 'bait', 'fish', 'net'],
+                uncommon: ['pearls', 'large_fish', 'fish_trap', 'salt'],
+                rare: ['rare_fish', 'giant_pearl', 'treasure_catch']
+            },
+            miner: {
+                common: ['pickaxe', 'torch', 'coal', 'iron_ore'],
+                uncommon: ['silver_ore', 'lantern', 'mining_helmet', 'rope'],
+                rare: ['gold_ore', 'rare_gems', 'ancient_artifact']
+            },
+            town_crier: {
+                common: ['bell', 'scroll', 'ink', 'torch'],
+                uncommon: ['town_decree', 'megaphone', 'news_ledger', 'city_map'],
+                rare: ['royal_proclamation', 'secret_message', 'bribe_evidence']
+            },
+            loan_shark: {
+                common: ['ledger', 'gold_coins', 'contract', 'ink'],
+                uncommon: ['debt_note', 'collection_list', 'thugs_whistle', 'interest_chart'],
+                rare: ['blackmail_evidence', 'property_deed', 'noble_debt']
+            },
+            scholar: {
+                common: ['book', 'parchment', 'ink', 'quill'],
+                uncommon: ['rare_book', 'magnifying_glass', 'ancient_map', 'research_notes'],
+                rare: ['ancient_tome', 'lost_knowledge', 'magical_scroll']
             }
         };
 
@@ -469,11 +652,51 @@ const NPCEncounterSystem = {
     // 💰 How much coin weighs down their purse? Depends on their trade 💸
     generateTravelerGold(type) {
         const goldRanges = {
+            // Original traders
             traveler: { min: 10, max: 50 },
             merchant: { min: 50, max: 200 },
             smuggler: { min: 30, max: 150 },
             courier: { min: 15, max: 40 },
-            pilgrim: { min: 5, max: 25 }
+            pilgrim: { min: 5, max: 25 },
+
+            // Hostile - stolen gold
+            robber: { min: 20, max: 100 },
+            thief: { min: 15, max: 80 },
+            bandit: { min: 25, max: 120 },
+
+            // Neutral professionals
+            mercenary: { min: 40, max: 150 },
+            spy: { min: 30, max: 100 },
+            informant: { min: 10, max: 50 },
+
+            // Service providers
+            healer: { min: 20, max: 80 },
+            priest: { min: 5, max: 30 },
+            innkeeper: { min: 30, max: 100 },
+            apothecary: { min: 25, max: 90 },
+            general_store: { min: 40, max: 120 },
+
+            // Authority
+            guard: { min: 15, max: 50 },
+            noble: { min: 100, max: 500 },
+            guild_master: { min: 80, max: 300 },
+            scribe: { min: 10, max: 40 },
+
+            // Civilians
+            beggar: { min: 0, max: 5 },
+            drunk: { min: 2, max: 15 },
+            farmer: { min: 10, max: 40 },
+            ferryman: { min: 15, max: 50 },
+            stablemaster: { min: 20, max: 60 },
+            jeweler: { min: 50, max: 200 },
+            blacksmith: { min: 30, max: 100 },
+            herbalist: { min: 15, max: 50 },
+            hunter: { min: 10, max: 40 },
+            fisherman: { min: 8, max: 35 },
+            miner: { min: 15, max: 60 },
+            town_crier: { min: 5, max: 20 },
+            loan_shark: { min: 100, max: 400 },
+            scholar: { min: 15, max: 60 }
         };
 
         const range = goldRanges[type] || goldRanges.traveler;
