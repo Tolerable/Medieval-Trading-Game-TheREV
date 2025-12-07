@@ -3720,7 +3720,9 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             panel.style.bottom = 'auto';
 
             // Ensure panel is draggable and bring to front
+            // Reset draggable flag to force re-setup (chat view has different header)
             if (typeof DraggablePanels !== 'undefined') {
+                panel.dataset.draggable = 'false';
                 DraggablePanels.makeDraggable(panel);
                 DraggablePanels.bringToFront(panel);
             }

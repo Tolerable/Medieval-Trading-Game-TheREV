@@ -47,7 +47,7 @@ const DraggablePanels = {
         'achievement-overlay': '.achievement-header, h2',
         'financial-sheet-overlay': '.financial-header, h2',
         'property-employee-panel': '.property-header, h2',
-        'people-panel': '.people-header, h2, h3',
+        'people-panel': '.people-header, .npc-name-header, h2, h3',
         'transportation-panel': '.transportation-header, h2',
         'settings-panel': '.settings-header, h2'
     },
