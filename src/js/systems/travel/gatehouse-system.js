@@ -1,11 +1,13 @@
-// 
+//
 // GATEHOUSE SYSTEM - pay to escape your current hell
-// 
-// Version: 0.90.01 | Unity AI Lab
+//
+// Version: 0.90.02 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
-// 
+//
+// Config-driven: Fees and zones can be adjusted in GameConfig.gatehouses
+//
 
 const GatehouseSystem = {
     // Track which gatehouses have been paid for (unlocked)
@@ -13,6 +15,21 @@ const GatehouseSystem = {
 
     // Track the player's starting zone (determines which zones are free)
     startingZone: 'starter',
+
+    // Helper to get fee from config (with fallback)
+    getGateFee(gatehouseId) {
+        // Check GameConfig first
+        if (typeof GameConfig !== 'undefined' && GameConfig.gatehouses?.fees?.[gatehouseId]) {
+            return GameConfig.gatehouses.fees[gatehouseId];
+        }
+        // Fallback to hardcoded values
+        const fallbackFees = {
+            northern_outpost: 10000,
+            western_watch: 50000,
+            jade_harbor: 100000
+        };
+        return fallbackFees[gatehouseId] || 0;
+    },
 
     // Define travel zones and their gatehouses
     // Capital is ALWAYS accessible from any starting location

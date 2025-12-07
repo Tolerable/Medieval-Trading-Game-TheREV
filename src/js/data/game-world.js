@@ -1236,9 +1236,15 @@ const GameWorld = {
     doomVisitedLocations: [], //  Separate tracking for Doom World - starts fresh on each entry!
     currentRegion: 'starter',
 
-    // Killed NPCs tracking - NPCs respawn after 24 game hours (1440 game minutes)
+    // Killed NPCs tracking - NPCs respawn after time defined in GameConfig
     killedNPCs: {}, // { npcId: killTimeInGameMinutes }
-    NPC_RESPAWN_TIME: 1440, // 24 hours in game minutes
+
+    // Get NPC respawn time from config (fallback to 1440 = 24 hours)
+    get NPC_RESPAWN_TIME() {
+        return (typeof GameConfig !== 'undefined' && GameConfig.npc?.death?.respawnTimeGameMinutes)
+            || (typeof GameConfig !== 'undefined' && GameConfig.world?.npcRespawnTimeMinutes)
+            || 1440;
+    },
 
     // ═══════════════════════════════════════════════════════════════
     //  INITIALIZATION - Where the world awakens

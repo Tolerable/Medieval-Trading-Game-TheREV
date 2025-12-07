@@ -477,8 +477,18 @@ const CombatModal = {
         }
 
         // Apply reputation loss for killing NPCs (unless it's a quest target)
+        // Read rep loss values from GameConfig.npc.death.reputationLoss
         if (!this.currentCombat.isQuestTarget && typeof CityReputationSystem !== 'undefined') {
-            const repLoss = npc.stats.tier === 'boss' ? 50 : (npc.stats.tier === 'outlaw' ? 5 : 20);
+            const repConfig = (typeof GameConfig !== 'undefined' && GameConfig.npc?.death?.reputationLoss) || {};
+            let repLoss;
+            if (npc.stats.tier === 'boss') {
+                repLoss = repConfig.boss || 50;
+            } else if (npc.stats.tier === 'outlaw') {
+                repLoss = repConfig.outlaw || 5;
+            } else {
+                repLoss = repConfig.civilian || 20;
+            }
+
             if (locationId && CityReputationSystem.changeReputation) {
                 CityReputationSystem.changeReputation(locationId, -repLoss);
                 if (typeof addMessage === 'function') {

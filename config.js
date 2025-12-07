@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // GAME CONFIG - the dark heart of all settings
 // ═══════════════════════════════════════════════════════════════
-// Version: 0.90.00 | Unity AI Lab
+// Version: 0.90.02 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 // unityailabcontact@gmail.com
@@ -12,8 +12,8 @@ const GameConfig = {
     // 📋 VERSION INFO - tracking our descent into madness
     // ═══════════════════════════════════════════════════════════════
     version: {
-        game: '0.90.01',        // the credits & about update
-        file: '0.90.01',        // keeping pace with the darkness
+        game: '0.90.02',        // NPC death, trade locks, config overhaul
+        file: '0.90.02',        // keeping pace with the darkness
         build: '2025.12',      // born in the depths of 2025
         releaseDate: '2025'    // the year we unleashed this beast
     },
@@ -477,7 +477,21 @@ const GameConfig = {
 
         // 🎲 luck effects
         luckCritChanceBonus: 0.02,     // 2% crit chance per luck above 5
-        critDamageMultiplier: 1.5      // 50% bonus damage on crit
+        critDamageMultiplier: 1.5,     // 50% bonus damage on crit
+
+        // 💀 Player death settings (added 2025-12-06)
+        playerDeath: {
+            enabled: true,              // true = player can die, false = always 1 HP
+            showFinalStats: true,       // Show 0 health at end of combat
+            deathDelayMs: 2000          // Delay before game over triggers
+        },
+
+        // 🎯 Combat UI
+        ui: {
+            showCombatLog: true,
+            maxLogEntries: 20,
+            showDamageNumbers: true
+        }
     },
 
     // ═══════════════════════════════════════════════════════════════
@@ -607,6 +621,204 @@ const GameConfig = {
             rare: 2.0,
             epic: 3.0,
             legendary: 5.0
+        }
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🚶 TRAVEL SYSTEM - journey across the realm
+    // ═══════════════════════════════════════════════════════════════
+    travel: {
+        enabled: true,
+        baseSpeedMinutesPerUnit: 5,       // Game minutes per map distance unit
+        allowCancelTravel: true,           // Can cancel mid-journey
+        allowRerouteTravel: true,          // Can change destination mid-journey
+
+        // Map display settings
+        map: {
+            showUndiscoveredAsQuestionMarks: true,   // Show ??? for unexplored
+            showGatehouseNamesWhenDiscovered: true,  // Gates show real names even when discovered
+            labelFontSize: 12,                       // Normal location label size
+            areaLabelFontSize: 24,                   // Capital/region label size
+            revealGatesFromCapital: true             // Gates visible when at Royal Capital
+        }
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🏰 GATEHOUSE SYSTEM - controlling access to zones
+    // ═══════════════════════════════════════════════════════════════
+    gatehouses: {
+        enabled: true,
+
+        // Gate fees (gold required to unlock passage)
+        // Progression: east (1k) -> north (10k) -> west (50k)
+        fees: {
+            northern_outpost: 10000,    // Northern zone gate - mid game
+            western_watch: 50000,       // Western zone gate - late game
+            jade_harbor: 1000           // Eastern zone gate - early-mid game
+        },
+
+        // Which gate controls which zone
+        zones: {
+            northern: 'northern_outpost',
+            western: 'western_watch',
+            eastern: 'jade_harbor'
+        },
+
+        // Zone assignment for locations
+        locationZones: {
+            northern_outpost: 'starter',  // Gate is in starter zone
+            ironforge_city: 'northern',   // City is behind the gate
+            western_watch: 'starter',
+            stonebridge: 'western',
+            jade_harbor: 'starter',
+            jade_city: 'eastern'
+        }
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // ⭐ REPUTATION SYSTEM - how the world sees you
+    // ═══════════════════════════════════════════════════════════════
+    reputation: {
+        // City-wide reputation
+        city: {
+            enabled: true,
+            saveToLocalStorage: true,
+
+            // Reputation level thresholds
+            levels: {
+                HOSTILE: { min: -100, max: -50, color: '#ff4444' },
+                UNTRUSTED: { min: -49, max: -20, color: '#ff8844' },
+                SUSPICIOUS: { min: -19, max: -1, color: '#ffaa44' },
+                NEUTRAL: { min: 0, max: 19, color: '#888888' },
+                FRIENDLY: { min: 20, max: 49, color: '#44aa44' },
+                TRUSTED: { min: 50, max: 79, color: '#44cc44' },
+                ELITE: { min: 80, max: 100, color: '#44ff44' }
+            },
+
+            // Price modifiers based on reputation
+            priceModifiers: {
+                HOSTILE: 1.2,      // 20% higher prices
+                UNTRUSTED: 1.1,    // 10% higher
+                SUSPICIOUS: 1.05,  // 5% higher
+                NEUTRAL: 1.0,      // Normal prices
+                FRIENDLY: 0.95,    // 5% discount
+                TRUSTED: 0.9,      // 10% discount
+                ELITE: 0.8         // 20% discount
+            }
+        },
+
+        // NPC-specific reputation and trade unlocks
+        npc: {
+            enabled: true,
+            startingReputation: 0,
+            maxReputation: 100,
+            minReputation: -100,
+            dynamicTradeUnlock: true,  // Rep changes affect trade access in real-time
+
+            // Reputation thresholds for trading
+            tradeUnlockThresholds: {
+                alwaysTrade: 0,    // merchant, innkeeper, farmer, etc.
+                lowRep: 10,        // blacksmith, apothecary, tailor
+                mediumRep: 25,     // jeweler, banker, guild_master
+                highRep: 50        // noble
+            },
+
+            // Which NPC types require which rep level
+            tradeRequirements: {
+                // Always trade (0 rep)
+                alwaysTrade: ['merchant', 'innkeeper', 'general_store', 'baker', 'farmer', 'fisherman', 'ferryman', 'traveler'],
+                // Low rep (10+)
+                lowRep: ['blacksmith', 'apothecary', 'tailor', 'herbalist', 'miner'],
+                // Medium rep (25+)
+                mediumRep: ['jeweler', 'banker', 'guild_master'],
+                // High rep (50+)
+                highRep: ['noble']
+            }
+        }
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 👥 NPC SYSTEM - the souls who populate the world
+    // ═══════════════════════════════════════════════════════════════
+    npc: {
+        // Relationship tracking
+        relationships: {
+            enabled: true,
+            startingReputation: 0,
+            maxReputation: 100,
+            minReputation: -100,
+            reputationDecayEnabled: false,
+            reputationDecayPerDay: 1
+        },
+
+        // NPC trading behavior
+        trading: {
+            enabled: true,
+            showTradePreview: true,
+            refreshInventoryOnVisit: true
+        },
+
+        // NPC death and respawn (added 2025-12-06)
+        death: {
+            enabled: true,
+            respawnTimeGameHours: 24,         // 24 in-game hours
+            respawnTimeGameMinutes: 1440,     // = 24 * 60 minutes
+            removeFromPanelWhenDead: true,    // Hide from people panel when dead
+
+            // Reputation loss for killing NPCs
+            reputationLoss: {
+                outlaw: 5,        // Minimal loss for outlaws/bandits
+                civilian: 20,     // Moderate loss for regular NPCs
+                boss: 50,         // Large loss for bosses
+                questTarget: 0    // No loss for quest targets
+            }
+        }
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 📜 QUEST SYSTEM - the narrative threads
+    // ═══════════════════════════════════════════════════════════════
+    quests: {
+        enabled: true,
+        maxActiveQuests: 5,
+
+        // Quest UI markers
+        markers: {
+            available: '!',       // NPC has quest to give
+            inProgress: '?',      // Quest in progress, talk to NPC
+            complete: '!'         // Ready to turn in
+        },
+
+        // Quest tracking
+        tracking: {
+            showInJournal: true,
+            showOnMap: true,
+            showInPeoplePanel: true
+        }
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🌍 WORLD SYSTEM - the realm itself
+    // ═══════════════════════════════════════════════════════════════
+    world: {
+        defaultStartingLocation: 'greendale',
+        randomStartEnabled: true,
+
+        // Starter zone locations (for random start)
+        starterZoneLocations: [
+            'greendale', 'riverside_hamlet', 'sunhaven',
+            'kings_inn', 'royal_capital'
+        ],
+
+        // NPC respawn tracking
+        npcRespawnEnabled: true,
+        npcRespawnTimeMinutes: 1440,  // 24 game hours
+
+        // Location visibility
+        visibility: {
+            revealOnVisit: true,
+            revealConnections: true,
+            revealGatehousesFromCapital: true
         }
     },
 
