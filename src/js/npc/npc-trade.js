@@ -496,12 +496,19 @@ const NPCTradeWindow = {
             const qty = typeof data === 'number' ? data : data.quantity || 1;
             const price = this.getItemPrice(itemId);
 
-            // Gold/currency is always 1:1 - you're trading actual money!
+            // Gold/currency is always worth 1g per unit - actual money!
             const isCurrency = itemId === 'gold' || (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem(itemId)?.category === 'currency');
+            // Player sells at 50% (min 1g), NPC sells at full price minus discount
+            // Currency (gold) is ALWAYS 1g regardless of side
             const displayPrice = isCurrency ? 1 :
                 (side === 'npc' ?
                     Math.ceil(price * (1 - this.currentDiscount / 100)) :
-                    Math.max(1, Math.floor(price * 0.5))); // Sell at half price, minimum 1g
+                    Math.max(1, Math.floor(price * 0.5)));
+
+            // Debug: Log gold pricing
+            if (itemId === 'gold') {
+                console.log(`💰 Gold pricing: isCurrency=${isCurrency}, displayPrice=${displayPrice}, side=${side}`);
+            }
 
             // 🛒 Get item data for cart
             const itemData = typeof ItemDatabase !== 'undefined' ? ItemDatabase.getItem(itemId) : null;
@@ -2514,11 +2521,17 @@ const NPCTradeWindow = {
                 if (clickableItem) {
                     const action = clickableItem.dataset.action;
                     const itemId = clickableItem.dataset.item;
-                    const price = parseInt(clickableItem.dataset.price, 10) || 0;
+                    const priceAttr = clickableItem.dataset.price;
+                    const price = parseInt(priceAttr, 10) || 0;
                     const stock = parseInt(clickableItem.dataset.stock, 10) || 1;
                     const itemName = clickableItem.dataset.itemName || itemId;
                     const itemIcon = clickableItem.dataset.itemIcon || '📦';
                     const itemWeight = parseFloat(clickableItem.dataset.itemWeight) || 1;
+
+                    // Debug: Log what we're getting from the DOM
+                    if (itemId === 'gold') {
+                        console.log(`💰 Gold clicked: priceAttr="${priceAttr}", parsed price=${price}, stock=${stock}`);
+                    }
 
                     // 🖤 Bulk quantity from modifier keys: Ctrl = 25, Shift = 5, Normal = 1 💀
                     let bulkQty = 1;
