@@ -1922,6 +1922,32 @@ permissions:
 
 ## 📅 VERSION HISTORY
 
+### v0.90.01 - UI Polish + CPU Optimization (2025-12-07)
+
+**UI Improvements:**
+- Voice TTS preview now applies master volume correctly
+- Test voice button spam prevention (disabled while playing)
+- Removed redundant Main Menu button from settings
+- Market trade window text centering for multi-word items
+- **NEW:** UI Scale setting (75%-150%) in Settings > UI tab
+- Trade cart panel: badge margin, weight display, button layout, hidden spinners
+- Transportation panel: card overlap fix, tip text placement
+
+**CPU Optimization:**
+- Menu weather particle intervals: 150ms → 400ms (winter), 50ms → 200ms (thundersnow)
+- Game weather particles: 60 → 25 max
+- Player marker animations: 3s → 5s cycles, added `will-change: transform, opacity`
+
+**Technical Changes:**
+- `config.js` - Added `uiScale` default (1.0)
+- `settings-panel.js` - Voice TTS volume fix, UI scale control, button changes
+- `trade-cart-panel.js` - Multiple cart UI fixes
+- `menu-weather-system.js` - Reduced particle frequencies
+- `weather-system.js` - Reduced particle count
+- `game-world-renderer.js` - Slower marker animations, GPU hints
+
+---
+
 ### v0.90.00 - The Unified Dialogue Update (2025-12-05)
 
 **New Features:**

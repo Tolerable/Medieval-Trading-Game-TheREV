@@ -1743,6 +1743,27 @@ The game features **57 achievements** across 12 categories, including 10 hidden 
 
 ## 📅 VERSION HISTORY
 
+### v0.90.01 - UI Polish + CPU Optimization (2025-12-07)
+
+**UI Improvements:**
+- Voice TTS preview now applies master volume correctly
+- Test voice button disables while playing (spam prevention)
+- Removed redundant Main Menu button from settings
+- Market trade window text centering for multi-word items (Silk Garments, Luxury Items, Royal Goods)
+- **NEW:** UI Scale setting (75%-150%) for scaling panels
+- Trade cart improvements: badge margin, weight display, Complete Trade button layout
+- Transportation panel: fixed card overlap, improved tip text placement
+- Hidden number input spinners in trade cart
+
+**CPU Optimization:**
+- Weather particle frequency reduced (150ms → 400ms intervals)
+- Storm rain drops reduced (80 → 40)
+- Game weather particles reduced (60 → 25 max)
+- Player marker animations slowed (3s → 5s cycles)
+- Added GPU hints (`will-change: transform, opacity`)
+
+---
+
 ### v0.90.00 - The Unified Dialogue Update (2025-12-05)
 
 **Major Features:**

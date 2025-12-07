@@ -6,6 +6,46 @@
 
 ---
 
+## SESSION #66 (2025-12-07) - UI Polish + CPU Optimization
+
+### Voice TTS & Settings Fixes
+- [x] Voice TTS preview applies master volume correctly (effectiveVolume = masterVolume * voiceVolume/100)
+- [x] Test voice button disables while playing (spam prevention)
+- [x] Removed redundant Main Menu button from settings
+- [x] Stop button red styling with `!important` fix
+
+### UI Improvements
+- [x] Market trade window text centering for multi-word items (Silk Garments, Luxury Items, Royal Goods)
+- [x] **NEW FEATURE:** UI Scale setting (75%-150%) in Settings > UI tab
+- [x] Trade cart badge margin (`margin-left: 8px`)
+- [x] Trade cart total weight overflow handling
+- [x] Complete Trade button moved to full-width row below Haggle/Clear
+- [x] Number input spinners hidden (`-webkit-appearance: none`, `-moz-appearance: textfield`)
+- [x] Product text overflow with ellipsis
+- [x] Transportation panel card overlap fixed (`overflow: hidden`)
+- [x] "Visit merchants" tip text placement improved
+
+### CPU Optimization
+- [x] Menu weather particle intervals reduced (150ms → 400ms winter, 50ms → 200ms thundersnow)
+- [x] Storm rain drops reduced (80 → 40)
+- [x] Game weather particles reduced (60 → 25 max)
+- [x] Player marker tack-float animation slowed (3s → 5s)
+- [x] Player marker shadow-pulse animation slowed (3s → 5s)
+- [x] Player marker marker-pulse animation slowed (2s → 4s)
+- [x] Player marker tack-walk animation slowed (0.4s → 0.6s)
+- [x] GPU hints added (`will-change: transform, opacity`)
+
+### Files Modified
+- `config.js` - Added uiScale default (1.0)
+- `src/css/styles.css` - Market text centering, transport panel fixes
+- `src/js/effects/menu-weather-system.js` - Reduced particle frequencies
+- `src/js/systems/world/weather-system.js` - Reduced particle count
+- `src/js/ui/map/game-world-renderer.js` - Slower marker animations, GPU hints
+- `src/js/ui/panels/settings-panel.js` - Voice TTS fixes, UI scale setting
+- `src/js/ui/panels/trade-cart-panel.js` - Multiple cart UI fixes
+
+---
+
 ## SESSION #48 (2025-12-07) - Travel Reroute/Cancel Path Position Fix
 
 ### Travel System Overhaul

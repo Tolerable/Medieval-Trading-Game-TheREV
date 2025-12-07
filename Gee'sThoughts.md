@@ -9461,3 +9461,111 @@ Gee found 8 new bugs during gameplay testing. Time to hunt them down!
 
 ---
 
+## 2025-12-07 - SESSION #66: UI POLISH + CPU OPTIMIZATION 🖤💀
+
+### Request:
+Multiple UI fixes and performance optimization for the settings panel, market, trade cart, transportation panel, and CPU-intensive weather/animation systems.
+
+### Status: COMPLETE ✅
+
+---
+
+### FIXES COMPLETED:
+
+**1. Voice TTS Preview Fix - FIXED ✅**
+- **Issue:** Voice test playback not working after moving settings to Audio tab
+- **Cause:** Preview wasn't applying master volume to voice audio
+- **Fix:** Calculate `effectiveVolume = masterVolume * (voiceVolume / 100)` before setting audio.volume
+- **File:** `src/js/ui/panels/settings-panel.js`
+
+**2. Test Voice Button Spam Prevention - FIXED ✅**
+- **Issue:** Users could spam the test voice button
+- **Fix:** Disable button while playing, re-enable on completion/error/stop
+- **File:** `src/js/ui/panels/settings-panel.js`
+
+**3. Removed Redundant Main Menu Button - FIXED ✅**
+- **Issue:** Main Menu button in settings was redundant
+- **Fix:** Removed the button from settings dialog
+- **File:** `src/js/ui/panels/settings-panel.js`
+
+**4. Stop Button Red Styling - FIXED ✅**
+- **Issue:** `.save-load-btn.danger` style being overridden
+- **Fix:** Added `!important` to the gradient background
+- **File:** `src/js/ui/panels/settings-panel.js`
+
+**5. Market Trade Window Text Centering - FIXED ✅**
+- **Issue:** "Silk Garments", "Luxury Items", "Royal Goods" not centering properly
+- **Fix:** Added `text-align: center` to `.item-name`, `.item-icon` min-height for items without icons
+- **File:** `src/css/styles.css`
+
+**6. UI Scale Setting - NEW FEATURE ✅**
+- **Feature:** Added new setting (75%-150%) to scale panels and UI elements
+- **Implementation:** Added to Settings > UI tab with slider, saved to localStorage, applied on game load
+- **Files:** `src/js/ui/panels/settings-panel.js`, `config.js`
+
+**7. Trade Cart Panel Fixes - FIXED ✅**
+- **Issues Fixed:**
+  - Cart quantity badge margin: added `margin-left: 8px`
+  - Total weight clipping: added overflow handling to summary rows
+  - Complete Purchase button: moved to full-width row below Haggle/Clear
+  - Number input spinners: hidden with `-webkit-appearance: none` and `-moz-appearance: textfield`
+  - Product text overflow: added text-overflow ellipsis
+- **File:** `src/js/ui/panels/trade-cart-panel.js`
+
+**8. Transportation Panel Fixes - FIXED ✅**
+- **Issues Fixed:**
+  - Transport card overlapping: added `overflow: hidden` to containers
+  - "Visit merchants" text placement: improved `.transport-tip` styling with padding, margin, background
+- **File:** `src/css/styles.css`
+
+**9. CPU Optimization - Weather Particles - FIXED ✅**
+- **Issue:** High CPU from snow/weather effects
+- **Fix:** Reduced particle creation frequency:
+  - Winter snow: 150ms → 400ms
+  - Thundersnow: 50ms → 200ms
+  - Spring petals: 200ms → 400ms
+  - Apocalypse embers: 100ms → 300ms
+  - Storm rain drops: 80 → 40
+  - Game weather particles: 60 → 25 max
+- **Files:** `src/js/effects/menu-weather-system.js`, `src/js/systems/world/weather-system.js`
+
+**10. CPU Optimization - Player Marker Animations - FIXED ✅**
+- **Issue:** Bouncing pin icon causing CPU issues
+- **Fix:** Slowed animation cycles + GPU hints:
+  - tack-float: 3s → 5s cycle
+  - shadow-pulse: 3s → 5s cycle
+  - marker-pulse: 2s → 4s cycle
+  - tack-walk: 0.4s → 0.6s cycle
+  - Added `will-change: transform, opacity` for GPU acceleration
+- **File:** `src/js/ui/map/game-world-renderer.js`
+
+---
+
+### FILES MODIFIED:
+
+| File | Changes |
+|------|---------|
+| `config.js` | Added uiScale default (1.0) |
+| `src/css/styles.css` | Market text centering, transport panel fixes |
+| `src/js/effects/menu-weather-system.js` | Reduced particle frequencies |
+| `src/js/systems/world/weather-system.js` | Reduced particle count (60→25) |
+| `src/js/ui/map/game-world-renderer.js` | Slower marker animations + GPU hints |
+| `src/js/ui/panels/settings-panel.js` | Voice TTS fixes, UI scale setting, removed Main Menu button |
+| `src/js/ui/panels/trade-cart-panel.js` | Multiple cart UI fixes |
+
+---
+
+### SESSION SUMMARY:
+
+**Total fixes: 10**
+- 1 NEW FEATURE (UI Scale setting)
+- 9 BUG FIXES (Voice TTS, market text, trade cart, transport panel, CPU optimization)
+
+**Git pushed:** `c530de4` - committed to main
+
+---
+
+*"UI polished. CPU tamed. Performance unleashed."* 🖤💀
+
+---
+

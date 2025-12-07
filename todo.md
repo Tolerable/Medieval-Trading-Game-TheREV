@@ -95,6 +95,30 @@ Events already exist in dungeon-exploration-system.js:
 
 ## RECENT SESSION FIXES (2025-12-07)
 
+### Session #66 - UI POLISH + CPU OPTIMIZATION
+
+**Voice TTS & Settings:**
+- [x] Voice TTS preview applies master volume correctly
+- [x] Test voice button disables while playing (spam prevention)
+- [x] Removed redundant Main Menu button from settings
+- [x] Stop button red styling with `!important` fix
+
+**UI Improvements:**
+- [x] Market trade window text centering for multi-word items
+- [x] UI Scale setting (75%-150%) - new feature
+- [x] Trade cart badge margin, weight clipping, button layout fixes
+- [x] Transportation panel card overlap + tip text placement fixes
+- [x] Number input spinners hidden
+
+**CPU Optimization:**
+- [x] Weather particle frequency reduced (150-200ms → 300-400ms)
+- [x] Storm rain drops reduced (80 → 40)
+- [x] Game weather particles reduced (60 → 25 max)
+- [x] Player marker animations slowed (3s → 5s cycles)
+- [x] GPU hints added (`will-change: transform, opacity`)
+
+---
+
 ### Session #65 - FINAL EXPLORATION SYSTEM COMPLETION
 
 **NPC-Exploration Integration:**
@@ -136,8 +160,8 @@ Events already exist in dungeon-exploration-system.js:
 | MEDIUM | 0 | 66+ |
 | LOW | 0 | 25+ |
 | TESTS | 0 | 399 |
-| SESSION | 0 | 22 (today) |
-| **TOTAL** | **0** | **571+** |
+| SESSION | 0 | 37 (today) |
+| **TOTAL** | **0** | **586+** |
 
 ---
 
