@@ -176,15 +176,9 @@ function initializeButtonListeners() {
         }
     });
     
-    // Time Control Buttons
-    safeAddEventListener('pause-btn', 'click', function() {
-        console.log('Pause button clicked');
-        if (typeof TimeSystem !== 'undefined' && TimeSystem.setSpeed) {
-            TimeSystem.setSpeed('PAUSED');
-        } else {
-            deboogerWarn('TimeSystem.setSpeed not found');
-        }
-    });
+    // Time Control Buttons - pause-btn is handled by time-machine.js setupTimeControls()
+    // DO NOT add duplicate handler here - it causes double-toggle bug!
+    // The onclick handler in time-machine.js has full toggle logic with userPreferredSpeed support
 
     safeAddEventListener('normal-speed-btn', 'click', function() {
         console.log('Normal Speed button clicked');
