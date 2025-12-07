@@ -615,35 +615,27 @@ const NPCEncounterSystem = {
         };
 
         const template = inventoryTemplates[type] || inventoryTemplates.traveler;
-        const inventory = [];
+        // inventory must be OBJECT {itemId: quantity} not array - NPCTradeWindow expects this format
+        const inventory = {};
 
         // the basics - bread, water, the mundane necessities of existence
         const commonCount = 2 + Math.floor(Math.random() * 3);
         for (let i = 0; i < commonCount && template.common.length > 0; i++) {
             const item = template.common[Math.floor(Math.random() * template.common.length)];
-            inventory.push({
-                id: item,
-                quantity: 1 + Math.floor(Math.random() * 3)
-            });
+            inventory[item] = (inventory[item] || 0) + 1 + Math.floor(Math.random() * 3);
         }
 
         // something slightly special - the uncommon treasures they've found
         const uncommonCount = Math.random() > 0.3 ? (Math.random() > 0.5 ? 2 : 1) : 0;
         for (let i = 0; i < uncommonCount && template.uncommon.length > 0; i++) {
             const item = template.uncommon[Math.floor(Math.random() * template.uncommon.length)];
-            inventory.push({
-                id: item,
-                quantity: 1
-            });
+            inventory[item] = (inventory[item] || 0) + 1;
         }
 
         // jackpot - a rare prize hidden among their wares (20% chance)
         if (Math.random() < 0.2 && template.rare.length > 0) {
             const item = template.rare[Math.floor(Math.random() * template.rare.length)];
-            inventory.push({
-                id: item,
-                quantity: 1
-            });
+            inventory[item] = (inventory[item] || 0) + 1;
         }
 
         return inventory;
