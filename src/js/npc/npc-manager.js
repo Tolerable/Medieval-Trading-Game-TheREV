@@ -187,6 +187,11 @@ const NPCManager = {
 
         this.setActiveNPC(npcId);
 
+        // discover NPC's faction when talking to them
+        if (npc.faction && typeof FactionSystem !== 'undefined' && FactionSystem.discoverFaction) {
+            FactionSystem.discoverFaction(npc.faction);
+        }
+
         // use dialogue system if available
         if (typeof NPCDialogueSystem !== 'undefined') {
             NPCDialogueSystem.startDialogue(npc);
@@ -208,6 +213,11 @@ const NPCManager = {
         if (!npc) return false;
 
         this.setActiveNPC(npcId);
+
+        // discover NPC's faction when trading with them
+        if (npc.faction && typeof FactionSystem !== 'undefined' && FactionSystem.discoverFaction) {
+            FactionSystem.discoverFaction(npc.faction);
+        }
 
         // use appropriate trading system
         if (npc.type === 'merchant' && typeof NPCMerchantSystem !== 'undefined') {
