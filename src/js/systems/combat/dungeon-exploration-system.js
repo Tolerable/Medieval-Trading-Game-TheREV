@@ -1559,10 +1559,912 @@ const DungeonExplorationSystem = {
                     ]
                 }
             ]
+        },
+
+        //
+        // INN EVENTS - rest, rumors, and revelry
+        //
+
+        inn_traveler_tales: {
+            id: 'inn_traveler_tales',
+            name: 'Traveler Tales',
+            description: 'A grizzled traveler sits alone in the corner, nursing an ale. They look like they have stories to tell.',
+            icon: '🧳',
+            locationType: ['inn'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'listen_stories',
+                    text: '👂 Listen to their stories',
+                    preview: 'Risk: None. Free entertainment.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 40, type: 'treasure_hint', message: 'They mention a hidden cache near the old mill!', loot: ['ancient_coin', 'ancient_coin', 'dusty_tome'] },
+                        { weight: 35, type: 'boring', message: 'Just tall tales and exaggerations. Entertaining though.', loot: [] },
+                        { weight: 25, type: 'map', message: 'They sketch you a map to a forgotten ruin!', loot: ['ancient_seal', 'ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'buy_drink',
+                    text: '🍺 Buy them a drink (10 gold)',
+                    preview: 'Risk: Costs gold. Loosens tongues.',
+                    goldCost: 10,
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 5 },
+                    outcomes: [
+                        { weight: 50, type: 'good_info', message: 'Grateful for the drink, they share valuable trade secrets!', goldBonus: 40, loot: [] },
+                        { weight: 30, type: 'gift', message: 'They insist you take this as thanks!', loot: ['ancient_coin', 'ancient_coin', 'rusted_medallion'] },
+                        { weight: 20, type: 'scam', message: 'They drink up and disappear. Classic.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        inn_gambling_den: {
+            id: 'inn_gambling_den',
+            name: 'Back Room Gambling',
+            description: 'A door in the back leads to a private room. The sound of dice and coins carries through the crack.',
+            icon: '🎲',
+            locationType: ['inn'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'join_game',
+                    text: '🎰 Join the game (50 gold buy-in)',
+                    preview: 'Risk: High variance. Could win big or lose everything.',
+                    goldCost: 50,
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 20, type: 'jackpot', message: 'LUCKY STREAK! You clean out the table!', goldBonus: 200, loot: [] },
+                        { weight: 30, type: 'win', message: 'You walk away a winner!', goldBonus: 75, loot: [] },
+                        { weight: 30, type: 'lose', message: 'The dice betray you. Better luck next time.', loot: [] },
+                        { weight: 15, type: 'big_lose', message: 'Cleaned out! At least you kept your pants.', loot: [] },
+                        { weight: 5, type: 'cheat_caught', message: 'Someone accuses you of cheating! Bar fight!', healthPenalty: 15, loot: ['ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'observe',
+                    text: '👀 Just watch and learn',
+                    preview: 'Risk: None. Study the players.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 50, type: 'learn', message: 'You notice one player cheating. They pay you to stay quiet.', goldBonus: 30, loot: [] },
+                        { weight: 30, type: 'nothing', message: 'Just a normal game. Boring but educational.', loot: [] },
+                        { weight: 20, type: 'dropped', message: 'A player drops coins in their excitement!', loot: ['ancient_coin', 'ancient_coin'] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // VILLAGE EVENTS - rural charm and local secrets
+        //
+
+        village_elder_wisdom: {
+            id: 'village_elder_wisdom',
+            name: 'Village Elder',
+            description: 'The village elder sits on a worn bench, watching the world go by. They say the old ones know secrets.',
+            icon: '👴',
+            locationType: ['village'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'ask_wisdom',
+                    text: '🙏 Ask for wisdom',
+                    preview: 'Risk: None. Elders love to talk.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 40, type: 'secret', message: 'They whisper of buried treasure behind the old church!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'blessing', message: 'They bless your journey. You feel invigorated!', healthBonus: 10, loot: [] },
+                        { weight: 25, type: 'rambling', message: 'Just stories about the good old days. Nice but useless.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'offer_gift',
+                    text: '🎁 Offer a small gift (15 gold)',
+                    preview: 'Risk: Costs gold. Shows respect.',
+                    goldCost: 15,
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 5 },
+                    outcomes: [
+                        { weight: 50, type: 'grateful', message: 'Touched by your kindness, they give you a family heirloom!', loot: ['ancient_seal', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'blessing', message: 'They speak ancient words of protection. You feel safer.', healthBonus: 15, loot: [] },
+                        { weight: 15, type: 'insulted', message: 'They think you are trying to bribe them. Awkward.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        village_local_trade: {
+            id: 'village_local_trade',
+            name: 'Village Market Day',
+            description: 'Its market day! Locals have set up stalls selling homemade goods and surplus produce.',
+            icon: '🏪',
+            locationType: ['village'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'browse_stalls',
+                    text: '🛒 Browse the stalls',
+                    preview: 'Risk: None. Might find a bargain.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 45, type: 'bargain', message: 'You find an excellent deal on local crafts!', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'nothing', message: 'Nothing catches your eye today.', loot: [] },
+                        { weight: 20, type: 'rare_find', message: 'An old farmer is selling antique items cheap!', loot: ['ancient_seal', 'rusted_medallion', 'ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'help_vendor',
+                    text: '💪 Help a struggling vendor',
+                    preview: 'Risk: Low stamina drain. Good karma.',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 15, max: 25 },
+                    outcomes: [
+                        { weight: 50, type: 'paid', message: 'They insist on paying you for your help!', goldBonus: 25, loot: [] },
+                        { weight: 30, type: 'gift', message: 'They give you free goods as thanks!', loot: ['ancient_coin', 'ancient_coin', 'cave_mushroom'] },
+                        { weight: 20, type: 'nothing', message: 'Just a thank you. Virtue is its own reward.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // OUTPOST EVENTS - military life and frontier dangers
+        //
+
+        outpost_guard_duty: {
+            id: 'outpost_guard_duty',
+            name: 'Volunteer Guard Duty',
+            description: 'The guards look exhausted. The captain offers coin for anyone willing to take a watch shift.',
+            icon: '🛡️',
+            locationType: ['outpost'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'take_watch',
+                    text: '⚔️ Take a guard shift',
+                    preview: 'Risk: Moderate stamina drain. Guaranteed pay.',
+                    healthCost: { min: 0, max: 10 },
+                    staminaCost: { min: 25, max: 40 },
+                    outcomes: [
+                        { weight: 40, type: 'uneventful', message: 'Quiet night. Easy money.', goldBonus: 30, loot: [] },
+                        { weight: 30, type: 'skirmish', message: 'Bandits tested the walls! You helped repel them!', healthPenalty: 10, goldBonus: 60, loot: ['ancient_coin', 'bone_fragment'] },
+                        { weight: 20, type: 'discovery', message: 'You spot smugglers! The captain rewards you handsomely!', goldBonus: 50, loot: ['ancient_seal'] },
+                        { weight: 10, type: 'attack', message: 'A serious raid! You fight bravely but take wounds!', healthPenalty: 25, goldBonus: 80, loot: ['ancient_coin', 'ancient_coin', 'demon_tooth'] }
+                    ]
+                },
+                {
+                    id: 'report_intel',
+                    text: '📋 Share travel intelligence',
+                    preview: 'Risk: None. Information has value.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 50, type: 'useful', message: 'Your information helps them! Small reward.', goldBonus: 20, loot: [] },
+                        { weight: 30, type: 'very_useful', message: 'Critical intel! The captain is very grateful!', goldBonus: 40, loot: ['ancient_coin'] },
+                        { weight: 20, type: 'known', message: 'They already knew. At least you tried.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        outpost_training_yard: {
+            id: 'outpost_training_yard',
+            name: 'Training Yard',
+            description: 'Soldiers practice combat in the yard. A grizzled sergeant offers to spar with travelers.',
+            icon: '⚔️',
+            locationType: ['outpost'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'spar',
+                    text: '🗡️ Accept the challenge',
+                    preview: 'Risk: Health/stamina drain. Learn from the best.',
+                    healthCost: { min: 10, max: 25 },
+                    staminaCost: { min: 20, max: 35 },
+                    outcomes: [
+                        { weight: 30, type: 'win', message: 'You win! The sergeant is impressed and shares fighting tips!', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 40, type: 'lose_gracefully', message: 'You lose but learn valuable techniques.', loot: ['ancient_coin'] },
+                        { weight: 20, type: 'draw', message: 'Evenly matched! Mutual respect earned.', goldBonus: 15, loot: [] },
+                        { weight: 10, type: 'crushing', message: 'Brutal defeat. But you wont make those mistakes again.', healthPenalty: 10, loot: [] }
+                    ]
+                },
+                {
+                    id: 'watch_learn',
+                    text: '👀 Watch and learn',
+                    preview: 'Risk: None. Observe the masters.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 60, type: 'learn', message: 'You pick up some useful combat moves!', loot: [] },
+                        { weight: 30, type: 'noticed', message: 'The sergeant notices your interest and gives pointers.', loot: ['ancient_coin'] },
+                        { weight: 10, type: 'recruited', message: 'They try to recruit you! You politely decline but get supplies.', loot: ['ancient_coin', 'ancient_coin'] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // ADDITIONAL MINE EVENTS - ore extraction and mining hazards
+        //
+
+        mine_ore_vein: {
+            id: 'mine_ore_vein',
+            name: 'Rich Ore Vein',
+            description: 'A glittering vein of ore runs through the rock wall. This could be valuable... if you can extract it.',
+            icon: '💎',
+            locationType: ['mine'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'extract_ore',
+                    text: '⛏️ Extract the ore carefully',
+                    preview: 'Risk: High stamina drain. Mining takes effort.',
+                    healthCost: { min: 5, max: 15 },
+                    staminaCost: { min: 30, max: 45 },
+                    toolRequired: 'pickaxe',
+                    outcomes: [
+                        { weight: 30, type: 'rich_vein', message: 'HIGH QUALITY ORE! This will fetch a premium!', loot: ['obsidian_shard', 'obsidian_shard', 'obsidian_shard', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 40, type: 'decent', message: 'Solid haul of ore. Good day in the mines.', loot: ['obsidian_shard', 'obsidian_shard', 'ancient_coin'] },
+                        { weight: 20, type: 'mixed', message: 'Some ore, some useless rock. It happens.', loot: ['obsidian_shard', 'ancient_coin'] },
+                        { weight: 10, type: 'collapse', message: 'The wall shifts! You grab what you can and retreat!', healthPenalty: 15, loot: ['ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'chip_sample',
+                    text: '🔨 Take a small sample',
+                    preview: 'Risk: Low. Quick assessment.',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 50, type: 'sample', message: 'A nice sample. Worth something to assayers.', loot: ['obsidian_shard', 'ancient_coin'] },
+                        { weight: 30, type: 'surprise', message: 'The sample reveals a hidden gem pocket!', loot: ['void_crystal', 'ancient_coin'] },
+                        { weight: 20, type: 'worthless', message: 'Fools gold. It happens to the best of us.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        mine_tool_cache: {
+            id: 'mine_tool_cache',
+            name: 'Miners Tool Cache',
+            description: 'An old tool shed sits near the mine entrance. Previous workers left equipment behind.',
+            icon: '🔧',
+            locationType: ['mine'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'search_tools',
+                    text: '🔍 Search through the tools',
+                    preview: 'Risk: None. Tools have value.',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 40, type: 'good_find', message: 'Quality tools! Still functional!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'average', message: 'Some useful items, mostly rusted junk.', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 25, type: 'hidden', message: 'Someone hid coins inside a tool handle!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin', 'rusted_medallion'] }
+                    ]
+                },
+                {
+                    id: 'sharpen_tools',
+                    text: '🪓 Sharpen your own tools',
+                    preview: 'Risk: Low stamina. Better efficiency later.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 15, max: 20 },
+                    outcomes: [
+                        { weight: 70, type: 'sharpened', message: 'Your tools are now in better condition!', loot: [] },
+                        { weight: 30, type: 'find', message: 'While sharpening, you notice a coin under the bench!', loot: ['ancient_coin'] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // ADDITIONAL FOREST EVENTS - nature, hunting, and woodland mysteries
+        //
+
+        forest_herb_patch: {
+            id: 'forest_herb_patch',
+            name: 'Wild Herb Patch',
+            description: 'A clearing filled with medicinal plants. Apothecaries would pay well for these.',
+            icon: '🌿',
+            locationType: ['forest'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'gather_herbs',
+                    text: '🌱 Gather medicinal herbs',
+                    preview: 'Risk: Low. Nature provides.',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 15, max: 25 },
+                    outcomes: [
+                        { weight: 45, type: 'rich_harvest', message: 'A bounty of healing herbs!', loot: ['cave_mushroom', 'cave_mushroom', 'cave_mushroom', 'cave_mushroom'] },
+                        { weight: 35, type: 'decent', message: 'A fair gathering. Enough to sell.', loot: ['cave_mushroom', 'cave_mushroom', 'ancient_coin'] },
+                        { weight: 20, type: 'rare', message: 'A rare moonpetal! Extremely valuable!', loot: ['void_crystal', 'cave_mushroom'] }
+                    ]
+                },
+                {
+                    id: 'search_area',
+                    text: '🔍 Search the surrounding area',
+                    preview: 'Risk: None. Might find more than plants.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 40, type: 'cache', message: 'Someone buried something here!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'nothing', message: 'Just plants and bugs. Nature is nice though.', loot: ['cave_mushroom'] },
+                        { weight: 25, type: 'bones', message: 'Old bones with valuables still attached.', loot: ['ancient_coin', 'ancient_coin', 'rusted_medallion'] }
+                    ]
+                }
+            ]
+        },
+
+        forest_animal_trail: {
+            id: 'forest_animal_trail',
+            name: 'Animal Trail',
+            description: 'Fresh tracks lead deeper into the forest. Could be prey... or predator.',
+            icon: '🦌',
+            locationType: ['forest'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'follow_tracks',
+                    text: '🐾 Follow the tracks',
+                    preview: 'Risk: Moderate. What you hunt might hunt back.',
+                    healthCost: { min: 5, max: 20 },
+                    staminaCost: { min: 20, max: 35 },
+                    outcomes: [
+                        { weight: 30, type: 'deer', message: 'A deer! Easy prey! Fresh meat and hide!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 25, type: 'boar', message: 'A boar charges! You bring it down after a fight!', healthPenalty: 10, loot: ['ancient_coin', 'ancient_coin', 'bone_fragment'] },
+                        { weight: 25, type: 'wolf', message: 'Wolves! You fight them off!', healthPenalty: 15, loot: ['bone_fragment', 'bone_fragment', 'demon_tooth'] },
+                        { weight: 20, type: 'nothing', message: 'The trail goes cold. Waste of time.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'set_trap',
+                    text: '🪤 Set a trap and wait',
+                    preview: 'Risk: Low. Patience required.',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 25, max: 35 },
+                    outcomes: [
+                        { weight: 40, type: 'catch', message: 'Your trap catches something! Dinner and pelts!', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'nothing', message: 'Nothing took the bait. Better luck next time.', loot: [] },
+                        { weight: 25, type: 'surprise', message: 'A rare silver fox! Worth a fortune!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_seal'] }
+                    ]
+                }
+            ]
+        },
+
+        forest_timber_camp: {
+            id: 'forest_timber_camp',
+            name: 'Abandoned Timber Camp',
+            description: 'An old logging operation left behind. Equipment and supplies scattered about.',
+            icon: '🪓',
+            locationType: ['forest'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'search_camp',
+                    text: '🔍 Search the camp',
+                    preview: 'Risk: Low. Loggers leave things behind.',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 10, max: 20 },
+                    outcomes: [
+                        { weight: 40, type: 'supplies', message: 'Leftover supplies! Food, coins, useful items!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'tools', message: 'Quality logging tools. Worth selling.', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 25, type: 'stash', message: 'Pay stash hidden under a log! Finders keepers!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'check_logs',
+                    text: '🪵 Check the stacked logs',
+                    preview: 'Risk: Low. Might find something hidden.',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 45, type: 'nothing', message: 'Just logs. Very log-like.', loot: [] },
+                        { weight: 35, type: 'nest', message: 'A birds nest with shiny things! Birds collect coins?', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 20, type: 'hollow', message: 'A hollow log! Someone hid valuables inside!', loot: ['ancient_coin', 'ancient_coin', 'rusted_medallion'] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // ADDITIONAL FARM EVENTS - rural life and agricultural adventures
+        //
+
+        farm_crop_field: {
+            id: 'farm_crop_field',
+            name: 'Overgrown Field',
+            description: 'An abandoned field with crops gone wild. Nature reclaims what was planted.',
+            icon: '🌾',
+            locationType: ['farm'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'harvest_wild',
+                    text: '🌾 Harvest what remains',
+                    preview: 'Risk: Low stamina. Free produce!',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 15, max: 25 },
+                    outcomes: [
+                        { weight: 45, type: 'good_harvest', message: 'Wild vegetables and grain! Edible and sellable!', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'basic', message: 'Some edible plants. Better than nothing.', loot: ['ancient_coin'] },
+                        { weight: 20, type: 'rare', message: 'Wild herbs among the crops! Valuable!', loot: ['cave_mushroom', 'cave_mushroom', 'ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'search_scarecrow',
+                    text: '👀 Check the old scarecrow',
+                    preview: 'Risk: None. Scarecrows dont bite.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 40, type: 'pockets', message: 'The scarecrows pockets have coins! Farmers joke?', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'nothing', message: 'Just straw and old clothes.', loot: [] },
+                        { weight: 25, type: 'hidden', message: 'Inside the straw! A small lockbox!', loot: ['ancient_coin', 'ancient_coin', 'rusty_lockbox'] }
+                    ]
+                }
+            ]
+        },
+
+        farm_livestock_pen: {
+            id: 'farm_livestock_pen',
+            name: 'Abandoned Livestock Pen',
+            description: 'Empty animal pens with scattered feed and old equipment.',
+            icon: '🐄',
+            locationType: ['farm'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'search_pen',
+                    text: '🔍 Search the pens',
+                    preview: 'Risk: None. Animals are long gone.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 40, type: 'equipment', message: 'Farming equipment worth selling!', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'hidden_coins', message: 'Coins dropped in the hay over the years!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 25, type: 'nothing', message: 'Just old hay and animal smell.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'check_trough',
+                    text: '🪣 Check the water trough',
+                    preview: 'Risk: None. People drop things.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 45, type: 'coins', message: 'Coins at the bottom! Farmers made wishes here.', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'nothing', message: 'Just murky water and algae.', loot: [] },
+                        { weight: 20, type: 'ring', message: 'A wedding ring! Someone will miss this... or not.', loot: ['ancient_coin', 'ancient_coin', 'rusted_medallion'] }
+                    ]
+                }
+            ]
+        },
+
+        farm_windmill: {
+            id: 'farm_windmill',
+            name: 'Old Windmill',
+            description: 'A weathered windmill creaks in the breeze. The miller is long gone.',
+            icon: '🏭',
+            locationType: ['farm', 'village'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'explore_inside',
+                    text: '🚪 Explore inside',
+                    preview: 'Risk: Low. Watch for unstable floors.',
+                    healthCost: { min: 0, max: 10 },
+                    staminaCost: { min: 10, max: 20 },
+                    outcomes: [
+                        { weight: 35, type: 'millers_stash', message: 'The miller hid his savings! Found it!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'equipment', message: 'Milling equipment. Worth something to collectors.', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 20, type: 'rats', message: 'Rats! They scatter but you find their shiny hoarde!', loot: ['ancient_coin', 'ancient_coin', 'bone_fragment'] },
+                        { weight: 10, type: 'collapse', message: 'Floor gives way! Minor fall.', healthPenalty: 5, loot: ['ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'climb_top',
+                    text: '⬆️ Climb to the top',
+                    preview: 'Risk: Moderate. Good view... if you survive.',
+                    healthCost: { min: 5, max: 15 },
+                    staminaCost: { min: 15, max: 25 },
+                    outcomes: [
+                        { weight: 40, type: 'view', message: 'Amazing view! You spot something valuable below!', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'nest', message: 'Bird nest with shiny coins they collected!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 25, type: 'slip', message: 'You slip but grab on! Heart pounding, you descend.', healthPenalty: 5, loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // ADDITIONAL CAVE EVENTS - deep exploration and magical phenomena
+        //
+
+        cave_crystal_chamber: {
+            id: 'cave_crystal_chamber',
+            name: 'Crystal Chamber',
+            description: 'A cavern lined with glowing crystals of various colors. The air hums with energy.',
+            icon: '💎',
+            locationType: ['cave'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'harvest_crystals',
+                    text: '💎 Harvest the crystals',
+                    preview: 'Risk: Moderate. Crystals can be unstable.',
+                    healthCost: { min: 5, max: 20 },
+                    staminaCost: { min: 20, max: 35 },
+                    outcomes: [
+                        { weight: 30, type: 'jackpot', message: 'Perfect specimens! Mages will pay handsomely!', loot: ['void_crystal', 'void_crystal', 'obsidian_shard', 'ancient_coin'] },
+                        { weight: 35, type: 'good', message: 'Several quality crystals extracted!', loot: ['void_crystal', 'obsidian_shard', 'ancient_coin'] },
+                        { weight: 20, type: 'shatter', message: 'Some crystals shatter on extraction. Still got a few.', loot: ['obsidian_shard', 'ancient_coin'] },
+                        { weight: 15, type: 'feedback', message: 'Energy feedback! The crystal zaps you!', healthPenalty: 15, loot: ['void_crystal'] }
+                    ]
+                },
+                {
+                    id: 'meditate',
+                    text: '🧘 Meditate among the crystals',
+                    preview: 'Risk: Unknown. Magical phenomena possible.',
+                    healthCost: { min: 0, max: 10 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 30, type: 'energized', message: 'Power flows through you! You feel incredible!', healthBonus: 25, loot: [] },
+                        { weight: 35, type: 'vision', message: 'You see a vision of hidden treasure!', loot: ['ancient_seal', 'ancient_coin'] },
+                        { weight: 20, type: 'nothing', message: 'Peaceful but uneventful. The crystals hum quietly.', loot: [] },
+                        { weight: 15, type: 'nightmare', message: 'Dark visions assault your mind! You flee!', healthPenalty: 10, loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        cave_underground_river: {
+            id: 'cave_underground_river',
+            name: 'Underground River',
+            description: 'A river flows through the darkness. Who knows what it carries from the depths?',
+            icon: '🌊',
+            locationType: ['cave'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'wade_shallow',
+                    text: '🚶 Wade through the shallows',
+                    preview: 'Risk: Moderate. Cold and slippery.',
+                    healthCost: { min: 5, max: 15 },
+                    staminaCost: { min: 15, max: 25 },
+                    outcomes: [
+                        { weight: 35, type: 'treasure', message: 'Coins washed down from somewhere! Free money!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 30, type: 'some', message: 'A few coins and interesting rocks.', loot: ['ancient_coin', 'ancient_coin', 'obsidian_shard'] },
+                        { weight: 20, type: 'slip', message: 'You slip on rocks! Bruised but okay.', healthPenalty: 10, loot: ['ancient_coin'] },
+                        { weight: 15, type: 'creature', message: 'Something brushes your leg! You scramble out!', healthPenalty: 5, loot: [] }
+                    ]
+                },
+                {
+                    id: 'fish_river',
+                    text: '🎣 Fish in the river',
+                    preview: 'Risk: Low. Cave fish are... different.',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 15, max: 20 },
+                    outcomes: [
+                        { weight: 40, type: 'fish', message: 'Strange but edible cave fish!', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 30, type: 'treasure', message: 'Your hook catches something metallic!', loot: ['ancient_coin', 'ancient_coin', 'rusted_medallion'] },
+                        { weight: 20, type: 'nothing', message: 'Nothing biting today.', loot: [] },
+                        { weight: 10, type: 'big_one', message: 'A HUGE cave fish! Worth a fortune to collectors!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_seal'] }
+                    ]
+                }
+            ]
+        },
+
+        cave_ancient_painting: {
+            id: 'cave_ancient_painting',
+            name: 'Ancient Cave Paintings',
+            description: 'Prehistoric art adorns the walls. Someone left offerings here thousands of years ago.',
+            icon: '🎨',
+            locationType: ['cave'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'study_paintings',
+                    text: '📖 Study the paintings',
+                    preview: 'Risk: None. History lesson.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 40, type: 'map', message: 'The paintings show a map! You recognize a location!', loot: ['ancient_seal', 'ancient_coin'] },
+                        { weight: 35, type: 'nothing', message: 'Interesting but not valuable. Nice art though.', loot: [] },
+                        { weight: 25, type: 'clue', message: 'A painted X marks a spot on the floor!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'search_offerings',
+                    text: '🔍 Search the old offerings',
+                    preview: 'Risk: Low. Ancient people left things.',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 35, type: 'artifacts', message: 'Ancient artifacts! Museums pay for these!', loot: ['ancient_seal', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'coins', message: 'Ancient coins! Still valuable!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 20, type: 'bones', message: 'Just old bones and pottery shards.', loot: ['bone_fragment', 'ancient_coin'] },
+                        { weight: 10, type: 'cursed', message: 'You disturb something. A chill runs through you.', healthPenalty: 5, loot: ['ancient_coin'] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // BOSS ENCOUNTER EVENTS - the ultimate test of exploration
+        // These trigger boss fights after sufficient exploration progress
+        //
+
+        boss_malachar: {
+            id: 'boss_malachar',
+            name: 'The Dark Lords Chamber',
+            description: 'A massive door of black iron stands before you. Ancient runes pulse with malevolent energy. Beyond lies Malachar, the Dark Lord himself.',
+            icon: '👹',
+            locationType: ['dungeon'],
+            difficulty: 'deadly',
+            requiresExplorationCount: 8,
+            isBossEncounter: true,
+            bossId: 'malachar',
+            choices: [
+                {
+                    id: 'challenge_boss',
+                    text: '⚔️ Challenge Malachar',
+                    preview: 'Risk: EXTREME. This is a boss fight. Prepare to die or be legend.',
+                    healthCost: { min: 50, max: 100 },
+                    staminaCost: { min: 40, max: 60 },
+                    outcomes: [
+                        { weight: 30, type: 'victory', message: 'MALACHAR IS DEFEATED! The Dark Lord falls! His hoard is yours!', triggerBossDefeat: 'malachar', loot: ['blade_of_virtue', 'void_crystal', 'ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 40, type: 'pyrrhic', message: 'You defeat Malachar but at great cost. Worth it.', triggerBossDefeat: 'malachar', healthPenalty: 50, loot: ['void_crystal', 'ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 30, type: 'defeat', message: 'Malachar is too powerful! You barely escape with your life!', healthPenalty: 80, loot: ['bone_fragment'] }
+                    ]
+                },
+                {
+                    id: 'prepare_first',
+                    text: '🛡️ Scout and prepare',
+                    preview: 'Risk: Low. Wisdom before valor.',
+                    healthCost: { min: 5, max: 15 },
+                    staminaCost: { min: 15, max: 25 },
+                    outcomes: [
+                        { weight: 50, type: 'intel', message: 'You observe his patterns. Next time you will be ready.', loot: ['dusty_tome'] },
+                        { weight: 30, type: 'spotted', message: 'He senses you! A blast of dark energy!', healthPenalty: 20, loot: [] },
+                        { weight: 20, type: 'weakness', message: 'You discover a weakness! The blade of virtue can harm him!', loot: ['ancient_seal'] }
+                    ]
+                },
+                {
+                    id: 'retreat',
+                    text: '🚪 Retreat for now',
+                    preview: 'Risk: None. Live to fight another day.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 10 },
+                    outcomes: [
+                        { weight: 100, type: 'safe', message: 'You back away slowly. The door remains. He waits.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        boss_grimfang: {
+            id: 'boss_grimfang',
+            name: 'The Alphas Den',
+            description: 'Wolf bones litter the cave floor. A massive shape moves in the darkness. Grimfang, alpha of the Bloodmoon Pack, has caught your scent.',
+            icon: '🐺',
+            locationType: ['dungeon', 'forest'],
+            difficulty: 'hard',
+            requiresExplorationCount: 4,
+            isBossEncounter: true,
+            bossId: 'alpha_wolf',
+            choices: [
+                {
+                    id: 'fight_alpha',
+                    text: '⚔️ Fight Grimfang',
+                    preview: 'Risk: HIGH. Alpha wolves dont go down easy.',
+                    healthCost: { min: 30, max: 60 },
+                    staminaCost: { min: 30, max: 45 },
+                    outcomes: [
+                        { weight: 35, type: 'victory', message: 'GRIMFANG IS SLAIN! The pack scatters without their alpha!', triggerBossDefeat: 'alpha_wolf', loot: ['demon_tooth', 'ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'bloody_win', message: 'You kill Grimfang but his fangs found their mark.', triggerBossDefeat: 'alpha_wolf', healthPenalty: 30, loot: ['demon_tooth', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 30, type: 'driven_off', message: 'Grimfang drives you back! You escape with wounds.', healthPenalty: 40, loot: ['bone_fragment'] }
+                    ]
+                },
+                {
+                    id: 'use_meat',
+                    text: '🥩 Distract with meat',
+                    preview: 'Risk: Low. Wolves love food.',
+                    healthCost: { min: 0, max: 10 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 40, type: 'distracted', message: 'Grimfang is distracted! You slip past and grab treasure!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'unimpressed', message: 'He ignores the meat. He wants YOUR meat.', healthPenalty: 15, loot: [] },
+                        { weight: 25, type: 'pack_comes', message: 'The meat attracts the whole pack! RUN!', healthPenalty: 25, loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        boss_frost_lord: {
+            id: 'boss_frost_lord',
+            name: 'The Frozen Throne',
+            description: 'Ice covers everything. Your breath freezes. On a throne of glacial ice sits the Frost Lord, elemental of eternal winter.',
+            icon: '❄️',
+            locationType: ['cave'],
+            difficulty: 'hard',
+            requiresExplorationCount: 6,
+            isBossEncounter: true,
+            bossId: 'frost_lord',
+            choices: [
+                {
+                    id: 'challenge_frost',
+                    text: '⚔️ Challenge the Frost Lord',
+                    preview: 'Risk: VERY HIGH. Cold burns worse than fire.',
+                    healthCost: { min: 40, max: 80 },
+                    staminaCost: { min: 35, max: 50 },
+                    outcomes: [
+                        { weight: 30, type: 'victory', message: 'THE FROST LORD SHATTERS! His frozen tear remains!', triggerBossDefeat: 'frost_lord', loot: ['void_crystal', 'obsidian_shard', 'ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 40, type: 'frostbitten', message: 'Victory! But the cold has marked you forever.', triggerBossDefeat: 'frost_lord', healthPenalty: 40, loot: ['void_crystal', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 30, type: 'frozen', message: 'Too cold! You retreat before becoming an ice sculpture!', healthPenalty: 50, loot: [] }
+                    ]
+                },
+                {
+                    id: 'offer_warmth',
+                    text: '🔥 Offer fire as tribute',
+                    preview: 'Risk: Unknown. Elementals are unpredictable.',
+                    healthCost: { min: 10, max: 20 },
+                    staminaCost: { min: 15, max: 20 },
+                    outcomes: [
+                        { weight: 30, type: 'amused', message: 'He finds your flame amusing. Takes tribute, lets you live.', loot: ['obsidian_shard', 'ancient_coin'] },
+                        { weight: 40, type: 'angry', message: 'FIRE?! He HATES fire! Ice shards fly!', healthPenalty: 30, loot: [] },
+                        { weight: 30, type: 'curious', message: 'He examines the fire. While distracted, you grab loot.', loot: ['void_crystal', 'ancient_coin', 'ancient_coin'] }
+                    ]
+                }
+            ]
+        },
+
+        boss_dragon: {
+            id: 'boss_dragon',
+            name: 'The Dragons Hoard',
+            description: 'Mountains of gold. Rivers of gems. And atop it all, a dragon the size of a house. Scorathax the Ancient opens one baleful eye.',
+            icon: '🐉',
+            locationType: ['cave'],
+            difficulty: 'deadly',
+            requiresExplorationCount: 10,
+            isBossEncounter: true,
+            bossId: 'dragon',
+            choices: [
+                {
+                    id: 'fight_dragon',
+                    text: '⚔️ FIGHT THE DRAGON',
+                    preview: 'Risk: LEGENDARY. Dragon slayers are rare for a reason.',
+                    healthCost: { min: 60, max: 120 },
+                    staminaCost: { min: 50, max: 70 },
+                    outcomes: [
+                        { weight: 20, type: 'dragonslayer', message: 'IMPOSSIBLE! YOU SLEW THE DRAGON! LEGENDARY!!!', triggerBossDefeat: 'dragon', loot: ['dragon_scale', 'blood_ruby', 'void_crystal', 'void_crystal', 'ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 30, type: 'wounded_victory', message: 'THE DRAGON FALLS! But so do you... almost. Worth it.', triggerBossDefeat: 'dragon', healthPenalty: 70, loot: ['dragon_scale', 'void_crystal', 'ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 50, type: 'roasted', message: 'FIRE! So much fire! You flee, barely alive, smelling of smoke.', healthPenalty: 90, loot: [] }
+                    ]
+                },
+                {
+                    id: 'negotiate',
+                    text: '💬 Attempt to negotiate',
+                    preview: 'Risk: Variable. Dragons love riddles and gold.',
+                    healthCost: { min: 0, max: 30 },
+                    staminaCost: { min: 10, max: 20 },
+                    goldCost: 100,
+                    outcomes: [
+                        { weight: 25, type: 'amused', message: 'The dragon is amused! He lets you take SOME treasure.', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_coin', 'void_crystal'] },
+                        { weight: 35, type: 'bored', message: 'BORING! He breathes fire in your direction. As a warning.', healthPenalty: 20, loot: [] },
+                        { weight: 25, type: 'riddle', message: 'He asks a riddle! You answer correctly! He honors the deal!', loot: ['blood_ruby', 'ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 15, type: 'insulted', message: '100 GOLD?! THATS ALL?! He is DEEPLY insulted!', healthPenalty: 40, loot: [] }
+                    ]
+                },
+                {
+                    id: 'sneak_treasure',
+                    text: '🤫 Sneak and grab treasure',
+                    preview: 'Risk: HIGH. Dragons have excellent hearing.',
+                    healthCost: { min: 10, max: 40 },
+                    staminaCost: { min: 30, max: 45 },
+                    outcomes: [
+                        { weight: 25, type: 'success', message: 'Like a shadow! You fill your pockets and escape!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_coin', 'ancient_coin', 'void_crystal'] },
+                        { weight: 35, type: 'partial', message: 'He stirs! You grab what you can and RUN!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 40, type: 'caught', message: 'HE WAKES! Fire everywhere! You escape singed!', healthPenalty: 35, loot: ['ancient_coin'] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // DOOM PORTAL EVENTS - gateways to the corrupted world
+        //
+
+        doom_portal_activation: {
+            id: 'doom_portal_activation',
+            name: 'The Doom Portal',
+            description: 'A swirling vortex of dark energy pulses before you. Through it, you see a twisted reflection of the world - corrupted, dying, ruled by GREED. The Boatman awaits.',
+            icon: '🌀',
+            locationType: ['dungeon'],
+            difficulty: 'deadly',
+            requiresBossDefeated: true,
+            isDoomPortal: true,
+            choices: [
+                {
+                    id: 'enter_portal',
+                    text: '🌀 Enter the Doom World',
+                    preview: 'Risk: UNKNOWN. Another world awaits. There may be no return.',
+                    healthCost: { min: 20, max: 40 },
+                    staminaCost: { min: 30, max: 40 },
+                    outcomes: [
+                        { weight: 100, type: 'transport', message: 'The portal consumes you. Reality twists. You emerge in... the Doom World.', triggerDoomWorld: true, loot: [] }
+                    ]
+                },
+                {
+                    id: 'speak_boatman',
+                    text: '💀 Speak with the Boatman',
+                    preview: 'Risk: None. He knows things.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 50, type: 'warning', message: '"The Doom World is death, traveler. GREED rules there. Gold is worthless. Only survival matters." He grins.', loot: [] },
+                        { weight: 30, type: 'hint', message: '"Bring food and water. Much food. Much water. Gold cannot buy life where we go."', loot: [] },
+                        { weight: 20, type: 'cryptic', message: '"I have ferried many. None return the same. Most dont return at all." He laughs.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'turn_back',
+                    text: '🚪 Turn back',
+                    preview: 'Risk: None. The portal will wait.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 5 },
+                    outcomes: [
+                        { weight: 100, type: 'retreat', message: 'You step away from the portal. It pulses, waiting. The Boatman nods.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        doom_return_portal: {
+            id: 'doom_return_portal',
+            name: 'Portal Home',
+            description: 'A faint shimmer in the corrupted air. A way back to the normal world. But is it safe? Can you trust anything in the Doom World?',
+            icon: '✨',
+            locationType: ['dungeon'],
+            difficulty: 'medium',
+            isDoomWorldOnly: true,
+            choices: [
+                {
+                    id: 'return_home',
+                    text: '🏠 Return to the normal world',
+                    preview: 'Risk: Low. Escape this nightmare.',
+                    healthCost: { min: 10, max: 20 },
+                    staminaCost: { min: 15, max: 25 },
+                    outcomes: [
+                        { weight: 70, type: 'safe_return', message: 'The portal accepts you. Reality stabilizes. You are HOME.', triggerReturnFromDoom: true, loot: [] },
+                        { weight: 20, type: 'rough_transit', message: 'The transit is rough. You arrive battered but alive.', triggerReturnFromDoom: true, healthPenalty: 15, loot: [] },
+                        { weight: 10, type: 'trapped', message: 'The portal flickers! Not yet stable! Try again later.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'stay_doom',
+                    text: '💀 Stay in the Doom World',
+                    preview: 'Risk: HIGH. More to explore... more to survive.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 5 },
+                    outcomes: [
+                        { weight: 100, type: 'stay', message: 'You turn away from salvation. The Doom World calls to you.', loot: [] }
+                    ]
+                }
+            ]
         }
     },
 
-    // 
+    //
     //  BOSS ENCOUNTERS - the big bads that guard the good loot
     // 
     // These spawn at specific locations after exploration threshold
@@ -2179,9 +3081,12 @@ const DungeonExplorationSystem = {
         // Gold handling
         let goldChange = (outcome.goldBonus || 0) - (choice.goldCost || 0);
 
-        // Generate loot with difficulty multiplier + luck bonus
+        // Generate loot with difficulty multiplier + luck bonus + gatheringDifficulty + tool bonus
         const luckMultiplier = 1 + (luckBonus / 20); // every 20 luck = 100% more loot chance
-        const loot = this.generateLoot(outcome.loot || [], diffMult.lootMult * luckMultiplier);
+        const gatheringDifficulty = location.gatheringDifficulty || 1.0; // higher = better loot
+        const toolBonus = this.getToolEfficiencyBonus(choice, playerStats); // tool efficiency
+        const totalLootMult = diffMult.lootMult * luckMultiplier * gatheringDifficulty * toolBonus;
+        const loot = this.generateLoot(outcome.loot || [], totalLootMult, location.type);
 
         // Calculate loot value
         let lootValue = 0;
@@ -2242,9 +3147,11 @@ const DungeonExplorationSystem = {
     },
 
     // Generate loot items with quantities
-    generateLoot(lootIds, multiplier = 1) {
+    // Now supports location-specific bonus loot from ExplorationConfig.LOCATION_LOOT_TABLES
+    generateLoot(lootIds, multiplier = 1, locationType = null) {
         const loot = {};
 
+        // Process base loot from outcome
         lootIds.forEach(id => {
             // Chance for extra items based on multiplier
             let quantity = 1;
@@ -2258,6 +3165,35 @@ const DungeonExplorationSystem = {
                 loot[id] = quantity;
             }
         });
+
+        // Add bonus loot from location-specific loot tables (scaled by multiplier)
+        // Higher multiplier = better chance for bonus loot
+        if (locationType && typeof ExplorationConfig !== 'undefined' && ExplorationConfig.getLootForLocationType) {
+            // Chance for bonus loot: 20% base + (multiplier - 1) * 30%
+            const bonusChance = 0.2 + Math.max(0, multiplier - 1) * 0.3;
+            if (Math.random() < bonusChance) {
+                const bonusItem = ExplorationConfig.getLootForLocationType(locationType, multiplier);
+                if (bonusItem) {
+                    if (loot[bonusItem]) {
+                        loot[bonusItem] += 1;
+                    } else {
+                        loot[bonusItem] = 1;
+                    }
+                }
+            }
+
+            // High multiplier (2.0+) gives second bonus chance
+            if (multiplier >= 2.0 && Math.random() < 0.3) {
+                const bonusItem2 = ExplorationConfig.getLootForLocationType(locationType, multiplier);
+                if (bonusItem2) {
+                    if (loot[bonusItem2]) {
+                        loot[bonusItem2] += 1;
+                    } else {
+                        loot[bonusItem2] = 1;
+                    }
+                }
+            }
+        }
 
         return Object.entries(loot).map(([id, quantity]) => ({ id, quantity }));
     },
@@ -2325,7 +3261,58 @@ const DungeonExplorationSystem = {
         if (typeof updatePlayerInfo === 'function') updatePlayerInfo();
         if (typeof InventorySystem !== 'undefined') InventorySystem.updateInventoryDisplay?.();
 
+        // Check for NPC encounter spawn from exploration outcome
+        if (results.outcome?.spawnNPC) {
+            this.spawnNPCFromExploration(results.outcome.spawnNPC, results);
+        }
+
         return true;
+    },
+
+    // Spawn an NPC encounter from exploration outcomes
+    spawnNPCFromExploration(npcConfig, results) {
+        // npcConfig can be: string (npcId), or object { npcId, chance, message }
+        let npcId, chance, message;
+
+        if (typeof npcConfig === 'string') {
+            npcId = npcConfig;
+            chance = 1.0; // 100% if just string
+            message = null;
+        } else {
+            npcId = npcConfig.npcId;
+            chance = npcConfig.chance || 0.5;
+            message = npcConfig.message;
+        }
+
+        // Roll for chance
+        if (Math.random() > chance) {
+            console.log(`NPC spawn chance failed (${chance * 100}%)`);
+            return;
+        }
+
+        // Show encounter message
+        if (message && typeof game !== 'undefined' && game.addMessage) {
+            game.addMessage(message, 'event');
+        }
+
+        // Trigger NPC encounter if system exists
+        if (typeof NPCInteractionSystem !== 'undefined' && NPCInteractionSystem.startEncounter) {
+            NPCInteractionSystem.startEncounter(npcId);
+            console.log(`Spawned NPC encounter: ${npcId}`);
+        } else if (typeof game !== 'undefined' && game.addMessage) {
+            // Fallback message if no NPC system
+            game.addMessage(`You encounter a ${npcId.replace(/_/g, ' ')}!`, 'event');
+        }
+
+        // Fire event for other systems to hook into
+        document.dispatchEvent(new CustomEvent('npc-encounter-spawned', {
+            detail: {
+                npcId: npcId,
+                source: 'exploration',
+                explorationId: results.event?.id,
+                locationId: results.locationId
+            }
+        }));
     },
 
     // 
@@ -2559,6 +3546,59 @@ const DungeonExplorationSystem = {
         return false;
     },
 
+    // Get tool efficiency bonus for exploration
+    // Having the right tool for the job increases loot yield
+    getToolEfficiencyBonus(choice, playerStats) {
+        let bonus = 1.0; // base multiplier
+
+        // Tool efficiency mapping - which tools help which exploration types
+        const toolBonuses = {
+            pickaxe: ['mine', 'cave', 'dungeon'],      // mining/digging explorations
+            axe: ['forest', 'farm'],                   // woodcutting/clearing
+            fishing_rod: ['port', 'cave'],             // fishing/water explorations
+            rope: ['cave', 'dungeon', 'ruins'],        // climbing/descending
+            torch: ['dungeon', 'cave', 'mine'],        // dark places
+            lantern: ['dungeon', 'cave', 'mine'],      // better light source
+            shovel: ['farm', 'ruins', 'dungeon']       // digging/excavation
+        };
+
+        // Check player's equipped/owned tools
+        const playerTools = [];
+        if (playerStats.equippedTool) playerTools.push(playerStats.equippedTool);
+        if (playerStats.tools) {
+            Object.keys(playerStats.tools).forEach(t => {
+                if (playerStats.tools[t]) playerTools.push(t);
+            });
+        }
+        if (playerStats.inventory) {
+            Object.keys(playerStats.inventory).forEach(item => {
+                if (toolBonuses[item] && playerStats.inventory[item] > 0) {
+                    playerTools.push(item);
+                }
+            });
+        }
+
+        // Check if any tool matches the choice's tool requirement
+        if (choice.toolRequired && playerTools.includes(choice.toolRequired)) {
+            bonus += 0.25; // 25% bonus for having required tool
+        }
+
+        // Additional bonuses for having helpful tools (even if not required)
+        // Based on location type in the exploration event
+        const eventLocTypes = choice.locationType || [];
+        playerTools.forEach(tool => {
+            const helpfulFor = toolBonuses[tool] || [];
+            eventLocTypes.forEach(locType => {
+                if (helpfulFor.includes(locType)) {
+                    bonus += 0.1; // 10% bonus per helpful tool
+                }
+            });
+        });
+
+        // Cap bonus at 2.0 (100% extra)
+        return Math.min(2.0, bonus);
+    },
+
     // Handle choice selection
     handleChoiceSelection(location, event, choice, difficulty) {
         const results = this.executeChoice(event, choice, location,
@@ -2578,6 +3618,33 @@ const DungeonExplorationSystem = {
             detail: { dungeon: location.id, rooms: 1 }
         });
         document.dispatchEvent(exploreEvent);
+
+        // Fire location-investigated event for investigate quest objectives
+        // This fires for search/investigate type explorations
+        const investigateEvent = new CustomEvent('location-investigated', {
+            detail: {
+                location: location.id,
+                area: event.id,
+                locationType: location.type,
+                explorationId: event.id
+            }
+        });
+        document.dispatchEvent(investigateEvent);
+
+        // Fire exploration-complete event with full details for advanced quest tracking
+        const explorationCompleteEvent = new CustomEvent('exploration-complete', {
+            detail: {
+                explorationId: event.id,
+                locationId: location.id,
+                locationType: location.type,
+                choiceId: choice.id,
+                outcome: results.outcome,
+                loot: results.loot,
+                isBossEncounter: event.isBossEncounter || false,
+                bossId: event.bossId || null
+            }
+        });
+        document.dispatchEvent(explorationCompleteEvent);
 
         // Show results
         this.showResultsUI(results);
@@ -3639,6 +4706,60 @@ const DungeonExplorationSystem = {
             this.bossProgress = state.bossProgress || {};
             this.defeatedBosses = state.defeatedBosses || {};
         }
+    },
+
+    //
+    // TRIGGER SPECIFIC EXPLORATION EVENT - called by ExplorationPanel
+    //
+    triggerExplorationEvent(explorationId, locationId) {
+        console.log(`Triggering exploration: ${explorationId} at ${locationId}`);
+
+        // get the event data
+        const event = this.EXPLORATION_EVENTS[explorationId];
+        if (!event) {
+            console.warn(`Exploration event not found: ${explorationId}`);
+            if (typeof game !== 'undefined' && game.addMessage) {
+                game.addMessage(`This exploration (${explorationId}) is not yet implemented.`, 'info');
+            }
+            return false;
+        }
+
+        // get the location
+        const location = this.getLocation(locationId);
+        if (!location) {
+            console.warn(`Location not found: ${locationId}`);
+            return false;
+        }
+
+        // check if location type matches event's allowed types
+        if (event.locationType && !event.locationType.includes(location.type)) {
+            console.warn(`Event ${explorationId} not valid for location type ${location.type}`);
+            if (typeof game !== 'undefined' && game.addMessage) {
+                game.addMessage(`This exploration is not available at ${location.name}.`, 'warning');
+            }
+            return false;
+        }
+
+        // play dungeon music
+        if (typeof MusicSystem !== 'undefined') {
+            MusicSystem.playDungeonMusic();
+        }
+
+        // get difficulty and render UI
+        const difficulty = this.getLocationDifficulty(location);
+        this.renderExplorationUI(location, event, difficulty);
+
+        return true;
+    },
+
+    //
+    // GET ALL EVENTS FOR LOCATION TYPE - returns array of event IDs
+    //
+    getEventIdsForLocationType(locationType) {
+        return Object.keys(this.EXPLORATION_EVENTS).filter(eventId => {
+            const event = this.EXPLORATION_EVENTS[eventId];
+            return event.locationType && event.locationType.includes(locationType);
+        });
     }
 };
 

@@ -387,6 +387,62 @@ ItemDatabase.categories = {
 
 ---
 
+## EXPLORATION SYSTEM (v0.90.02)
+
+### How Exploration Works
+
+Press **'E'** to open the Exploration Panel at any location:
+
+1. **Open Panel** - Press E or click Explore button
+2. **View Options** - See explorations specific to this location type
+3. **Check Requirements** - Some need tools, skills, or rank
+4. **Select & Start** - Choose exploration, confirm, trigger event
+5. **Resolve Outcome** - Make choices, receive rewards/consequences
+
+### Location-Type Explorations (12 Types)
+
+| Location Type | Example Explorations |
+|---------------|----------------------|
+| Dungeon | altar, chest, well, skeleton_hoard |
+| Cave | narrow_passage, underground_lake, glowing_pool |
+| Mine | dig_spot, abandoned_shaft |
+| Ruins | library, throne_room, hidden_vault |
+| City/Town | market_stall, back_alley, sewers |
+| Capital | noble_district, grand_market |
+| Forest | hidden_grove, bandit_camp |
+| Farm | old_barn, well |
+| Port | docks, smuggler_contact |
+| Inn | traveler_tales, gambling_den |
+| Village | elder_wisdom, local_trade |
+| Outpost | guard_duty, training_yard |
+
+### Exploration Requirements
+
+Some explorations have prerequisites:
+- **Tools:** pickaxe for mining, rope for caves
+- **Skills:** mining 1+ for dig spots
+- **Stats:** minimum health/stamina
+- **Rank:** higher explorations need merchant rank
+- **Reputation:** faction standing with locals
+
+### Cooldowns
+
+Each exploration has per-location cooldowns:
+- **Default:** 60 minutes
+- **Dungeon:** 120 minutes (more dangerous)
+- **Village/Farm:** 30 minutes (simpler)
+
+Cooldowns saved to localStorage per exploration per location.
+
+### Key Files
+| File | Purpose |
+|------|---------|
+| `exploration-config.js` | Master config mapping 12 location types |
+| `exploration-panel.js` | UI panel with 'E' keyboard shortcut |
+| `dungeon-exploration-system.js` | 30+ exploration events |
+
+---
+
 ## CRAFTING SYSTEM
 
 ### Crafting Progression Tree
@@ -514,6 +570,14 @@ Travel animation follows actual waypoints:
 19. ✅ Perk selection safety checks
 20. ✅ Achievement trigger safety checks
 21. ✅ Time system vitals pause fix
+
+### Exploration System (v0.90.02)
+22. ✅ Location-type specific explorations (12 types)
+23. ✅ ExplorationConfig master mapping object
+24. ✅ ExplorationPanel UI with 'E' keyboard shortcut
+25. ✅ Exploration cooldowns per location (localStorage)
+26. ✅ 30+ exploration events connected to location types
+27. ✅ Inn, Village, Outpost events (6 new)
 
 ---
 

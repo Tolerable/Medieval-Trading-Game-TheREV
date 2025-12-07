@@ -593,6 +593,98 @@
 
 
 ================================================================================
+                              EXPLORATION SYSTEM (NEW v0.90.01)
+================================================================================
+
++-----------------------------------------------------------------------------+
+|                         EXPLORATION ARCHITECTURE                             |
++-----------------------------------------------------------------------------+
+
+                         +----------------------+
+                         | EXPLORATION CONFIG   |
+                         | exploration-config   |
+                         |        .js           |
+                         +----------+-----------+
+                                    |
+    +-------------------------------+-------------------------------+
+    |               |               |               |               |
+    v               v               v               v               v
++----------+  +----------+  +----------+  +----------+  +----------+
+|LOCATION_ |  |  QUEST_  |  |COOLDOWNS |  |REQUIRE-  |  | HELPER   |
+|EXPLOR-   |  |EXPLOR-   |  | per type |  | MENTS    |  | METHODS  |
+|ATIONS    |  |ATIONS    |  | 30-120m  |  | tools,   |  | get/can  |
++----------+  +----------+  +----------+  +----------+  +----------+
+| 12 types |  | quest-   |  | default  |  | skills,  |  | ForLoc() |
+| mapped   |  | triggered|  | dungeon  |  | stats,   |  | canDo()  |
+|          |  |          |  | cave etc |  | rank,rep |  |          |
++----------+  +----------+  +----------+  +----------+  +----------+
+
+    LOCATION TYPE MAPPINGS:
+    +----------------------------------------------------------+
+    | dungeon | cave | mine | forest | farm | ruins            |
+    | city    | capital | village | inn | port | outpost       |
+    +----------------------------------------------------------+
+
+                         +----------------------+
+                         |  EXPLORATION PANEL   |
+                         | exploration-panel.js |
+                         +----------+-----------+
+                                    |
+    +-------------------------------+-------------------------------+
+    |               |               |               |               |
+    v               v               v               v               v
++----------+  +----------+  +----------+  +----------+  +----------+
+| KEYBOARD |  | LOCATION |  | OPTIONS  |  | PREVIEW  |  | COOLDOWN |
+| SHORTCUT |  | HEADER   |  | LIST     |  | PANEL    |  | TRACKING |
+| Press E  |  | name/type|  | by type  |  | costs    |  | localStorage
++----------+  +----------+  +----------+  +----------+  +----------+
+
+                         +----------------------+
+                         |DUNGEON EXPLORATION   |
+                         | dungeon-exploration  |
+                         |     -system.js       |
+                         +----------+-----------+
+                                    |
+    +-------------------------------+-------------------------------+
+    |               |               |               |               |
+    v               v               v               v               v
++----------+  +----------+  +----------+  +----------+  +----------+
+|EXPLORAT- |  |EXPLORAT- |  |  BOSS    |  |DIFFICULTY|  | TRIGGER  |
+|ION_EVENTS|  |ION_LOOT  |  |ENCOUNTERS|  | SCALING  |  | METHODS  |
+| 30+ evts |  | 40+ items|  | 8 bosses |  | region   |  | trigger  |
++----------+  +----------+  +----------+  +----------+  +----------+
+
+    EXPLORATION EVENT TYPES:
+    +----------------------------------------------------------+
+    | DUNGEON: altar, chest, well, skeleton_hoard, vault       |
+    | CAVE: narrow_passage, underground_lake, glowing_pool     |
+    | MINE: dig_spot, abandoned_shaft                          |
+    | RUINS: library, throne_room, hidden_vault                |
+    | CITY: market_stall, back_alley, sewers, noble_district   |
+    | FOREST: hidden_grove, bandit_camp                        |
+    | FARM: old_barn, farm_well                                |
+    | PORT: docks, smuggler_contact                            |
+    | INN: traveler_tales, gambling_den                        |
+    | VILLAGE: elder_wisdom, local_trade                       |
+    | OUTPOST: guard_duty, training_yard                       |
+    +----------------------------------------------------------+
+
+    EXPLORATION FLOW:
+    +----------------------------------------------------------+
+    | 1. Player at location                                     |
+    | 2. Press 'E' or click Explore in location panel          |
+    | 3. ExplorationPanel shows available explorations         |
+    | 4. Player selects exploration (filtered by location type)|
+    | 5. triggerExplorationEvent() called                      |
+    | 6. DungeonExplorationSystem renders choice UI            |
+    | 7. Player makes choice (costs health/stamina/gold)       |
+    | 8. Outcome determined (weighted random)                  |
+    | 9. Loot + rewards applied                                |
+    | 10. Cooldown set for that exploration at that location   |
+    +----------------------------------------------------------+
+
+
+================================================================================
                               DOOM WORLD
 ================================================================================
 

@@ -4,6 +4,378 @@
 
 ---
 
+## 2025-12-07 - SESSION #59: EXPLORATION SYSTEM OVERHAUL
+
+**Request:** Gee wants exploration options to be location-type specific. Currently all locations share the same generic explorations - this is an error. Quest explorations need appropriate explore options tied to location types and NPCs.
+
+**Status:** PHASE 1 COMPLETE - ARCHITECTURE BUILT
+
+### Implementation Complete:
+
+#### 1. Created `src/js/data/exploration-config.js`
+- Master config mapping all 12 location types to their explorations
+- Location-specific overrides (e.g., shadow_dungeon gets boss_malachar)
+- Quest-triggered exploration mappings
+- Cooldown settings per location type (30-120 minutes)
+- Requirement checking (tools, skills, stats, rank, reputation)
+
+#### 2. Created `src/js/ui/panels/exploration-panel.js`
+- New UI panel for selecting explorations
+- Press 'E' key to open at current location
+- Shows available explorations based on location type
+- Displays requirements and cooldowns
+- Preview of selected exploration before starting
+
+#### 3. Updated `dungeon-exploration-system.js`
+- Added `triggerExplorationEvent(explorationId, locationId)` method
+- Added `getEventIdsForLocationType(locationType)` helper
+- Added 6 NEW exploration events:
+  - INN: inn_traveler_tales, inn_gambling_den
+  - VILLAGE: village_elder_wisdom, village_local_trade
+  - OUTPOST: outpost_guard_duty, outpost_training_yard
+
+#### 4. Updated `index.html`
+- Added script includes for new files
+
+### Files Created:
+- `src/js/data/exploration-config.js` (280 lines)
+- `src/js/ui/panels/exploration-panel.js` (450 lines)
+
+### Files Modified:
+- `src/js/systems/combat/dungeon-exploration-system.js` (+280 lines for new events and methods)
+- `index.html` (+2 script includes)
+
+### Agent Analysis Results (5 agents ran GO workflow):
+
+#### Agent 1: Exploration System Analysis
+- **CRITICAL FINDING:** `dungeon-exploration-system.js` has 30+ complete exploration events with choices, outcomes, and rewards - BUT THEY'RE NOT CONNECTED TO ANYTHING!
+- EXPLORATION_EVENTS exist with `locationType` arrays but nothing triggers them
+- EXPLORATION_LOOT has 40+ items across 5 rarity tiers ready to use
+- Missing: Event triggering system, exploration selection UI, state tracking
+
+#### Agent 2: Quest System Analysis
+- Quest objectives define `explore`, `investigate`, `visit` types
+- Quests emit events: `location-discovered`, `dungeon-room-explored`, `combat-victory`
+- Quest-exploration mapping exists but not used
+- Need to link exploration events to quest objectives
+
+#### Agent 3: Location Data Analysis
+- **42 locations** across **12 types**: capital, city, village, mine, forest, farm, dungeon, cave, inn, outpost, port, ruins
+- **20 locations** support gathering with `gatheringDifficulty` (0.8 to 2.0)
+- Each location has NPCs, sells/buys, availableResources
+- Location types NEED unique explorations (mines ≠ forests ≠ inns)
+
+#### Agent 4: Loot & Rewards Analysis
+- Combat loot: enemy-specific drops with 50% per item
+- EXPLORATION_LOOT: 40+ items (common to legendary, 1g to 3500g)
+- Gathering system: tool efficiency, difficulty scaling
+- Doom world: inverted economy (food 10x, gold 0.3x)
+
+#### Agent 5: NPC Encounter Analysis
+- Static NPCs per location (game-world.js)
+- Random encounters on travel (30% chance)
+- 52 NPC types with inventories
+- Location type determines encounter context
+
+### Architecture Gaps Found:
+1. **No exploration trigger** - Events defined but never called
+2. **No exploration UI** - No panel to show/select explorations
+3. **No state tracking** - Can't track completed explorations
+4. **No location mapping** - Events have locationType but locations don't reference events
+5. **No quest integration** - Quests can't trigger specific explorations
+
+### TODO List Created: 47 items
+- CRITICAL: 4 architecture items
+- HIGH: 37 location-type specific explorations
+- MEDIUM: 15 integration items
+- LOW: 9 polish items
+
+**Files to Create:**
+- `src/js/data/exploration-config.js` - Master config per location type
+- `src/js/ui/exploration-panel.js` - UI for exploration selection
+
+**Files to Modify:**
+- `dungeon-exploration-system.js` - Connect to locations
+- `quest-system.js` - Link explore objectives to events
+- `game-world.js` - Add exploration references to locations
+- `game.js` - Add exploration triggers to game loop
+
+### Documentation Updated:
+- `gamelayout.md` - Added comprehensive EXPLORATION SYSTEM section with ASCII diagrams
+- `001-ARCHITECT.md` - Added exploration system section and completed features list
+- `todo.md` - Updated with Phase 1 complete, Phase 2 remaining items
+
+### Phase 2 Progress (Session #60):
+
+Added **11 NEW exploration events** for location variety:
+
+**Mine Events (2 new):**
+- `mine_ore_vein` - Rich ore extraction with risk of collapse
+- `mine_tool_cache` - Abandoned miner equipment search
+
+**Forest Events (3 new):**
+- `forest_herb_patch` - Wild medicinal herb gathering
+- `forest_animal_trail` - Hunting and trapping wildlife
+- `forest_timber_camp` - Abandoned logging operation loot
+
+**Farm Events (3 new):**
+- `farm_crop_field` - Overgrown field harvest and scarecrow search
+- `farm_livestock_pen` - Empty pens with hidden coins
+- `farm_windmill` - Old windmill exploration with millers stash
+
+**Cave Events (3 new):**
+- `cave_crystal_chamber` - Crystal harvesting with magical feedback risk
+- `cave_underground_river` - Wading for washed treasure, cave fishing
+- `cave_ancient_painting` - Prehistoric art and ancient offerings
+
+**Files Modified:**
+- `dungeon-exploration-system.js` - Added 11 new EXPLORATION_EVENTS
+- `exploration-config.js` - Updated location type mappings to include new events
+- `todo.md` - Marked Phase 2 location events as complete
+
+### Session #61 - Boss & Doom Portal Events:
+
+Added **6 NEW exploration events** for boss fights and doom world:
+
+**Boss Encounter Events (4 new):**
+- `boss_malachar` - Dark Lords Chamber (deadly, 8 explorations required)
+- `boss_grimfang` - Alphas Den (hard, 4 explorations required)
+- `boss_frost_lord` - Frozen Throne (hard, 6 explorations required)
+- `boss_dragon` - Dragons Hoard (deadly, 10 explorations required)
+
+**Doom Portal Events (2 new):**
+- `doom_portal_activation` - Enter the Doom World (requires boss defeated)
+- `doom_return_portal` - Return home from Doom World
+
+**Special Properties Added:**
+- `isBossEncounter: true` - Marks event as boss fight
+- `bossId` - Links to BOSS_ENCOUNTERS data
+- `requiresExplorationCount` - Min explorations before boss appears
+- `triggerBossDefeat` - Outcome fires boss defeat event
+- `isDoomPortal: true` - Marks doom portal event
+- `triggerDoomWorld: true` - Outcome triggers doom world transport
+- `triggerReturnFromDoom: true` - Outcome returns player to normal world
+
+**Files Modified:**
+- `dungeon-exploration-system.js` - Added 6 new boss/doom EXPLORATION_EVENTS
+- `todo.md` - Marked boss/doom portal events as complete
+
+### Session #62 - Quest & Loot Integration:
+
+**Quest-Exploration Integration:**
+
+Added 3 new CustomEvents fired from `handleChoiceSelection()`:
+1. `dungeon-room-explored` - Already existed, fires for quest `explore` objectives
+2. `location-investigated` - NEW: fires for quest `investigate` objectives
+   - detail: { location, area, locationType, explorationId }
+3. `exploration-complete` - NEW: fires with full details for advanced tracking
+   - detail: { explorationId, locationId, locationType, choiceId, outcome, loot, isBossEncounter, bossId }
+
+QuestSystem already listens to these events at lines 3909-3914.
+
+**Location-Specific Loot Tables:**
+
+Added `LOCATION_LOOT_TABLES` to `exploration-config.js`:
+- 12 location types mapped (dungeon, cave, mine, forest, farm, ruins, city, capital, village, inn, port, outpost)
+- Weighted by rarity: common (40%), uncommon (30%), rare (20%), epic (8%), legendary (2%)
+- Uses ONLY existing items from EXPLORATION_LOOT (no hallucinated items!)
+- `getLootForLocationType(locationType, difficultyMultiplier)` method added
+
+**Existing EXPLORATION_LOOT items used:**
+- Common: ancient_coin, dusty_tome, rusted_medallion, bone_fragment, cave_mushroom
+- Uncommon: skull_goblet, enchanted_quill, obsidian_shard, silver_candelabra, ancient_seal
+- Rare: cursed_mirror, dragon_scale, spirit_lantern, demon_tooth, void_crystal
+- Epic: lich_phylactery_fragment, ancient_crown, blood_ruby, shadow_cloak_remnant
+- Legendary: tear_of_eternity, world_shard
+
+**Files Modified:**
+- `dungeon-exploration-system.js` - Added location-investigated and exploration-complete events
+- `exploration-config.js` - Added LOCATION_LOOT_TABLES and getLootForLocationType()
+- `todo.md` - Marked quest/loot integration items as complete
+
+### Session #63 - Difficulty Scaling, Doom Loot, Cooldown Timers:
+
+**1. GatheringDifficulty Scaling:**
+- Modified `executeChoice()` to use `location.gatheringDifficulty` as multiplier
+- Formula: `totalLootMult = diffMult.lootMult * luckMultiplier * gatheringDifficulty`
+- Higher difficulty locations (deep_mine: 2.0, silver_mine: 1.5) now give better loot
+
+**2. Doom World Loot Tables:**
+- Added 4 doom-specific loot tables to `exploration-config.js`:
+  - `doom_dungeon` - skull_goblet, void_crystal, lich_phylactery_fragment
+  - `doom_cave` - bone_fragment, demon_tooth, blood_ruby
+  - `doom_ruins` - cursed_mirror, ancient_crown, world_shard
+  - `doom_city` - shadow_cloak_remnant, tear_of_eternity
+- `getLootForLocationType()` auto-detects `game.inDoomWorld` and uses doom tables
+
+**3. Live Cooldown Timers:**
+- Added `formatCooldownTime(ms)` - shows h:mm or mm:ss format
+- Added `startCooldownTimer()` - updates display every second
+- Added `stopCooldownTimer()` - cleans up on panel close
+- Timer starts when panel opens, stops when closed
+- Expired cooldowns auto-refresh the exploration list
+
+**4. Enhanced generateLoot():**
+- Now accepts `locationType` parameter
+- Bonus loot from `LOCATION_LOOT_TABLES` based on multiplier
+- 20% base chance + (multiplier-1)*30% for bonus loot
+- 2.0+ multiplier gives second 30% bonus chance
+
+**Files Modified:**
+- `dungeon-exploration-system.js:3084-3088` - Added gatheringDifficulty to loot calc
+- `dungeon-exploration-system.js:3148-3197` - Enhanced generateLoot with location loot
+- `exploration-config.js:412-441` - Added doom_* loot tables
+- `exploration-config.js:447-457` - Auto doom detection in getLootForLocationType
+- `exploration-panel.js:269-285` - Cooldown timer CSS
+- `exploration-panel.js:606-658` - Timer functions
+- `exploration-panel.js:466-479` - Start/stop timer hooks
+- `todo.md` - Marked 3 items complete
+
+### Session #64 - Tool Efficiency, Progress Indicators, % Completion:
+
+**1. Tool Efficiency Bonuses:**
+- Added `getToolEfficiencyBonus(choice, playerStats)` to dungeon-exploration-system.js
+- Tools give 1.25x bonus at appropriate locations:
+  - pickaxe: mine, cave, dungeon
+  - axe: forest, farm
+  - fishing_rod: port, cave
+  - rope: cave, dungeon, ruins
+  - torch/lantern: dungeon, cave, mine
+  - shovel: farm, ruins, dungeon
+- Multiple tools stack up to 2.0x max bonus
+- Integrated into `executeChoice()` loot calculation
+
+**2. Exploration Progress Indicators:**
+- Added progress bar CSS to exploration-panel.js (lines 304-328)
+- Progress bar shows location completion percentage
+- Fill width calculated from `getLocationCompletionPercent()`
+- Dark gothic styling matches panel theme
+
+**3. Location Completion Tracking:**
+- Added `completedExplorations` object for tracking
+- `loadCompletedExplorations()` - loads from localStorage
+- `saveCompletedExplorations()` - persists to localStorage
+- `markExplorationCompleted(locationId, explorationId)` - marks done
+- `getLocationCompletionPercent(locationId, locationType)` - calculates %
+- `isExplorationCompleted(locationId, explorationId)` - check status
+- Completed explorations show green "Done" badge
+- `startExploration()` now calls `markExplorationCompleted()`
+
+**Files Modified:**
+- `dungeon-exploration-system.js` - Added getToolEfficiencyBonus(), hooked into executeChoice()
+- `exploration-panel.js` - Added progress bar, completion tracking methods
+- `todo.md` - Marked tool efficiency, progress indicators, completion tracking complete
+
+### Session #65 - FINAL EXPLORATION SYSTEM COMPLETION:
+
+**Request:** Gee said "do all of them at once for the final finish of all items NO TESTS!" - Complete all remaining exploration system items.
+
+**Status:** PHASE 2 COMPLETE - EXPLORATION SYSTEM FINISHED
+
+**1. NPC-Exploration Integration:**
+
+Added `NPC_EXPLORATIONS` config to exploration-config.js:
+- 17 NPC types unlock special explorations:
+  - Merchants: traveling_merchant, exotic_merchant
+  - Guides: mountain_guide, cave_guide, forest_ranger
+  - Specialists: master_smith, alchemist, herbalist
+  - Shady: smuggler, fence, pirate_captain
+  - Knowledge: scholar, librarian, sage
+  - Military: guard_captain, veteran_soldier, mercenary
+
+Added `QUEST_NPC_EXPLORATIONS` config:
+- elder_morin -> greendale_elder_guidance (act1_quest1)
+- harbormaster_vex -> harbor_manifest_search (act1_quest5)
+- master_ironhand -> ironforge_saboteur_hunt (act2_quest3)
+- lord_ashworth -> noble_conspiracy_intel (act4_quest2)
+- boatman -> doom_world_passage (always available)
+
+New methods:
+- `getNPCExplorations(locationId)` - Returns NPC-unlocked explorations at location
+- `getAllExplorationsForLocation(locationId, locationType)` - Combines base + NPC explorations
+
+**2. NPC Encounter Spawning:**
+
+Added `spawnNPCFromExploration(npcConfig, results)` to dungeon-exploration-system.js:
+- Outcomes can have `spawnNPC: 'npc_id'` or `spawnNPC: { npcId, chance, message }`
+- Rolls chance, shows message, triggers NPCInteractionSystem.startEncounter()
+- Fires `npc-encounter-spawned` CustomEvent for other systems
+
+**3. NPC Guide Requirements:**
+
+Expanded `EXPLORATION_REQUIREMENTS` with:
+- `requiresNPC` - Exploration requires specific NPC at location
+- `npcDescription` - Message shown when NPC not present
+- Examples: guided_mountain_pass, guided_cave_expedition, avalanche_safe_route
+
+Updated `canDoExploration()` to check:
+- NPC presence at location via GameWorld.locations
+- Exploration count requirements for bosses
+- Boss defeated requirement for doom portal
+- Multiple tool requirements (tool, tool2)
+- Gold requirements
+
+**4. Exploration History Log:**
+
+Added to exploration-panel.js:
+- `explorationHistory` array for tracking
+- `loadExplorationHistory()` - loads from localStorage (max 50 entries)
+- `saveExplorationHistory()` - persists to localStorage
+- `addToHistory(explorationId, locationId, locationType, eventData)` - records exploration
+- `toggleHistory()` - toggles collapsible history section
+- `populateHistory()` - renders last 10 entries with time ago
+- `formatTimeAgo(timestamp)` - formats as "Just now", "5m ago", "2h ago", "3d ago"
+
+UI additions:
+- History container with collapse toggle [+]/[-]
+- History entries with icon, name, location, time
+- Success/failure indicators (green/red left border)
+
+**5. Balance & Cost System:**
+
+Added `EXPLORATION_COSTS` to exploration-config.js:
+- Health costs by tier: safe (0-5), easy (2-10), medium (5-20), hard (10-35), deadly (20-50)
+- Stamina costs by tier: safe (5-10), easy (10-20), medium (15-30), hard (25-45), deadly (35-60)
+- Gold costs: safe/easy (0), medium (5), hard (15), deadly (30)
+
+Added `EXPLORATION_VS_GATHERING`:
+- rewardMultiplier: 2.0 (exploration gives 2x value vs same-time gathering)
+- riskMultiplier: 1.5 (1.5x more health/stamina cost)
+- cooldownPenalty: 1.2 (20% longer cooldowns)
+
+Added `getBalancedCosts(explorationId, locationType)`:
+- Returns balanced costs based on difficulty and location type
+- Dangerous types (dungeon, cave, mine, ruins) bump to hard
+- Safe types (farm, village, inn) bump to easy
+
+**6. Extended EXPLORATION_REQUIREMENTS:**
+
+Now includes 45+ exploration requirements:
+- Mining: mine_dig_spot, mine_abandoned_shaft, mine_ore_vein, mine_tool_cache
+- Forest: forest_timber_harvest, forest_timber_camp, forest_herb_patch, forest_animal_trail
+- Cave: cave_narrow_passage, cave_underground_river, cave_crystal_chamber
+- Dungeon: dungeon_skeleton_hoard, dungeon_altar, dungeon_well
+- Ruins: ruins_hidden_vault, ruins_library
+- Social: capital_royal_audience, port_smuggler_contact, inn_gambling_den
+- Bosses: boss_malachar, boss_grimfang, boss_frost_lord, boss_dragon
+- Doom: doom_portal_activation, doom_return_portal
+
+**Files Modified:**
+- `exploration-config.js` - NPC_EXPLORATIONS, QUEST_NPC_EXPLORATIONS, EXPLORATION_COSTS, extended EXPLORATION_REQUIREMENTS, getNPCExplorations(), getAllExplorationsForLocation(), getBalancedCosts()
+- `exploration-panel.js` - NPC section UI, history log UI/methods, badge class handling
+- `dungeon-exploration-system.js` - spawnNPCFromExploration() method
+- `todo.md` - Marked all exploration items complete
+- `Gee'sThoughts.md` - Session #65 log
+
+**EXPLORATION SYSTEM STATUS:** COMPLETE
+- All CRITICAL items: DONE
+- All HIGH items: DONE
+- All MEDIUM items: DONE
+- All LOW items: DONE (except sounds per user request)
+- Remaining: 8 manual smoke tests
+
+---
+
 ## 2025-12-07 - SESSION #58: PLAYER EMOJI DIRECTION FIX
 
 **Request:** Player travel icon showing wrong direction - emoji cycling back and forth rapidly instead of facing the direction of travel. User said "the left and right emoji playing at the same time cycling back and forth".
