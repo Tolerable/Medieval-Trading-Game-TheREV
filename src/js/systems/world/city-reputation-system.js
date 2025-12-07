@@ -60,15 +60,27 @@ const CityReputationSystem = {
         const currentRep = this.getReputation(cityId);
         const newRep = Math.max(-100, Math.min(100, currentRep + amount));
         this.cityReputation[cityId] = newRep;
-        
+
         const oldLevel = this.getReputationLevel(currentRep);
         const newLevel = this.getReputationLevel(newRep);
-        
+
         if (oldLevel.name !== newLevel.name) {
             addMessage(`Your reputation in ${cityId} is now ${newLevel.name}!`);
         }
-        
+
         this.saveReputation();
+
+        // Fire event for UI updates (trade locks, etc)
+        document.dispatchEvent(new CustomEvent('city-reputation-changed', {
+            detail: {
+                cityId: cityId,
+                oldRep: currentRep,
+                newRep: newRep,
+                change: amount,
+                oldLevel: oldLevel.name,
+                newLevel: newLevel.name
+            }
+        }));
     },
 
     // Get reputation level

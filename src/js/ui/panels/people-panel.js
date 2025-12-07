@@ -621,6 +621,16 @@ const PeoplePanel = {
                 }
             }
         });
+
+        // Listen for city reputation changes (from combat, crimes, etc)
+        document.addEventListener('city-reputation-changed', (e) => {
+            const currentLocationId = game?.currentLocation?.id;
+            // Refresh trade section if we're at the affected city
+            if (e.detail.cityId === currentLocationId && this.currentNPC && this.viewMode === 'chat') {
+                this.updateNPCStatsBar(this.currentNPC);
+                this.updateTradeSection(this.currentNPC);
+            }
+        });
     },
 
     // 🔓 OPEN PANEL

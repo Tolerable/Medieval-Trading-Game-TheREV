@@ -470,6 +470,23 @@ const CombatModal = {
             game.player.gold = (game.player.gold || 0) + goldDrop;
         }
 
+        // Mark NPC as killed - they won't appear for 24 game hours
+        const locationId = game?.currentLocation?.id;
+        if (typeof GameWorld !== 'undefined' && GameWorld.markNPCKilled) {
+            GameWorld.markNPCKilled(npc.type, locationId);
+        }
+
+        // Apply reputation loss for killing NPCs (unless it's a quest target)
+        if (!this.currentCombat.isQuestTarget && typeof CityReputationSystem !== 'undefined') {
+            const repLoss = npc.stats.tier === 'boss' ? 50 : (npc.stats.tier === 'outlaw' ? 5 : 20);
+            if (locationId && CityReputationSystem.changeReputation) {
+                CityReputationSystem.changeReputation(locationId, -repLoss);
+                if (typeof addMessage === 'function') {
+                    addMessage(`📉 Lost ${repLoss} reputation for violence!`, 'warning');
+                }
+            }
+        }
+
         // Fire enemy-defeated event for quest tracking
         document.dispatchEvent(new CustomEvent('enemy-defeated', {
             detail: {

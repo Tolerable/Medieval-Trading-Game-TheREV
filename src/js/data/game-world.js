@@ -958,15 +958,21 @@ const GameWorld = {
         //  Normal world NPC loading
         const npcTypes = this.getNPCsForLocation(locationId);
 
+        // Filter and map NPCs, excluding killed ones
         return npcTypes.map(npcType => {
+            //  Generate unique ID for this NPC at this location
+            const npcId = `${locationId}_${npcType}`;
+
+            // Check if this NPC is dead (killed in combat, respawns after 24 game hours)
+            if (this.isNPCDead(npcId)) {
+                return null; // Skip this NPC
+            }
+
             //  Try to get persona from database
             let persona = null;
             if (typeof NPCPersonaDatabase !== 'undefined') {
                 persona = NPCPersonaDatabase.getPersona(npcType);
             }
-
-            //  Generate unique ID for this NPC at this location
-            const npcId = `${locationId}_${npcType}`;
 
             //  Generate unique name for this NPC at this location
             const generatedName = this.generateNPCName(locationId, npcType);
@@ -983,7 +989,7 @@ const GameWorld = {
                 //  CRITICAL: Set type AFTER persona spread to prevent overwrite from fallback personas
                 type: npcType
             };
-        });
+        }).filter(npc => npc !== null); // Remove nulls (killed NPCs)
     },
 
     //  Format doom NPC type to display name
@@ -1230,18 +1236,24 @@ const GameWorld = {
     doomVisitedLocations: [], //  Separate tracking for Doom World - starts fresh on each entry!
     currentRegion: 'starter',
 
+    // Killed NPCs tracking - NPCs respawn after 24 game hours (1440 game minutes)
+    killedNPCs: {}, // { npcId: killTimeInGameMinutes }
+    NPC_RESPAWN_TIME: 1440, // 24 hours in game minutes
+
     // ═══════════════════════════════════════════════════════════════
     //  INITIALIZATION - Where the world awakens
     // ═══════════════════════════════════════════════════════════════
     init() {
         console.log(' GameWorld awakens from the void...');
         this.unlockedRegions = ['starter', 'capital', 'northern', 'eastern', 'western', 'southern'];
-        //  Start with greendale as default - createCharacter() will add proper starting location based on perks 
+        //  Start with greendale as default - createCharacter() will add proper starting location based on perks
         // This ensures the map always has something to render even if called before character creation
         this.visitedLocations = ['greendale'];
         //  Reset doom world visited locations on new game - no bleeding between games!
         this.doomVisitedLocations = [];
         this.currentRegion = 'starter';
+        // Reset killed NPCs on new game
+        this.killedNPCs = {};
 
         //  Try to setup market prices (may fail if ItemDatabase not loaded)
         try {
@@ -1288,6 +1300,89 @@ const GameWorld = {
         }
 
         console.log(' GameWorld initialization complete - the realm awaits');
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // NPC DEATH TRACKING - Track killed NPCs and respawn after 24 game hours
+    // ═══════════════════════════════════════════════════════════════
+
+    // Mark an NPC as killed - they won't appear for 24 game hours
+    markNPCKilled(npcId, locationId) {
+        const fullId = locationId ? `${locationId}_${npcId}` : npcId;
+        const currentTime = this._getCurrentGameTime();
+        this.killedNPCs[fullId] = currentTime;
+        console.log(`NPC killed: ${fullId} at game time ${currentTime}`);
+
+        // Fire event for other systems
+        if (typeof EventBus !== 'undefined') {
+            EventBus.emit('npc-killed', { npcId: fullId, killTime: currentTime });
+        }
+    },
+
+    // Check if an NPC is currently dead (hasn't respawned yet)
+    isNPCDead(npcId) {
+        const killTime = this.killedNPCs[npcId];
+        if (!killTime) return false;
+
+        const currentTime = this._getCurrentGameTime();
+        const timeSinceKill = currentTime - killTime;
+
+        // Check if respawn time has passed
+        if (timeSinceKill >= this.NPC_RESPAWN_TIME) {
+            // NPC has respawned - remove from killed list
+            delete this.killedNPCs[npcId];
+            console.log(`NPC respawned: ${npcId}`);
+            return false;
+        }
+
+        return true; // Still dead
+    },
+
+    // Get time until NPC respawns (in game minutes)
+    getTimeUntilRespawn(npcId) {
+        const killTime = this.killedNPCs[npcId];
+        if (!killTime) return 0;
+
+        const currentTime = this._getCurrentGameTime();
+        const timeSinceKill = currentTime - killTime;
+        const remaining = this.NPC_RESPAWN_TIME - timeSinceKill;
+
+        return Math.max(0, remaining);
+    },
+
+    // Get current game time in minutes
+    _getCurrentGameTime() {
+        if (typeof game !== 'undefined' && game.player && game.player.stats) {
+            // Calculate total game minutes from day and time
+            const day = game.player.stats.day || 1;
+            const hour = game.player.stats.hour || 6;
+            const minute = game.player.stats.minute || 0;
+            return ((day - 1) * 1440) + (hour * 60) + minute;
+        }
+        // Fallback
+        return 0;
+    },
+
+    // Check all killed NPCs and clean up respawned ones
+    checkNPCRespawns() {
+        const currentTime = this._getCurrentGameTime();
+        const respawned = [];
+
+        for (const npcId in this.killedNPCs) {
+            const killTime = this.killedNPCs[npcId];
+            if (currentTime - killTime >= this.NPC_RESPAWN_TIME) {
+                respawned.push(npcId);
+                delete this.killedNPCs[npcId];
+            }
+        }
+
+        if (respawned.length > 0) {
+            console.log(`NPCs respawned: ${respawned.join(', ')}`);
+            // Refresh people panel if open
+            if (typeof PeoplePanel !== 'undefined' && PeoplePanel.isOpen) {
+                PeoplePanel.refresh();
+            }
+        }
     },
 
     // ═══════════════════════════════════════════════════════════════
@@ -1771,7 +1866,8 @@ const GameWorld = {
             unlockedRegions: [...this.unlockedRegions],
             visitedLocations: [...this.visitedLocations],
             doomVisitedLocations: [...this.doomVisitedLocations], //  Save doom progress too!
-            currentRegion: this.currentRegion
+            currentRegion: this.currentRegion,
+            killedNPCs: { ...this.killedNPCs } // Save killed NPCs for respawn tracking
         };
     },
 
@@ -1779,8 +1875,11 @@ const GameWorld = {
         if (!data) return;
         if (data.unlockedRegions) this.unlockedRegions = [...data.unlockedRegions];
         if (data.visitedLocations) this.visitedLocations = [...data.visitedLocations];
-        if (data.doomVisitedLocations) this.doomVisitedLocations = [...data.doomVisitedLocations]; // 
+        if (data.doomVisitedLocations) this.doomVisitedLocations = [...data.doomVisitedLocations]; //
         if (data.currentRegion) this.currentRegion = data.currentRegion;
+        if (data.killedNPCs) this.killedNPCs = { ...data.killedNPCs };
+        // Check for respawns on load
+        this.checkNPCRespawns();
         console.log(' GameWorld state restored from the abyss');
     }
 };
