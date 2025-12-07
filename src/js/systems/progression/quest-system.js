@@ -1519,8 +1519,11 @@ const QuestSystem = {
             }
         }
 
-        if (rewards.reputation && typeof NPCRelationshipSystem !== 'undefined') {
-            NPCRelationshipSystem.modifyReputation(quest.giver, rewards.reputation);
+        // Use global ReputationSystem for quest reputation rewards (unified system)
+        if (rewards.reputation) {
+            if (typeof ReputationSystem !== 'undefined' && ReputationSystem.addDirectReputation) {
+                ReputationSystem.addDirectReputation(rewards.reputation, `Completed: ${quest.name}`);
+            }
             rewardsGiven.reputation = rewards.reputation;
         }
 

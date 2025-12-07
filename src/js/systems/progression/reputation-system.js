@@ -244,10 +244,8 @@ const ReputationSystem = {
     // Listen for your sins and virtues alike
     setupEventListeners() {
         if (typeof EventBus !== 'undefined') {
-            // The eyes that never blink - watching every action
-            EventBus.on('quest:completed', (data) => {
-                this.modifyReputation('complete_quest', data.questDifficulty || 1);
-            });
+            // Quest reputation is now handled directly in quest-system.js via addDirectReputation()
+            // This prevents double-counting and ensures actual quest rewards are used
 
             EventBus.on('quest:failed', () => {
                 this.modifyReputation('fail_quest');
@@ -351,6 +349,50 @@ const ReputationSystem = {
         this.showReputationChange(finalChange, action.description);
 
         return finalChange;
+    },
+
+    // Add reputation directly with custom amount - used by quest system for actual rewards
+    addDirectReputation(amount, description = 'Reputation change') {
+        const previousTier = this.getCurrentTier();
+
+        this.reputation += amount;
+
+        // Record in history
+        this.history.push({
+            action: 'direct',
+            description: description,
+            change: amount,
+            newTotal: this.reputation,
+            timestamp: Date.now(),
+            location: null
+        });
+
+        if (this.history.length > 100) {
+            this.history = this.history.slice(-100);
+        }
+
+        this.saveReputation();
+
+        // Check tier change
+        const newTier = this.getCurrentTier();
+        if (previousTier.id !== newTier.id) {
+            this.onTierChanged(previousTier, newTier);
+        }
+
+        // Emit event
+        if (typeof EventBus !== 'undefined') {
+            EventBus.emit('reputation:changed', {
+                action: 'direct',
+                change: amount,
+                newTotal: this.reputation,
+                tier: newTier.id
+            });
+        }
+
+        // Show the notification with actual amount
+        this.showReputationChange(amount, description);
+
+        return amount;
     },
 
     // You've become someone new - hero or villain, the world reacts
