@@ -39,10 +39,10 @@ const GatehouseSystem = {
         },
         eastern: {
             name: 'Eastern Reaches',
-            description: 'Prosperous trading regions to the east. Rich markets await those who can afford entry.',
-            accessible: false,
-            gatehouse: 'eastern_gate',
-            fee: 1000 // ��� Early-mid game - 1k gold OR sneak through south
+            description: 'Prosperous trading regions to the east. Accessible via the southern coast.',
+            accessible: true, // FREE - accessible via south path
+            gatehouse: null, // No gatehouse - natural expansion from south
+            fee: 0
         },
         western: {
             name: 'Western Wilds',
@@ -112,50 +112,22 @@ const GatehouseSystem = {
             visibleAlways: true,
             useGameWorldLocation: true
         },
-        // Starter zone gatehouse (for players starting in harder areas)
-        starter_gate: {
-            id: 'starter_gate',
-            name: 'Riverlands Gate',
-            type: 'gatehouse',
-            icon: '🏰',
-            description: 'The entrance to the peaceful Riverlands. A safe region perfect for beginning traders.',
-            fee: 75,
-            unlocksZone: 'starter',
-            guards: 'Riverlands Militia',
-            services: ['passage', 'supplies'],
-            visibleAlways: true,
-            // Virtual gate - uses Greendale location as the entry point
-            virtualGate: true,
-            nearLocation: 'greendale'
-        },
-        // Eastern zone gatehouse - EARLY-MID GAME 1k (or sneak through south)
-        eastern_gate: {
-            id: 'eastern_gate',
-            name: 'Eastern Checkpoint',
-            type: 'gatehouse',
-            icon: '🏰',
-            description: 'The checkpoint to the prosperous Eastern Kingdoms. Pay 1,000 gold for direct access, or find the back path through the south.',
-            fee: 1000, // ��� Early-mid game - can bypass via south
-            unlocksZone: 'eastern',
-            guards: 'Eastern Merchants Guild',
-            services: ['passage', 'trade_permits'],
-            visibleAlways: true,
-            virtualGate: true,
-            nearLocation: 'jade_harbor'
-        }
-        //  Southern/Glendale has NO gatehouse - FREE access from starter!
+        // Southern/Glendale has NO gatehouse - FREE access from starter!
+        // Eastern has NO gatehouse - FREE access via south path!
+        // Starter has NO gatehouse - always accessible!
     },
 
     // Map zones to their controlling gatehouses
-    //  Progression: starter  south (FREE)  east (1k or back path)  north (10k)  west (50k)
+    // Progression: starter -> south (FREE) -> east (FREE via south) -> north (10k) -> west (50k)
+    // Only NORTH and WEST are gated - everything else is freely accessible
     ZONE_GATEHOUSES: {
-        'northern': 'northern_outpost',    // ��� 10,000g - mid game
+        'northern': 'northern_outpost',    // 10,000g - mid game
         'northern_deep': 'winterwatch_outpost',
         'western': 'western_outpost',      // 50,000g - late game
-        'eastern': 'eastern_gate',         // ��� 1,000g - early-mid (bypassable via south)
-        'southern': null,                  // ��� FREE! No gatehouse - natural expansion
+        'eastern': null,                   // FREE! Accessible via south path
+        'southern': null,                  // FREE! No gatehouse - natural expansion
         'capital': null,                   // Capital ALWAYS accessible
-        'starter': 'starter_gate'
+        'starter': null                    // Starter always accessible
     },
 
     // Locations mapped to their zones (for quick lookup)
@@ -357,13 +329,17 @@ const GatehouseSystem = {
         console.log(`🏰 canAccessLocation check: ${locationId} (zone: ${destZone}) from ${fromId} (zone: ${fromZone})`);
 
         // ALWAYS ACCESSIBLE ZONES - no gates needed
+        // Only NORTH and WEST are gated - everything else is free
         if (destZone === 'capital') {
             return { accessible: true, reason: null, zoneType: 'capital' };
         }
-        if (destZone === this.startingZone) {
-            return { accessible: true, reason: null, zoneType: 'starting' };
+        if (destZone === 'starter') {
+            return { accessible: true, reason: null, zoneType: 'starter' };
         }
         if (destZone === 'southern') {
+            return { accessible: true, reason: null, zoneType: 'free' };
+        }
+        if (destZone === 'eastern') {
             return { accessible: true, reason: null, zoneType: 'free' };
         }
 

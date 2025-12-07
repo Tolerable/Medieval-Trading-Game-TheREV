@@ -4,6 +4,51 @@
 
 ---
 
+## 2025-12-06 - SESSION #40: GATE RESTRICTION FIX
+
+**Request:** Fix gate travel restrictions:
+1. Gates should be accessible (you can travel TO them)
+2. South should NOT be restricted
+3. Only North and West are restricted (require fees)
+4. Locked zones should be HIDDEN until fee is paid
+
+**Status:** COMPLETE
+
+### Changes Made:
+
+**1. Removed Eastern and Starter gates (gatehouse-system.js)**
+- Eastern zone now FREE (accessible via south path)
+- Starter zone always accessible (no gate)
+- Removed `eastern_gate` and `starter_gate` from GATEHOUSES
+- Updated ZONE_GATEHOUSES to have null for eastern/starter
+
+**2. Updated canAccessLocation logic**
+- Added `eastern` to always-accessible zones
+- Changed `startingZone` check to direct `starter` check
+- Only north (10k) and west (50k) require payment
+
+**3. Added isLocationInLockedZone helper**
+- Only returns true for northern/northern_deep/western zones
+- Returns false if gatehouse fee has been paid
+- Gatehouses themselves are never locked (must be reachable)
+
+**4. Updated visibility calculations**
+- Connected locations in locked zones stay HIDDEN
+- Only gatehouses in locked zones are discoverable
+- Free zones (starter, capital, south, east) always discoverable
+
+### Zone Progression:
+```
+starter -> south (FREE) -> east (FREE via south) -> north (10k) -> west (50k)
+```
+
+### Files Changed:
+- `src/js/systems/travel/gatehouse-system.js` - Zone config, gate definitions
+- `src/js/ui/map/game-world-renderer.js` - Visibility with locked zones
+- `src/js/systems/travel/travel-panel-map.js` - Visibility fallback
+
+---
+
 ## 2025-12-06 - SESSION #39: LOCATION TAB VISITED LIST FIX
 
 **Request:** Location tab not showing past visited locations correctly

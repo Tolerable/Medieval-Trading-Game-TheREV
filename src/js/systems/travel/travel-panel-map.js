@@ -396,15 +396,25 @@ const TravelPanelMap = {
             visibility[locId] = 'visible';
         });
 
-        // ALL locations directly connected to visited ones are ALWAYS 'discovered'
-        // Players must be able to see and travel to any adjacent location
+        // Connected locations are 'discovered' UNLESS in a locked zone
+        // Locked zones (north, west) are hidden until fee is paid
         visited.forEach(locId => {
             const location = locations[locId];
             if (location && location.connections) {
                 location.connections.forEach(connectedId => {
                     if (!visibility[connectedId]) {
-                        // ALL connected locations are discovered - no exceptions
-                        visibility[connectedId] = 'discovered';
+                        // Check if connected location is in a locked zone
+                        const isLocked = this.isLocationInLockedZone(connectedId);
+                        if (isLocked) {
+                            // Locked zone locations stay hidden until fee paid
+                            // EXCEPT gatehouses - those are always discoverable
+                            if (this.isGatehouse(connectedId)) {
+                                visibility[connectedId] = 'discovered';
+                            }
+                        } else {
+                            // Free zone - mark as discovered
+                            visibility[connectedId] = 'discovered';
+                        }
                     }
                 });
             }
@@ -435,7 +445,7 @@ const TravelPanelMap = {
         return visibility;
     },
 
-    //  Check if a location is a gatehouse/outpost
+    // Check if a location is a gatehouse/outpost
     isGatehouse(locationId) {
         if (typeof GatehouseSystem !== 'undefined' && GatehouseSystem.GATEHOUSES) {
             if (GatehouseSystem.GATEHOUSES[locationId]) {
@@ -450,7 +460,35 @@ const TravelPanelMap = {
         return false;
     },
 
-    //  Check if location is behind a locked gate
+    // Check if a location is in a LOCKED zone (north or west) that requires payment
+    isLocationInLockedZone(locationId) {
+        if (typeof GatehouseSystem === 'undefined') {
+            return false;
+        }
+        // Get the zone for this location
+        const zone = GatehouseSystem.LOCATION_ZONES?.[locationId] ||
+                     (GatehouseSystem.getLocationZone ? GatehouseSystem.getLocationZone(locationId) : null);
+
+        // Only NORTHERN and WESTERN zones are locked
+        if (zone !== 'northern' && zone !== 'northern_deep' && zone !== 'western') {
+            return false;
+        }
+
+        // Check if the gatehouse for this zone has been unlocked
+        const gatehouseId = GatehouseSystem.ZONE_GATEHOUSES?.[zone];
+        if (gatehouseId && GatehouseSystem.unlockedGates?.has(gatehouseId)) {
+            return false;
+        }
+
+        // The gatehouse itself is never locked
+        if (this.isGatehouse(locationId)) {
+            return false;
+        }
+
+        return true;
+    },
+
+    // Check if location is behind a locked gate
     isLocationBehindLockedGate(locationId) {
         if (typeof GatehouseSystem === 'undefined' || !GatehouseSystem.canAccessLocation) {
             return false;

@@ -844,19 +844,27 @@ const GameWorldRenderer = {
             visibility[locId] = 'visible';
         });
 
-        // Second pass: ALL locations directly connected to visited ones are ALWAYS 'discovered'
-        // Players must be able to see and travel to any adjacent location from where they've been
-        // This includes outposts, gatehouses, and locations in locked regions
-        // The gate fee system handles access control, not visibility
+        // Second pass: Connected locations are 'discovered' UNLESS in a locked zone
+        // Locked zones (north, west) are hidden until fee is paid at gatehouse
         visited.forEach(locId => {
             const location = locations[locId];
             if (location && location.connections) {
                 location.connections.forEach(connectedId => {
                     // Only mark as discovered if not already visible
                     if (!visibility[connectedId]) {
-                        // ALL connected locations are discovered - no exceptions
-                        // You can always see where a path leads from an explored location
-                        visibility[connectedId] = 'discovered';
+                        // Check if connected location is in a locked zone
+                        const isLocked = this.isLocationInLockedZone(connectedId);
+                        if (isLocked) {
+                            // Locked zone locations stay hidden until fee paid
+                            // EXCEPT gatehouses themselves - those are always discoverable
+                            if (this.isGatehouse(connectedId)) {
+                                visibility[connectedId] = 'discovered';
+                            }
+                            // else stays hidden
+                        } else {
+                            // Free zone - mark as discovered
+                            visibility[connectedId] = 'discovered';
+                        }
                     }
                 });
             }
@@ -891,7 +899,7 @@ const GameWorldRenderer = {
         return visibility;
     },
 
-    // 🏰 check if a location is a gatehouse/outpost (the toll booths of the realm)
+    // Check if a location is a gatehouse/outpost (the toll booths of the realm)
     isGatehouse(locationId) {
         // Check GatehouseSystem first
         if (typeof GatehouseSystem !== 'undefined' && GatehouseSystem.GATEHOUSES) {
@@ -906,6 +914,38 @@ const GameWorldRenderer = {
             return true;
         }
         return false;
+    },
+
+    // Check if a location is in a LOCKED zone (north or west) that requires payment
+    // Returns true if the location is hidden until gatehouse fee is paid
+    isLocationInLockedZone(locationId) {
+        if (typeof GatehouseSystem === 'undefined') {
+            return false; // No gatehouse system, nothing is locked
+        }
+
+        // Get the zone for this location
+        const zone = GatehouseSystem.LOCATION_ZONES?.[locationId] ||
+                     GatehouseSystem.getLocationZone?.(locationId);
+
+        // Only NORTHERN and WESTERN zones are locked
+        // Everything else (starter, capital, southern, eastern) is free
+        if (zone !== 'northern' && zone !== 'northern_deep' && zone !== 'western') {
+            return false; // Free zone
+        }
+
+        // Check if the gatehouse for this zone has been unlocked
+        const gatehouseId = GatehouseSystem.ZONE_GATEHOUSES?.[zone];
+        if (gatehouseId && GatehouseSystem.unlockedGates?.has(gatehouseId)) {
+            return false; // Zone is unlocked, not hidden
+        }
+
+        // The gatehouse/outpost itself is never locked (player needs to reach it to pay)
+        if (this.isGatehouse(locationId)) {
+            return false;
+        }
+
+        // Zone is locked and fee not paid - location should be hidden
+        return true;
     },
 
     // 🚧 check if some gatekeeping mechanism blocks your path (capitalism simulator moment)
