@@ -193,89 +193,137 @@
     line-height: 1.4;
 }
 
-/* Main Content */
+/* Main Content - NO scroll here, only inventories scroll */
 .trade-main-content {
     flex: 1;
-    overflow-y: auto;
+    overflow: visible;
     padding: 15px 20px;
 }
 
 /* Trade Columns Layout */
 .trade-columns {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 15px;
-    min-height: 300px;
+    grid-template-columns: 1fr 200px 1fr;
+    gap: 12px;
 }
 
 .trade-column {
     background: var(--npc-bg-medium);
     border-radius: 8px;
-    padding: 12px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
+    max-height: 350px;
 }
 
 .trade-column h3, .trade-column h4 {
-    margin: 0 0 10px 0;
-    font-size: 0.9rem;
+    margin: 0 0 8px 0;
+    font-size: 0.85rem;
     color: var(--npc-text-dim);
     text-align: center;
+    flex-shrink: 0;
 }
 
-/* Inventory */
+/* Inventory - ONLY THIS scrolls */
 .trade-inventory {
-    max-height: 400px;
-    overflow-y: auto;
     flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 150px;
+    max-height: 250px;
 }
 
 .trade-inventory.scrollable {
     padding-right: 5px;
 }
 
+/* Inventory Item - Horizontal compact layout */
 .inventory-item {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 8px;
-    padding: 8px;
-    margin-bottom: 4px;
+    gap: 6px;
+    padding: 5px 8px;
+    margin-bottom: 3px;
     background: var(--npc-bg-light);
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.85rem;
+    transition: all 0.15s;
+    font-size: 0.8rem;
 }
 
 .inventory-item:hover {
     background: var(--npc-accent);
-    transform: translateX(3px);
+    transform: translateX(2px);
+}
+
+.inventory-item.added-to-cart {
+    background: var(--npc-success, #4a9);
+    transform: scale(0.98);
 }
 
 .item-icon {
-    font-size: 1.2rem;
+    font-size: 1rem;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
 }
 
 .item-name {
     flex: 1;
     color: var(--npc-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .item-qty {
     color: var(--npc-gold);
     font-weight: bold;
+    flex-shrink: 0;
+    font-size: 0.75rem;
 }
 
 .item-price {
     color: var(--npc-text-dim);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
 }
 
 .empty-inventory {
     text-align: center;
     color: var(--npc-text-dim);
-    padding: 20px;
+    padding: 15px;
     font-style: italic;
+    font-size: 0.8rem;
+}
+
+/* Gold input row */
+.gold-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--npc-border);
+    flex-shrink: 0;
+}
+
+.gold-input-row label {
+    font-size: 0.75rem;
+    color: var(--npc-text-dim);
+}
+
+.gold-input-row input {
+    flex: 1;
+    max-width: 80px;
+    padding: 4px 8px;
+    background: var(--npc-bg-dark);
+    border: 1px solid var(--npc-border);
+    border-radius: 4px;
+    color: var(--npc-gold);
+    font-size: 0.8rem;
 }
 
 /* Trade Area */

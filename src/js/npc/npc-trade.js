@@ -214,6 +214,12 @@ const NPCTradeWindow = {
             }
         }
 
+        // 🖤💀 REP-BASED PRICING: Calculate discount from city + NPC reputation 💰
+        const repDiscount = this.calculateRepDiscount(npcData);
+        if (repDiscount > this.currentDiscount) {
+            this.currentDiscount = repDiscount;
+        }
+
         this.updateHeader(npcData, type);
         this.updateNPCSection(npcData);
         this.renderContent(type, npcData);
@@ -740,18 +746,20 @@ const NPCTradeWindow = {
     // 💱 TRADING LOGIC
     // ═══════════════════════════════════════════════════════════════
 
-    addToOffer(itemId, side) {
+    addToOffer(itemId, side, quantity = 1) {
         if (side === 'player') {
             const currentQty = this.playerOffer.items[itemId] || 0;
             const availableQty = this.getPlayerItemQty(itemId);
-            if (currentQty < availableQty) {
-                this.playerOffer.items[itemId] = currentQty + 1;
+            const maxAdd = Math.min(quantity, availableQty - currentQty);
+            if (maxAdd > 0) {
+                this.playerOffer.items[itemId] = currentQty + maxAdd;
             }
         } else {
             const currentQty = this.npcOffer.items[itemId] || 0;
             const availableQty = this.getNPCItemQty(itemId);
-            if (currentQty < availableQty) {
-                this.npcOffer.items[itemId] = currentQty + 1;
+            const maxAdd = Math.min(quantity, availableQty - currentQty);
+            if (maxAdd > 0) {
+                this.npcOffer.items[itemId] = currentQty + maxAdd;
             }
         }
         this.updateOfferDisplay();
@@ -2387,6 +2395,42 @@ const NPCTradeWindow = {
         return itemId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     },
 
+    // 🖤💀 REPUTATION-BASED DISCOUNT CALCULATOR 💰
+    // City rep + NPC rep combine to give you better prices
+    calculateRepDiscount(npcData) {
+        let totalDiscount = 0;
+
+        // 🏰 CITY REPUTATION DISCOUNT - from CityReputationSystem
+        if (typeof CityReputationSystem !== 'undefined' && typeof game !== 'undefined') {
+            const cityId = game.currentLocation?.id;
+            if (cityId) {
+                const cityRep = CityReputationSystem.getReputation(cityId);
+                const repLevel = CityReputationSystem.getReputationLevel(cityId);
+                // Config-based price modifiers or fallback
+                const priceModifiers = (typeof GameConfig !== 'undefined' && GameConfig.reputation?.city?.priceModifiers) || {
+                    HOSTILE: 1.2, UNTRUSTED: 1.1, SUSPICIOUS: 1.05, NEUTRAL: 1.0,
+                    FRIENDLY: 0.95, TRUSTED: 0.9, ELITE: 0.8
+                };
+                const modifier = priceModifiers[repLevel?.name] || 1.0;
+                // Convert modifier to discount percentage (1.0 = 0%, 0.8 = 20%, 1.2 = -20%)
+                const cityDiscount = Math.round((1 - modifier) * 100);
+                totalDiscount += cityDiscount;
+            }
+        }
+
+        // 👤 NPC REPUTATION DISCOUNT - from NPCRelationshipSystem
+        if (typeof NPCRelationshipSystem !== 'undefined' && npcData) {
+            const npcType = npcData.type || npcData.id;
+            const npcRep = NPCRelationshipSystem.getReputation(npcType);
+            // Every 20 rep = 1% discount (max 5% from NPC alone)
+            const npcDiscount = Math.min(5, Math.floor(npcRep / 20));
+            totalDiscount += npcDiscount;
+        }
+
+        // Cap total discount at 25% (profitable but not broken)
+        return Math.min(25, Math.max(-20, totalDiscount));
+    },
+
     // 🖤💀 INVENTORY PRIORITY SORTING - Gold → Weather → Food → Water → Everything else 💰
     _sortInventoryByPriority(items) {
         const getPriority = (itemId) => {
@@ -2499,7 +2543,7 @@ const NPCTradeWindow = {
                 }
 
                 // 🛒 Click on inventory item - opens TradeCartPanel
-                // 🖤 BULK SHORTCUTS: Shift+Click = 5, Ctrl+Click = 25 💀
+                // 🖤 BULK SHORTCUTS: Alt+Click = 100, Ctrl+Click = 25, Shift+Click = 5 💀
                 const clickableItem = target.closest('.clickable-item');
                 if (clickableItem) {
                     const action = clickableItem.dataset.action;
@@ -2510,9 +2554,10 @@ const NPCTradeWindow = {
                     const itemIcon = clickableItem.dataset.itemIcon || '📦';
                     const itemWeight = parseFloat(clickableItem.dataset.itemWeight) || 1;
 
-                    // 🖤 Bulk quantity from modifier keys: Ctrl = 25, Shift = 5, Normal = 1 💀
+                    // 🖤 Bulk quantity from modifier keys: Alt = 100, Ctrl = 25, Shift = 5, Normal = 1 💀
                     let bulkQty = 1;
-                    if (e.ctrlKey || e.metaKey) bulkQty = 25;
+                    if (e.altKey) bulkQty = 100;
+                    else if (e.ctrlKey || e.metaKey) bulkQty = 25;
                     else if (e.shiftKey) bulkQty = 5;
 
                     // 🛒 Open TradeCartPanel and add item
@@ -2532,8 +2577,11 @@ const NPCTradeWindow = {
                         clickableItem.classList.add('added-to-cart');
                         setTimeout(() => clickableItem.classList.remove('added-to-cart'), 300);
                     } else {
-                        // Fallback to old behavior
-                        this.addToOffer(itemId, clickableItem.dataset.side);
+                        // Fallback to old behavior - pass bulk quantity
+                        this.addToOffer(itemId, clickableItem.dataset.side, bulkQty);
+                        // Visual feedback for old system too
+                        clickableItem.classList.add('added-to-cart');
+                        setTimeout(() => clickableItem.classList.remove('added-to-cart'), 200);
                     }
                     return;
                 }
