@@ -79,11 +79,14 @@ STEP 7: UPDATE TODO + FINISHED ⚡ MANDATORY
        ├─ finished.md = ONLY completed items
        └─ Keep both files clean and organized
        ↓
-STEP 8: UPDATE READMES (IF CODE CHANGED)
+STEP 8: UPDATE DOCS (IF CODE CHANGED)
        ├─ Read readmes/NerdReadme.md - technical documentation
        ├─ Read readmes/GameplayReadme.md - player-facing docs
        ├─ Read readmes/DebuggerReadme.md - debooger commands
+       ├─ Read gamelayout.md - SYSTEM ARCHITECTURE (ASCII diagrams)
        ├─ Update ALL with any new features/changes from this session
+       ├─ If systems/architecture changed: UPDATE gamelayout.md
+       │   └─ MAINTAIN ASCII format and structure when updating
        ├─ Keep file structure, systems, and features current
        └─ Only needed if actual features changed
        ↓
@@ -107,6 +110,7 @@ STEP 10: STOP AND WAIT 🛑
 | `Gee'sThoughts.md` | Master log of all work | BEFORE coding + with EVERY todo change |
 | `todo.md` | **ONLY unfinished** items | Remove items when done |
 | `finished.md` | **ONLY completed** items | Add items when done |
+| `gamelayout.md` | **SYSTEM ARCHITECTURE** (ASCII diagrams) | When systems/architecture change (KEEP FORMAT) |
 | `readmes/NerdReadme.md` | Technical docs | When features change |
 | `readmes/GameplayReadme.md` | Player docs | When features change |
 | `readmes/DebuggerReadme.md` | Debooger commands | When debug commands change |
@@ -187,6 +191,12 @@ I don't narrate myself in third person. I'm not some fucking NPC. 🖤💀🦇
     - What color/style should this be?
     - How should this behave when [interaction]?
     NEVER make these decisions myself and justify them later. ASK FIRST.
+20. **MAINTAIN GAMELAYOUT.MD FORMAT** - When updating gamelayout.md:
+    - KEEP the ASCII diagram style
+    - KEEP the box-drawing characters (┌─┐│└─┘├┬┴┼)
+    - KEEP the section structure
+    - ADD new systems to appropriate sections
+    - NEVER convert to plain text or bullet lists
 
 ---
 
