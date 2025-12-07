@@ -193,20 +193,19 @@
     line-height: 1.4;
 }
 
-/* Main Content - FIXED: No outer scroll, fits in container */
+/* Main Content */
 .trade-main-content {
     flex: 1;
-    overflow: visible;
+    overflow-y: auto;
     padding: 15px 20px;
 }
 
-/* Trade Columns Layout - IMPROVED: Better spacing */
+/* Trade Columns Layout */
 .trade-columns {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 15px;
-    min-height: 250px;
-    max-height: 350px;
+    min-height: 300px;
 }
 
 .trade-column {
@@ -215,7 +214,6 @@
     padding: 12px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 }
 
 .trade-column h3, .trade-column h4 {
@@ -223,71 +221,54 @@
     font-size: 0.9rem;
     color: var(--npc-text-dim);
     text-align: center;
-    flex-shrink: 0;
 }
 
-/* Inventory - IMPROVED: Single scroll per inventory, horizontal items */
+/* Inventory */
 .trade-inventory {
-    max-height: 280px;
+    max-height: 400px;
     overflow-y: auto;
-    overflow-x: hidden;
     flex: 1;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    gap: 6px;
-    padding: 4px;
 }
 
 .trade-inventory.scrollable {
     padding-right: 5px;
 }
 
-/* Inventory Item - IMPROVED: Horizontal compact layout */
 .inventory-item {
     display: flex;
-    flex-direction: row;
     align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 4px;
     background: var(--npc-bg-light);
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 0.8rem;
-    min-width: calc(50% - 6px);
-    max-width: calc(50% - 6px);
-    flex: 1 1 calc(50% - 6px);
+    font-size: 0.85rem;
 }
 
 .inventory-item:hover {
     background: var(--npc-accent);
-    transform: scale(1.02);
+    transform: translateX(3px);
 }
 
 .item-icon {
-    font-size: 1.1rem;
-    flex-shrink: 0;
+    font-size: 1.2rem;
 }
 
 .item-name {
     flex: 1;
     color: var(--npc-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .item-qty {
     color: var(--npc-gold);
     font-weight: bold;
-    flex-shrink: 0;
 }
 
 .item-price {
     color: var(--npc-text-dim);
-    font-size: 0.75rem;
-    flex-shrink: 0;
+    font-size: 0.8rem;
 }
 
 .empty-inventory {
@@ -295,7 +276,6 @@
     color: var(--npc-text-dim);
     padding: 20px;
     font-style: italic;
-    width: 100%;
 }
 
 /* Trade Area */
@@ -1137,22 +1117,10 @@
     .trade-columns {
         grid-template-columns: 1fr;
         gap: 10px;
-        max-height: none;
     }
 
     .trade-area {
         order: -1;
-    }
-
-    .trade-inventory {
-        max-height: 200px;
-    }
-
-    /* On mobile, items can be full width */
-    .inventory-item {
-        min-width: 100%;
-        max-width: 100%;
-        flex: 1 1 100%;
     }
 
     .robbery-options {
