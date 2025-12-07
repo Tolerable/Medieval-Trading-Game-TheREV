@@ -674,76 +674,38 @@ const TravelPanelMap = {
         el.addEventListener('mouseleave', () => this.hideTooltip());
         el.addEventListener('click', (e) => this.onLocationClick(e, location, isDiscovered));
 
-        this.mapElement.appendChild(el);
-
-        // Add location name label
-        // EXCEPTION: Gatehouses always show their real name so players know which gate is which
+        // Add label as child of location element (tied together)
         const label = document.createElement('div');
         label.className = 'mini-map-location-label' + (isDiscovered ? ' discovered' : '');
+
         const isGate = this.isGatehouse(location.id);
-        label.textContent = (isDiscovered && !isGate) ? '???' : location.name;
-        const labelColor = isDiscovered ? '#888' : '#fff';
+        const locationName = location.name || location.id;
+        label.textContent = (isDiscovered && !isGate) ? '???' : locationName;
+
         label.style.cssText = `
             position: absolute;
-            left: ${location.mapPosition.x}px;
-            top: ${location.mapPosition.y + style.size / 2 + 6 + labelOffset}px;
+            left: 50%;
+            top: ${style.size + 2}px;
             transform: translateX(-50%);
-            color: ${labelColor};
+            color: ${isDiscovered ? '#888' : '#fff'};
             font-size: 10px;
             font-style: ${isDiscovered ? 'italic' : 'normal'};
             text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 0 0 4px #000;
             white-space: nowrap;
             pointer-events: none;
-            z-index: 28; /* 🖤 ABOVE weather (2-3) - labels always readable 💀 */
         `;
-        this.mapElement.appendChild(label);
+        el.appendChild(label);
+
+        this.mapElement.appendChild(el);
     },
 
     //  Calculate label offsets to prevent overlapping
+    // SIMPLIFIED: No offsets - labels render directly below their markers
     calculateLabelOffsets(locations) {
         const offsets = {};
-        const locArray = Object.values(locations).filter(l => l.mapPosition);
-        locArray.sort((a, b) => a.mapPosition.x - b.mapPosition.x);
-
-        const labelPositions = [];
-
-        locArray.forEach(location => {
-            const style = this.locationStyles[location.type] || this.locationStyles.town;
-            const baseY = location.mapPosition.y + style.size / 2 + 6;
-            const x = location.mapPosition.x;
-
-            let offset = 0;
-            let attempts = 0;
-            const maxAttempts = 4;
-
-            while (attempts < maxAttempts) {
-                const testY = baseY + offset;
-                let hasOverlap = false;
-
-                for (const existing of labelPositions) {
-                    const xDist = Math.abs(existing.x - x);
-                    const yDist = Math.abs(existing.y - testY);
-
-                    if (xDist < 70 && yDist < 12) {
-                        hasOverlap = true;
-                        break;
-                    }
-                }
-
-                if (!hasOverlap) break;
-
-                attempts++;
-                if (attempts % 2 === 1) {
-                    offset = 12 * Math.ceil(attempts / 2);
-                } else {
-                    offset = -12 * Math.ceil(attempts / 2);
-                }
-            }
-
-            offsets[location.id] = offset;
-            labelPositions.push({ x, y: baseY + offset, id: location.id });
+        Object.keys(locations).forEach(id => {
+            offsets[id] = 0;
         });
-
         return offsets;
     },
 

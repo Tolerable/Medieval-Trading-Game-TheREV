@@ -1473,105 +1473,39 @@ const GameWorldRenderer = {
         el.addEventListener('mouseleave', () => this.hideTooltip());
         el.addEventListener('click', (e) => this.onLocationClick(e, location, isDiscovered));
 
-        this.mapElement.appendChild(el);
-
-        // Add location name label with stagger offset for overlapping labels
+        // Add label as child of location element (tied together)
         const label = document.createElement('div');
         label.className = 'map-location-label' + (isDiscovered ? ' discovered' : '');
 
-        // 🖤 Check if this is an area label (like GREENDALE) - make it BIG and BOLD 💀
-        // Area labels and capital ALWAYS show their real name (no ??? mystery)
-        const isAreaLabel = location.isAreaLabel || location.type === 'capital';
         const isGate = this.isGatehouse(location.id);
-
-        // Show "???" for discovered but unexplored locations
-        // EXCEPTION: Gatehouses and area labels always show their real name
-        if (isDiscovered && !isGate && !isAreaLabel) {
-            label.textContent = '???';
-        } else {
-            label.textContent = this.getLocationName(location.id);
-        }
-
-        const labelColor = isDiscovered ? '#aabbcc' : '#fff'; // 🖤 Lighter grey-blue for unexplored - actually visible!
-
-        // Area labels only get big styling when visited (not when discovered/unexplored)
-        const useAreaLabelStyle = isAreaLabel && !isDiscovered;
-        const fontSize = useAreaLabelStyle ? '24px' : '12px';
-        const fontWeight = useAreaLabelStyle ? 'bold' : 'normal';
-        const textShadow = useAreaLabelStyle ?
-            '2px 2px 4px #000, -2px -2px 4px #000, 0 0 8px #000, 0 0 12px #000' :
-            '1px 1px 3px #000, -1px -1px 3px #000, 0 0 6px #000';
+        const locationName = location.name || location.id;
+        label.textContent = (isDiscovered && !isGate) ? '???' : locationName;
 
         label.style.cssText = `
             position: absolute;
-            left: ${scaledPos.x}px;
-            top: ${scaledPos.y + style.size / 2 + 8 + labelOffset}px;
+            left: 50%;
+            top: ${style.size + 4}px;
             transform: translateX(-50%);
-            color: ${labelColor};
-            font-size: ${fontSize};
-            font-weight: ${fontWeight};
+            color: ${isDiscovered ? '#aabbcc' : '#fff'};
+            font-size: 12px;
             font-style: ${isDiscovered ? 'italic' : 'normal'};
-            text-shadow: ${textShadow};
+            text-shadow: 1px 1px 3px #000, -1px -1px 3px #000, 0 0 6px #000;
             white-space: nowrap;
             pointer-events: none;
-            z-index: 18; /* 🖤 ABOVE weather (2-3) - matches --z-map-labels 💀 */
         `;
-        this.mapElement.appendChild(label);
+        el.appendChild(label);
+
+        this.mapElement.appendChild(el);
     },
 
-    // 🔍 calculate label offsets so text doesn't overlap like my unresolved issues
+    // 🔍 calculate label offsets so text doesn't overlap
+    // SIMPLIFIED: No offsets for now - just return 0 for all locations
+    // This ensures labels render directly below their location markers
     calculateLabelOffsets(locations) {
         const offsets = {};
-        const locArray = Object.values(locations).filter(l => l.mapPosition);
-
-        // Sort by x position to process left to right
-        locArray.sort((a, b) => a.mapPosition.x - b.mapPosition.x);
-
-        // Track label positions to detect overlaps
-        const labelPositions = [];
-
-        locArray.forEach(location => {
-            const style = this.locationStyles[location.type] || this.locationStyles.town;
-            const baseY = location.mapPosition.y + style.size / 2 + 8;
-            const x = location.mapPosition.x;
-
-            // Check for nearby labels that might overlap (within 80px horizontally and similar Y)
-            let offset = 0;
-            let attempts = 0;
-            const maxAttempts = 4;
-
-            while (attempts < maxAttempts) {
-                const testY = baseY + offset;
-                let hasOverlap = false;
-
-                for (const existing of labelPositions) {
-                    const xDist = Math.abs(existing.x - x);
-                    const yDist = Math.abs(existing.y - testY);
-
-                    // If horizontally close (within 80px) and vertically close (within 14px)
-                    if (xDist < 80 && yDist < 14) {
-                        hasOverlap = true;
-                        break;
-                    }
-                }
-
-                if (!hasOverlap) {
-                    break;
-                }
-
-                // Alternate between pushing down and up
-                attempts++;
-                if (attempts % 2 === 1) {
-                    offset = 14 * Math.ceil(attempts / 2);
-                } else {
-                    offset = -14 * Math.ceil(attempts / 2);
-                }
-            }
-
-            offsets[location.id] = offset;
-            labelPositions.push({ x, y: baseY + offset, id: location.id });
+        Object.keys(locations).forEach(id => {
+            offsets[id] = 0;
         });
-
         return offsets;
     },
 

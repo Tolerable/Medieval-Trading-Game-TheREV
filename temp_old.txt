@@ -74,7 +74,7 @@ const GameWorld = {
             population: 10000,
             marketSize: 'grand',
             travelCost: { base: 5 },
-            connections: ['northern_outpost', 'jade_harbor', 'greendale', 'western_watch', 'kings_inn'],
+            connections: ['ironforge_city', 'jade_harbor', 'greendale', 'stonebridge', 'kings_inn'],
             mapPosition: { x: 400, y: 300 },
             sells: ['royal_goods', 'luxury_items', 'fine_clothes', 'jewelry', 'silk_garments', 'perfume', 'wine', 'spices'],
             buys: ['artifacts', 'rare_gems', 'silk', 'gems', 'gold_bar', 'exotic_goods', 'furs', 'spices'],
@@ -84,20 +84,20 @@ const GameWorld = {
         // ═══════════════════════════════════════════════════════════
         //  CITIES (6 major cities around the capital)
         // ═══════════════════════════════════════════════════════════
-        northern_outpost: {
-            id: 'northern_outpost',
-            name: 'Northern Outpost',
+        ironforge_city: {
+            id: 'ironforge_city',
+            name: 'Ironforge City',
             region: 'northern',
-            type: 'outpost',
-            description: 'A fortified military outpost guarding the northern frontier. Pay the passage fee here to enter the Northern Territories.',
-            population: 200,
-            marketSize: 'small',
+            type: 'city',
+            description: 'A mighty fortress city built around ancient forges. Master smiths craft weapons and armor from raw ore.',
+            population: 3000,
+            marketSize: 'large',
             travelCost: { base: 8 },
-            connections: ['royal_capital', 'frostholm_village', 'iron_mines', 'ironforge_city'],
-            mapPosition: { x: 340, y: 200 },
-            sells: ['iron_sword', 'shield', 'helmet', 'chainmail', 'bandages', 'torch', 'rope'],
-            buys: ['food', 'bread', 'meat', 'ale', 'furs', 'leather', 'coal'],
-            npcs: ['guard', 'captain', 'sergeant', 'merchant'] // GATE - guards control passage to northern zone
+            connections: ['royal_capital', 'frostholm_village', 'iron_mines', 'northern_outpost'],
+            mapPosition: { x: 400, y: 160 },
+            sells: ['iron_sword', 'steel_sword', 'iron_armor', 'chainmail', 'plate_armor', 'helmet', 'shield', 'iron_bar', 'steel_bar', 'iron_tools'],
+            buys: ['iron_ore', 'coal', 'leather', 'wood', 'gold_ore'],
+            npcs: ['blacksmith', 'guard', 'captain', 'apothecary', 'merchant', 'miner'] // Quest: main_preparation needs blacksmith, apothecary, guard
         },
         jade_harbor: {
             id: 'jade_harbor',
@@ -116,7 +116,8 @@ const GameWorld = {
         },
         greendale: {
             id: 'greendale',
-            name: 'Greendale',
+            name: 'GREENDALE',
+            isAreaLabel: true, // Render as large area name on map
             region: 'starter',
             type: 'city',
             description: 'The breadbasket of the realm. Farmers bring wheat and livestock; bakers and brewers turn them into bread and ale.',
@@ -129,20 +130,20 @@ const GameWorld = {
             buys: ['wheat', 'grain', 'milk', 'honey', 'salt', 'herbs', 'wool'],
             npcs: ['elder', 'baker', 'apothecary', 'merchant', 'farmer', 'guard'] // Quest: act1_quest1 (First Steps) needs elder (innkeeper only at inns!)
         },
-        western_watch: {
-            id: 'western_watch',
-            name: 'Western Watch',
+        stonebridge: {
+            id: 'stonebridge',
+            name: 'Stonebridge',
             region: 'western',
-            type: 'outpost',
-            description: 'A fortified outpost watching the wild western frontier. Pay the passage fee here to enter the Western Wilds.',
-            population: 150,
-            marketSize: 'small',
+            type: 'city',
+            description: 'An ancient city of master masons. They buy raw stone and timber to craft tools and building materials.',
+            population: 2800,
+            marketSize: 'large',
             travelCost: { base: 8 },
-            connections: ['royal_capital', 'darkwood_village', 'stone_quarry', 'stonebridge'],
-            mapPosition: { x: 160, y: 340 },
-            sells: ['iron_sword', 'bow', 'arrows', 'rope', 'torch', 'bandages', 'map'],
-            buys: ['food', 'bread', 'ale', 'leather', 'timber', 'coal'],
-            npcs: ['guard', 'scout', 'sergeant', 'merchant'] // GATE - guards control passage to western zone
+            connections: ['royal_capital', 'darkwood_village', 'stone_quarry', 'western_outpost'],
+            mapPosition: { x: 240, y: 300 },
+            sells: ['bricks', 'mortar', 'tools', 'hammer', 'pickaxe', 'nails', 'planks', 'furniture'],
+            buys: ['stone', 'timber', 'wood', 'iron_bar', 'clay', 'coal'],
+            npcs: ['merchant', 'guard', 'blacksmith', 'mason'] // Quest: stonebridge quests need merchant, guard
         },
         silverkeep: {
             id: 'silverkeep',
@@ -153,7 +154,7 @@ const GameWorld = {
             population: 2200,
             marketSize: 'large',
             travelCost: { base: 10 },
-            connections: ['northern_outpost', 'silver_mine', 'mountain_pass_inn'],
+            connections: ['ironforge_city', 'silver_mine', 'mountain_pass_inn'],
             mapPosition: { x: 280, y: 160 },
             sells: ['jewelry', 'gemstone', 'mirror', 'crown', 'gold_bar', 'fine_clothes'],
             buys: ['silver_ore', 'gold_ore', 'gems', 'raw_gems', 'coal'],
@@ -187,7 +188,7 @@ const GameWorld = {
             population: 200,
             marketSize: 'small',
             travelCost: { base: 10 },
-            connections: ['northern_outpost', 'frozen_cave', 'winterwatch_outpost'],
+            connections: ['ironforge_city', 'frozen_cave', 'winterwatch_outpost'],
             mapPosition: { x: 460, y: 100 },
             sells: ['furs', 'leather', 'hide', 'winter_clothing', 'meat'],
             buys: ['bread', 'ale', 'tools', 'rope', 'salt', 'grain'],
@@ -217,7 +218,7 @@ const GameWorld = {
             population: 180,
             marketSize: 'small',
             travelCost: { base: 10 },
-            connections: ['western_watch', 'ancient_forest', 'hermit_grove'],
+            connections: ['stonebridge', 'ancient_forest', 'hermit_grove'],
             mapPosition: { x: 160, y: 240 },
             sells: ['timber', 'planks', 'wood', 'mushrooms', 'herbs', 'rope'],
             buys: ['axe', 'food', 'ale', 'nails', 'iron_tools'],
@@ -282,7 +283,7 @@ const GameWorld = {
             population: 80,
             marketSize: 'small',
             travelCost: { base: 12 },
-            connections: ['northern_outpost', 'deep_cavern'],
+            connections: ['ironforge_city', 'deep_cavern'],
             mapPosition: { x: 340, y: 100 },
             sells: ['iron_ore', 'coal', 'stone'],
             buys: ['pickaxe', 'torch', 'lamp', 'rope', 'food', 'ale', 'bandages'],
@@ -667,7 +668,7 @@ const GameWorld = {
             population: 20,
             marketSize: 'small',
             travelCost: { base: 10 },
-            connections: ['silverkeep', 'ironforge_city'],
+            connections: ['silverkeep', 'northern_outpost'],
             mapPosition: { x: 220, y: 200 },
             sells: ['ale', 'bread', 'meat', 'furs', 'torch', 'rope'],
             buys: ['wheat', 'vegetables', 'coal', 'wood', 'salt'],
@@ -722,20 +723,20 @@ const GameWorld = {
         // ═══════════════════════════════════════════════════════════
         //  OUTPOSTS (3 frontier locations)
         // ═══════════════════════════════════════════════════════════
-        ironforge_city: {
-            id: 'ironforge_city',
-            name: 'Ironforge City',
+        northern_outpost: {
+            id: 'northern_outpost',
+            name: 'Northern Outpost',
             region: 'northern',
-            type: 'city',
-            description: 'A mighty fortress city built around ancient forges. Master smiths craft legendary weapons and armor from raw ore.',
-            population: 3000,
-            marketSize: 'large',
+            type: 'outpost',
+            description: 'A military outpost guarding the northern frontier. Soldiers trade weapons and supplies.',
+            population: 100,
+            marketSize: 'small',
             travelCost: { base: 12 },
-            connections: ['northern_outpost', 'mountain_pass_inn'],
-            mapPosition: { x: 400, y: 160 },
-            sells: ['iron_sword', 'steel_sword', 'iron_armor', 'chainmail', 'plate_armor', 'helmet', 'shield', 'iron_bar', 'steel_bar', 'iron_tools'],
-            buys: ['iron_ore', 'coal', 'leather', 'wood', 'gold_ore'],
-            npcs: ['blacksmith', 'guard', 'captain', 'apothecary', 'merchant', 'miner'] // CITY - behind the gate
+            connections: ['ironforge_city', 'mountain_pass_inn'],
+            mapPosition: { x: 340, y: 200 },
+            sells: ['iron_sword', 'shield', 'helmet', 'chainmail', 'bandages', 'torch'],
+            buys: ['food', 'bread', 'meat', 'ale', 'furs', 'leather', 'coal'],
+            npcs: ['guard', 'captain', 'sergeant', 'blacksmith']
         },
         winterwatch_outpost: {
             id: 'winterwatch_outpost',
@@ -752,20 +753,20 @@ const GameWorld = {
             buys: ['furs', 'food', 'meat', 'ale', 'coal', 'wood'],
             npcs: ['guard', 'captain', 'scout']
         },
-        stonebridge: {
-            id: 'stonebridge',
-            name: 'Stonebridge',
+        western_outpost: {
+            id: 'western_outpost',
+            name: 'Western Watch',
             region: 'western',
-            type: 'village',
-            description: 'An ancient village of master masons built around a great stone bridge. They craft tools and building materials from raw stone and timber.',
-            population: 2800,
-            marketSize: 'large',
+            type: 'outpost',
+            description: 'An outpost watching the wild western frontier. Scouts trade survival gear and maps.',
+            population: 70,
+            marketSize: 'small',
             travelCost: { base: 12 },
-            connections: ['western_watch', 'stone_quarry'],
-            mapPosition: { x: 240, y: 300 },
-            sells: ['bricks', 'mortar', 'tools', 'hammer', 'pickaxe', 'nails', 'planks', 'furniture'],
-            buys: ['stone', 'timber', 'wood', 'iron_bar', 'clay', 'coal'],
-            npcs: ['merchant', 'guard', 'blacksmith', 'mason'] // VILLAGE - behind the gate
+            connections: ['stonebridge', 'stone_quarry'],
+            mapPosition: { x: 160, y: 340 },
+            sells: ['iron_sword', 'bow', 'arrows', 'rope', 'torch', 'bandages'],
+            buys: ['food', 'bread', 'ale', 'leather', 'timber', 'coal'],
+            npcs: ['guard', 'scout', 'sergeant'] // Quest: main_frontier, main_shadow_key need guard
         },
 
         // ═══════════════════════════════════════════════════════════
@@ -848,7 +849,7 @@ const GameWorld = {
             population: 90,
             marketSize: 'medium',
             travelCost: { base: 10 },
-            connections: ['western_watch', 'stonebridge', 'miners_rest'],
+            connections: ['stonebridge', 'western_outpost', 'miners_rest'],
             mapPosition: { x: 180, y: 420 },
             sells: ['stone', 'clay', 'sand', 'bricks'],
             buys: ['pickaxe', 'tools', 'food', 'ale', 'rope', 'bandages'],
@@ -957,21 +958,15 @@ const GameWorld = {
         //  Normal world NPC loading
         const npcTypes = this.getNPCsForLocation(locationId);
 
-        // Filter and map NPCs, excluding killed ones
         return npcTypes.map(npcType => {
-            //  Generate unique ID for this NPC at this location
-            const npcId = `${locationId}_${npcType}`;
-
-            // Check if this NPC is dead (killed in combat, respawns after 24 game hours)
-            if (this.isNPCDead(npcId)) {
-                return null; // Skip this NPC
-            }
-
             //  Try to get persona from database
             let persona = null;
             if (typeof NPCPersonaDatabase !== 'undefined') {
                 persona = NPCPersonaDatabase.getPersona(npcType);
             }
+
+            //  Generate unique ID for this NPC at this location
+            const npcId = `${locationId}_${npcType}`;
 
             //  Generate unique name for this NPC at this location
             const generatedName = this.generateNPCName(locationId, npcType);
@@ -988,7 +983,7 @@ const GameWorld = {
                 //  CRITICAL: Set type AFTER persona spread to prevent overwrite from fallback personas
                 type: npcType
             };
-        }).filter(npc => npc !== null); // Remove nulls (killed NPCs)
+        });
     },
 
     //  Format doom NPC type to display name
@@ -1235,30 +1230,18 @@ const GameWorld = {
     doomVisitedLocations: [], //  Separate tracking for Doom World - starts fresh on each entry!
     currentRegion: 'starter',
 
-    // Killed NPCs tracking - NPCs respawn after time defined in GameConfig
-    killedNPCs: {}, // { npcId: killTimeInGameMinutes }
-
-    // Get NPC respawn time from config (fallback to 1440 = 24 hours)
-    get NPC_RESPAWN_TIME() {
-        return (typeof GameConfig !== 'undefined' && GameConfig.npc?.death?.respawnTimeGameMinutes)
-            || (typeof GameConfig !== 'undefined' && GameConfig.world?.npcRespawnTimeMinutes)
-            || 1440;
-    },
-
     // ═══════════════════════════════════════════════════════════════
     //  INITIALIZATION - Where the world awakens
     // ═══════════════════════════════════════════════════════════════
     init() {
         console.log(' GameWorld awakens from the void...');
         this.unlockedRegions = ['starter', 'capital', 'northern', 'eastern', 'western', 'southern'];
-        //  Start with greendale as default - createCharacter() will add proper starting location based on perks
+        //  Start with greendale as default - createCharacter() will add proper starting location based on perks 
         // This ensures the map always has something to render even if called before character creation
         this.visitedLocations = ['greendale'];
         //  Reset doom world visited locations on new game - no bleeding between games!
         this.doomVisitedLocations = [];
         this.currentRegion = 'starter';
-        // Reset killed NPCs on new game
-        this.killedNPCs = {};
 
         //  Try to setup market prices (may fail if ItemDatabase not loaded)
         try {
@@ -1305,89 +1288,6 @@ const GameWorld = {
         }
 
         console.log(' GameWorld initialization complete - the realm awaits');
-    },
-
-    // ═══════════════════════════════════════════════════════════════
-    // NPC DEATH TRACKING - Track killed NPCs and respawn after 24 game hours
-    // ═══════════════════════════════════════════════════════════════
-
-    // Mark an NPC as killed - they won't appear for 24 game hours
-    markNPCKilled(npcId, locationId) {
-        const fullId = locationId ? `${locationId}_${npcId}` : npcId;
-        const currentTime = this._getCurrentGameTime();
-        this.killedNPCs[fullId] = currentTime;
-        console.log(`NPC killed: ${fullId} at game time ${currentTime}`);
-
-        // Fire event for other systems
-        if (typeof EventBus !== 'undefined') {
-            EventBus.emit('npc-killed', { npcId: fullId, killTime: currentTime });
-        }
-    },
-
-    // Check if an NPC is currently dead (hasn't respawned yet)
-    isNPCDead(npcId) {
-        const killTime = this.killedNPCs[npcId];
-        if (!killTime) return false;
-
-        const currentTime = this._getCurrentGameTime();
-        const timeSinceKill = currentTime - killTime;
-
-        // Check if respawn time has passed
-        if (timeSinceKill >= this.NPC_RESPAWN_TIME) {
-            // NPC has respawned - remove from killed list
-            delete this.killedNPCs[npcId];
-            console.log(`NPC respawned: ${npcId}`);
-            return false;
-        }
-
-        return true; // Still dead
-    },
-
-    // Get time until NPC respawns (in game minutes)
-    getTimeUntilRespawn(npcId) {
-        const killTime = this.killedNPCs[npcId];
-        if (!killTime) return 0;
-
-        const currentTime = this._getCurrentGameTime();
-        const timeSinceKill = currentTime - killTime;
-        const remaining = this.NPC_RESPAWN_TIME - timeSinceKill;
-
-        return Math.max(0, remaining);
-    },
-
-    // Get current game time in minutes
-    _getCurrentGameTime() {
-        if (typeof game !== 'undefined' && game.player && game.player.stats) {
-            // Calculate total game minutes from day and time
-            const day = game.player.stats.day || 1;
-            const hour = game.player.stats.hour || 6;
-            const minute = game.player.stats.minute || 0;
-            return ((day - 1) * 1440) + (hour * 60) + minute;
-        }
-        // Fallback
-        return 0;
-    },
-
-    // Check all killed NPCs and clean up respawned ones
-    checkNPCRespawns() {
-        const currentTime = this._getCurrentGameTime();
-        const respawned = [];
-
-        for (const npcId in this.killedNPCs) {
-            const killTime = this.killedNPCs[npcId];
-            if (currentTime - killTime >= this.NPC_RESPAWN_TIME) {
-                respawned.push(npcId);
-                delete this.killedNPCs[npcId];
-            }
-        }
-
-        if (respawned.length > 0) {
-            console.log(`NPCs respawned: ${respawned.join(', ')}`);
-            // Refresh people panel if open
-            if (typeof PeoplePanel !== 'undefined' && PeoplePanel.isOpen) {
-                PeoplePanel.refresh();
-            }
-        }
     },
 
     // ═══════════════════════════════════════════════════════════════
@@ -1871,8 +1771,7 @@ const GameWorld = {
             unlockedRegions: [...this.unlockedRegions],
             visitedLocations: [...this.visitedLocations],
             doomVisitedLocations: [...this.doomVisitedLocations], //  Save doom progress too!
-            currentRegion: this.currentRegion,
-            killedNPCs: { ...this.killedNPCs } // Save killed NPCs for respawn tracking
+            currentRegion: this.currentRegion
         };
     },
 
@@ -1880,11 +1779,8 @@ const GameWorld = {
         if (!data) return;
         if (data.unlockedRegions) this.unlockedRegions = [...data.unlockedRegions];
         if (data.visitedLocations) this.visitedLocations = [...data.visitedLocations];
-        if (data.doomVisitedLocations) this.doomVisitedLocations = [...data.doomVisitedLocations]; //
+        if (data.doomVisitedLocations) this.doomVisitedLocations = [...data.doomVisitedLocations]; // 
         if (data.currentRegion) this.currentRegion = data.currentRegion;
-        if (data.killedNPCs) this.killedNPCs = { ...data.killedNPCs };
-        // Check for respawns on load
-        this.checkNPCRespawns();
         console.log(' GameWorld state restored from the abyss');
     }
 };

@@ -412,16 +412,14 @@ const PropertyMapPicker = {
                 if (isBuildable) this.selectLocation(locId);
             });
 
-            this.mapElement.appendChild(marker);
-
-            // Add name label below
+            // Add label as child of marker (tied together)
             const label = document.createElement('div');
             label.className = 'property-location-label';
             label.textContent = location.name;
             label.style.cssText = `
                 position: absolute;
-                left: ${location.x}px;
-                top: ${location.y + style.size/2 + 5}px;
+                left: 50%;
+                top: ${style.size + 5}px;
                 transform: translateX(-50%);
                 font-size: 11px;
                 color: ${isBuildable ? '#fff' : '#888'};
@@ -430,7 +428,9 @@ const PropertyMapPicker = {
                 white-space: nowrap;
                 text-align: center;
             `;
-            this.mapElement.appendChild(label);
+            marker.appendChild(label);
+
+            this.mapElement.appendChild(marker);
         });
     },
 
