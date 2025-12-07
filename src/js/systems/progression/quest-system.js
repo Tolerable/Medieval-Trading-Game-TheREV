@@ -1196,6 +1196,13 @@ const QuestSystem = {
         document.dispatchEvent(new CustomEvent('quest-started', { detail: { quest: activeQuest } }));
         //  Also emit quest-assigned - PeoplePanel waits for this
         document.dispatchEvent(new CustomEvent('quest-assigned', { detail: { quest: activeQuest, questId } }));
+
+        //  Auto-expand the quest's chain in the tracker so player sees it immediately
+        const chainName = quest.chain || this.getQuestChainName(questId);
+        if (chainName) {
+            this.expandedChains[chainName] = true;
+        }
+
         this.updateQuestLogUI();
 
         //  Auto-open the quest info panel for the new quest
@@ -1204,6 +1211,23 @@ const QuestSystem = {
         }, 100);
 
         return { success: true, quest: activeQuest };
+    },
+
+    // Get the chain name for a quest (looks it up if not explicitly set)
+    getQuestChainName(questId) {
+        const quest = this.quests[questId];
+        if (!quest) return null;
+
+        // If quest has explicit chain, use it
+        if (quest.chain) return quest.chain;
+
+        // Check if it's a main quest (shadow_rising chain)
+        if (quest.type === 'main') return 'shadow_rising';
+
+        // Check if it has a location-based chain
+        if (quest.location) return quest.location;
+
+        return 'side_quests';
     },
 
     checkProgress(questId) {
