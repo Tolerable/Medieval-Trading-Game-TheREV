@@ -9819,6 +9819,22 @@ function handleKeyPress(event) {
     // Keyboard shortcuts
     switch (event.key) {
         case 'Escape':
+            // SACRED PROTECTION: Never fuck with game setup or character creation
+            const gameSetupPanel = document.getElementById('game-setup-panel');
+            const charCreationOverlay = document.getElementById('character-creation-overlay');
+
+            if (gameSetupPanel && !gameSetupPanel.classList.contains('hidden') && gameSetupPanel.style.display !== 'none') {
+                return; // Game setup is protected from ESC massacre
+            }
+            if (charCreationOverlay && (charCreationOverlay.classList.contains('active') || charCreationOverlay.style.display === 'flex')) {
+                return; // Character creation is protected too
+            }
+
+            // Let ModalSystem handle if modal is open
+            if (typeof ModalSystem !== 'undefined' && ModalSystem.activeModals && ModalSystem.activeModals.size > 0) {
+                return; // Modal handles its own ESC
+            }
+
             // Let PanelManager handle ESC for closing panels in order
             if (typeof PanelManager !== 'undefined' && PanelManager.openPanels.length > 0) {
                 // PanelManager will handle this via its capture handler
