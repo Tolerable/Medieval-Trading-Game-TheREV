@@ -10382,6 +10382,22 @@ game.initOverlaySystem = function() {
     // Add escape key listener for overlays (PanelManager handles panel-by-panel closing)
     EventManager.addEventListener(document, 'keydown', (e) => {
         if (e.key === 'Escape') {
+            // NEVER fuck with character creation / game setup - the void awaits
+            const charCreation = document.getElementById('character-creation-overlay');
+            const gameSetup = document.getElementById('game-setup-panel');
+
+            if (charCreation && (charCreation.classList.contains('active') || charCreation.style.display === 'flex')) {
+                return; // Leave character creation alone!
+            }
+            if (gameSetup && !gameSetup.classList.contains('hidden') && gameSetup.style.display !== 'none') {
+                return; // Leave game setup alone!
+            }
+
+            // Let ModalSystem handle if modal is open
+            if (typeof ModalSystem !== 'undefined' && ModalSystem.activeModals && ModalSystem.activeModals.size > 0) {
+                return; // Modal's handler deals with this
+            }
+
             // Let PanelManager handle if it has panels open
             if (typeof PanelManager !== 'undefined' && PanelManager.openPanels.length > 0) {
                 return; // PanelManager handles this

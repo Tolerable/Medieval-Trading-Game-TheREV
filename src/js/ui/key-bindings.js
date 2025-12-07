@@ -299,10 +299,15 @@ const KeyBindings = {
             return; // Modal's own ESC handler will deal with this
         }
 
-        // NEVER close character creation - that sends you to the void of despair
+        // NEVER close character creation or game setup - that sends you to the void of despair
         const charCreation = document.getElementById('character-creation-overlay');
+        const gameSetup = document.getElementById('game-setup-panel');
+
         if (charCreation && (charCreation.classList.contains('active') || charCreation.style.display === 'flex')) {
             return; // Let them finish making their doomed character in peace
+        }
+        if (gameSetup && !gameSetup.classList.contains('hidden') && gameSetup.style.display !== 'none') {
+            return; // Game setup is sacred too
         }
 
         if (document.fullscreenElement) {

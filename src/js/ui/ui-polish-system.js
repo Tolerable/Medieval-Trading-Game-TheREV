@@ -481,18 +481,23 @@ const UIPolishSystem = {
             return; // Modal's own ESC handler will deal with this
         }
 
-        // NEVER close character creation - that sends you to the void
+        // NEVER close character creation or game setup - that sends you to the void
         const charCreation = document.getElementById('character-creation-overlay');
+        const gameSetup = document.getElementById('game-setup-panel');
+
         if (charCreation && (charCreation.classList.contains('active') || charCreation.style.display === 'flex')) {
             return; // Don't touch it, let the player finish creating their character
+        }
+        if (gameSetup && !gameSetup.classList.contains('hidden') && gameSetup.style.display !== 'none') {
+            return; // Don't touch game setup either!
         }
 
         // banish the visible windows back into the dark (except protected ones)
         const openPanels = document.querySelectorAll('.panel[style*="display: block"], .modal[style*="display: block"]');
 
         openPanels.forEach(panel => {
-            // Skip character creation even if found via selector
-            if (panel.id === 'character-creation-overlay') return;
+            // Skip character creation and game setup even if found via selector
+            if (panel.id === 'character-creation-overlay' || panel.id === 'game-setup-panel') return;
             panel.style.display = 'none';
         });
     },
