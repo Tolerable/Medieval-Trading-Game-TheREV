@@ -117,7 +117,7 @@ const PeoplePanel = {
                     <div id="people-trade-section" class="trade-section hidden">
                         <div class="trade-header">💰 Trade Available</div>
                         <div id="trade-preview" class="trade-preview"></div>
-                        <button class="trade-btn" data-action="open-trade">Trade with NPC</button>
+                        <button class="trade-btn" data-action="open-trade" onclick="PeoplePanel.openFullTrade()">Trade with NPC</button>
                     </div>
                 </div>
 
@@ -580,7 +580,8 @@ const PeoplePanel = {
             if (e.target.matches('[data-action="back-to-list"]')) {
                 this.showListView();
             }
-            if (e.target.matches('[data-action="open-trade"]')) {
+            if (e.target.matches('[data-action="open-trade"]') || e.target.closest('[data-action="open-trade"]')) {
+                console.log('🛒 Trade button clicked, currentNPC:', this.currentNPC);
                 this.openFullTrade();
             }
             if (e.target.matches('[data-action="send-message"]')) {
@@ -2211,7 +2212,11 @@ const PeoplePanel = {
         }
 
         // 🖤 Open the NPC's inventory after a short delay for the message to show
-        setTimeout(() => this.openFullTrade(), 500);
+        console.log('🛒 askAboutWares: About to call openFullTrade in 500ms');
+        setTimeout(() => {
+            console.log('🛒 askAboutWares: setTimeout fired, calling openFullTrade now');
+            this.openFullTrade();
+        }, 500);
     },
 
     async askAboutWork() {
@@ -3193,6 +3198,9 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
 
     openFullTrade() {
         // 🖤 Open NPC trade window for this specific NPC 💀
+        console.log('🛒 openFullTrade called, currentNPC:', this.currentNPC);
+        console.log('🛒 NPCTradeWindow defined:', typeof NPCTradeWindow !== 'undefined');
+
         if (!this.currentNPC) {
             console.warn('💱 No NPC selected for trade');
             return;
@@ -3200,6 +3208,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
 
         // 🛒 Open the NPC trade window
         if (typeof NPCTradeWindow !== 'undefined') {
+            console.log('🛒 Calling NPCTradeWindow.open with:', this.currentNPC);
             NPCTradeWindow.open(this.currentNPC, 'trade');
         } else {
             // 🖤 Fallback to grand market if at capital
