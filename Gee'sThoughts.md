@@ -4,6 +4,35 @@
 
 ---
 
+## 2025-12-06 - SESSION #39: LOCATION TAB VISITED LIST FIX
+
+**Request:** Location tab not showing past visited locations correctly
+
+**Status:** COMPLETE
+
+### Fixes Implemented:
+
+**1. Tab switching now refreshes content (travel-panel-map.js)**
+- Destinations tab now calls `populateDestinations()` when shown
+- History tab now calls `GameWorldRenderer.updateHistoryPanel()` when shown
+
+**2. Visited locations uses world-aware helper (game.js)**
+- Changed `GameWorld.visitedLocations` to use `GameWorld.getActiveVisitedLocations()`
+- This properly supports doom world vs normal world separation
+- Applied to both `populateDestinations()` and `calculateDestinationVisibility()`
+
+**3. Visual visited indicator on location cards (game.js)**
+- Added `isVisited` property to destination objects
+- Cards with visited locations get green left border (`.visited` class)
+- "VISITED" badge shown next to location name
+- Filter "Visited Only" now works correctly
+
+### Files Changed:
+- `src/js/systems/travel/travel-panel-map.js` - Tab refresh on switch
+- `src/js/core/game.js` - World-aware visited locations + visual indicator
+
+---
+
 ## 2025-12-06 - SESSION #38: REROUTE TRAVEL FIX
 
 **Request:** Reroute travel not working:

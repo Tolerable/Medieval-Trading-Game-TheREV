@@ -227,6 +227,20 @@ const TravelPanelMap = {
                 if (tabName === 'destination') {
                     this.updateDestinationDisplay();
                 }
+
+                // Update destinations/locations list when shown
+                if (tabName === 'destinations') {
+                    if (typeof populateDestinations === 'function') {
+                        populateDestinations();
+                    }
+                }
+
+                // Update history tab when shown
+                if (tabName === 'history') {
+                    if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.updateHistoryPanel) {
+                        GameWorldRenderer.updateHistoryPanel();
+                    }
+                }
             });
         });
     },

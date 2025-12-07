@@ -7869,6 +7869,11 @@ function populateDestinations() {
     const currentLoc = typeof GameWorld !== 'undefined' ? GameWorld.locations?.[currentLocId] : null;
     const allLocations = typeof GameWorld !== 'undefined' ? GameWorld.locations : {};
 
+    // Get visited locations using world-aware helper (supports doom world separation)
+    const visitedLocations = (typeof GameWorld !== 'undefined' && typeof GameWorld.getActiveVisitedLocations === 'function')
+        ? GameWorld.getActiveVisitedLocations()
+        : (GameWorld?.visitedLocations || []);
+
     // Calculate visibility for all locations
     const visibility = calculateDestinationVisibility();
 
@@ -7882,7 +7887,7 @@ function populateDestinations() {
         if (vis === 'hidden') return; // dont show hidden locations
 
         const isConnected = currentLoc?.connections?.includes(locId) || false;
-        const isVisited = GameWorld.visitedLocations?.includes(locId) || false;
+        const isVisited = visitedLocations.includes(locId);
 
         // Apply filter
         if (filterValue === 'connected' && !isConnected) return;
@@ -7903,6 +7908,7 @@ function populateDestinations() {
             ...location,
             visibility: vis,
             isConnected,
+            isVisited,
             distance,
             travelTime,
             travelCost: Math.ceil(distance / 5) // rough gold cost
@@ -7958,6 +7964,7 @@ function populateDestinations() {
             }
             .destination-card:hover { background: rgba(79, 195, 247, 0.15); border-color: #81d4fa; }
             .destination-card.discovered { background: rgba(60, 60, 60, 0.4); border-color: #666; }
+            .destination-card.visited { border-left: 3px solid #4caf50; }
             .destination-card.no-route { opacity: 0.5; cursor: not-allowed; border-color: #444; }
             .destination-card.no-route:hover { background: rgba(60, 60, 60, 0.4); border-color: #444; }
             .dest-card-icon { grid-row: span 2; font-size: 28px; }
@@ -7966,7 +7973,9 @@ function populateDestinations() {
             .dest-card-stat { display: flex; align-items: center; gap: 3px; }
             .dest-card-badge { grid-row: span 2; font-size: 10px; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.3); color: #888; text-transform: uppercase; }
             .destination-card.can-travel .dest-card-badge { background: rgba(79, 195, 247, 0.2); color: #4fc3f7; }
+            .destination-card.visited .dest-card-badge { background: rgba(76, 175, 80, 0.2); color: #81c784; }
             .dest-card-warning { grid-column: 2; font-size: 10px; color: #ff9800; margin-top: 2px; }
+            .dest-card-visited-badge { font-size: 9px; color: #4caf50; margin-left: 5px; }
             .discovered .dest-card-name { color: #888; }
         `;
         document.head.appendChild(styleEl);
@@ -7977,9 +7986,10 @@ function populateDestinations() {
         const icon = typeIcons[destination.type] || '📍';
         const isDiscovered = destination.visibility === 'discovered';
         const canTravel = destination.isConnected;
+        const isVisited = destination.isVisited;
 
         const destElement = document.createElement('div');
-        destElement.className = `destination-card ${isDiscovered ? 'discovered' : ''} ${canTravel ? 'can-travel' : 'no-route'}`;
+        destElement.className = `destination-card ${isDiscovered ? 'discovered' : ''} ${canTravel ? 'can-travel' : 'no-route'} ${isVisited ? 'visited' : ''}`;
 
         // 🖤 Clean card layout: icon | name+stats | badge 💀
         if (isDiscovered) {
@@ -7995,7 +8005,7 @@ function populateDestinations() {
         } else {
             destElement.innerHTML = `
                 <div class="dest-card-icon">${icon}</div>
-                <div class="dest-card-name">${destination.name}</div>
+                <div class="dest-card-name">${destination.name}${isVisited ? '<span class="dest-card-visited-badge">VISITED</span>' : ''}</div>
                 <div class="dest-card-badge">${destination.region || destination.type}</div>
                 <div class="dest-card-stats">
                     <span class="dest-card-stat">📏 ${Math.round(destination.distance)} mi</span>
@@ -8036,15 +8046,19 @@ function populateDestinations() {
     });
 }
 
-// 🔍 Calculate visibility for destinations - what can you see from here?
+// Calculate visibility for destinations - what can you see from here?
 function calculateDestinationVisibility() {
     const visibility = {};
     const locations = typeof GameWorld !== 'undefined' ? GameWorld.locations : {};
 
-    // Get visited locations
+    // Get visited locations using world-aware helper (supports doom world separation)
     let visited = [];
-    if (typeof GameWorld !== 'undefined' && Array.isArray(GameWorld.visitedLocations)) {
-        visited = GameWorld.visitedLocations;
+    if (typeof GameWorld !== 'undefined') {
+        if (typeof GameWorld.getActiveVisitedLocations === 'function') {
+            visited = GameWorld.getActiveVisitedLocations();
+        } else if (Array.isArray(GameWorld.visitedLocations)) {
+            visited = GameWorld.visitedLocations;
+        }
     }
     // Always include current location
     if (game.currentLocation?.id && !visited.includes(game.currentLocation.id)) {
