@@ -4,6 +4,52 @@
 
 ---
 
+## 2025-12-06 - SESSION #44: NPC DIALOG BUTTONS + FACTION REP + TRADE PANEL
+
+**Request:** Fix NPC dialog buttons to match NPC roles (quest givers have their buttons, bandits have theirs, etc). Make give gold/item buttons affect proper faction/guild rep. Redesign trade panel with horizontal item layout and remove extra scroll.
+
+**Status:** COMPLETE
+
+### Changes Made:
+
+1. **NPC Dialog Buttons - Category-Specific Actions** (people-panel.js):
+   - Added `_getNPCCategory()` helper to identify NPC type (vendor, service, authority, criminal, boss, traveler)
+   - Added `_getNPCFaction()` helper to find NPC's guild/faction
+   - AUTHORITY NPCs: Added "Ask about the law" button, elders/chieftains get "Ask for blessing"
+   - CRIMINAL NPCs: Informants get "Buy information", smugglers get "Ask about contraband", loan sharks get "Ask for a loan", gold gifts labeled as "Offer Bribe"
+   - BOSS NPCs: Added "Intimidate" button
+   - TRAVELER NPCs: Beggars get "Give alms", travelers/pilgrims get "Ask about travels"
+   - Added flee button for criminal and boss encounters (not just random encounters)
+
+2. **Faction/Guild Rep from Gifts** (people-panel.js):
+   - Updated `_executeGoldGift()` to use `NPCRelationshipSystem.recordInteraction()` instead of just `modifyReputation()`
+   - This properly triggers faction rep updates AND NPC rep updates
+   - Shows faction name in game message when giving gifts ("+rep with Merchants' Guild")
+   - Updated `_executeItemGift()` similarly - now uses item value for rep calculation
+
+3. **New Action Functions Added** (people-panel.js):
+   - `askAboutLaw()` - for authority NPCs
+   - `askForBlessing()` - for elders/chieftains
+   - `askBuyInformation()` - for informants
+   - `askAboutContraband()` - for smugglers
+   - `askForLoan()` - for loan sharks
+   - `attemptIntimidate()` - for boss NPCs
+   - `askAboutTravels()` - for travelers/pilgrims
+
+4. **Trade Panel Redesign** (npc-systems.css):
+   - Removed outer scroll (`overflow: visible` on `.trade-main-content`)
+   - Items now display in horizontal 2-column layout per inventory
+   - Each inventory has its own scroll (max-height: 280px)
+   - Items use flexbox wrapping: `flex: 1 1 calc(50% - 6px)`
+   - More compact item styling with text truncation
+   - Mobile responsive: items go full-width on small screens
+
+### Files Modified:
+- `src/js/ui/panels/people-panel.js` - Button logic, gift functions, helper functions
+- `src/css/npc-systems.css` - Trade panel layout and responsive design
+
+---
+
 ## 2025-12-06 - SESSION #43: SWAP GATE NAMES (OUTPOSTS ↔ CITIES)
 
 **Request:** Swap location names for gates vs cities. The gate names got mixed up with the city names.

@@ -1326,19 +1326,70 @@ const PeoplePanel = {
         // These show for ALL NPCs as interaction options
         const isEncounter = npcData.isEncounter || this._isSpecialEncounter;
 
-        // 💰 Give Gold - charity or bribery, you decide
-        actions.push({
-            label: '💰 Give Gold',
-            action: () => this.giveGoldToNPC(),
-            priority: 30
-        });
+        // 🏷️ Get NPC category for smarter button placement
+        const npcCategory = this._getNPCCategory(npcType);
 
-        // 🎁 Give Item - gift an item from inventory
+        // 🖤💀 CATEGORY-SPECIFIC ACTIONS - Different NPCs have different interaction buttons 💀
+
+        // 🏛️ AUTHORITY NPCs - guards, elders, nobles
+        if (npcCategory === 'authority') {
+            actions.push({ label: '📜 Ask about the law', action: () => this.askAboutLaw(), priority: 25 });
+            if (npcType === 'elder' || npcType === 'chieftain') {
+                actions.push({ label: '🙏 Ask for blessing', action: () => this.askForBlessing(), priority: 26 });
+            }
+        }
+
+        // 💀 CRIMINAL NPCs - thieves, bandits, informants
+        if (npcCategory === 'criminal') {
+            if (npcType === 'informant') {
+                actions.push({ label: '👂 Buy information', action: () => this.askBuyInformation(), priority: 25 });
+            }
+            if (npcType === 'smuggler') {
+                actions.push({ label: '📦 Ask about contraband', action: () => this.askAboutContraband(), priority: 25 });
+            }
+            if (npcType === 'loan_shark') {
+                actions.push({ label: '💸 Ask for a loan', action: () => this.askForLoan(), priority: 25 });
+            }
+            // Criminals appreciate gifts (bribery)
+            actions.push({
+                label: '💰 Offer Bribe',
+                action: () => this.giveGoldToNPC(),
+                priority: 30
+            });
+        } else {
+            // 💰 Give Gold - charity for non-criminals
+            actions.push({
+                label: '💰 Give Gold',
+                action: () => this.giveGoldToNPC(),
+                priority: 30
+            });
+        }
+
+        // 🎁 Give Item - gift an item from inventory (available to all)
         actions.push({
             label: '🎁 Give Item',
             action: () => this.giveItemToNPC(),
             priority: 31
         });
+
+        // 👹 BOSS NPCs - Show intimidate option if brave
+        if (npcCategory === 'boss') {
+            actions.push({
+                label: '😤 Intimidate',
+                action: () => this.attemptIntimidate(),
+                priority: 28
+            });
+        }
+
+        // 🚶 TRAVELER NPCs - travelers, pilgrims, beggars
+        if (npcCategory === 'traveler') {
+            if (npcType === 'beggar') {
+                actions.push({ label: '🪙 Give alms', action: () => this.giveGoldToNPC(), priority: 25 });
+            }
+            if (npcType === 'traveler' || npcType === 'pilgrim') {
+                actions.push({ label: '🗺️ Ask about travels', action: () => this.askAboutTravels(), priority: 26 });
+            }
+        }
 
         // ⚔️ Attack - violence is always an option (but has consequences)
         // Protected NPCs: mystical (boatman), authority (guards/nobles) unless encounter
@@ -1370,7 +1421,7 @@ const PeoplePanel = {
         }
         // Quest NPCs with reason 'quest_npc' get NO attack option at all
 
-        // 🗡️ Rob/Pickpocket - for the morally flexible
+        // 🗡️ Rob/Pickpocket - for the morally flexible (not from authority or bosses)
         if (['merchant', 'traveler', 'noble', 'pilgrim', 'beggar', 'drunk'].includes(npcType)) {
             actions.push({
                 label: '🗡️ Pickpocket',
@@ -1379,8 +1430,8 @@ const PeoplePanel = {
             });
         }
 
-        // 🏃 Flee - get the fuck out
-        if (isEncounter) {
+        // 🏃 Flee - get the fuck out (encounters and criminals only)
+        if (isEncounter || npcCategory === 'criminal' || npcCategory === 'boss') {
             actions.push({
                 label: '🏃 Flee',
                 action: () => this.fleeFromEncounter(),
@@ -2213,6 +2264,49 @@ const PeoplePanel = {
         await this.sendActionMessage('heal', "I'm injured. Can you help me?");
     },
 
+    // 🏛️ AUTHORITY NPC ACTIONS
+
+    async askAboutLaw() {
+        if (!this.currentNPC) return;
+        await this.sendActionMessage('ask_law', "What are the laws here? What should I know?");
+    },
+
+    async askForBlessing() {
+        if (!this.currentNPC) return;
+        await this.sendActionMessage('ask_blessing', "I seek your wisdom and blessing, elder.");
+    },
+
+    // 💀 CRIMINAL NPC ACTIONS
+
+    async askBuyInformation() {
+        if (!this.currentNPC) return;
+        await this.sendActionMessage('buy_info', "I'm looking to buy information. What can you tell me?");
+    },
+
+    async askAboutContraband() {
+        if (!this.currentNPC) return;
+        await this.sendActionMessage('ask_contraband', "I hear you can get... special goods. What do you have?");
+    },
+
+    async askForLoan() {
+        if (!this.currentNPC) return;
+        await this.sendActionMessage('ask_loan', "I need some gold. What are your terms?");
+    },
+
+    // 👹 BOSS NPC ACTIONS
+
+    async attemptIntimidate() {
+        if (!this.currentNPC) return;
+        await this.sendActionMessage('intimidate', "*steps forward menacingly* You don't scare me.");
+    },
+
+    // 🚶 TRAVELER NPC ACTIONS
+
+    async askAboutTravels() {
+        if (!this.currentNPC) return;
+        await this.sendActionMessage('ask_travels', "Where have you traveled from? What have you seen?");
+    },
+
     // ═══════════════════════════════════════════════════════════════
     // 🏰 GATEHOUSE PAYMENT - Pay passage fee to guard
     // ═══════════════════════════════════════════════════════════════
@@ -2407,16 +2501,36 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             this.currentNPC.gold += amount;
         }
 
-        // 💰 Increase reputation with this NPC
+        // 💰 Increase reputation with this NPC AND their faction/guild
+        const npcType = this.currentNPC.type || this.currentNPC.id;
+        const repGain = Math.floor(amount / 5);
+
         if (typeof NPCRelationshipSystem !== 'undefined') {
-            NPCRelationshipSystem.modifyReputation(this.currentNPC.type || this.currentNPC.id, Math.floor(amount / 5));
+            // Record interaction which updates both NPC rep and faction rep
+            NPCRelationshipSystem.recordInteraction(npcType, 'gift', {
+                value: amount,
+                itemId: 'gold'
+            });
+
+            // Get faction name for display
+            const faction = this._getNPCFaction(npcType);
+            if (faction) {
+                if (typeof addMessage === 'function') {
+                    addMessage(`💰 Gave ${amount.toLocaleString()} gold to ${this.currentNPC.name} (+rep with ${faction.name})`);
+                }
+            } else {
+                if (typeof addMessage === 'function') {
+                    addMessage(`💰 Gave ${amount.toLocaleString()} gold to ${this.currentNPC.name}`);
+                }
+            }
+        } else {
+            if (typeof addMessage === 'function') {
+                addMessage(`💰 Gave ${amount.toLocaleString()} gold to ${this.currentNPC.name}`);
+            }
         }
 
         this.addChatMessage(`*hands over ${amount.toLocaleString()} gold*`, 'player');
         this.addChatMessage(`*accepts the gold gratefully* Many thanks, traveler.`, 'npc');
-        if (typeof addMessage === 'function') {
-            addMessage(`💰 Gave ${amount.toLocaleString()} gold to ${this.currentNPC.name}`);
-        }
         if (typeof updateDisplay === 'function') updateDisplay();
     },
 
@@ -2505,23 +2619,44 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             delete game.player.inventory[itemId];
         }
 
-        // Get display name
+        // Get display name and value for rep calculation
         let name = itemId.replace(/_/g, ' ');
+        let itemValue = 10; // Default value for rep calculation
         if (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem) {
             const item = ItemDatabase.getItem(itemId);
             if (item?.name) name = item.name;
+            if (item?.basePrice) itemValue = item.basePrice;
         }
 
-        // 💚 Increase reputation
+        // 💚 Increase reputation with this NPC AND their faction/guild
+        const npcType = this.currentNPC.type || this.currentNPC.id;
+
         if (typeof NPCRelationshipSystem !== 'undefined') {
-            NPCRelationshipSystem.modifyReputation(this.currentNPC.type || this.currentNPC.id, 5);
+            // Record interaction which updates both NPC rep and faction rep
+            NPCRelationshipSystem.recordInteraction(npcType, 'gift', {
+                value: itemValue,
+                itemId: itemId
+            });
+
+            // Get faction name for display
+            const faction = this._getNPCFaction(npcType);
+            if (faction) {
+                if (typeof addMessage === 'function') {
+                    addMessage(`🎁 Gave ${name} to ${this.currentNPC.name} (+rep with ${faction.name})`);
+                }
+            } else {
+                if (typeof addMessage === 'function') {
+                    addMessage(`🎁 Gave ${name} to ${this.currentNPC.name}`);
+                }
+            }
+        } else {
+            if (typeof addMessage === 'function') {
+                addMessage(`🎁 Gave ${name} to ${this.currentNPC.name}`);
+            }
         }
 
         this.addChatMessage(`*offers ${name}*`, 'player');
         this.addChatMessage(`*takes the gift* How kind of you!`, 'npc');
-        if (typeof addMessage === 'function') {
-            addMessage(`🎁 Gave ${name} to ${this.currentNPC.name}`);
-        }
     },
 
     // ═══════════════════════════════════════════════════════════════
@@ -3339,6 +3474,42 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         const div = document.createElement('div');
         div.textContent = String(text);
         return div.innerHTML;
+    },
+
+    // 🏛️ Get the faction/guild an NPC belongs to
+    _getNPCFaction(npcType) {
+        if (typeof NPCRelationshipSystem === 'undefined') return null;
+
+        const factions = NPCRelationshipSystem.factions || {};
+        for (const [factionId, faction] of Object.entries(factions)) {
+            if (faction.members && faction.members.includes(npcType)) {
+                return { id: factionId, name: faction.name, description: faction.description };
+            }
+        }
+        return null;
+    },
+
+    // 🏷️ Get NPC category for button layouts
+    _getNPCCategory(npcType) {
+        // Check NPC embedded data first
+        if (typeof NPC_EMBEDDED_DATA !== 'undefined' && NPC_EMBEDDED_DATA[npcType]) {
+            return NPC_EMBEDDED_DATA[npcType].category || 'unknown';
+        }
+
+        // Fallback categorization
+        const categories = {
+            vendor: ['merchant', 'general_store', 'blacksmith', 'apothecary', 'innkeeper', 'jeweler', 'tailor', 'baker', 'farmer', 'fisherman', 'herbalist'],
+            service: ['healer', 'banker', 'stablemaster', 'ferryman', 'priest', 'scholar'],
+            authority: ['guard', 'elder', 'noble', 'guild_master', 'captain', 'royal_advisor', 'chieftain'],
+            criminal: ['thief', 'robber', 'bandit', 'smuggler', 'informant', 'loan_shark'],
+            boss: ['dark_lord', 'bandit_chief', 'dragon', 'necromancer'],
+            traveler: ['traveler', 'pilgrim', 'courier', 'beggar', 'drunk', 'sailor']
+        };
+
+        for (const [category, types] of Object.entries(categories)) {
+            if (types.includes(npcType)) return category;
+        }
+        return 'unknown';
     },
 
     // ═══════════════════════════════════════════════════════════════
