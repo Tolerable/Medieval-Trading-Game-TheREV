@@ -2196,11 +2196,11 @@ const QuestSystem = {
 
         card.className = `quest-card ${stateClass} ${isMain ? 'main-quest' : ''} ${quest.difficulty || ''}`;
 
-        //  Add click handler to open unified quest info panel 
+        //  Add click handler to toggle unified quest info panel
         if (isActive || isCompleted || isDiscovered || isAvailable) {
             card.style.cursor = 'pointer';
             card.addEventListener('click', () => {
-                this.showQuestInfoPanel(quest.id);
+                this.toggleQuestInfoPanel(quest.id);
             });
         }
 
@@ -2613,7 +2613,7 @@ const QuestSystem = {
             return `
                 ${connector}
                 <div class="chain-quest ${statusClass} ${isTracked ? 'tracked' : ''} ${isRepeatable ? 'repeatable' : ''} ${isExpanded ? 'expanded' : ''}"
-                     onclick="event.stopPropagation(); QuestSystem.showQuestInfoPanel('${quest.id}')"
+                     onclick="event.stopPropagation(); QuestSystem.toggleQuestInfoPanel('${quest.id}')"
                      data-quest-id="${quest.id}">
                     <div class="quest-row-header">
                         ${expandArrow}
@@ -3603,7 +3603,7 @@ const QuestSystem = {
                     <span class="chain-arrow">⬆</span>
                     <span class="chain-label">Previous:</span>
                     <span class="chain-quest-name ${prereqCompleted ? 'completed' : ''}"
-                          onclick="QuestSystem.showQuestInfoPanel('${prerequisiteId}')"
+                          onclick="QuestSystem.toggleQuestInfoPanel('${prerequisiteId}')"
                           style="cursor: pointer; text-decoration: underline;">
                         ${prereqCompleted ? '✓' : '○'} ${prereqName}
                     </span>
@@ -3632,7 +3632,7 @@ const QuestSystem = {
                     <span class="chain-arrow">⬇</span>
                     <span class="chain-label">Next:</span>
                     <span class="chain-quest-name ${nextStatus}"
-                          onclick="QuestSystem.showQuestInfoPanel('${nextQuestId}')"
+                          onclick="QuestSystem.toggleQuestInfoPanel('${nextQuestId}')"
                           style="cursor: pointer; text-decoration: underline;">
                         ${nextCompleted ? '✓' : (nextActive ? '○' : '🔒')} ${nextName}
                     </span>
@@ -3656,6 +3656,9 @@ const QuestSystem = {
 
         //  Store onClose callback for later
         this._questInfoPanelOnClose = options.onClose || null;
+
+        //  Track which quest is currently displayed (for toggle functionality)
+        this._currentlyDisplayedQuestId = qId;
 
         //  Save position of existing panel before removing
         const existing = document.getElementById('quest-info-panel');
@@ -3811,11 +3814,28 @@ const QuestSystem = {
             panel.remove();
         }
 
-        //  Call onClose callback if it was set 
+        //  Clear the currently displayed quest ID
+        this._currentlyDisplayedQuestId = null;
+
+        //  Call onClose callback if it was set
         if (this._questInfoPanelOnClose) {
             const callback = this._questInfoPanelOnClose;
             this._questInfoPanelOnClose = null; // Clear it first to prevent loops
             callback();
+        }
+    },
+
+    //  Toggle quest info panel - close if same quest, open if different
+    toggleQuestInfoPanel(questId, options = {}) {
+        const panel = document.getElementById('quest-info-panel');
+        const isShowingSameQuest = panel && this._currentlyDisplayedQuestId === questId;
+
+        if (isShowingSameQuest) {
+            // Same quest - close the panel
+            this.hideQuestInfoPanel();
+        } else {
+            // Different quest or no panel - open it
+            this.showQuestInfoPanel(questId, options);
         }
     },
 
