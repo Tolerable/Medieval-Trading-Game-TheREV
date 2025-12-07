@@ -1276,6 +1276,21 @@ const PeoplePanel = {
             actions.push({ label: '💚 I need healing', action: () => this.askForHealing(), priority: 22 });
         }
 
+        // 🏰 GATEHOUSE PAYMENT - Guards at gatehouses can accept passage fees
+        if (npcType === 'guard' && typeof GatehouseSystem !== 'undefined') {
+            const gatehouse = GatehouseSystem.GATEHOUSES[location];
+            if (gatehouse && !GatehouseSystem.isGatehouseUnlocked(location)) {
+                const canAfford = (game?.player?.gold || 0) >= gatehouse.fee;
+                actions.push({
+                    label: `🏰 Pay Passage Fee (${gatehouse.fee}g)`,
+                    action: () => this.payGatehouseFee(location, gatehouse),
+                    priority: 0, // Highest priority - this is what they're here for
+                    questRelated: true,
+                    disabled: !canAfford
+                });
+            }
+        }
+
         // 🖤 BOATMAN PORTAL ACTION - Special case for doom world access 💀
         if (npcType === 'boatman') {
             const inDoom = typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive;
@@ -2167,6 +2182,40 @@ const PeoplePanel = {
 
         // 🖤 Send standardized HEAL instruction to API 💀
         await this.sendActionMessage('heal', "I'm injured. Can you help me?");
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🏰 GATEHOUSE PAYMENT - Pay passage fee to guard
+    // ═══════════════════════════════════════════════════════════════
+
+    payGatehouseFee(gatehouseId, gatehouse) {
+        if (!this.currentNPC) return;
+
+        const playerGold = game?.player?.gold || 0;
+        const fee = gatehouse.fee;
+        const zoneName = GatehouseSystem.ZONES[gatehouse.unlocksZone]?.name || 'the region beyond';
+
+        if (playerGold < fee) {
+            this.addChatMessage(`I'd like to pay the passage fee.`, 'player');
+            this.addChatMessage(`*The guard eyes your coin purse* You don't have enough gold. The fee is ${fee} gold, and you only have ${playerGold}. Come back when you can afford it.`, 'npc');
+            addMessage(`💸 Not enough gold! You need ${fee}g but only have ${playerGold}g.`);
+            return;
+        }
+
+        // Show dialogue
+        this.addChatMessage(`I'd like to pay the passage fee to enter ${zoneName}.`, 'player');
+        this.addChatMessage(`*The guard nods* That'll be ${fee} gold. *counts your coins carefully* ...Very well, you're cleared for passage. Safe travels.`, 'npc');
+
+        // Process payment through GatehouseSystem
+        if (GatehouseSystem.payPassageFee(gatehouseId)) {
+            addMessage(`🏰 Paid ${fee} gold - ${gatehouse.name} passage unlocked!`);
+            addMessage(`🎉 You can now freely travel to ${zoneName}!`);
+
+            // Refresh the quick actions to remove the payment button
+            setTimeout(() => {
+                this.updateQuickActions(this.currentNPC);
+            }, 500);
+        }
     },
 
     // ═══════════════════════════════════════════════════════════════

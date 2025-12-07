@@ -72,6 +72,41 @@ Now clicking any location while traveling will instantly change your course!
 
 ---
 
+## 2025-12-06 - SESSION #36c: GATEHOUSE GUARD VIA PEOPLE PANEL 🖤💀🛡️
+
+**Request:** Gee clarified that the guard encounter should NOT be a popup. Instead:
+- First arrival at gatehouse shows a message to talk to the guard
+- Player uses People Panel to select and talk to the guard
+- Guard has a "Pay Passage Fee" action button in their dialogue
+
+**Status:** COMPLETE
+
+### Changes Made:
+
+**1. People Panel - Guard Actions (people-panel.js)**
+- Added gatehouse payment detection in `updateQuickActions()`
+- When talking to a guard at a locked gatehouse, shows "🏰 Pay Passage Fee (Xg)" button
+- Button has priority 0 (highest) and quest-related styling
+- Added `payGatehouseFee()` function with dialogue and payment processing
+
+**2. Arrival Message (travel-system.js)**
+- Changed from popup to simple message on first gatehouse arrival
+- "You've arrived at X. To enter Y, speak with the guard and pay the Z gold passage fee."
+
+**3. Blocked Travel Message (gatehouse-system.js)**
+- When blocked at gatehouse: "Speak with the guard to pay the fee"
+- When blocked elsewhere: "Travel to the gatehouse and speak with the guard"
+- No more popup modals - all via chat messages
+
+### Flow:
+1. Player arrives at gatehouse → message tells them to talk to guard
+2. Player opens People Panel → selects Guard
+3. Guard shows "🏰 Pay Passage Fee" button at top of actions
+4. Click button → dialogue exchange + payment processed
+5. Zone unlocked, button disappears from guard's actions
+
+---
+
 ## 2025-12-06 - SESSION #35: FULL CODE REVIEW + TODO CLEANUP 🖤💀✅
 
 **Request:** Gee wanted verification that all past 24hr items in finished.md and todo.md were ACTUALLY completed in full - not just claimed as done.

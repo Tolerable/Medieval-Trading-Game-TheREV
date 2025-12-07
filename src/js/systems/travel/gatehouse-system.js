@@ -533,13 +533,18 @@ const GatehouseSystem = {
                 if (!access.accessible) {
                     console.log('🏰 Travel blocked:', access);
 
+                    const gatehouse = self.GATEHOUSES[access.gatehouse];
+                    const zoneName = self.ZONES[gatehouse?.unlocksZone]?.name || 'that region';
+
                     if (access.atGatehouse) {
-                        // Player is AT the gatehouse trying to pass through
-                        // Show the guard NPC interaction prompt
-                        self.showGatehouseArrivalPrompt(access.gatehouse);
+                        // Player is AT the gatehouse trying to pass through without paying
+                        // Tell them to talk to the guard via People Panel
+                        addMessage(`🏰 You need to pay the passage fee before entering ${zoneName}.`);
+                        addMessage(`💬 Speak with the guard to pay the ${access.fee} gold fee.`);
                     } else {
                         // Player is trying to enter from elsewhere - tell them to go to gatehouse
-                        self.showGatehousePrompt(access.gatehouse, destinationId);
+                        addMessage(`🚫 You cannot enter ${zoneName} from here.`);
+                        addMessage(`🏰 Travel to ${gatehouse?.name || 'the gatehouse'} and speak with the guard to pay the passage fee.`);
                     }
                     return;
                 }

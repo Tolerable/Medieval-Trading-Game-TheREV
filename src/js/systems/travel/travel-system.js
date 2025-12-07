@@ -2391,14 +2391,12 @@ const TravelSystem = {
 
         addMessage(`🔔 Arrived at ${destination.name}!`);
 
-        // Check if we arrived at a gatehouse - offer to pay the fee
+        // Check if we arrived at a gatehouse for the first time - tell player to talk to guard
         if (typeof GatehouseSystem !== 'undefined' && GatehouseSystem.GATEHOUSES) {
             const gatehouse = GatehouseSystem.GATEHOUSES[destination.id];
             if (gatehouse && !GatehouseSystem.isGatehouseUnlocked(destination.id)) {
-                // Show gatehouse interaction prompt after a brief delay
-                setTimeout(() => {
-                    GatehouseSystem.showGatehouseArrivalPrompt(destination.id);
-                }, 500);
+                const zoneName = GatehouseSystem.ZONES[gatehouse.unlocksZone]?.name || 'the region beyond';
+                addMessage(`🏰 You've arrived at ${gatehouse.name}. To enter ${zoneName}, speak with the guard and pay the ${gatehouse.fee} gold passage fee.`);
             }
         }
 
