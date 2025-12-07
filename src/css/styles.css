@@ -2000,6 +2000,17 @@ svg.map-paths,
     border-bottom: 1px solid rgba(52, 152, 219, 0.3);
     padding-bottom: 0.5rem;
     letter-spacing: 1px;
+    cursor: grab;
+    user-select: none;
+}
+
+.panel h2:active {
+    cursor: grabbing;
+}
+
+/* All elements inside panel h2 inherit grab cursor (for drag handle) */
+.panel h2 * {
+    cursor: inherit;
 }
 
 .panel h3 {
@@ -2963,11 +2974,21 @@ svg.map-paths,
     background: rgba(79, 195, 247, 0.1);
     border-bottom: 1px solid rgba(79, 195, 247, 0.2);
     font-size: 0.9rem;
-    cursor: move;
+    cursor: grab;
     user-select: none;
     pointer-events: auto;
     position: relative;
     z-index: 151;
+}
+
+#message-log h3:active,
+#game-container #message-log h3:active {
+    cursor: grabbing;
+}
+
+#message-log h3 *,
+#game-container #message-log h3 * {
+    cursor: inherit;
 }
 
 #messages {
@@ -4702,6 +4723,16 @@ button.menu-social-link {
     background-color: #2a2a2a;
     border: 1px solid #444;
     border-radius: 4px;
+    cursor: grab;
+    user-select: none;
+}
+
+.market-header:active {
+    cursor: grabbing;
+}
+
+.market-header * {
+    cursor: inherit;
 }
 
 .market-info {
@@ -5022,6 +5053,16 @@ button.menu-social-link {
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #444;
+    cursor: grab;
+    user-select: none;
+}
+
+.inventory-header:active {
+    cursor: grabbing;
+}
+
+.inventory-header * {
+    cursor: inherit;
 }
 
 .inventory-controls {
@@ -5828,6 +5869,16 @@ button.menu-social-link {
     margin-bottom: 0.75rem;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid #4fc3f7;
+    cursor: grab;
+    user-select: none;
+}
+
+.setup-header:active {
+    cursor: grabbing;
+}
+
+.setup-header * {
+    cursor: inherit;
 }
 
 /* 🖤 Character name input with gold display inline */
@@ -6903,6 +6954,16 @@ button.menu-social-link {
 /* Enhanced Travel Panel */
 .travel-header {
     margin-bottom: 1rem;
+    cursor: grab;
+    user-select: none;
+}
+
+.travel-header:active {
+    cursor: grabbing;
+}
+
+.travel-header * {
+    cursor: inherit;
 }
 
 .travel-tabs {
