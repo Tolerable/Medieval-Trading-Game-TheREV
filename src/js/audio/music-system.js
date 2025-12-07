@@ -276,11 +276,7 @@ const MusicSystem = {
 
         // If already playing this category, don't restart
         if (this.currentCategory === category && this.isPlaying) {
-            // Only log once per second to prevent spam
-            if (!this._lastAlreadyPlayingLog || Date.now() - this._lastAlreadyPlayingLog > 1000) {
-                console.log(`🎵 MusicSystem: Already playing ${category} music`);
-                this._lastAlreadyPlayingLog = Date.now();
-            }
+            // Silently return - no need to log this common case
             this.pendingCategory = null;
             return;
         }

@@ -4,6 +4,32 @@
 
 ---
 
+## 2025-12-07 - SESSION #58: PLAYER EMOJI DIRECTION FIX
+
+**Request:** Player travel icon showing wrong direction - emoji cycling back and forth rapidly instead of facing the direction of travel. User said "the left and right emoji playing at the same time cycling back and forth".
+
+**Status:** FIXED
+
+### Root Cause:
+The direction detection code in `runTravelAnimation()` was comparing `currentX > travel.lastX` EVERY FRAME. When position changes are tiny (slow speeds, paused game), this comparison can flip back and forth, causing the emoji to rapidly swap between 🚶 and 🚶‍➡️.
+
+### The Fix (`game-world-renderer.js:1990-2033`):
+- Changed from frame-by-frame position comparison to SEGMENT-BASED direction
+- Now calculates which waypoint segment we're on and gets direction from segment endpoint
+- Direction only updates when moving to a new segment with a different direction
+- Uses `segmentEnd.x > segmentStart.x` instead of `currentX > lastX`
+
+### Technical Details:
+- Removed: `const currentMovingRight = currentX > travel.lastX` (caused flickering)
+- Added: Segment calculation to find current waypoint pair
+- Added: `const segmentMovingRight = segmentEnd.x > segmentStart.x` (stable direction)
+- Only updates emoji when segment direction actually changes
+
+### Files Modified:
+- `src/js/ui/map/game-world-renderer.js` - Lines 1990-2033
+
+---
+
 ## 2025-12-07 - SESSION #57: DOOM WORLD + GATHERING SYSTEM FIXES
 
 **Request:** Gee reported multiple issues:

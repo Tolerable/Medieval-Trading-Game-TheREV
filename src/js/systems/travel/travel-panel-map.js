@@ -2213,7 +2213,8 @@ const TravelPanelMap = {
             this.travelMarker = null;
             this.travelMarker = document.createElement('div');
             this.travelMarker.id = 'travel-moving-marker';
-            this.travelMarker.innerHTML = '🚶';
+            // Use inner span with CSS class for the flip - outer div handles position
+            this.travelMarker.innerHTML = '<span class="walk-emoji" style="display: inline-block;">🚶</span>';
             this.travelMarker.style.cssText = `
                 position: absolute;
                 z-index: 150;
@@ -2234,14 +2235,11 @@ const TravelPanelMap = {
         this.travelMarker.style.top = currentY + 'px';
         this.travelMarker.style.display = 'block';
 
-        // Flip direction based on travel direction
-        // The walking emoji faces LEFT by default, so mirror when moving RIGHT
-        if (endLoc.mapPosition.x > startPos.x) {
-            // Moving right - flip to face right
-            this.travelMarker.style.transform = 'translate(-50%, -50%) scaleX(-1)';
-        } else {
-            // Moving left - default emoji orientation
-            this.travelMarker.style.transform = 'translate(-50%, -50%)';
+        // Use different emoji for direction: 🚶 faces left, 🚶‍➡️ faces right
+        const movingRight = endLoc.mapPosition.x > startPos.x;
+        const walkEmojiSpan = this.travelMarker.querySelector('.walk-emoji');
+        if (walkEmojiSpan) {
+            walkEmojiSpan.textContent = movingRight ? '🚶‍➡️' : '🚶';
         }
     },
 
@@ -2870,10 +2868,13 @@ if (document.readyState === 'loading') {
             100% { transform: scale(2.5); opacity: 0; }
         }
 
-        /* Walking animation for travel marker */
+        /* Walking animation for travel marker - uses margin-top to not interfere with scaleX */
         @keyframes walk-bounce {
-            0%, 100% { transform: translate(-50%, -50%) translateY(0); }
-            50% { transform: translate(-50%, -50%) translateY(-4px); }
+            0%, 100% { margin-top: 0; }
+            50% { margin-top: -4px; }
+        }
+        .emoji-flip-right {
+            transform: scaleX(-1) !important;
         }
 
         /* Travel In Progress Styles */

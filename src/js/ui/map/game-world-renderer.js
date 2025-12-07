@@ -1688,8 +1688,11 @@ const GameWorldRenderer = {
                         animation: tack-walk 0.4s ease-in-out infinite;
                     }
                     @keyframes tack-walk {
-                        0%, 100% { transform: translateY(-4px) rotate(-5deg); }
-                        50% { transform: translateY(-8px) rotate(5deg); }
+                        0%, 100% { margin-top: -4px; }
+                        50% { margin-top: -8px; }
+                    }
+                    .emoji-flip-right {
+                        transform: scaleX(-1) !important;
                     }
                     /* 💀 July 18th Dungeon Bonanza pulse effect */
                     @keyframes bonanza-pulse {
@@ -1708,7 +1711,7 @@ const GameWorldRenderer = {
 
             this.mapElement.appendChild(this.playerMarker);
 
- // CRITICAL: If we're currently traveling, apply traveling style to newly created marker 
+ // CRITICAL: If we're currently traveling, apply traveling style to newly created marker
  // This fixes the bug where render() clears the marker and recreates it with "YOU ARE HERE"
  // even though we're mid-travel
             if (this.currentTravel) {
@@ -1718,10 +1721,11 @@ const GameWorldRenderer = {
                 this.playerMarker.style.flexDirection = 'column-reverse';
 
                 const movingRight = this.currentTravel.movingRight;
-                const mirrorStyle = movingRight ? '' : 'display:inline-block;transform:scaleX(-1);';
+                // 🚶 faces left, 🚶‍➡️ faces right (Unicode: person walking + ZWJ + right arrow)
+                const walkEmoji = movingRight ? '🚶‍➡️' : '🚶';
 
                 this.playerMarker.innerHTML = `
-                    <div class="marker-tack" style="font-size: 42px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); animation: tack-walk 0.4s ease-in-out infinite; z-index: 152; transform-origin: bottom center;"><span style="${mirrorStyle}">🚶</span></div>
+                    <div class="marker-tack" style="font-size: 42px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); animation: tack-walk 0.4s ease-in-out infinite; z-index: 152;"><span class="walk-emoji" style="display: inline-block;">${walkEmoji}</span></div>
                     <div class="marker-shadow" style="position: absolute; bottom: -5px; width: 24px; height: 8px; background: rgba(0, 0, 0, 0.3); border-radius: 50%; animation: shadow-pulse 3s ease-in-out infinite; z-index: 99;"></div>
                     <div class="marker-pulse" style="position: absolute; bottom: 0px; width: 16px; height: 16px; background: rgba(255, 136, 68, 0.5); border-radius: 50%; animation: marker-pulse 2s ease-out infinite; z-index: 100;"></div>
                     <div class="marker-label" style="background: linear-gradient(180deg, #ff8844 0%, #cc4400 100%); color: white; font-size: 9px; font-weight: bold; padding: 4px 10px; border-radius: 12px; white-space: nowrap; margin-bottom: 4px; box-shadow: 0 3px 10px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.8); z-index: 151; letter-spacing: 0.5px; text-transform: uppercase;">TRAVELING...</div>
@@ -1823,16 +1827,15 @@ const GameWorldRenderer = {
             this.playerMarker.style.flexDirection = 'column-reverse';
 
             const movingRight = this.currentTravel.movingRight;
-            const mirrorStyle = movingRight ? '' : 'display:inline-block;transform:scaleX(-1);';
+            // 🚶 faces left, 🚶‍➡️ faces right
+            const walkEmoji = movingRight ? '🚶‍➡️' : '🚶';
 
             this.playerMarker.innerHTML = `
-                <div class="marker-tack" style="font-size: 42px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); animation: tack-walk 0.4s ease-in-out infinite; z-index: 152; transform-origin: bottom center;"><span style="${mirrorStyle}">🚶</span></div>
+                <div class="marker-tack" style="font-size: 42px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); animation: tack-walk 0.4s ease-in-out infinite; z-index: 152;"><span class="walk-emoji" style="display: inline-block;">${walkEmoji}</span></div>
                 <div class="marker-shadow" style="position: absolute; bottom: -5px; width: 24px; height: 8px; background: rgba(0, 0, 0, 0.3); border-radius: 50%; animation: shadow-pulse 3s ease-in-out infinite; z-index: 99;"></div>
                 <div class="marker-pulse" style="position: absolute; bottom: 0px; width: 16px; height: 16px; background: rgba(255, 136, 68, 0.5); border-radius: 50%; animation: marker-pulse 2s ease-out infinite; z-index: 100;"></div>
                 <div class="marker-label" style="background: linear-gradient(180deg, #ff8844 0%, #cc4400 100%); color: white; font-size: 9px; font-weight: bold; padding: 4px 10px; border-radius: 12px; white-space: nowrap; margin-bottom: 4px; box-shadow: 0 3px 10px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.8); z-index: 151; letter-spacing: 0.5px; text-transform: uppercase;">TRAVELING...</div>
             `;
-
-            console.log(movingRight ? '🚶 MOVING RIGHT' : '🚶 MOVING LEFT (mirrored)');
         }
 
         console.log('🗺️ animateTravel: Starting travel animation', {
@@ -1965,17 +1968,67 @@ const GameWorldRenderer = {
  // Update marker position (pass alreadyScaled=true since travel coords are pre-scaled)
         this.updatePlayerMarker(currentX, currentY, true);
 
- // Mirror the walking emoji based on travel direction
+ // CRITICAL: Ensure marker shows walking emoji with correct direction
+ // updatePlayerMarker may recreate marker with default content so we must re-apply traveling state
         if (this.playerMarker) {
- // Update direction if it changes (e.g. via waypoints or cancel)
-            const currentMovingRight = currentX > travel.lastX;
-            if (travel.lastX !== undefined && currentMovingRight !== travel.movingRight) {
-                travel.movingRight = currentMovingRight;
- // Update the emoji mirror by recreating the inner span
-                const tack = this.playerMarker.querySelector('.marker-tack');
-                if (tack) {
-                    const mirrorStyle = travel.movingRight ? '' : 'display:inline-block;transform:scaleX(-1);';
-                    tack.innerHTML = `<span style="${mirrorStyle}">🚶</span>`;
+            // Check if marker has walking emoji - if not, it was recreated and needs traveling state
+            const existingWalkEmoji = this.playerMarker.querySelector('.walk-emoji');
+            if (!existingWalkEmoji) {
+                // Marker was recreated - re-apply traveling state
+                this.playerMarker.classList.add('traveling');
+                this.playerMarker.style.flexDirection = 'column-reverse';
+                // 🚶 faces left, 🚶‍➡️ faces right
+                const walkEmoji = travel.movingRight ? '🚶‍➡️' : '🚶';
+                this.playerMarker.innerHTML = `
+                    <div class="marker-tack" style="font-size: 42px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); animation: tack-walk 0.4s ease-in-out infinite; z-index: 152;"><span class="walk-emoji" style="display: inline-block;">${walkEmoji}</span></div>
+                    <div class="marker-shadow" style="position: absolute; bottom: -5px; width: 24px; height: 8px; background: rgba(0, 0, 0, 0.3); border-radius: 50%; animation: shadow-pulse 3s ease-in-out infinite; z-index: 99;"></div>
+                    <div class="marker-pulse" style="position: absolute; bottom: 0px; width: 16px; height: 16px; background: rgba(255, 136, 68, 0.5); border-radius: 50%; animation: marker-pulse 2s ease-out infinite; z-index: 100;"></div>
+                    <div class="marker-label" style="background: linear-gradient(180deg, #ff8844 0%, #cc4400 100%); color: white; font-size: 9px; font-weight: bold; padding: 4px 10px; border-radius: 12px; white-space: nowrap; margin-bottom: 4px; box-shadow: 0 3px 10px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.8); z-index: 151; letter-spacing: 0.5px; text-transform: uppercase;">TRAVELING...</div>
+                `;
+            }
+
+            // Update direction based on SEGMENT destination, not frame-by-frame movement
+            // Frame-by-frame causes flickering when position barely changes between frames
+            if (travel.waypoints && travel.waypoints.length > 1) {
+                // Find current segment's target waypoint and determine direction from that
+                const waypoints = travel.waypoints;
+                const numSegments = waypoints.length - 1;
+
+                // Calculate which segment we're on (same logic as position calculation above)
+                let totalDist = 0;
+                const segmentDists = [];
+                for (let i = 0; i < numSegments; i++) {
+                    const dx = waypoints[i + 1].x - waypoints[i].x;
+                    const dy = waypoints[i + 1].y - waypoints[i].y;
+                    segmentDists.push(Math.sqrt(dx * dx + dy * dy));
+                    totalDist += segmentDists[i];
+                }
+
+                let targetDist = progress * totalDist;
+                let accumDist = 0;
+                let segmentIndex = 0;
+                for (let i = 0; i < numSegments; i++) {
+                    if (accumDist + segmentDists[i] >= targetDist) {
+                        segmentIndex = i;
+                        break;
+                    }
+                    accumDist += segmentDists[i];
+                    segmentIndex = i;
+                }
+                if (segmentIndex >= numSegments) segmentIndex = numSegments - 1;
+
+                // Get segment direction: is the target waypoint to the right of start waypoint?
+                const segmentStart = waypoints[segmentIndex];
+                const segmentEnd = waypoints[segmentIndex + 1] || waypoints[waypoints.length - 1];
+                const segmentMovingRight = segmentEnd.x > segmentStart.x;
+
+                // Only update emoji if segment direction changed
+                if (segmentMovingRight !== travel.movingRight) {
+                    travel.movingRight = segmentMovingRight;
+                    const span = this.playerMarker.querySelector('.walk-emoji');
+                    if (span) {
+                        span.textContent = travel.movingRight ? '🚶‍➡️' : '🚶';
+                    }
                 }
             }
             travel.lastX = currentX;
