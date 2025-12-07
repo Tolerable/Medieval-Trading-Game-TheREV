@@ -1978,7 +1978,7 @@ const NPCTradeWindow = {
                 // Varied stock - a bit of everything
                 bread: 8, water: 10, dried_meat: 5, ale: 5,
                 cloth: 8, rope: 5, candle: 10, lantern: 3,
-                soap: 5, salt: 8, spices: 3,
+                soap: 5, salt: 8, spices: 3, silk: 15,
                 dagger: 2, leather_armor: 1
             },
             peddler: {
