@@ -305,12 +305,12 @@ const MainQuests = {
             act2_quest1: {
                 id: 'act2_quest1',
                 name: 'Eastern Expansion',
-                description: 'With enough wealth to pay the gatehouse toll, travel to Ironforge City in the north to continue your investigation.',
+                description: 'With enough wealth to pay the gatehouse toll at Northern Outpost, travel to Ironforge City in the north to continue your investigation.',
                 giver: 'elder',
                 giverName: 'Elder Morin',
                 turnInNpc: 'blacksmith',
                 turnInNpcName: 'Forgemaster Grimjaw',
-                turnInLocation: 'ironforge_city',
+                turnInLocation: 'northern_outpost', // Ironforge City is now at northern_outpost ID
                 location: 'greendale',
                 type: 'main',
                 act: 2,
@@ -320,14 +320,14 @@ const MainQuests = {
                 wealthGateCheck: true,
                 objectives: [
                     { type: 'gold', amount: 5000, description: 'Accumulate 5,000 gold wealth' },
-                    { type: 'visit', location: 'ironforge_city', completed: false, description: 'Travel to Ironforge City (pay northern gatehouse toll)' },
-                    { type: 'talk', npc: 'blacksmith', location: 'ironforge_city', completed: false, description: 'Report to Forgemaster Grimjaw' }
+                    { type: 'visit', location: 'northern_outpost', completed: false, description: 'Travel to Ironforge City (pay Northern Outpost gatehouse toll)' },
+                    { type: 'talk', npc: 'blacksmith', location: 'northern_outpost', completed: false, description: 'Report to Forgemaster Grimjaw' }
                 ],
                 rewards: { gold: 200, reputation: 35, experience: 100 },
                 prerequisite: 'act1_quest7',
                 nextQuest: 'act2_quest2',
                 dialogue: {
-                    offer: "You've built your fortune wisely. The northern gatehouse will now allow you passage. In Ironforge City, seek out the scholar Aldwin - he studies ancient texts and may know more about Malachar. But be careful - the Black Ledger has eyes everywhere.",
+                    offer: "You've built your fortune wisely. The Northern Outpost gatehouse will now allow you passage. In Ironforge City, seek out the scholar Aldwin - he studies ancient texts and may know more about Malachar. But be careful - the Black Ledger has eyes everywhere.",
                     progress: "The road north requires gold and courage. You have both now.",
                     complete: "Ironforge! The great forges light the sky even at night. Now, find the scholar before our enemies find you."
                 }
@@ -342,8 +342,8 @@ const MainQuests = {
                 giverName: 'Forgemaster Grimjaw',
                 turnInNpc: 'blacksmith',
                 turnInNpcName: 'Forgemaster Grimjaw',
-                turnInLocation: 'ironforge_city',
-                location: 'ironforge_city',
+                turnInLocation: 'northern_outpost', // Ironforge City is now at northern_outpost ID
+                location: 'northern_outpost', // Ironforge City is now at northern_outpost ID
                 type: 'main',
                 act: 2,
                 actOrder: 2,
@@ -373,8 +373,8 @@ const MainQuests = {
                 giverName: 'Scholar Aldwin',
                 turnInNpc: 'scholar',
                 turnInNpcName: 'Scholar Aldwin',
-                turnInLocation: 'ironforge_city',
-                location: 'ironforge_city',
+                turnInLocation: 'northern_outpost',
+                location: 'northern_outpost',
                 type: 'main',
                 act: 2,
                 actOrder: 3,
@@ -405,7 +405,7 @@ const MainQuests = {
                 turnInNpc: 'merchant',
                 turnInNpcName: 'Silk Merchant Li',
                 turnInLocation: 'jade_harbor',
-                location: 'ironforge_city',
+                location: 'northern_outpost',
                 type: 'main',
                 act: 2,
                 actOrder: 4,
@@ -497,15 +497,15 @@ const MainQuests = {
                 giverName: 'Smuggler Boss Vex',
                 turnInNpc: 'guard',
                 turnInNpcName: 'Guard Captain Aldric',
-                turnInLocation: 'ironforge_city',
-                location: 'ironforge_city',
+                turnInLocation: 'northern_outpost',
+                location: 'northern_outpost',
                 type: 'main',
                 act: 2,
                 actOrder: 7,
                 chain: 'shadow_rising',
                 difficulty: 'medium',
                 objectives: [
-                    { type: 'visit', location: 'ironforge_city', completed: false, description: 'Return to Ironforge City' },
+                    { type: 'visit', location: 'northern_outpost', completed: false, description: 'Return to Ironforge City' },
                     { type: 'talk', npc: 'guard', completed: false, description: 'Present evidence to Captain Aldric' },
                     { type: 'talk', npc: 'scholar', completed: false, description: 'Confirm findings with Scholar Aldwin' }
                 ],
@@ -821,7 +821,7 @@ const MainQuests = {
                 turnInNpc: 'guard',
                 turnInNpcName: 'Captain Aldric',
                 turnInLocation: 'western_outpost',
-                location: 'ironforge_city',
+                location: 'northern_outpost',
                 type: 'main',
                 act: 4,
                 actOrder: 2,
@@ -829,23 +829,23 @@ const MainQuests = {
                 difficulty: 'hard',
                 objectives: [
                     { type: 'choice', options: ['pay_50000', 'fight_through'], description: 'Choose: pay 50,000g toll or fight past guards' },
-                    { type: 'visit', location: 'western_outpost', completed: false, description: 'Reach Western Watch outpost' }
+                    { type: 'visit', location: 'western_outpost', completed: false, description: 'Reach Stonebridge village beyond the gate' }
                 ],
                 rewards: { gold: 1500, reputation: 180, experience: 700 },
                 prerequisite: 'act4_quest1',
                 nextQuest: 'act4_quest3',
                 dialogue: {
-                    offer: "The western gate is controlled by mercenaries - some are Black Ledger funded, some are just greedy. You can pay their toll or we can fight through. Either way, we need to reach the Western Outpost.",
+                    offer: "The western gate at Western Watch is controlled by mercenaries - some are Black Ledger funded, some are just greedy. You can pay their toll or we can fight through. Either way, we need to reach Stonebridge beyond.",
                     progress: "The choice is yours. Gold or steel.",
-                    complete: "The western territories are ours to traverse now. The outpost ahead is the last friendly settlement before the Shadow Tower. Prepare yourself."
+                    complete: "The western territories are ours to traverse now. Stonebridge ahead is the last friendly settlement before the Shadow Tower. Prepare yourself."
                 }
             },
 
-            // 4.3 - Outpost Alliance
+            // 4.3 - Stonebridge Alliance
             act4_quest3: {
                 id: 'act4_quest3',
-                name: 'Outpost Alliance',
-                description: 'Secure the Western Outpost as a staging ground for the assault on the Shadow Tower.',
+                name: 'Stonebridge Alliance',
+                description: 'Secure Stonebridge village as a staging ground for the assault on the Shadow Tower.',
                 giver: 'sergeant',
                 giverName: 'Sergeant Helena',
                 turnInNpc: 'sergeant',
@@ -866,9 +866,9 @@ const MainQuests = {
                 prerequisite: 'act4_quest2',
                 nextQuest: 'act4_quest4',
                 dialogue: {
-                    offer: "The outpost is undermanned and undersupplied. We've been forgotten out here while the lords play politics. Bring us supplies and we'll fight alongside you against whatever's in that tower.",
+                    offer: "Stonebridge is undermanned and undersupplied. We've been forgotten out here while the lords play politics. Bring us supplies and we'll fight alongside you against whatever's in that tower.",
                     progress: "Medical supplies, weapons, food - anything helps.",
-                    complete: "With these supplies, we can field a proper force. You've earned the loyalty of the Western Watch. When you're ready to assault the tower, we'll be at your side."
+                    complete: "With these supplies, we can field a proper force. You've earned the loyalty of Stonebridge. When you're ready to assault the tower, we'll be at your side."
                 }
             },
 
@@ -944,8 +944,8 @@ const MainQuests = {
                 giverName: 'Scholar Aldwin',
                 turnInNpc: 'scholar',
                 turnInNpcName: 'Scholar Aldwin',
-                turnInLocation: 'ironforge_city',
-                location: 'ironforge_city',
+                turnInLocation: 'northern_outpost',
+                location: 'northern_outpost',
                 type: 'main',
                 act: 4,
                 actOrder: 6,

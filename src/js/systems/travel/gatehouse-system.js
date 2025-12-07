@@ -32,9 +32,9 @@ const GatehouseSystem = {
         },
         northern: {
             name: 'Northern Territories',
-            description: 'Cold northern lands with valuable furs and minerals. A harsh realm for seasoned traders.',
+            description: 'Cold northern lands with valuable furs and minerals. Pass through Northern Outpost to reach Ironforge City.',
             accessible: false,
-            gatehouse: 'ironforge_city',
+            gatehouse: 'ironforge_city', // Northern Outpost is the gate
             fee: 10000 // Mid-game barrier - 10k gold to brave the frozen north
         },
         eastern: {
@@ -46,9 +46,9 @@ const GatehouseSystem = {
         },
         western: {
             name: 'Western Wilds',
-            description: 'Untamed western frontier with rare resources. Only the wealthiest merchants dare enter.',
+            description: 'Untamed western frontier with rare resources. Pass through Western Watch to reach Stonebridge village.',
             accessible: false,
-            gatehouse: 'stonebridge',
+            gatehouse: 'stonebridge', // Western Watch is the gate
             fee: 50000 // Late-game barrier - 50k gold for the endgame zone
         },
         southern: {
@@ -70,30 +70,30 @@ const GatehouseSystem = {
     // Gatehouse definitions - cities/locations that control access to zones
     // Players can travel TO these, but can't pass THROUGH without paying
     GATEHOUSES: {
-        // Northern zone gate - Ironforge City - MID GAME 10k
+        // Northern zone gate - Northern Outpost - MID GAME 10k
         ironforge_city: {
             id: 'ironforge_city',
-            name: 'Ironforge City',
+            name: 'Northern Outpost',
             type: 'gatehouse',
             icon: '🏰',
-            description: 'The great city of Ironforge controls access to the Northern Territories. Only seasoned traders with 10,000 gold may pass beyond.',
+            description: 'The Northern Outpost guards access to the Northern Territories. Only seasoned traders with 10,000 gold may pass beyond to Ironforge City.',
             fee: 10000,
             unlocksZone: 'northern',
-            guards: 'Ironforge Guard',
-            services: ['passage', 'smithing', 'trade'],
+            guards: 'Northern Guard',
+            services: ['passage', 'supplies'],
             visibleAlways: true,
             useGameWorldLocation: true
         },
-        // Western zone gate - Stonebridge - LATE GAME 50k
+        // Western zone gate - Western Watch - LATE GAME 50k
         stonebridge: {
             id: 'stonebridge',
-            name: 'Stonebridge',
+            name: 'Western Watch',
             type: 'gatehouse',
-            icon: '🌉',
-            description: 'The fortified town of Stonebridge marks the edge of civilized lands. Only the wealthiest merchants (50,000 gold) may enter the Western Wilds.',
+            icon: '🛡️',
+            description: 'The Western Watch marks the edge of civilized lands. Only the wealthiest merchants (50,000 gold) may enter the Western Wilds and reach Stonebridge.',
             fee: 50000,
             unlocksZone: 'western',
-            guards: 'Stonebridge Militia',
+            guards: 'Western Watch Militia',
             services: ['passage', 'supplies', 'bounties'],
             visibleAlways: true,
             useGameWorldLocation: true
@@ -117,10 +117,10 @@ const GatehouseSystem = {
     },
 
     // Map zones to their controlling gatehouses
-    // Progression: starter -> south (FREE) -> east (1k at Jade Harbor) -> north (10k at Ironforge) -> west (50k at Stonebridge)
+    // Progression: starter -> south (FREE) -> east (1k at Jade Harbor) -> north (10k at Northern Outpost) -> west (50k at Western Watch)
     ZONE_GATEHOUSES: {
-        'northern': 'ironforge_city',      // 10,000g - mid game (Ironforge City)
-        'western': 'stonebridge',          // 50,000g - late game (Stonebridge)
+        'northern': 'ironforge_city',      // 10,000g - mid game (Northern Outpost gate → Ironforge City)
+        'western': 'stonebridge',          // 50,000g - late game (Western Watch gate → Stonebridge village)
         'eastern': 'jade_harbor',          // 1,000g - early-mid game (Jade Harbor)
         'southern': null,                  // FREE! No gatehouse - natural expansion
         'capital': null,                   // Capital ALWAYS accessible
@@ -144,12 +144,12 @@ const GatehouseSystem = {
         'hunting_lodge': 'starter',
         'river_cave': 'starter',
 
-        // Ironforge City is the GATE to northern - it's in starter zone but controls northern access
+        // Northern Outpost (ironforge_city ID) is the GATE to northern - it's in starter zone but controls northern access
         'ironforge_city': 'starter',
 
-        // Northern zone locations (behind the gate at Ironforge)
+        // Northern zone locations (behind the gate - Ironforge City is at northern_outpost ID)
         'iron_mines': 'northern',
-        'northern_outpost': 'northern',
+        'northern_outpost': 'northern', // This is now Ironforge City
         'silverkeep': 'northern',
         'silver_mine': 'northern',
         'frostholm_village': 'northern',
@@ -160,11 +160,11 @@ const GatehouseSystem = {
         'frozen_cave': 'northern',
         'ruins_of_eldoria': 'northern',
 
-        // Stonebridge is the GATE to western - it's in starter zone but controls western access
+        // Western Watch (stonebridge ID) is the GATE to western - it's in starter zone but controls western access
         'stonebridge': 'starter',
 
-        // Western zone locations (behind the gate at Stonebridge)
-        'western_outpost': 'western',
+        // Western zone locations (behind the gate - Stonebridge village is at western_outpost ID)
+        'western_outpost': 'western', // This is now Stonebridge village
         'darkwood_village': 'western',
         'miners_rest': 'western',
         'ancient_forest': 'western',

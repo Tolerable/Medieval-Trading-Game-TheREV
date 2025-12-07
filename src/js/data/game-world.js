@@ -86,18 +86,18 @@ const GameWorld = {
         // ═══════════════════════════════════════════════════════════
         ironforge_city: {
             id: 'ironforge_city',
-            name: 'Ironforge City',
+            name: 'Northern Outpost',
             region: 'northern',
-            type: 'city',
-            description: 'A mighty fortress city built around ancient forges. Master smiths craft weapons and armor from raw ore.',
-            population: 3000,
-            marketSize: 'large',
+            type: 'outpost',
+            description: 'A fortified military outpost guarding the northern frontier. Pay the passage fee here to enter the Northern Territories.',
+            population: 200,
+            marketSize: 'small',
             travelCost: { base: 8 },
             connections: ['royal_capital', 'frostholm_village', 'iron_mines', 'northern_outpost'],
             mapPosition: { x: 400, y: 160 },
-            sells: ['iron_sword', 'steel_sword', 'iron_armor', 'chainmail', 'plate_armor', 'helmet', 'shield', 'iron_bar', 'steel_bar', 'iron_tools'],
-            buys: ['iron_ore', 'coal', 'leather', 'wood', 'gold_ore'],
-            npcs: ['blacksmith', 'guard', 'captain', 'apothecary', 'merchant', 'miner'] // Quest: main_preparation needs blacksmith, apothecary, guard
+            sells: ['iron_sword', 'shield', 'helmet', 'chainmail', 'bandages', 'torch', 'rope'],
+            buys: ['food', 'bread', 'meat', 'ale', 'furs', 'leather', 'coal'],
+            npcs: ['guard', 'captain', 'sergeant', 'merchant'] // GATE - guards control passage to northern zone
         },
         jade_harbor: {
             id: 'jade_harbor',
@@ -132,18 +132,18 @@ const GameWorld = {
         },
         stonebridge: {
             id: 'stonebridge',
-            name: 'Stonebridge',
+            name: 'Western Watch',
             region: 'western',
-            type: 'city',
-            description: 'An ancient city of master masons. They buy raw stone and timber to craft tools and building materials.',
-            population: 2800,
-            marketSize: 'large',
+            type: 'outpost',
+            description: 'A fortified outpost watching the wild western frontier. Pay the passage fee here to enter the Western Wilds.',
+            population: 150,
+            marketSize: 'small',
             travelCost: { base: 8 },
             connections: ['royal_capital', 'darkwood_village', 'stone_quarry', 'western_outpost'],
             mapPosition: { x: 240, y: 300 },
-            sells: ['bricks', 'mortar', 'tools', 'hammer', 'pickaxe', 'nails', 'planks', 'furniture'],
-            buys: ['stone', 'timber', 'wood', 'iron_bar', 'clay', 'coal'],
-            npcs: ['merchant', 'guard', 'blacksmith', 'mason'] // Quest: stonebridge quests need merchant, guard
+            sells: ['iron_sword', 'bow', 'arrows', 'rope', 'torch', 'bandages', 'map'],
+            buys: ['food', 'bread', 'ale', 'leather', 'timber', 'coal'],
+            npcs: ['guard', 'scout', 'sergeant', 'merchant'] // GATE - guards control passage to western zone
         },
         silverkeep: {
             id: 'silverkeep',
@@ -725,18 +725,18 @@ const GameWorld = {
         // ═══════════════════════════════════════════════════════════
         northern_outpost: {
             id: 'northern_outpost',
-            name: 'Northern Outpost',
+            name: 'Ironforge City',
             region: 'northern',
-            type: 'outpost',
-            description: 'A military outpost guarding the northern frontier. Soldiers trade weapons and supplies.',
-            population: 100,
-            marketSize: 'small',
+            type: 'city',
+            description: 'A mighty fortress city built around ancient forges. Master smiths craft legendary weapons and armor from raw ore.',
+            population: 3000,
+            marketSize: 'large',
             travelCost: { base: 12 },
             connections: ['ironforge_city', 'mountain_pass_inn'],
             mapPosition: { x: 340, y: 200 },
-            sells: ['iron_sword', 'shield', 'helmet', 'chainmail', 'bandages', 'torch'],
-            buys: ['food', 'bread', 'meat', 'ale', 'furs', 'leather', 'coal'],
-            npcs: ['guard', 'captain', 'sergeant', 'blacksmith']
+            sells: ['iron_sword', 'steel_sword', 'iron_armor', 'chainmail', 'plate_armor', 'helmet', 'shield', 'iron_bar', 'steel_bar', 'iron_tools'],
+            buys: ['iron_ore', 'coal', 'leather', 'wood', 'gold_ore'],
+            npcs: ['blacksmith', 'guard', 'captain', 'apothecary', 'merchant', 'miner'] // CITY - behind the gate
         },
         winterwatch_outpost: {
             id: 'winterwatch_outpost',
@@ -755,18 +755,18 @@ const GameWorld = {
         },
         western_outpost: {
             id: 'western_outpost',
-            name: 'Western Watch',
+            name: 'Stonebridge',
             region: 'western',
-            type: 'outpost',
-            description: 'An outpost watching the wild western frontier. Scouts trade survival gear and maps.',
-            population: 70,
-            marketSize: 'small',
+            type: 'village',
+            description: 'An ancient village of master masons built around a great stone bridge. They craft tools and building materials from raw stone and timber.',
+            population: 2800,
+            marketSize: 'large',
             travelCost: { base: 12 },
             connections: ['stonebridge', 'stone_quarry'],
             mapPosition: { x: 160, y: 340 },
-            sells: ['iron_sword', 'bow', 'arrows', 'rope', 'torch', 'bandages'],
-            buys: ['food', 'bread', 'ale', 'leather', 'timber', 'coal'],
-            npcs: ['guard', 'scout', 'sergeant'] // Quest: main_frontier, main_shadow_key need guard
+            sells: ['bricks', 'mortar', 'tools', 'hammer', 'pickaxe', 'nails', 'planks', 'furniture'],
+            buys: ['stone', 'timber', 'wood', 'iron_bar', 'clay', 'coal'],
+            npcs: ['merchant', 'guard', 'blacksmith', 'mason'] // VILLAGE - behind the gate
         },
 
         // ═══════════════════════════════════════════════════════════

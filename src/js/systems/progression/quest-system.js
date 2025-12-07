@@ -66,7 +66,7 @@ const QuestSystem = {
     //  TRACKED QUEST - the one quest to rule them all (only one at a time)
     trackedQuestId: null,
     questMarkerElement: null,
-    trackerHidden: false, // Ÿ–¤ðŸ’€ Track if user manually hid the tracker widget ðŸ’€
+    trackerHidden: false, // ï¿½ï¿½ï¿½ðŸ’€ Track if user manually hid the tracker widget ðŸ’€
 
     // 
     //  QUEST ITEMS - special items that exist only for quests
@@ -279,7 +279,7 @@ const QuestSystem = {
         greendale_delivery_ironforge: {
             id: 'greendale_delivery_ironforge',
             name: 'Package to Ironforge',
-            description: 'Deliver a merchant package to the blacksmith in Ironforge City.',
+            description: 'Deliver a merchant package to the blacksmith in Ironforge City (beyond Northern Outpost gate).',
             giver: 'merchant',
             giverName: 'Merchant Giles',
             location: 'greendale',
@@ -287,7 +287,7 @@ const QuestSystem = {
             difficulty: 'medium',
             objectives: [
                 { type: 'carry', item: 'greendale_package', count: 1, current: 0, description: 'Carry the package' },
-                { type: 'visit', location: 'ironforge_city', completed: false, description: 'Travel to Ironforge City' },
+                { type: 'visit', location: 'northern_outpost', completed: false, description: 'Travel to Ironforge City' },
                 { type: 'talk', npc: 'blacksmith', completed: false, description: 'Deliver to blacksmith' }
             ],
             rewards: { gold: 80, reputation: 15, experience: 40 },
@@ -309,7 +309,7 @@ const QuestSystem = {
             description: 'Giant rats infest the inn storehouse. Clear them out.',
             giver: 'innkeeper',
             giverName: 'Martha the Innkeep',
-            location: 'riverside_inn', // Ÿ–¤ðŸ’€ Fixed: Innkeeper is at the inn!
+            location: 'riverside_inn', // ï¿½ï¿½ï¿½ðŸ’€ Fixed: Innkeeper is at the inn!
             type: 'combat',
             difficulty: 'easy',
             objectives: [
@@ -439,7 +439,7 @@ const QuestSystem = {
             description: 'The inn is hosting a feast. They need fresh fish from Jade Harbor.',
             giver: 'innkeeper',
             giverName: 'Madame Chen',
-            location: 'silk_road_inn', // Ÿ–¤ðŸ’€ Fixed: Innkeeper is at Silk Road Inn (connects to jade_harbor)
+            location: 'silk_road_inn', // ï¿½ï¿½ï¿½ðŸ’€ Fixed: Innkeeper is at Silk Road Inn (connects to jade_harbor)
             type: 'collect',
             difficulty: 'easy',
             objectives: [
@@ -1261,7 +1261,7 @@ const QuestSystem = {
                         break;
 
                     case 'visit':
-                    case 'travel': // Ÿ–¤ðŸ’€ Travel is alias for visit - doom quests use this ðŸ’€
+                    case 'travel': // ï¿½ï¿½ï¿½ðŸ’€ Travel is alias for visit - doom quests use this ðŸ’€
                         //  Support both 'location' and 'to' properties for objectives 
                         const targetLocation = objective.location || objective.to;
                         if (data.location === targetLocation) {
@@ -1377,8 +1377,8 @@ const QuestSystem = {
         if (questUpdated) {
             this.saveQuestProgress();
             this.updateQuestLogUI();
-            this.updateQuestTracker(); // Ÿ–¤ FIX: Update tracker widget when progress changes ðŸ’€
-            this.updateQuestMapMarker(); // ŸŽ¯ FIX: Update map marker when objectives complete - moves to next objective location! ðŸ’€
+            this.updateQuestTracker(); // ï¿½ï¿½ï¿½ FIX: Update tracker widget when progress changes ðŸ’€
+            this.updateQuestMapMarker(); // ï¿½ï¿½ï¿½ FIX: Update map marker when objectives complete - moves to next objective location! ðŸ’€
             this.checkForAutoComplete();
         }
     },
@@ -1513,7 +1513,7 @@ const QuestSystem = {
             addMessage(`Quest Complete: ${quest.name}!`, 'success');
             if (rewardsGiven.gold) addMessage(`+${rewardsGiven.gold} gold`, 'success');
             if (rewardsGiven.experience) addMessage(`+${rewardsGiven.experience} XP`, 'success');
-            if (rewardsGiven.reputation) addMessage(`+${rewardsGiven.reputation} reputation`, 'success'); // Ÿ–¤ðŸ’€ FIXED: Show rep reward message
+            if (rewardsGiven.reputation) addMessage(`+${rewardsGiven.reputation} reputation`, 'success'); // ï¿½ï¿½ï¿½ðŸ’€ FIXED: Show rep reward message
             for (const [item, qty] of Object.entries(rewardsGiven.items)) {
                 addMessage(`+${qty}x ${item}`, 'success');
             }
@@ -1869,7 +1869,7 @@ const QuestSystem = {
             'royal_capital': 'ðŸ‘‘ Royal Affairs',
             'sunhaven': 'â˜€ï¸ Sunhaven Stories',
             'frostholm': 'â„ï¸ Frostholm Legends',
-            'stonebridge': 'ðŸŒ‰ Stonebridge Matters',
+            'stonebridge': 'ðŸ›¡ï¸ Western Watch Matters',
             'dungeons': 'ðŸ° Dungeon Delving',
             'repeatable': 'ðŸ”„ Daily Tasks',
             'side_quests': 'ðŸ“‹ Miscellaneous'
@@ -2032,7 +2032,7 @@ const QuestSystem = {
                         isFailed,
                         isDiscovered,
                         isMain,
-                        isAvailable // Ÿ–¤ track if quest is actually available from a met NPC
+                        isAvailable // ï¿½ï¿½ï¿½ track if quest is actually available from a met NPC
                     });
                 }
             });
@@ -2070,8 +2070,8 @@ const QuestSystem = {
         if (isActive) stateClass = 'active';
         else if (isCompleted) stateClass = 'completed';
         else if (isFailed) stateClass = 'failed';
-        else if (isAvailable) stateClass = 'available'; // Ÿ–¤ actually available from a met NPC
-        else if (isDiscovered) stateClass = 'discovered'; // Ÿ’€ discovered but not available yet
+        else if (isAvailable) stateClass = 'available'; // ï¿½ï¿½ï¿½ actually available from a met NPC
+        else if (isDiscovered) stateClass = 'discovered'; // ï¿½ï¿½ï¿½ discovered but not available yet
 
         card.className = `quest-card ${stateClass} ${isMain ? 'main-quest' : ''} ${quest.difficulty || ''}`;
 
@@ -2218,12 +2218,12 @@ const QuestSystem = {
     getLocationDisplayName(locationId) {
         const names = {
             'greendale': 'Greendale',
-            'ironforge_city': 'Ironforge City',
+            'ironforge_city': 'Northern Outpost',
             'jade_harbor': 'Jade Harbor',
             'royal_capital': 'Royal Capital',
             'sunhaven': 'Sunhaven',
             'frostholm': 'Frostholm',
-            'stonebridge': 'Stonebridge',
+            'stonebridge': 'Western Watch',
             'shadow_tower': 'Shadow Tower',
             'crystal_cave': 'Crystal Cave',
             'frost_peak': 'Frost Peak',
@@ -2255,13 +2255,13 @@ const QuestSystem = {
             case 'collect': return `Collect ${objective.item}`;
             case 'defeat': return `Defeat ${objective.enemy}`;
             case 'visit': return `Visit ${objective.location}`;
-            case 'travel': return `Travel to ${objective.to || objective.location}`; // Ÿ–¤ðŸ’€ Doom quests use travel ðŸ’€
+            case 'travel': return `Travel to ${objective.to || objective.location}`; // ï¿½ï¿½ï¿½ðŸ’€ Doom quests use travel ðŸ’€
             case 'talk': return `Talk to ${objective.npc}`;
             case 'buy': return 'Make a purchase';
             case 'trade': return 'Complete a trade';
             case 'carry': return `Carry ${objective.item}`;
             case 'explore': return `Explore ${objective.dungeon}`;
-            case 'investigate': return `Search ${objective.location}`; // Ÿ–¤ðŸ’€ Investigation objectives ðŸ’€
+            case 'investigate': return `Search ${objective.location}`; // ï¿½ï¿½ï¿½ðŸ’€ Investigation objectives ðŸ’€
             default: return objective.type;
         }
     },
@@ -2452,7 +2452,7 @@ const QuestSystem = {
             const isCompleted = this.completedQuests.includes(quest.id);
             const isActive = !!this.activeQuests[quest.id];
             const isTracked = this.trackedQuestId === quest.id;
-            const isExpanded = this._expandedQuestId === quest.id; // Ÿ–¤ðŸ’€ NEW: Check if this quest is expanded
+            const isExpanded = this._expandedQuestId === quest.id; // ï¿½ï¿½ï¿½ðŸ’€ NEW: Check if this quest is expanded
 
             //  Determine quest status for styling - only active or completed possible here!
             let status = 'active';
@@ -2623,7 +2623,7 @@ const QuestSystem = {
             'shadow_rising': 'Shadow Rising (Main Story)',
             'doom_world': 'ðŸ’€ Doom World',
             'greendale': 'ðŸŒ¾ Greendale',
-            'ironforge': 'âš’ï¸ Ironforge City',
+            'ironforge': 'âš’ï¸ Northern Outpost',
             'jade_harbor': 'ðŸŒŠ Jade Harbor',
             'sunhaven': 'â˜€ï¸ Sunhaven',
             'frostholm': 'â„ï¸ Frostholm',
@@ -2950,7 +2950,7 @@ const QuestSystem = {
         }
         const overlay = document.getElementById('quest-overlay');
         if (overlay) {
-            overlay.style.display = 'flex'; // Ÿ–¤ðŸ’€ SHOW overlay ðŸ’€
+            overlay.style.display = 'flex'; // ï¿½ï¿½ï¿½ðŸ’€ SHOW overlay ðŸ’€
             overlay.classList.add('active');
             this.questLogOpen = true;
             this.updateQuestLogUI();
@@ -2960,7 +2960,7 @@ const QuestSystem = {
     hideQuestLog() {
         const overlay = document.getElementById('quest-overlay');
         if (overlay) {
-            overlay.style.display = 'none'; // Ÿ–¤ðŸ’€ HIDE overlay ðŸ’€
+            overlay.style.display = 'none'; // ï¿½ï¿½ï¿½ðŸ’€ HIDE overlay ðŸ’€
             overlay.classList.remove('active');
             this.questLogOpen = false;
         }
@@ -3144,7 +3144,7 @@ const QuestSystem = {
             questId: quest.id,
             objective: currentObjective,
             isTracked: true,
-            isDoom: quest.isDoom || quest.id?.startsWith('doom_') // Ÿ–¤ðŸ’€ Flag for doom quest styling
+            isDoom: quest.isDoom || quest.id?.startsWith('doom_') // ï¿½ï¿½ï¿½ðŸ’€ Flag for doom quest styling
         };
     },
 
@@ -3794,7 +3794,7 @@ const QuestSystem = {
         document.addEventListener('player-location-changed', (e) => {
             //  CRITICAL FIX: Event detail uses locationId, not location!
             this.updateProgress('visit', { location: e.detail.locationId });
-            this.updateProgress('travel', { location: e.detail.locationId }); // Ÿ–¤ðŸ’€ Also trigger travel objectives ðŸ’€
+            this.updateProgress('travel', { location: e.detail.locationId }); // ï¿½ï¿½ï¿½ðŸ’€ Also trigger travel objectives ðŸ’€
         });
 
         //  NPC interaction event - DON'T auto-complete talk objectives just from opening chat! 

@@ -4,6 +4,29 @@
 
 ---
 
+## 2025-12-06 - SESSION #43: SWAP GATE NAMES (OUTPOSTS ↔ CITIES)
+
+**Request:** Swap location names for gates vs cities. The gate names got mixed up with the city names.
+
+**Status:** COMPLETE
+
+### The Swap:
+| Location ID | OLD Name | NEW Name | Role |
+|-------------|----------|----------|------|
+| ironforge_city | Ironforge City | Northern Outpost | GATE to northern zone |
+| northern_outpost | Northern Outpost | Ironforge City | CITY in northern zone |
+| stonebridge | Stonebridge | Western Watch | GATE to western zone |
+| western_outpost | Western Outpost | Stonebridge | VILLAGE in western zone |
+
+### Files Updated:
+- `src/js/data/game-world.js` - All 4 location names, types, descriptions, NPCs, sells/buys
+- `src/js/core/game.js` - DOOM_WORLD_LOCATIONS fallback copy of all 4 locations
+- `src/js/systems/travel/gatehouse-system.js` - GATEHOUSES names, descriptions, guards, ZONES descriptions, comments
+- `src/js/systems/progression/main-quests.js` - All quest locations changed from ironforge_city to northern_outpost, quest dialogue updated
+- `src/js/systems/progression/quest-system.js` - Location display names, chain names, delivery quest location
+
+---
+
 ## 2025-12-06 - SESSION #42: CANCEL TRAVEL + REROUTE + PAUSE + GATE VISIBILITY FIX
 
 **Request:** Cancel travel and reroute back to starting location and reroute anywhere is not working. Also can't pause while traveling. Gates not visible from Royal Capital!
