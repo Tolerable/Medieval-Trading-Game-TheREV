@@ -6366,56 +6366,30 @@ function createCharacter(event) {
         }
     }
 
-    // 🖤💀 SHOW ALL VALIDATION ERRORS IN A MODAL/TOOLTIP 💀
+    // 🖤💀 SHOW ALL VALIDATION ERRORS IN A BLOCKING MODAL 💀
     if (validationErrors.length > 0) {
         console.warn('Character creation validation failed:', validationErrors);
 
-        // Show validation modal/tooltip with all errors
-        let validationTooltip = document.getElementById('creation-validation-tooltip');
-        if (!validationTooltip) {
-            validationTooltip = document.createElement('div');
-            validationTooltip.id = 'creation-validation-tooltip';
-            validationTooltip.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: linear-gradient(135deg, #2c1810 0%, #1a0a05 100%);
-                border: 3px solid #f44336;
-                color: white;
-                padding: 20px 30px;
-                border-radius: 12px;
-                font-size: 14px;
-                font-weight: bold;
-                z-index: 100000;
-                box-shadow: 0 8px 32px rgba(244, 67, 54, 0.5);
-                max-width: 400px;
-                text-align: left;
-            `;
-            document.body.appendChild(validationTooltip);
-        }
+        // Build error list HTML
+        const errorListHtml = validationErrors
+            .map(err => `<div style="margin: 8px 0; padding-left: 10px; border-left: 3px solid #f44336;">${err}</div>`)
+            .join('');
 
-        validationTooltip.innerHTML = `
-            <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f44336; padding-bottom: 10px;">
-                <span style="font-size: 24px; margin-right: 10px;">🚫</span>
-                <span style="font-size: 16px; color: #f44336;">Cannot Start Game</span>
-            </div>
-            <div style="margin-bottom: 15px;">
-                ${validationErrors.map(err => `<div style="margin: 8px 0; padding-left: 10px; border-left: 3px solid #f44336;">${err}</div>`).join('')}
-            </div>
-            <button onclick="this.parentElement.style.display='none'" style="
-                width: 100%;
-                padding: 10px;
-                background: #f44336;
-                color: white;
-                border: none;
-                border-radius: 6px;
-                cursor: pointer;
-                font-weight: bold;
-                font-size: 14px;
-            ">OK, I'll fix it</button>
-        `;
-        validationTooltip.style.display = 'block';
+        // Use ModalSystem for proper input blocking
+        if (typeof ModalSystem !== 'undefined') {
+            ModalSystem.show({
+                title: '🚫 Cannot Start Game',
+                content: `<div style="color: #f44336; margin-bottom: 10px;">Please fix the following:</div>${errorListHtml}`,
+                buttons: [
+                    { text: "OK, I'll fix it", className: 'primary', onClick: () => ModalSystem.hide() }
+                ],
+                closeable: true,
+                draggable: true
+            });
+        } else {
+            // Fallback alert if ModalSystem not available
+            alert('Cannot start game:\n' + validationErrors.join('\n'));
+        }
 
         // Also show in message log
         validationErrors.forEach(err => addMessage(err, 'error'));
