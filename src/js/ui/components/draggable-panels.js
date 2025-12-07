@@ -453,22 +453,22 @@ const DraggablePanels = {
     attachDragEvents(handle, element) {
         const self = this;
 
-        // Remove old handlers by cloning (prevents duplicates)
-        const newHandle = handle.cloneNode(true);
-        if (handle.parentNode) {
-            handle.parentNode.replaceChild(newHandle, handle);
-        }
+        // Skip if already has drag events attached (prevents duplicates without cloning)
+        // NOTE: We do NOT clone the handle anymore - cloning destroys onclick handlers
+        // set up by other systems (like panel-manager's minimize/rotate buttons)
+        if (handle.dataset.dragEventsAttached === 'true') return;
+        handle.dataset.dragEventsAttached = 'true';
 
-        newHandle.addEventListener('mousedown', function(e) {
+        handle.addEventListener('mousedown', function(e) {
             // Don't drag if clicking buttons or inputs
-            if (e.target.closest('button, input, select, .panel-close-x, .panel-close-btn')) return;
+            if (e.target.closest('button, input, select, .panel-close-x, .panel-close-btn, .toolbar-collapse, .toolbar-rotate')) return;
             e.preventDefault();
             e.stopPropagation();
             self.startDrag(e, element);
         }, true);
 
-        newHandle.addEventListener('touchstart', function(e) {
-            if (e.target.closest('button, input, select, .panel-close-x, .panel-close-btn')) return;
+        handle.addEventListener('touchstart', function(e) {
+            if (e.target.closest('button, input, select, .panel-close-x, .panel-close-btn, .toolbar-collapse, .toolbar-rotate')) return;
             e.preventDefault();
             e.stopPropagation();
             self.startDrag(e, element);
