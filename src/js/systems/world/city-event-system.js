@@ -127,6 +127,15 @@ const CityEventSystem = {
         this.startEventTimer();
     },
 
+    // Get display name for city (friendly format)
+    getCityDisplayName(cityId) {
+        if (typeof GameWorld !== 'undefined' && GameWorld.locations?.[cityId]?.name) {
+            return GameWorld.locations[cityId].name;
+        }
+        // Fallback: convert snake_case to Title Case
+        return cityId.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    },
+
     // Drag the saved chaos out of storage
     loadEvents() {
         const saved = localStorage.getItem('tradingGameCityEvents');
@@ -210,7 +219,7 @@ const CityEventSystem = {
         this.applyEventEffects(cityId, event);
 
         // Notify player
-        addMessage(`📢 Event in ${cityId}: ${event.name}`);
+        addMessage(`📢 Event in ${this.getCityDisplayName(cityId)}: ${event.name}`);
         addMessage(event.description);
 
         //  Town crier voice announcement (if player is in this city)
@@ -309,7 +318,7 @@ const CityEventSystem = {
                 this.removeEventEffects(cityId, event);
 
                 // Notify player
-                addMessage(`📢 Event ended in ${cityId}: ${event.name}`);
+                addMessage(`📢 Event ended in ${this.getCityDisplayName(cityId)}: ${event.name}`);
             }
         }
 
@@ -366,7 +375,7 @@ const CityEventSystem = {
             event.active = false;
             this.removeEventEffects(cityId, event);
             this.saveEvents();
-            addMessage(`Event ${event.name} in ${cityId} has been force-ended.`);
+            addMessage(`Event ${event.name} in ${this.getCityDisplayName(cityId)} has been force-ended.`);
         }
     },
 

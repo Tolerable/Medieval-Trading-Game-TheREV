@@ -2556,7 +2556,7 @@ const SettingsPanel = {
         const masterVolume = parseFloat(this.panelElement.querySelector('#master-volume')?.value || 0.7);
         const effectiveVolume = masterVolume * (voiceVolume / 100);
 
-        this.updateVoicePreviewStatus(`Generating ${personality} NPC response...`, 'playing');
+        this.updateVoicePreviewStatus(`Generating ${this.formatDisplayName(personality)} NPC response...`, 'playing');
 
         try {
             // Use NPCDialogueSystem for dialogue generation
@@ -2629,7 +2629,7 @@ const SettingsPanel = {
                 if (testBtn) testBtn.disabled = false;
             };
 
-            this.updateVoicePreviewStatus(`[${personality}/${voice}]: "${phrase}"`, 'playing');
+            this.updateVoicePreviewStatus(`[${this.formatDisplayName(personality)}/${voice}]: "${phrase}"`, 'playing');
             await this.previewAudio.play();
 
         } catch (error) {
@@ -2707,7 +2707,7 @@ const SettingsPanel = {
                 if (testBtn) testBtn.disabled = false;
             };
 
-            this.updateVoicePreviewStatus(`[${personality}/${voice}] (fallback): "${phrase}"`, 'playing');
+            this.updateVoicePreviewStatus(`[${this.formatDisplayName(personality)}/${voice}] (fallback): "${phrase}"`, 'playing');
             await this.previewAudio.play();
         } catch (e) {
             this.updateVoicePreviewStatus(`Fallback failed: ${e.message}`, 'error');
@@ -2727,6 +2727,12 @@ const SettingsPanel = {
         // Re-enable test button
         const testBtn = this.panelElement?.querySelector('#test-voice-btn');
         if (testBtn) testBtn.disabled = false;
+    },
+
+    // Format snake_case to Title Case for display
+    formatDisplayName(id) {
+        if (!id) return 'Unknown';
+        return id.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     },
 
     // update voice preview status

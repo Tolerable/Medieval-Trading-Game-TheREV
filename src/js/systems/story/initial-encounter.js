@@ -687,9 +687,14 @@ const InitialEncounterSystem = {
             }
         }
 
-        //  Show message to player
+        //  Show message to player with clear instructions
         if (typeof addMessage === 'function') {
-            addMessage('🎭 The hooded stranger lingers in the shadows... perhaps you should speak with them.', 'info');
+            addMessage('🎭 The hooded stranger lingers in the shadows... Press [P] to see People and speak with them.', 'info');
+        }
+
+        // Refresh PeoplePanel if open to show the new NPC
+        if (typeof PeoplePanel !== 'undefined' && PeoplePanel.isOpen) {
+            PeoplePanel.refresh();
         }
 
         //  Resume time using interrupt system 

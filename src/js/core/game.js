@@ -5135,10 +5135,13 @@ function startNewGame() {
         QuestSystem.resetAllQuests();
     }
 
-    // 🖤 Reset initial encounter state so hooded stranger shows again
+    // Reset initial encounter state so hooded stranger shows again
     if (typeof InitialEncounterSystem !== 'undefined') {
         InitialEncounterSystem.hasShownEncounter = false;
         InitialEncounterSystem.hasShownTutorialChoice = false;
+        InitialEncounterSystem.hasAcceptedInitialQuest = false;
+        InitialEncounterSystem.strangerSpawnedAtLocation = null;
+        InitialEncounterSystem.hasCompletedIntro = false;
         InitialEncounterSystem._mainQuestUnlocked = false;
     }
 

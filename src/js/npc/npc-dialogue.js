@@ -1088,7 +1088,8 @@ Available commands:\n`;
                 }
 
                 if (typeof addMessage === 'function') {
-                    addMessage(`${npcData.name || 'NPC'} took ${qty}x ${itemId} from you.`);
+                    const itemName = (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem?.(itemId)?.name) || itemId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    addMessage(`${npcData.name || 'NPC'} took ${qty}x ${itemName} from you.`);
                 }
                 if (typeof InventorySystem !== 'undefined') {
                     InventorySystem.updateInventoryDisplay();
@@ -1109,7 +1110,8 @@ Available commands:\n`;
                 }));
 
                 if (typeof addMessage === 'function') {
-                    addMessage(`${npcData.name || 'NPC'} gave you ${qty}x ${itemId}!`);
+                    const itemName = (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem?.(itemId)?.name) || itemId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    addMessage(`${npcData.name || 'NPC'} gave you ${qty}x ${itemName}!`);
                 }
                 if (typeof InventorySystem !== 'undefined') {
                     InventorySystem.updateInventoryDisplay();

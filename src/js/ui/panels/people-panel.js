@@ -73,13 +73,13 @@ const PeoplePanel = {
                     <span id="chat-npc-title" class="npc-title-subtitle">Title</span>
                     <div class="npc-header-badges" id="chat-npc-badges"></div>
                 </div>
-                <!-- 📊 NPC Stats Bar - horizontal layout -->
+                <!-- NPC Stats Bar - horizontal layout -->
                 <div class="npc-stats-bar" id="npc-stats-bar">
                     <div class="npc-stat-item" title="Relationship">
                         <span class="stat-icon" id="npc-relation-icon">😐</span>
                         <span class="stat-label" id="npc-relation-label">Neutral</span>
                     </div>
-                    <div class="npc-stat-item" title="Reputation (current / trade requirement)">
+                    <div class="npc-stat-item" title="Reputation">
                         <span class="stat-icon">⭐</span>
                         <span class="stat-value" id="npc-reputation-value">0</span><span class="stat-sep">/</span><span class="stat-value stat-req" id="npc-rep-required">0</span>
                     </div>
@@ -87,9 +87,9 @@ const PeoplePanel = {
                         <span class="stat-icon">🤝</span>
                         <span class="stat-value" id="npc-trades-value">0</span>
                     </div>
-                    <div class="npc-stat-item" title="Gold Traded">
+                    <div class="npc-stat-item" title="NPC Gold">
                         <span class="stat-icon">💰</span>
-                        <span class="stat-value" id="npc-gold-traded-value">0</span>
+                        <span class="stat-value" id="npc-gold-value">0</span>
                     </div>
                 </div>
 
@@ -948,7 +948,7 @@ const PeoplePanel = {
         const badges = document.getElementById('chat-npc-badges');
         badges.innerHTML = '';
 
-        // wow-style quest badges
+        // wow-style quest badges with proper tooltips
         const questMarker = this.getQuestMarker(npcData.type || npcData.id);
         if (questMarker) {
             if (questMarker.marker === '?') {
@@ -957,20 +957,26 @@ const PeoplePanel = {
                 const isMain = questMarker.style.includes('main');
                 const badgeClass = isComplete ? 'badge-quest-complete' : 'badge-quest-progress';
                 const text = isComplete ? '? Turn In' : '? In Progress';
-                badges.innerHTML += `<span class="badge ${badgeClass}">${text}</span>`;
+                const tooltip = isComplete
+                    ? 'Quest ready to turn in! Talk to complete the quest.'
+                    : 'Quest in progress. Check objectives in quest log.';
+                badges.innerHTML += `<span class="badge ${badgeClass}" title="${tooltip}">${text}</span>`;
             } else {
                 // Quest available
                 const isMain = questMarker.style.includes('main');
                 const badgeClass = isMain ? 'badge-quest-main' : 'badge-quest';
-                badges.innerHTML += `<span class="badge ${badgeClass}">! Quest</span>`;
+                const tooltip = isMain
+                    ? 'Main story quest available! Talk to accept.'
+                    : 'Side quest available. Talk to learn more.';
+                badges.innerHTML += `<span class="badge ${badgeClass}" title="${tooltip}">! Quest</span>`;
             }
         }
         if (this.npcHasDeliveryForThem(npcData.type || npcData.id)) {
-            badges.innerHTML += '<span class="badge badge-delivery">📦 Delivery</span>';
+            badges.innerHTML += '<span class="badge badge-delivery" title="You have a delivery for this NPC. Complete the delivery quest!">📦 Delivery</span>';
         }
-        // 🖤💀 Also check npcData.canTrade for random encounters (smuggler, courier, pilgrim) 💀
+        // Also check npcData.canTrade for random encounters (smuggler, courier, pilgrim)
         if (this.npcCanTrade(npcData.type || npcData.id) || npcData.canTrade) {
-            badges.innerHTML += '<span class="badge badge-trade">💰 Trade</span>';
+            badges.innerHTML += '<span class="badge badge-trade" title="This NPC can trade with you. Open trade to buy/sell items.">💰 Trade</span>';
         }
     },
 
@@ -1009,13 +1015,23 @@ const PeoplePanel = {
         const repRequired = this.getTradeRepRequirement(npcType);
         const canTrade = this.npcCanTrade(npcType) || npcData.canTrade;
 
+        // Get NPC's available gold for trading
+        let npcGold = 0;
+        if (typeof NPCTradeSystem !== 'undefined' && NPCTradeSystem.getNPCGold) {
+            npcGold = NPCTradeSystem.getNPCGold(npcData);
+        } else if (npcData.gold !== undefined) {
+            npcGold = npcData.gold;
+        } else if (npcData.inventory?.gold !== undefined) {
+            npcGold = npcData.inventory.gold;
+        }
+
         // update ui elements
         const relationIcon = document.getElementById('npc-relation-icon');
         const relationLabel = document.getElementById('npc-relation-label');
         const reputationValue = document.getElementById('npc-reputation-value');
         const repRequiredEl = document.getElementById('npc-rep-required');
         const tradesValue = document.getElementById('npc-trades-value');
-        const goldTradedValue = document.getElementById('npc-gold-traded-value');
+        const npcGoldValue = document.getElementById('npc-gold-value');
 
         if (relationIcon) relationIcon.textContent = icon;
         if (relationLabel) relationLabel.textContent = label;
@@ -1036,7 +1052,35 @@ const PeoplePanel = {
             repRequiredEl.style.color = canTrade ? '#4a9' : '#888';
         }
         if (tradesValue) tradesValue.textContent = tradeStats.timesTraded;
-        if (goldTradedValue) goldTradedValue.textContent = tradeStats.totalGoldTraded.toLocaleString();
+        if (npcGoldValue) npcGoldValue.textContent = npcGold.toLocaleString();
+
+        // Update dynamic tooltips on stat items
+        const statsBar = document.getElementById('npc-stats-bar');
+        if (statsBar) {
+            const statItems = statsBar.querySelectorAll('.npc-stat-item');
+
+            // Relationship tooltip
+            if (statItems[0]) {
+                const repRange = levelInfo ? `${levelInfo.min} to ${levelInfo.max}` : '0 to 100';
+                statItems[0].title = `Relationship: ${label}\nYour standing with this NPC (${repRange} rep range)`;
+            }
+
+            // Reputation tooltip
+            if (statItems[1]) {
+                const repStatus = canTrade ? 'Trade unlocked!' : `Need ${repRequired - relationship.reputation} more rep to trade`;
+                statItems[1].title = `Reputation: ${relationship.reputation} / ${repRequired} required\n${repStatus}`;
+            }
+
+            // Trades completed tooltip
+            if (statItems[2]) {
+                statItems[2].title = `Trades Completed: ${tradeStats.timesTraded}\nTotal successful trades with this NPC\nTotal gold traded: ${tradeStats.totalGoldTraded.toLocaleString()}g`;
+            }
+
+            // NPC Gold tooltip
+            if (statItems[3]) {
+                statItems[3].title = `NPC Gold: ${npcGold.toLocaleString()}g\nGold available for this NPC to trade with you`;
+            }
+        }
     },
 
     // send greeting - now uses npcinstructiontemplates for npc-specific greetings
@@ -3656,6 +3700,22 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
 
         // open panel directly to chat view
         this.open();
+
+        // Center the panel on screen for special encounters
+        const panel = document.getElementById(this.panelId);
+        if (panel) {
+            // Reset to center position for special encounters
+            panel.style.left = '50%';
+            panel.style.top = '50%';
+            panel.style.transform = 'translate(-50%, -50%)';
+            panel.style.right = 'auto';
+            panel.style.bottom = 'auto';
+
+            // Bring to front
+            if (typeof DraggablePanels !== 'undefined' && DraggablePanels.bringToFront) {
+                DraggablePanels.bringToFront(panel);
+            }
+        }
 
         // skip list view entirely - go straight to chat
         this.viewMode = 'chat';

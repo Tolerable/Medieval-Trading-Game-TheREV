@@ -3301,7 +3301,8 @@ const DungeonExplorationSystem = {
             console.log(`Spawned NPC encounter: ${npcId}`);
         } else if (typeof game !== 'undefined' && game.addMessage) {
             // Fallback message if no NPC system
-            game.addMessage(`You encounter a ${npcId.replace(/_/g, ' ')}!`, 'event');
+            const npcName = npcId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            game.addMessage(`You encounter a ${npcName}!`, 'event');
         }
 
         // Fire event for other systems to hook into
