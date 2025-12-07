@@ -1003,7 +1003,7 @@ const GameWorldRenderer = {
 
  // draw the threads of fate connecting your doom to various destinations
     drawConnections(visibilityMap = {}) {
-        const svg = document.createElementNS('http:// www.w3.org/2000/svg', 'svg');
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', this.MAP_WIDTH.toString());
         svg.setAttribute('height', this.MAP_HEIGHT.toString());
         svg.style.cssText = `
@@ -1044,14 +1044,14 @@ const GameWorldRenderer = {
                 if (!scaledFrom || !scaledTo) return;
 
  // Create a group for the path (visible line + invisible hitbox)
-                const group = document.createElementNS('http:// www.w3.org/2000/svg', 'g');
+                const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 group.style.cursor = 'help';
 
  // Calculate path info for tooltip
                 const pathInfo = this.getPathInfo(location, target);
 
  // Invisible wider line for easier hovering
-                const hitbox = document.createElementNS('http:// www.w3.org/2000/svg', 'line');
+                const hitbox = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 hitbox.setAttribute('x1', scaledFrom.x);
                 hitbox.setAttribute('y1', scaledFrom.y);
                 hitbox.setAttribute('x2', scaledTo.x);
@@ -1061,7 +1061,7 @@ const GameWorldRenderer = {
                 hitbox.style.pointerEvents = 'stroke';
 
  // Visible path line
-                const line = document.createElementNS('http:// www.w3.org/2000/svg', 'line');
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 line.setAttribute('x1', scaledFrom.x);
                 line.setAttribute('y1', scaledFrom.y);
                 line.setAttribute('x2', scaledTo.x);
