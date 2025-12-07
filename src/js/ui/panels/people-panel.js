@@ -3701,13 +3701,21 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         // open panel directly to chat view
         this.open();
 
-        // Center the panel on screen for special encounters
+        // Center the panel on screen for special encounters (pixel-based for draggability)
         const panel = document.getElementById(this.panelId);
         if (panel) {
-            // Reset to center position for special encounters
-            panel.style.left = '50%';
-            panel.style.top = '50%';
-            panel.style.transform = 'translate(-50%, -50%)';
+            // Get panel dimensions after it's visible
+            const rect = panel.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            // Calculate centered position in pixels (draggable-friendly)
+            const centerLeft = Math.max(20, (viewportWidth - rect.width) / 2);
+            const centerTop = Math.max(20, (viewportHeight - rect.height) / 2);
+
+            panel.style.left = centerLeft + 'px';
+            panel.style.top = centerTop + 'px';
+            panel.style.transform = 'none';
             panel.style.right = 'auto';
             panel.style.bottom = 'auto';
 
