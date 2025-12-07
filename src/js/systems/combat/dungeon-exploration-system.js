@@ -2788,8 +2788,14 @@ const DungeonExplorationSystem = {
     },
 
     // Check if location is on cooldown
-    isOnCooldown(locationId) {
-        //  Dungeon Bonanza (July 18th) bypasses all cooldowns!
+    // Optional: pass isQuestExploration=true to bypass cooldown for quest-related explorations
+    isOnCooldown(locationId, isQuestExploration = false) {
+        // Quest explorations NEVER have cooldowns - player needs to progress!
+        if (isQuestExploration) {
+            return false;
+        }
+
+        // Dungeon Bonanza (July 18th) bypasses all cooldowns!
         if (typeof DungeonBonanzaSystem !== 'undefined' && DungeonBonanzaSystem.shouldBypassCooldowns()) {
             console.log('💀 Dark Convergence active - dungeon cooldowns bypassed!');
             return false;
@@ -4106,22 +4112,26 @@ const DungeonExplorationSystem = {
     },
 
     // Show exploration panel for a specific event
-    showSpecificExplorationPanel(locationId, eventId) {
+    // isQuestExploration flag bypasses cooldown for quest-related explorations
+    showSpecificExplorationPanel(locationId, eventId, isQuestExploration = false) {
         const location = this.getLocation(locationId);
         if (!location) return;
-
-        // Check cooldown
-        if (this.isOnCooldown(locationId)) {
-            const remaining = this.getCooldownRemaining(locationId);
-            const hours = Math.floor(remaining);
-            const minutes = Math.round((remaining - hours) * 60);
-            this.showCooldownMessage(location, hours, minutes);
-            return;
-        }
 
         const event = this.EXPLORATION_EVENTS[eventId];
         if (!event) {
             console.error('🏚️ Event not found:', eventId);
+            return;
+        }
+
+        // Check if this event is quest-related (has questRequired or is in QUEST_EXPLORATIONS)
+        const isQuestEvent = isQuestExploration || event.questRequired || event.isQuestExploration;
+
+        // Check cooldown (quest explorations bypass)
+        if (this.isOnCooldown(locationId, isQuestEvent)) {
+            const remaining = this.getCooldownRemaining(locationId);
+            const hours = Math.floor(remaining);
+            const minutes = Math.round((remaining - hours) * 60);
+            this.showCooldownMessage(location, hours, minutes);
             return;
         }
 
