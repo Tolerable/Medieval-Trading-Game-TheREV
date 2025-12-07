@@ -2759,6 +2759,116 @@ svg.map-paths,
     color: #4fc3f7;
 }
 
+/* New Transport Panel Layout - cleaner view-only design */
+.transport-summary-header {
+    margin-bottom: 1rem;
+}
+
+.transport-summary-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    text-align: center;
+}
+
+.transport-stat-item {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(139, 90, 43, 0.4);
+    border-radius: 8px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.transport-stat-item .stat-icon {
+    font-size: 1.2rem;
+}
+
+.transport-stat-item .stat-value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #4fc3f7;
+}
+
+.transport-stat-item .stat-label {
+    font-size: 0.7rem;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.transport-owned-section {
+    margin-bottom: 1rem;
+}
+
+.transport-category {
+    margin-bottom: 0.75rem;
+}
+
+.transport-category-title {
+    font-size: 0.85rem;
+    color: #8b5a2b;
+    margin: 0 0 0.5rem 0;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid rgba(139, 90, 43, 0.3);
+}
+
+.transport-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.5rem;
+}
+
+.transport-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(139, 90, 43, 0.4);
+    border-radius: 8px;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.transport-card-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.transport-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.transport-card-name {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.transport-card-stats {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: #4fc3f7;
+}
+
+.transport-tip {
+    text-align: center;
+    color: #666;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(139, 90, 43, 0.2);
+}
+
+.no-transport {
+    text-align: center;
+    color: #888;
+    padding: 1rem;
+    font-style: italic;
+}
+
 /* Transport items in market */
 .market-item.transport-item {
     border-left: 3px solid #ff9800;

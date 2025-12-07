@@ -19,7 +19,7 @@ const GameWorldRenderer = {
         zoom: 1,             // Start at 1:1 scale (natural size)
         offsetX: 0,
         offsetY: 0,
-        minZoom: 0.3,        // Max zoomed out - see the whole world
+        minZoom: 0.5,        // Max zoomed out - shows map with room for stars/moon borders
         maxZoom: 2,          // Max zoomed in - close up detail
         defaultZoom: 2,      // Default zoom for reset (max zoom per Gee's request)
         isDragging: false,
@@ -2332,14 +2332,29 @@ const GameWorldRenderer = {
 
  // zoom handlers - for when you need to see your problems closer or further away
  // zoom towards cursor position, not the corner like some amateur hour nonsense
- // FIXED: Finer zoom granularity (5% per scroll tick instead of 10%)
+ // FIXED: Adaptive zoom granularity - smaller steps at high zoom, larger at low zoom
     onWheel(e) {
         e.preventDefault();
 
- // FIXED: Finer zoom - 5% per scroll tick for smoother control 
- // Scroll up = zoom in (multiply by 1.05), scroll down = zoom out (divide by 1.05)
-        const zoomFactor = e.deltaY > 0 ? (1 / 1.05) : 1.05;
+ // Adaptive zoom speed based on current zoom level
+ // At high zoom (2.0), we want smaller steps (~2-3%) for precision
+ // At low zoom (0.5), we want larger steps (~5-8%) to move faster
+ // Use logarithmic scaling for consistent "feel" across zoom range
         const oldZoom = this.mapState.zoom;
+
+ // Normalize deltaY - trackpad sends small deltas, mouse wheel sends large ones
+ // Clamp to reasonable range to prevent massive jumps
+        const normalizedDelta = Math.sign(e.deltaY) * Math.min(Math.abs(e.deltaY), 100);
+
+ // Base zoom sensitivity - adjusted by current zoom level
+ // Higher zoom = finer control (smaller factor), lower zoom = coarser control
+        const baseSensitivity = 0.0015; // base multiplier
+        const zoomAdjust = Math.max(0.5, 2.0 - oldZoom); // More sensitive when zoomed out
+
+ // Calculate zoom change - deltaY is positive for zoom out, negative for zoom in
+        const zoomChange = -normalizedDelta * baseSensitivity * zoomAdjust;
+        const zoomFactor = 1 + zoomChange;
+
         const newZoom = Math.max(this.mapState.minZoom, Math.min(this.mapState.maxZoom, oldZoom * zoomFactor));
 
         if (Math.abs(newZoom - oldZoom) < 0.001) return; // no meaningful change, bail

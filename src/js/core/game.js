@@ -1875,7 +1875,7 @@ const transportationOptions = {
         sellPrice: 20,
         carryCapacity: 150,
         speedModifier: 0.85,
-        icon: '🛒',
+        icon: '🛞',
         description: 'A wooden cart you push by hand. Good early game option.'
     },
 
@@ -1938,7 +1938,7 @@ const transportationOptions = {
         sellPrice: 220,
         carryCapacity: 600,
         speedModifier: 0.65,  // Heavier, slower
-        icon: '🚛',
+        icon: '📦',
         description: 'A large wagon for serious hauling. Requires an animal.',
         requiresAnimal: true
     }
@@ -8574,149 +8574,102 @@ function populateTransportationOptions() {
 
     container.innerHTML = '';
 
-    // Get current location type
-    const locationType = game.currentLocation?.type || 'town';
-    const locationName = game.currentLocation?.name || 'Unknown';
-
-    // Get what's available at this location
-    const availableIds = TRANSPORT_SELLERS[locationType] || [];
-    const available = availableIds.map(id => transportationOptions[id]).filter(Boolean);
-
-    // Get transport summary for validation
+    // Get transport summary
     const summary = TransportSystem.getTransportSummary(game.player);
     const owned = game.player.ownedTransport || ['satchel'];
 
-    // Location header
+    // Summary header with nice stats
     const headerEl = document.createElement('div');
-    headerEl.className = 'transport-location-header';
+    headerEl.className = 'transport-summary-header';
     headerEl.innerHTML = `
-        <h4>${escapeHtml(locationName)} - Transport Market</h4>
-        <div class="transport-stats">
-            <span>Animals: ${summary.animals}</span>
-            <span>Vehicles: ${summary.vehicles}</span>
-            <span>Capacity: ${summary.capacity} lbs</span>
-            <span>Speed: ${Math.round(summary.speed * 100)}%</span>
+        <div class="transport-summary-stats">
+            <div class="transport-stat-item">
+                <span class="stat-icon">📦</span>
+                <span class="stat-value">${summary.capacity} lbs</span>
+                <span class="stat-label">Capacity</span>
+            </div>
+            <div class="transport-stat-item">
+                <span class="stat-icon">⚡</span>
+                <span class="stat-value">${Math.round(summary.speed * 100)}%</span>
+                <span class="stat-label">Speed</span>
+            </div>
+            <div class="transport-stat-item">
+                <span class="stat-icon">🐴</span>
+                <span class="stat-value">${summary.animals}</span>
+                <span class="stat-label">Animals</span>
+            </div>
+            <div class="transport-stat-item">
+                <span class="stat-icon">🛞</span>
+                <span class="stat-value">${summary.vehicles}</span>
+                <span class="stat-label">Vehicles</span>
+            </div>
         </div>
     `;
     container.appendChild(headerEl);
 
-    // BUY SECTION
-    const buySection = document.createElement('div');
-    buySection.className = 'transport-section';
-    buySection.innerHTML = '<h5>For Sale</h5>';
-
-    if (available.length === 0) {
-        buySection.innerHTML += '<p class="no-items">No transport available at this location.</p>';
-    } else {
-        available.forEach(transport => {
-            const price = TransportSystem.getPrice(transport.id, locationType);
-            const canAfford = game.player.gold >= price;
-
-            // Check vehicle restriction
-            let canBuy = canAfford;
-            let restriction = '';
-            if (transport.requiresAnimal && !summary.canBuyVehicle) {
-                canBuy = false;
-                restriction = 'Need animal first';
-            }
-
-            const itemEl = document.createElement('div');
-            itemEl.className = `transport-item ${canBuy ? '' : 'disabled'}`;
-            itemEl.innerHTML = `
-                <div class="transport-icon">${transport.icon}</div>
-                <div class="transport-info">
-                    <div class="transport-name">${escapeHtml(transport.name)}</div>
-                    <div class="transport-desc">${escapeHtml(transport.description)}</div>
-                    <div class="transport-stats-row">
-                        <span>+${transport.carryCapacity} lbs</span>
-                        <span>${transport.speedModifier > 1 ? '+' : ''}${Math.round((transport.speedModifier - 1) * 100)}% speed</span>
-                    </div>
-                </div>
-                <div class="transport-price">
-                    <span class="${canAfford ? 'can-afford' : 'cannot-afford'}">${price}g</span>
-                    ${restriction ? `<span class="restriction">${restriction}</span>` : ''}
-                </div>
-            `;
-
-            if (canBuy) {
-                EventManager.addEventListener(itemEl, 'click', () => purchaseTransport(transport.id));
-            }
-
-            buySection.appendChild(itemEl);
-        });
-    }
-    container.appendChild(buySection);
-
-    // SELL SECTION - show owned transport that can be sold
-    const sellSection = document.createElement('div');
-    sellSection.className = 'transport-section';
-    sellSection.innerHTML = '<h5>Sell Your Transport</h5>';
-
-    const sellable = owned.filter(id => {
-        const t = transportationOptions[id];
-        return t && t.canSell !== false && t.sellPrice > 0;
-    });
-
-    if (sellable.length === 0) {
-        sellSection.innerHTML += '<p class="no-items">Nothing to sell.</p>';
-    } else {
-        sellable.forEach(id => {
-            const transport = transportationOptions[id];
-            const sellPrice = transport.sellPrice;
-
-            // Check if selling animal would strand a vehicle
-            let canSell = true;
-            let restriction = '';
-            if (transport.category === TRANSPORT_CATEGORY.ANIMAL && !summary.canSellAnimal) {
-                canSell = false;
-                restriction = 'Would strand vehicle';
-            }
-
-            const itemEl = document.createElement('div');
-            itemEl.className = `transport-item sellable ${canSell ? '' : 'disabled'}`;
-            itemEl.innerHTML = `
-                <div class="transport-icon">${transport.icon}</div>
-                <div class="transport-info">
-                    <div class="transport-name">${escapeHtml(transport.name)}</div>
-                    <div class="transport-stats-row">
-                        <span>-${transport.carryCapacity} lbs capacity</span>
-                    </div>
-                </div>
-                <div class="transport-price sell-price">
-                    <span>+${sellPrice}g</span>
-                    ${restriction ? `<span class="restriction">${restriction}</span>` : ''}
-                </div>
-            `;
-
-            if (canSell) {
-                EventManager.addEventListener(itemEl, 'click', () => sellTransport(id));
-            }
-
-            sellSection.appendChild(itemEl);
-        });
-    }
-    container.appendChild(sellSection);
-
-    // OWNED SECTION - summary of what you have
+    // Owned transport cards - cleaner layout
     const ownedSection = document.createElement('div');
-    ownedSection.className = 'transport-section';
-    ownedSection.innerHTML = '<h5>Your Transport</h5>';
+    ownedSection.className = 'transport-owned-section';
 
-    const ownedList = document.createElement('div');
-    ownedList.className = 'owned-transport-list';
+    if (owned.length === 0) {
+        ownedSection.innerHTML = '<p class="no-transport">You have no transport. Visit a market to purchase animals or vehicles.</p>';
+    } else {
+        // Group by category for better organization
+        const carriers = owned.filter(id => transportationOptions[id]?.category === TRANSPORT_CATEGORY.CARRIER);
+        const animals = owned.filter(id => transportationOptions[id]?.category === TRANSPORT_CATEGORY.ANIMAL);
+        const vehicles = owned.filter(id => transportationOptions[id]?.category === TRANSPORT_CATEGORY.VEHICLE);
 
-    owned.forEach(id => {
+        // Render each category
+        if (carriers.length > 0) {
+            ownedSection.appendChild(createTransportCategory('Carriers', carriers));
+        }
+        if (animals.length > 0) {
+            ownedSection.appendChild(createTransportCategory('Animals', animals));
+        }
+        if (vehicles.length > 0) {
+            ownedSection.appendChild(createTransportCategory('Vehicles', vehicles));
+        }
+    }
+
+    container.appendChild(ownedSection);
+
+    // Tip at bottom
+    const tipEl = document.createElement('div');
+    tipEl.className = 'transport-tip';
+    tipEl.innerHTML = '<small>Visit merchants or stables to buy/sell transport.</small>';
+    container.appendChild(tipEl);
+}
+
+// Helper to create transport category section
+function createTransportCategory(title, transportIds) {
+    const section = document.createElement('div');
+    section.className = 'transport-category';
+    section.innerHTML = `<h5 class="transport-category-title">${title}</h5>`;
+
+    const grid = document.createElement('div');
+    grid.className = 'transport-grid';
+
+    transportIds.forEach(id => {
         const t = transportationOptions[id];
         if (!t) return;
 
-        const itemEl = document.createElement('span');
-        itemEl.className = 'owned-transport-item';
-        itemEl.textContent = `${t.icon} ${t.name}`;
-        ownedList.appendChild(itemEl);
+        const card = document.createElement('div');
+        card.className = 'transport-card';
+        card.innerHTML = `
+            <div class="transport-card-icon">${t.icon}</div>
+            <div class="transport-card-info">
+                <div class="transport-card-name">${escapeHtml(t.name)}</div>
+                <div class="transport-card-stats">
+                    <span>+${t.carryCapacity} lbs</span>
+                    <span>${t.speedModifier >= 1 ? '+' : ''}${Math.round((t.speedModifier - 1) * 100)}% spd</span>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
     });
 
-    ownedSection.appendChild(ownedList);
-    container.appendChild(ownedSection);
+    section.appendChild(grid);
+    return section;
 }
 
 function purchaseTransport(transportId) {

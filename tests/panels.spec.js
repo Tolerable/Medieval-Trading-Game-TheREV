@@ -65,7 +65,7 @@ test.describe('Game Panels', () => {
 
     test('opens via action bar button', async ({ page }) => {
       // 🖤 Try multiple button selectors including bottom action bar
-      const invBtn = page.locator('#inventory-btn, #bottom-inventory-btn, [data-panel="inventory"], button:has-text("🎒")');
+      const invBtn = page.locator('#inventory-btn, #bottom-inventory-btn, [data-panel="inventory"], button:has-text("👝")');
 
       // Use direct function call since buttons may not be visible in test viewport
       const visible = await page.evaluate(() => {
