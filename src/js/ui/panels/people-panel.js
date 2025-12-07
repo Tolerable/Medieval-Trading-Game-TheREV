@@ -2222,9 +2222,17 @@ const PeoplePanel = {
 
         // always show trade section for potential traders, but indicate locked status
         // also include npcs with cantrade flag from encounters
-        const potentialTrader = npcData.canTrade || repRequired > 0 || ['merchant', 'innkeeper', 'general_store', 'baker',
-            'farmer', 'fisherman', 'ferryman', 'traveler', 'blacksmith', 'apothecary',
-            'tailor', 'herbalist', 'miner', 'jeweler', 'banker', 'guild_master', 'noble'].includes(npcType);
+        // MUST match npcCanTrade() list - merchant, innkeeper, elder, sailor, guard, etc.
+        const potentialTrader = npcData.canTrade || repRequired > 0 || [
+            // always tradeable (from npcCanTrade)
+            'merchant', 'innkeeper', 'general_store', 'baker', 'farmer',
+            'fisherman', 'ferryman', 'traveler', 'elder', 'healer', 'guard',
+            'priest', 'hunter', 'woodcutter', 'barkeep', 'sailor', 'explorer',
+            'adventurer', 'druid', 'royal_advisor', 'chieftain', 'stablemaster', 'courier',
+            // rep-gated traders
+            'blacksmith', 'apothecary', 'tailor', 'herbalist', 'miner',
+            'jeweler', 'banker', 'guild_master', 'scholar', 'noble'
+        ].includes(npcType);
 
         if (potentialTrader) {
             container.classList.remove('hidden');
