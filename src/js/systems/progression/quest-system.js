@@ -1194,9 +1194,14 @@ const QuestSystem = {
         }
 
         document.dispatchEvent(new CustomEvent('quest-started', { detail: { quest: activeQuest } }));
-        //  Also emit quest-assigned - PeoplePanel waits for this 
+        //  Also emit quest-assigned - PeoplePanel waits for this
         document.dispatchEvent(new CustomEvent('quest-assigned', { detail: { quest: activeQuest, questId } }));
         this.updateQuestLogUI();
+
+        //  Auto-open the quest info panel for the new quest
+        setTimeout(() => {
+            this.showQuestInfoPanel(questId, { isNewQuest: true });
+        }, 100);
 
         return { success: true, quest: activeQuest };
     },
@@ -3652,9 +3657,12 @@ const QuestSystem = {
         //  Store onClose callback for later
         this._questInfoPanelOnClose = options.onClose || null;
 
-        //  Remove existing panel
+        //  Save position of existing panel before removing
         const existing = document.getElementById('quest-info-panel');
-        if (existing) existing.remove();
+        if (existing) {
+            this.saveQuestInfoPanelPosition(existing);
+            existing.remove();
+        }
 
         const progress = this.checkProgress(qId);
         //  Get location from quest data, not just tracked quest
@@ -3743,17 +3751,27 @@ const QuestSystem = {
             </div>
         `;
 
-        //  Style the panel (pixel-based centering for draggability)
+        //  Style the panel - use saved position or center
         const panelWidth = 350;
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const centerLeft = Math.max(20, (viewportWidth - panelWidth) / 2);
-        const centerTop = Math.max(20, (viewportHeight - 400) / 2);
+        const savedPos = this.getQuestInfoPanelPosition();
+        let posLeft, posTop;
+
+        if (savedPos) {
+            // Use saved position
+            posLeft = savedPos.left;
+            posTop = savedPos.top;
+        } else {
+            // Center the panel
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            posLeft = Math.max(20, (viewportWidth - panelWidth) / 2);
+            posTop = Math.max(20, (viewportHeight - 400) / 2);
+        }
 
         panel.style.cssText = `
             position: fixed;
-            top: ${centerTop}px;
-            left: ${centerLeft}px;
+            top: ${posTop}px;
+            left: ${posLeft}px;
             width: ${panelWidth}px;
             max-width: 90vw;
             background: linear-gradient(180deg, rgba(40, 40, 70, 0.98) 0%, rgba(25, 25, 45, 0.98) 100%);
@@ -3776,6 +3794,11 @@ const QuestSystem = {
             DraggablePanels.bringToFront(panel);
         }
 
+        //  Save position when panel is moved (via drag end)
+        panel.addEventListener('mouseup', () => {
+            this.saveQuestInfoPanelPosition(panel);
+        });
+
         //  Add panel styles
         this.addQuestInfoPanelStyles();
     },
@@ -3783,7 +3806,10 @@ const QuestSystem = {
     //  Hide the quest info panel and call onClose callback if set
     hideQuestInfoPanel() {
         const panel = document.getElementById('quest-info-panel');
-        if (panel) panel.remove();
+        if (panel) {
+            this.saveQuestInfoPanelPosition(panel);
+            panel.remove();
+        }
 
         //  Call onClose callback if it was set 
         if (this._questInfoPanelOnClose) {
@@ -3791,6 +3817,41 @@ const QuestSystem = {
             this._questInfoPanelOnClose = null; // Clear it first to prevent loops
             callback();
         }
+    },
+
+    //  Save quest info panel position to localStorage
+    saveQuestInfoPanelPosition(panel) {
+        if (!panel) return;
+        const rect = panel.getBoundingClientRect();
+        const pos = {
+            left: parseInt(panel.style.left) || rect.left,
+            top: parseInt(panel.style.top) || rect.top
+        };
+        try {
+            localStorage.setItem('questInfoPanelPosition', JSON.stringify(pos));
+        } catch (e) {
+            console.warn('Could not save quest panel position:', e);
+        }
+    },
+
+    //  Get saved quest info panel position from localStorage
+    getQuestInfoPanelPosition() {
+        try {
+            const saved = localStorage.getItem('questInfoPanelPosition');
+            if (saved) {
+                const pos = JSON.parse(saved);
+                // Validate position is within viewport
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                if (pos.left >= 0 && pos.left < viewportWidth - 100 &&
+                    pos.top >= 0 && pos.top < viewportHeight - 100) {
+                    return pos;
+                }
+            }
+        } catch (e) {
+            console.warn('Could not load quest panel position:', e);
+        }
+        return null;
     },
 
     //  Center the map on the quest target location
@@ -3828,7 +3889,10 @@ const QuestSystem = {
 
         //  Close the panel (callback already cleared, won't trigger)
         const panel = document.getElementById('quest-info-panel');
-        if (panel) panel.remove();
+        if (panel) {
+            this.saveQuestInfoPanelPosition(panel);
+            panel.remove();
+        }
     },
 
     //  Get display name for a location
