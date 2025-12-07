@@ -10,13 +10,8 @@
 const LoadingManager = {
     // Final system check - multiple indicators that game is ready
     finalCheck: () => {
-        // Check if audio is preloaded (if MusicSystem exists)
-        if (typeof MusicSystem !== 'undefined' && MusicSystem.preloadProgress) {
-            const audioProgress = MusicSystem.preloadProgress;
-            if (audioProgress.total > 0 && audioProgress.loaded < audioProgress.total) {
-                return false;
-            }
-        }
+        // Audio preloads in background - don't block game start for music
+        // Players can start playing immediately, audio fades in when ready
 
         // Primary: window.startNewGame is set at end of game.js
         if (typeof window.startNewGame === 'function') {
