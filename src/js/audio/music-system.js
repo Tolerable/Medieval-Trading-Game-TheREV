@@ -114,9 +114,12 @@ const MusicSystem = {
         // Load saved settings (overrides config defaults if user changed them)
         this.loadSettings();
 
+        // Load master volume from SettingsPanel's saved settings
+        this.loadMasterVolumeFromSettings();
+
         // Create audio element
         this.currentAudio = new Audio();
-        this.currentAudio.volume = this.settings.volume;
+        this.currentAudio.volume = this.getEffectiveVolume();
 
         // Listen for track end
         this.currentAudio.addEventListener('ended', () => this.onTrackEnd());
@@ -223,6 +226,28 @@ const MusicSystem = {
             }
         } catch (e) {
             console.warn('🎵 MusicSystem: Could not load settings');
+        }
+    },
+
+    // 🔊 Load master volume from SettingsPanel's saved settings
+    loadMasterVolumeFromSettings() {
+        try {
+            // SettingsPanel saves to 'tradingGameSettings'
+            const saved = localStorage.getItem('tradingGameSettings');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.audio && typeof parsed.audio.masterVolume === 'number') {
+                    this.settings.masterVolume = parsed.audio.masterVolume;
+                    console.log(`🎵 MusicSystem: Loaded master volume from settings: ${Math.round(this.settings.masterVolume * 100)}%`);
+                }
+                // Also load music volume if available
+                if (parsed.audio && typeof parsed.audio.musicVolume === 'number') {
+                    this.settings.volume = parsed.audio.musicVolume;
+                    console.log(`🎵 MusicSystem: Loaded music volume from settings: ${Math.round(this.settings.volume * 100)}%`);
+                }
+            }
+        } catch (e) {
+            console.warn('🎵 MusicSystem: Could not load master volume from settings');
         }
     },
 

@@ -179,10 +179,29 @@ const NPCVoiceChatSystem = {
             } else {
                 this.settings = { ...this.config.defaults };
             }
+            // Also load master volume from SettingsPanel's saved settings
+            this.loadMasterVolumeFromSettings();
         } catch (error) {
             // silent fallback - corrupt data just means we use defaults
             this.settings = { ...this.config.defaults };
             localStorage.removeItem('npcVoiceChatSettings');
+        }
+    },
+
+    // Load master volume from SettingsPanel's saved settings
+    loadMasterVolumeFromSettings() {
+        try {
+            const saved = localStorage.getItem('tradingGameSettings');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.audio && typeof parsed.audio.masterVolume === 'number') {
+                    // Convert 0.0-1.0 to 0-100 for internal use
+                    this.settings.masterVolume = Math.round(parsed.audio.masterVolume * 100);
+                    console.log(`🎙️ Loaded master volume from settings: ${this.settings.masterVolume}%`);
+                }
+            }
+        } catch (e) {
+            console.warn('🎙️ Could not load master volume from settings');
         }
     },
 
