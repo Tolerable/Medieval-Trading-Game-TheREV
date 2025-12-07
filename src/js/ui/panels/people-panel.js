@@ -842,7 +842,7 @@ const PeoplePanel = {
         if (questMarker) {
             badges += `<span class="quest-badge ${questMarker.style}">${questMarker.marker}</span>`;
         }
-        if (canTrade) badges += '<span class="trade-badge">💰</span>';
+        // trade badge removed - clutters the UI
 
         card.innerHTML = `
             <div class="npc-card-icon">${icon}${badges}</div>
@@ -974,10 +974,7 @@ const PeoplePanel = {
         if (this.npcHasDeliveryForThem(npcData.type || npcData.id)) {
             badges.innerHTML += '<span class="badge badge-delivery" title="You have a delivery for this NPC. Complete the delivery quest!">📦 Delivery</span>';
         }
-        // Also check npcData.canTrade for random encounters (smuggler, courier, pilgrim)
-        if (this.npcCanTrade(npcData.type || npcData.id) || npcData.canTrade) {
-            badges.innerHTML += '<span class="badge badge-trade" title="This NPC can trade with you. Open trade to buy/sell items.">💰 Trade</span>';
-        }
+        // trade badge removed - clutters the UI, trade section at bottom shows availability
     },
 
     // update npc stats bar - horizontal relationship/trade stats
