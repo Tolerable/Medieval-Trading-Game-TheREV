@@ -5142,6 +5142,16 @@ function startNewGame() {
         InitialEncounterSystem._mainQuestUnlocked = false;
     }
 
+    // Reset exploration system for new game (cooldowns, completed, history)
+    if (typeof ExplorationPanel !== 'undefined' && ExplorationPanel.resetForNewGame) {
+        ExplorationPanel.resetForNewGame();
+    }
+
+    // Reset dungeon exploration system (boss progress, defeated bosses)
+    if (typeof DungeonExplorationSystem !== 'undefined' && DungeonExplorationSystem.resetForNewGame) {
+        DungeonExplorationSystem.resetForNewGame();
+    }
+
     // 🖤 Reset stat decay tracker for new game - so decay happens correctly from minute 0 💀
     game._lastProcessedMinute = -1;
 

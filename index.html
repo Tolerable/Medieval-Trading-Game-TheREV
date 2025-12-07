@@ -659,11 +659,30 @@
                         </div>
                     </div>
                     
-                    <!-- Quick Access Slots -->
+                    <!-- Quick Access Slots + Item Info Panel -->
                     <div class="quick-access-container">
                         <h3>Quick Access</h3>
-                        <div id="quick-access-slots" class="quick-access-slots">
-                            <!-- Quick access slots will be populated by JavaScript -->
+                        <div class="quick-access-row">
+                            <div id="quick-access-slots" class="quick-access-slots">
+                                <!-- Quick access slots will be populated by JavaScript -->
+                            </div>
+                            <!-- Item Hover Info Panel - shows full item details on hover -->
+                            <div id="item-hover-info" class="item-hover-info">
+                                <div class="hover-info-header">
+                                    <span id="hover-item-icon" class="hover-icon">📦</span>
+                                    <span id="hover-item-name" class="hover-name">Hover over an item</span>
+                                </div>
+                                <div class="hover-info-body">
+                                    <p id="hover-item-desc" class="hover-desc">Item details will appear here</p>
+                                    <div class="hover-stats">
+                                        <div class="hover-stat"><span class="stat-label">Value:</span> <span id="hover-item-value">-</span></div>
+                                        <div class="hover-stat"><span class="stat-label">Weight:</span> <span id="hover-item-weight">-</span></div>
+                                        <div class="hover-stat"><span class="stat-label">Category:</span> <span id="hover-item-category">-</span></div>
+                                        <div class="hover-stat"><span class="stat-label">Rarity:</span> <span id="hover-item-rarity">-</span></div>
+                                    </div>
+                                    <div id="hover-item-bonuses" class="hover-bonuses hidden"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     

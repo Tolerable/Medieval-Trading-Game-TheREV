@@ -9569,3 +9569,267 @@ Multiple UI fixes and performance optimization for the settings panel, market, t
 
 ---
 
+## 2025-12-07 - SESSION #67: QUEST INFO PANEL - GIVER & CHAIN DISPLAY 🖤💀
+
+### Request:
+Gee wants the individual quest panel to display:
+1. The person's name who gave the quest
+2. How this quest links to the current quest chain (prev/next quests)
+
+### Status: COMPLETE ✅
+
+---
+
+### IMPLEMENTATION:
+
+**1. Quest Giver Section - NEW FEATURE ✅**
+- **Feature:** Shows who assigned the quest with location info
+- **Data Sources:** `quest.assignedBy`, `quest.giverName`, `quest.giver`
+- **Display:** Quest giver name (gold text) + location (italic gray)
+- **Styling:** Blue-tinted background with left border accent
+
+**2. Quest Chain Section - NEW FEATURE ✅**
+- **Feature:** Shows quest chain navigation with clickable links
+- **Data Sources:** `quest.chain`, `quest.chainOrder`, `quest.prerequisite`, `quest.nextQuest`
+- **Display:**
+  - Chain name with part number (e.g., "Shadow Rising (Part 3)")
+  - Previous quest: ⬆ with ✓/○ status, clickable to navigate
+  - Current quest: ➤ highlighted in gold
+  - Next quest: ⬇ with ✓/○/🔒 status, clickable to navigate
+- **Styling:** Purple-tinted background with left border accent
+
+**3. New Helper Function - buildQuestChainInfo() ✅**
+- Builds HTML for quest chain visualization
+- Handles standalone quests (no chain = no section shown)
+- Clickable quest names navigate to that quest's info panel
+- Status indicators: completed (✓ green), active (○ yellow), locked (🔒 gray)
+
+---
+
+### FILES MODIFIED:
+
+| File | Changes |
+|------|---------|
+| `src/js/systems/progression/quest-system.js` | +80 lines: buildQuestChainInfo(), showQuestInfoPanel updates, new CSS styles |
+
+---
+
+### CODE CHANGES:
+
+**New Function: buildQuestChainInfo()**
+```javascript
+buildQuestChainInfo(questId, quest) {
+    // Returns { html, hasChain } with chain visualization
+    // Shows: chain name, prerequisite, current, next quest
+    // Clickable navigation between quests
+}
+```
+
+**Updated: showQuestInfoPanel()**
+- Added quest giver name extraction
+- Added quest chain info section
+- New HTML sections for giver and chain display
+
+**New CSS Classes:**
+- `.quest-giver-section` - Blue-tinted info box
+- `.quest-giver-name` - Gold highlighted name
+- `.quest-chain-section` - Purple-tinted chain box
+- `.quest-chain-link` - Individual quest links
+- `.chain-quest-name.completed/active/locked` - Status styles
+
+---
+
+### SESSION SUMMARY:
+
+**Total changes: 2 NEW FEATURES**
+1. Quest Giver display in quest info panel
+2. Quest Chain visualization with navigation
+
+**Impact:** Players can now see:
+- WHO gave them each quest
+- WHERE that quest fits in a chain
+- NAVIGATE between related quests by clicking
+
+---
+
+*"Quests now have context. The chain is visible. The story connects."* 🖤💀
+
+---
+
+## 2025-12-07 - SESSION #68: NPC DIALOGUE PANEL + UNIVERSAL FACTION SYSTEM 🖤💀
+
+### Request:
+1. NPC dialogue panel badges trailing out - fix by moving name to header
+2. Not all quest givers should require rep to unlock trade
+3. Create universal faction system that maps ALL NPCs, bosses, enemies to factions
+
+### Status: COMPLETE ✅
+
+---
+
+### FIXES COMPLETED:
+
+**1. NPC Dialogue Panel Header Restructure - FIXED ✅**
+- **Issue:** Badges trailing out of panel, name scrunched
+- **Fix:** Created new `.npc-name-header` with name at very top (gold, prominent)
+- **Fix:** Created `.npc-info-row` below for title + badges with flex-wrap
+- **Styling:** Blue gradient header background, badges wrap properly now
+- **File:** `src/js/ui/panels/people-panel.js`
+
+**2. Quest Giver Trade Unlock - FIXED ✅**
+- **Issue:** Quest givers like elder, healer, guard needed 15 rep to trade
+- **Fix:** Added quest givers to `alwaysTrade` list (no rep required):
+  - `elder`, `healer`, `guard`, `priest`, `hunter`, `woodcutter`
+  - `barkeep`, `sailor`, `explorer`, `adventurer`, `druid`
+  - `royal_advisor`, `chieftain`, `stablemaster`, `courier`
+- **Also Added:** Shady types (thief, spy, smuggler) need only 5 rep
+- **File:** `src/js/ui/panels/people-panel.js` (`npcCanTrade`, `getTradeRepRequirement`)
+
+**3. Universal NPC-to-Faction Mapping - NEW FEATURE ✅**
+- **Added:** `npcFactionMap` object with 60+ NPC types mapped to factions:
+  - Merchants Guild: merchant, general_store, baker, blacksmith, jeweler, tailor, etc.
+  - Farmers Collective: farmer, fisherman, herbalist, woodcutter, hunter, druid
+  - City Guard: guard, captain, watchman, soldier
+  - Noble Houses: noble, royal_advisor, lord, lady, chieftain, elder
+  - Mages Circle: mage, wizard, sorcerer, priest, scholar, alchemist, healer
+  - Thieves Guild: thief, spy, pickpocket, fence, assassin, informant
+  - Smugglers Ring: smuggler, pirate, ferryman, sailor, boatman
+- **File:** `src/js/systems/progression/faction-system.js`
+
+**4. Enemy Faction System - NEW FEATURE ✅**
+- **Added:** `enemyFactions` object with hostile factions:
+  - `bandits`: Bandit, bandit_leader (-50 default rep)
+  - `monsters`: Goblin, wolf, dragon, troll, ogre, frost_lord (-75 default rep)
+  - `undead`: Skeleton, zombie, ghost, vampire, necromancer (-100 default rep)
+  - `shadow_cult`: Cultist, shadow_knight, malachar, doom_lord, dark_mage (-100 default rep)
+- **File:** `src/js/systems/progression/faction-system.js`
+
+**5. Faction Helper Functions - NEW FEATURE ✅**
+- `getNPCFactions(npcType)` - Get all factions an NPC belongs to
+- `getNPCPrimaryFaction(npcType)` - Get first/main faction
+- `isNPCInFaction(npcType, factionId)` - Check if NPC is in faction
+- `getNPCsInFaction(factionId)` - Get all NPC types in a faction
+- `isEnemy(npcType)` - Check if NPC is hostile
+
+**6. Faction Rep Integration - NEW FEATURE ✅**
+- **Updated:** `getNPCReputation()` now checks FactionSystem if no individual rep
+- **Logic:** Individual rep > Faction rep (scaled) > Default 0
+- **Scaling:** Faction rep (-100 to +100) scaled to trade rep (0-100)
+- **File:** `src/js/ui/panels/people-panel.js`
+
+---
+
+### FILES MODIFIED:
+
+| File | Changes |
+|------|---------|
+| `src/js/ui/panels/people-panel.js` | Panel header restructure, quest giver trade fix, faction integration |
+| `src/js/systems/progression/faction-system.js` | NPC-faction map, enemy factions, helper functions |
+
+---
+
+### SESSION SUMMARY:
+
+**Total changes: 6 FEATURES**
+1. NPC dialogue panel header restructure (name prominent at top)
+2. Quest giver trade unlock (no rep needed for 20+ NPC types)
+3. Universal NPC-to-faction mapping (60+ NPCs mapped)
+4. Enemy faction system (bandits, monsters, undead, shadow_cult)
+5. Faction helper functions (5 new methods)
+6. Faction rep integration with trade system
+
+**Impact:**
+- Players see NPC name prominently, badges don't overflow
+- Quest givers can trade immediately without rep grind
+- All NPCs/bosses/enemies now have faction affiliations
+- Faction reputation affects trade unlock for unmapped NPCs
+
+---
+
+*"Every soul has allegiance. Every enemy has origin. The factions are mapped."* 🖤💀
+
+---
+
+## 2025-12-07 - SESSION #69: INVENTORY HOVER INFO PANEL 🖤💀
+
+### Request:
+In the inventory panel, the Quick Access area should show full item info when hovering over items. The small item cards have truncated information - need a live-updating info panel.
+
+### Status: COMPLETE ✅
+
+---
+
+### IMPLEMENTATION:
+
+**1. Item Hover Info Panel - NEW FEATURE ✅**
+- **Location:** Next to Quick Access slots in a flex row
+- **Updates:** Dynamically on mouseenter for any inventory item
+- **Shows:**
+  - Icon (large)
+  - Name (gold text)
+  - Description (italic)
+  - Value (per unit + total)
+  - Weight (per unit + total)
+  - Category
+  - Rarity (color-coded: common/uncommon/rare/epic/legendary)
+  - Bonuses for equipment (stat modifiers)
+  - Effects for consumables
+
+**2. HTML Structure - ADDED ✅**
+```html
+<div class="quick-access-row">
+    <div id="quick-access-slots">...</div>
+    <div id="item-hover-info" class="item-hover-info">
+        <div class="hover-info-header">icon + name</div>
+        <div class="hover-info-body">desc, stats, bonuses</div>
+    </div>
+</div>
+```
+
+**3. CSS Styling - ADDED ✅**
+- `.quick-access-row` - flex container for side-by-side layout
+- `.item-hover-info` - gradient background, cyan border
+- `.hover-name` - gold text, bold
+- `.hover-stats` - 2-column grid layout
+- `.hover-bonuses` - gold text, hidden until needed
+- Rarity colors: common=#888, uncommon=#1eff00, rare=#0070dd, epic=#a335ee, legendary=#ff8000
+
+**4. JavaScript Function - ADDED ✅**
+```javascript
+updateHoverInfoPanel(itemId, quantity) {
+    // Get item from ItemDatabase
+    // Update all info elements
+    // Show bonuses or effects if present
+    // Apply rarity color
+}
+```
+
+---
+
+### FILES MODIFIED:
+
+| File | Changes |
+|------|---------|
+| `index.html` | Added item-hover-info panel structure |
+| `src/css/styles.css` | Added hover info panel styles, quick-access-row |
+| `src/js/ui/panels/inventory-panel.js` | Added updateHoverInfoPanel(), mouseenter events |
+
+---
+
+### SESSION SUMMARY:
+
+**Total changes: 1 NEW FEATURE**
+1. Inventory item hover info panel with full details
+
+**Impact:**
+- Players can now see complete item information without truncation
+- Description, bonuses, effects all visible on hover
+- Rarity color-coded for quick identification
+- Value and weight show both per-unit and total amounts
+
+---
+
+*"Hover and learn. Every item tells its story."* 🖤💀
+
+---
+

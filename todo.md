@@ -95,6 +95,61 @@ Events already exist in dungeon-exploration-system.js:
 
 ## RECENT SESSION FIXES (2025-12-07)
 
+### Session #69 - INVENTORY HOVER INFO PANEL
+
+**Inventory Hover Info Panel:**
+- [x] Added item-hover-info panel next to Quick Access
+- [x] Shows full item details: icon, name, description
+- [x] Shows stats: value (unit + total), weight, category, rarity
+- [x] Shows bonuses/effects for equipment and consumables
+- [x] Rarity color-coded (WoW-style colors)
+- [x] Updates dynamically on hover via updateHoverInfoPanel()
+
+---
+
+### Session #68 - NPC DIALOGUE PANEL + UNIVERSAL FACTION SYSTEM
+
+**NPC Dialogue Panel Fixes:**
+- [x] Restructured header - NPC name now prominent at very top
+- [x] Created `.npc-name-header` with gold name, large icon
+- [x] Created `.npc-info-row` with title + badges (flex-wrap)
+- [x] Badges no longer trail off panel
+
+**Quest Giver Trade Unlock:**
+- [x] Added 20+ quest givers to alwaysTrade list (no rep required)
+- [x] Added shady types (thief, spy, smuggler) - only 5 rep needed
+- [x] Lowered default rep requirement from 15 to 10
+
+**Universal Faction System:**
+- [x] Created `npcFactionMap` with 60+ NPC types mapped
+- [x] Created `enemyFactions` (bandits, monsters, undead, shadow_cult)
+- [x] Added `getNPCFactions()`, `getNPCPrimaryFaction()`, `isNPCInFaction()`
+- [x] Added `getNPCsInFaction()`, `isEnemy()` helper functions
+- [x] Integrated faction rep with `getNPCReputation()` fallback
+
+---
+
+### Session #67 - QUEST INFO PANEL - GIVER & CHAIN DISPLAY
+
+**Quest Giver Display:**
+- [x] Show quest giver name in quest info panel
+- [x] Show quest giver location
+- [x] Style with blue-tinted background
+
+**Quest Chain Visualization:**
+- [x] Show chain name with part number
+- [x] Show previous quest (clickable, with status)
+- [x] Show current quest (highlighted)
+- [x] Show next quest (clickable, with status)
+- [x] Style with purple-tinted background
+
+**New Code:**
+- [x] buildQuestChainInfo() helper function
+- [x] Updated showQuestInfoPanel() with new sections
+- [x] Added 80+ lines of CSS for new sections
+
+---
+
 ### Session #66 - UI POLISH + CPU OPTIMIZATION
 
 **Voice TTS & Settings:**
@@ -160,8 +215,8 @@ Events already exist in dungeon-exploration-system.js:
 | MEDIUM | 0 | 66+ |
 | LOW | 0 | 25+ |
 | TESTS | 0 | 399 |
-| SESSION | 0 | 37 (today) |
-| **TOTAL** | **0** | **586+** |
+| SESSION | 0 | 72 (today) |
+| **TOTAL** | **0** | **621+** |
 
 ---
 

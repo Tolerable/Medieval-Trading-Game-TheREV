@@ -1743,24 +1743,36 @@ The game features **57 achievements** across 12 categories, including 10 hidden 
 
 ## 📅 VERSION HISTORY
 
-### v0.90.01 - UI Polish + CPU Optimization (2025-12-07)
+### v0.90.01 - Sessions #66-69 (2025-12-07)
 
-**UI Improvements:**
-- Voice TTS preview now applies master volume correctly
-- Test voice button disables while playing (spam prevention)
-- Removed redundant Main Menu button from settings
-- Market trade window text centering for multi-word items (Silk Garments, Luxury Items, Royal Goods)
-- **NEW:** UI Scale setting (75%-150%) for scaling panels
-- Trade cart improvements: badge margin, weight display, Complete Trade button layout
-- Transportation panel: fixed card overlap, improved tip text placement
-- Hidden number input spinners in trade cart
+**Session #69 - Inventory Hover Info Panel:**
+- **NEW:** Item hover info panel next to Quick Access
+- Shows full item details: icon, name, description, value, weight, category, rarity
+- Shows bonuses/effects for equipment and consumables
+- Rarity color-coded (common/uncommon/rare/epic/legendary)
+- Updates dynamically as you hover over items
 
-**CPU Optimization:**
-- Weather particle frequency reduced (150ms → 400ms intervals)
-- Storm rain drops reduced (80 → 40)
-- Game weather particles reduced (60 → 25 max)
-- Player marker animations slowed (3s → 5s cycles)
-- Added GPU hints (`will-change: transform, opacity`)
+**Session #68 - NPC Dialogue Panel + Universal Faction System:**
+- NPC name now prominent at top of dialogue panel (gold text, large icon)
+- Badges no longer trail off panel - proper flex-wrap
+- Quest givers can trade immediately (20+ types added to alwaysTrade)
+- Universal NPC-to-faction mapping (60+ NPC types)
+- Enemy factions: bandits, monsters, undead, shadow_cult
+- Faction rep integration with trade unlock
+
+**Session #67 - Quest Info Panel - Giver & Chain Display:**
+- Quest giver name and location shown in quest info panel
+- Quest chain visualization with prev/next navigation
+- Clickable chain links to navigate between quests
+- Blue-tinted giver section, purple-tinted chain section
+
+**Session #66 - UI Polish + CPU Optimization:**
+- Voice TTS preview applies master volume correctly
+- Test voice button spam prevention
+- UI Scale setting (75%-150%)
+- Trade cart UI improvements
+- Weather particle optimization (CPU reduction)
+- Player marker animation optimization
 
 ---
 

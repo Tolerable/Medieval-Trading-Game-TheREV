@@ -4708,6 +4708,31 @@ const DungeonExplorationSystem = {
         }
     },
 
+    // Reset all exploration state for new game
+    resetForNewGame() {
+        console.log('DungeonExplorationSystem resetting for new game...');
+
+        // Clear boss progress and defeated bosses
+        this.bossProgress = {};
+        this.defeatedBosses = {};
+
+        // Clear active boss if any
+        this.activeBoss = null;
+
+        // Clear localStorage
+        try {
+            localStorage.removeItem('dungeonBossProgress');
+            localStorage.removeItem('dungeonDefeatedBosses');
+        } catch (e) {
+            console.warn('Could not clear dungeon localStorage:', e);
+        }
+
+        // Close any open exploration overlay
+        this.closeExploration();
+
+        console.log('DungeonExplorationSystem reset complete!');
+    },
+
     //
     // TRIGGER SPECIFIC EXPLORATION EVENT - called by ExplorationPanel
     //

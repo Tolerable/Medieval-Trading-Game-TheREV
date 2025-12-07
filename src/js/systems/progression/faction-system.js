@@ -178,9 +178,169 @@ const FactionSystem = {
         }
     },
 
-    // 
+    //
+    // UNIVERSAL NPC-TO-FACTION MAPPING
+    // Every NPC, boss, and enemy belongs to at least one faction
+    //
+    npcFactionMap: {
+        // Merchants Guild members - traders, shop owners, craftsmen
+        merchant: ['merchants_guild'],
+        general_store: ['merchants_guild'],
+        baker: ['merchants_guild', 'farmers_collective'],
+        blacksmith: ['merchants_guild'],
+        jeweler: ['merchants_guild', 'noble_houses'],
+        tailor: ['merchants_guild'],
+        apothecary: ['merchants_guild', 'mages_circle'],
+        banker: ['merchants_guild', 'noble_houses'],
+        guild_master: ['merchants_guild'],
+        innkeeper: ['merchants_guild'],
+
+        // Farmers Collective - agricultural workers
+        farmer: ['farmers_collective'],
+        fisherman: ['farmers_collective'],
+        herbalist: ['farmers_collective', 'mages_circle'],
+        woodcutter: ['farmers_collective'],
+        hunter: ['farmers_collective'],
+        druid: ['farmers_collective', 'mages_circle'],
+
+        // City Guard - law enforcement
+        guard: ['city_guard'],
+        captain: ['city_guard', 'noble_houses'],
+        watchman: ['city_guard'],
+        soldier: ['city_guard'],
+
+        // Noble Houses - aristocracy
+        noble: ['noble_houses'],
+        royal_advisor: ['noble_houses'],
+        lord: ['noble_houses'],
+        lady: ['noble_houses'],
+        chieftain: ['noble_houses'],
+        elder: ['noble_houses', 'farmers_collective'],
+
+        // Mages Circle - magic users
+        mage: ['mages_circle'],
+        wizard: ['mages_circle'],
+        sorcerer: ['mages_circle'],
+        priest: ['mages_circle'],
+        scholar: ['mages_circle'],
+        alchemist: ['mages_circle'],
+
+        // Thieves Guild - criminals and rogues
+        thief: ['thieves_guild'],
+        spy: ['thieves_guild'],
+        pickpocket: ['thieves_guild'],
+        fence: ['thieves_guild'],
+        assassin: ['thieves_guild'],
+        informant: ['thieves_guild'],
+
+        // Smugglers Ring - underground traders
+        smuggler: ['smugglers', 'thieves_guild'],
+        pirate: ['smugglers'],
+        ferryman: ['smugglers', 'merchants_guild'],
+        sailor: ['smugglers', 'merchants_guild'],
+        boatman: ['smugglers'],
+
+        // Service NPCs - multiple or no faction
+        healer: ['mages_circle'],
+        traveler: [],  // Neutral, no faction
+        courier: ['merchants_guild'],
+        barkeep: ['merchants_guild'],
+        drunk: [],
+        beggar: [],
+        stablemaster: ['merchants_guild'],
+        explorer: [],
+        adventurer: [],
+
+        // Enemies and Bosses - hostile factions
+        bandit: ['bandits'],
+        bandit_leader: ['bandits'],
+        goblin: ['monsters'],
+        wolf: ['monsters'],
+        skeleton: ['undead'],
+        zombie: ['undead'],
+        necromancer: ['undead', 'mages_circle'],
+        dragon: ['monsters'],
+        troll: ['monsters'],
+        ogre: ['monsters'],
+        ghost: ['undead'],
+        vampire: ['undead'],
+        cultist: ['shadow_cult'],
+        shadow_knight: ['shadow_cult'],
+        malachar: ['shadow_cult'],  // Main antagonist
+        doom_lord: ['shadow_cult'],
+        frost_lord: ['monsters'],
+        dark_mage: ['shadow_cult', 'mages_circle']
+    },
+
+    // Enemy factions - these are hostile to the player by default
+    enemyFactions: {
+        bandits: {
+            id: 'bandits',
+            name: 'Bandits',
+            icon: '🗡️',
+            description: 'Highway robbers and thieves who prey on travelers.',
+            defaultRep: -50
+        },
+        monsters: {
+            id: 'monsters',
+            name: 'Wild Monsters',
+            icon: '👹',
+            description: 'Feral creatures and beasts that threaten civilization.',
+            defaultRep: -75
+        },
+        undead: {
+            id: 'undead',
+            name: 'The Undead',
+            icon: '💀',
+            description: 'Risen corpses and dark spirits.',
+            defaultRep: -100
+        },
+        shadow_cult: {
+            id: 'shadow_cult',
+            name: 'Shadow Cult',
+            icon: '🖤',
+            description: 'Followers of darkness seeking to plunge the world into shadow.',
+            defaultRep: -100
+        }
+    },
+
+    // Get faction(s) for an NPC type
+    getNPCFactions(npcType) {
+        return this.npcFactionMap[npcType] || [];
+    },
+
+    // Get primary faction for an NPC (first in list)
+    getNPCPrimaryFaction(npcType) {
+        const factions = this.getNPCFactions(npcType);
+        return factions.length > 0 ? factions[0] : null;
+    },
+
+    // Check if NPC is in a specific faction
+    isNPCInFaction(npcType, factionId) {
+        const factions = this.getNPCFactions(npcType);
+        return factions.includes(factionId);
+    },
+
+    // Get all NPCs in a faction
+    getNPCsInFaction(factionId) {
+        const npcs = [];
+        for (const [npcType, factions] of Object.entries(this.npcFactionMap)) {
+            if (factions.includes(factionId)) {
+                npcs.push(npcType);
+            }
+        }
+        return npcs;
+    },
+
+    // Check if NPC type is an enemy
+    isEnemy(npcType) {
+        const factions = this.getNPCFactions(npcType);
+        return factions.some(f => this.enemyFactions[f]);
+    },
+
+    //
     // INITIALIZATION
-    // 
+    //
     init() {
         console.log('🏛️ FactionSystem: Establishing allegiances... choose your enemies wisely 🗡️');
 

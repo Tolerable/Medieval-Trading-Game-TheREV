@@ -6,6 +6,73 @@
 
 ---
 
+## SESSION #69 (2025-12-07) - Inventory Hover Info Panel
+
+### Item Hover Info Panel
+- [x] Added item-hover-info panel structure to index.html
+- [x] Created .quick-access-row flex container for side-by-side layout
+- [x] Shows: icon, name, description, value (unit + total), weight, category, rarity
+- [x] Shows bonuses for equipment, effects for consumables
+- [x] Rarity color-coded (WoW-style: common, uncommon, rare, epic, legendary)
+- [x] Added updateHoverInfoPanel() function to inventory-panel.js
+- [x] Added mouseenter event listeners to inventory items
+
+### Files Modified
+- `index.html` - Added item-hover-info panel HTML
+- `src/css/styles.css` - Added hover info panel styles
+- `src/js/ui/panels/inventory-panel.js` - Added hover update function
+
+---
+
+## SESSION #68 (2025-12-07) - NPC Dialogue Panel + Universal Faction System
+
+### NPC Dialogue Panel
+- [x] Created .npc-name-header with prominent gold name at top
+- [x] Created .npc-info-row with title + badges (flex-wrap)
+- [x] Badges no longer trail off panel
+
+### Quest Giver Trade Unlock
+- [x] Added 20+ quest giver types to alwaysTrade list
+- [x] Added shady types (thief, spy, smuggler) - only 5 rep needed
+- [x] Lowered default rep requirement from 15 to 10
+
+### Universal Faction System
+- [x] Created npcFactionMap with 60+ NPC types
+- [x] Created enemyFactions (bandits, monsters, undead, shadow_cult)
+- [x] Added getNPCFactions(), getNPCPrimaryFaction(), isNPCInFaction()
+- [x] Added getNPCsInFaction(), isEnemy() helper functions
+- [x] Integrated faction rep into getNPCReputation() fallback
+
+### Files Modified
+- `src/js/ui/panels/people-panel.js` - Panel restructure, trade unlock
+- `src/js/systems/progression/faction-system.js` - NPC-faction mapping
+
+---
+
+## SESSION #67 (2025-12-07) - Quest Info Panel - Giver & Chain Display
+
+### Quest Giver Display
+- [x] Show quest giver name in quest info panel (assignedBy/giverName/giver)
+- [x] Show quest giver location (from quest.location)
+- [x] Blue-tinted background with left border accent styling
+
+### Quest Chain Visualization
+- [x] Show chain name with part number (e.g., "Shadow Rising (Part 3)")
+- [x] Previous quest link with ⬆ arrow, status indicator (✓/○), clickable navigation
+- [x] Current quest highlighted with ➤ arrow, gold text
+- [x] Next quest link with ⬇ arrow, status indicator (✓/○/🔒), clickable navigation
+- [x] Purple-tinted background with left border accent styling
+
+### New Code
+- [x] buildQuestChainInfo(questId, quest) - Returns { html, hasChain } with chain visualization
+- [x] Updated showQuestInfoPanel() - Added quest giver and chain sections
+- [x] Added 80+ lines of CSS for .quest-giver-section, .quest-chain-section, and related classes
+
+### Files Modified
+- `src/js/systems/progression/quest-system.js` - +80 lines of code and CSS
+
+---
+
 ## SESSION #66 (2025-12-07) - UI Polish + CPU Optimization
 
 ### Voice TTS & Settings Fixes

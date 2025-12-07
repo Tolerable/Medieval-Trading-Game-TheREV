@@ -1922,29 +1922,40 @@ permissions:
 
 ## 📅 VERSION HISTORY
 
-### v0.90.01 - UI Polish + CPU Optimization (2025-12-07)
+### v0.90.01 - Sessions #66-69 (2025-12-07)
 
-**UI Improvements:**
-- Voice TTS preview now applies master volume correctly
-- Test voice button spam prevention (disabled while playing)
-- Removed redundant Main Menu button from settings
-- Market trade window text centering for multi-word items
-- **NEW:** UI Scale setting (75%-150%) in Settings > UI tab
-- Trade cart panel: badge margin, weight display, button layout, hidden spinners
-- Transportation panel: card overlap fix, tip text placement
+**Session #69 - Inventory Hover Info Panel:**
+- **NEW:** `updateHoverInfoPanel()` in inventory-panel.js
+- Item info panel next to Quick Access shows full item details on hover
+- Shows: icon, name, description, value (unit + total), weight, category, rarity
+- Shows bonuses/effects with color coding
+- Rarity colors: common=#888, uncommon=#1eff00, rare=#0070dd, epic=#a335ee, legendary=#ff8000
+- Files: `index.html`, `styles.css`, `inventory-panel.js`
 
-**CPU Optimization:**
-- Menu weather particle intervals: 150ms → 400ms (winter), 50ms → 200ms (thundersnow)
-- Game weather particles: 60 → 25 max
-- Player marker animations: 3s → 5s cycles, added `will-change: transform, opacity`
+**Session #68 - NPC Dialogue Panel + Universal Faction System:**
+- Restructured `.npc-name-header` - name prominent at top with gold color
+- Created `.npc-info-row` for title + badges with flex-wrap
+- Added 20+ quest giver types to `alwaysTrade` (no rep required)
+- Created `npcFactionMap` with 60+ NPC types mapped to 7+ factions
+- Created `enemyFactions`: bandits(-50), monsters(-75), undead(-100), shadow_cult(-100)
+- Added 5 faction helper functions: `getNPCFactions()`, `getNPCPrimaryFaction()`, etc.
+- Integrated faction rep into `getNPCReputation()` fallback
+- Files: `people-panel.js`, `faction-system.js`
 
-**Technical Changes:**
-- `config.js` - Added `uiScale` default (1.0)
-- `settings-panel.js` - Voice TTS volume fix, UI scale control, button changes
-- `trade-cart-panel.js` - Multiple cart UI fixes
-- `menu-weather-system.js` - Reduced particle frequencies
-- `weather-system.js` - Reduced particle count
-- `game-world-renderer.js` - Slower marker animations, GPU hints
+**Session #67 - Quest Info Panel - Giver & Chain Display:**
+- Added `buildQuestChainInfo()` helper to quest-system.js
+- Quest giver section with blue-tinted background
+- Quest chain section with purple-tinted background
+- Shows: chain name, part number, prev/current/next quests
+- Clickable navigation between chain quests
+- Files: `quest-system.js` (+80 lines code + CSS)
+
+**Session #66 - UI Polish + CPU Optimization:**
+- Voice TTS: `effectiveVolume = masterVolume * (voiceVolume / 100)`
+- UI Scale: stored in localStorage, applied via CSS transform
+- Weather particles: 150ms → 400ms intervals, 60 → 25 max particles
+- Player marker: 3s → 5s animation cycles, `will-change` GPU hints
+- Files: `settings-panel.js`, `menu-weather-system.js`, `weather-system.js`, `game-world-renderer.js`
 
 ---
 

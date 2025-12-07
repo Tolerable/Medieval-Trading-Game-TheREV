@@ -947,16 +947,17 @@ const QuestSystem = {
         // Clear from localStorage
         try {
             localStorage.removeItem('medievalTradingGameQuests');
-            console.log('📜 Quest localStorage cleared');
+            localStorage.removeItem('questCompletionTimes');
+            console.log('Quest localStorage cleared');
         } catch (e) {
-            console.warn('📜 Could not clear quest localStorage:', e);
+            console.warn('Could not clear quest localStorage:', e);
         }
 
         // Update UI
         this.updateQuestLogUI();
         this.updateQuestTracker();
 
-        console.log('📜 Quest state reset complete - fresh start! 🖤');
+        console.log('Quest state reset complete - fresh start!');
     },
 
     saveQuestProgress() {
@@ -3545,7 +3546,85 @@ const QuestSystem = {
         document.head.appendChild(style);
     },
 
-    //  Unified Quest Info Panel - used for ALL quest displays 
+    //  Build quest chain info - shows how this quest connects to others
+    buildQuestChainInfo(questId, quest) {
+        const chainName = quest.chain || null;
+        const prerequisiteId = quest.prerequisite || null;
+        const nextQuestId = quest.nextQuest || null;
+
+        // No chain info if standalone quest
+        if (!chainName && !prerequisiteId && !nextQuestId) {
+            return { html: '', hasChain: false };
+        }
+
+        let html = '<div class="quest-info-section quest-chain-section">';
+        html += '<strong>🔗 Quest Chain:</strong>';
+        html += '<div class="quest-chain-info">';
+
+        // Show chain name if part of a chain
+        if (chainName) {
+            const chainDisplayName = this.getChainDisplayName(chainName);
+            const chainOrder = quest.chainOrder || quest.actOrder || null;
+            html += `<div class="quest-chain-name">${chainDisplayName}`;
+            if (chainOrder) {
+                html += ` <span class="quest-chain-order">(Part ${chainOrder})</span>`;
+            }
+            html += '</div>';
+        }
+
+        // Show prerequisite quest (previous in chain)
+        if (prerequisiteId) {
+            const prereqQuest = this.quests[prerequisiteId];
+            const prereqName = prereqQuest?.name || prerequisiteId;
+            const prereqCompleted = this.completedQuests.includes(prerequisiteId);
+            html += `
+                <div class="quest-chain-link prev-quest">
+                    <span class="chain-arrow">⬆</span>
+                    <span class="chain-label">Previous:</span>
+                    <span class="chain-quest-name ${prereqCompleted ? 'completed' : ''}"
+                          onclick="QuestSystem.showQuestInfoPanel('${prerequisiteId}')"
+                          style="cursor: pointer; text-decoration: underline;">
+                        ${prereqCompleted ? '✓' : '○'} ${prereqName}
+                    </span>
+                </div>
+            `;
+        }
+
+        // Show current quest indicator
+        html += `
+            <div class="quest-chain-link current-quest">
+                <span class="chain-arrow">➤</span>
+                <span class="chain-label">Current:</span>
+                <span class="chain-quest-name active">${quest.name}</span>
+            </div>
+        `;
+
+        // Show next quest (if known)
+        if (nextQuestId) {
+            const nextQuest = this.quests[nextQuestId];
+            const nextName = nextQuest?.name || nextQuestId;
+            const nextActive = !!this.activeQuests[nextQuestId];
+            const nextCompleted = this.completedQuests.includes(nextQuestId);
+            const nextStatus = nextCompleted ? 'completed' : (nextActive ? 'active' : 'locked');
+            html += `
+                <div class="quest-chain-link next-quest">
+                    <span class="chain-arrow">⬇</span>
+                    <span class="chain-label">Next:</span>
+                    <span class="chain-quest-name ${nextStatus}"
+                          onclick="QuestSystem.showQuestInfoPanel('${nextQuestId}')"
+                          style="cursor: pointer; text-decoration: underline;">
+                        ${nextCompleted ? '✓' : (nextActive ? '○' : '🔒')} ${nextName}
+                    </span>
+                </div>
+            `;
+        }
+
+        html += '</div></div>';
+
+        return { html, hasChain: true };
+    },
+
+    //  Unified Quest Info Panel - used for ALL quest displays
     // Options: { isNewQuest: bool, onClose: function, showTrackButton: bool }
     showQuestInfoPanel(questId = null, options = {}) {
         const qId = questId || this.trackedQuestId;
@@ -3562,10 +3641,10 @@ const QuestSystem = {
         if (existing) existing.remove();
 
         const progress = this.checkProgress(qId);
-        //  Get location from quest data, not just tracked quest 
+        //  Get location from quest data, not just tracked quest
         const targetLocation = quest.location || this.getTrackedQuestLocation();
 
-        //  Store the displayed quest's target location for "Show on Map" button 
+        //  Store the displayed quest's target location for "Show on Map" button
         this._displayedQuestTargetLocation = targetLocation;
         const locationName = targetLocation ? this.getLocationDisplayName(targetLocation) : 'Unknown';
 
@@ -3581,6 +3660,13 @@ const QuestSystem = {
         if (quest.rewards?.reputation) rewardParts.push(`👑 +${quest.rewards.reputation} rep`);
         const rewardsStr = rewardParts.length > 0 ? rewardParts.join(' • ') : 'None';
 
+        //  Build quest giver info - who assigned this quest?
+        const questGiverName = quest.assignedBy || quest.giverName || quest.giver || 'Unknown';
+        const questGiverLocation = quest.location ? this.getLocationDisplayName(quest.location) : '';
+
+        //  Build quest chain info - how does this quest connect to others?
+        const chainInfo = this.buildQuestChainInfo(qId, quest);
+
         //  Create the unified info panel
         const panel = document.createElement('div');
         panel.id = 'quest-info-panel';
@@ -3594,6 +3680,19 @@ const QuestSystem = {
             ${isNewQuest ? '<div class="quest-info-new-banner">✨ Quest Started! ✨</div>' : ''}
             <div class="quest-info-body">
                 <p class="quest-info-desc">${quest.description}</p>
+
+                <!-- Quest Giver Section -->
+                <div class="quest-info-section quest-giver-section">
+                    <strong>👤 Quest Giver:</strong>
+                    <div class="quest-giver-info">
+                        <span class="quest-giver-name">${questGiverName}</span>
+                        ${questGiverLocation ? `<span class="quest-giver-location">at ${questGiverLocation}</span>` : ''}
+                    </div>
+                </div>
+
+                <!-- Quest Chain Section -->
+                ${chainInfo.html}
+
                 ${targetLocation ? `
                 <div class="quest-info-section">
                     <strong>📍 Location:</strong> ${locationName}
@@ -3861,6 +3960,91 @@ const QuestSystem = {
             .status-ready_to_complete { color: #81c784; font-weight: bold; }
             .status-in_progress { color: #ffc107; }
             .status-not_started { color: #888; }
+
+            /* Quest Giver Section - who assigned this quest? */
+            .quest-giver-section {
+                background: rgba(79, 195, 247, 0.1);
+                border-radius: 6px;
+                padding: 10px;
+                border-left: 3px solid #4fc3f7;
+            }
+            .quest-giver-info {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            .quest-giver-name {
+                color: #ffd700;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            .quest-giver-location {
+                color: #888;
+                font-size: 12px;
+                font-style: italic;
+            }
+
+            /* Quest Chain Section - how this quest links to others */
+            .quest-chain-section {
+                background: rgba(156, 39, 176, 0.1);
+                border-radius: 6px;
+                padding: 10px;
+                border-left: 3px solid #9c27b0;
+            }
+            .quest-chain-info {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .quest-chain-name {
+                color: #ce93d8;
+                font-weight: bold;
+                font-size: 13px;
+                padding-bottom: 6px;
+                border-bottom: 1px solid rgba(156, 39, 176, 0.3);
+                margin-bottom: 4px;
+            }
+            .quest-chain-order {
+                color: #888;
+                font-weight: normal;
+                font-size: 11px;
+            }
+            .quest-chain-link {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 4px 0;
+            }
+            .chain-arrow {
+                width: 16px;
+                text-align: center;
+                font-size: 12px;
+            }
+            .prev-quest .chain-arrow { color: #888; }
+            .current-quest .chain-arrow { color: #ffd700; }
+            .next-quest .chain-arrow { color: #666; }
+            .chain-label {
+                color: #888;
+                font-size: 11px;
+                width: 55px;
+            }
+            .chain-quest-name {
+                color: #ddd;
+                font-size: 12px;
+            }
+            .chain-quest-name.completed {
+                color: #81c784;
+            }
+            .chain-quest-name.active {
+                color: #ffd700;
+                font-weight: bold;
+            }
+            .chain-quest-name.locked {
+                color: #666;
+            }
+            .chain-quest-name:hover:not(.active) {
+                color: #4fc3f7;
+            }
         `;
         document.head.appendChild(style);
     },

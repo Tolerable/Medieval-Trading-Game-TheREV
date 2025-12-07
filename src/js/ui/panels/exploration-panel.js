@@ -1150,6 +1150,47 @@ const ExplorationPanel = {
         if (minutes < 60) return `${minutes}m ago`;
         if (hours < 24) return `${hours}h ago`;
         return `${days}d ago`;
+    },
+
+    // Reset all exploration state for new game
+    resetForNewGame() {
+        console.log('Exploration panel resetting for new game...');
+
+        // Clear cooldowns
+        this.explorationCooldowns = {};
+        try {
+            localStorage.removeItem('explorationCooldowns');
+        } catch (e) {
+            console.warn('Failed to clear exploration cooldowns:', e);
+        }
+
+        // Clear completed explorations
+        this.completedExplorations = {};
+        try {
+            localStorage.removeItem('explorationCompleted');
+        } catch (e) {
+            console.warn('Failed to clear completed explorations:', e);
+        }
+
+        // Clear exploration history
+        this.explorationHistory = [];
+        try {
+            localStorage.removeItem('explorationHistory');
+        } catch (e) {
+            console.warn('Failed to clear exploration history:', e);
+        }
+
+        // Reset panel state
+        this.currentLocation = null;
+        this.currentLocationType = null;
+        this.selectedExploration = null;
+
+        // Close panel if open
+        if (this.isOpen) {
+            this.close();
+        }
+
+        console.log('Exploration panel reset complete - fresh start!');
     }
 };
 

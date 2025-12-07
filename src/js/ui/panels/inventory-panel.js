@@ -143,12 +143,17 @@ const InventorySystem = {
                 </div>
             `;
 
-            // show bonuses on hover if item has them
+            // show bonuses on hover if item has them (tooltip fallback)
             if (item.bonuses) {
                 itemElement.title = Object.entries(item.bonuses)
                     .map(([stat, val]) => `${stat}: ${val > 0 ? '+' : ''}${val}`)
                     .join(', ');
             }
+
+            // Add hover events for the item info panel
+            itemElement.addEventListener('mouseenter', () => {
+                this.updateHoverInfoPanel(itemId, quantity);
+            });
 
             inventoryContainer.appendChild(itemElement);
         }
@@ -217,6 +222,71 @@ const InventorySystem = {
             const itemB = ItemDatabase?.getItem(b[0]);
             return (itemA?.name || a[0]).localeCompare(itemB?.name || b[0]);
         });
+    },
+
+    // Update the hover info panel with item details
+    updateHoverInfoPanel(itemId, quantity) {
+        const item = ItemDatabase?.getItem(itemId);
+        if (!item) return;
+
+        // Get elements
+        const iconEl = document.getElementById('hover-item-icon');
+        const nameEl = document.getElementById('hover-item-name');
+        const descEl = document.getElementById('hover-item-desc');
+        const valueEl = document.getElementById('hover-item-value');
+        const weightEl = document.getElementById('hover-item-weight');
+        const categoryEl = document.getElementById('hover-item-category');
+        const rarityEl = document.getElementById('hover-item-rarity');
+        const bonusesEl = document.getElementById('hover-item-bonuses');
+
+        // Update content
+        if (iconEl) iconEl.textContent = item.icon || '📦';
+        if (nameEl) nameEl.textContent = item.name || itemId;
+        if (descEl) descEl.textContent = item.description || 'No description available.';
+
+        // Calculate values
+        const unitValue = ItemDatabase?.calculatePrice?.(itemId) || item.basePrice || 0;
+        const totalValue = unitValue * quantity;
+        const unitWeight = item.weight || 0;
+        const totalWeight = ItemDatabase?.calculateWeight?.(itemId, quantity) || (unitWeight * quantity);
+
+        if (valueEl) valueEl.textContent = `${unitValue}g each (${totalValue}g total)`;
+        if (weightEl) weightEl.textContent = `${unitWeight} lbs (${totalWeight.toFixed(1)} lbs total)`;
+        if (categoryEl) categoryEl.textContent = item.category || 'Misc';
+
+        // Rarity with color
+        if (rarityEl) {
+            const rarity = item.rarity || 'common';
+            const rarityColors = {
+                common: '#888',
+                uncommon: '#1eff00',
+                rare: '#0070dd',
+                epic: '#a335ee',
+                legendary: '#ff8000'
+            };
+            rarityEl.textContent = rarity.charAt(0).toUpperCase() + rarity.slice(1);
+            rarityEl.style.color = rarityColors[rarity] || '#888';
+        }
+
+        // Bonuses
+        if (bonusesEl) {
+            if (item.bonuses && Object.keys(item.bonuses).length > 0) {
+                const bonusText = Object.entries(item.bonuses)
+                    .map(([stat, val]) => `${stat}: ${val > 0 ? '+' : ''}${val}`)
+                    .join(' | ');
+                bonusesEl.textContent = `Bonuses: ${bonusText}`;
+                bonusesEl.classList.remove('hidden');
+            } else if (item.effects) {
+                // Show effects for consumables
+                const effectText = typeof item.effects === 'object'
+                    ? Object.entries(item.effects).map(([k, v]) => `${k}: ${v}`).join(' | ')
+                    : item.effects;
+                bonusesEl.textContent = `Effects: ${effectText}`;
+                bonusesEl.classList.remove('hidden');
+            } else {
+                bonusesEl.classList.add('hidden');
+            }
+        }
     },
 
     // Sort inventory - enhanced with ascending/descending options

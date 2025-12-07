@@ -62,15 +62,15 @@ const PeoplePanel = {
 
             <!-- 💬 CHAT VIEW - conversation with selected NPC -->
             <div id="people-chat-view" class="people-view hidden">
-                <div class="panel-header chat-header">
-                    <button class="back-btn" data-action="back-to-list">← Back</button>
-                    <div class="npc-header-info">
-                        <span id="chat-npc-icon" class="npc-icon">👤</span>
-                        <div class="npc-header-text">
-                            <h2 id="chat-npc-name">NPC Name</h2>
-                            <span id="chat-npc-title" class="npc-title">Title</span>
-                        </div>
-                    </div>
+                <!-- NPC Name Header - prominent at very top -->
+                <div class="npc-name-header">
+                    <button class="back-btn" data-action="back-to-list">←</button>
+                    <span id="chat-npc-icon" class="npc-icon-large">👤</span>
+                    <h2 id="chat-npc-name" class="npc-name-title">NPC Name</h2>
+                </div>
+                <!-- NPC Info Row - title + badges -->
+                <div class="npc-info-row">
+                    <span id="chat-npc-title" class="npc-title-subtitle">Title</span>
                     <div class="npc-header-badges" id="chat-npc-badges"></div>
                 </div>
                 <!-- 📊 NPC Stats Bar - horizontal layout -->
@@ -251,6 +251,63 @@ const PeoplePanel = {
             .npc-talk-btn:hover { background: linear-gradient(135deg, #4a4a5a, #3a3a4a); }
 
             /* 💬 Chat View Styles */
+            /* NPC Name Header - prominent at very top */
+            .npc-name-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 12px 15px;
+                background: linear-gradient(90deg, rgba(79, 195, 247, 0.2) 0%, transparent 100%);
+                border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+            }
+
+            .npc-name-header .back-btn {
+                padding: 6px 10px;
+                background: rgba(255,255,255,0.1);
+                border: 1px solid rgba(255,255,255,0.2);
+                border-radius: 6px;
+                color: #fff;
+                cursor: pointer;
+                font-size: 1.2em;
+                line-height: 1;
+            }
+
+            .npc-name-header .back-btn:hover {
+                background: rgba(255,255,255,0.2);
+            }
+
+            .npc-icon-large {
+                font-size: 2em;
+            }
+
+            .npc-name-title {
+                margin: 0;
+                font-size: 1.3em;
+                color: #ffd700;
+                flex: 1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* NPC Info Row - title + badges */
+            .npc-info-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 8px 15px;
+                background: rgba(0, 0, 0, 0.2);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                flex-wrap: wrap;
+            }
+
+            .npc-title-subtitle {
+                font-size: 0.9em;
+                color: #aaa;
+                font-style: italic;
+            }
+
             .chat-header {
                 display: flex;
                 align-items: center;
@@ -281,14 +338,17 @@ const PeoplePanel = {
 
             .npc-header-badges {
                 display: flex;
+                flex-wrap: wrap;
                 gap: 4px;
+                justify-content: flex-end;
             }
 
             .badge {
-                padding: 2px 8px;
+                padding: 3px 8px;
                 border-radius: 10px;
                 font-size: 0.75em;
                 font-weight: bold;
+                white-space: nowrap;
             }
             /* Quest status badges */
             .badge-quest { background: #ffd700; color: #000; }
@@ -3343,74 +3403,117 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         // some NPCs trade freely, others need you to earn their trust first
 
         // always tradeable - no rep required, these folks just want your gold
+        // includes common quest givers who don't need reputation to trade
         const alwaysTrade = [
             'merchant', 'innkeeper', 'general_store', 'baker', 'farmer',
-            'fisherman', 'ferryman', 'traveler'
+            'fisherman', 'ferryman', 'traveler',
+            // Quest givers - they give quests, they can trade without rep requirements
+            'elder', 'healer', 'guard', 'priest', 'hunter', 'woodcutter',
+            'barkeep', 'sailor', 'explorer', 'adventurer', 'druid',
+            'royal_advisor', 'chieftain', 'stablemaster', 'courier'
         ];
         if (alwaysTrade.includes(npcType)) return true;
 
-        // trade with low rep (10+) - they need to at least know you
+        // trade with low rep (10+) - specialty traders, they need to know you a bit
         const lowRepTrade = ['blacksmith', 'apothecary', 'tailor', 'herbalist', 'miner'];
         if (lowRepTrade.includes(npcType)) {
             return this.getNPCReputation(npcType) >= 10;
         }
 
-        // trade with medium rep (25+) - specialty traders, gotta prove yourself
-        const medRepTrade = ['jeweler', 'banker', 'guild_master'];
+        // trade with medium rep (25+) - elite traders, gotta prove yourself
+        const medRepTrade = ['jeweler', 'banker', 'guild_master', 'scholar'];
         if (medRepTrade.includes(npcType)) {
             return this.getNPCReputation(npcType) >= 25;
         }
 
-        // trade with high rep (50+) - elite traders, only for the trusted
+        // trade with high rep (50+) - nobility, only for the trusted
         const highRepTrade = ['noble'];
         if (highRepTrade.includes(npcType)) {
             return this.getNPCReputation(npcType) >= 50;
         }
 
-        // everyone else - check if they have decent rep (15+) to unlock barter
-        // this way even guards, healers, etc can trade if you're friendly enough
-        return this.getNPCReputation(npcType) >= 15;
+        // shady types - need some trust but not much
+        const shadyTrade = ['thief', 'spy', 'smuggler'];
+        if (shadyTrade.includes(npcType)) {
+            return this.getNPCReputation(npcType) >= 5;
+        }
+
+        // everyone else - check if they have decent rep (10+) to unlock barter
+        return this.getNPCReputation(npcType) >= 10;
     },
 
     // get npc reputation - how much does this npc type trust us?
-    // fix: search relationships by npctype field, not just key
+    // Uses: individual NPC rep > faction rep > default 0
     getNPCReputation(npcTypeOrId) {
-        if (typeof NPCRelationshipSystem === 'undefined') return 0;
+        // First check individual NPC relationship
+        if (typeof NPCRelationshipSystem !== 'undefined') {
+            // Direct lookup by id
+            const directRel = NPCRelationshipSystem.relationships?.[npcTypeOrId];
+            if (directRel) return directRel.reputation || 0;
 
-        // first check direct lookup by id
-        const directRel = NPCRelationshipSystem.relationships?.[npcTypeOrId];
-        if (directRel) return directRel.reputation || 0;
-
-        // search all relationships for matching npctype
-        // This finds "blacksmith_royal_capital_123" when passed "blacksmith"
-        for (const rel of Object.values(NPCRelationshipSystem.relationships || {})) {
-            if (rel.npcType === npcTypeOrId) {
-                return rel.reputation || 0;
+            // Search all relationships for matching npctype
+            for (const rel of Object.values(NPCRelationshipSystem.relationships || {})) {
+                if (rel.npcType === npcTypeOrId) {
+                    return rel.reputation || 0;
+                }
             }
+
+            // Check faction/type reputation as fallback
+            const factionRep = NPCRelationshipSystem.factionReputation?.[npcTypeOrId];
+            if (factionRep !== undefined) return factionRep;
         }
 
-        // check faction/type reputation as fallback
-        const factionRep = NPCRelationshipSystem.factionReputation?.[npcTypeOrId];
-        if (factionRep !== undefined) return factionRep;
+        // Check FactionSystem for NPC's faction reputation
+        if (typeof FactionSystem !== 'undefined') {
+            const npcFactions = FactionSystem.getNPCFactions?.(npcTypeOrId);
+            if (npcFactions && npcFactions.length > 0) {
+                // Use average of all faction reps, scaled to match individual rep system
+                // Faction rep is -100 to +100, we scale to roughly 0-100 for trade
+                let totalRep = 0;
+                for (const factionId of npcFactions) {
+                    const factionRep = FactionSystem.getReputation?.(factionId) || 0;
+                    totalRep += factionRep;
+                }
+                // Average faction rep, then scale: -100 to +100 becomes -50 to +50
+                // Add 50 to shift to 0-100 range for trade calculations
+                const avgRep = totalRep / npcFactions.length;
+                return Math.floor((avgRep + 100) / 2); // Now 0-100 scale
+            }
+        }
 
         return 0;
     },
 
     // get trade rep requirement - show players what they need
     getTradeRepRequirement(npcType) {
-        const alwaysTrade = ['merchant', 'innkeeper', 'general_store', 'baker', 'farmer', 'fisherman', 'ferryman', 'traveler'];
+        // Always tradeable - no rep required (includes quest givers)
+        const alwaysTrade = [
+            'merchant', 'innkeeper', 'general_store', 'baker', 'farmer',
+            'fisherman', 'ferryman', 'traveler',
+            'elder', 'healer', 'guard', 'priest', 'hunter', 'woodcutter',
+            'barkeep', 'sailor', 'explorer', 'adventurer', 'druid',
+            'royal_advisor', 'chieftain', 'stablemaster', 'courier'
+        ];
         if (alwaysTrade.includes(npcType)) return 0;
 
+        // Shady types - minimal trust needed
+        const shadyTrade = ['thief', 'spy', 'smuggler'];
+        if (shadyTrade.includes(npcType)) return 5;
+
+        // Low rep (10+) - specialty traders
         const lowRepTrade = ['blacksmith', 'apothecary', 'tailor', 'herbalist', 'miner'];
         if (lowRepTrade.includes(npcType)) return 10;
 
-        const medRepTrade = ['jeweler', 'banker', 'guild_master'];
+        // Medium rep (25+) - elite traders
+        const medRepTrade = ['jeweler', 'banker', 'guild_master', 'scholar'];
         if (medRepTrade.includes(npcType)) return 25;
 
+        // High rep (50+) - nobility
         const highRepTrade = ['noble'];
         if (highRepTrade.includes(npcType)) return 50;
 
-        return 15;
+        // Default - basic trust needed
+        return 10;
     },
 
     // ═══════════════════════════════════════════════════════════════
