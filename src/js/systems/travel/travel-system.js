@@ -1800,7 +1800,7 @@ const TravelSystem = {
 
         // Priority queue (using array with sorting - not optimal but works)
         const openSet = [startId];
-        const closedSet = new Set(); // Ÿ–¤ Track visited nodes to prevent infinite loops ðŸ’€
+        const closedSet = new Set(); // ï¿½ï¿½ï¿½ Track visited nodes to prevent infinite loops ðŸ’€
         const cameFrom = {};
         const gScore = { [startId]: 0 };
         const fScore = { [startId]: this.heuristicDistance(startId, goalId) };
@@ -3953,15 +3953,20 @@ TravelSystem.showTravelPanel = function() {
             activeTab.classList.add('active');
         }
 
-        // Render the mini map (needed for map tab, and keeps it ready) 
+        // Render the mini map (needed for map tab, and keeps it ready)
         if (typeof TravelPanelMap !== 'undefined' && TravelPanelMap.render) {
             setTimeout(() => {
                 TravelPanelMap.render();
-                //  Center on player when opening map tab
+                // Center on player when opening map tab
                 if (defaultTab === 'map' && TravelPanelMap.centerOnPlayer) {
                     TravelPanelMap.centerOnPlayer();
                 }
             }, 50);
+        }
+
+        // Populate the destinations list (Locations tab)
+        if (typeof populateDestinations === 'function') {
+            populateDestinations();
         }
     }
 };

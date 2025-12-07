@@ -1831,73 +1831,79 @@ const TravelPanelMap = {
         }
     },
 
-    // Cancel ongoing travel - turn around and head back at ANY point! 
-    //  FIX: Don't call startTravel() - that recalculates everything and crashes
-    // Instead, REVERSE direction in-place: swap start/destination, time continues normally
+    // Cancel ongoing travel - turn around and head back at ANY point!
     cancelTravel() {
         if (typeof TravelSystem === 'undefined') {
             this.onTravelComplete();
             return;
         }
 
-        //  Get current travel state before modifying anything 
+        // Get current travel state before modifying anything
         const startLoc = this.travelState.startLocation;
         const destLoc = this.travelState.destination || this.currentDestination;
         const currentProgress = TravelSystem.playerPosition.travelProgress || 0;
         const originalDuration = TravelSystem.playerPosition.travelDuration || 30;
-        const originalStartTime = TravelSystem.playerPosition.travelStartTime;
 
-        //  If not actually traveling or no valid locations, just cancel 
+        // If not actually traveling or no valid locations, just cancel
         if (!TravelSystem.playerPosition.isTraveling || !startLoc || !startLoc.id) {
             addMessage('🛑 Journey cancelled');
             this.onTravelComplete();
             return;
         }
 
-        //  Calculate return journey - proportional time based on distance traveled 
+        // Calculate return journey - proportional time based on distance already traveled
         // If 30% there, takes 30% of original time to get back
         const returnDuration = Math.max(1, Math.round(originalDuration * currentProgress));
 
         addMessage(`🔙 Turning back to ${startLoc.name}... (${returnDuration} min)`);
         console.log(`🖤 Cancel travel: was ${Math.round(currentProgress * 100)}% to ${destLoc?.name}, returning in ${returnDuration} min`);
 
-        //  REVERSE DIRECTION IN-PLACE - don't stop travel, just swap! 
-        // The new "destination" is where we came from (startLoc)
-        // The new "start" is where we were going (destLoc)
-        // Progress flips: 0% (just turned around) will progress to 100% (arrived back)
+        // STOP current travel completely first
+        TravelSystem.playerPosition.isTraveling = false;
 
-        // Get the TravelSystem location object (not just the ID)
+        // Cancel the animation in GameWorldRenderer
+        if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.onTravelCancel) {
+            GameWorldRenderer.onTravelCancel();
+        }
+
+        // Get the TravelSystem location object for the return destination
         const returnDestination = TravelSystem.locations[startLoc.id] || startLoc;
 
-        // Update TravelSystem state - KEEP traveling, just change direction
-        TravelSystem.playerPosition.destination = returnDestination;
-        TravelSystem.playerPosition.travelDuration = returnDuration;
-        TravelSystem.playerPosition.travelProgress = 0; // Starting fresh on return trip
-        TravelSystem.playerPosition.travelStartTime = TimeSystem.getTotalMinutes(); // Reset start time for return
-        // Note: isTraveling stays TRUE - we're still traveling, just reversed
+        // Small delay to let cancel complete, then start return journey
+        setTimeout(() => {
+            // Start a fresh return journey using TravelSystem.startTravel
+            if (typeof TravelSystem.startTravel === 'function') {
+                // Create a fake "current location" at the interrupted point
+                // For simplicity, we start from current logical position back to start
+                TravelSystem.playerPosition.currentLocation = destLoc?.id || TravelSystem.playerPosition.currentLocation;
+                TravelSystem.startTravel(startLoc.id, returnDuration);
+            } else {
+                // Fallback: Manual state update
+                TravelSystem.playerPosition.isTraveling = true;
+                TravelSystem.playerPosition.destination = returnDestination;
+                TravelSystem.playerPosition.travelDuration = returnDuration;
+                TravelSystem.playerPosition.travelProgress = 0;
+                TravelSystem.playerPosition.travelStartTime = TimeSystem.getTotalMinutes();
 
-        // Update our local travel state - swap start and destination
-        this.travelState.startLocation = destLoc; // We're now "coming from" the old destination
-        this.travelState.destination = startLoc; // We're "going to" the old start
-        this.travelState.startTime = TravelSystem.playerPosition.travelStartTime;
-        this.travelState.duration = returnDuration;
+                // Update local travel state
+                this.travelState.startLocation = destLoc;
+                this.travelState.destination = startLoc;
+                this.travelState.startTime = TravelSystem.playerPosition.travelStartTime;
+                this.travelState.duration = returnDuration;
+                this.currentDestination = { ...startLoc };
 
-        // Update the destination display
-        this.currentDestination = { ...startLoc };
-
-        //  Update GameWorldRenderer if it exists - tell it we're reversing 
-        if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.setDestination) {
-            GameWorldRenderer.setDestination(startLoc.id);
-            if (GameWorldRenderer.onTravelStart) {
-                GameWorldRenderer.onTravelStart(destLoc?.id, startLoc.id, returnDuration);
+                // Start new animation from current position back to start
+                if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.onTravelStart) {
+                    GameWorldRenderer.onTravelStart(destLoc?.id, startLoc.id, returnDuration);
+                }
             }
-        }
 
-        // Refresh the UI to show the reversed journey
-        this.updateTravelProgressDisplay();
-        if (typeof TravelSystem.updateTravelUI === 'function') {
-            TravelSystem.updateTravelUI();
-        }
+            // Refresh the UI
+            this.updateTravelProgressDisplay();
+            if (typeof TravelSystem.updateTravelUI === 'function') {
+                TravelSystem.updateTravelUI();
+            }
+        }, 100);
     },
 
     // Handle travel completion - mark destination as reached with learned info 
