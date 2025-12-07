@@ -129,10 +129,15 @@ const ModalSystem = {
             if (!this._escHandlerAttached) {
                 this._escHandler = (e) => {
                     if (e.key === 'Escape') {
+                        // Stop propagation so other ESC handlers don't also fire
+                        // Without this, UIPolishSystem closes ALL panels behind us
+                        e.stopPropagation();
+                        e.preventDefault();
                         this.hide();
                     }
                 };
-                document.addEventListener('keydown', this._escHandler);
+                // Use capture phase to intercept ESC before other handlers
+                document.addEventListener('keydown', this._escHandler, true);
                 this._escHandlerAttached = true;
             }
         }
@@ -177,7 +182,8 @@ const ModalSystem = {
         this._blockBackgroundInput(false);
 
         if (this._escHandler) {
-            document.removeEventListener('keydown', this._escHandler);
+            // Must use capture: true to match how we added it
+            document.removeEventListener('keydown', this._escHandler, true);
             this._escHandler = null;
             // Reset flag so next modal can add ESC listener
             this._escHandlerAttached = false;
