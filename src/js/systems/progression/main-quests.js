@@ -297,7 +297,7 @@ const MainQuests = {
     act2: {
         name: 'Whispers of Conspiracy',
         theme: 'Discover something is wrong, investigate',
-        regions: ['ironforge_city', 'jade_harbor', 'smugglers_cove'],
+        regions: ['northern_outpost', 'jade_harbor', 'smugglers_cove'],
         wealthGate: 5000,
 
         quests: {
@@ -310,7 +310,7 @@ const MainQuests = {
                 giverName: 'Elder Morin',
                 turnInNpc: 'blacksmith',
                 turnInNpcName: 'Forgemaster Grimjaw',
-                turnInLocation: 'northern_outpost', // Ironforge City is now at northern_outpost ID
+                turnInLocation: 'ironforge_city', // Ironforge City is now at ironforge_city ID
                 location: 'greendale',
                 type: 'main',
                 act: 2,
@@ -320,8 +320,8 @@ const MainQuests = {
                 wealthGateCheck: true,
                 objectives: [
                     { type: 'gold', amount: 5000, description: 'Accumulate 5,000 gold wealth' },
-                    { type: 'visit', location: 'northern_outpost', completed: false, description: 'Travel to Ironforge City (pay Northern Outpost gatehouse toll)' },
-                    { type: 'talk', npc: 'blacksmith', location: 'northern_outpost', completed: false, description: 'Report to Forgemaster Grimjaw' }
+                    { type: 'visit', location: 'ironforge_city', completed: false, description: 'Travel to Ironforge City (pay Northern Outpost gatehouse toll)' },
+                    { type: 'talk', npc: 'blacksmith', location: 'ironforge_city', completed: false, description: 'Report to Forgemaster Grimjaw' }
                 ],
                 rewards: { gold: 200, reputation: 35, experience: 100 },
                 prerequisite: 'act1_quest7',
@@ -342,8 +342,8 @@ const MainQuests = {
                 giverName: 'Forgemaster Grimjaw',
                 turnInNpc: 'blacksmith',
                 turnInNpcName: 'Forgemaster Grimjaw',
-                turnInLocation: 'northern_outpost', // Ironforge City is now at northern_outpost ID
-                location: 'northern_outpost', // Ironforge City is now at northern_outpost ID
+                turnInLocation: 'ironforge_city', // Ironforge City is now at ironforge_city ID
+                location: 'ironforge_city', // Ironforge City is now at ironforge_city ID
                 type: 'main',
                 act: 2,
                 actOrder: 2,
@@ -373,8 +373,8 @@ const MainQuests = {
                 giverName: 'Scholar Aldwin',
                 turnInNpc: 'scholar',
                 turnInNpcName: 'Scholar Aldwin',
-                turnInLocation: 'northern_outpost',
-                location: 'northern_outpost',
+                turnInLocation: 'ironforge_city',
+                location: 'ironforge_city',
                 type: 'main',
                 act: 2,
                 actOrder: 3,
@@ -405,7 +405,7 @@ const MainQuests = {
                 turnInNpc: 'merchant',
                 turnInNpcName: 'Silk Merchant Li',
                 turnInLocation: 'jade_harbor',
-                location: 'northern_outpost',
+                location: 'ironforge_city',
                 type: 'main',
                 act: 2,
                 actOrder: 4,
@@ -497,15 +497,15 @@ const MainQuests = {
                 giverName: 'Smuggler Boss Vex',
                 turnInNpc: 'guard',
                 turnInNpcName: 'Guard Captain Aldric',
-                turnInLocation: 'northern_outpost',
-                location: 'northern_outpost',
+                turnInLocation: 'ironforge_city',
+                location: 'ironforge_city',
                 type: 'main',
                 act: 2,
                 actOrder: 7,
                 chain: 'shadow_rising',
                 difficulty: 'medium',
                 objectives: [
-                    { type: 'visit', location: 'northern_outpost', completed: false, description: 'Return to Ironforge City' },
+                    { type: 'visit', location: 'ironforge_city', completed: false, description: 'Return to Ironforge City' },
                     { type: 'talk', npc: 'guard', completed: false, description: 'Present evidence to Captain Aldric' },
                     { type: 'talk', npc: 'scholar', completed: false, description: 'Confirm findings with Scholar Aldwin' }
                 ],
@@ -775,7 +775,7 @@ const MainQuests = {
     act4: {
         name: 'War of Commerce',
         theme: 'Economic warfare, sabotage, alliance building',
-        regions: ['western_outpost', 'shadow_dungeon', 'ruins_of_eldoria'],
+        regions: ['stonebridge', 'shadow_dungeon', 'ruins_of_eldoria'],
         wealthGate: 150000,
 
         quests: {
@@ -820,8 +820,8 @@ const MainQuests = {
                 giverName: 'Captain Aldric',
                 turnInNpc: 'guard',
                 turnInNpcName: 'Captain Aldric',
-                turnInLocation: 'western_outpost',
-                location: 'northern_outpost',
+                turnInLocation: 'stonebridge',
+                location: 'ironforge_city',
                 type: 'main',
                 act: 4,
                 actOrder: 2,
@@ -829,7 +829,7 @@ const MainQuests = {
                 difficulty: 'hard',
                 objectives: [
                     { type: 'choice', options: ['pay_50000', 'fight_through'], description: 'Choose: pay 50,000g toll or fight past guards' },
-                    { type: 'visit', location: 'western_outpost', completed: false, description: 'Reach Stonebridge village beyond the gate' }
+                    { type: 'visit', location: 'stonebridge', completed: false, description: 'Reach Stonebridge village beyond the gate' }
                 ],
                 rewards: { gold: 1500, reputation: 180, experience: 700 },
                 prerequisite: 'act4_quest1',
@@ -850,8 +850,8 @@ const MainQuests = {
                 giverName: 'Sergeant Helena',
                 turnInNpc: 'sergeant',
                 turnInNpcName: 'Sergeant Helena',
-                turnInLocation: 'western_outpost',
-                location: 'western_outpost',
+                turnInLocation: 'stonebridge',
+                location: 'stonebridge',
                 type: 'main',
                 act: 4,
                 actOrder: 3,
@@ -944,8 +944,8 @@ const MainQuests = {
                 giverName: 'Scholar Aldwin',
                 turnInNpc: 'scholar',
                 turnInNpcName: 'Scholar Aldwin',
-                turnInLocation: 'northern_outpost',
-                location: 'northern_outpost',
+                turnInLocation: 'ironforge_city',
+                location: 'ironforge_city',
                 type: 'main',
                 act: 4,
                 actOrder: 6,
@@ -1029,7 +1029,7 @@ const MainQuests = {
                 turnInNpc: 'guard',
                 turnInNpcName: 'War Council',
                 turnInLocation: 'shadow_dungeon',
-                location: 'western_outpost',
+                location: 'stonebridge',
                 type: 'main',
                 act: 5,
                 actOrder: 1,
@@ -1124,7 +1124,7 @@ const MainQuests = {
                 turnInNpc: 'guard',
                 turnInNpcName: 'War Council',
                 turnInLocation: 'forest_dungeon',
-                location: 'western_outpost',
+                location: 'stonebridge',
                 type: 'main',
                 act: 5,
                 actOrder: 4,

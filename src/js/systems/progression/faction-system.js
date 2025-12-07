@@ -98,7 +98,7 @@ const FactionSystem = {
             name: 'City Guard',
             icon: '🛡️',
             description: 'The law enforcement of the realm.',
-            headquarters: 'ironforge_city',
+            headquarters: 'northern_outpost',
             rivals: ['thieves_guild', 'smugglers', 'bandits'],
             allies: ['merchants_guild', 'noble_houses'],
             benefits: {
@@ -385,10 +385,10 @@ const FactionSystem = {
         const locationFactions = {
             'royal_capital': ['noble_houses', 'merchants_guild'],
             'jade_harbor': ['merchants_guild', 'smugglers'],
-            'ironforge_city': ['city_guard', 'merchants_guild'],
+            'northern_outpost': ['city_guard', 'merchants_guild'],
             'greendale': ['farmers_collective'],
             'sunhaven': ['farmers_collective', 'merchants_guild'],
-            'stonebridge': ['merchants_guild'],
+            'western_watch': ['merchants_guild'],
             'silverkeep': ['noble_houses']
         };
 

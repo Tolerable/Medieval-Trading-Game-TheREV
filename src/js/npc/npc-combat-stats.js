@@ -146,14 +146,14 @@ const NPCCombatStats = {
 
         // Tier 2: Towns & cities (1.1-1.2x)
         royal_capital: { health: 1.2, attack: 1.15, defense: 1.15, gold: 1.2, xp: 1.1 },
-        ironforge_city: { health: 1.2, attack: 1.2, defense: 1.15, gold: 1.1, xp: 1.1 },
+        northern_outpost: { health: 1.2, attack: 1.2, defense: 1.15, gold: 1.1, xp: 1.1 },
         jade_harbor: { health: 1.15, attack: 1.1, defense: 1.1, gold: 1.15, xp: 1.1 },
-        stonebridge: { health: 1.15, attack: 1.15, defense: 1.1, gold: 1.1, xp: 1.0 },
+        western_watch: { health: 1.15, attack: 1.15, defense: 1.1, gold: 1.1, xp: 1.0 },
         sunhaven: { health: 1.1, attack: 1.05, defense: 1.05, gold: 1.0, xp: 1.0 },
 
         // Tier 3: Dangerous regions (1.3-1.5x)
-        northern_outpost: { health: 1.4, attack: 1.35, defense: 1.3, gold: 1.2, xp: 1.3 },
-        western_outpost: { health: 1.35, attack: 1.3, defense: 1.25, gold: 1.2, xp: 1.25 },
+        ironforge_city: { health: 1.4, attack: 1.35, defense: 1.3, gold: 1.2, xp: 1.3 },
+        stonebridge: { health: 1.35, attack: 1.3, defense: 1.25, gold: 1.2, xp: 1.25 },
         frostholm_village: { health: 1.3, attack: 1.25, defense: 1.2, gold: 1.1, xp: 1.2 },
         darkwood_village: { health: 1.35, attack: 1.3, defense: 1.2, gold: 1.15, xp: 1.25 },
         smugglers_cove: { health: 1.4, attack: 1.4, defense: 1.2, gold: 1.3, xp: 1.3 },

@@ -287,7 +287,7 @@ const QuestSystem = {
             difficulty: 'medium',
             objectives: [
                 { type: 'carry', item: 'greendale_package', count: 1, current: 0, description: 'Carry the package' },
-                { type: 'visit', location: 'northern_outpost', completed: false, description: 'Travel to Ironforge City' },
+                { type: 'visit', location: 'ironforge_city', completed: false, description: 'Travel to Ironforge City' },
                 { type: 'talk', npc: 'blacksmith', completed: false, description: 'Deliver to blacksmith' }
             ],
             rewards: { gold: 80, reputation: 15, experience: 40 },
@@ -336,7 +336,7 @@ const QuestSystem = {
             description: 'The blacksmith needs iron ore for a special commission.',
             giver: 'blacksmith',
             giverName: 'Grimjaw the Smith',
-            location: 'ironforge_city',
+            location: 'northern_outpost',
             type: 'collect',
             difficulty: 'medium',
             objectives: [
@@ -360,7 +360,7 @@ const QuestSystem = {
             description: 'Bandits raid the trade routes. Eliminate them.',
             giver: 'guard',
             giverName: 'Captain Aldric',
-            location: 'ironforge_city',
+            location: 'northern_outpost',
             type: 'combat',
             difficulty: 'hard',
             objectives: [
@@ -385,7 +385,7 @@ const QuestSystem = {
             description: 'The forge is running low on coal.',
             giver: 'blacksmith',
             giverName: 'Grimjaw the Smith',
-            location: 'ironforge_city',
+            location: 'northern_outpost',
             type: 'collect',
             difficulty: 'easy',
             objectives: [
@@ -670,13 +670,13 @@ const QuestSystem = {
         // 
         //  STONEBRIDGE QUESTS - construction/quarry town
         // 
-        stonebridge_quarry: {
-            id: 'stonebridge_quarry',
+        western_watch_quarry: {
+            id: 'western_watch_quarry',
             name: 'Stone for the Bridge',
             description: 'The bridge needs repair. Gather quality stone.',
             giver: 'merchant',
             giverName: 'Mason Gerald',
-            location: 'stonebridge',
+            location: 'western_watch',
             type: 'collect',
             difficulty: 'medium',
             objectives: [
@@ -694,13 +694,13 @@ const QuestSystem = {
             }
         },
 
-        stonebridge_goblin_menace: {
-            id: 'stonebridge_goblin_menace',
+        western_watch_goblin_menace: {
+            id: 'western_watch_goblin_menace',
             name: 'Goblin Menace',
             description: 'Goblins raid from the Shadow Dungeon. Clear them out.',
             giver: 'guard',
             giverName: 'Sergeant Thom',
-            location: 'stonebridge',
+            location: 'western_watch',
             type: 'combat',
             difficulty: 'hard',
             objectives: [
@@ -1869,7 +1869,7 @@ const QuestSystem = {
             'royal_capital': '👑 Royal Affairs',
             'sunhaven': '☀️ Sunhaven Stories',
             'frostholm': '❄️ Frostholm Legends',
-            'stonebridge': '🛡️ Western Watch Matters',
+            'western_watch': '🛡️ Western Watch Matters',
             'dungeons': '🏰 Dungeon Delving',
             'repeatable': '🔄 Daily Tasks',
             'side_quests': '📋 Miscellaneous'
@@ -2218,12 +2218,12 @@ const QuestSystem = {
     getLocationDisplayName(locationId) {
         const names = {
             'greendale': 'Greendale',
-            'ironforge_city': 'Northern Outpost',
+            'northern_outpost': 'Northern Outpost',
             'jade_harbor': 'Jade Harbor',
             'royal_capital': 'Royal Capital',
             'sunhaven': 'Sunhaven',
             'frostholm': 'Frostholm',
-            'stonebridge': 'Western Watch',
+            'western_watch': 'Western Watch',
             'shadow_tower': 'Shadow Tower',
             'crystal_cave': 'Crystal Cave',
             'frost_peak': 'Frost Peak',

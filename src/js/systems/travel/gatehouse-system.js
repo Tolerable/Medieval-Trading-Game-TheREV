@@ -34,7 +34,7 @@ const GatehouseSystem = {
             name: 'Northern Territories',
             description: 'Cold northern lands with valuable furs and minerals. Pass through Northern Outpost to reach Ironforge City.',
             accessible: false,
-            gatehouse: 'ironforge_city', // Northern Outpost is the gate
+            gatehouse: 'northern_outpost', // Northern Outpost is the gate
             fee: 10000 // Mid-game barrier - 10k gold to brave the frozen north
         },
         eastern: {
@@ -48,7 +48,7 @@ const GatehouseSystem = {
             name: 'Western Wilds',
             description: 'Untamed western frontier with rare resources. Pass through Western Watch to reach Stonebridge village.',
             accessible: false,
-            gatehouse: 'stonebridge', // Western Watch is the gate
+            gatehouse: 'western_watch', // Western Watch is the gate
             fee: 50000 // Late-game barrier - 50k gold for the endgame zone
         },
         southern: {
@@ -71,8 +71,8 @@ const GatehouseSystem = {
     // Players can travel TO these, but can't pass THROUGH without paying
     GATEHOUSES: {
         // Northern zone gate - Northern Outpost - MID GAME 10k
-        ironforge_city: {
-            id: 'ironforge_city',
+        northern_outpost: {
+            id: 'northern_outpost',
             name: 'Northern Outpost',
             type: 'gatehouse',
             icon: '🏰',
@@ -85,8 +85,8 @@ const GatehouseSystem = {
             useGameWorldLocation: true
         },
         // Western zone gate - Western Watch - LATE GAME 50k
-        stonebridge: {
-            id: 'stonebridge',
+        western_watch: {
+            id: 'western_watch',
             name: 'Western Watch',
             type: 'gatehouse',
             icon: '🛡️',
@@ -119,8 +119,8 @@ const GatehouseSystem = {
     // Map zones to their controlling gatehouses
     // Progression: starter -> south (FREE) -> east (1k at Jade Harbor) -> north (10k at Northern Outpost) -> west (50k at Western Watch)
     ZONE_GATEHOUSES: {
-        'northern': 'ironforge_city',      // 10,000g - mid game (Northern Outpost gate → Ironforge City)
-        'western': 'stonebridge',          // 50,000g - late game (Western Watch gate → Stonebridge village)
+        'northern': 'northern_outpost',      // 10,000g - mid game (Northern Outpost gate → Ironforge City)
+        'western': 'western_watch',          // 50,000g - late game (Western Watch gate → Stonebridge village)
         'eastern': 'jade_harbor',          // 1,000g - early-mid game (Jade Harbor)
         'southern': null,                  // FREE! No gatehouse - natural expansion
         'capital': null,                   // Capital ALWAYS accessible
@@ -144,12 +144,12 @@ const GatehouseSystem = {
         'hunting_lodge': 'starter',
         'river_cave': 'starter',
 
-        // Northern Outpost (ironforge_city ID) is the GATE to northern - it's in starter zone but controls northern access
-        'ironforge_city': 'starter',
+        // Northern Outpost is the GATE to northern - in starter zone, controls northern access
+        'northern_outpost': 'starter',
 
-        // Northern zone locations (behind the gate - Ironforge City is at northern_outpost ID)
+        // Northern zone locations (behind the gate)
         'iron_mines': 'northern',
-        'northern_outpost': 'northern', // This is now Ironforge City
+        'ironforge_city': 'northern', // The great forge city
         'silverkeep': 'northern',
         'silver_mine': 'northern',
         'frostholm_village': 'northern',
@@ -160,11 +160,11 @@ const GatehouseSystem = {
         'frozen_cave': 'northern',
         'ruins_of_eldoria': 'northern',
 
-        // Western Watch (stonebridge ID) is the GATE to western - it's in starter zone but controls western access
-        'stonebridge': 'starter',
+        // Western Watch is the GATE to western - in starter zone, controls western access
+        'western_watch': 'starter',
 
-        // Western zone locations (behind the gate - Stonebridge village is at western_outpost ID)
-        'western_outpost': 'western', // This is now Stonebridge village
+        // Western zone locations (behind the gate)
+        'stonebridge': 'western', // The mason village
         'darkwood_village': 'western',
         'miners_rest': 'western',
         'ancient_forest': 'western',

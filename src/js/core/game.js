@@ -1966,7 +1966,7 @@ const GameWorld = {
             population: 10000,
             marketSize: 'grand',
             travelCost: { base: 5 },
-            connections: ['ironforge_city', 'jade_harbor', 'greendale', 'stonebridge', 'kings_inn'],
+            connections: ['northern_outpost', 'jade_harbor', 'greendale', 'western_watch', 'kings_inn'],
             mapPosition: { x: 400, y: 300 },
             // What this location SELLS (produces/has in stock)
             sells: ['royal_goods', 'luxury_items', 'fine_clothes', 'jewelry', 'silk_garments', 'perfume', 'wine', 'spices'],
@@ -1977,8 +1977,8 @@ const GameWorld = {
         // ═══════════════════════════════════════════════════════════
         // CITIES (6 major cities around the capital)
         // ═══════════════════════════════════════════════════════════
-        ironforge_city: {
-            id: 'ironforge_city',
+        northern_outpost: {
+            id: 'northern_outpost',
             name: 'Northern Outpost',
             region: 'northern',
             type: 'outpost',
@@ -1986,7 +1986,7 @@ const GameWorld = {
             population: 200,
             marketSize: 'small',
             travelCost: { base: 8 },
-            connections: ['royal_capital', 'frostholm_village', 'iron_mines', 'northern_outpost'],
+            connections: ['royal_capital', 'frostholm_village', 'iron_mines', 'ironforge_city'],
             mapPosition: { x: 400, y: 160 },
             sells: ['iron_sword', 'shield', 'helmet', 'chainmail', 'bandages', 'torch', 'rope'],
             buys: ['food', 'bread', 'meat', 'ale', 'furs', 'leather', 'coal']
@@ -2019,8 +2019,8 @@ const GameWorld = {
             sells: ['bread', 'ale', 'flour', 'cheese', 'butter', 'eggs', 'meat', 'vegetables', 'livestock'],
             buys: ['wheat', 'grain', 'milk', 'honey', 'salt', 'herbs', 'wool']
         },
-        stonebridge: {
-            id: 'stonebridge',
+        western_watch: {
+            id: 'western_watch',
             name: 'Western Watch',
             region: 'western',
             type: 'outpost',
@@ -2028,7 +2028,7 @@ const GameWorld = {
             population: 150,
             marketSize: 'small',
             travelCost: { base: 8 },
-            connections: ['royal_capital', 'darkwood_village', 'stone_quarry', 'western_outpost'],
+            connections: ['royal_capital', 'darkwood_village', 'stone_quarry', 'stonebridge'],
             mapPosition: { x: 240, y: 300 },
             sells: ['iron_sword', 'bow', 'arrows', 'rope', 'torch', 'bandages', 'map'],
             buys: ['food', 'bread', 'ale', 'leather', 'timber', 'coal']
@@ -2042,7 +2042,7 @@ const GameWorld = {
             population: 2200,
             marketSize: 'large',
             travelCost: { base: 10 },
-            connections: ['ironforge_city', 'silver_mine', 'mountain_pass_inn'],
+            connections: ['northern_outpost', 'silver_mine', 'mountain_pass_inn'],
             mapPosition: { x: 280, y: 160 },
             sells: ['jewelry', 'gemstone', 'mirror', 'crown', 'gold_bar', 'fine_clothes'],
             buys: ['silver_ore', 'gold_ore', 'gems', 'raw_gems', 'coal']
@@ -2074,7 +2074,7 @@ const GameWorld = {
             population: 200,
             marketSize: 'small',
             travelCost: { base: 10 },
-            connections: ['ironforge_city', 'frozen_cave', 'winterwatch_outpost'],
+            connections: ['northern_outpost', 'frozen_cave', 'winterwatch_outpost'],
             mapPosition: { x: 460, y: 100 },
             sells: ['furs', 'leather', 'hide', 'winter_clothing', 'meat'],
             buys: ['bread', 'ale', 'tools', 'rope', 'salt', 'grain']
@@ -2102,7 +2102,7 @@ const GameWorld = {
             population: 180,
             marketSize: 'small',
             travelCost: { base: 10 },
-            connections: ['stonebridge', 'ancient_forest', 'hermit_grove'],
+            connections: ['western_watch', 'ancient_forest', 'hermit_grove'],
             mapPosition: { x: 160, y: 240 },
             sells: ['timber', 'planks', 'wood', 'mushrooms', 'herbs', 'rope'],
             buys: ['axe', 'food', 'ale', 'nails', 'iron_tools']
@@ -2162,7 +2162,7 @@ const GameWorld = {
             population: 80,
             marketSize: 'small',
             travelCost: { base: 12 },
-            connections: ['ironforge_city', 'deep_cavern'],
+            connections: ['northern_outpost', 'deep_cavern'],
             mapPosition: { x: 340, y: 100 },
             sells: ['iron_ore', 'coal', 'stone'],
             buys: ['pickaxe', 'torch', 'lamp', 'rope', 'food', 'ale', 'bandages']
@@ -2490,7 +2490,7 @@ const GameWorld = {
             population: 20,
             marketSize: 'small',
             travelCost: { base: 10 },
-            connections: ['silverkeep', 'northern_outpost'],
+            connections: ['silverkeep', 'ironforge_city'],
             mapPosition: { x: 220, y: 200 },
             sells: ['ale', 'bread', 'meat', 'furs', 'torch', 'rope'],
             buys: ['wheat', 'vegetables', 'coal', 'wood', 'salt']
@@ -2541,8 +2541,8 @@ const GameWorld = {
         // ═══════════════════════════════════════════════════════════
         // OUTPOSTS (3 frontier locations)
         // ═══════════════════════════════════════════════════════════
-        northern_outpost: {
-            id: 'northern_outpost',
+        ironforge_city: {
+            id: 'ironforge_city',
             name: 'Ironforge City',
             region: 'northern',
             type: 'city',
@@ -2550,7 +2550,7 @@ const GameWorld = {
             population: 3000,
             marketSize: 'large',
             travelCost: { base: 12 },
-            connections: ['ironforge_city', 'mountain_pass_inn'],
+            connections: ['northern_outpost', 'mountain_pass_inn'],
             mapPosition: { x: 340, y: 200 },
             sells: ['iron_sword', 'steel_sword', 'iron_armor', 'chainmail', 'plate_armor', 'helmet', 'shield', 'iron_bar', 'steel_bar', 'iron_tools'],
             buys: ['iron_ore', 'coal', 'leather', 'wood', 'gold_ore']
@@ -2569,8 +2569,8 @@ const GameWorld = {
             sells: ['iron_sword', 'shield', 'iron_armor', 'rope', 'torch', 'bandages'],
             buys: ['furs', 'food', 'meat', 'ale', 'coal', 'wood']
         },
-        western_outpost: {
-            id: 'western_outpost',
+        stonebridge: {
+            id: 'stonebridge',
             name: 'Stonebridge',
             region: 'western',
             type: 'village',
@@ -2578,7 +2578,7 @@ const GameWorld = {
             population: 2800,
             marketSize: 'large',
             travelCost: { base: 12 },
-            connections: ['stonebridge', 'stone_quarry'],
+            connections: ['western_watch', 'stone_quarry'],
             mapPosition: { x: 160, y: 340 },
             sells: ['bricks', 'mortar', 'tools', 'hammer', 'pickaxe', 'nails', 'planks', 'furniture'],
             buys: ['stone', 'timber', 'wood', 'iron_bar', 'clay', 'coal']
@@ -2656,7 +2656,7 @@ const GameWorld = {
             population: 90,
             marketSize: 'medium',
             travelCost: { base: 10 },
-            connections: ['stonebridge', 'western_outpost', 'miners_rest'],
+            connections: ['western_watch', 'stonebridge', 'miners_rest'],
             mapPosition: { x: 180, y: 420 },
             sells: ['stone', 'clay', 'sand', 'bricks'],
             buys: ['pickaxe', 'tools', 'food', 'ale', 'rope', 'bandages']
@@ -6622,7 +6622,7 @@ function initializeGameWorld() {
         'riverwood': 'riverwood',
         'royal_capital': 'royal_capital',
         'greendale': 'greendale',
-        'stonebridge': 'stonebridge',
+        'western_watch': 'western_watch',
         'amberhaven': 'jade_harbor',
         'ironhold': 'ironforge',
         'frostfall': 'frostholm',

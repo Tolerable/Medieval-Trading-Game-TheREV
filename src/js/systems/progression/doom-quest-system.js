@@ -117,7 +117,7 @@ const DoomQuestSystem = {
             type: 'main',
             difficulty: 'very_hard',
             objectives: [
-                { type: 'visit', location: 'ironforge_city', completed: false, description: 'Journey to Ironforge Ruins' },
+                { type: 'visit', location: 'northern_outpost', completed: false, description: 'Journey to Ironforge Ruins' },
                 { type: 'talk', npc: 'plague_apothecary', completed: false, description: 'Find the Plague Doctor' },
                 { type: 'collect', item: 'plague_cure', count: 10, current: 0, description: 'Obtain plague medicine' },
                 { type: 'return', location: 'smugglers_cove', completed: false, description: 'Return before it\'s too late' }
@@ -231,7 +231,7 @@ const DoomQuestSystem = {
             difficulty: 'legendary',
             objectives: [
                 { type: 'rally', troops: true, description: 'Rally the Resistance forces' },
-                { type: 'march', path: ['stonebridge', 'royal_capital'], description: 'March to the Fallen Throne' },
+                { type: 'march', path: ['western_watch', 'royal_capital'], description: 'March to the Fallen Throne' },
                 { type: 'battle', encounter: 'shadow_army', description: 'Break through the Shadow Army' }
             ],
             rewards: { experience: 1500 },
@@ -321,7 +321,7 @@ const DoomQuestSystem = {
             description: 'The crazed blacksmith works day and night forging weapons. He believes if he forges enough, he can arm an army to defeat the darkness. He hasn\'t slept in weeks. He\'s killing himself at the forge.',
             giver: 'crazed_blacksmith',
             giverName: 'Grimm the Smith',
-            location: 'ironforge_city',
+            location: 'northern_outpost',
             type: 'tragedy',
             difficulty: 'medium',
             objectives: [

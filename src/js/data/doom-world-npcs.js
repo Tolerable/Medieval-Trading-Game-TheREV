@@ -12,10 +12,10 @@ const DoomWorldNPCs = {
     // ═══════════════════════════════════════════════════════════════
     locationNames: {
         royal_capital: 'The Fallen Throne',
-        ironforge_city: 'Ironforge Ruins',
+        northern_outpost: 'Ironforge Ruins',
         jade_harbor: 'Jade Harbor Wreckage',
         greendale: 'Greendale Ashes',
-        stonebridge: 'The Broken Bridge',
+        western_watch: 'The Broken Bridge',
         silverkeep: 'Silverkeep Tombs',
         sunhaven: 'Sunhaven Blight',
         frostholm_village: 'Frostholm Graves',
@@ -50,9 +50,9 @@ const DoomWorldNPCs = {
         shepherds_inn: "Shepherd's Wake",
         lighthouse_inn: 'The Dark Beacon',
         hunting_lodge: 'The Hunters\' Tomb',
-        northern_outpost: 'Northern Last Stand',
+        ironforge_city: 'Northern Last Stand',
         winterwatch_outpost: 'Winterwatch Fallen',
-        western_outpost: 'Western Graves',
+        stonebridge: 'Western Graves',
         fishermans_port: 'Port of the Dead',
         smugglers_cove: 'Smuggler\'s Sanctuary',
         hermit_grove: 'The Mad Hermit\'s Den',
@@ -77,7 +77,7 @@ const DoomWorldNPCs = {
         // ═══════════════════════════════════════════════════════════
         // RUINED CITIES
         // ═══════════════════════════════════════════════════════════
-        ironforge_city: {
+        northern_outpost: {
             npcs: ['crazed_blacksmith', 'hollow_guard', 'broken_captain', 'plague_apothecary', 'desperate_merchant', 'trapped_miner'],
             description: 'The forges have gone cold. Weapons are worth more than gold now. The blacksmith works day and night forging blades for those who can pay in food.',
             atmosphere: 'Cold forges. Empty streets. The clang of desperate metalwork echoes through ruins.'
@@ -92,7 +92,7 @@ const DoomWorldNPCs = {
             description: 'The breadbasket has become a graveyard. Crops wither. Elder Morin speaks of dark omens that have come true.',
             atmosphere: 'Dead fields stretch endlessly. The smell of rot hangs heavy. Survivors eye each other with suspicion.'
         },
-        stonebridge: {
+        western_watch: {
             npcs: ['broken_merchant', 'wounded_guard', 'one_armed_blacksmith', 'grieving_mason'],
             description: 'The bridge that gave the city its name has collapsed. The mason who built it weeps over the ruins.',
             atmosphere: 'Rubble everywhere. The river runs red. Crows feast on those who fell with the bridge.'
@@ -299,7 +299,7 @@ const DoomWorldNPCs = {
         // ═══════════════════════════════════════════════════════════
         // FALLEN OUTPOSTS
         // ═══════════════════════════════════════════════════════════
-        northern_outpost: {
+        ironforge_city: {
             npcs: ['last_guard', 'dying_captain', 'wounded_sergeant', 'desperate_blacksmith'],
             description: 'The outpost holds against the dark. For now. Reinforcements will never come.',
             atmosphere: 'Fortified walls. Exhausted soldiers. The sound of things testing the perimeter.'
@@ -309,7 +309,7 @@ const DoomWorldNPCs = {
             description: 'Winterwatch has fallen silent. The few survivors are too cold to speak.',
             atmosphere: 'Frozen sentries at their posts. Ice covering everything. The wind howling accusations.'
         },
-        western_outpost: {
+        stonebridge: {
             npcs: ['besieged_guard', 'scarred_scout', 'shell_shocked_sergeant'],
             description: 'The western frontier is lost. The outpost is the last line.',
             atmosphere: 'Smoke on the horizon. The distant sound of horns. Grim determination.'

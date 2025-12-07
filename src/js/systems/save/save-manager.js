@@ -860,7 +860,7 @@ const SaveManager = {
             if (QuestSystem.activeQuests['act2_quest1']) {
                 const quest = QuestSystem.activeQuests['act2_quest1'];
                 const hasTurnInObjective = quest.objectives && quest.objectives.some(o =>
-                    o.type === 'talk' && o.npc === 'blacksmith' && o.location === 'ironforge_city'
+                    o.type === 'talk' && o.npc === 'blacksmith' && o.location === 'northern_outpost'
                 );
 
                 if (!hasTurnInObjective) {
@@ -869,7 +869,7 @@ const SaveManager = {
                     quest.objectives.push({
                         type: 'talk',
                         npc: 'blacksmith',
-                        location: 'ironforge_city',
+                        location: 'northern_outpost',
                         completed: false,
                         description: 'Report to Forgemaster Grimjaw'
                     });

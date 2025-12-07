@@ -609,8 +609,8 @@ const TravelSystem = {
                 services: ['inn', 'general_store']
             },
 
-            stonebridge: {
-                id: 'stonebridge',
+            western_watch: {
+                id: 'western_watch',
                 name: 'Stonebridge',
                 type: 'village',
                 x: 1100,

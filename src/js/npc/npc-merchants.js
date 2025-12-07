@@ -404,7 +404,7 @@ const NPCMerchantSystem = {
         } else {
             // Fallback list if GameWorld isn't loaded yet
             locations = [
-                'greendale', 'riverwood', 'stonebridge', 'royal_capital', 'ironforge_city',
+                'greendale', 'riverwood', 'western_watch', 'royal_capital', 'northern_outpost',
                 'jade_harbor', 'silverkeep', 'sunhaven', 'frostholm_village', 'vineyard_village',
                 'darkwood_village', 'hillcrest', 'meadowbrook', 'coastal_village', 'mountain_pass',
                 'desert_oasis', 'lakeside_town', 'forest_clearing', 'ancient_ruins', 'trading_post'

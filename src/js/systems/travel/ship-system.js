@@ -153,7 +153,7 @@ const ShipSystem = {
         ironforge_docks: {
             name: 'Ironforge Docks',
             icon: '⚓',
-            location: 'ironforge_city',
+            location: 'northern_outpost',
             dockCapacity: 15,
             services: ['repair', 'resupply', 'crew_hire', 'shipyard'],
             tradingGoods: ['iron', 'weapons', 'armor', 'coal'],
