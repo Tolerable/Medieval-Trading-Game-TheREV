@@ -3727,13 +3727,18 @@ const QuestSystem = {
             </div>
         `;
 
-        //  Style the panel
+        //  Style the panel (pixel-based centering for draggability)
+        const panelWidth = 350;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const centerLeft = Math.max(20, (viewportWidth - panelWidth) / 2);
+        const centerTop = Math.max(20, (viewportHeight - 400) / 2);
+
         panel.style.cssText = `
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 350px;
+            top: ${centerTop}px;
+            left: ${centerLeft}px;
+            width: ${panelWidth}px;
             max-width: 90vw;
             background: linear-gradient(180deg, rgba(40, 40, 70, 0.98) 0%, rgba(25, 25, 45, 0.98) 100%);
             border: 2px solid #ffd700;
@@ -3744,9 +3749,16 @@ const QuestSystem = {
             backdrop-filter: blur(10px);
             color: #fff;
             font-size: 14px;
+            cursor: default;
         `;
 
         document.body.appendChild(panel);
+
+        // Make panel draggable
+        if (typeof DraggablePanels !== 'undefined') {
+            DraggablePanels.makeDraggable(panel);
+            DraggablePanels.bringToFront(panel);
+        }
 
         //  Add panel styles
         this.addQuestInfoPanelStyles();
@@ -3828,6 +3840,8 @@ const QuestSystem = {
                 background: linear-gradient(90deg, rgba(255, 215, 0, 0.2) 0%, transparent 100%);
                 border-bottom: 1px solid rgba(255, 215, 0, 0.3);
                 border-radius: 10px 10px 0 0;
+                cursor: move;
+                user-select: none;
             }
             .quest-info-header h3 {
                 flex: 1;
