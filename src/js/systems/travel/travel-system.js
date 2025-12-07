@@ -235,30 +235,110 @@ const TravelSystem = {
     portalToDoomWorld(entryLocationId) {
         console.log('🌑 Portaling to Doom World from', entryLocationId);
 
+        // Get the FULL location object from GameWorld
+        const entryLocation = GameWorld?.locations?.[entryLocationId];
+        if (!entryLocation) {
+            console.error('💀 DOOM ERROR: Location', entryLocationId, 'not found in GameWorld!');
+            return false;
+        }
+
+        // Reset doom world visited locations - start fresh with ONLY entry dungeon explored!
+        if (typeof GameWorld !== 'undefined' && GameWorld.resetDoomVisitedLocations) {
+            GameWorld.resetDoomVisitedLocations(entryLocationId);
+            console.log('💀 GameWorld.doomVisitedLocations reset to:', GameWorld.doomVisitedLocations);
+        }
+
+        // Clear doom discovered paths - start fresh, only entry point and its connections known
+        this.doomDiscoveredPaths = new Set();
+        this.doomDiscoveredPaths.add(entryLocationId);
+
+        // Also discover paths TO adjacent locations (so player can see where to go)
+        if (entryLocation?.connections) {
+            entryLocation.connections.forEach(connId => {
+                this.doomDiscoveredPaths.add(`${entryLocationId}->${connId}`);
+                this.doomDiscoveredPaths.add(`${connId}->${entryLocationId}`);
+            });
+            console.log('💀 Discovered paths from entry:', Array.from(this.doomDiscoveredPaths));
+        }
+
         // Switch to doom world
         this.currentWorld = 'doom';
         this.saveCurrentWorld();
-
-        // The entry point is the same location ID but now in doom context
-        // Player stays at same grid position but world is now doom version
         this.playerPosition.currentLocation = entryLocationId;
+
+        // PROPERLY SET game.currentLocation to FULL location object with doom name
+        if (typeof game !== 'undefined') {
+            const doomLocName = (typeof DoomWorldNPCs !== 'undefined' && DoomWorldNPCs.locationNames)
+                ? DoomWorldNPCs.locationNames[entryLocationId]
+                : `Ruined ${entryLocation.name}`;
+            game.currentLocation = {
+                ...entryLocation,
+                name: doomLocName,
+                originalName: entryLocation.name
+            };
+            game.inDoomWorld = true;
+            console.log('💀 game.currentLocation set to:', game.currentLocation.name, game.currentLocation.id);
+        }
+
+        // Activate DoomWorldConfig (economy changes)
+        if (typeof DoomWorldConfig !== 'undefined' && DoomWorldConfig.activate) {
+            DoomWorldConfig.activate();
+            console.log('💀 DoomWorldConfig activated - economy inverted');
+        }
+
+        // Set apocalypse weather
+        if (typeof WeatherSystem !== 'undefined') {
+            WeatherSystem.changeWeather('apocalypse');
+            console.log('💀 Apocalypse weather activated');
+        }
+
+        // Activate doom backdrop for map
+        if (typeof GameWorldRenderer !== 'undefined') {
+            if (GameWorldRenderer.enterDungeonMode) {
+                GameWorldRenderer.enterDungeonMode();
+            }
+            // CRITICAL: Re-render the map to show doom world state!
+            if (GameWorldRenderer.render) {
+                GameWorldRenderer.render();
+            }
+            if (GameWorldRenderer.updatePlayerMarker) {
+                GameWorldRenderer.updatePlayerMarker();
+            }
+            // CENTER MAP ON PLAYER LOCATION
+            if (GameWorldRenderer.centerOnLocation) {
+                GameWorldRenderer.centerOnLocation(entryLocationId);
+            } else if (GameWorldRenderer.centerOnPlayer) {
+                GameWorldRenderer.centerOnPlayer();
+            }
+            console.log('💀 Doom backdrop + map re-rendered + centered on player');
+        }
 
         // Emit event for other systems to react
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('worldChanged', { world: 'doom', entryLocation: entryLocationId });
+            EventBus.emit('doom:entered', { entryLocation: entryLocationId, doomLocation: game?.currentLocation?.name });
         }
 
         addMessage('🌑 You step through the portal into the Doom World...');
         addMessage('☠️ The air is thick with despair. Everything familiar is twisted and corrupted.');
         addMessage('🗺️ You must explore this dark reality anew - only this portal location is known to you.');
+        addMessage('⚠️ Gold is worthless here. Trade survival items to survive.');
 
         console.log('🌑 Now in Doom World. Doom paths discovered:', this.doomDiscoveredPaths.size);
 
-        // Force map re-render to show doom world state
-        if (typeof TravelPanelMap !== 'undefined') {
+        // Refresh panels to show doom state
+        if (typeof PeoplePanel !== 'undefined' && PeoplePanel.refresh) {
+            PeoplePanel.refresh();
+        }
+        if (typeof TravelPanelMap !== 'undefined' && TravelPanelMap.render) {
             TravelPanelMap.render();
         }
         this.render();
+
+        // Play doom arrival narration
+        if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.playDoomArrivalVoice) {
+            setTimeout(() => DoomWorldSystem.playDoomArrivalVoice(), 1500);
+        }
 
         return true;
     },

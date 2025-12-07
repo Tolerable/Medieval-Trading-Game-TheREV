@@ -191,7 +191,7 @@ const ResourceGatheringSystem = {
     hasRequiredTool(resourceId) {
         const requirement = this.TOOL_REQUIREMENTS[resourceId];
         if (!requirement || !requirement.tool) {
-            return { hasTool: true, tool: null }; // ��� no tool needed - peasant work
+            return { hasTool: true, tool: null }; // ��� no tool needed - peasant work
         }
 
         if (typeof game === 'undefined' || !game.player) {
@@ -231,7 +231,7 @@ const ResourceGatheringSystem = {
         }
 
         if (typeof game === 'undefined' || !game.player || !game.player.skills) {
-            return { hasSkill: true }; // ��� can't verify - fuck it, let them try
+            return { hasSkill: true }; // ��� can't verify - fuck it, let them try
         }
 
         const playerSkillLevel = game.player.skills[requirement.skill] || 0;
@@ -559,7 +559,7 @@ const ResourceGatheringSystem = {
         //  Calculate gathering time - harder locations take longer but yield better resources
         const baseTime = 15 + Math.random() * 15;
         const toolEfficiency = toolCheck.toolInfo?.efficiency || 1.0;
-        const locationDifficulty = location.gatheringDifficulty || 1.0; // ��� Uses location-specific difficulty
+        const locationDifficulty = location.gatheringDifficulty || 1.0; // ��� Uses location-specific difficulty
         let gatheringTime = Math.round((baseTime * locationDifficulty) / toolEfficiency);
 
         // SLOW MODE: if stamina is low, gathering takes longer
@@ -604,14 +604,18 @@ const ResourceGatheringSystem = {
     },
 
     // Update gathering progress (called from game loop)
+    // Uses TimeMachine's game minutes for time-based progression
     update() {
         if (!this.activeGathering) return;
 
+        // Skip update if time is paused
+        if (typeof TimeMachine !== 'undefined' && TimeMachine.isPaused) return;
+
         const currentTime = TimeSystem.getTotalMinutes();
         const elapsed = currentTime - this.activeGathering.startTime;
-        const progress = elapsed / this.activeGathering.duration;
+        const progress = Math.min(1.0, elapsed / this.activeGathering.duration);
 
-        // Update progress UI
+        // Update progress UI with percentage
         this.updateGatheringProgress(progress);
 
         // Check if complete
@@ -624,20 +628,24 @@ const ResourceGatheringSystem = {
     completeGathering() {
         if (!this.activeGathering) return;
 
-        const { resourceId, abundance, tool, staminaCost, locationId, isSlowMode } = this.activeGathering;
+        const { resourceId, staminaCost, locationId, baseYield, action } = this.activeGathering;
+        const abundance = this.activeGathering.abundance || 0.5;
+        const tool = this.activeGathering.tool || null;
+        const isSlowMode = this.activeGathering.isSlowMode || false;
 
         //  Get location for difficulty-based yield bonus
         const location = this.findLocation(locationId);
         const locationDifficulty = location?.gatheringDifficulty || 1.0;
 
-        // Calculate yield based on abundance, luck, and equipment bonuses
-        const baseYield = Math.floor(1 + abundance * 3);
+        // Calculate yield based on action's baseYield range
+        const yieldRange = baseYield || { min: 1, max: 3 };
+        const baseAmount = yieldRange.min + Math.floor(Math.random() * (yieldRange.max - yieldRange.min + 1));
         const bonusYield = Math.random() < abundance ? 1 : 0;
 
         //  Higher difficulty locations give better yields (risk vs reward!)
         // Difficulty 2.0 = +50% yield, Difficulty 0.8 = -10% yield
         const difficultyBonus = Math.floor((locationDifficulty - 1.0) * 2);
-        let totalYield = baseYield + bonusYield + Math.max(0, difficultyBonus);
+        let totalYield = baseAmount + bonusYield + Math.max(0, difficultyBonus);
 
         //  Apply equipment gathering bonuses
         if (typeof EquipmentSystem !== 'undefined') {
@@ -797,6 +805,47 @@ const ResourceGatheringSystem = {
         return null;
     },
 
+    // Get resource weight for carry calculations
+    getResourceWeight(resourceId) {
+        const weights = {
+            // Mining resources (heavy)
+            iron_ore: 10,
+            coal: 8,
+            stone: 15,
+            copper_ore: 9,
+            silver_ore: 10,
+            gold_ore: 12,
+            gems: 1,
+            rare_minerals: 8,
+            crystals: 2,
+            // Forestry resources
+            wood: 5,
+            planks: 3,
+            rare_wood: 8,
+            // Herbalism (light)
+            herbs: 0.5,
+            medicinal_plants: 0.5,
+            rare_herbs: 0.3,
+            mushrooms: 0.3,
+            // Fishing
+            fish: 2,
+            exotic_fish: 3,
+            river_pearls: 0.5,
+            // Survival (light)
+            food: 1,
+            water: 2,
+            bread: 0.5,
+            meat: 2,
+            berries: 0.3,
+            vegetables: 0.5,
+            apples: 0.3,
+            cheese: 0.5,
+            ale: 1,
+            wine: 1
+        };
+        return weights[resourceId] || 1;
+    },
+
     // Get human-readable resource name
     getResourceName(resourceId) {
         const names = {
@@ -847,9 +896,23 @@ const ResourceGatheringSystem = {
     },
 
     //  Add gathering section to location panel (like exploration section)
+    // Only shows at locations that support gathering (mine, forest, farm, etc.)
     addGatheringSection(locationId) {
         const location = this.findLocation(locationId);
         if (!location) return;
+
+        // Check if location supports gathering
+        const gatherableTypes = ['mine', 'forest', 'farm', 'cave', 'quarry', 'fishing', 'river', 'lake'];
+        const hasAvailableResources = location.availableResources && location.availableResources.length > 0;
+        const isGatherableType = gatherableTypes.includes(location.type);
+
+        // Don't show gathering section at non-gatherable locations
+        if (!hasAvailableResources && !isGatherableType) {
+            // Remove existing section if any
+            const existingSection = document.getElementById('gathering-section');
+            if (existingSection) existingSection.remove();
+            return;
+        }
 
         const locationPanel = document.getElementById('location-panel');
         if (!locationPanel) return;
@@ -858,8 +921,8 @@ const ResourceGatheringSystem = {
         const existingSection = document.getElementById('gathering-section');
         if (existingSection) existingSection.remove();
 
-        // Get available gathering actions for this location type
-        const availableActions = this.getAvailableGatheringActions(location.type);
+        // Get available gathering actions for this location (using location's availableResources)
+        const availableActions = this.getAvailableGatheringActions(location.type, location);
 
         // Create gathering section
         const section = document.createElement('div');
@@ -958,20 +1021,90 @@ const ResourceGatheringSystem = {
         locationPanel.appendChild(section);
     },
 
-    //  Get available gathering actions for a location type
-    getAvailableGatheringActions(locationType) {
-        if (typeof UnifiedItemSystem === 'undefined') return [];
-
+    //  Get available gathering actions for a location
+    // Uses location's availableResources array if present, otherwise falls back to type
+    getAvailableGatheringActions(locationType, location = null) {
         const actions = [];
-        const gatheringActions = UnifiedItemSystem.gatheringActions || {};
 
-        for (const [actionId, action] of Object.entries(gatheringActions)) {
-            if (action.locationTypes && action.locationTypes.includes(locationType)) {
-                actions.push({ id: actionId, ...action });
+        // Get the location's available resources if provided
+        const availableResources = location?.availableResources || [];
+
+        // If location has specific resources, use those
+        if (availableResources.length > 0) {
+            availableResources.forEach(resourceId => {
+                const actionData = this.getGatheringActionForResource(resourceId, location);
+                if (actionData) {
+                    actions.push(actionData);
+                }
+            });
+            return actions;
+        }
+
+        // Fallback: Use UnifiedItemSystem's location type matching
+        if (typeof UnifiedItemSystem !== 'undefined') {
+            const gatheringActions = UnifiedItemSystem.gatheringActions || {};
+
+            for (const [actionId, action] of Object.entries(gatheringActions)) {
+                if (action.locationTypes && action.locationTypes.includes(locationType)) {
+                    actions.push({ id: actionId, ...action });
+                }
             }
         }
 
         return actions;
+    },
+
+    // Get gathering action data for a specific resource
+    getGatheringActionForResource(resourceId, location = null) {
+        // Resource-specific gathering actions with real items
+        const resourceActions = {
+            // Mining
+            stone: { id: 'gather_stone', name: 'Mine Stone', icon: '🪨', outputItem: 'stone', baseTime: 20, baseYield: { min: 2, max: 4 }, toolRequired: null, staminaCost: 5 },
+            iron_ore: { id: 'gather_iron', name: 'Mine Iron Ore', icon: '⛏️', outputItem: 'iron_ore', baseTime: 35, baseYield: { min: 1, max: 3 }, toolRequired: 'pickaxe', staminaCost: 8 },
+            copper_ore: { id: 'gather_copper', name: 'Mine Copper Ore', icon: '🟤', outputItem: 'copper_ore', baseTime: 30, baseYield: { min: 1, max: 3 }, toolRequired: 'pickaxe', staminaCost: 7 },
+            coal: { id: 'gather_coal', name: 'Mine Coal', icon: '⚫', outputItem: 'coal', baseTime: 25, baseYield: { min: 2, max: 4 }, toolRequired: 'pickaxe', staminaCost: 6 },
+            silver_ore: { id: 'gather_silver', name: 'Mine Silver Ore', icon: '⚪', outputItem: 'silver_ore', baseTime: 45, baseYield: { min: 1, max: 2 }, toolRequired: 'pickaxe', staminaCost: 10 },
+            gold_ore: { id: 'gather_gold', name: 'Mine Gold Ore', icon: '🟡', outputItem: 'gold_ore', baseTime: 60, baseYield: { min: 1, max: 2 }, toolRequired: 'pickaxe', staminaCost: 12 },
+            gems: { id: 'gather_gems', name: 'Mine Gems', icon: '💎', outputItem: 'gems', baseTime: 50, baseYield: { min: 1, max: 2 }, toolRequired: 'pickaxe', staminaCost: 10 },
+
+            // Forestry
+            wood: { id: 'gather_wood', name: 'Chop Wood', icon: '🪵', outputItem: 'wood', baseTime: 25, baseYield: { min: 2, max: 5 }, toolRequired: 'axe', staminaCost: 6 },
+            timber: { id: 'gather_timber', name: 'Harvest Timber', icon: '🌲', outputItem: 'wood', baseTime: 40, baseYield: { min: 3, max: 6 }, toolRequired: 'axe', staminaCost: 8 },
+
+            // Herbalism
+            herbs: { id: 'gather_herbs', name: 'Gather Herbs', icon: '🌿', outputItem: 'herbs', baseTime: 15, baseYield: { min: 2, max: 4 }, toolRequired: null, staminaCost: 3 },
+            mushrooms: { id: 'gather_mushrooms', name: 'Forage Mushrooms', icon: '🍄', outputItem: 'mushrooms', baseTime: 12, baseYield: { min: 1, max: 3 }, toolRequired: null, staminaCost: 2 },
+            berries: { id: 'gather_berries', name: 'Pick Berries', icon: '🫐', outputItem: 'berries', baseTime: 10, baseYield: { min: 2, max: 5 }, toolRequired: null, staminaCost: 2 },
+            honey: { id: 'gather_honey', name: 'Collect Honey', icon: '🍯', outputItem: 'honey', baseTime: 20, baseYield: { min: 1, max: 2 }, toolRequired: null, staminaCost: 4 },
+
+            // Farming
+            wheat: { id: 'gather_wheat', name: 'Harvest Wheat', icon: '🌾', outputItem: 'wheat', baseTime: 20, baseYield: { min: 3, max: 6 }, toolRequired: null, staminaCost: 5 },
+            vegetables: { id: 'gather_vegetables', name: 'Pick Vegetables', icon: '🥕', outputItem: 'vegetables', baseTime: 15, baseYield: { min: 2, max: 4 }, toolRequired: null, staminaCost: 3 },
+            eggs: { id: 'gather_eggs', name: 'Collect Eggs', icon: '🥚', outputItem: 'eggs', baseTime: 8, baseYield: { min: 2, max: 5 }, toolRequired: null, staminaCost: 1 },
+            milk: { id: 'gather_milk', name: 'Milk Cow', icon: '🥛', outputItem: 'milk', baseTime: 12, baseYield: { min: 1, max: 3 }, toolRequired: null, staminaCost: 2 },
+            apples: { id: 'gather_apples', name: 'Pick Apples', icon: '🍎', outputItem: 'apples', baseTime: 10, baseYield: { min: 2, max: 5 }, toolRequired: null, staminaCost: 2 },
+            grapes: { id: 'gather_grapes', name: 'Harvest Grapes', icon: '🍇', outputItem: 'grapes', baseTime: 15, baseYield: { min: 2, max: 4 }, toolRequired: null, staminaCost: 3 },
+
+            // Hunting
+            meat: { id: 'gather_meat', name: 'Hunt Game', icon: '🥩', outputItem: 'meat', baseTime: 40, baseYield: { min: 1, max: 3 }, toolRequired: 'bow', staminaCost: 10 },
+            hide: { id: 'gather_hide', name: 'Skin Animal', icon: '🦌', outputItem: 'hide', baseTime: 30, baseYield: { min: 1, max: 2 }, toolRequired: 'knife', staminaCost: 6 },
+
+            // Fishing
+            fish: { id: 'gather_fish', name: 'Catch Fish', icon: '🐟', outputItem: 'fish', baseTime: 25, baseYield: { min: 1, max: 3 }, toolRequired: 'fishing_rod', staminaCost: 4 },
+
+            // Water
+            water: { id: 'gather_water', name: 'Collect Water', icon: '💧', outputItem: 'water', baseTime: 8, baseYield: { min: 2, max: 5 }, toolRequired: null, staminaCost: 1 }
+        };
+
+        const action = resourceActions[resourceId];
+        if (!action) return null;
+
+        // Apply location difficulty modifier to time
+        const difficulty = location?.gatheringDifficulty || 1.0;
+        return {
+            ...action,
+            baseTime: Math.round(action.baseTime * difficulty)
+        };
     },
 
     //  Check tool requirement for gathering action
@@ -1010,18 +1143,93 @@ const ResourceGatheringSystem = {
             return;
         }
 
-        const action = UnifiedItemSystem?.gatheringActions?.[actionId];
+        const locationId = game.currentLocation.id;
+        const location = this.findLocation(locationId);
+
+        // Try to find action from our getGatheringActionForResource first
+        // actionId format: 'gather_stone', 'gather_iron', etc.
+        const resourceId = actionId.replace('gather_', '');
+        let action = this.getGatheringActionForResource(resourceId, location);
+
+        // Fallback to UnifiedItemSystem
+        if (!action && typeof UnifiedItemSystem !== 'undefined') {
+            action = UnifiedItemSystem.gatheringActions?.[actionId];
+        }
+
         if (!action) {
             addMessage('invalid gathering action', 'error');
             return;
         }
 
-        // Use the resource ID from the action
-        const resourceId = action.outputItem;
-        const locationId = game.currentLocation.id;
+        // Use the output item from the action
+        const outputItem = action.outputItem || resourceId;
 
-        // Start gathering
-        this.startGathering(locationId, resourceId);
+        // Start gathering with the action's time and yield info
+        this.startGatheringWithAction(locationId, outputItem, action);
+    },
+
+    // Start gathering with specific action parameters
+    startGatheringWithAction(locationId, resourceId, action) {
+        // Check if already gathering
+        if (this.activeGathering) {
+            addMessage('already gathering. one task at a time.', 'warning');
+            return false;
+        }
+
+        // Find the location
+        const location = this.findLocation(locationId);
+        if (!location) {
+            addMessage('invalid location.', 'error');
+            return false;
+        }
+
+        // Check tool requirement
+        const toolCheck = this.checkToolRequirement(action);
+        if (!toolCheck.hasRequired) {
+            addMessage(`Need ${toolCheck.requiredTool} to gather this resource.`, 'error');
+            return false;
+        }
+
+        // Check stamina
+        const currentStamina = game.player?.stats?.stamina || 0;
+        const staminaCost = action.staminaCost || 5;
+        if (currentStamina < staminaCost) {
+            addMessage('Too exhausted to gather. Rest first.', 'error');
+            return false;
+        }
+
+        // Check carry weight
+        const resourceWeight = this.getResourceWeight(resourceId) || 1;
+        if (!this.canCarryMore(resourceWeight)) {
+            addMessage('Inventory full! Sell or drop items first.', 'error');
+            return false;
+        }
+
+        // Calculate gathering time using action's baseTime
+        const gatheringTime = action.baseTime || 20;
+
+        // Start gathering session
+        this.activeGathering = {
+            locationId: locationId,
+            resourceId: resourceId,
+            action: action,
+            startTime: TimeSystem.getTotalMinutes(),
+            duration: gatheringTime,
+            staminaCost: staminaCost,
+            baseYield: action.baseYield || { min: 1, max: 3 }
+        };
+
+        // Auto-start time if paused
+        if (typeof TimeMachine !== 'undefined' && TimeMachine.isPaused) {
+            TimeMachine.setSpeed('normal');
+        }
+
+        addMessage(`Gathering ${this.getResourceName(resourceId)}... ~${gatheringTime} min`, 'info');
+
+        // Show gathering progress UI
+        this.showGatheringProgress();
+
+        return true;
     },
 
     // Setup gathering UI elements
@@ -1094,9 +1302,29 @@ const ResourceGatheringSystem = {
     // Update gathering progress UI
     updateGatheringProgress(progress) {
         const progressDiv = document.getElementById('gathering-progress');
-        if (progressDiv) {
+        if (progressDiv && this.activeGathering) {
             const percentage = Math.min(100, Math.round(progress * 100));
-            progressDiv.querySelector('.progress-bar-fill').style.width = percentage + '%';
+            const progressBar = progressDiv.querySelector('.progress-bar-fill');
+            const resourceDisplay = progressDiv.querySelector('.gathering-resource');
+
+            if (progressBar) {
+                progressBar.style.width = percentage + '%';
+            }
+
+            // Update text with percentage and time remaining
+            if (resourceDisplay) {
+                const resourceName = this.getResourceName(this.activeGathering.resourceId);
+                const timeRemaining = Math.max(0, Math.ceil(this.activeGathering.duration * (1 - progress)));
+                resourceDisplay.innerHTML = `
+                    <div>Gathering ${resourceName}</div>
+                    <div style="font-size: 1.2em; color: #4caf50; margin-top: 4px;">
+                        ${percentage}% complete
+                    </div>
+                    <div style="font-size: 0.85em; color: #888; margin-top: 2px;">
+                        ~${timeRemaining} min remaining
+                    </div>
+                `;
+            }
         }
     },
 

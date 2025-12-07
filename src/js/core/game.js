@@ -1304,6 +1304,11 @@ const game = {
         // Death timer logic is handled within processPlayerStatsOverTime (starvation/dehydration)
         this.processPlayerStatsOverTime();
 
+        // Update resource gathering system - track progress on mining/collecting
+        if (typeof ResourceGatheringSystem !== 'undefined' && ResourceGatheringSystem.update) {
+            ResourceGatheringSystem.update();
+        }
+
         // Update UI
         this.updateUI();
 
@@ -1486,7 +1491,9 @@ const game = {
         }
 
         // check if the void claims another soul
-        if (game.player.stats.health <= 0) {
+        // guard: don't trigger death if GameOverSystem is already processing
+        const isAlreadyDying = typeof GameOverSystem !== 'undefined' && GameOverSystem.isProcessingGameOver;
+        if (game.player.stats.health <= 0 && !isAlreadyDying) {
             // Use DeathCauseSystem if available, otherwise fallback
             let deathCause = 'the void simply called';
             if (typeof DeathCauseSystem !== 'undefined') {
@@ -7696,7 +7703,7 @@ function updateMarketButtonVisibility() {
         addMessage('🏪 You left the Royal Capital - the grand market is behind you now.');
     }
 
-    console.log(`🏪 Market availability at ${game?.currentLocation?.name || 'unknown'}: ${hasMarket ? 'YES' : 'NO'}`);
+    // Debug log removed - was spamming during travel updates
 }
 
 // 🏪 Hook into location changes to update market visibility 💀

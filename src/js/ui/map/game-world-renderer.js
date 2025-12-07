@@ -946,7 +946,16 @@ const GameWorldRenderer = {
  // Check if a location is in a LOCKED zone that requires payment
  // Returns true if the location is hidden until gatehouse fee is paid
  // Locked zones: northern, northern_deep, western, eastern
+ // DOOM WORLD: All zones are unlocked - no gatehouse restrictions apply
     isLocationInLockedZone(locationId) {
+        // DOOM WORLD BYPASS: No zone locks in the apocalypse
+        const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld()) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
+                       (typeof game !== 'undefined' && game.inDoomWorld);
+        if (inDoom) {
+            return false; // All zones accessible in doom world
+        }
+
         if (typeof GatehouseSystem === 'undefined') {
             return false; // No gatehouse system, nothing is locked
         }
@@ -978,7 +987,16 @@ const GameWorldRenderer = {
     },
 
  // check if some gatekeeping mechanism blocks your path (capitalism simulator moment)
+ // DOOM WORLD: No gatehouse restrictions - the apocalypse has no toll booths
     isLocationBehindLockedGate(locationId) {
+        // DOOM WORLD BYPASS: No gates in the apocalypse
+        const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld()) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
+                       (typeof game !== 'undefined' && game.inDoomWorld);
+        if (inDoom) {
+            return false; // All gates open in doom world
+        }
+
  // If GatehouseSystem doesn't exist or isn't initialized, don't block anything
         if (typeof GatehouseSystem === 'undefined' || !GatehouseSystem.canAccessLocation) {
             return false;
@@ -1478,7 +1496,8 @@ const GameWorldRenderer = {
         label.className = 'map-location-label' + (isDiscovered ? ' discovered' : '');
 
         const isGate = this.isGatehouse(location.id);
-        const locationName = location.name || location.id;
+        // use getLocationName for proper doom world name support
+        const locationName = this.getLocationName(location.id);
         label.textContent = (isDiscovered && !isGate) ? '???' : locationName;
 
  // position label ABOVE icon so YOU ARE HERE marker doesn't cover it 

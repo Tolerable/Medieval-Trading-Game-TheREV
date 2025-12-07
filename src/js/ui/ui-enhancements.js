@@ -560,10 +560,10 @@ const KeyboardShortcuts = {
         loadingOverlay.id = 'loading-overlay';
         loadingOverlay.className = 'overlay hidden';
         loadingOverlay.innerHTML = `
-            <div class="overlay-content" role="dialog" aria-modal="true" aria-labelledby="loading-title">
+            <div class="overlay-content" role="dialog" aria-modal="true" aria-labelledby="overlay-loading-title">
                 <div class="loading-content">
                     <div class="loading-spinner" aria-hidden="true"></div>
-                    <div id="loading-title" class="loading-text">Loading...</div>
+                    <div id="overlay-loading-title" class="loading-text">Loading...</div>
                     <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                         <div class="progress-fill"></div>
                     </div>

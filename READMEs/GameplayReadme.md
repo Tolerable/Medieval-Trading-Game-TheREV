@@ -28,6 +28,7 @@
 - [Transportation Options](#️-transportation-options)
 
 ### Empire Building
+- [Resource Gathering](#resource-gathering)
 - [Properties & Empire Building](#-properties--empire-building)
 - [Crafting System](#-crafting-system)
 
@@ -759,6 +760,53 @@ Herbs + Other → Potions
 | **Port → Inland** | Fish, Exotic goods | Seafood, Luxuries | 60-100% |
 | **Capital → Villages** | Luxury goods | High-end items | 100-200% |
 | **Dungeon → Anywhere** | Loot | Everything | 200-500% |
+
+---
+
+## RESOURCE GATHERING
+
+*"Time to roll up your sleeves and extract value from the land itself."*
+
+At certain locations, you can gather raw resources directly from the environment. This is a great way to get starting materials for crafting or trade goods without spending gold.
+
+### Where to Gather
+
+Resource gathering is only available at specific location types:
+
+| Location Type | Resources Available |
+|---------------|---------------------|
+| **Mine** | Iron ore, coal, copper ore, gold ore, gems |
+| **Forest** | Wood, herbs, mushrooms, berries |
+| **Farm** | Grain, vegetables, fruits, flax |
+| **Cave** | Stone, crystals, mushrooms |
+| **Quarry** | Stone, marble |
+| **Fishing Spot** | Fish, shells |
+| **River/Lake** | Fish, water, clay |
+
+*Cities, towns, and dungeons do NOT have gathering options.*
+
+### How Gathering Works
+
+1. **Arrive** at a gatherable location
+2. **Select a resource** from the available options
+3. **Watch progress** - Shows percentage complete and time remaining
+4. **Collect** - Item goes to your inventory when done
+
+### Progress Tracking
+
+The gathering system shows:
+- **Percentage complete** (e.g., "Mining Iron Ore... 45%")
+- **Time remaining** (e.g., "~2 minutes left")
+- **Tool bonus** (if you have the right tool equipped)
+
+Progress is tied to game time - pausing the game pauses gathering, and faster game speeds mean faster gathering!
+
+### Tips for Gatherers
+
+- Check the location's `availableResources` to see what you can gather
+- Having the right tool (pickaxe for mining, axe for wood) speeds up gathering
+- Watch your carry weight - resources are heavy!
+- Gathered resources can be crafted into more valuable items
 
 ---
 

@@ -338,7 +338,16 @@ const GatehouseSystem = {
     // 🚫 Can you walk this path or is it still locked by greed?
     // Gates block you until gold opens the way
     // Once paid, roam freely (within that zone of suffering)
+    // DOOM WORLD: All zones accessible - the apocalypse has no toll booths
     canAccessLocation(locationId, fromLocationId = null) {
+        // DOOM WORLD BYPASS: No gatehouse restrictions in doom world
+        const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld()) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
+                       (typeof game !== 'undefined' && game.inDoomWorld);
+        if (inDoom) {
+            return { accessible: true, reason: null, zoneType: 'doom_world' };
+        }
+
         // Get destination zone
         const destZone = this.LOCATION_ZONES[locationId] || this.getLocationZone(locationId);
 

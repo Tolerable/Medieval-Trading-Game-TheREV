@@ -804,19 +804,54 @@ const DungeonExplorationSystem = {
 ```javascript
 const ResourceGatheringSystem = {
     isGathering: false,
-    currentResource: null,
+    activeGathering: null,  // Current gathering session state
     gatheringProgress: 0,
     isCommitted: false,  // Can't leave after first action
 
+    // Core gathering methods
     startGathering(resourceType, locationId),
     completeGathering(),
     stopGatheringSession(reason),
+    update(),  // Called from game loop, respects TimeMachine.isPaused
+
+    // Weight management
     getCurrentCarryWeight(),
     getMaxCarryCapacity(),
     canCarryMore(additionalWeight),
-    commitToLocation(locationId),
-    canLeaveLocation()
+    getResourceWeight(resourceId),  // Returns weight per resource type
+
+    // Location-aware gathering
+    addGatheringSection(locationId),  // Only shows at gatherable locations
+    getGatheringActionForResource(resourceId, location),  // Real game items
+
+    // Gatherable location types:
+    // mine, forest, farm, cave, quarry, fishing, river, lake
+    // Cities/towns/dungeons do NOT show gathering section
 };
+```
+
+**Time Integration:**
+```javascript
+update() {
+    if (!this.activeGathering) return;
+    // Respects game pause state
+    if (typeof TimeMachine !== 'undefined' && TimeMachine.isPaused) return;
+    // Progress calculated from TimeMachine time elapsed
+    // Shows percentage complete + time remaining in UI
+}
+```
+
+**Resource Weight Map:**
+```javascript
+getResourceWeight(resourceId) {
+    const weights = {
+        iron_ore: 10, coal: 8, stone: 15, copper_ore: 9,
+        silver_ore: 10, gold_ore: 12, gems: 1, wood: 5,
+        planks: 3, herbs: 0.5, mushrooms: 0.3, food: 1, water: 2
+        // ... 25+ resources with weights
+    };
+    return weights[resourceId] || 1;
+}
 ```
 
 ---
@@ -849,8 +884,16 @@ const TravelSystem = {
     // 🌑 Current dimension
     currentWorld: 'normal',  // 'normal' or 'doom'
 
-    // Portal functions
-    portalToDoomWorld(locationId),   // Switch to doom at location
+    // Portal functions - REWRITTEN for proper doom isolation
+    portalToDoomWorld(entryLocationId) {
+        // 1. Reset doom visited locations (only entry dungeon explored)
+        // 2. Clear doom discovered paths (fresh start)
+        // 3. Discover paths to adjacent locations from entry
+        // 4. Set game.currentLocation with corrupted doom name
+        // 5. Activate DoomWorldConfig (inverted economy)
+        // 6. Set apocalypse weather
+        // 7. Enter dungeon mode backdrop + re-render map
+    },
     portalToNormalWorld(locationId), // Switch back
     isInDoomWorld(),                 // Check current dimension
 
@@ -861,6 +904,35 @@ const TravelSystem = {
             : this.discoveredPaths;
     }
 };
+```
+
+### Doom World Bypass Pattern
+
+Zone locks and gatehouse restrictions are bypassed in doom world using a consistent 3-way check:
+
+```javascript
+// Used in: game-world-renderer.js, gatehouse-system.js, travel-panel-map.js
+const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld()) ||
+               (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
+               (typeof game !== 'undefined' && game.inDoomWorld);
+if (inDoom) {
+    return false; // No zone locks in doom world
+}
+```
+
+**Files with doom bypass:**
+- `game-world-renderer.js` - `isLocationInLockedZone()`, `isLocationBehindLockedGate()`
+- `gatehouse-system.js` - `canAccessLocation()`
+- `travel-panel-map.js` - `isLocationInLockedZone()`, `isLocationBehindLockedGate()`
+
+### Death Spam Prevention
+
+```javascript
+// In game.js update loop - prevents multiple death triggers
+const isAlreadyDying = typeof GameOverSystem !== 'undefined' && GameOverSystem.isProcessingGameOver;
+if (game.player.stats.health <= 0 && !isAlreadyDying) {
+    // Handle death only once
+}
 ```
 
 ### First Portal Entry

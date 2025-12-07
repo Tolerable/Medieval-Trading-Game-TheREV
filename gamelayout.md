@@ -1,5 +1,5 @@
 # MEDIEVAL TRADING GAME - COMPLETE SYSTEM ARCHITECTURE
-## Version 0.90.01 | Last Updated: 2025-12-07
+## Version 0.90.01 | Last Updated: 2025-12-07 (Session #57)
 
 ```
 ================================================================================
@@ -549,6 +549,50 @@
 
 
 ================================================================================
+                              RESOURCE GATHERING SYSTEM
+================================================================================
+
++-----------------------------------------------------------------------------+
+|                         GATHERING ARCHITECTURE                               |
++-----------------------------------------------------------------------------+
+
+                         +----------------------+
+                         | RESOURCE GATHERING   |
+                         | resource-gathering   |
+                         | -system.js           |
+                         +----------+-----------+
+                                    |
+    +-------------------------------+-------------------------------+
+    |               |               |               |               |
+    v               v               v               v               v
++----------+  +----------+  +----------+  +----------+  +----------+
+| MINING   |  | FORAGING |  | FISHING  |  | HUNTING  |  | FARMING  |
+| iron,coal|  | herbs,   |  | fish,    |  | meat,    |  | grain,   |
+| gold,ore |  | mushroom |  | shells   |  | leather  |  | veggies  |
++----------+  +----------+  +----------+  +----------+  +----------+
+
+    GATHERABLE LOCATION TYPES:
+    +--------------------------------------------------+
+    | mine, forest, farm, cave, quarry, fishing,       |
+    | river, lake - Only show gathering at these types |
+    +--------------------------------------------------+
+
+    PROGRESS TRACKING:
+    +--------------------------------------------------+
+    | Uses TimeMachine for time-based progression      |
+    | Shows percent complete + time remaining          |
+    | Real items from location.availableResources      |
+    +--------------------------------------------------+
+
+    TIME INTEGRATION:
+    +--------------------------------------------------+
+    | ResourceGatheringSystem.update() called in loop  |
+    | Respects TimeMachine.isPaused for pausing        |
+    | Progress calculated from game time elapsed       |
+    +--------------------------------------------------+
+
+
+================================================================================
                               DOOM WORLD
 ================================================================================
 
@@ -587,6 +631,22 @@
     | Different dialogue/personality    |
     | Survival-focused trading          |
     +----------------------------------+
+
+    DOOM WORLD ACCESS (Two Pathways):
+    +--------------------------------------------------+
+    | 1. /doom command - Debug access to doom world    |
+    | 2. Boatman portal - After defeating dungeon boss |
+    | Both pathways use same portalToDoomWorld() logic |
+    +--------------------------------------------------+
+
+    DOOM WORLD ISOLATION:
+    +--------------------------------------------------+
+    | - Zone locks/gatehouse fees BYPASSED in doom     |
+    | - Doom location names (corrupted) shown on map   |
+    | - Separate visited/discovered location tracking  |
+    | - Normal world state preserved separately        |
+    | - GameOverSystem guards prevent death spam       |
+    +--------------------------------------------------+
 
 
 ================================================================================
@@ -729,7 +789,7 @@ MTG v0.90.01/
     +--------------------------------+
     | Version:           0.90.01     |
     | Build Status:      Active Dev  |
-    | Bugs Fixed:        519+        |
+    | Bugs Fixed:        531+        |
     +--------------------------------+
 
 

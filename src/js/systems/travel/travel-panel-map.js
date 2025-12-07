@@ -484,7 +484,16 @@ const TravelPanelMap = {
 
     // Check if a location is in a LOCKED zone that requires payment
     // Locked zones: northern, northern_deep, western, eastern
+    // DOOM WORLD: All zones accessible - no gatehouse restrictions
     isLocationInLockedZone(locationId) {
+        // DOOM WORLD BYPASS: No zone locks in the apocalypse
+        const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld()) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
+                       (typeof game !== 'undefined' && game.inDoomWorld);
+        if (inDoom) {
+            return false; // All zones accessible in doom world
+        }
+
         if (typeof GatehouseSystem === 'undefined') {
             return false;
         }
@@ -513,7 +522,16 @@ const TravelPanelMap = {
     },
 
     // Check if location is behind a locked gate
+    // DOOM WORLD: No gatehouse restrictions - the apocalypse has no toll booths
     isLocationBehindLockedGate(locationId) {
+        // DOOM WORLD BYPASS: No gates in the apocalypse
+        const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld()) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
+                       (typeof game !== 'undefined' && game.inDoomWorld);
+        if (inDoom) {
+            return false; // All gates open in doom world
+        }
+
         if (typeof GatehouseSystem === 'undefined' || !GatehouseSystem.canAccessLocation) {
             return false;
         }

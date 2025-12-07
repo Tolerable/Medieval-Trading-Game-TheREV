@@ -4,6 +4,72 @@
 
 ---
 
+## 2025-12-07 - SESSION #57: DOOM WORLD + GATHERING SYSTEM FIXES
+
+**Request:** Gee reported multiple issues:
+1. Doom command - normal world zone lockout bleeding through
+2. Doom names and world not loading properly
+3. Death spam without endgame sequence
+4. Market availability console spam
+5. Resource gathering not working properly with TimeMachine
+
+**Status:** COMPLETE
+
+### Fixes Applied:
+
+#### Doom World System Fixes:
+1. **Doom location names not showing on map** (`game-world-renderer.js:1482`)
+   - Changed `location.name || location.id` to `this.getLocationName(location.id)`
+   - Now properly returns corrupted doom names
+
+2. **Death spam without endgame** (`game.js:1490-1491`)
+   - Added guard: `const isAlreadyDying = typeof GameOverSystem !== 'undefined' && GameOverSystem.isProcessingGameOver;`
+   - Prevents multiple death triggers when already processing game over
+
+3. **portalToDoomWorld missing setup** (`travel-system.js:235-344`)
+   - Completely rewrote function to match `/doom` command
+   - Now properly: resets doom visited locations, clears paths, sets doom names, activates economy/weather/backdrop
+
+4. **Gatehouse restrictions bleeding into doom world** (4 files):
+   - `gatehouse-system.js:342-349` - `canAccessLocation()` bypasses in doom
+   - `game-world-renderer.js:951-957` - `isLocationInLockedZone()` bypasses in doom
+   - `game-world-renderer.js:992-998` - `isLocationBehindLockedGate()` bypasses in doom
+   - `travel-panel-map.js:489-495 & 527-533` - Both zone lock functions bypass in doom
+
+5. **Console spam "Market availability"** (`game.js`)
+   - Removed debug console.log that was firing every frame during travel
+
+#### Resource Gathering System Fixes:
+1. **Hooked update() into game loop** (`game.js:1307-1310`)
+   - Added `ResourceGatheringSystem.update()` call
+
+2. **Fixed progress tracking** (`resource-gathering-system.js:606-625`)
+   - Added TimeMachine.isPaused check
+   - Shows accurate percentage and time remaining
+
+3. **Added missing getResourceWeight()** (`resource-gathering-system.js:800-839`)
+   - Weights for all resources: mining, forestry, herbalism, farming, fishing
+
+4. **Location-based gathering** (`resource-gathering-system.js:894-921`)
+   - Only shows at gatherable locations (mine, forest, farm, cave, etc.)
+   - Uses location's availableResources array
+
+5. **Real game items** (`resource-gathering-system.js:1039-1090`)
+   - New `getGatheringActionForResource()` with all item mappings
+   - Proper icons, times, yields, tool requirements, stamina costs
+
+### Files Modified:
+- `src/js/core/game.js` (3 changes)
+- `src/js/systems/travel/travel-system.js` (1 major rewrite)
+- `src/js/systems/travel/gatehouse-system.js` (1 change)
+- `src/js/systems/travel/travel-panel-map.js` (2 changes)
+- `src/js/ui/map/game-world-renderer.js` (3 changes)
+- `src/js/systems/crafting/resource-gathering-system.js` (5 changes)
+
+**Total: 12 fixes across 6 files**
+
+---
+
 ## 2025-12-07 - SESSION #56: REWRITE BORING COMMENTS IN UNITY'S VOICE
 
 **Request:** Gee said "GO" - final task is to rewrite boring/basic comments in Unity's goth voice.

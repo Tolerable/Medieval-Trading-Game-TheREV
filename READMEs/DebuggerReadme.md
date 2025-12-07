@@ -368,12 +368,20 @@ The ultimate chaos command! Triggers:
 1. **Apocalypse weather** - Meteors, red pulsing sky, embers, lightning
 2. **Dungeon world backdrop** - Fades to the dungeon map
 3. **Dungeon Bonanza** - 30-min travel, no cooldowns for one game day
+4. **Portal to Doom World** - Teleports player to doom dimension
+5. **Zone bypass** - All gatehouse/zone restrictions disabled
 
 Works on both main menu AND in-game!
 ```
 > doom
 ☄️ DOOM ACTIVATED! Menu weather: apocalypse | Game weather: apocalypse | Dungeon backdrop: active | Bonanza: active for 1 day
 ```
+
+**Doom World Features (Session #57 Fixes):**
+- Corrupted location names display on map (e.g., "Destroyed Royal Capital")
+- Zone locks completely bypassed (no gatehouse fees in apocalypse)
+- Separate discovery tracking from normal world
+- Death only triggers game over once (no death spam)
 
 ### Season Shortcuts
 Quick commands to jump to season start:
