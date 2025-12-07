@@ -508,6 +508,25 @@ const CombatModal = {
             }
         }));
 
+        // Record quest kill if this is a quest target
+        if (this.currentCombat.isQuestTarget && typeof QuestSystem !== 'undefined' && QuestSystem.recordQuestKill) {
+            QuestSystem.recordQuestKill(npc.type, game?.currentLocation?.id);
+        }
+
+        // Call onVictory callback if provided
+        if (this.currentCombat.options?.onVictory && typeof this.currentCombat.options.onVictory === 'function') {
+            try {
+                this.currentCombat.options.onVictory({
+                    enemyType: npc.type,
+                    enemyName: npc.name,
+                    gold: goldDrop,
+                    xp: xpReward
+                });
+            } catch (e) {
+                console.error('Error in onVictory callback:', e);
+            }
+        }
+
         this._addLog(`Victory! ${npc.name} is defeated!`, 'system');
 
         // Show outcome

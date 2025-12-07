@@ -3261,11 +3261,12 @@ const ItemDatabase = {
 
         let price = item.basePrice || 0;
 
-        //  DOOM WORLD ECONOMY 
+        //  DOOM WORLD ECONOMY
         // When in doom world, apply apocalyptic price modifiers
-        const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
-                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
-                       (typeof game !== 'undefined' && game.inDoomWorld);
+        // IMPORTANT: All three checks must be explicit true, not just truthy
+        const inDoom = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld && TravelSystem.isInDoomWorld() === true) ||
+                       (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive === true) ||
+                       (typeof game !== 'undefined' && game.inDoomWorld === true);
 
         if (inDoom && typeof DoomWorldNPCs !== 'undefined') {
             // Check for exact item match in doom economy

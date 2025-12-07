@@ -7484,6 +7484,89 @@ function updateLocationPanelMain() {
 
     actionsSection.innerHTML = navButtonsHTML;
 
+    // ⚔️ QUEST COMBAT SECTION - Show available combat encounters for active quests
+    if (typeof QuestSystem !== 'undefined' && QuestSystem.getActiveQuestCombatForLocation) {
+        const questCombats = QuestSystem.getActiveQuestCombatForLocation(game.currentLocation.id);
+
+        if (questCombats.length > 0) {
+            let questCombatSection = locationPanel.querySelector('.quest-combat-section');
+            if (!questCombatSection) {
+                questCombatSection = document.createElement('div');
+                questCombatSection.className = 'quest-combat-section';
+                questCombatSection.style.cssText = 'margin-top: 12px; padding: 10px; background: linear-gradient(135deg, rgba(139, 0, 0, 0.2) 0%, rgba(60, 20, 20, 0.3) 100%); border: 1px solid #ff6b6b; border-radius: 8px;';
+                actionsSection.parentNode.insertBefore(questCombatSection, actionsSection.nextSibling);
+            }
+
+            let combatHTML = `<h4 style="margin: 0 0 8px 0; color: #ff6b6b; font-size: 0.95rem;">⚔️ Quest Combat Available</h4>`;
+
+            for (const combat of questCombats) {
+                const difficultyColor = combat.difficulty === 'easy' ? '#4caf50' :
+                                       combat.difficulty === 'hard' ? '#ff9800' :
+                                       combat.difficulty === 'boss' || combat.isBoss ? '#f44336' : '#ffd700';
+                const difficultyLabel = combat.isBoss ? 'BOSS' : combat.difficulty.toUpperCase();
+
+                combatHTML += `
+                    <div class="quest-combat-encounter" style="margin-bottom: 8px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="color: #ffd700; font-weight: bold;">${escapeHtml(combat.questName)}</span>
+                            <span style="color: ${difficultyColor}; font-size: 0.75rem; padding: 2px 6px; background: rgba(0,0,0,0.5); border-radius: 4px;">${difficultyLabel}</span>
+                        </div>
+                        <p style="margin: 0 0 6px 0; color: #ccc; font-size: 0.85rem;">${escapeHtml(combat.description)}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #888; font-size: 0.8rem;">Remaining: ${combat.remaining}</span>
+                            <button class="quest-combat-btn"
+                                data-enemy-type="${escapeHtml(combat.enemyType)}"
+                                data-enemy-name="${escapeHtml(combat.enemyName)}"
+                                data-quest-id="${escapeHtml(combat.questId)}"
+                                data-is-boss="${combat.isBoss}"
+                                style="padding: 6px 12px; background: linear-gradient(135deg, #8b0000 0%, #5a0000 100%);
+                                       border: 1px solid #ff6b6b; border-radius: 4px; color: #fff; cursor: pointer;
+                                       font-weight: bold; font-size: 0.85rem;">
+                                ⚔️ Fight!
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            questCombatSection.innerHTML = combatHTML;
+
+            // Attach event listeners to combat buttons
+            questCombatSection.querySelectorAll('.quest-combat-btn').forEach(btn => {
+                btn.onclick = () => {
+                    const enemyType = btn.dataset.enemyType;
+                    const enemyName = btn.dataset.enemyName;
+                    const questId = btn.dataset.questId;
+                    const isBoss = btn.dataset.isBoss === 'true';
+
+                    // Open combat modal with quest context
+                    if (typeof CombatModal !== 'undefined' && CombatModal.open) {
+                        CombatModal.open(enemyType, enemyName, {
+                            isQuestTarget: true,
+                            questId: questId,
+                            isBoss: isBoss,
+                            onVictory: () => {
+                                // Record the kill for quest progress
+                                if (typeof QuestSystem !== 'undefined' && QuestSystem.recordQuestKill) {
+                                    QuestSystem.recordQuestKill(enemyType, game.currentLocation.id);
+                                }
+                                // Refresh the location panel to update remaining count
+                                updateLocationPanel();
+                            }
+                        });
+                    } else {
+                        console.warn('CombatModal not available');
+                        addMessage(`You engage the ${enemyName} in combat!`, 'combat');
+                    }
+                };
+            });
+        } else {
+            // Remove quest combat section if no combats available
+            const existingSection = locationPanel.querySelector('.quest-combat-section');
+            if (existingSection) existingSection.remove();
+        }
+    }
+
     // 🖤💀 RESTORE LOCATION ACTION BUTTONS if they're missing! 💀
     // These are the Visit Market, Travel, People buttons
     // They get wiped when exploration/gathering views take over
@@ -7910,6 +7993,7 @@ function populateMarketItems() {
 
             // Use regional economy sell price if available
             let sellPrice;
+
             if (typeof GameWorld !== 'undefined' && GameWorld.calculateSellPrice) {
                 // Get item's origin region for regional trade bonus
                 const originRegion = GameWorld.getItemOriginRegion(itemId);

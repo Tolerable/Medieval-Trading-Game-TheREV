@@ -1486,10 +1486,21 @@ const GameWorld = {
     },
 
     // Check if currently in doom world
+    // IMPORTANT: Must return explicit true only when actually in doom world
     isInDoomWorld() {
-        return (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
-               (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
-               (typeof game !== 'undefined' && game.inDoomWorld);
+        // Check TravelSystem first (most reliable)
+        if (typeof TravelSystem !== 'undefined' && typeof TravelSystem.isInDoomWorld === 'function') {
+            if (TravelSystem.isInDoomWorld() === true) return true;
+        }
+        // Check DoomWorldSystem
+        if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive === true) {
+            return true;
+        }
+        // Check game state flag
+        if (typeof game !== 'undefined' && game.inDoomWorld === true) {
+            return true;
+        }
+        return false;
     },
 
     // Check if an item is a doom-world item (from the doom dimension)

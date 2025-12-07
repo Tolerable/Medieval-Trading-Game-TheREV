@@ -1654,6 +1654,106 @@ const QuestSystem = {
         });
     },
 
+    // Get active combat quests that can be progressed at the current location
+    // Returns array of { quest, objective, enemyType, remaining } for combat encounters
+    getActiveQuestCombatForLocation(locationId) {
+        const combatEncounters = [];
+
+        for (const [questId, quest] of Object.entries(this.activeQuests)) {
+            // Check if quest is at this location or is location-agnostic
+            if (quest.location && quest.location !== locationId && quest.location !== 'any') continue;
+
+            // Find kill/combat objectives that aren't complete
+            for (const objective of (quest.objectives || [])) {
+                if (objective.completed) continue;
+
+                // Handle 'kill' type objectives
+                if (objective.type === 'kill' && objective.target) {
+                    const remaining = (objective.count || 1) - (objective.current || 0);
+                    if (remaining > 0) {
+                        combatEncounters.push({
+                            questId: questId,
+                            questName: quest.name,
+                            objective: objective,
+                            enemyType: objective.target,
+                            enemyName: this._formatEnemyName(objective.target),
+                            remaining: remaining,
+                            description: objective.description || `Defeat ${remaining} ${this._formatEnemyName(objective.target)}`,
+                            difficulty: quest.difficulty || 'medium',
+                            isBoss: objective.target.includes('captain') || objective.target.includes('boss') || quest.isBossQuest
+                        });
+                    }
+                }
+
+                // Handle 'defeat' type objectives (alias for kill)
+                if (objective.type === 'defeat' && objective.enemy) {
+                    const remaining = (objective.count || 1) - (objective.current || 0);
+                    if (remaining > 0) {
+                        combatEncounters.push({
+                            questId: questId,
+                            questName: quest.name,
+                            objective: objective,
+                            enemyType: objective.enemy,
+                            enemyName: this._formatEnemyName(objective.enemy),
+                            remaining: remaining,
+                            description: objective.description || `Defeat ${remaining} ${this._formatEnemyName(objective.enemy)}`,
+                            difficulty: quest.difficulty || 'medium',
+                            isBoss: objective.enemy.includes('captain') || objective.enemy.includes('boss') || quest.isBossQuest
+                        });
+                    }
+                }
+            }
+        }
+
+        return combatEncounters;
+    },
+
+    // Format enemy type ID to display name
+    _formatEnemyName(enemyType) {
+        if (!enemyType) return 'Enemy';
+        return enemyType
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, c => c.toUpperCase());
+    },
+
+    // Record a kill for quest progress - called after combat victory
+    recordQuestKill(enemyType, locationId = null) {
+        let updated = false;
+        const currentLoc = locationId || (typeof game !== 'undefined' ? game.currentLocation?.id : null);
+
+        for (const [questId, quest] of Object.entries(this.activeQuests)) {
+            // Check location match if quest has specific location
+            if (quest.location && quest.location !== currentLoc && quest.location !== 'any') continue;
+
+            for (const objective of (quest.objectives || [])) {
+                if (objective.completed) continue;
+
+                // Match kill objectives
+                if ((objective.type === 'kill' && objective.target === enemyType) ||
+                    (objective.type === 'defeat' && objective.enemy === enemyType)) {
+                    objective.current = (objective.current || 0) + 1;
+                    const required = objective.count || 1;
+
+                    console.log(`Quest "${quest.name}": Killed ${enemyType} (${objective.current}/${required})`);
+
+                    if (objective.current >= required) {
+                        objective.completed = true;
+                        console.log(`Quest "${quest.name}": Objective complete!`);
+                    }
+
+                    updated = true;
+
+                    // Update tracker UI
+                    if (typeof this.updateQuestTracker === 'function') {
+                        this.updateQuestTracker();
+                    }
+                }
+            }
+        }
+
+        return updated;
+    },
+
     getQuestContextForNPC(npcType, location) {
         const available = this.getQuestsForNPC(npcType, location);
         const active = this.getActiveQuestsForNPC(npcType, location);

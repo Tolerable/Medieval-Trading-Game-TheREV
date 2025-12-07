@@ -495,9 +495,13 @@ const NPCTradeWindow = {
         return sortedEntries.map(([itemId, data]) => {
             const qty = typeof data === 'number' ? data : data.quantity || 1;
             const price = this.getItemPrice(itemId);
-            const displayPrice = side === 'npc' ?
-                Math.ceil(price * (1 - this.currentDiscount / 100)) :
-                Math.floor(price * 0.5); // Sell at half price
+
+            // Gold/currency is always 1:1 - you're trading actual money!
+            const isCurrency = itemId === 'gold' || (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem(itemId)?.category === 'currency');
+            const displayPrice = isCurrency ? 1 :
+                (side === 'npc' ?
+                    Math.ceil(price * (1 - this.currentDiscount / 100)) :
+                    Math.max(1, Math.floor(price * 0.5))); // Sell at half price, minimum 1g
 
             // 🛒 Get item data for cart
             const itemData = typeof ItemDatabase !== 'undefined' ? ItemDatabase.getItem(itemId) : null;
@@ -829,7 +833,10 @@ const NPCTradeWindow = {
         // 📊 Add up the value of your offerings - every item has a price ⚖️
         let playerItemValue = 0;
         for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
-            playerItemValue += Math.floor(this.getItemPrice(itemId) * 0.5) * qty; // Sell at half
+            // Gold/currency is always 1:1
+            const isCurrency = itemId === 'gold' || (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem(itemId)?.category === 'currency');
+            const itemValue = isCurrency ? 1 : Math.max(1, Math.floor(this.getItemPrice(itemId) * 0.5));
+            playerItemValue += itemValue * qty; // Sell at half (min 1g)
         }
 
         let npcItemValue = 0;
@@ -884,7 +891,10 @@ const NPCTradeWindow = {
         // 🧮 Crunch the numbers - is this trade worthy of acceptance? 💎
         let playerTotalValue = this.playerOffer.gold;
         for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
-            playerTotalValue += Math.floor(this.getItemPrice(itemId) * 0.5) * qty;
+            // Gold/currency is always 1:1
+            const isCurrency = itemId === 'gold' || (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem(itemId)?.category === 'currency');
+            const itemValue = isCurrency ? 1 : Math.max(1, Math.floor(this.getItemPrice(itemId) * 0.5));
+            playerTotalValue += itemValue * qty;
         }
 
         let npcTotalValue = this.npcOffer.gold;
