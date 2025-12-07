@@ -34,8 +34,8 @@ const GatehouseSystem = {
             name: 'Northern Territories',
             description: 'Cold northern lands with valuable furs and minerals. A harsh realm for seasoned traders.',
             accessible: false,
-            gatehouse: 'northern_outpost',
-            fee: 10000 // ��� Mid-game barrier - 10k gold to brave the frozen north
+            gatehouse: 'ironforge_city',
+            fee: 10000 // Mid-game barrier - 10k gold to brave the frozen north
         },
         eastern: {
             name: 'Eastern Reaches',
@@ -48,7 +48,7 @@ const GatehouseSystem = {
             name: 'Western Wilds',
             description: 'Untamed western frontier with rare resources. Only the wealthiest merchants dare enter.',
             accessible: false,
-            gatehouse: 'western_outpost',
+            gatehouse: 'stonebridge',
             fee: 50000 // Late-game barrier - 50k gold for the endgame zone
         },
         southern: {
@@ -67,52 +67,38 @@ const GatehouseSystem = {
         }
     },
 
-    // Gatehouse/Outpost definitions - uses existing GameWorld outposts as paywalls
-    // These outposts control access to their respective zones
+    // Gatehouse definitions - cities/locations that control access to zones
+    // Players can travel TO these, but can't pass THROUGH without paying
     GATEHOUSES: {
-        // Northern zone gatehouse (existing outpost) - MID GAME 10k
-        northern_outpost: {
-            id: 'northern_outpost',
-            name: 'Northern Outpost',
+        // Northern zone gate - Ironforge City - MID GAME 10k
+        ironforge_city: {
+            id: 'ironforge_city',
+            name: 'Ironforge City',
             type: 'gatehouse',
             icon: '🏰',
-            description: 'Military outpost controlling access to the Northern Territories. Only seasoned traders with 10,000 gold may pass.',
-            fee: 10000, // ��� Mid-game barrier
+            description: 'The great city of Ironforge controls access to the Northern Territories. Only seasoned traders with 10,000 gold may pass beyond.',
+            fee: 10000,
             unlocksZone: 'northern',
-            guards: 'Northern Guard',
-            services: ['passage', 'supplies', 'weapons'],
+            guards: 'Ironforge Guard',
+            services: ['passage', 'smithing', 'trade'],
             visibleAlways: true,
             useGameWorldLocation: true
         },
-        // Deep northern zone gatehouse (existing outpost)
-        winterwatch_outpost: {
-            id: 'winterwatch_outpost',
-            name: 'Winterwatch',
+        // Western zone gate - Stonebridge - LATE GAME 50k
+        stonebridge: {
+            id: 'stonebridge',
+            name: 'Stonebridge',
             type: 'gatehouse',
-            icon: '🏰',
-            description: 'The northernmost watchtower. Guards the deep northern wilderness where ruins and frozen caves await.',
-            fee: 150,
-            unlocksZone: 'northern_deep',
-            guards: 'Winterwatch Rangers',
-            services: ['passage', 'shelter', 'supplies'],
-            visibleAlways: true,
-            useGameWorldLocation: true
-        },
-        // Western zone gatehouse (existing outpost) - LATE GAME 50k
-        western_outpost: {
-            id: 'western_outpost',
-            name: 'Western Watch',
-            type: 'gatehouse',
-            icon: '🏰',
-            description: 'Frontier outpost marking the edge of civilized lands. Only the wealthiest merchants (50,000 gold) may enter the Western Wilds.',
-            fee: 50000, // Late-game barrier - endgame zone
+            icon: '🌉',
+            description: 'The fortified town of Stonebridge marks the edge of civilized lands. Only the wealthiest merchants (50,000 gold) may enter the Western Wilds.',
+            fee: 50000,
             unlocksZone: 'western',
-            guards: 'Frontier Rangers',
+            guards: 'Stonebridge Militia',
             services: ['passage', 'supplies', 'bounties'],
             visibleAlways: true,
             useGameWorldLocation: true
         },
-        // Eastern zone gatehouse - Jade Harbor controls access to eastern lands
+        // Eastern zone gate - Jade Harbor - EARLY-MID GAME 1k
         jade_harbor: {
             id: 'jade_harbor',
             name: 'Jade Harbor',
@@ -131,13 +117,11 @@ const GatehouseSystem = {
     },
 
     // Map zones to their controlling gatehouses
-    // Progression: starter -> south (FREE) -> east (1k at Jade Harbor) -> north (10k) -> west (50k)
-    // Gates: East (Jade Harbor), North (Northern Outpost), West (Western Outpost)
+    // Progression: starter -> south (FREE) -> east (1k at Jade Harbor) -> north (10k at Ironforge) -> west (50k at Stonebridge)
     ZONE_GATEHOUSES: {
-        'northern': 'northern_outpost',    // 10,000g - mid game
-        'northern_deep': 'winterwatch_outpost',
-        'western': 'western_outpost',      // 50,000g - late game
-        'eastern': 'jade_harbor',          // 1,000g - early-mid game gate
+        'northern': 'ironforge_city',      // 10,000g - mid game (Ironforge City)
+        'western': 'stonebridge',          // 50,000g - late game (Stonebridge)
+        'eastern': 'jade_harbor',          // 1,000g - early-mid game (Jade Harbor)
         'southern': null,                  // FREE! No gatehouse - natural expansion
         'capital': null,                   // Capital ALWAYS accessible
         'starter': null                    // Starter always accessible
@@ -160,12 +144,12 @@ const GatehouseSystem = {
         'hunting_lodge': 'starter',
         'river_cave': 'starter',
 
-        // Northern Outpost is the GATE to northern - it's in starter zone but controls northern access
-        'northern_outpost': 'starter',
+        // Ironforge City is the GATE to northern - it's in starter zone but controls northern access
+        'ironforge_city': 'starter',
 
-        // Northern zone locations (behind the gate)
+        // Northern zone locations (behind the gate at Ironforge)
         'iron_mines': 'northern',
-        'ironforge_city': 'northern',
+        'northern_outpost': 'northern',
         'silverkeep': 'northern',
         'silver_mine': 'northern',
         'frostholm_village': 'northern',
@@ -176,11 +160,11 @@ const GatehouseSystem = {
         'frozen_cave': 'northern',
         'ruins_of_eldoria': 'northern',
 
-        // Western Outpost is the GATE to western - it's in starter zone but controls western access
-        'western_outpost': 'starter',
+        // Stonebridge is the GATE to western - it's in starter zone but controls western access
+        'stonebridge': 'starter',
 
-        // Western zone locations (behind the gate)
-        'stonebridge': 'western',
+        // Western zone locations (behind the gate at Stonebridge)
+        'western_outpost': 'western',
         'darkwood_village': 'western',
         'miners_rest': 'western',
         'ancient_forest': 'western',

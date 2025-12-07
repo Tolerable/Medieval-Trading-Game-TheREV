@@ -4,6 +4,35 @@
 
 ---
 
+## 2025-12-06 - SESSION #41: CORRECT GATE LOCATIONS
+
+**Request:** Gates were at wrong locations! Fix:
+- North gate: Ironforge City (NOT northern_outpost)
+- West gate: Stonebridge (NOT western_outpost)
+- East gate: Jade Harbor (correct)
+
+**Status:** COMPLETE
+
+### Changes Made:
+- Updated ZONES.northern.gatehouse to 'ironforge_city'
+- Updated ZONES.western.gatehouse to 'stonebridge'
+- Replaced northern_outpost/western_outpost in GATEHOUSES with ironforge_city/stonebridge
+- Updated ZONE_GATEHOUSES mapping
+- Fixed LOCATION_ZONES:
+  - ironforge_city: 'starter' (gate, reachable)
+  - stonebridge: 'starter' (gate, reachable)
+  - northern_outpost: 'northern' (behind the gate)
+  - western_outpost: 'western' (behind the gate)
+
+### Correct Gate Setup:
+| Gate | Location | Fee | Zone Unlocked |
+|------|----------|-----|---------------|
+| North | Ironforge City | 10,000g | Northern Territories |
+| West | Stonebridge | 50,000g | Western Wilds |
+| East | Jade Harbor | 1,000g | Eastern Reaches |
+
+---
+
 ## 2025-12-06 - SESSION #40: GATE RESTRICTION FIX (v2)
 
 **Request:** Fix gate travel restrictions properly:
