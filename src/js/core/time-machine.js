@@ -167,6 +167,8 @@ const TimeMachine = {
         // This prevents double-init from resetting time after load
         if (this.isRunning) {
             console.log('⏰ TIME MACHINE: Already running - skipping reset');
+            // Still setup UI controls even if already running - ensures pause button is wired
+            this.setupTimeControls();
             return true;
         }
 

@@ -1878,18 +1878,26 @@ const TravelPanelMap = {
         console.log('🚶 TravelPanelMap.travelToDestination() starting travel to:', this.currentDestination.id);
 
         // Start travel - destination will be cleared when arrival completes
+        let travelStarted = false;
         if (typeof TravelSystem !== 'undefined' && TravelSystem.startTravel) {
-            const result = TravelSystem.startTravel(this.currentDestination.id);
-            console.log('🚶 TravelSystem.startTravel result:', result, 'isTraveling:', TravelSystem.playerPosition?.isTraveling);
+            TravelSystem.startTravel(this.currentDestination.id);
+            // Check if travel actually started (startTravel may reject if already traveling)
+            travelStarted = TravelSystem.playerPosition?.isTraveling === true;
+            console.log('🚶 TravelSystem.startTravel - isTraveling:', travelStarted);
         } else if (typeof travelTo === 'function') {
             travelTo(this.currentDestination.id);
+            travelStarted = true; // Assume legacy function works
         } else {
             console.error('🖤 No travel function available!');
             return;
         }
 
-        // Start the travel UI countdown - don't clear destination yet!
-        this.startTravelCountdown();
+        // Only start countdown if travel actually began
+        if (travelStarted) {
+            this.startTravelCountdown();
+        } else {
+            console.warn('🖤 Travel was not started - not starting countdown');
+        }
     },
 
     //  Travel state tracking
@@ -1912,9 +1920,34 @@ const TravelPanelMap = {
         this.travelState.destination = { ...this.currentDestination };
 
         // Store the starting location for the travel marker
+        // IMPORTANT: Ensure we have a valid startLocation with id for cancel/reroute to work
         if (typeof game !== 'undefined' && game.currentLocation) {
-            this.travelState.startLocation = { ...game.currentLocation };
+            const loc = game.currentLocation;
+            // Ensure we have proper location data with id
+            if (typeof loc === 'string') {
+                // game.currentLocation is just an ID string - look up full data
+                const fullLoc = typeof GameWorld !== 'undefined' && GameWorld.locations?.[loc];
+                if (fullLoc) {
+                    this.travelState.startLocation = { id: loc, name: fullLoc.name, type: fullLoc.type };
+                } else {
+                    this.travelState.startLocation = { id: loc, name: loc, type: 'unknown' };
+                }
+            } else if (loc.id) {
+                // Proper location object
+                this.travelState.startLocation = { ...loc };
+            } else {
+                // Fallback - try TravelSystem's currentLocation
+                const tsLocId = typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.currentLocation;
+                if (tsLocId) {
+                    const tsLoc = typeof GameWorld !== 'undefined' && GameWorld.locations?.[tsLocId];
+                    this.travelState.startLocation = tsLoc
+                        ? { id: tsLocId, name: tsLoc.name, type: tsLoc.type }
+                        : { id: tsLocId, name: tsLocId, type: 'unknown' };
+                }
+            }
         }
+
+        console.log('🚶 startTravelCountdown: startLocation =', this.travelState.startLocation);
 
         // Get travel info from TravelSystem
         //  Null check for playerPosition to prevent crash 

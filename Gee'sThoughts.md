@@ -4,6 +4,32 @@
 
 ---
 
+## 2025-12-06 - SESSION #42: CANCEL TRAVEL + REROUTE + PAUSE FIX
+
+**Request:** Cancel travel and reroute back to starting location and reroute anywhere is not working. Also can't pause while traveling.
+
+**Status:** FIXED
+
+### Issues Found & Fixed:
+
+1. **Pause button not working** (time-machine.js):
+   - The `init()` function had a guard `if (this.isRunning) return true` that skipped `setupTimeControls()`
+   - This meant the pause button onclick handler was never attached after the first game load
+   - Fixed by adding `setupTimeControls()` call before the early return
+
+2. **Cancel/Reroute not working** (travel-panel-map.js):
+   - `travelToDestination()` called `startTravelCountdown()` even if `TravelSystem.startTravel()` failed
+   - Added check: only call `startTravelCountdown()` if `isTraveling === true` after startTravel
+   - `startTravelCountdown()` didn't properly handle `game.currentLocation` being a string vs object
+   - Added robust validation to ensure `startLocation` always has `{id, name, type}`
+
+### Files Modified:
+- `src/js/core/time-machine.js` - line 170-172: Added setupTimeControls() to isRunning guard
+- `src/js/systems/travel/travel-panel-map.js` - lines 1871-1901: Added travelStarted check
+- `src/js/systems/travel/travel-panel-map.js` - lines 1914-1950: Robust startLocation validation
+
+---
+
 ## 2025-12-06 - SESSION #41: CORRECT GATE LOCATIONS
 
 **Request:** Gates were at wrong locations! Fix:
