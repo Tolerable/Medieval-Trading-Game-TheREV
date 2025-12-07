@@ -452,6 +452,10 @@
                             </div>
                         </div>
 
+                        <div id="start-game-warning" class="start-game-warning">
+                            <span class="warning-icon">!</span>
+                            <span id="start-game-warning-text">Spend all attribute points and select 2 perks to start</span>
+                        </div>
                         <div class="form-actions">
                             <button type="button" id="randomize-character-btn" class="secondary" title="Randomize all character options" onclick="event.preventDefault(); console.log('📍 Randomize clicked'); if(typeof window.randomizeCharacter === 'function') { window.randomizeCharacter(); } else { console.error('❌ randomizeCharacter not found'); }">🎲</button>
                             <button type="button" id="start-game-btn" class="primary" title="Begin your journey into darkness" onclick="event.preventDefault(); console.log('📍 Start Game clicked'); if(typeof window.createCharacter === 'function') { window.createCharacter(event); } else { console.error('❌ createCharacter not found'); }">▶ Start</button>

@@ -2273,6 +2273,41 @@ svg.map-paths,
     text-align: center;
 }
 
+/* 🖤 Start Game Warning - visible feedback when requirements not met */
+.start-game-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 100, 100, 0.15);
+    border: 1px solid rgba(255, 100, 100, 0.4);
+    border-radius: 6px;
+    color: #ff6b6b;
+    font-size: 0.85rem;
+}
+
+.start-game-warning.hidden {
+    display: none;
+}
+
+.start-game-warning .warning-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 100, 100, 0.3);
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+#start-game-warning-text {
+    flex: 1;
+}
+
 /* 🦇 Form Actions - COMPACT 💀 */
 .form-actions {
     display: flex;

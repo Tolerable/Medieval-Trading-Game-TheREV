@@ -5891,6 +5891,8 @@ function setupAttributeButtons() {
 // 🎮 button validation - can't start til you've suffered through character creation
 function updateStartGameButton() {
     const startGameBtn = document.getElementById('start-game-btn');
+    const warningDiv = document.getElementById('start-game-warning');
+    const warningText = document.getElementById('start-game-warning-text');
     if (!startGameBtn) return;
 
     // Check if all attribute points are spent
@@ -5902,6 +5904,23 @@ function updateStartGameButton() {
     // Enable button only if all points are spent AND 2 perks selected
     const canStart = allPointsSpent && hasRequiredPerks;
     startGameBtn.disabled = !canStart;
+
+    // Update warning visibility and text
+    if (warningDiv && warningText) {
+        if (canStart) {
+            warningDiv.classList.add('hidden');
+        } else {
+            warningDiv.classList.remove('hidden');
+            // Set warning message based on what's missing
+            if (!allPointsSpent && !hasRequiredPerks) {
+                warningText.textContent = `Spend ${characterCreationState.availableAttributePoints} attribute points and select 2 perks`;
+            } else if (!allPointsSpent) {
+                warningText.textContent = `Spend ${characterCreationState.availableAttributePoints} remaining attribute points`;
+            } else {
+                warningText.textContent = `Select ${2 - (selectedPerks?.length || 0)} more perk${(2 - (selectedPerks?.length || 0)) > 1 ? 's' : ''}`;
+            }
+        }
+    }
 
     // Set appropriate tooltip message
     if (!allPointsSpent && !hasRequiredPerks) {

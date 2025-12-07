@@ -87,8 +87,18 @@ const ModalSystem = {
         // ⚡ Breathe life into the vessel and reveal it to the world
         modalContainer.innerHTML = html;
         modalContainer.style.display = 'flex';
+        modalContainer.classList.add('active');
+
+        // Block all input to elements behind the modal
+        this._blockBackgroundInput(true);
 
         const dialog = modalContainer.querySelector('.modal-dialog');
+
+        // Focus the first button or the dialog itself for accessibility
+        const firstButton = dialog.querySelector('button');
+        if (firstButton) {
+            setTimeout(() => firstButton.focus(), 50);
+        }
 
         // 🗡️ Wire up the choices that shape your fate
         buttons.forEach((btn, idx) => {
@@ -158,16 +168,67 @@ const ModalSystem = {
         const modalContainer = document.getElementById(this.currentModalId);
         if (modalContainer) {
             modalContainer.style.display = 'none';
+            modalContainer.classList.remove('active');
             modalContainer.innerHTML = '';
             this.activeModals.delete(this.currentModalId);
         }
+
+        // Unblock background input
+        this._blockBackgroundInput(false);
+
         if (this._escHandler) {
             document.removeEventListener('keydown', this._escHandler);
             this._escHandler = null;
-            // 🖤 Reset flag so next modal can add ESC listener 💀
+            // Reset flag so next modal can add ESC listener
             this._escHandlerAttached = false;
         }
         this.dragState = null;
+
+        // Restore focus to previously focused element if we saved one
+        if (this._previouslyFocusedElement) {
+            this._previouslyFocusedElement.focus();
+            this._previouslyFocusedElement = null;
+        }
+    },
+
+    /**
+     * Block/unblock input to elements behind modal
+     */
+    _blockBackgroundInput(block) {
+        // Save currently focused element before blocking
+        if (block && document.activeElement) {
+            this._previouslyFocusedElement = document.activeElement;
+        }
+
+        // Find all interactive elements outside the modal
+        const modal = document.getElementById(this.currentModalId);
+        const interactiveSelectors = 'input, textarea, button, select, a[href], [tabindex]:not([tabindex="-1"])';
+
+        document.querySelectorAll(interactiveSelectors).forEach(el => {
+            // Skip elements inside the modal
+            if (modal && modal.contains(el)) return;
+
+            if (block) {
+                // Store original tabindex and disable
+                if (!el.hasAttribute('data-original-tabindex')) {
+                    el.setAttribute('data-original-tabindex', el.getAttribute('tabindex') || '');
+                }
+                el.setAttribute('tabindex', '-1');
+                // Also blur if this element is focused
+                if (document.activeElement === el) {
+                    el.blur();
+                }
+            } else {
+                // Restore original tabindex
+                const originalTabindex = el.getAttribute('data-original-tabindex');
+                if (originalTabindex === '') {
+                    el.removeAttribute('tabindex');
+                } else if (originalTabindex !== null) {
+                    el.setAttribute('tabindex', originalTabindex);
+                }
+                el.removeAttribute('data-original-tabindex');
+            }
+        });
     },
 
     // ═══════════════════════════════════════════════════════════════
