@@ -19,7 +19,7 @@ const SettingsPanel = {
     get defaultSettings() {
         // fallback defaults if GameConfig not loaded yet
         const fallback = {
-            audio: { masterVolume: 0.7, musicVolume: 0.5, sfxVolume: 0.7, voiceVolume: 70, voiceEnabled: true, isMusicMuted: false, isSfxMuted: false, audioEnabled: true },
+            audio: { masterVolume: 0.7, musicVolume: 0.5, sfxVolume: 0.7, voiceVolume: 70 },
             visual: { particlesEnabled: true, screenShakeEnabled: true, animationsEnabled: true, weatherEffectsEnabled: true, quality: 'medium', reducedMotion: false, flashWarnings: true },
             animation: { animationsEnabled: true, animationSpeed: 1.0, reducedMotion: false, quality: 'medium' },
             ui: { animationsEnabled: true, hoverEffectsEnabled: true, transitionsEnabled: true, reducedMotion: false, highContrast: false, fontSize: 'medium', theme: 'default', uiScale: 1.0 },
@@ -166,36 +166,6 @@ const SettingsPanel = {
                                     <label for="voice-volume">NPC Voice Volume</label>
                                     <input type="range" id="voice-volume" min="0" max="100" step="5" value="70">
                                     <span class="setting-value" id="voice-volume-value">70%</span>
-                                </div>
-                                <div class="setting-item">
-                                    <label>
-                                        <input type="checkbox" id="audio-enabled" checked>
-                                        Enable Audio
-                                    </label>
-                                </div>
-                                <div class="setting-item">
-                                    <label>
-                                        <input type="checkbox" id="voice-enabled" checked>
-                                        Enable NPC Voice (TTS)
-                                    </label>
-                                </div>
-                                <div class="setting-item mute-all-container">
-                                    <button type="button" id="mute-all-btn" class="mute-all-btn">
-                                        <span class="mute-icon">🔊</span>
-                                        <span class="mute-text">Mute All</span>
-                                    </button>
-                                </div>
-                                <div class="setting-item">
-                                    <label>
-                                        <input type="checkbox" id="music-mute">
-                                        Mute Music
-                                    </label>
-                                </div>
-                                <div class="setting-item">
-                                    <label>
-                                        <input type="checkbox" id="sfx-mute">
-                                        Mute Sound Effects
-                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -936,36 +906,6 @@ const SettingsPanel = {
                 padding: 5px 10px;
                 border-radius: 4px;
                 cursor: pointer;
-            }
-
-            /* Mute All toggle button */
-            .mute-all-btn {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 8px 16px;
-                background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-                border: 2px solid #4fc3f7;
-                border-radius: 6px;
-                color: #e0e0e0;
-                font-size: 14px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.2s ease;
-            }
-
-            .mute-all-btn:hover {
-                background: linear-gradient(135deg, #5a6578 0%, #3d4758 100%);
-                transform: scale(1.02);
-            }
-
-            .mute-all-btn.muted {
-                background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
-                border-color: #fc8181;
-            }
-
-            .mute-all-btn .mute-icon {
-                font-size: 18px;
             }
 
             .setting-value {
@@ -1852,12 +1792,6 @@ const SettingsPanel = {
         this.setupRangeControl('sfx-volume', 'audio', 'sfxVolume', (value) => `${Math.round(value * 100)}%`);
         this.setupVoiceVolumeControl(); // Voice volume with master volume integration
 
-        this.setupCheckboxControl('audio-enabled', 'audio', 'audioEnabled');
-        this.setupVoiceEnabledControl(); // Voice enabled checkbox
-        this.setupMuteAllControl(); // Special handler for Mute All
-        this.setupCheckboxControl('music-mute', 'audio', 'isMusicMuted');
-        this.setupCheckboxControl('sfx-mute', 'audio', 'isSfxMuted');
-
         // visual settings - checkboxes for your eyeballs
         this.setupCheckboxControl('particles-enabled', 'visual', 'particlesEnabled');
         this.setupCheckboxControl('screen-shake-enabled', 'visual', 'screenShakeEnabled');
@@ -2008,11 +1942,6 @@ const SettingsPanel = {
             if (category === 'audio' && settingKey === 'musicVolume' && typeof MusicSystem !== 'undefined') {
                 MusicSystem.setVolume(value);
             }
-
-            // Update mute button state when any volume slider changes (derived state)
-            if (category === 'audio' && (settingKey === 'masterVolume' || settingKey === 'musicVolume' || settingKey === 'sfxVolume')) {
-                this.updateMuteAllButton();
-            }
         });
     },
 
@@ -2032,116 +1961,6 @@ const SettingsPanel = {
             // apply setting immediately for certain controls - no patience here
             this.applyImmediateSetting(category, settingKey, value);
         });
-    },
-
-    // setup mute all control - toggle button with derived state
-    setupMuteAllControl() {
-        const muteAllBtn = this.panelElement.querySelector('#mute-all-btn');
-        if (!muteAllBtn) return;
-
-        // Store previous values for unmuting
-        this.previousAudioSettings = {
-            masterVolume: 0.7,
-            musicVolume: 0.5,
-            sfxVolume: 0.7
-        };
-
-        // Update button appearance based on current state (derived, not stored)
-        this.updateMuteAllButton();
-
-        muteAllBtn.addEventListener('click', () => {
-            const isMuted = this.isEffectivelyMuted();
-
-            const masterVolumeSlider = this.panelElement.querySelector('#master-volume');
-            const musicVolumeSlider = this.panelElement.querySelector('#music-volume');
-            const sfxVolumeSlider = this.panelElement.querySelector('#sfx-volume');
-
-            // Helper to update slider and its value display
-            const updateSlider = (slider, value) => {
-                if (!slider) return;
-                slider.value = value;
-                const settingItem = slider.closest('.setting-item');
-                if (settingItem) {
-                    const valueSpan = settingItem.querySelector('.setting-value');
-                    if (valueSpan) {
-                        valueSpan.textContent = `${Math.round(value * 100)}%`;
-                    }
-                }
-            };
-
-            if (!isMuted) {
-                // Currently has sound - MUTE: save current values before zeroing
-                this.previousAudioSettings = {
-                    masterVolume: parseFloat(masterVolumeSlider?.value) || 0.7,
-                    musicVolume: parseFloat(musicVolumeSlider?.value) || 0.5,
-                    sfxVolume: parseFloat(sfxVolumeSlider?.value) || 0.7
-                };
-
-                console.log('🔇 Saving previous settings:', this.previousAudioSettings);
-
-                // Set all volumes to 0
-                this.currentSettings.audio.masterVolume = 0;
-                this.currentSettings.audio.musicVolume = 0;
-                this.currentSettings.audio.sfxVolume = 0;
-
-                updateSlider(masterVolumeSlider, 0);
-                updateSlider(musicVolumeSlider, 0);
-                updateSlider(sfxVolumeSlider, 0);
-
-                // Apply to audio systems
-                this.applyAllVolumes(0, 0, 0);
-                console.log('🔇 Mute All: MUTED');
-
-            } else {
-                // Currently muted - UNMUTE: restore previous or default to 50%
-                const restoreMaster = this.previousAudioSettings.masterVolume || 0.5;
-                const restoreMusic = this.previousAudioSettings.musicVolume || 0.5;
-                const restoreSfx = this.previousAudioSettings.sfxVolume || 0.5;
-
-                this.currentSettings.audio.masterVolume = restoreMaster;
-                this.currentSettings.audio.musicVolume = restoreMusic;
-                this.currentSettings.audio.sfxVolume = restoreSfx;
-
-                updateSlider(masterVolumeSlider, restoreMaster);
-                updateSlider(musicVolumeSlider, restoreMusic);
-                updateSlider(sfxVolumeSlider, restoreSfx);
-
-                // Apply to audio systems
-                this.applyAllVolumes(restoreMaster, restoreMusic, restoreSfx);
-                console.log('🔊 Mute All: UNMUTED');
-            }
-
-            // Update button appearance
-            this.updateMuteAllButton();
-        });
-    },
-
-    // Check if audio is effectively muted (derived from actual volume values)
-    isEffectivelyMuted() {
-        const master = this.currentSettings.audio.masterVolume || 0;
-        const music = this.currentSettings.audio.musicVolume || 0;
-        const sfx = this.currentSettings.audio.sfxVolume || 0;
-        return master === 0 && music === 0 && sfx === 0;
-    },
-
-    // Update mute all button appearance based on derived state
-    updateMuteAllButton() {
-        const muteAllBtn = this.panelElement?.querySelector('#mute-all-btn');
-        if (!muteAllBtn) return;
-
-        const isMuted = this.isEffectivelyMuted();
-        const icon = muteAllBtn.querySelector('.mute-icon');
-        const text = muteAllBtn.querySelector('.mute-text');
-
-        if (isMuted) {
-            muteAllBtn.classList.add('muted');
-            if (icon) icon.textContent = '🔇';
-            if (text) text.textContent = 'Unmute All';
-        } else {
-            muteAllBtn.classList.remove('muted');
-            if (icon) icon.textContent = '🔊';
-            if (text) text.textContent = 'Mute All';
-        }
     },
 
     // Apply volumes to all audio systems
@@ -2249,30 +2068,6 @@ const SettingsPanel = {
         console.log(`🎨 UI scale set to ${Math.round(scale * 100)}%`);
     },
 
-    // Setup voice enabled checkbox
-    setupVoiceEnabledControl() {
-        const checkbox = this.panelElement.querySelector('#voice-enabled');
-        if (!checkbox) return;
-
-        // Load initial value from NPCVoiceChatSystem
-        if (typeof NPCVoiceChatSystem !== 'undefined') {
-            checkbox.checked = NPCVoiceChatSystem.settings.voiceEnabled !== false;
-        }
-
-        // Handle changes
-        checkbox.addEventListener('change', (e) => {
-            const enabled = e.target.checked;
-
-            // Update NPCVoiceChatSystem
-            if (typeof NPCVoiceChatSystem !== 'undefined') {
-                NPCVoiceChatSystem.updateSetting('voiceEnabled', enabled);
-            }
-
-            // Store in currentSettings
-            this.currentSettings.audio.voiceEnabled = enabled;
-        });
-    },
-
     // setup select control - dropdowns for the indecisive
     setupSelectControl(elementId, category, settingKey) {
         const element = this.panelElement.querySelector(`#${elementId}`);
@@ -2295,29 +2090,9 @@ const SettingsPanel = {
     applyImmediateSetting(category, settingKey, value) {
         switch (category) {
             case 'audio':
-                if (typeof AudioSystem !== 'undefined') {
-                    switch (settingKey) {
-                        case 'isMusicMuted':
-                            AudioSystem.toggleMusicMute();
-                            // also toggle musicsystem
-                            if (typeof MusicSystem !== 'undefined') {
-                                MusicSystem.setEnabled(!value);
-                            }
-                            break;
-                        case 'isSfxMuted':
-                            AudioSystem.toggleSfxMute();
-                            break;
-                    }
-                }
-                // handle music mute even if audiosystem not available
-                if (settingKey === 'isMusicMuted' && typeof MusicSystem !== 'undefined') {
-                    MusicSystem.setEnabled(!value);
-                }
-                if (settingKey === 'audioEnabled' && typeof MusicSystem !== 'undefined') {
-                    MusicSystem.setEnabled(value);
-                }
+                // Audio settings now controlled via sliders only
                 break;
-                
+
             case 'visual':
                 if (typeof VisualEffectsSystem !== 'undefined') {
                     switch (settingKey) {
@@ -2445,23 +2220,6 @@ const SettingsPanel = {
                 if (tempValue) tempValue.textContent = e.target.value;
                 if (typeof NPCVoiceChatSystem !== 'undefined') {
                     NPCVoiceChatSystem.updateSetting('temperature', parseFloat(e.target.value));
-                }
-            });
-        }
-
-        // voice enabled checkbox
-        const voiceEnabled = this.panelElement.querySelector('#voice-enabled');
-        if (voiceEnabled) {
-            if (typeof NPCVoiceChatSystem !== 'undefined') {
-                voiceEnabled.checked = NPCVoiceChatSystem.settings.voiceEnabled !== false;
-            }
-            voiceEnabled.addEventListener('change', (e) => {
-                if (typeof NPCVoiceChatSystem !== 'undefined') {
-                    NPCVoiceChatSystem.updateSetting('voiceEnabled', e.target.checked);
-                    // When toggling voice OFF, immediately stop any playing voice
-                    if (!e.target.checked) {
-                        NPCVoiceChatSystem.stopVoicePlayback();
-                    }
                 }
             });
         }
@@ -4308,10 +4066,7 @@ const SettingsPanel = {
             'audio': {
                 'masterVolume': 'master-volume',
                 'musicVolume': 'music-volume',
-                'sfxVolume': 'sfx-volume',
-                'audioEnabled': 'audio-enabled',
-                'isMusicMuted': 'music-mute',
-                'isSfxMuted': 'sfx-mute'
+                'sfxVolume': 'sfx-volume'
             },
             'visual': {
                 'particlesEnabled': 'particles-enabled',
