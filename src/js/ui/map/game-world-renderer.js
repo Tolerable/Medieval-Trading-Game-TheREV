@@ -1480,7 +1480,9 @@ const GameWorldRenderer = {
         label.className = 'map-location-label' + (isDiscovered ? ' discovered' : '');
         // Show "Unknown" or "???" for discovered but unexplored locations
         // 🖤 Use getLocationName() to get doom names when in doom world 💀
-        label.textContent = isDiscovered ? '???' : this.getLocationName(location.id);
+        // EXCEPTION: Gatehouses always show their real name so players know which gate is which
+        const isGate = this.isGatehouse(location.id);
+        label.textContent = (isDiscovered && !isGate) ? '???' : this.getLocationName(location.id);
         const labelColor = isDiscovered ? '#aabbcc' : '#fff'; // 🖤 Lighter grey-blue for unexplored - actually visible!
 
         // 🖤 Check if this is an area label (like GREENDALE) - make it BIG and BOLD 💀

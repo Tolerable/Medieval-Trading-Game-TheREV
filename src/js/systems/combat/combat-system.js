@@ -497,7 +497,12 @@ const CombatSystem = {
         const combat = this.activeCombat;
         combat.state = 'victory';
 
+        // Set enemy health to 0 for display
+        combat.enemy.currentHealth = 0;
+
         this.addCombatLog(`🏆 Victory! You defeated the ${combat.enemy.name}!`);
+        this.addCombatLog(`❤️ Enemy health: 0 / ${combat.enemy.health}`);
+        this.addCombatLog(`❤️ Your health: ${combat.player.health} / ${combat.player.maxHealth}`);
 
         // Calculate rewards
         const goldReward = Math.floor(
@@ -574,23 +579,19 @@ const CombatSystem = {
         const combat = this.activeCombat;
         combat.state = 'defeat';
 
+        // Keep health at 0 - player actually died in combat
+        game.player.stats.health = 0;
+        combat.player.health = 0;
+
         this.addCombatLog(`💀 Defeat! The ${combat.enemy.name} has bested you!`);
-
-        // Lose some gold
-        const goldLost = Math.min(game.player.gold, Math.floor(game.player.gold * 0.1));
-        if (goldLost > 0) {
-            game.player.gold -= goldLost;
-            this.addCombatLog(`💸 You lost ${goldLost} gold...`);
-        }
-
-        // Player doesn't die - they're left at 1 HP
-        game.player.stats.health = 1;
+        this.addCombatLog(`❤️ Your health: 0 / ${combat.player.maxHealth}`);
 
         // Fire event
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('combat-defeat', { enemy: combat.enemy.id });
         }
 
+        // Update UI to show final 0 health state
         this.updateCombatUI();
         this.showDefeatUI();
     },
@@ -603,10 +604,13 @@ const CombatSystem = {
             this.activeCombat.state = result;
         }
 
-        // Update player stats display
+        // Update player stats display immediately
         if (typeof updatePlayerStats === 'function') {
             updatePlayerStats();
         }
+
+        // Check if player died - trigger game over
+        const playerDied = result === 'defeat' && game.player.stats.health <= 0;
 
         // Close combat UI after delay
         setTimeout(() => {
@@ -616,6 +620,20 @@ const CombatSystem = {
             // Resume game if it was paused
             if (typeof TimeSystem !== 'undefined' && TimeSystem.isPaused) {
                 TimeSystem.resume();
+            }
+
+            // If player died in combat, trigger death sequence
+            if (playerDied) {
+                // Set death cause for combat
+                if (typeof DeathCauseSystem !== 'undefined') {
+                    DeathCauseSystem.recordCause('combat', 'slain in combat');
+                }
+                // Trigger game over
+                if (typeof handlePlayerDeath === 'function') {
+                    handlePlayerDeath('slain in combat');
+                } else if (typeof GameOverSystem !== 'undefined') {
+                    GameOverSystem.triggerGameOver('slain in combat');
+                }
             }
         }, 2000);
     },

@@ -677,9 +677,11 @@ const TravelPanelMap = {
         this.mapElement.appendChild(el);
 
         // Add location name label
+        // EXCEPTION: Gatehouses always show their real name so players know which gate is which
         const label = document.createElement('div');
         label.className = 'mini-map-location-label' + (isDiscovered ? ' discovered' : '');
-        label.textContent = isDiscovered ? '???' : location.name;
+        const isGate = this.isGatehouse(location.id);
+        label.textContent = (isDiscovered && !isGate) ? '???' : location.name;
         const labelColor = isDiscovered ? '#888' : '#fff';
         label.style.cssText = `
             position: absolute;
