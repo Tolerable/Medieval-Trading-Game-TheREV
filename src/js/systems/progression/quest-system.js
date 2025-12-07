@@ -2645,9 +2645,9 @@ const QuestSystem = {
         style.id = 'quest-tracker-styles';
         //  QUEST CHAIN TRACKER STYLES 
         style.textContent = `
-            /* 🖤 Tracker content area */
+            /* 🖤 Tracker content area - dynamic sizing up to 80vh */
             .tracker-content {
-                max-height: 500px;
+                max-height: calc(80vh - 50px); /* 80% viewport minus header space */
                 overflow-y: auto;
                 overflow-x: hidden;
                 box-sizing: border-box;
