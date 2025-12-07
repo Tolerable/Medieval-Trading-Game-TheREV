@@ -10896,10 +10896,12 @@ game.hideOverlay = function(overlayId) {
     }
 };
 
-// Hide all overlays
+// Hide all overlays (except character creation - that's sacred)
 game.hideAllOverlays = function() {
     const overlays = document.querySelectorAll('#overlay-container > .overlay');
     overlays.forEach(overlay => {
+        // NEVER hide character creation - the void awaits those who do
+        if (overlay.id === 'character-creation-overlay') return;
         overlay.classList.add('hidden');
         overlay.classList.remove('active');
     });

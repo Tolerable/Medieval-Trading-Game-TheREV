@@ -476,10 +476,23 @@ const UIPolishSystem = {
     },
     
     handleEscapeKey(event) {
-        // banish the visible windows back into the dark
+        // Check if ModalSystem has an active modal - let it handle ESC
+        if (typeof ModalSystem !== 'undefined' && ModalSystem.activeModals && ModalSystem.activeModals.size > 0) {
+            return; // Modal's own ESC handler will deal with this
+        }
+
+        // NEVER close character creation - that sends you to the void
+        const charCreation = document.getElementById('character-creation-overlay');
+        if (charCreation && (charCreation.classList.contains('active') || charCreation.style.display === 'flex')) {
+            return; // Don't touch it, let the player finish creating their character
+        }
+
+        // banish the visible windows back into the dark (except protected ones)
         const openPanels = document.querySelectorAll('.panel[style*="display: block"], .modal[style*="display: block"]');
 
         openPanels.forEach(panel => {
+            // Skip character creation even if found via selector
+            if (panel.id === 'character-creation-overlay') return;
             panel.style.display = 'none';
         });
     },

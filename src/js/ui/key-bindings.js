@@ -292,8 +292,19 @@ const KeyBindings = {
         }
     },
 
-    // handle escape key - the great closer
+    // handle escape key - the great closer (but not TOO great)
     handleEscape() {
+        // Check if ModalSystem has an active modal - let it handle ESC first
+        if (typeof ModalSystem !== 'undefined' && ModalSystem.activeModals && ModalSystem.activeModals.size > 0) {
+            return; // Modal's own ESC handler will deal with this
+        }
+
+        // NEVER close character creation - that sends you to the void of despair
+        const charCreation = document.getElementById('character-creation-overlay');
+        if (charCreation && (charCreation.classList.contains('active') || charCreation.style.display === 'flex')) {
+            return; // Let them finish making their doomed character in peace
+        }
+
         if (document.fullscreenElement) {
             document.exitFullscreen();
             if (typeof addMessage === 'function') addMessage('🖥️ Exited fullscreen');
@@ -301,7 +312,7 @@ const KeyBindings = {
         }
 
         if (typeof game !== 'undefined' && game.hideAllOverlays) {
-            const overlays = document.querySelectorAll('.overlay.active');
+            const overlays = document.querySelectorAll('.overlay.active:not(#character-creation-overlay)');
             if (overlays.length > 0) {
                 game.hideAllOverlays();
                 if (typeof addMessage === 'function') addMessage('✖️ Closed overlay');
