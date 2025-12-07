@@ -128,13 +128,15 @@ MTG v0.90.01/
 │       │
 │       ├── ui/                   # User interface
 │       │   ├── components/       # Tooltips, modals, panels, draggable
+│       │   │   └── combat-modal.js # Turn-based combat UI
 │       │   ├── panels/           # Settings, inventory, people, equipment
 │       │   └── map/              # World map rendering
 │       │
 │       ├── npc/                  # NPC systems
 │       │   ├── npc-chat-ui.js    # Chat interface
 │       │   ├── npc-voice.js      # TTS integration
-│       │   └── npc-trade.js      # Trading with NPCs
+│       │   ├── npc-trade.js      # Trading with NPCs
+│       │   └── npc-combat-stats.js # NPC stat generation for combat
 │       │
 │       ├── property/             # Property ownership
 │       │   ├── property-types.js # Building types
@@ -885,6 +887,199 @@ const GreedyWon = {
     }
 };
 ```
+
+---
+
+## ⚔️ COMBAT SYSTEM
+
+*"Violence is the last refuge of the incompetent... but sometimes it's also the first."*
+
+The combat system provides stat-based turn combat through a dedicated modal. NPCs have stats based on their type, location, and game difficulty.
+
+### Combat Modal (combat-modal.js)
+
+```javascript
+const CombatModal = {
+    currentCombat: null,
+    isOpen: false,
+
+    // Open combat with an NPC
+    open(npcData) {
+        // npcData: { type, name, location, isQuestTarget, questId }
+        // Generates NPC stats via NPCCombatStats
+        // Shows modal with player vs NPC stats
+    },
+
+    // Combat actions
+    doAction(action) {
+        // 'attack' - Player attacks NPC
+        // 'defend' - Player defends (+50% defense this turn)
+        // 'flee' - Attempt escape (speed-based chance)
+    },
+
+    // Turn flow
+    _playerAttack(),  // Calculate damage, apply to NPC
+    _npcTurn(),       // NPC attacks back
+    _victory(),       // Handle win - gold, XP, quest event
+    _defeat(),        // Handle loss - damage, flee
+
+    // Quest integration
+    _fireQuestEvent(npc) {
+        // Fires 'enemy-defeated' CustomEvent for quest tracking
+        document.dispatchEvent(new CustomEvent('enemy-defeated', {
+            detail: {
+                enemyType: npc.type,
+                enemyName: npc.name,
+                count: 1,
+                isNPC: true,
+                questId: this.currentCombat.questId
+            }
+        }));
+    }
+};
+```
+
+### NPC Combat Stats (npc-combat-stats.js)
+
+```javascript
+const NPCCombatStats = {
+    // 30+ NPC types with base stats
+    BASE_STATS: {
+        // Tier 1 - Civilians (easy kills, low rewards)
+        merchant: { health: 15, attack: 2, defense: 0, speed: 3, tier: 1, goldDrop: [5, 20], xp: 3 },
+        traveler: { health: 12, attack: 1, defense: 0, speed: 4, tier: 1, goldDrop: [2, 10], xp: 2 },
+        beggar: { health: 8, attack: 1, defense: 0, speed: 2, tier: 1, goldDrop: [0, 3], xp: 1 },
+        drunk: { health: 10, attack: 3, defense: 0, speed: 1, tier: 1, goldDrop: [1, 8], xp: 2 },
+
+        // Tier 2 - Workers/Guards (moderate challenge)
+        guard: { health: 40, attack: 12, defense: 6, speed: 6, tier: 2, goldDrop: [10, 40], xp: 20 },
+        blacksmith: { health: 30, attack: 8, defense: 4, speed: 4, tier: 2, goldDrop: [15, 50], xp: 12 },
+
+        // Tier 3 - Fighters/Outlaws (dangerous)
+        bandit: { health: 50, attack: 16, defense: 5, speed: 8, tier: 3, goldDrop: [20, 60], xp: 30 },
+        assassin: { health: 35, attack: 22, defense: 3, speed: 12, tier: 3, goldDrop: [40, 100], xp: 45 },
+
+        // Tier 4 - Bosses (deadly)
+        malachar: { health: 300, attack: 45, defense: 20, speed: 4, tier: 4, goldDrop: [500, 1000], xp: 250 },
+        shadow_guardian: { health: 200, attack: 35, defense: 25, speed: 6, tier: 4, goldDrop: [300, 600], xp: 180 },
+        rat_king: { health: 150, attack: 25, defense: 10, speed: 10, tier: 4, goldDrop: [200, 400], xp: 120 },
+        greedy_won: { health: 500, attack: 60, defense: 30, speed: 3, tier: 4, goldDrop: [1000, 2000], xp: 500 }
+    },
+
+    // Location multipliers
+    LOCATION_MULTIPLIERS: {
+        village: 0.8,      // Weaker NPCs
+        town: 1.0,         // Standard
+        city: 1.2,         // Tougher
+        capital: 1.5,      // Elite
+        dungeon: 1.8,      // Dangerous
+        doom_world: 2.0    // Maximum danger
+    },
+
+    // Difficulty multipliers
+    DIFFICULTY_MULTIPLIERS: {
+        easy: 0.7,
+        normal: 1.0,
+        hard: 1.3,
+        deadly: 1.6
+    },
+
+    // Path danger levels for encounter variety
+    PATH_DANGER: {
+        safe: { encounterChance: 0.05, types: ['traveler', 'merchant', 'pilgrim', 'courier'] },
+        normal: { encounterChance: 0.10, types: ['traveler', 'merchant', 'drunk', 'beggar', 'thief'] },
+        dangerous: { encounterChance: 0.20, types: ['bandit', 'thief', 'robber', 'wolf', 'smuggler'] },
+        deadly: { encounterChance: 0.30, types: ['bandit', 'assassin', 'orc', 'skeleton', 'ghost'] }
+    },
+
+    // Daily encounter limit
+    MAX_ENCOUNTERS_PER_DAY: 2,
+    encountersToday: 0,
+    lastEncounterDay: 0,
+
+    // Generate stats for an NPC
+    generateStats(npcType, location, difficulty) {
+        const base = this.BASE_STATS[npcType] || this.BASE_STATS.traveler;
+        const locMult = this.LOCATION_MULTIPLIERS[location] || 1.0;
+        const diffMult = this.DIFFICULTY_MULTIPLIERS[difficulty] || 1.0;
+
+        return {
+            health: Math.round(base.health * locMult * diffMult),
+            maxHealth: Math.round(base.health * locMult * diffMult),
+            attack: Math.round(base.attack * locMult * diffMult),
+            defense: Math.round(base.defense * locMult * diffMult),
+            speed: base.speed,
+            tier: base.tier,
+            goldDrop: [
+                Math.round(base.goldDrop[0] * diffMult),
+                Math.round(base.goldDrop[1] * diffMult)
+            ],
+            xp: Math.round(base.xp * diffMult)
+        };
+    },
+
+    // Get random encounter for path danger level
+    getRandomEncounter(dangerLevel) {
+        if (this.encountersToday >= this.MAX_ENCOUNTERS_PER_DAY) return null;
+        const danger = this.PATH_DANGER[dangerLevel] || this.PATH_DANGER.normal;
+        if (Math.random() > danger.encounterChance) return null;
+        const type = danger.types[Math.floor(Math.random() * danger.types.length)];
+        this.encountersToday++;
+        return type;
+    }
+};
+```
+
+### Quest-Aware Attack Protection (people-panel.js)
+
+```javascript
+// Check if an NPC can be attacked
+canAttackNPC(npcType, location) {
+    // Protected NPCs - authority figures and mystical beings
+    const protectedNPCs = ['noble', 'king', 'queen', 'boatman', 'ferryman'];
+    if (protectedNPCs.includes(npcType)) {
+        return { allowed: false, reason: 'protected' };
+    }
+
+    // Guards protected unless quest target
+    if (npcType === 'guard') {
+        const guardQuestTarget = this._isQuestDefeatTarget(npcType, location);
+        if (guardQuestTarget) {
+            return { allowed: true, reason: 'quest_target', isQuestTarget: true, questId: guardQuestTarget.questId };
+        }
+        return { allowed: false, reason: 'protected' };
+    }
+
+    // Check quest involvement
+    if (typeof QuestSystem !== 'undefined') {
+        for (const questId in QuestSystem.activeQuests || {}) {
+            const quest = QuestSystem.activeQuests[questId];
+            // Check if NPC is quest giver
+            if (this._npcMatchesType(npcType, quest.giver)) {
+                return { allowed: false, reason: 'quest_npc', questId };
+            }
+            // Check objectives for talk/deliver targets
+            for (const obj of quest.objectives || []) {
+                if ((obj.type === 'talk' || obj.type === 'deliver') &&
+                    this._npcMatchesType(npcType, obj.target)) {
+                    return { allowed: false, reason: 'quest_target_talk', questId };
+                }
+            }
+        }
+    }
+
+    return { allowed: true, reason: 'normal' };
+}
+```
+
+### Combat Integration Points
+
+| System | Integration |
+|--------|-------------|
+| **People Panel** | Attack action calls `CombatModal.open()` |
+| **Quest System** | Listens for `enemy-defeated` event |
+| **Travel Encounters** | Uses `NPCCombatStats.getRandomEncounter()` |
+| **Dungeon Events** | Boss fights use tier 4 stats |
 
 ---
 

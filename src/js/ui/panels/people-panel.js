@@ -1331,15 +1331,34 @@ const PeoplePanel = {
         });
 
         // ⚔️ Attack - violence is always an option (but has consequences)
-        // 🖤💀 Boatman is mystical - cannot be attacked. Guards/nobles protected unless encounter. 💀
-        const unattackableNPCs = ['guard', 'noble', 'king', 'queen', 'boatman', 'ferryman'];
-        if (!unattackableNPCs.includes(npcType) || isEncounter) {
+        // Protected NPCs: mystical (boatman), authority (guards/nobles) unless encounter
+        // Quest NPCs: NEVER attackable unless quest requires defeating them
+        const unattackableNPCs = ['noble', 'king', 'queen', 'boatman', 'ferryman'];
+        const canAttackResult = this.canAttackNPC(npcType, location);
+
+        if (canAttackResult.allowed) {
+            // Attack allowed - show button with quest context if applicable
+            const attackLabel = canAttackResult.isQuestTarget
+                ? '⚔️ Attack (Quest)'
+                : '⚔️ Attack';
             actions.push({
-                label: '⚔️ Attack',
-                action: () => this.attackNPC(),
-                priority: 80
+                label: attackLabel,
+                action: () => this.attackNPC(canAttackResult),
+                priority: 80,
+                questRelated: canAttackResult.isQuestTarget
             });
+        } else if (canAttackResult.reason === 'protected') {
+            // Show disabled attack for protected NPCs (guards in normal context)
+            if (isEncounter) {
+                // Encounters override protection
+                actions.push({
+                    label: '⚔️ Attack',
+                    action: () => this.attackNPC({ allowed: true, reason: 'encounter' }),
+                    priority: 80
+                });
+            }
         }
+        // Quest NPCs with reason 'quest_npc' get NO attack option at all
 
         // 🗡️ Rob/Pickpocket - for the morally flexible
         if (['merchant', 'traveler', 'noble', 'pilgrim', 'beggar', 'drunk'].includes(npcType)) {
@@ -2495,29 +2514,142 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         }
     },
 
+    // ═══════════════════════════════════════════════════════════════
+    // ⚔️ COMBAT SYSTEM - Quest-aware attack logic
+    // ═══════════════════════════════════════════════════════════════
+
+    // Check if an NPC can be attacked - considers quest involvement
+    canAttackNPC(npcType, location) {
+        // Protected NPCs - authority figures and mystical beings
+        const protectedNPCs = ['noble', 'king', 'queen', 'boatman', 'ferryman'];
+        if (protectedNPCs.includes(npcType)) {
+            return { allowed: false, reason: 'protected' };
+        }
+
+        // Guards are protected unless in special circumstances
+        if (npcType === 'guard') {
+            // Check if there's a quest requiring guard defeat
+            const guardQuestTarget = this._isQuestDefeatTarget(npcType, location);
+            if (guardQuestTarget) {
+                return { allowed: true, reason: 'quest_target', isQuestTarget: true, questId: guardQuestTarget.questId };
+            }
+            return { allowed: false, reason: 'protected' };
+        }
+
+        // Check if NPC is involved in active quests (as giver or objective)
+        if (typeof QuestSystem !== 'undefined') {
+            // Check if this NPC is a quest giver for active quests
+            for (const questId in QuestSystem.activeQuests || {}) {
+                const quest = QuestSystem.activeQuests[questId];
+
+                // Don't attack quest givers
+                if (this._npcMatchesType(npcType, quest.giver)) {
+                    return { allowed: false, reason: 'quest_npc', questId };
+                }
+
+                // Don't attack NPCs needed for talk/deliver objectives
+                const hasNonCombatObjective = quest.objectives?.some(obj =>
+                    !obj.completed &&
+                    (obj.type === 'talk' || obj.type === 'deliver') &&
+                    this._npcMatchesType(npcType, obj.npc)
+                );
+                if (hasNonCombatObjective) {
+                    return { allowed: false, reason: 'quest_npc', questId };
+                }
+
+                // Don't attack turn-in NPCs
+                if (this._npcMatchesType(npcType, quest.turnInNpc)) {
+                    return { allowed: false, reason: 'quest_npc', questId };
+                }
+            }
+
+            // Check if NPC is a defeat target for any active quest
+            const defeatTarget = this._isQuestDefeatTarget(npcType, location);
+            if (defeatTarget) {
+                return { allowed: true, reason: 'quest_target', isQuestTarget: true, questId: defeatTarget.questId };
+            }
+
+            // Check if NPC offers available quests (not yet accepted)
+            const availableQuests = QuestSystem.getQuestsForNPC?.(npcType, location) || [];
+            if (availableQuests.length > 0) {
+                return { allowed: false, reason: 'quest_npc' };
+            }
+        }
+
+        // No quest involvement - can attack (with consequences)
+        return { allowed: true, reason: 'normal' };
+    },
+
+    // Check if NPC is a defeat/kill target for any active quest
+    _isQuestDefeatTarget(npcType, location) {
+        if (typeof QuestSystem === 'undefined') return null;
+
+        for (const questId in QuestSystem.activeQuests || {}) {
+            const quest = QuestSystem.activeQuests[questId];
+            const defeatObj = quest.objectives?.find(obj =>
+                !obj.completed &&
+                (obj.type === 'defeat' || obj.type === 'kill') &&
+                this._npcMatchesType(npcType, obj.enemy || obj.target)
+            );
+            if (defeatObj) {
+                return { questId, objective: defeatObj };
+            }
+        }
+        return null;
+    },
+
+    // Helper to match NPC type (handles arrays)
+    _npcMatchesType(npcType, target) {
+        if (!target) return false;
+        if (Array.isArray(target)) {
+            return target.includes(npcType);
+        }
+        return npcType === target;
+    },
+
     // ⚔️ Attack NPC - violence has consequences
-    // 🖤💀 FIXED: Use modal instead of window.confirm() 💀
-    attackNPC() {
+    // Now uses Combat Modal system for proper stat-based combat
+    attackNPC(attackContext = {}) {
         if (!this.currentNPC) return;
 
-        // 🖤💀 Show confirmation modal 💀
+        const npcType = this.currentNPC.type || this.currentNPC.id;
+        const npcName = this.currentNPC.name;
+        const self = this;
+
+        // Show confirmation before starting combat
         if (typeof ModalSystem !== 'undefined') {
             ModalSystem.show({
-                title: '⚔️ Attack?',
+                title: '⚔️ Initiate Combat?',
                 content: `
                     <div style="text-align:center;padding:15px;">
-                        <p style="color:#ff6b6b;font-size:18px;margin-bottom:10px;">Attack ${this.escapeHtml(this.currentNPC.name)}?</p>
-                        <p style="color:#888;">This will have serious consequences!</p>
-                        <p style="color:#666;font-size:12px;margin-top:10px;">• Reputation loss<br>• Possible injury<br>• Guards may be alerted</p>
+                        <p style="color:#ff6b6b;font-size:18px;margin-bottom:10px;">Attack ${this.escapeHtml(npcName)}?</p>
+                        <p style="color:#888;">This will start turn-based combat!</p>
+                        ${attackContext.isQuestTarget ? '<p style="color:#4caf50;">Quest Target</p>' : ''}
+                        <p style="color:#666;font-size:12px;margin-top:10px;">
+                            ${attackContext.isQuestTarget ? '' : '• Reputation loss<br>'}
+                            • Risk of injury or death<br>
+                            • Rewards on victory
+                        </p>
                     </div>
                 `,
                 buttons: [
                     {
-                        text: '⚔️ Attack!',
+                        text: '⚔️ Fight!',
                         className: 'primary',
                         onClick: () => {
                             ModalSystem.hide();
-                            this._executeAttack();
+                            self.close(); // Close people panel
+
+                            // Use new Combat Modal system
+                            if (typeof CombatModal !== 'undefined') {
+                                CombatModal.open(npcType, npcName, {
+                                    isQuestTarget: attackContext.isQuestTarget,
+                                    questId: attackContext.questId
+                                });
+                            } else {
+                                // Fallback to old system
+                                self._executeAttack();
+                            }
                         }
                     },
                     {
@@ -2525,13 +2657,17 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
                         className: 'secondary',
                         onClick: () => {
                             ModalSystem.hide();
-                            this.addChatMessage("*thinks better of it*", 'player');
+                            self.addChatMessage("*thinks better of it*", 'player');
                         }
                     }
                 ]
             });
+        } else if (typeof CombatModal !== 'undefined') {
+            // No ModalSystem but have CombatModal - go directly to combat
+            this.close();
+            CombatModal.open(npcType, npcName, attackContext);
         } else {
-            // Fallback
+            // Fallback to old system
             this._executeAttack();
         }
     },

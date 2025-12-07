@@ -4,6 +4,124 @@
 
 ---
 
+## 2025-12-06 - SESSION #37: MASSIVE COMBAT SYSTEM OVERHAUL 🖤💀⚔️
+
+**Request:** Gee requested a MASSIVE combat system overhaul:
+1. Quest NPCs should NOT have attack option (unless quest requires it)
+2. NEW Combat Modal for ALL attacks (encounters, events, dialogue attacks)
+3. NPC Stats system based on NPC type, location, and game difficulty
+4. Full stat-based combat with player stats vs NPC stats
+5. Update all READMEs and documentation
+
+**Status:** IN PROGRESS - Using 5 parallel agents for analysis
+
+### Task Breakdown:
+
+| Task | Agent | Status |
+|------|-------|--------|
+| Analyze People Panel attack logic | Agent 1 | Pending |
+| Analyze existing combat/encounter systems | Agent 2 | Pending |
+| Design NPC stats structure | Agent 3 | Pending |
+| Design Combat Modal UI/UX | Agent 4 | Pending |
+| Analyze quest system for attack integration | Agent 5 | Pending |
+
+### Components Needed:
+1. **Quest NPC Detection** - Check if NPC is quest-related before showing attack
+2. **Combat Modal** - New UI showing player vs NPC stats, attack options, results
+3. **NPC Stats System** - Stats based on type (guard stronger than merchant), location (city guards tougher), difficulty setting
+4. **Combat Resolution** - Stat-based calculations for damage, dodge, etc.
+5. **Integration Points** - Encounters, events, dialogue attacks all use new modal
+
+### Agent Analysis Complete:
+
+**Agent 1 - People Panel Attack Logic:**
+- Attack action at lines 1333-1342
+- Current unattackable: `['guard', 'noble', 'king', 'queen', 'boatman', 'ferryman']`
+- `attackNPC()` at lines 2500-2537, `_executeAttack()` at 2540-2580
+- Uses D20 + stat roll system already
+- Need `isQuestNPC()` helper function
+
+**Agent 2 - Combat/Encounter Systems:**
+- Full combat system EXISTS at `combat-system.js` (1085 lines!)
+- 8 enemy types with abilities: bandit, wolf, thief, skeleton, goblin, orc, ghost, troll
+- Combat modal already exists with Attack/Defend/Flee/Item buttons
+- Missing: integration with robbery, NPC workflow commands, travel encounters
+
+**Agent 3 - NPC Stats Design:**
+- 20+ NPC types with stat baselines (merchant=15HP, guard=40HP, boss=200HP)
+- Location multipliers: 1.0x (starter) to 2.0x (dragon_lair)
+- Difficulty multipliers: 0.7x (easy) to 2.0x (deadly)
+- New files needed: `npc-combat-stats.js`, `difficulty-system.js`
+
+**Agent 4 - Combat Modal UI:**
+- Z-index 750 for combat modal
+- Dark purple/gold theme matching game
+- Side-by-side player vs enemy stats with health bars
+- Combat log with color-coded entries
+- Round-by-round flow recommended
+
+**Agent 5 - Quest Attack Integration:**
+- Main quests use `type: 'defeat'` with `enemy` field
+- Side quests use `type: 'kill'` with `target` field
+- Quest system already listens to `enemy-defeated` events
+- Need `canAttackNPC()` function checking quest involvement
+
+### Implementation Progress:
+
+**COMPLETED:**
+1. ✅ `canAttackNPC()` helper in people-panel.js (lines 2521-2580)
+   - Checks protected NPCs (noble, king, queen, boatman, ferryman)
+   - Guards protected unless quest target
+   - Quest givers, talk targets, turn-in NPCs protected
+   - Quest defeat/kill targets ARE attackable with special label
+
+2. ✅ `NPCCombatStats` system (src/js/npc/npc-combat-stats.js)
+   - 30+ NPC types with base stats
+   - 20+ location multipliers
+   - 4 difficulty settings (easy/normal/hard/deadly)
+   - Path danger levels (safe/normal/dangerous/deadly)
+   - Daily encounter limit (max 2 per day)
+   - Boss stats for dungeon fights
+
+3. ✅ `CombatModal` UI (src/js/ui/components/combat-modal.js)
+   - Side-by-side player vs NPC stats
+   - Health bars with critical/low indicators
+   - Combat log with color-coded entries
+   - Attack/Defend/Flee actions
+   - Round-by-round combat
+   - Victory/Defeat/Fled outcomes
+   - Quest integration (fires enemy-defeated event)
+
+4. ✅ Updated `attackNPC()` in people-panel.js
+   - Uses new CombatModal system
+   - Passes quest context (isQuestTarget, questId)
+   - Falls back to old system if CombatModal unavailable
+
+5. ✅ Added new files to index.html
+
+**COMPLETED:**
+6. ✅ Updated NerdReadme.md with full combat system technical docs
+   - Combat Modal API documentation
+   - NPCCombatStats system with all tiers/multipliers
+   - Quest-aware attack protection code
+   - Integration points table
+   - Added combat-modal.js and npc-combat-stats.js to file structure
+
+7. ✅ Updated GameplayReadme.md with player-facing combat docs
+   - How combat works (turn flow)
+   - Combat actions (Attack/Defend/Flee)
+   - NPC tiers (Civilian/Worker/Outlaw/Boss)
+   - Location & difficulty scaling tables
+   - Quest NPC protection rules
+   - Travel encounter variety by path danger
+   - Victory rewards and combat tips
+
+**STILL NEEDED:**
+- Test integration with robbery encounters
+- Test travel encounter integration
+
+---
+
 ## 2025-12-06 - SESSION #36: GATEHOUSE + CANCEL TRAVEL FIXES 🖤💀🏰
 
 **Request:** Gee reported 4 critical issues:

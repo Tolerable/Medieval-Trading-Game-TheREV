@@ -985,6 +985,99 @@ This works on both the **main menu** (menu weather system) and **in-game** (game
 
 ---
 
+## ⚔️ COMBAT SYSTEM
+
+*"Some problems can't be solved with gold. Those require steel."*
+
+The combat system provides turn-based stat combat when attacking NPCs or encountering hostiles. All attacks trigger the Combat Modal.
+
+### How Combat Works
+
+1. **Initiate** - Attack an NPC via People Panel or get attacked during encounter
+2. **Combat Modal Opens** - Shows your stats vs enemy stats side-by-side
+3. **Choose Action** - Attack, Defend, or Flee each turn
+4. **Resolution** - Combat continues until one side wins or you escape
+
+### Combat Actions
+
+| Action | Effect |
+|--------|--------|
+| **Attack** | Deal damage based on your attack vs their defense |
+| **Defend** | +50% defense this turn, then enemy attacks |
+| **Flee** | Attempt escape (speed-based chance) |
+
+### NPC Tiers
+
+Enemies are organized into 4 tiers of difficulty:
+
+| Tier | Type | Examples | Challenge |
+|------|------|----------|-----------|
+| **1** | Civilians | Merchant, Traveler, Beggar, Drunk | Easy - low health, minimal damage |
+| **2** | Workers/Guards | Guard, Blacksmith, Innkeeper | Moderate - trained fighters |
+| **3** | Outlaws | Bandit, Assassin, Thief, Smuggler | Dangerous - combat specialists |
+| **4** | Bosses | Malachar, Shadow Guardian, Greedy Won | Deadly - dungeon bosses |
+
+### Location & Difficulty Scaling
+
+NPC stats scale based on where you are and your difficulty setting:
+
+**Location Multipliers:**
+| Location | Multiplier |
+|----------|------------|
+| Village | 0.8x (easier) |
+| Town | 1.0x (standard) |
+| City | 1.2x (tougher) |
+| Capital | 1.5x (elite) |
+| Dungeon | 1.8x (dangerous) |
+| Doom World | 2.0x (nightmare) |
+
+**Difficulty Multipliers:**
+| Difficulty | Multiplier |
+|------------|------------|
+| Easy | 0.7x |
+| Normal | 1.0x |
+| Hard | 1.3x |
+| Deadly | 1.6x |
+
+### Quest NPC Protection
+
+You **cannot attack** NPCs involved in active quests:
+- Quest givers
+- NPCs you need to talk to
+- NPCs you need to deliver items to
+
+**Exception:** NPCs marked as quest defeat targets (like "kill the bandit leader") CAN be attacked and show a special "(Quest)" label on the attack button.
+
+### Travel Encounter Variety
+
+Random encounters during travel are based on path danger level:
+
+| Path Type | Encounter Chance | NPC Types |
+|-----------|------------------|-----------|
+| **Safe** | 5% | Traveler, Merchant, Pilgrim, Courier |
+| **Normal** | 10% | Traveler, Merchant, Drunk, Beggar, Thief |
+| **Dangerous** | 20% | Bandit, Thief, Robber, Wolf, Smuggler |
+| **Deadly** | 30% | Bandit, Assassin, Orc, Skeleton, Ghost |
+
+**Daily Limit:** Maximum 2 combat encounters per day to prevent endless grinding.
+
+### Victory Rewards
+
+When you defeat an NPC:
+- **Gold** - Random amount based on NPC tier
+- **XP** - Experience points (for future leveling)
+- **Quest Progress** - If target was a quest objective
+
+### Combat Tips
+
+- Higher attack = more damage dealt
+- Higher defense = less damage taken
+- Higher speed = better flee chance
+- Defend when low on health to reduce incoming damage
+- Flee from tier 4 bosses unless well-equipped
+
+---
+
 ## 🎭 RANDOM ENCOUNTERS
 
 As you travel the roads and visit locations, you may encounter random NPCs. The world is alive with wanderers, merchants, pilgrims, and less savory folk.
