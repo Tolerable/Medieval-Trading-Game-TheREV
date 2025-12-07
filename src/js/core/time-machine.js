@@ -14,14 +14,14 @@ console.log('⏰ TIME MACHINE loading... preparing to bend reality');
 
 const TimeMachine = {
     // ═══════════════════════════════════════════════════════════════
-    // 💀 CONSTANTS - The immutable laws of time
+    // constants - the immutable laws of time
     // ═══════════════════════════════════════════════════════════════
     MINUTES_PER_HOUR: 60,
     HOURS_PER_DAY: 24,
     DAYS_PER_WEEK: 7,
     MONTHS_PER_YEAR: 12,
 
-    // 📅 Gregorian calendar - real month names and days
+    // gregorian calendar - real month names and days
     MONTH_NAMES: [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
@@ -32,7 +32,7 @@ const TimeMachine = {
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ],
 
-    // 🗡️ Days per month (February handled dynamically for leap years)
+    // days per month (February handled dynamically for leap years)
     DAYS_IN_MONTH: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
 
     // Speed settings - game minutes per real second (actual multipliers)
@@ -51,7 +51,7 @@ const TimeMachine = {
         VERY_FAST: '4x'
     },
 
-    // 🌙 Season definitions with gameplay effects
+    // season definitions with gameplay effects
     SEASONS: {
         spring: {
             name: 'Spring',
@@ -75,7 +75,7 @@ const TimeMachine = {
                 travelSpeed: 1.1,
                 cropGrowth: 1.0,
                 hungerDrain: 0.9,
-                thirstDrain: 1.3, // 🔥 More thirsty in summer
+                thirstDrain: 1.3, // more thirsty in summer
                 staminaDrain: 1.1,
                 priceModifier: { water: 1.3, ice: 2.0 }
             },
@@ -88,7 +88,7 @@ const TimeMachine = {
             effects: {
                 travelSpeed: 0.95,
                 cropGrowth: 0.8,
-                hungerDrain: 1.1, // 🦇 Bodies prepare for winter
+                hungerDrain: 1.1, // bodies prepare for winter
                 thirstDrain: 0.9,
                 staminaDrain: 1.0,
                 priceModifier: { food: 0.8, preserves: 1.2 }
@@ -102,7 +102,7 @@ const TimeMachine = {
             effects: {
                 travelSpeed: 0.7,
                 cropGrowth: 0,
-                hungerDrain: 1.3, // 💀 Cold burns calories
+                hungerDrain: 1.3, // cold burns calories
                 thirstDrain: 0.7,
                 staminaDrain: 1.4,
                 priceModifier: { food: 1.4, firewood: 1.5, furs: 1.3 }
@@ -112,18 +112,18 @@ const TimeMachine = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🕰️ STATE - The current moment in this dark timeline
+    // state - the current moment in this dark timeline
     // ═══════════════════════════════════════════════════════════════
     currentTime: {
         minute: 0,
         hour: 8,
         day: 1,
         week: 1,
-        month: 4,      // 🖤 April (1-indexed)
+        month: 4,      // april (1-indexed)
         year: 1111     // The dark ages indeed
     },
 
-    // 🎮 Engine state
+    // engine state
     currentSpeed: 'PAUSED',
     isPaused: true,
     isRunning: false,
@@ -131,29 +131,29 @@ const TimeMachine = {
     accumulatedTime: 0,
     animationFrameId: null,
 
-    // 🔄 Tracking for daily/weekly events
+    // tracking for daily/weekly events
     lastProcessedDay: 0,
     lastProcessedWeek: 0,
     lastWageProcessedDay: 0,
 
-    // 🖤 DOM element cache - query once, use forever 💀
+    // dom element cache - query once, use forever
     _domCache: null,
 
-    // 🖤 Cache for getTotalDays() calculation - avoids expensive loops 💀
+    // cache for getTotalDays() calculation - avoids expensive loops
     _totalDaysCache: { year: null, month: null, day: null, result: null },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖤 INITIALIZATION - The beginning of time itself
+    // initialization - the beginning of time itself
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤💀 Track if time has been loaded from save - prevents reset 💀
+    // track if time has been loaded from save - prevents reset
     _timeLoadedFromSave: false,
 
     init() {
         console.log('⏰ TIME MACHINE initializing...');
         console.log(`⏰ TIME MACHINE DEBUG: _timeLoadedFromSave=${this._timeLoadedFromSave}, isRunning=${this.isRunning}, currentTime=${JSON.stringify(this.currentTime)}`);
 
-        // 🖤💀 DON'T reset time if it was loaded from a save! 💀
+        // don't reset time if it was loaded from a save!
         // This prevents game.start() -> game.init() -> TimeMachine.init() from wiping saved time
         if (this._timeLoadedFromSave) {
             console.log('⏰ TIME MACHINE: Time was loaded from save - skipping reset');
@@ -163,7 +163,7 @@ const TimeMachine = {
             return true;
         }
 
-        // 🖤💀 ADDITIONAL GUARD: Don't reset if already initialized and running! 💀
+        // additional guard: don't reset if already initialized and running!
         // This prevents double-init from resetting time after load
         if (this.isRunning) {
             console.log('⏰ TIME MACHINE: Already running - skipping reset');
@@ -172,7 +172,7 @@ const TimeMachine = {
             return true;
         }
 
-        // 🖤 Set initial time state (only for NEW games)
+        // set initial time state (only for NEW games)
         this.currentTime = {
             minute: 0,
             hour: 8,
@@ -182,17 +182,17 @@ const TimeMachine = {
             year: 1111
         };
 
-        // 🦇 Start paused - let the player read the intro
+        // start paused - let the player read the intro
         this.currentSpeed = 'PAUSED';
         this.isPaused = true;
         this.isRunning = false;
         this.lastFrameTime = 0;
         this.accumulatedTime = 0;
 
-        // 🖤💀 USER PREFERRED SPEED - The speed the player WANTS, not what the system forces 💀
-        // This is what we restore to after interrupts (encounters, achievements, etc.)
+        // user preferred speed - the speed the player WANTS, not what the system forces
+        // this is what we restore to after interrupts (encounters, achievements, etc.)
         this.userPreferredSpeed = 'NORMAL';
-        this._interruptStack = []; // Track nested interrupts (achievement during encounter, etc.)
+        this._interruptStack = []; // track nested interrupts (achievement during encounter, etc.)
 
         // Setup UI controls
         this.setupTimeControls();
@@ -206,10 +206,10 @@ const TimeMachine = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎮 THE GAME LOOP - The heartbeat of existence
+    // the game loop - the heartbeat of existence
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Start the engine
+    // start the engine
     start() {
         if (this.isRunning) {
             console.log('⏰ TIME MACHINE already running');
@@ -223,7 +223,7 @@ const TimeMachine = {
         console.log('⏰ TIME MACHINE running!');
     },
 
-    // 💀 Stop the engine
+    // stop the engine
     stop() {
         console.log('⏰ TIME MACHINE stopping...');
         this.isRunning = false;
@@ -233,48 +233,48 @@ const TimeMachine = {
         }
     },
 
-    // ⚡ Main game loop tick
+    // main game loop tick
     tick(currentFrameTime) {
         if (!this.isRunning) {
             this.animationFrameId = null;
             return;
         }
 
-        // 🦇 FIX: Wrap in try-catch to prevent silent loop death
+        // wrap in try-catch to prevent silent loop death
         try {
-            // 🦇 Calculate delta time
+            // calculate delta time
             const deltaTime = currentFrameTime - this.lastFrameTime;
             this.lastFrameTime = currentFrameTime;
 
-            // 💀 Cap delta to prevent spiral of death
+            // cap delta to prevent spiral of death
             const cappedDelta = Math.min(deltaTime, 100);
 
-            // 🖤 Update time if not paused
+            // update time if not paused
             if (!this.isPaused && this.currentSpeed !== 'PAUSED') {
                 const timeAdvanced = this.update(cappedDelta);
 
                 if (timeAdvanced) {
-                    // 🔮 Trigger all time-dependent updates
+                    // trigger all time-dependent updates
                     this.onTimeAdvance();
                 }
             }
 
-            // 🎨 Update UI every frame
+            // update UI every frame
             this.updateUI();
         } catch (err) {
-            // 💀 Log error but DON'T let it kill the loop
+            // log error but DON'T let it kill the loop
             console.error('⏰ TIME MACHINE tick error:', err);
         }
 
-        // 🔄 Continue the loop - ALWAYS schedule next frame even if error occurred
+        // continue the loop - ALWAYS schedule next frame even if error occurred
         this.animationFrameId = requestAnimationFrame((t) => this.tick(t));
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // ⏱️ TIME PROGRESSION - The march of time
+    // time progression - the march of time
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Update time based on real delta
+    // update time based on real delta
     update(deltaTime) {
         if (this.isPaused || this.currentSpeed === 'PAUSED') {
             return false;
@@ -283,11 +283,11 @@ const TimeMachine = {
         const speedMultiplier = this.SPEEDS[this.currentSpeed];
         if (speedMultiplier === 0) return false;
 
-        // 🌙 Convert real time to game time
+        // convert real time to game time
         const gameMinutesPassed = (deltaTime / 1000) * speedMultiplier;
         this.accumulatedTime += gameMinutesPassed;
 
-        // ⚰️ Only process whole minutes
+        // only process whole minutes
         const minutesToProcess = Math.floor(this.accumulatedTime);
         if (minutesToProcess > 0) {
             this.accumulatedTime -= minutesToProcess;
@@ -298,16 +298,16 @@ const TimeMachine = {
         return false;
     },
 
-    // 💀 Add minutes to current time
+    // add minutes to current time
     addMinutes(minutes) {
         this.currentTime.minute += minutes;
 
-        // 🖤 Minutes overflow into hours
+        // minutes overflow into hours
         while (this.currentTime.minute >= this.MINUTES_PER_HOUR) {
             this.currentTime.minute -= this.MINUTES_PER_HOUR;
             this.currentTime.hour++;
 
-            // 🦇 Hours overflow into days
+            // hours overflow into days
             if (this.currentTime.hour >= this.HOURS_PER_DAY) {
                 this.currentTime.hour -= this.HOURS_PER_DAY;
                 this.advanceDay();
@@ -315,12 +315,12 @@ const TimeMachine = {
         }
     },
 
-    // 🗡️ Advance to next day
+    // advance to next day
     advanceDay() {
         this.currentTime.day++;
         this.currentTime.week = Math.ceil(this.currentTime.day / this.DAYS_PER_WEEK);
 
-        // 💀 Check month overflow
+        // check month overflow
         const daysInMonth = this.getDaysInMonth(this.currentTime.month, this.currentTime.year);
 
         if (this.currentTime.day > daysInMonth) {
@@ -329,13 +329,13 @@ const TimeMachine = {
             this.advanceMonth();
         }
 
-        // 🔮 Fire day change event
+        // fire day change event
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('dayChanged', { day: this.currentTime.day, month: this.currentTime.month });
         }
     },
 
-    // ⚰️ Advance to next month
+    // advance to next month
     advanceMonth() {
         const oldSeason = this.getSeason();
         this.currentTime.month++;
@@ -346,24 +346,24 @@ const TimeMachine = {
             console.log(`🎆 Happy New Year ${this.currentTime.year}! Another year of darkness...`);
         }
 
-        // 🌙 Check for season change
+        // check for season change
         const newSeason = this.getSeason();
         if (oldSeason !== newSeason) {
             console.log(`🍂 Season changed: ${oldSeason} → ${newSeason}`);
             this.onSeasonChange(oldSeason, newSeason);
         }
 
-        // 🔮 Fire month change event
+        // fire month change event
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('monthChanged', { month: this.currentTime.month, year: this.currentTime.year });
         }
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🍂 SEASONS - The cycle of life and suffering
+    // seasons - the cycle of life and suffering
     // ═══════════════════════════════════════════════════════════════
 
-    // 🌙 Get current season based on month
+    // get current season based on month
     getSeason() {
         const month = this.currentTime.month;
         if (month >= 3 && month <= 5) return 'spring';
@@ -372,27 +372,27 @@ const TimeMachine = {
         return 'winter';
     },
 
-    // 🖤 Get season data object
+    // get season data object
     getSeasonData() {
         return this.SEASONS[this.getSeason()];
     },
 
-    // ⚡ Get a specific seasonal effect
+    // get a specific seasonal effect
     getSeasonalEffect(effectName) {
         const season = this.getSeasonData();
         return season.effects[effectName] ?? 1.0;
     },
 
-    // 🔮 Called when season changes
+    // called when season changes
     onSeasonChange(oldSeason, newSeason) {
         const seasonData = this.SEASONS[newSeason];
 
-        // 📢 Notify player
+        // notify player
         if (typeof addMessage === 'function') {
             addMessage(`${seasonData.icon} ${seasonData.name} has arrived! ${seasonData.description}`);
         }
 
-        // 🔮 Fire season change event
+        // fire season change event
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('seasonChanged', {
                 oldSeason,
@@ -409,41 +409,41 @@ const TimeMachine = {
             if (transitionWeather) {
                 console.log(`🌦️ Seasonal transition: forcing ${transitionWeather} weather for ${newSeason}`);
                 WeatherSystem.setWeather(transitionWeather);
-                // 🦇 Lock weather for ~1 in-game day (1440 minutes) to match backdrop fade
-                // 🖤 Guard against race condition where getTotalMinutes returns invalid value 💀
+                // lock weather for ~1 in-game day (1440 minutes) to match backdrop fade
+                // guard against race condition where getTotalMinutes returns invalid value
                 const currentMinutes = this.getTotalMinutes();
                 if (currentMinutes && currentMinutes > 0) {
                     WeatherSystem.lockWeatherUntil = currentMinutes + 1440;
                 } else {
-                    // 🖤 Fallback: lock for 24 hours from now using timestamp 💀
+                    // fallback: lock for 24 hours from now using timestamp
                     WeatherSystem.lockWeatherUntil = Date.now() + (24 * 60 * 60 * 1000);
                     console.warn('🌦️ Time not ready, using timestamp fallback for weather lock');
                 }
             }
         } else if (typeof WeatherSystem !== 'undefined' && WeatherSystem.generateWeather) {
-            // 💀 Fallback to random generation if setWeather not available
+            // fallback to random generation if setWeather not available
             WeatherSystem.generateWeather();
         }
     },
 
-    // 🖤 Weather that plays during season transitions - matches the vibe
+    // weather that plays during season transitions - matches the vibe
     SEASONAL_TRANSITION_WEATHER: {
-        spring: 'clear',      // 🌸 Lovely sunny day to welcome spring
-        summer: 'clear',      // ☀️ Bright beautiful summer day
-        autumn: 'cloudy',     // 🍂 Overcast, moody autumn arrival
-        winter: 'snow'        // ❄️ Snowstorm heralds winter's grip
+        spring: 'clear',      // lovely sunny day to welcome spring
+        summer: 'clear',      // bright beautiful summer day
+        autumn: 'cloudy',     // overcast, moody autumn arrival
+        winter: 'snow'        // snowstorm heralds winter's grip
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📅 CALENDAR HELPERS - Gregorian math for the masochists
+    // calendar helpers - gregorian math for the masochists
     // ═══════════════════════════════════════════════════════════════
 
-    // 🦇 Is it a leap year?
+    // is it a leap year?
     isLeapYear(year) {
         return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
     },
 
-    // 🗡️ Get days in a specific month
+    // get days in a specific month
     getDaysInMonth(month, year) {
         if (month === 2 && this.isLeapYear(year)) {
             return 29;
@@ -451,14 +451,14 @@ const TimeMachine = {
         return this.DAYS_IN_MONTH[month - 1];
     },
 
-    // 🌙 Get month name
+    // get month name
     getMonthName(month, short = false) {
         const names = short ? this.MONTH_NAMES_SHORT : this.MONTH_NAMES;
         return names[month - 1] || 'Unknown';
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // ⚡ SPEED CONTROL - Time bends to your will
+    // speed control - time bends to your will
     // ═══════════════════════════════════════════════════════════════
 
     setSpeed(speed) {
@@ -471,45 +471,45 @@ const TimeMachine = {
         this.currentSpeed = speed;
         this.isPaused = (speed === 'PAUSED');
 
-        // 🚶 Start engine if unpausing - FORCE RESTART to prevent stuck state
-        // 🦇 FIX: Always ensure tick loop is running when speed !== PAUSED
-        // This handles edge case where isRunning=true but the animation frame died
+        // start engine if unpausing - FORCE RESTART to prevent stuck state
+        // always ensure tick loop is running when speed !== PAUSED
+        // this handles edge case where isRunning=true but the animation frame died
         if (speed !== 'PAUSED') {
             if (!this.isRunning) {
-                // Normal case: engine wasn't running, start it
+                // normal case: engine wasn't running, start it
                 this.start();
             } else if (!this.animationFrameId) {
-                // 🖤 BUG FIX: isRunning=true but no animation frame scheduled!
-                // This can happen if tick() crashed or the loop got stuck
+                // bug fix: isRunning=true but no animation frame scheduled!
+                // this can happen if tick() crashed or the loop got stuck
                 console.warn('⏰ TIME MACHINE: Detected stale isRunning state, forcing restart...');
                 this.isRunning = false;
                 this.start();
             } else {
-                // Engine is running with valid animation frame - just reset accumulated time
+                // engine is running with valid animation frame - just reset accumulated time
                 // to ensure immediate response after unpause
                 this.lastFrameTime = performance.now();
             }
         }
 
-        // 🗺️ Auto-travel: start pending travel when unpausing
+        // auto-travel: start pending travel when unpausing
         if (wasAtDestinationReady && !this.isPaused) {
             this.checkAndStartPendingTravel();
         }
 
-        // 🖤 FIX: Enable achievements on first unpause 💀
-        // This prevents starting wealth achievements from firing before player starts playing
+        // enable achievements on first unpause
+        // this prevents starting wealth achievements from firing before player starts playing
         if (speed !== 'PAUSED' && typeof AchievementSystem !== 'undefined' && AchievementSystem.enableAchievements) {
             AchievementSystem.enableAchievements();
         }
 
-        // 🖤 FIX: Enable merchant rank celebrations AFTER achievements (with delay to prevent overlap) 💀
+        // enable merchant rank celebrations AFTER achievements (with delay to prevent overlap)
         if (speed !== 'PAUSED' && typeof MerchantRankSystem !== 'undefined' && MerchantRankSystem.enableRankCelebrations) {
             setTimeout(() => {
                 MerchantRankSystem.enableRankCelebrations();
-            }, 1500); // 🦇 1.5s delay so achievement popups clear first
+            }, 1500); // 1.5s delay so achievement popups clear first
         }
 
-        // 🎨 Update UI
+        // update UI
         this.updateTimeControlButtons();
 
         console.log(`⏰ TIME MACHINE setSpeed: ${speed} | isPaused: ${this.isPaused} | isRunning: ${this.isRunning} | animFrameId: ${this.animationFrameId}`);
@@ -517,7 +517,7 @@ const TimeMachine = {
         return true;
     },
 
-    // ⏸️ Toggle pause
+    // toggle pause
     togglePause() {
         if (this.isPaused) {
             this.setSpeed('NORMAL');
@@ -528,7 +528,7 @@ const TimeMachine = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖤💀 INTERRUPT HANDLING - Pause for events, restore user's preferred speed 💀
+    // interrupt handling - pause for events, restore user's preferred speed
     // ═══════════════════════════════════════════════════════════════
 
     /**
@@ -537,7 +537,7 @@ const TimeMachine = {
      * @param {string} source - What's causing the interrupt (for debugging)
      */
     pauseForInterrupt(source = 'unknown') {
-        // 🖤 Save current speed to the interrupt stack (for nested interrupts)
+        // save current speed to the interrupt stack (for nested interrupts)
         const speedToSave = this.isPaused ? 'PAUSED' : this.currentSpeed;
         this._interruptStack.push({
             speed: speedToSave,
@@ -545,7 +545,7 @@ const TimeMachine = {
             timestamp: Date.now()
         });
 
-        // 🦇 Only pause if not already paused
+        // only pause if not already paused
         if (!this.isPaused) {
             this.setSpeed('PAUSED');
         }
@@ -559,20 +559,20 @@ const TimeMachine = {
      * @param {string} source - What was causing the interrupt (for debugging)
      */
     resumeFromInterrupt(source = 'unknown') {
-        // 🖤 Pop from interrupt stack
+        // pop from interrupt stack
         const savedState = this._interruptStack.pop();
 
         if (savedState) {
-            // 🦇 Restore the speed that was active before THIS interrupt
+            // restore the speed that was active before THIS interrupt
             const speedToRestore = savedState.speed;
             console.log(`▶️ Resuming from interrupt: ${source} | Restoring speed: ${speedToRestore} | Stack depth: ${this._interruptStack.length}`);
 
-            // 🔮 Only restore if we're still paused (another system might have already changed it)
+            // only restore if we're still paused (another system might have already changed it)
             if (this.isPaused && speedToRestore !== 'PAUSED') {
                 this.setSpeed(speedToRestore);
             }
         } else {
-            // 🖤 Stack empty - use user's preferred speed as fallback
+            // stack empty - use user's preferred speed as fallback
             console.log(`▶️ Resuming from interrupt: ${source} | No saved state, using userPreferredSpeed: ${this.userPreferredSpeed}`);
             if (this.isPaused) {
                 this.setSpeed(this.userPreferredSpeed);
@@ -592,31 +592,31 @@ const TimeMachine = {
         }
     },
 
-    // 🚶 Check for pending travel destination
+    // check for pending travel destination
     checkAndStartPendingTravel() {
         console.log('🚶 checkAndStartPendingTravel called');
 
-        // 💀 Don't start if already traveling
+        // don't start if already traveling
         if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling) {
             console.log('🚶 Already traveling, skipping');
             return;
         }
 
-        // 🖤 First try TravelPanelMap's onGameUnpaused (handles the full travel flow)
+        // first try TravelPanelMap's onGameUnpaused (handles the full travel flow)
         if (typeof TravelPanelMap !== 'undefined' && TravelPanelMap.currentDestination && TravelPanelMap.onGameUnpaused) {
             console.log('🚶 Delegating to TravelPanelMap.onGameUnpaused');
             TravelPanelMap.onGameUnpaused();
             return; // TravelPanelMap handles everything, don't double-call
         }
 
-        // 🔮 Fallback: Check for pending destination in GameWorldRenderer only
+        // fallback: check for pending destination in GameWorldRenderer only
         let destinationId = null;
 
         if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.currentDestination) {
             destinationId = GameWorldRenderer.currentDestination.id;
         }
 
-        // 🗡️ Start travel if destination exists and isn't current location
+        // start travel if destination exists and isn't current location
         if (destinationId && typeof TravelSystem !== 'undefined' && TravelSystem.startTravel) {
             if (typeof game !== 'undefined' && game.currentLocation?.id !== destinationId) {
                 console.log(`🚶 Auto-starting travel to ${destinationId} (fallback)`);
@@ -626,14 +626,14 @@ const TimeMachine = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔔 TIME EVENTS - When time advances, stuff happens
+    // time events - when time advances, stuff happens
     // ═══════════════════════════════════════════════════════════════
 
     onTimeAdvance() {
-        // 🍖 STAT DECAY - hunger, thirst, stamina drain over time
+        // stat decay - hunger, thirst, stamina drain over time
         this.processStatDecay();
 
-        // 🌙 Midnight processing
+        // midnight processing
         if (this.currentTime.hour === 0 && this.currentTime.minute === 0) {
             if (this.lastProcessedDay !== this.currentTime.day) {
                 this.lastProcessedDay = this.currentTime.day;
@@ -641,104 +641,104 @@ const TimeMachine = {
             }
         }
 
-        // 📅 Weekly wage processing
+        // weekly wage processing
         if (this.currentTime.day % 7 === 0 && this.lastWageProcessedDay !== this.currentTime.day) {
             this.lastWageProcessedDay = this.currentTime.day;
             this.processWeeklyEvents();
         }
 
-        // 🏪 Update market prices
+        // update market prices
         if (typeof DynamicMarketSystem !== 'undefined') {
             DynamicMarketSystem.updateMarketPrices();
-            // 🦇 FIX: Check for 8am daily market refresh
+            // check for 8am daily market refresh
             if (DynamicMarketSystem.checkDailyRefresh) {
                 DynamicMarketSystem.checkDailyRefresh();
             }
         }
 
-        // 🏙️ City events
+        // city events
         if (typeof CityEventSystem !== 'undefined') {
             CityEventSystem.updateEvents();
         }
 
-        // 💀 Dungeon Bonanza (July 18th special event)
+        // dungeon bonanza (July 18th special event)
         if (typeof DungeonBonanzaSystem !== 'undefined') {
             DungeonBonanzaSystem.update();
         }
 
-        // 🏠 Property systems
+        // property systems
         if (typeof PropertySystem !== 'undefined') {
             if (PropertySystem.processWorkQueues) PropertySystem.processWorkQueues();
             if (PropertySystem.processConstruction) PropertySystem.processConstruction();
             if (PropertySystem.processRentPayments) PropertySystem.processRentPayments();
         }
 
-        // 📊 Price alerts
+        // price alerts
         if (typeof TradingSystem !== 'undefined' && TradingSystem.checkPriceAlerts) {
             TradingSystem.checkPriceAlerts();
         }
 
-        // 🚶 Travel progress
+        // travel progress
         if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling) {
             TravelSystem.updateTravelProgress();
         }
     },
 
-    // 🍖 STAT DECAY - DISABLED - game.js processPlayerStatsOverTime() handles this via GameConfig
-    // 🦇 FIX: Removed duplicate stat decay that was stacking with game.js version
-    // The actual decay rates are in config.js:
+    // stat decay - DISABLED - game.js processPlayerStatsOverTime() handles this via GameConfig
+    // removed duplicate stat decay that was stacking with game.js version
+    // the actual decay rates are in config.js:
     //   - Hunger: 5 days (100→0), decayPerUpdate: 0.0694 every 5 game minutes
     //   - Thirst: 3 days (100→0), decayPerUpdate: 0.1157 every 5 game minutes
-    // Seasonal effects are now applied in game.js processPlayerStatsOverTime()
+    // seasonal effects are now applied in game.js processPlayerStatsOverTime()
     lastStatDecayMinute: 0,
-    STAT_DECAY_INTERVAL: 30, // 🖤 Legacy - kept for compatibility
+    STAT_DECAY_INTERVAL: 30, // legacy - kept for compatibility
 
     processStatDecay() {
-        // 🦇 FIX: Do nothing - stat decay is handled by game.js processPlayerStatsOverTime()
-        // This function was causing DOUBLE decay when combined with game.js
-        // Keeping empty function to avoid breaking any calls to it
+        // do nothing - stat decay is handled by game.js processPlayerStatsOverTime()
+        // this function was causing DOUBLE decay when combined with game.js
+        // keeping empty function to avoid breaking any calls to it
     },
 
-    // 🌙 Daily events at midnight
+    // daily events at midnight
     processDailyEvents() {
         console.log(`📅 Processing daily events for Day ${this.currentTime.day}`);
 
-        // 🏠 Property daily income
+        // property daily income
         if (typeof PropertySystem !== 'undefined' && PropertySystem.processDailyIncome) {
             PropertySystem.processDailyIncome();
         }
 
-        // 🚚 Trade routes
+        // trade routes
         if (typeof TradeRouteSystem !== 'undefined' && TradeRouteSystem.processDailyTrade) {
             TradeRouteSystem.processDailyTrade();
         }
 
-        // 🔮 Fire daily event
+        // fire daily event
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('dailyProcess', { day: this.currentTime.day });
         }
     },
 
-    // 📅 Weekly events
+    // weekly events
     processWeeklyEvents() {
         console.log(`📅 Processing weekly events`);
 
-        // 👥 Employee wages
+        // employee wages
         if (typeof EmployeeSystem !== 'undefined' && EmployeeSystem.processWeeklyWages) {
             EmployeeSystem.processWeeklyWages();
         }
 
-        // 🔮 Fire weekly event
+        // fire weekly event
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('weeklyProcess', { week: this.currentTime.week });
         }
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🕰️ TIME FORMATTING - Making time readable
+    // time formatting - making time readable
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Format time in 12-hour AM/PM
+    // format time in 12-hour AM/PM
     formatTimeAMPM(hour, minute) {
         const period = hour >= 12 ? 'PM' : 'AM';
         const hour12 = hour % 12 || 12;
@@ -746,25 +746,25 @@ const TimeMachine = {
         return `${hour12}:${minuteStr} ${period}`;
     },
 
-    // 🖤 Full formatted time: "April 1, 1111 - 8:00 AM"
+    // full formatted time: "April 1, 1111 - 8:00 AM"
     getFormattedTime() {
         const timeStr = this.formatTimeAMPM(this.currentTime.hour, this.currentTime.minute);
         const monthName = this.getMonthName(this.currentTime.month);
         return `${monthName} ${this.currentTime.day}, ${this.currentTime.year} - ${timeStr}`;
     },
 
-    // 🦇 Short date: "Apr 1, 1111"
+    // short date: "Apr 1, 1111"
     getFormattedDate() {
         const monthName = this.getMonthName(this.currentTime.month, true);
         return `${monthName} ${this.currentTime.day}, ${this.currentTime.year}`;
     },
 
-    // 💀 Just the clock: "8:00 AM"
+    // just the clock: "8:00 AM"
     getFormattedClock() {
         return this.formatTimeAMPM(this.currentTime.hour, this.currentTime.minute);
     },
 
-    // 📊 Get all time info as object
+    // get all time info as object
     getTimeInfo() {
         const season = this.getSeason();
         return {
@@ -789,10 +789,10 @@ const TimeMachine = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🧮 TIME CALCULATIONS - Math is inevitable
+    // time calculations - math is inevitable
     // ═══════════════════════════════════════════════════════════════
 
-    // ⏳ Minutes until a specific hour
+    // minutes until a specific hour
     getMinutesUntilHour(targetHour) {
         let minutes = 0;
         const currentHour = this.currentTime.hour;
@@ -809,7 +809,7 @@ const TimeMachine = {
         return minutes;
     },
 
-    // 🧮 Total minutes since game start
+    // total minutes since game start
     getTotalMinutes() {
         const totalDays = this.getTotalDays();
         return (totalDays * this.HOURS_PER_DAY * this.MINUTES_PER_HOUR) +
@@ -817,19 +817,19 @@ const TimeMachine = {
                this.currentTime.minute;
     },
 
-    // 🖤 Total days since game start (uses GameConfig for start date) 💀
+    // total days since game start (uses GameConfig for start date)
     getTotalDays() {
         const currYear = this.currentTime.year;
         const currMonth = this.currentTime.month;
         const currDay = this.currentTime.day;
 
-        // 🖤 Check cache first - avoid expensive loops on every call 💀
+        // check cache first - avoid expensive loops on every call
         const cache = this._totalDaysCache;
         if (cache.year === currYear && cache.month === currMonth && cache.day === currDay) {
             return cache.result;
         }
 
-        // 🦇 Get start date from GameConfig (single source of truth)
+        // get start date from GameConfig (single source of truth)
         const startDate = typeof GameConfig !== 'undefined'
             ? GameConfig.time.startingDate
             : { year: 1111, month: 4, day: 1 };
@@ -838,10 +838,10 @@ const TimeMachine = {
         const startMonth = startDate.month;
         const startDay = startDate.day;
 
-        // 🖤 Convert both dates to "days since epoch" then subtract
-        // This is cleaner than the previous branching logic
+        // convert both dates to "days since epoch" then subtract
+        // this is cleaner than the previous branching logic
 
-        // Days from epoch to start date
+        // days from epoch to start date
         let startDays = 0;
         for (let y = 1; y < startYear; y++) {
             startDays += this.isLeapYear(y) ? 366 : 365;
@@ -851,7 +851,7 @@ const TimeMachine = {
         }
         startDays += startDay;
 
-        // Days from epoch to current date
+        // days from epoch to current date
         let currDays = 0;
         for (let y = 1; y < currYear; y++) {
             currDays += this.isLeapYear(y) ? 366 : 365;
@@ -861,22 +861,22 @@ const TimeMachine = {
         }
         currDays += currDay;
 
-        // 💀 Simple subtraction - no edge cases to worry about
+        // simple subtraction - no edge cases to worry about
         const result = currDays - startDays;
 
-        // 🖤 Update cache for next call 💀
+        // update cache for next call
         this._totalDaysCache = { year: currYear, month: currMonth, day: currDay, result };
 
         return result;
     },
 
-    // 🔄 Convenience getter for backward compatibility
+    // convenience getter for backward compatibility
     get currentDay() {
         return this.currentTime.day;
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎨 UI UPDATES - Making pixels dance
+    // ui updates - making pixels dance
     // ═══════════════════════════════════════════════════════════════
 
     updateUI() {
@@ -884,10 +884,10 @@ const TimeMachine = {
         this.updateTimeControlButtons();
     },
 
-    // 🖤 Initialize DOM cache - query once, not 60 times per second 💀
+    // initialize DOM cache - query once, not 60 times per second
     _initDomCache() {
-        // 🖤 Check if cache exists AND elements are still in DOM 💀
-        // If any cached element was removed (panel reload), invalidate cache
+        // check if cache exists AND elements are still in DOM
+        // if any cached element was removed (panel reload), invalidate cache
         if (this._domCache) {
             const anyInvalid = this._domCache.timeDisplay && !document.contains(this._domCache.timeDisplay);
             if (anyInvalid) {
@@ -905,13 +905,13 @@ const TimeMachine = {
             yearDisplay: document.getElementById('current-year'),
             dateText: document.getElementById('date-text'),
             timeIndicator: document.getElementById('time-phase-indicator'),
-            phaseTime: null, // 🦇 Set after timeIndicator found
+            phaseTime: null, // set after timeIndicator found
             speedDisplay: document.getElementById('speed-indicator') ||
                          document.querySelector('.speed-indicator'),
             seasonDisplay: document.getElementById('season-indicator')
         };
 
-        // 🖤 Cache the nested element too
+        // cache the nested element too
         if (this._domCache.timeIndicator) {
             this._domCache.phaseTime = this._domCache.timeIndicator.querySelector('.phase-time');
         }
@@ -919,17 +919,17 @@ const TimeMachine = {
         return this._domCache;
     },
 
-    // 🔮 Clear DOM cache (call if elements are dynamically recreated)
+    // clear DOM cache (call if elements are dynamically recreated)
     clearDomCache() {
         this._domCache = null;
     },
 
-    // 🕰️ Update time display elements
+    // update time display elements
     updateTimeDisplay() {
         const timeInfo = this.getTimeInfo();
         const cache = this._initDomCache();
 
-        // 🖤 Use cached elements - no more 60fps DOM queries 💀
+        // use cached elements - no more 60fps DOM queries
         if (cache.timeDisplay) {
             cache.timeDisplay.textContent = timeInfo.formatted;
         }
@@ -946,7 +946,7 @@ const TimeMachine = {
             cache.dateText.textContent = `${timeInfo.monthName} ${timeInfo.day}, ${timeInfo.year}`;
         }
 
-        // 🖤 Top-bar time widget
+        // top-bar time widget
         if (cache.phaseTime) {
             const hour = timeInfo.hour;
             const minute = timeInfo.minute || 0;
@@ -966,7 +966,7 @@ const TimeMachine = {
             cache.speedDisplay.textContent = speedLabels[timeInfo.speed] || timeInfo.speed;
         }
 
-        // 🖤 Guard against missing seasonData - the void protects 💀
+        // guard against missing seasonData - the void protects
         if (cache.seasonDisplay && timeInfo.seasonData) {
             cache.seasonDisplay.textContent = `${timeInfo.seasonData.icon} ${timeInfo.seasonData.name}`;
         }
@@ -1044,14 +1044,14 @@ const TimeMachine = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // ⏩ TIME SKIP - Jump forward without killing the player
+    // time skip - jump forward without killing the player
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Skip forward by N months - preserves player stats (cheat mode)
+    // skip forward by N months - preserves player stats (cheat mode)
     skipMonths(months, preserveStats = true) {
         console.log(`⏩ Skipping ${months} month(s)...`);
 
-        // 💾 Save current stats if preserving
+        // save current stats if preserving
         let savedStats = null;
         if (preserveStats && typeof game !== 'undefined' && game.player?.stats) {
             savedStats = { ...game.player.stats };
@@ -1062,29 +1062,29 @@ const TimeMachine = {
         const startMonth = this.currentTime.month;
         const startYear = this.currentTime.year;
 
-        // ⏩ Advance months
+        // advance months
         for (let i = 0; i < months; i++) {
             this.advanceMonth();
         }
 
-        // 🍂 Check for season change
+        // check for season change
         const newSeason = this.getSeason();
         if (oldSeason !== newSeason) {
             console.log(`🍂 Season changed: ${oldSeason} → ${newSeason}`);
             this.onSeasonChange(oldSeason, newSeason);
 
-            // 🗺️ Update seasonal backdrop
+            // update seasonal backdrop
             if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.loadSeasonalBackdrop) {
                 GameWorldRenderer.loadSeasonalBackdrop(newSeason);
             }
         }
 
-        // 🌦️ Generate new weather for the new time
+        // generate new weather for the new time
         if (typeof WeatherSystem !== 'undefined' && WeatherSystem.generateWeather) {
             WeatherSystem.generateWeather();
         }
 
-        // 💾 Restore stats if preserved
+        // restore stats if preserved
         if (savedStats && typeof game !== 'undefined' && game.player?.stats) {
             game.player.stats = savedStats;
             console.log('💾 Stats restored');
@@ -1093,7 +1093,7 @@ const TimeMachine = {
             }
         }
 
-        // 🔔 Fire events for systems that need to update
+        // fire events for systems that need to update
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('timeSkipped', {
                 months,
@@ -1102,24 +1102,24 @@ const TimeMachine = {
             });
         }
 
-        // 📢 Notify player
+        // notify player
         if (typeof addMessage === 'function') {
             const seasonData = this.SEASONS[newSeason];
             addMessage(`⏩ Time has jumped forward ${months} month(s). It is now ${this.getFormattedDate()}. ${seasonData.icon} ${seasonData.name}`);
         }
 
-        // 🎨 Update UI
+        // update UI
         this.updateUI();
 
         console.log(`⏩ Time skip complete: ${this.getFormattedDate()}`);
         return this.getFormattedDate();
     },
 
-    // 🦇 Skip forward by N days - preserves player stats (cheat mode)
+    // skip forward by N days - preserves player stats (cheat mode)
     skipDays(days, preserveStats = true) {
         console.log(`⏩ Skipping ${days} day(s)...`);
 
-        // 💾 Save current stats if preserving
+        // save current stats if preserving
         let savedStats = null;
         if (preserveStats && typeof game !== 'undefined' && game.player?.stats) {
             savedStats = { ...game.player.stats };
@@ -1127,12 +1127,12 @@ const TimeMachine = {
 
         const oldSeason = this.getSeason();
 
-        // ⏩ Advance days
+        // advance days
         for (let i = 0; i < days; i++) {
             this.advanceDay();
         }
 
-        // 🍂 Check for season change
+        // check for season change
         const newSeason = this.getSeason();
         if (oldSeason !== newSeason) {
             this.onSeasonChange(oldSeason, newSeason);
@@ -1141,12 +1141,12 @@ const TimeMachine = {
             }
         }
 
-        // 🌦️ Generate new weather
+        // generate new weather
         if (typeof WeatherSystem !== 'undefined' && WeatherSystem.generateWeather) {
             WeatherSystem.generateWeather();
         }
 
-        // 💾 Restore stats if preserved
+        // restore stats if preserved
         if (savedStats && typeof game !== 'undefined' && game.player?.stats) {
             game.player.stats = savedStats;
             if (typeof updatePlayerStats === 'function') {
@@ -1154,7 +1154,7 @@ const TimeMachine = {
             }
         }
 
-        // 🎨 Update UI
+        // update UI
         this.updateUI();
 
         if (typeof addMessage === 'function') {
@@ -1165,7 +1165,7 @@ const TimeMachine = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💾 SAVE/LOAD - Preserving time across the void
+    // save/load - preserving time across the void
     // ═══════════════════════════════════════════════════════════════
 
     getSaveData() {
@@ -1176,7 +1176,7 @@ const TimeMachine = {
             accumulatedTime: this.accumulatedTime,
             lastProcessedDay: this.lastProcessedDay,
             lastWageProcessedDay: this.lastWageProcessedDay,
-            lastStatDecayMinute: this.lastStatDecayMinute // 🍖 Stat decay tracking
+            lastStatDecayMinute: this.lastStatDecayMinute // stat decay tracking
         };
     },
 
@@ -1185,7 +1185,7 @@ const TimeMachine = {
 
         console.log(`⏰ TIME MACHINE loadSaveData called with currentTime:`, data.currentTime);
 
-        // 🖤💀 Set flag to prevent init() from resetting this loaded time! 💀
+        // set flag to prevent init() from resetting this loaded time!
         this._timeLoadedFromSave = true;
         console.log(`⏰ TIME MACHINE: _timeLoadedFromSave flag SET to true`);
 
@@ -1193,7 +1193,7 @@ const TimeMachine = {
             this.currentTime = { ...data.currentTime };
             console.log(`⏰ TIME MACHINE: currentTime restored to ${JSON.stringify(this.currentTime)}`);
 
-            // 🖤 Migrate old saves
+            // migrate old saves
             if (this.currentTime.year < 1111) {
                 this.currentTime.year = 1111;
             }
@@ -1221,7 +1221,7 @@ const TimeMachine = {
             this.lastStatDecayMinute = data.lastStatDecayMinute;
         }
 
-        // 🍂 Restore seasonal backdrop after load
+        // restore seasonal backdrop after load
         const season = this.getSeason();
         if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.loadSeasonalBackdrop) {
             setTimeout(() => GameWorldRenderer.loadSeasonalBackdrop(season), 100);
@@ -1233,13 +1233,13 @@ const TimeMachine = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🔄 BACKWARD COMPATIBILITY - Keep old names working
+// backward compatibility - keep old names working
 // ═══════════════════════════════════════════════════════════════
 
-// 🖤 TimeSystem alias (most code uses this name)
+// TimeSystem alias (most code uses this name)
 const TimeSystem = TimeMachine;
 
-// 🦇 GameEngine alias (some code uses this)
+// GameEngine alias (some code uses this)
 const GameEngine = {
     isRunning: false,
     get running() { return TimeMachine.isRunning; },
@@ -1266,7 +1266,7 @@ const GameEngine = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY - Let the darkness spread
+// expose globally - let the darkness spread
 // ═══════════════════════════════════════════════════════════════
 
 window.TimeMachine = TimeMachine;

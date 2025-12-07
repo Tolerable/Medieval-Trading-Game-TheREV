@@ -8,7 +8,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 const PropertyStorage = {
-    // 🖤 Escape HTML to prevent XSS attacks - dark magic for security
+    // Sanitize or die - XSS is my enemy
     escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>"']/g, char => ({
@@ -16,18 +16,18 @@ const PropertyStorage = {
         })[char]);
     },
 
-    // 🏠 Initialize storage for a property ⚰️
+    // Give this property a vault for hoarding your shit
     initialize(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return false;
 
-        // 🖤💀 FIXED: Firefox compatibility - don't use ??= 💀
+        // Firefox is a needy bitch - can't handle ??= operator
         if (!property.storage) property.storage = {};
 
         const propertyType = PropertyTypes.get(property.type);
         let capacity = propertyType.storageBonus || 0;
 
-        // 📏 Expansion upgrade bonus 🦇
+        // Expansions let you hoard even more useless crap
         if (property.upgrades.includes('expansion')) {
             capacity *= 1.5;
         }
@@ -38,7 +38,7 @@ const PropertyStorage = {
         return true;
     },
 
-    // 📊 Calculate storage used 🗡️
+    // See how much of your vault is already rotting with inventory
     calculateUsed(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property || !property.storage) return 0;
@@ -48,7 +48,7 @@ const PropertyStorage = {
             if (typeof ItemDatabase !== 'undefined') {
                 totalWeight += ItemDatabase.calculateWeight(itemId, quantity);
             } else {
-                // 🖤 Fallback: 1 unit weight per item when ItemDatabase unavailable 💀
+                // If ItemDatabase is dead, just assume 1 lb per item - crude but it works
                 totalWeight += quantity * 1;
             }
         }
@@ -56,7 +56,7 @@ const PropertyStorage = {
         return totalWeight;
     },
 
-    // 📦 Get storage capacity 🌙
+    // How much can you cram into this vault before it bursts
     getCapacity(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return 0;
@@ -68,7 +68,7 @@ const PropertyStorage = {
         return property.storageCapacity;
     },
 
-    // 📊 Get storage used 🔮
+    // How much dead weight is already rotting in here
     getUsed(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return 0;
@@ -80,19 +80,19 @@ const PropertyStorage = {
         return property.storageUsed;
     },
 
-    // 📦 Get available storage space 💀
+    // How much room left before you're drowning in crap
     getAvailable(propertyId) {
         return this.getCapacity(propertyId) - this.getUsed(propertyId);
     },
 
-    // ➕ Add items to property storage 🖤
+    // Cram more items into your property's vault
     add(propertyId, itemId, quantity) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return false;
 
         if (!property.storage) this.initialize(propertyId);
 
-        // 📊 Check capacity ⚰️
+        // Make sure there's room for this shit
         const itemWeight = typeof ItemDatabase !== 'undefined' ?
             ItemDatabase.calculateWeight(itemId, quantity) : quantity * 1;
 
@@ -101,7 +101,7 @@ const PropertyStorage = {
             return false;
         }
 
-        // ➕ Add items 🦇
+        // Pile it in with the rest of the hoard
         if (!property.storage[itemId]) property.storage[itemId] = 0;
         property.storage[itemId] += quantity;
         property.storageUsed += itemWeight;
@@ -109,12 +109,12 @@ const PropertyStorage = {
         return true;
     },
 
-    // ➖ Remove items from property storage 🗡️
+    // Yank items out of your vault
     remove(propertyId, itemId, quantity) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property || !property.storage) return false;
 
-        // 🔍 Check availability 🌙
+        // Make sure you actually have enough to take
         if (!property.storage[itemId] || property.storage[itemId] < quantity) {
             addMessage(`${property.locationName || 'Property'} doesn't have enough ${itemId}!`);
             return false;
@@ -123,7 +123,7 @@ const PropertyStorage = {
         const itemWeight = typeof ItemDatabase !== 'undefined' ?
             ItemDatabase.calculateWeight(itemId, quantity) : quantity * 1;
 
-        // ➖ Remove items 🔮
+        // Rip it out of the hoard
         property.storage[itemId] -= quantity;
         if (property.storage[itemId] <= 0) {
             delete property.storage[itemId];
@@ -134,21 +134,21 @@ const PropertyStorage = {
         return true;
     },
 
-    // 🔄 Transfer items between properties 💀
+    // Move your shit from one vault to another
     transferBetweenProperties(fromPropertyId, toPropertyId, itemId, quantity) {
         const fromProperty = PropertySystem.getProperty(fromPropertyId);
         const toProperty = PropertySystem.getProperty(toPropertyId);
 
         if (!fromProperty || !toProperty) return false;
 
-        // 🔍 Check source 🖤
+        // Make sure the source actually has what you want
         if (!fromProperty.storage || !fromProperty.storage[itemId] ||
             fromProperty.storage[itemId] < quantity) {
             addMessage(`${fromProperty.locationName || 'Source property'} doesn't have enough ${itemId}!`);
             return false;
         }
 
-        // 📦 Check destination capacity ⚰️
+        // Make sure the destination has room for your crap
         const itemWeight = typeof ItemDatabase !== 'undefined' ?
             ItemDatabase.calculateWeight(itemId, quantity) : quantity * 1;
 
@@ -157,7 +157,7 @@ const PropertyStorage = {
             return false;
         }
 
-        // 🔄 Transfer 🦇
+        // Move the goods from A to B
         this.remove(fromPropertyId, itemId, quantity);
         this.add(toPropertyId, itemId, quantity);
 
@@ -168,19 +168,19 @@ const PropertyStorage = {
         return true;
     },
 
-    // 📤 Transfer from storage to player inventory 🗡️
+    // Take shit from your vault and shove it in your pockets
     transferToPlayer(propertyId, itemId, quantity) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return false;
 
-        // 🔍 Check availability 🌙
+        // Make sure the vault has what you're trying to steal from it
         if (!property.storage || !property.storage[itemId] ||
             property.storage[itemId] < quantity) {
             addMessage(`Not enough ${itemId} in storage!`);
             return false;
         }
 
-        // 📊 Check player capacity 🔮
+        // Make sure you can actually carry this shit
         const itemWeight = typeof ItemDatabase !== 'undefined' ?
             ItemDatabase.calculateWeight(itemId, quantity) : quantity * 1;
 
@@ -193,7 +193,7 @@ const PropertyStorage = {
             return false;
         }
 
-        // 🔄 Transfer 💀
+        // Take from vault, stuff in pockets
         this.remove(propertyId, itemId, quantity);
 
         if (!game.player.inventory[itemId]) game.player.inventory[itemId] = 0;
@@ -203,25 +203,25 @@ const PropertyStorage = {
 
         addMessage(`Took ${quantity} ${itemId} from ${property.locationName || 'property'} storage!`);
 
-        // 🔄 Update displays 🖤
+        // Refresh the UI so you can see what's left
         this.updateDisplay(propertyId);
         if (typeof InventorySystem !== 'undefined') InventorySystem.updateInventoryDisplay();
 
         return true;
     },
 
-    // 📥 Transfer from player inventory to storage ⚰️
+    // Shove shit from your pockets into the vault
     transferFromPlayer(propertyId, itemId, quantity) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return false;
 
-        // 🔍 Check player inventory 🦇
+        // Make sure you actually have this shit in your inventory
         if (!game.player.inventory[itemId] || game.player.inventory[itemId] < quantity) {
             addMessage(`You don't have enough ${itemId}!`);
             return false;
         }
 
-        // 📥 Transfer 🗡️
+        // Add to vault, remove from pockets
         if (!this.add(propertyId, itemId, quantity)) return false;
 
         game.player.inventory[itemId] -= quantity;
@@ -233,14 +233,14 @@ const PropertyStorage = {
 
         addMessage(`Stored ${quantity} ${itemId} in ${property.locationName || 'property'}!`);
 
-        // 🔄 Update displays 🌙
+        // Refresh the UI so you can see your growing hoard
         this.updateDisplay(propertyId);
         if (typeof InventorySystem !== 'undefined') InventorySystem.updateInventoryDisplay();
 
         return true;
     },
 
-    // 📋 Get all items stored across all properties 🔮
+    // get all items stored across all properties
     getAllStoredItems() {
         const allItems = {};
 
@@ -256,7 +256,7 @@ const PropertyStorage = {
         return allItems;
     },
 
-    // 🔍 Find properties that contain a specific item 💀
+    // find properties that contain a specific item
     findPropertiesWithItem(itemId) {
         const properties = [];
 
@@ -275,16 +275,16 @@ const PropertyStorage = {
         return properties;
     },
 
-    // 📤 Auto-store produced items from work queues 🖤
+    // auto-store produced items from work queues
     autoStoreProducedItems(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property || !property.totalProduction) return;
 
         for (const [itemId, quantity] of Object.entries(property.totalProduction)) {
             if (quantity > 0) {
-                // 🏠 Try to store in the property first ⚰️
+                // try to store in the property first
                 if (!this.add(propertyId, itemId, quantity)) {
-                    // 🏘️ Try other properties 🦇
+                    // try other properties
                     const otherProperties = game.player.ownedProperties.filter(p => p.id !== propertyId);
                     let stored = false;
 
@@ -297,7 +297,7 @@ const PropertyStorage = {
                         }
                     }
 
-                    // 🎒 Fallback to player inventory 🗡️
+                    // fallback to player inventory
                     if (!stored) {
                         if (!game.player.inventory[itemId]) game.player.inventory[itemId] = 0;
                         game.player.inventory[itemId] += quantity;
@@ -310,7 +310,7 @@ const PropertyStorage = {
         }
     },
 
-    // 🔄 Update storage display 🌙
+    // update storage display
     updateDisplay(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return;
@@ -340,7 +340,7 @@ const PropertyStorage = {
                 }
             }
 
-            // 🖤 Using data attributes to prevent XSS - no inline onclick
+            // using data attributes to prevent XSS - no inline onclick
             const safePropertyId = this.escapeHtml(propertyId);
             const safeItemId = this.escapeHtml(itemId);
             const safeItemName = this.escapeHtml(itemName);
@@ -352,7 +352,7 @@ const PropertyStorage = {
                 <button class="storage-item-btn" data-action="take" data-property="${safePropertyId}" data-item="${safeItemId}" data-qty="${Math.min(10, quantity)}">Take 10</button>
                 <button class="storage-item-btn" data-action="take" data-property="${safePropertyId}" data-item="${safeItemId}" data-qty="${quantity}">Take All</button>
             `;
-            // 💀 Attach event listeners safely
+            // attach event listeners safely
             itemElement.querySelectorAll('.storage-item-btn[data-action="take"]').forEach(btn => {
                 btn.onclick = () => this.transferToPlayer(btn.dataset.property, btn.dataset.item, parseInt(btn.dataset.qty));
             });
@@ -360,7 +360,7 @@ const PropertyStorage = {
             storageContainer.appendChild(itemElement);
         }
 
-        // 📊 Update storage info bar 🔮
+        // update storage info bar
         const storageInfo = document.getElementById(`property-storage-info-${propertyId}`);
         if (storageInfo) {
             const used = this.getUsed(propertyId);
@@ -378,7 +378,7 @@ const PropertyStorage = {
         }
     },
 
-    // 🔄 Update transfer display 💀
+    // update transfer display
     updateTransferDisplay(propertyId) {
         const transferContainer = document.getElementById(`property-transfer-${propertyId}`);
         if (!transferContainer) return;
@@ -403,7 +403,7 @@ const PropertyStorage = {
         this._populatePropertySelector(propertyId);
     },
 
-    // 🎒 Populate transfer from inventory 🖤
+    // populate transfer from inventory
     _populateTransferFromInventory(propertyId) {
         const container = document.getElementById(`transfer-from-inventory-${propertyId}`);
         if (!container || !game.player.inventory) return;
@@ -431,7 +431,7 @@ const PropertyStorage = {
 
             const itemElement = document.createElement('div');
             itemElement.className = 'transfer-item';
-            // 🖤 Using data attributes to prevent XSS - no inline onclick
+            // using data attributes to prevent XSS - no inline onclick
             const safePropertyId = this.escapeHtml(propertyId);
             const safeItemId = this.escapeHtml(itemId);
             const safeItemName = this.escapeHtml(itemName);
@@ -443,7 +443,7 @@ const PropertyStorage = {
                 <button class="transfer-btn" data-action="store" data-property="${safePropertyId}" data-item="${safeItemId}" data-qty="${Math.min(10, quantity)}">Store 10</button>
                 <button class="transfer-btn" data-action="store" data-property="${safePropertyId}" data-item="${safeItemId}" data-qty="${quantity}">Store All</button>
             `;
-            // 🦇 Attach event listeners safely
+            // attach event listeners safely
             itemElement.querySelectorAll('.transfer-btn[data-action="store"]').forEach(btn => {
                 btn.onclick = () => this.transferFromPlayer(btn.dataset.property, btn.dataset.item, parseInt(btn.dataset.qty));
             });
@@ -452,7 +452,7 @@ const PropertyStorage = {
         }
     },
 
-    // 🏘️ Populate property selector ⚰️
+    // populate property selector
     _populatePropertySelector(propertyId) {
         const selector = document.getElementById(`transfer-property-select-${propertyId}`);
         if (!selector) return;
@@ -481,7 +481,7 @@ const PropertyStorage = {
         }
     },
 
-    // 🔄 Populate transfer between properties 🦇
+    // populate transfer between properties
     _populateTransferBetweenProperties(fromPropertyId, toPropertyId) {
         const container = document.getElementById(`transfer-between-properties-${fromPropertyId}`);
         if (!container) return;
@@ -515,7 +515,7 @@ const PropertyStorage = {
 
             const itemElement = document.createElement('div');
             itemElement.className = 'transfer-item';
-            // 🖤 Using data attributes to prevent XSS - no inline onclick
+            // using data attributes to prevent XSS - no inline onclick
             const safeFromId = this.escapeHtml(fromPropertyId);
             const safeToId = this.escapeHtml(toPropertyId);
             const safeItemId = this.escapeHtml(itemId);
@@ -528,7 +528,7 @@ const PropertyStorage = {
                 <button class="transfer-btn" data-action="transfer" data-from="${safeFromId}" data-to="${safeToId}" data-item="${safeItemId}" data-qty="${Math.min(10, quantity)}">Transfer 10</button>
                 <button class="transfer-btn" data-action="transfer" data-from="${safeFromId}" data-to="${safeToId}" data-item="${safeItemId}" data-qty="${quantity}">Transfer All</button>
             `;
-            // ⚰️ Attach event listeners safely
+            // attach event listeners safely
             itemElement.querySelectorAll('.transfer-btn[data-action="transfer"]').forEach(btn => {
                 btn.onclick = () => this.transferBetweenProperties(btn.dataset.from, btn.dataset.to, btn.dataset.item, parseInt(btn.dataset.qty));
             });
@@ -537,7 +537,7 @@ const PropertyStorage = {
         }
     },
 
-    // 🔄 Switch storage tab 🗡️
+    // switch storage tab
     switchTab(propertyId, tab) {
         const storedTab = document.querySelector(`#property-storage-${propertyId}`);
         const transferTab = document.querySelector(`#property-transfer-${propertyId}`);
@@ -559,5 +559,5 @@ const PropertyStorage = {
     }
 };
 
-// 🌙 expose to global scope 🦇
+// expose to global scope
 window.PropertyStorage = PropertyStorage;

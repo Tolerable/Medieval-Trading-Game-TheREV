@@ -416,7 +416,7 @@ const PropertyMapPicker = {
             const label = document.createElement('div');
             label.className = 'property-location-label';
             label.textContent = location.name;
-            // 🖤 Position label ABOVE icon for consistency 💀
+            // position label ABOVE icon for consistency
             label.style.cssText = `
                 position: absolute;
                 left: 50%;

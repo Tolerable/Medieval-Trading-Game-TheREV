@@ -86,7 +86,7 @@ const NPCCombatStats = {
     encountersToday: 0,
     lastEncounterDay: 0,
 
-    // Check and reset daily encounter count
+    // has midnight passed? reset the encounter tally - new day, new meat
     checkDailyReset() {
         const currentDay = typeof TimeSystem !== 'undefined' ? TimeSystem.getDay() : 1;
         if (currentDay !== this.lastEncounterDay) {
@@ -108,7 +108,7 @@ const NPCCombatStats = {
         console.log(`⚔️ Encounter ${this.encountersToday}/${this.MAX_ENCOUNTERS_PER_DAY} today`);
     },
 
-    // Get random encounter for a path danger level
+    // roll the dice - summon a hostile soul from the danger tier (or return nothing)
     getRandomEncounter(dangerLevel = 'normal') {
         if (!this.canHaveEncounter()) {
             return null; // No more encounters today
@@ -219,21 +219,21 @@ const NPCCombatStats = {
         malachar: 'shadow_blast'   // Multi-target damage
     },
 
-    // Get combat stats for any NPC
+    // calculate power level for any hostile puppet - base stats scaled by location and difficulty
     getStats(npcType, location = null, difficulty = null) {
-        // Get base stats for this NPC type
+        // fetch this enemy type's foundation stats - every hollow soul starts somewhere
         const baseStats = this.BASE_STATS[npcType] || this.BASE_STATS.default;
 
-        // Get location multiplier
+        // adjust for location difficulty - some places breed stronger monsters
         const locMult = location
             ? (this.LOCATION_MULTIPLIERS[location] || this.LOCATION_MULTIPLIERS.default)
             : this.LOCATION_MULTIPLIERS.default;
 
-        // Get difficulty multiplier (from game settings or default to normal)
+        // player's chosen difficulty affects enemy strength - easy mode weakens them, hard mode empowers
         const gameDifficulty = difficulty || game?.settings?.difficulty || 'normal';
         const diffMult = this.DIFFICULTY_MULTIPLIERS[gameDifficulty] || this.DIFFICULTY_MULTIPLIERS.normal;
 
-        // Calculate final stats
+        // multiply everything together - forge the final stat block
         const stats = {
             health: Math.round(baseStats.health * locMult.health * diffMult.health),
             maxHealth: Math.round(baseStats.health * locMult.health * diffMult.health),
@@ -258,7 +258,7 @@ const NPCCombatStats = {
         return stats;
     },
 
-    // Calculate gold drop range with multipliers
+    // how much gold does this corpse carry? calculate loot with location scaling
     _calculateGoldDrop(baseRange, locMult, diffMult) {
         const min = Math.round(baseRange[0] * locMult * diffMult);
         const max = Math.round(baseRange[1] * locMult * diffMult);
@@ -271,7 +271,7 @@ const NPCCombatStats = {
         return min + Math.floor(Math.random() * (max - min + 1));
     },
 
-    // Get player combat stats (matching format)
+    // assemble the player's combat prowess - mirror the enemy stat format
     getPlayerStats() {
         const player = game?.player;
         if (!player) {
@@ -283,13 +283,13 @@ const NPCCombatStats = {
         let defense = 5;
         let speed = 5;
 
-        // Add attribute bonuses
+        // layer on attribute modifiers - strength fuels damage, endurance grants resilience
         const attrs = player.attributes || {};
         attack += (attrs.strength || 5) * 2;
         defense += (attrs.endurance || 5);
         speed += Math.floor((attrs.agility || 5) / 2);
 
-        // Add equipment bonuses (if EquipmentSystem exists)
+        // add gear bonuses if the equipment system exists - armor and weapons matter
         if (typeof EquipmentSystem !== 'undefined' && EquipmentSystem.getStatBonuses) {
             const equipBonus = EquipmentSystem.getStatBonuses();
             attack += equipBonus.attack || 0;
@@ -297,7 +297,7 @@ const NPCCombatStats = {
             speed += equipBonus.speed || 0;
         }
 
-        // Add combat skill bonuses (if CombatSystem exists)
+        // inject combat skill bonuses if the system tracks them - trained fighters hit harder
         if (typeof CombatSystem !== 'undefined' && CombatSystem.getSkillBonuses) {
             const skillBonus = CombatSystem.getSkillBonuses();
             attack += skillBonus.attack || 0;

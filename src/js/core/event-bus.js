@@ -26,7 +26,7 @@ const EventBus = {
     verbose: false,
 
     // ═══════════════════════════════════════════════════════════
-    // 📡 CORE METHODS - The dark API of communication
+    // CORE METHODS - The dark API of communication
     // ═══════════════════════════════════════════════════════════
 
     /**
@@ -41,7 +41,7 @@ const EventBus = {
         }
         this.listeners.get(event).add(callback);
 
-        // Return unsubscribe function - cutting ties is sometimes necessary
+        // hand back the kill switch - sometimes you gotta ghost your listeners
         return () => this.off(event, callback);
     },
 
@@ -53,7 +53,7 @@ const EventBus = {
     off(event, callback) {
         if (this.listeners.has(event)) {
             this.listeners.get(event).delete(callback);
-            // Clean up empty sets - no ghosts allowed
+            // delete empty sets - can't let ghost listeners haunt the bus
             if (this.listeners.get(event).size === 0) {
                 this.listeners.delete(event);
             }
@@ -80,15 +80,15 @@ const EventBus = {
      * @param {*} data - Data to pass to callbacks
      */
     emit(event, data = null) {
-        // Log if verbose - watching every whisper
+        // log the signal if we're paranoid mode
         if (this.verbose) {
             console.log(`📡 EventBus: ${event}`, data);
         }
 
-        // Add to history - documenting the chaos
+        // archive this scream for future deboogering
         this.addToHistory(event, data);
 
-        // Call all listeners - spread the dark message
+        // broadcast to every listener - let them all hear the news
         if (this.listeners.has(event)) {
             this.listeners.get(event).forEach(callback => {
                 try {
@@ -96,19 +96,19 @@ const EventBus = {
                 } catch (error) {
                     // event handler crashed - sanitize this shit or the XSS demons will feast
                     console.warn(`❌ EventBus: Handler error for '${event}':`, error.message);
-                    // Track the failure for debugging
+                    // log this crash for the error graveyard
                     this._trackFailedEvent(event, data, error);
                 }
             });
         }
 
-        // Also emit to wildcard listeners - the paranoid ones who hear everything
+        // notify the wildcard stalkers who eavesdrop on every fucking event
         if (this.listeners.has('*')) {
             this.listeners.get('*').forEach(callback => {
                 try {
                     callback({ event, data });
                 } catch (error) {
-                    // Wildcard handler crashed
+                    // wildcard listener ate shit
                     console.warn(`❌ EventBus: Wildcard handler error:`, error.message);
                     // Track wildcard failures too
                     this._trackFailedEvent('*', { event, data }, error);
@@ -137,14 +137,14 @@ const EventBus = {
             try {
                 const result = callback(data);
                 if (result instanceof Promise) {
-                    // Wrap promise to catch async failures
+                    // wrap the promise to catch when async shit explodes
                     promises.push(result.catch(error => {
                         console.warn(`❌ EventBus: Async handler error for '${event}':`, error.message);
                         this._trackFailedEvent(event, data, error, true);
                     }));
                 }
             } catch (error) {
-                // Async event handler crashed
+                // async handler died screaming
                 console.warn(`❌ EventBus: Async handler error for '${event}':`, error.message);
                 this._trackFailedEvent(event, data, error, true);
             }
@@ -154,7 +154,7 @@ const EventBus = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🔧 UTILITY METHODS - Tools for the obsessed
+    // UTILITY METHODS - Tools for the obsessed
     // ═══════════════════════════════════════════════════════════
 
     /**
@@ -196,7 +196,7 @@ const EventBus = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 📜 HISTORY & DEBOOGERING 🦇 - Peer into the past
+    // HISTORY & DEBOOGERING - Peer into the past
     // ═══════════════════════════════════════════════════════════
 
     addToHistory(event, data) {
@@ -253,7 +253,7 @@ const EventBus = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 💀 FAILED EVENT TRACKING - When handlers crash and burn
+    // FAILED EVENT TRACKING - When handlers crash and burn
     // ═══════════════════════════════════════════════════════════
 
     /**
@@ -273,7 +273,7 @@ const EventBus = {
             timestamp: Date.now()
         });
 
-        // Keep bounded - can't hoard errors forever
+        // cap the error collection - even failures deserve to die eventually
         while (this._failedEvents.length > this._maxFailedEvents) {
             this._failedEvents.shift();
         }
@@ -400,7 +400,7 @@ EventBus.EVENTS = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY
+// EXPOSE GLOBALLY - Let the darkness spread
 // ═══════════════════════════════════════════════════════════════
 
 window.EventBus = EventBus;

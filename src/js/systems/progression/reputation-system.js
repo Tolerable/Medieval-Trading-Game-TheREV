@@ -8,7 +8,7 @@
 // 
 
 const ReputationSystem = {
-    // Reputation tiers with thresholds and effects
+    // The ladder of worth - from despised to deified, every soul has a price
     tiers: {
         villain: {
             name: 'Villain',
@@ -170,7 +170,7 @@ const ReputationSystem = {
         }
     },
 
-    // Reputation actions and their effects
+    // Actions and their eternal consequences - every deed remembered, every sin tallied
     actions: {
         // Positive actions
         complete_quest: { base: 15, description: 'Completed a quest' },
@@ -195,24 +195,24 @@ const ReputationSystem = {
         fail_quest: { base: -10, description: 'Failed a quest' }
     },
 
-    // Current reputation value
+    // Your worth in the eyes of strangers - a number that defines you
     reputation: 0,
 
-    // Reputation history
+    // Every choice you've made, catalogued for eternity
     history: [],
 
-    // Per-location reputation modifiers
+    // Local fame and infamy - some places remember better than others
     locationReputation: {},
 
-    //  LRU tracking for location reputation cleanup 
+    // Memory fades - even hatred has limits 
     _locationAccessOrder: [],
-    _maxLocationRepEntries: 50, // Keep reputation for last 50 visited locations
+    _maxLocationRepEntries: 50, // Only 50 places remember your sins - the rest forget
 
-    // Bounty system
+    // Blood money - the price on your head
     bounty: 0,
     activeBounties: [],
 
-    // Initialize the system
+    // Wake the watcher - reputation begins its judgment
     init() {
         this.loadReputation();
         this.createStyles();
@@ -221,7 +221,7 @@ const ReputationSystem = {
         console.log('🏆 ReputationSystem initialized');
     },
 
-    // Load reputation from game state
+    // Resurrect your legacy from the void
     loadReputation() {
         if (typeof game !== 'undefined' && game.player) {
             this.reputation = game.player.reputation || 0;
@@ -231,7 +231,7 @@ const ReputationSystem = {
         }
     },
 
-    // Save reputation to game state
+    // Etch your deeds into permanence
     saveReputation() {
         if (typeof game !== 'undefined' && game.player) {
             game.player.reputation = this.reputation;
@@ -241,10 +241,10 @@ const ReputationSystem = {
         }
     },
 
-    // Setup event listeners
+    // Listen for your sins and virtues alike
     setupEventListeners() {
         if (typeof EventBus !== 'undefined') {
-            // Listen for various game events
+            // The eyes that never blink - watching every action
             EventBus.on('quest:completed', (data) => {
                 this.modifyReputation('complete_quest', data.questDifficulty || 1);
             });
@@ -273,7 +273,7 @@ const ReputationSystem = {
         }
     },
 
-    // Get current reputation tier
+    // What are you in their eyes? Hero? Monster? Stranger?
     getCurrentTier() {
         for (const [tierId, tier] of Object.entries(this.tiers)) {
             if (this.reputation >= tier.min && this.reputation <= tier.max) {
@@ -283,7 +283,7 @@ const ReputationSystem = {
         return { id: 'unknown', ...this.tiers.unknown };
     },
 
-    // Modify reputation
+    // Shift the scales - rise or fall, you cannot stand still
     modifyReputation(actionId, multiplier = 1, locationId = null) {
         const action = this.actions[actionId];
         if (!action) {
@@ -294,7 +294,7 @@ const ReputationSystem = {
         const previousTier = this.getCurrentTier();
         const baseChange = action.base * multiplier;
 
-        // Apply faction bonuses/penalties
+        // The famous rise faster, the damned fall harder - fate loves momentum
         const effects = this.getCurrentTier().effects;
         let finalChange = baseChange;
         if (baseChange > 0 && effects.factionBonus) {
@@ -307,14 +307,14 @@ const ReputationSystem = {
         finalChange = Math.round(finalChange);
         this.reputation += finalChange;
 
-        // Update location-specific reputation
+        // This place will remember you - for better or worse
         if (locationId) {
             this.locationReputation[locationId] = (this.locationReputation[locationId] || 0) + finalChange;
-            //  LRU tracking - move this location to end of access order 
+            // Update the ledger - this location remembers you now 
             this._updateLocationAccessOrder(locationId);
         }
 
-        // Add to history
+        // Another entry in your chronicle of choices
         this.history.push({
             action: actionId,
             description: action.description,
@@ -324,14 +324,14 @@ const ReputationSystem = {
             location: locationId
         });
 
-        // Keep history limited
+        // Only the last 100 sins are remembered - older ones fade to dust
         if (this.history.length > 100) {
             this.history = this.history.slice(-100);
         }
 
         this.saveReputation();
 
-        // Check for tier change
+        // Did you cross a threshold? Ascend or descend?
         const newTier = this.getCurrentTier();
         if (previousTier.id !== newTier.id) {
             this.onTierChanged(previousTier, newTier);
@@ -347,20 +347,20 @@ const ReputationSystem = {
             });
         }
 
-        // Show notification
+        // Let you feel the weight of your deeds
         this.showReputationChange(finalChange, action.description);
 
         return finalChange;
     },
 
-    // Handle tier change
+    // You've become someone new - hero or villain, the world reacts
     onTierChanged(previousTier, newTier) {
         const isPromotion = newTier.min > previousTier.min;
 
-        // Show tier change notification
+        // Announce your rebirth to the realm
         this.showTierChangeNotification(previousTier, newTier, isPromotion);
 
-        // Emit tier change event
+        // The cosmos acknowledges your transformation
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('reputation:tierChanged', {
                 previousTier: previousTier.id,
@@ -369,7 +369,7 @@ const ReputationSystem = {
             });
         }
 
-        // Apply tier-specific unlocks
+        // New doors open, new paths reveal themselves
         if (newTier.effects.specialAccess) {
             newTier.effects.specialAccess.forEach(access => {
                 if (typeof EventBus !== 'undefined') {
@@ -379,11 +379,11 @@ const ReputationSystem = {
         }
     },
 
-    // Get price modifier based on reputation
+    // Your reputation bleeds into your wallet - fame discounts, infamy inflates
     getPriceModifier(locationId = null) {
         let modifier = this.getCurrentTier().effects.priceModifier;
 
-        // Apply location-specific modifier
+        // This town knows you well - and prices adjust accordingly
         if (locationId && this.locationReputation[locationId]) {
             const localRep = this.locationReputation[locationId];
             if (localRep > 100) modifier *= 0.95;
@@ -412,18 +412,18 @@ const ReputationSystem = {
         }
     },
 
-    // Check if player can access certain content
+    // Are you worthy of these forbidden doors?
     canAccess(accessType) {
         const tier = this.getCurrentTier();
         return tier.effects.specialAccess?.includes(accessType) || false;
     },
 
-    // Get NPC trust level
+    // How much do strangers believe your lies?
     getNPCTrust() {
         return this.getCurrentTier().effects.npcTrust;
     },
 
-    // Check if guards are hostile
+    // Do the guards want your blood?
     areGuardsHostile() {
         return this.getCurrentTier().effects.guardHostility;
     },
@@ -472,7 +472,7 @@ const ReputationSystem = {
         return false;
     },
 
-    // Check location triggers
+    // Roll the dice - will this place welcome or reject you?
     checkLocationTriggers(locationId) {
         const tier = this.getCurrentTier();
 
@@ -483,7 +483,7 @@ const ReputationSystem = {
         }
     },
 
-    // Check NPC interaction triggers
+    // Let reputation shape how they greet you
     checkNPCTriggers(npcId) {
         const tier = this.getCurrentTier();
 

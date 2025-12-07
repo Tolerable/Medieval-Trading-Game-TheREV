@@ -8,53 +8,53 @@
 // 
 
 const DungeonBonanzaSystem = {
-    //  Event configuration
+    // The one day a year when dungeons get EASY - cosmic mercy
     EVENT_MONTH: 7,  // July
     EVENT_DAY: 18,   // 18th
     EVENT_NAME: 'The Dark Convergence',
 
-    //  Dungeon travel time override (30 minutes to any dungeon)
+    // Teleport mode - 30 minutes to any dungeon, fuck physics
     DUNGEON_TRAVEL_TIME: 30,
 
-    //  Track if we've shown the event notification today
+    // Don't spam the player with notifications - once per day is enough
     hasShownNotificationToday: false,
     lastNotificationDay: 0,
 
-    //  Manual override for doom command - active until end of current game day
+    // Debooger can force this shit on - lasts until midnight
     manualOverrideActive: false,
     manualOverrideEndDay: 0,
 
-    //  Activate bonanza manually for one game day
+    // Force the bonanza on - cheating or testing, I don't judge
     activateManualOverride() {
         this.manualOverrideActive = true;
-        // Set end day to current day - will expire on next day
+        // Active until day changes - then it dies
         this.manualOverrideEndDay = this.getCurrentDay();
         console.log('☄️ DOOM BONANZA ACTIVATED! Dungeon benefits until end of day');
         this.showEventNotification();
     },
 
-    //  Deactivate manual override
+    // deactivate manual override
     deactivateManualOverride() {
         this.manualOverrideActive = false;
         this.manualOverrideEndDay = 0;
         console.log('☄️ Doom bonanza ended');
     },
 
-    //  Check if manual override is still valid (same day)
+    // Is the override still alive or did midnight kill it?
     isManualOverrideValid() {
         if (!this.manualOverrideActive) return false;
         const currentDay = this.getCurrentDay();
         if (currentDay !== this.manualOverrideEndDay) {
-            // Day changed, deactivate override
+            // Midnight passed - override expires
             this.deactivateManualOverride();
             return false;
         }
         return true;
     },
 
-    //  Check if today is July 18th (The Dark Convergence) OR manual override active
+    // Is it July 18th or did someone cheat it on?
     isDungeonBonanzaDay() {
-        // Check manual override first
+        // Cheaters first - manual override wins
         if (this.isManualOverrideValid()) {
             return true;
         }
@@ -68,7 +68,7 @@ const DungeonBonanzaSystem = {
                TimeMachine.currentTime.day === this.EVENT_DAY;
     },
 
-    //  Get current game date for tracking
+    // get current game date for tracking
     getCurrentDay() {
         if (typeof TimeMachine !== 'undefined') {
             return TimeMachine.currentTime.year * 1000 +
@@ -83,7 +83,7 @@ const DungeonBonanzaSystem = {
         return 0;
     },
 
-    //  Get event modifiers for travel and dungeons
+    // get event modifiers for travel and dungeons
     getEventModifiers() {
         if (!this.isDungeonBonanzaDay()) {
             return {
@@ -100,31 +100,31 @@ const DungeonBonanzaSystem = {
         };
     },
 
-    //  Check if dungeon cooldowns should be bypassed
+    // check if dungeon cooldowns should be bypassed
     shouldBypassCooldowns() {
         return this.isDungeonBonanzaDay();
     },
 
-    //  Calculate travel time with Dungeon Bonanza override
-    // Returns null if no override should apply, otherwise returns the override time
+    // calculate travel time with Dungeon Bonanza override
+    // returns null if no override should apply, otherwise returns the override time
     getDungeonTravelTimeOverride(fromId, toId) {
         if (!this.isDungeonBonanzaDay()) return null;
 
-        //  Check if destination is a dungeon
+        // check if destination is a dungeon
         if (typeof GameWorld === 'undefined' || !GameWorld.locations) return null;
 
         const destination = GameWorld.locations[toId];
         if (!destination) return null;
 
-        //  Only override for dungeon-type locations
+        // only override for dungeon-type locations
         const dungeonTypes = ['dungeon', 'cave', 'ruins', 'mine'];
         if (!dungeonTypes.includes(destination.type)) return null;
 
-        //  Return the special 30-minute travel time
+        // return the special 30-minute travel time
         return this.DUNGEON_TRAVEL_TIME;
     },
 
-    //  Show event notification (once per game day)
+    // show event notification (once per game day)
     showEventNotification() {
         const currentDay = this.getCurrentDay();
 
@@ -141,7 +141,7 @@ const DungeonBonanzaSystem = {
         this.hasShownNotificationToday = true;
         this.lastNotificationDay = currentDay;
 
-        //  Show dramatic notification
+        // show dramatic notification
         if (typeof addMessage === 'function') {
             addMessage('═══════════════════════════════════════════════════', 'special');
             addMessage('💀 THE DARK CONVERGENCE HAS BEGUN! 💀', 'special');
@@ -156,14 +156,14 @@ const DungeonBonanzaSystem = {
         console.log('💀 DUNGEON BONANZA: The Dark Convergence is active!');
     },
 
-    //  Check and update event status (call from game loop)
+    // check and update event status (call from game loop)
     update() {
         if (this.isDungeonBonanzaDay()) {
             this.showEventNotification();
         }
     },
 
-    //  Get event status for UI display
+    // get event status for UI display
     getEventStatus() {
         if (!this.isDungeonBonanzaDay()) {
             return {
@@ -181,11 +181,11 @@ const DungeonBonanzaSystem = {
         };
     },
 
-    //  Initialize the system
+    // initialize the system
     init() {
         console.log('💀 DungeonBonanzaSystem initialized - watching for July 18th...');
 
-        //  Check immediately if today is the event
+        // check immediately if today is the event
         if (this.isDungeonBonanzaDay()) {
             this.showEventNotification();
         }
@@ -194,7 +194,7 @@ const DungeonBonanzaSystem = {
     }
 };
 
-//  Auto-initialize when loaded
+// auto-initialize when loaded
 if (typeof window !== 'undefined') {
     window.DungeonBonanzaSystem = DungeonBonanzaSystem;
 }

@@ -14,7 +14,7 @@ const FactionSystem = {
     playerFactionRep: {},
 
     //  Reputation thresholds - scaled to -100 to +100 for sanity
-    // the void operates on simple numbers, not your overcomplicated bullshit 
+    // -100 to +100 - simple math for complex hatred and fragile devotion 
     repLevels: {
         hated: { min: -100, max: -75, name: 'Hated', icon: 'ðŸ’€', color: '#8b0000' },
         hostile: { min: -75, max: -50, name: 'Hostile', icon: '', color: '#ff0000' },
@@ -184,10 +184,10 @@ const FactionSystem = {
     init() {
         console.log('ðŸ›ï¸ FactionSystem: Establishing allegiances... choose your enemies wisely ðŸ—¡ï¸');
 
-        //  Initialize faction reputations - everyone starts neutral (won't last)
+        // Everyone starts neutral - innocence dies fast in this world
         for (const factionId of Object.keys(this.factions)) {
             if (this.playerFactionRep[factionId] === undefined) {
-                this.playerFactionRep[factionId] = 0; // Ÿ¦‡ Start neutral - for now
+                this.playerFactionRep[factionId] = 0; // Zero. Neutral. Temporary peace before the inevitable betrayal
             }
         }
 
@@ -236,7 +236,7 @@ const FactionSystem = {
         const oldRep = this.playerFactionRep[factionId] || 0;
         const oldLevel = this.getReputationLevel(factionId);
 
-        //  Clamp to -100 to +100 - everyone can be redeemed... or damned
+        // Clamp the hate - even gods have limits on love and loathing
         this.playerFactionRep[factionId] = Math.max(-100, Math.min(100, oldRep + amount));
 
         const newLevel = this.getReputationLevel(factionId);
@@ -313,16 +313,15 @@ const FactionSystem = {
     },
 
     // 
-    //  EVENT HANDLERS - the void watches all your actions... and judges 
+    // Every action echoes in the void - I see what you do, and I remember 
     // 
     onTradeCompleted(data) {
-        //  TRADING IS THE PRIMARY WAY TO GAIN REP - make it meaningful
+        // Trade buys loyalty - gold speaks louder than blood in this realm
         const location = data.location || game?.currentLocation?.id;
         const value = data.totalValue || 0;
         const npcType = data.npcType || data.merchantType;
 
-        //  Base rep from trade value (scaled for -100 to 100 system)
-        // Every 50g traded = +1 rep with merchants guild (main source)
+        // Every 50 gold buys a sliver of respect - reputation through transaction
         if (value >= 50) {
             const repGain = Math.min(5, Math.floor(value / 50)); // Cap at 5 per trade
             this.modifyReputation('merchants_guild', repGain, 'successful trade');
@@ -471,11 +470,10 @@ const FactionSystem = {
     },
 
     // 
-    //  REPUTATION RECOVERY - because everyone deserves a second chance
-    // (or they just pay enough gold to make people forget)
+    // Sins can be washed away - if your pockets are deep enough
     // 
 
-    //  Bribe to recover rep (costs gold, recovers negative rep)
+    // Bribe your way back into their good graces - guilt is just a price tag
     bribeFaction(factionId, goldAmount) {
         const faction = this.factions[factionId];
         if (!faction) return { success: false, error: 'Invalid faction' };
@@ -490,7 +488,7 @@ const FactionSystem = {
                 return { success: false, error: 'Not enough gold' };
             }
 
-            //  Bribe efficiency: 100g = +5 rep (but only for negative rep recovery)
+            // 100 gold per 5 points of forgiveness - redemption has a price
             const repGain = Math.min(Math.abs(currentRep), Math.floor(goldAmount / 20));
             game.player.gold -= goldAmount;
             this.modifyReputation(factionId, repGain, 'bribe');
@@ -537,14 +535,14 @@ const FactionSystem = {
     },
 
     // 
-    //  BENEFITS/PENALTIES API - rewards for the loyal, suffering for the hated
+    // Loyalty brings gifts, hatred brings ruin - your choices echo forever
     // 
     getFactionBenefits(factionId) {
         const faction = this.factions[factionId];
         const level = this.getReputationLevel(factionId);
         if (!faction) return null;
 
-        //  Benefits start at 25+ rep (friendly)
+        // Kindness begins at 25 - below that, you're just another stranger
         if (level.currentRep >= 25 && faction.benefits) {
             const tiers = ['exalted', 'revered', 'honored', 'friendly'];
             for (const tier of tiers) {
@@ -562,7 +560,7 @@ const FactionSystem = {
         const level = this.getReputationLevel(factionId);
         if (!faction) return null;
 
-        //  Penalties start at -25 rep (unfriendly)
+        // Consequences begin at -25 - sink lower and the world turns hostile
         if (level.currentRep < -25 && faction.penalties) {
             const tiers = ['hated', 'hostile', 'unfriendly'];
             for (const tier of tiers) {
@@ -815,7 +813,7 @@ const FactionSystem = {
     },
 
     // 
-    //  DEBOOGER & CHEATS  - for testing, not for casuals 
+    // Debug commands - bend fate itself, if you dare 
     // 
     setReputation(factionId, amount) {
         if (this.factions[factionId]) {

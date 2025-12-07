@@ -598,12 +598,12 @@ Be sympathetic, desperate but not pathetic.`
      * @returns {Promise<{text: string, voice: string}>}
      */
     async generateDialogue(npcType, context = 'firstMeeting', options = {}) {
-        // Check if it's a boss
+        // is this a boss? search the vault of tyrants and monsters
         let persona = this.bossPersonas[npcType];
         let isBoss = true;
 
         if (!persona) {
-            // Check merchant personas
+            // not a boss - check if it's a merchant puppet instead
             persona = this.merchantPersonas[npcType];
             isBoss = false;
         }
@@ -617,20 +617,20 @@ Be sympathetic, desperate but not pathetic.`
 
         const voice = options.voice || persona.voice || 'nova';
 
-        // Build the system prompt with context
+        // assemble the instructions that command this puppet's tongue
         let systemPrompt = persona.systemPrompt;
 
-        // Add context-specific guidance for bosses
+        // inject situation-specific programming for boss encounters - context matters
         if (isBoss && persona.contextPrompts && persona.contextPrompts[context]) {
             systemPrompt += `\n\nCURRENT SITUATION: ${persona.contextPrompts[context]}`;
         }
 
-        // Add any custom context
+        // layer on any custom context the caller provided - additional flavor
         if (options.customContext) {
             systemPrompt += `\n\nADDITIONAL CONTEXT: ${options.customContext}`;
         }
 
-        // Add the critical TTS instruction
+        // force the TTS constraint - puppets must speak ONLY words, no stage directions
         systemPrompt += `\n\nIMPORTANT: Respond in first person AS the character. Do NOT use asterisks, action descriptions, or narration. Just speak directly as the character would. Keep response to 1-3 sentences.`;
 
         try {
@@ -648,9 +648,9 @@ Be sympathetic, desperate but not pathetic.`
                 status: error?.response?.status,
                 npcType: npcType,
                 isBoss: isBoss,
-                context: context?.substring?.(0, 100) || context // 🖤 Truncate long context for logging
+                context: context?.substring?.(0, 100) || context // truncate long context for logging
             });
-            // Return a fallback based on type
+            // the API void gave us nothing - return hardcoded fallback based on puppet type
             const fallbackText = isBoss
                 ? this.getBossFallback(npcType, context)
                 : this.getMerchantFallback(npcType);
@@ -715,7 +715,7 @@ Be sympathetic, desperate but not pathetic.`
         console.log('🎭 callTextAPI: Response status:', response.status);
 
         if (!response.ok) {
-            // 🦇 API returned error - throw to trigger fallback
+            // API returned error - throw to trigger fallback
             throw new Error(`Text API error: ${response.status}`);
         }
 
@@ -724,7 +724,7 @@ Be sympathetic, desperate but not pathetic.`
         let text = data.choices?.[0]?.message?.content?.trim() || '';
 
         if (!text) {
-            // 🦇 API returned empty - throw to trigger fallback
+            // API returned empty - throw to trigger fallback
             throw new Error('Empty response from text API');
         }
         console.log('🎭 callTextAPI: Got response:', text.substring(0, 80) + '...');
@@ -766,7 +766,7 @@ Be sympathetic, desperate but not pathetic.`
         try {
             await audio.play();
         } catch (error) {
-            // 🦇 Audio blocked by browser - common, silently ignore
+            // audio blocked by browser - common, silently ignore
         }
     },
 
@@ -1047,7 +1047,7 @@ Available commands:\n`;
                     console.warn(`🎮 Command failed: ${cmd.action}`, result.message);
                 }
             } catch (error) {
-                // 🦇 Command failed - track but don't spam console
+                // command failed - track but don't spam console
                 results.push({
                     command: cmd,
                     success: false,
@@ -1103,7 +1103,7 @@ Available commands:\n`;
 
                 if (!game.player.inventory) game.player.inventory = {};
                 game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + qty;
-                // 🖤 Emit item-received for quest progress tracking 💀
+                // emit item-received for quest progress tracking
                 document.dispatchEvent(new CustomEvent('item-received', {
                     detail: { item: itemId, quantity: qty, source: 'npc_gift' }
                 }));
@@ -1361,7 +1361,7 @@ Available commands:\n`;
                 npcType: npcType
             };
         } catch (error) {
-            // 🦇 Interactive dialogue failed - use fallback gracefully
+            // interactive dialogue failed - use fallback gracefully
             return {
                 text: this.getMerchantFallback(npcType),
                 voice: options.voice || persona.voice || 'nova',

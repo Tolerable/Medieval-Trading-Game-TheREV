@@ -8,7 +8,7 @@
 
 const DoomWorldNPCs = {
     // ═══════════════════════════════════════════════════════════════
-    // DOOM LOCATION NAMES - Everything burns
+    // DOOM LOCATION NAMES - What paradise looks like in ruins
     // ═══════════════════════════════════════════════════════════════
     locationNames: {
         royal_capital: 'The Fallen Throne',
@@ -61,12 +61,12 @@ const DoomWorldNPCs = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // DOOM NPC ARRAYS - Same people, shattered souls
-    // All NPCs from normal world exist here, but changed by the apocalypse
+    // DOOM NPC ARRAYS - The merchants, guards, and farmers you knew
+    // Now they're broken. Traumatized. Fighting to breathe one more day.
     // ═══════════════════════════════════════════════════════════════
     locationNPCs: {
         // ═══════════════════════════════════════════════════════════
-        // THE FALLEN THRONE (Royal Capital)
+        // THE FALLEN THRONE - Where kings died and gold turned to ash
         // ═══════════════════════════════════════════════════════════
         royal_capital: {
             npcs: ['fallen_noble', 'desperate_guard', 'mad_captain', 'starving_jeweler', 'ragged_tailor', 'ruined_banker', 'doomsayer', 'scavenger_merchant', 'grief_stricken_elder'],
@@ -75,7 +75,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // RUINED CITIES
+        // RUINED CITIES - Monuments to what we lost
         // ═══════════════════════════════════════════════════════════
         northern_outpost: {
             npcs: ['crazed_blacksmith', 'hollow_guard', 'broken_captain', 'plague_apothecary', 'desperate_merchant', 'trapped_miner'],
@@ -109,7 +109,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // DEVASTATED VILLAGES
+        // DEVASTATED VILLAGES - Ghosts of quiet life
         // ═══════════════════════════════════════════════════════════
         frostholm_village: {
             npcs: ['frozen_elder', 'frostbitten_merchant', 'shellshocked_guard', 'desperate_hunter', 'starving_trapper'],
@@ -143,7 +143,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // COLLAPSED MINES
+        // COLLAPSED MINES - Buried alive in the dark
         // ═══════════════════════════════════════════════════════════
         iron_mines: {
             npcs: ['buried_miner', 'frantic_foreman', 'scavenging_merchant'],
@@ -162,7 +162,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // CORRUPTED FORESTS
+        // CORRUPTED FORESTS - Where nature turned hostile
         // ═══════════════════════════════════════════════════════════
         ancient_forest: {
             npcs: ['poisoned_herbalist', 'hunted_hunter', 'mad_forager'],
@@ -181,7 +181,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // BLIGHTED FARMS
+        // BLIGHTED FARMS - The breadbasket rotted from within
         // ═══════════════════════════════════════════════════════════
         wheat_farm: {
             npcs: ['starving_farmer', 'desperate_miller', 'hollow_farmhand'],
@@ -205,7 +205,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // DUNGEONS OF DESPAIR
+        // DUNGEONS OF DESPAIR - Where the darkness was born
         // ═══════════════════════════════════════════════════════════
         shadow_dungeon: {
             npcs: ['corrupted_adventurer', 'doomed_treasure_hunter'],
@@ -224,7 +224,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // HAUNTED CAVES
+        // HAUNTED CAVES - Shelter that eats souls
         // ═══════════════════════════════════════════════════════════
         deep_cavern: {
             npcs: ['cave_dweller', 'hidden_miner'],
@@ -258,7 +258,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // DESPERATE INNS
+        // DESPERATE INNS - Last refuge of the damned
         // ═══════════════════════════════════════════════════════════
         kings_inn: {
             npcs: ['surviving_innkeeper', 'fallen_noble', 'shell_shocked_traveler', 'silenced_bard'],
@@ -297,7 +297,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // FALLEN OUTPOSTS
+        // FALLEN OUTPOSTS - The final stand that never ends
         // ═══════════════════════════════════════════════════════════
         ironforge_city: {
             npcs: ['last_guard', 'dying_captain', 'wounded_sergeant', 'desperate_blacksmith'],
@@ -316,7 +316,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // PORTS OF THE DEAD
+        // PORTS OF THE DEAD - Where the sea spits back corpses
         // ═══════════════════════════════════════════════════════════
         fishermans_port: {
             npcs: ['plague_fisherman', 'ghost_sailor', 'mad_harbormaster', 'hoarding_merchant'],
@@ -330,7 +330,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // CORRUPTED SPECIAL LOCATIONS
+        // CORRUPTED SPECIAL LOCATIONS - Where the strange became monstrous
         // ═══════════════════════════════════════════════════════════
         hermit_grove: {
             npcs: ['insane_hermit', 'prophetic_sage'],
@@ -350,7 +350,7 @@ const DoomWorldNPCs = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // DOOM NPC TYPES - What they've become
+    // DOOM NPC TYPES - The twisted reflections of who they were
     // ═══════════════════════════════════════════════════════════════
     npcTypes: {
         // Transformed versions of normal NPCs
@@ -379,10 +379,10 @@ const DoomWorldNPCs = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // DOOM ECONOMY VALUES - What matters now
+    // DOOM ECONOMY VALUES - The new mathematics of survival
     // ═══════════════════════════════════════════════════════════════
     economyModifiers: {
-        // Survival essentials - EXTREMELY valuable
+        // Survival essentials - Worth more than all the gold that ever existed
         food: 50.0,           // 50x normal price
         water: 100.0,         // 100x normal price - most precious
         bread: 40.0,
@@ -392,7 +392,7 @@ const DoomWorldNPCs = {
         bandages: 55.0,
         herbs: 30.0,
 
-        // Weapons and defense - Very valuable
+        // Weapons and defense - Your only friends in the dark
         iron_sword: 15.0,
         steel_sword: 20.0,
         bow: 12.0,
@@ -401,7 +401,7 @@ const DoomWorldNPCs = {
         armor: 18.0,
         chainmail: 16.0,
 
-        // Crafting materials for survival - Valuable
+        // Crafting materials for survival - Build shelter or become bones
         leather: 8.0,
         cloth: 6.0,
         rope: 10.0,
@@ -411,11 +411,11 @@ const DoomWorldNPCs = {
         iron_bar: 5.0,
         tools: 7.0,
 
-        // Clothing for protection - Moderately valuable
+        // Clothing for protection - Freeze or burn, pick your death
         winter_clothing: 12.0,
         furs: 10.0,
 
-        // Former luxuries - Nearly worthless
+        // Former luxuries - Pretty garbage for the dying
         gold: 0.01,           // Gold is worthless
         gold_bar: 0.02,
         jewelry: 0.05,
@@ -430,13 +430,13 @@ const DoomWorldNPCs = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // DOOM INVENTORY SYSTEM - Survival supplies, not luxury goods
+    // DOOM INVENTORY SYSTEM - What the damned carry in their pockets
     // ═══════════════════════════════════════════════════════════════
 
-    // Doom NPC inventory templates - survival focus, no gold value
+    // Loot tables for the apocalypse - scraps, salvation, and sorrow
     doomInventoryTemplates: {
         // ═══════════════════════════════════════════════════════════
-        // SURVIVORS - desperate for basics
+        // SURVIVORS - Clinging to moldy bread and broken hope
         // ═══════════════════════════════════════════════════════════
         survivor: {
             common: ['moldy_bread', 'dirty_water', 'tattered_cloth', 'rusty_knife'],
@@ -455,7 +455,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // CORRUPTED/HOSTILE - dangerous, may have valuable loot
+        // CORRUPTED/HOSTILE - Kill them and carve out what's useful
         // ═══════════════════════════════════════════════════════════
         blight_creature: {
             common: ['corrupted_flesh', 'dark_ichor', 'twisted_bone'],
@@ -479,7 +479,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // DOOM MERCHANTS - trade in survival, not luxury
+        // DOOM MERCHANTS - Trading scraps for your last breath
         // ═══════════════════════════════════════════════════════════
         scavenger_merchant: {
             common: ['salvaged_tools', 'scrap_metal', 'old_rope', 'torn_cloth'],
@@ -498,7 +498,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // DOOM SERVICE - healers and priests of the apocalypse
+        // DOOM SERVICE - Those who still try to heal the unhealable
         // ═══════════════════════════════════════════════════════════
         plague_apothecary: {
             common: ['makeshift_bandage', 'herbal_paste', 'pain_numbing_draught', 'fever_reducer'],
@@ -517,7 +517,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // DOOM MILITARY - warriors of the end times
+        // DOOM MILITARY - Soldiers with no war left to win
         // ═══════════════════════════════════════════════════════════
         desperate_guard: {
             common: ['notched_sword', 'dented_shield', 'worn_armor', 'broken_whistle'],
@@ -536,7 +536,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // DOOM CIVILIANS - what remains of normal folk
+        // DOOM CIVILIANS - Farmers and families reduced to ghosts
         // ═══════════════════════════════════════════════════════════
         starving_farmer: {
             common: ['dead_seeds', 'dry_soil', 'broken_hoe', 'empty_basket'],
@@ -560,7 +560,7 @@ const DoomWorldNPCs = {
         },
 
         // ═══════════════════════════════════════════════════════════
-        // DOOM SPECIALISTS - unique apocalypse roles
+        // DOOM SPECIALISTS - Strange talents for a strange hell
         // ═══════════════════════════════════════════════════════════
         crazed_blacksmith: {
             common: ['scrap_iron', 'broken_forge_tool', 'coal_dust', 'bent_nails'],
@@ -579,7 +579,7 @@ const DoomWorldNPCs = {
         }
     },
 
-    // Generate doom NPC inventory
+    // Roll the dice - what scraps does this NPC have?
     generateDoomInventory(npcType) {
         // Get base type from doom type mapping
         const npcData = this.npcTypes[npcType];
@@ -626,7 +626,7 @@ const DoomWorldNPCs = {
         return inventory;
     },
 
-    // Generate doom NPC "gold" (actually worthless, but they might have some)
+    // How much worthless gold do they clutch in denial?
     generateDoomGold(npcType) {
         // Gold is nearly worthless in doom - NPCs have very little
         const goldRanges = {
@@ -656,7 +656,7 @@ const DoomWorldNPCs = {
         return Math.floor(range.min + Math.random() * (range.max - range.min));
     },
 
-    // Check if doom NPC can trade
+    // Can they barter or are they too far gone?
     canDoomTrade(npcType) {
         const tradingTypes = [
             'scavenger_merchant', 'survival_smuggler', 'desperate_merchant', 'hoarding_merchant',
@@ -670,15 +670,15 @@ const DoomWorldNPCs = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // UTILITY FUNCTIONS
+    // UTILITY FUNCTIONS - Helper methods to navigate the wasteland
     // ═══════════════════════════════════════════════════════════════
 
-    // Get doom location name
+    // Translate place names to their ruined versions
     getLocationName(locationId) {
         return this.locationNames[locationId] || `Ruined ${locationId}`;
     },
 
-    // Get NPCs for a doom location
+    // Who still clings to life at this cursed place?
     getNPCsForLocation(locationId) {
         const locationData = this.locationNPCs[locationId];
         if (!locationData) {
@@ -688,32 +688,32 @@ const DoomWorldNPCs = {
         return locationData.npcs || [];
     },
 
-    // Get location description
+    // Fetch the grim tale of what this place became
     getLocationDescription(locationId) {
         const locationData = this.locationNPCs[locationId];
         return locationData?.description || 'Ruins and despair stretch as far as the eye can see.';
     },
 
-    // Get location atmosphere
+    // How does death feel in the air here?
     getLocationAtmosphere(locationId) {
         const locationData = this.locationNPCs[locationId];
         return locationData?.atmosphere || 'The air is thick with ash and hopelessness.';
     },
 
-    // Calculate doom price for item
+    // Convert item value to apocalypse economics
     getDoomPrice(itemId, basePrice) {
         const modifier = this.economyModifiers[itemId] || 1.0;
         return Math.round(basePrice * modifier);
     },
 
-    // Check if in doom world
+    // Are we currently in hell?
     isInDoomWorld() {
         return typeof game !== 'undefined' && game.inDoomWorld === true;
     }
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY
+// Spread the corruption everywhere - make it global
 // ═══════════════════════════════════════════════════════════════
 window.DoomWorldNPCs = DoomWorldNPCs;
 

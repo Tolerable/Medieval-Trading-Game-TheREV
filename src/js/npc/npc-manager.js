@@ -14,23 +14,23 @@ const NPCManager = {
     // currently active NPC - the soul the player is haunting
     activeNPC: null,
 
-    // 🏠 NPCs by location for quick lookup 🗡️
+    // npcs by location for quick lookup
     npcsByLocation: new Map(),
 
-    // 🔄 Update interval ID 🌙
+    // timer that keeps these hollow souls ticking - the void's metronome
     _updateInterval: null,
 
-    // 🖤 Debug mode flag for extra logging 💀
+    // extra logging to watch these puppets dance - the debooger sees all
     _deboogMode: false,
 
-    // 🖤 Initialize the NPC Manager ⚰️
+    // awaken the puppetmaster - time to pull the strings of these digital marionettes
     init() {
         console.log('👤 NPCManager awakening from the digital void...');
 
-        // 🔄 Start periodic updates 🦇
+        // start periodic updates
         this._updateInterval = setInterval(() => this.update(), 1000);
 
-        // 🎭 Listen for location changes 🗡️
+        // listen for location changes
         document.addEventListener('location-changed', (e) => {
             this.onLocationChange(e.detail);
         });
@@ -38,7 +38,7 @@ const NPCManager = {
         console.log('👤 NPCManager initialized - puppets await your command 💀');
     },
 
-    // ➕ Register an NPC 🌙
+    // register an NPC
     register(npc) {
         if (!npc || !npc.id) {
             console.warn('👤 Cannot register NPC without id');
@@ -47,7 +47,7 @@ const NPCManager = {
 
         this.npcs.set(npc.id, npc);
 
-        // 🏠 Add to location index 🔮
+        // catalogue this soul by location - every puppet needs a stage
         if (npc.location) {
             if (!this.npcsByLocation.has(npc.location)) {
                 this.npcsByLocation.set(npc.location, new Set());
@@ -59,12 +59,12 @@ const NPCManager = {
         return true;
     },
 
-    // ➖ Unregister an NPC 💀
+    // unregister an NPC
     unregister(npcId) {
         const npc = this.npcs.get(npcId);
         if (!npc) return false;
 
-        // 🏠 Remove from location index 🖤
+        // erase this ghost from its haunting grounds - one less puppet on the stage
         if (npc.location && this.npcsByLocation.has(npc.location)) {
             this.npcsByLocation.get(npc.location).delete(npcId);
         }
@@ -78,17 +78,17 @@ const NPCManager = {
         return true;
     },
 
-    // 🔍 Get NPC by ID ⚰️
+    // summon a specific soul from the registry - fetch your puppet by name
     get(npcId) {
         return this.npcs.get(npcId) || null;
     },
 
-    // 🏠 Get all NPCs at a location 🦇
+    // gather every hollow soul bound to this location - count the meat sacks
     getNPCsAtLocation(locationId) {
         const npcIds = this.npcsByLocation.get(locationId);
         if (!npcIds) return [];
 
-        // 🖤 Map IDs to NPCs, warn about missing ones in deboog mode 💀
+        // map IDs to NPCs, warn about missing ones in deboog mode
         const npcs = Array.from(npcIds).map(id => {
             const npc = this.npcs.get(id);
             if (!npc && this._deboogMode) {
@@ -100,14 +100,14 @@ const NPCManager = {
         return npcs;
     },
 
-    // 🎭 Get available NPCs for interaction 🗡️
+    // which puppets can the player touch right now? schedules determine who's awake
     getAvailableNPCs(locationId = null) {
         const location = locationId || game?.currentLocation?.id;
         if (!location) return [];
 
         const npcsHere = this.getNPCsAtLocation(location);
 
-        // 🕐 Filter by schedule if NPCScheduleSystem exists 🌙
+        // filter by schedule if NPCScheduleSystem exists
         if (typeof NPCScheduleSystem !== 'undefined') {
             return npcsHere.filter(npc => {
                 const schedule = NPCScheduleSystem.getNPCSchedule(npc.id);
@@ -119,7 +119,7 @@ const NPCManager = {
         return npcsHere;
     },
 
-    // 🎯 Set active NPC (for interaction) 🔮
+    // choose which soul gets center stage - this puppet speaks now
     setActiveNPC(npcId) {
         const npc = this.npcs.get(npcId);
         if (!npc) {
@@ -129,13 +129,13 @@ const NPCManager = {
 
         this.activeNPC = npc;
 
-        // 🎭 Fire event 💀
+        // fire event
         document.dispatchEvent(new CustomEvent('npc-activated', { detail: { npc } }));
 
         return true;
     },
 
-    // ⛔ Clear active NPC 🖤
+    // clear active NPC
     clearActiveNPC() {
         const previousNPC = this.activeNPC;
         this.activeNPC = null;
@@ -145,27 +145,27 @@ const NPCManager = {
         }
     },
 
-    // 🔄 Periodic update - runs every second ⚰️
+    // periodic update - runs every second
     update() {
-        // 📍 Update NPC positions/schedules 🦇
+        // update these soulless routines - watch the puppets dance their daily scripts
         if (typeof NPCScheduleSystem !== 'undefined') {
             NPCScheduleSystem.update();
         }
 
-        // 🎲 Random encounters 🗡️
+        // random encounters
         // NPCEncounterSystem hooks into TravelSystem and CityEventSystem directly
         // No periodic polling needed - encounters trigger on travel/arrival/events
     },
 
-    // 🏠 Handle location change 🌙
+    // player moved - dismiss the old puppets, summon new ones from the void
     onLocationChange(detail) {
         const newLocation = detail?.location?.id || detail?.locationId;
         if (!newLocation) return;
 
-        // 🎭 Clear active NPC when changing locations 🔮
+        // clear active NPC when changing locations
         this.clearActiveNPC();
 
-        // 📢 Announce NPCs at new location 💀
+        // announce NPCs at new location
         const npcsHere = this.getAvailableNPCs(newLocation);
         if (npcsHere.length > 0) {
             const npcNames = npcsHere.map(n => n.name).join(', ');
@@ -175,7 +175,7 @@ const NPCManager = {
         }
     },
 
-    // 💬 Start conversation with NPC 🖤
+    // start conversation with NPC
     startConversation(npcId) {
         const npc = this.get(npcId);
         if (!npc) {
@@ -187,13 +187,13 @@ const NPCManager = {
 
         this.setActiveNPC(npcId);
 
-        // 🎙️ Use dialogue system if available ⚰️
+        // use dialogue system if available
         if (typeof NPCDialogueSystem !== 'undefined') {
             NPCDialogueSystem.startDialogue(npc);
         } else if (typeof NPCVoiceChatSystem !== 'undefined') {
             NPCVoiceChatSystem.startChat(npc);
         } else {
-            // 🎭 Fallback - just show a message 🦇
+            // fallback - just show a message
             if (typeof addMessage === 'function') {
                 addMessage(`${npc.name}: "Hello, traveler!"`);
             }
@@ -202,14 +202,14 @@ const NPCManager = {
         return true;
     },
 
-    // 💰 Open trade with NPC 🗡️
+    // open trade with NPC
     openTrade(npcId) {
         const npc = this.get(npcId);
         if (!npc) return false;
 
         this.setActiveNPC(npcId);
 
-        // 🛒 Use appropriate trading system 🌙
+        // use appropriate trading system
         if (npc.type === 'merchant' && typeof NPCMerchantSystem !== 'undefined') {
             NPCMerchantSystem.openMerchantShop(npc);
         } else if (typeof NPCTradeWindow !== 'undefined') {
@@ -223,7 +223,7 @@ const NPCManager = {
         return true;
     },
 
-    // ❤️ Get relationship with NPC 🔮
+    // how much does this hollow thing tolerate you? check the favorability meter
     getRelationship(npcId) {
         if (typeof NPCRelationshipSystem !== 'undefined') {
             return NPCRelationshipSystem.getRelationship(npcId);
@@ -231,7 +231,7 @@ const NPCManager = {
         return { level: 0, title: 'Stranger' };
     },
 
-    // ❤️ Modify relationship 💀
+    // modify relationship
     modifyRelationship(npcId, amount) {
         if (typeof NPCRelationshipSystem !== 'undefined') {
             return NPCRelationshipSystem.modifyRelationship(npcId, amount);
@@ -239,7 +239,7 @@ const NPCManager = {
         return false;
     },
 
-    // 📊 Get NPC stats for display 🖤
+    // expose this puppet's vital signs for display - show the player who they're dealing with
     getNPCStats(npcId) {
         const npc = this.get(npcId);
         if (!npc) return null;
@@ -258,7 +258,7 @@ const NPCManager = {
         };
     },
 
-    // 🔍 Search NPCs by name/type ⚰️
+    // search the puppet registry by name or function - find your meat sack
     search(query) {
         const results = [];
         const lowerQuery = query.toLowerCase();
@@ -273,7 +273,7 @@ const NPCManager = {
         return results;
     },
 
-    // 🎲 Spawn random NPC encounter 🦇
+    // spawn random NPC encounter
     spawnEncounter(type = 'random') {
         if (typeof NPCEncounterSystem !== 'undefined' && NPCEncounterSystem.spawnRandomEncounter) {
             return NPCEncounterSystem.spawnRandomEncounter('road', type === 'random' ? null : type);
@@ -281,7 +281,7 @@ const NPCManager = {
         return null;
     },
 
-    // 💾 Get save data 🗡️
+    // serialize the puppet registry for preservation - save these hollow souls to disk
     getSaveData() {
         const data = {
             npcs: [],
@@ -295,38 +295,38 @@ const NPCManager = {
                 type: npc.type,
                 location: npc.location,
                 mood: npc.mood,
-                // 🎭 Don't save transient state 🌙
+                // don't save transient state
             });
         });
 
         return data;
     },
 
-    // 💾 Load save data 🔮
+    // resurrect the puppets from the save file - breathe digital life back into them
     loadSaveData(data) {
         if (!data) return;
 
-        // 🔄 Restore NPCs 💀
+        // restore NPCs
         if (data.npcs && Array.isArray(data.npcs)) {
             data.npcs.forEach(npcData => {
                 const existingNPC = this.npcs.get(npcData.id);
                 if (existingNPC) {
-                    // 🔄 Update existing NPC 🖤
+                    // overlay saved state onto existing puppet - refresh their programming
                     Object.assign(existingNPC, npcData);
                 } else {
-                    // ➕ Register new NPC ⚰️
+                    // register new NPC
                     this.register(npcData);
                 }
             });
         }
 
-        // 🎯 Restore active NPC 🦇
+        // restore active NPC
         if (data.activeNPC) {
             this.setActiveNPC(data.activeNPC);
         }
     },
 
-    // 🧹 Cleanup 🗡️
+    // cleanup
     destroy() {
         if (this._updateInterval) {
             clearInterval(this._updateInterval);
@@ -341,15 +341,15 @@ const NPCManager = {
     }
 };
 
-// 🌙 expose to global scope 🦇
+// expose to global scope
 window.NPCManager = NPCManager;
 
-// 🎯 Auto-initialize when DOM is ready 💀
+// auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => NPCManager.init());
 } else {
     NPCManager.init();
 }
 
-// 🖤 Cleanup on page unload - no memory leaks in my realm 💀
+// cleanup on page unload - no memory leaks in my realm
 window.addEventListener('beforeunload', () => NPCManager.destroy());

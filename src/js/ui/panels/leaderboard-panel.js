@@ -141,7 +141,7 @@ const GlobalLeaderboardSystem = {
         console.log(`🏆 Loaded config from GameConfig: backend=${this.config.backend}`);
     },
 
-    // 💾 Load config from localStorage (allows user to set their own keys)
+    // load config from localStorage (allows user to set their own keys)
     loadConfig() {
         try {
             const savedConfig = localStorage.getItem('leaderboard_config');
@@ -154,7 +154,7 @@ const GlobalLeaderboardSystem = {
         }
     },
 
-    // 💾 Save config to localStorage
+    // save config to localStorage
     saveConfig() {
         try {
             localStorage.setItem('leaderboard_config', JSON.stringify({
@@ -168,7 +168,7 @@ const GlobalLeaderboardSystem = {
         }
     },
 
-    // 🔧 Configure the leaderboard (call this to set up)
+    // configure the leaderboard (call this to set up)
     configure(options) {
         Object.assign(this.config, options);
         this.saveConfig();
@@ -176,9 +176,9 @@ const GlobalLeaderboardSystem = {
         this.fetchLeaderboard();
     },
 
-    // 📥 Fetch leaderboard from backend
+    // fetch leaderboard from backend
     async fetchLeaderboard() {
-        // 🖤 If a fetch is already in progress, wait for it instead of returning empty cache 💀
+        // if a fetch is already in progress, wait for it instead of returning empty cache
         if (this._fetchPromise) {
             return this._fetchPromise;
         }
@@ -188,7 +188,7 @@ const GlobalLeaderboardSystem = {
             return this.leaderboard;
         }
 
-        // 🖤 Store the promise so concurrent callers can await the same fetch 💀
+        // store the promise so concurrent callers can await the same fetch
         this._fetchPromise = (async () => {
             try {
                 switch (this.config.backend) {
@@ -201,10 +201,10 @@ const GlobalLeaderboardSystem = {
                         return this.fetchFromLocal();
                 }
             } catch (error) {
-                // 🦇 Network issue - silently fall back to local, no console spam
+                // network issue - silently fall back to local, no console spam
                 return this.fetchFromLocal();
             } finally {
-                // 🖤 Clear the promise when done so next call can fetch fresh 💀
+                // clear the promise when done so next call can fetch fresh
                 this._fetchPromise = null;
             }
         })();
@@ -212,7 +212,7 @@ const GlobalLeaderboardSystem = {
         return this._fetchPromise;
     },
 
-    // 📤 Submit score to leaderboard
+    // submit score to leaderboard
     async submitScore(scoreData) {
         console.log('🏆 submitScore called:', scoreData);
         console.log('🏆 Current backend:', this.config.backend);
@@ -223,7 +223,7 @@ const GlobalLeaderboardSystem = {
             return false;
         }
 
-        // 🖤💀 DEDUP FIX: Block rapid re-submissions of same character (5 second debounce)
+        // DEDUP FIX: block rapid re-submissions of same character (5 second debounce)
         const now = Date.now();
         const characterId = scoreData.characterId;
         if (characterId && characterId === this._lastSubmittedCharacterId && (now - this._lastSubmitTime) < 5000) {
@@ -231,7 +231,7 @@ const GlobalLeaderboardSystem = {
             return true; // Return true so callers don't think it failed
         }
 
-        // 🖤💀 DEDUP FIX: If a submission is already in progress, wait for it instead of starting another
+        // DEDUP FIX: if a submission is already in progress, wait for it instead of starting another
         if (this._submitPromise) {
             console.log('🏆 Submission already in progress, waiting...');
             return await this._submitPromise;
@@ -241,12 +241,12 @@ const GlobalLeaderboardSystem = {
         console.log('🏆 Saving to local first...');
         this.saveToLocal(scoreData);
 
-        // 🖤💀 Track this submission to prevent duplicates
+        // track this submission to prevent duplicates
         this._lastSubmittedCharacterId = characterId;
         this._lastSubmitTime = now;
 
         try {
-            // 🖤💀 Wrap the submission in a promise we can track
+            // wrap the submission in a promise we can track
             this._submitPromise = (async () => {
                 switch (this.config.backend) {
                     case 'jsonbin':
@@ -264,11 +264,11 @@ const GlobalLeaderboardSystem = {
 
             return await this._submitPromise;
         } catch (error) {
-            // 🦇 Global submission failed - user already notified via addMessage
+            // global submission failed - user already notified via addMessage
             addMessage?.('score saved locally. global submission failed - the void consumed it.');
             return false;
         } finally {
-            // 🖤💀 Clear the promise so next submission can proceed
+            // clear the promise so next submission can proceed
             this._submitPromise = null;
         }
     },
@@ -291,7 +291,7 @@ const GlobalLeaderboardSystem = {
             const url = `https://api.jsonbin.io/v3/b/${this.config.BIN_ID}/latest`;
             console.log('🏆 Fetch URL:', url);
 
-            // 🦇 Debooger: log the exact key being used (first/last chars only for security) 💀
+            // debooger: log the exact key being used (first/last chars only for security)
             const keyLen = this.config.API_KEY ? this.config.API_KEY.length : 0;
             console.log('🏆 Debooger: 💀 API Key length:', keyLen);
             console.log('🏆 API Key starts with:', this.config.API_KEY ? this.config.API_KEY.substring(0, 5) : 'N/A');
@@ -307,7 +307,7 @@ const GlobalLeaderboardSystem = {
             console.log('🏆 Fetch response status:', response.status);
 
             if (!response.ok) {
-                // 🦇 API error - will fall back to local, throw to trigger catch
+                // API error - will fall back to local, throw to trigger catch
                 throw new Error(`JSONBin fetch failed: ${response.status}`);
             }
 
@@ -334,7 +334,7 @@ const GlobalLeaderboardSystem = {
             console.log(`🏆 Fetched ${this.leaderboard.length} global scores from JSONBin`);
             return this.leaderboard;
         } catch (error) {
-            // 🦇 Network hiccup - silently fall back to local cache
+            // network hiccup - silently fall back to local cache
             console.warn('🏆 JSONBin unreachable, using local cache');
             return this.fetchFromLocal();
         }
@@ -361,7 +361,7 @@ const GlobalLeaderboardSystem = {
             console.log('🏆 Created entry with ID:', entry.id);
             console.log('🏆 Character ID:', entry.characterId);
 
-            // 🎭 DEDUPLICATION: Each character can only have ONE entry on the leaderboard
+            // DEDUPLICATION: each character can only have ONE entry on the leaderboard
             // Use characterId if available, otherwise fall back to playerName + isAlive check
             let existingIndex = -1;
 
@@ -417,7 +417,7 @@ const GlobalLeaderboardSystem = {
             console.log('🏆 PUT response status:', response.status);
 
             if (!response.ok) {
-                // 🦇 API rejected update - throw to trigger user notification
+                // API rejected update - throw to trigger user notification
                 throw new Error(`JSONBin update failed: ${response.status}`);
             }
 
@@ -436,7 +436,7 @@ const GlobalLeaderboardSystem = {
             addMessage?.('🏆 your legacy echoes across the realm! score submitted to Hall of Champions.');
             return true;
         } catch (error) {
-            // 🦇 Submission failed - user gets notified, no console spam needed
+            // submission failed - user gets notified, no console spam needed
             addMessage?.('⚠️ failed to submit to Hall of Champions - saved locally instead');
             return false;
         }
@@ -462,7 +462,7 @@ const GlobalLeaderboardSystem = {
         const content = gist.files['leaderboard.json']?.content;
 
         if (content) {
-            // 🖤💀 Validate JSON before parsing - corrupt data won't crash us
+            // validate JSON before parsing - corrupt data won't crash us
             try {
                 const data = JSON.parse(content);
                 if (data && Array.isArray(data.leaderboard)) {
@@ -542,7 +542,7 @@ const GlobalLeaderboardSystem = {
         // Load existing
         this.fetchFromLocal();
 
-        // 🎭 DEDUPLICATION: Each character can only have ONE entry
+        // DEDUPLICATION: each character can only have ONE entry
         let existingIndex = -1;
 
         if (entry.characterId) {
@@ -632,11 +632,11 @@ const GlobalLeaderboardSystem = {
 
         return {
             id: this.generateId(),
-            // 🎭 Character ID - unique per character for deduplication
+            // character ID - unique per character for deduplication
             // Each character can only have ONE entry on the leaderboard
             characterId: scoreData.characterId || null,
             playerName: scoreData.playerName || 'Anonymous Merchant',
-            // 👑 Merchant rank persists to leaderboard
+            // merchant rank persists to leaderboard
             merchantRank: scoreData.merchantRank || merchantRank || 'vagrant',
             merchantRankIcon: scoreData.merchantRankIcon || merchantRankIcon,
             merchantTitle: scoreData.merchantTitle || merchantTitle,
@@ -657,12 +657,12 @@ const GlobalLeaderboardSystem = {
             locationsVisited: scoreData.locationsVisited || 0,
             itemsCrafted: scoreData.itemsCrafted || 0,
             dungeonsExplored: scoreData.dungeonsExplored || 0,
-            // 🖤 v0.90+ Quest completion metrics
+            // v0.90+ Quest completion metrics
             questsCompleted: scoreData.questsCompleted || 0,
             mainQuestsCompleted: scoreData.mainQuestsCompleted || 0,
             sideQuestsCompleted: scoreData.sideQuestsCompleted || 0,
             doomQuestsCompleted: scoreData.doomQuestsCompleted || 0,
-            // 💚/💀 Status indicator
+            // status indicator
             isAlive: scoreData.isAlive || false
         };
     },
@@ -715,7 +715,7 @@ const GlobalLeaderboardSystem = {
             TradingSystem.tradeHistory?.length || 0 : 0;
         score += tradesCompleted * 5;
 
-        // 🖤 v0.90+ Quest completion bonuses
+        // v0.90+ Quest completion bonuses
         let questsCompleted = 0;
         let mainQuestsCompleted = 0;
         let sideQuestsCompleted = 0;
@@ -759,7 +759,7 @@ const GlobalLeaderboardSystem = {
 
         return {
             score,
-            // 🎭 Character ID for leaderboard deduplication
+            // character ID for leaderboard deduplication
             characterId: player.characterId || null,
             playerName: player.name || 'Anonymous',
             gold: player.gold || 0,
@@ -774,7 +774,7 @@ const GlobalLeaderboardSystem = {
             locationsVisited: Object.keys(player.visitedLocations || {}).length,
             itemsCrafted: player.itemsCrafted || 0,
             dungeonsExplored: player.dungeonsExplored || 0,
-            // 🖤 v0.90+ Quest metrics
+            // v0.90+ Quest metrics
             questsCompleted,
             mainQuestsCompleted,
             sideQuestsCompleted,
@@ -809,12 +809,12 @@ const GlobalLeaderboardSystem = {
             this.leaderboard.slice(0, this.config.maxEntries) :
             this.leaderboard.slice(0, this.config.displayEntries);
 
-        // 🖤 Build complete HTML string to avoid multiple reflows
+        // build complete HTML string to avoid multiple reflows
         let html = entriesToShow.map((entry, index) => {
             const rank = index + 1;
             const rankIcon = rank === 1 ? '👑' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
             const difficultyBadge = this.getDifficultyBadge(entry.difficulty);
-            // 💚 = still alive, 💀 = dead
+            // still alive or dead status
             const statusIcon = entry.isAlive ? '💚' : '💀';
             const statusText = entry.isAlive ? 'still playing' : this.escapeHtml(entry.causeOfDeath);
 
@@ -897,7 +897,7 @@ const GlobalLeaderboardSystem = {
                         rankDisplay = `<span class="rank-number">${getOrdinal(rank)}</span>`;
                     }
 
-                    // 💚 = still alive, 💀 = dead
+                    // still alive or dead status
                     const statusIcon = entry.isAlive ? '💚' : '💀';
                     const statusText = entry.isAlive ? 'still playing' : this.escapeHtml(entry.causeOfDeath || 'unknown');
                     const statusClass = entry.isAlive ? 'alive' : 'dead';
@@ -976,12 +976,12 @@ const GlobalLeaderboardSystem = {
     }
 };
 
-// 🌐 Expose globally
+// expose globally
 window.GlobalLeaderboardSystem = GlobalLeaderboardSystem;
 
-// 🧪 Test function - run from console: testJSONBin()
+// test function - run from console: testJSONBin()
 window.testJSONBin = async function() {
-    // 🔐 SECURE: Get credentials from config (which loads from env/localStorage)
+    // SECURE: get credentials from config (which loads from env/localStorage)
     const binId = GameConfig?.leaderboard?.jsonbin?.binId || localStorage.getItem('jsonbin_id');
     const apiKey = GameConfig?.leaderboard?.jsonbin?.apiKey || localStorage.getItem('jsonbin_key');
 
@@ -1033,14 +1033,14 @@ window.testJSONBin = async function() {
             console.log('❌ READ failed. Check bin ID and API key.');
         }
     } catch (error) {
-        // 🖤 Test function - only used by devs
+        // test function - only used by devs
         console.warn('🧪 Test error:', error);
     }
 };
 
-// 🧹 Reset/Clear leaderboard - run from console: resetLeaderboard()
+// reset/clear leaderboard - run from console: resetLeaderboard()
 window.resetLeaderboard = async function() {
-    // 🔐 Use GlobalLeaderboardSystem config as single source of truth
+    // use GlobalLeaderboardSystem config as single source of truth
     const binId = GlobalLeaderboardSystem?.config?.BIN_ID ||
                   GameConfig?.leaderboard?.jsonbin?.binId ||
                   localStorage.getItem('jsonbin_id');
@@ -1106,18 +1106,18 @@ window.resetLeaderboard = async function() {
             console.log('🎉 Leaderboard has been completely reset! The Hall of Champions is now empty.');
             return true;
         } else {
-            // 🦇 Reset failed - user running the command will see false return
+            // reset failed - user running the command will see false return
             console.warn('❌ Failed to reset leaderboard:', response.status);
             return false;
         }
     } catch (error) {
-        // 🦇 Network error during reset - report to console for deboogering 💀
+        // network error during reset - report to console for deboogering
         console.warn('❌ Error resetting leaderboard:', error.message);
         return false;
     }
 };
 
-// 🚀 Auto-initialize when DOM ready
+// auto-initialize when DOM ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => GlobalLeaderboardSystem.init());
 } else {

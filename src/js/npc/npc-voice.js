@@ -14,20 +14,20 @@ const NPCVoiceChatSystem = {
 
     config: {
         // API endpoints - where we summon the AI demons (use GameConfig if available)
-        // 🖤 all endpoints pulled from GameConfig.api - the dark source of truth
+        // all endpoints pulled from GameConfig.api - the dark source of truth
         get textEndpoint() {
             return (typeof GameConfig !== 'undefined' && GameConfig.api?.pollinations?.chatEndpoint)
                 ? GameConfig.api.pollinations.chatEndpoint
                 : 'https://text.pollinations.ai/openai';
         },
         get ttsEndpoint() {
-            // 🔊 TTS endpoint from expanded config
+            // TTS endpoint from expanded config
             return (typeof GameConfig !== 'undefined' && GameConfig.api?.pollinations?.tts?.endpoint)
                 ? GameConfig.api.pollinations.tts.endpoint
                 : 'https://text.pollinations.ai';
         },
         get ttsModel() {
-            // 🎭 TTS model from config
+            // TTS model from config
             return (typeof GameConfig !== 'undefined' && GameConfig.api?.pollinations?.tts?.model)
                 ? GameConfig.api.pollinations.tts.model
                 : 'openai-audio';
@@ -62,12 +62,12 @@ const NPCVoiceChatSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 📊 STATE - tracking our descent into NPC madness
+    // state - tracking our descent into NPC madness
     // ═══════════════════════════════════════════════════════════
 
     // available models from API
     availableTextModels: [],
-    // 🔊 available voices - pulled from GameConfig.api.pollinations.tts.voices
+    // available voices - pulled from GameConfig.api.pollinations.tts.voices
     get availableVoices() {
         return (typeof GameConfig !== 'undefined' && GameConfig.api?.pollinations?.tts?.voices)
             ? GameConfig.api.pollinations.tts.voices
@@ -95,14 +95,14 @@ const NPCVoiceChatSystem = {
     isInitialized: false,
 
     // ═══════════════════════════════════════════════════════════
-    // 🗃️ GREETING CACHE - pre-fetched greetings for instant response
+    // greeting cache - pre-fetched greetings for instant response
     // ═══════════════════════════════════════════════════════════
     greetingCache: new Map(),
     pendingGreetings: new Map(),
     cacheExpiry: 5 * 60 * 1000, // 5 minutes cache expiry
 
     // ═══════════════════════════════════════════════════════════
-    // 🚀 INITIALIZATION - awakening the voice demons
+    // initialization - awakening the voice demons
     // ═══════════════════════════════════════════════════════════
 
     async init() {
@@ -165,7 +165,7 @@ const NPCVoiceChatSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 💾 SETTINGS MANAGEMENT - preserving your preferences in the void
+    // settings management - preserving your preferences in the void
     // ═══════════════════════════════════════════════════════════
 
     loadSettings() {
@@ -179,7 +179,7 @@ const NPCVoiceChatSystem = {
                 this.settings = { ...this.config.defaults };
             }
         } catch (error) {
-            // 🖤 Silent fallback - corrupt data just means we use defaults
+            // silent fallback - corrupt data just means we use defaults
             this.settings = { ...this.config.defaults };
             localStorage.removeItem('npcVoiceChatSettings');
         }
@@ -190,7 +190,7 @@ const NPCVoiceChatSystem = {
             localStorage.setItem('npcVoiceChatSettings', JSON.stringify(this.settings));
             console.log('🎙️ Settings saved to localStorage');
         } catch (error) {
-            // 🦇 Storage full - settings live in memory only
+            // storage full - settings live in memory only
         }
     },
 
@@ -208,7 +208,7 @@ const NPCVoiceChatSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🌐 API MODEL FETCHING - summoning the available AI spirits
+    // API model fetching - summoning the available AI spirits
     // ═══════════════════════════════════════════════════════════
 
     async fetchModels() {
@@ -247,7 +247,7 @@ const NPCVoiceChatSystem = {
             console.log(`🎙️ Loaded ${models.length} text models and ${this.availableVoices.length} voices`);
 
         } catch (error) {
-            // 🦇 API unavailable - graceful fallback to defaults
+            // API unavailable - graceful fallback to defaults
             console.warn('🎙️ Using fallback models');
             this.useFallbackModels();
         }
@@ -300,14 +300,14 @@ const NPCVoiceChatSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🎵 AUDIO CONTEXT SETUP - preparing the ears for NPC wisdom
+    // audio context setup - preparing the ears for NPC wisdom
     // ═══════════════════════════════════════════════════════════
 
     audioContext: null,
     _audioContextSetup: false, // 🖤 Guard against duplicate setup 💀
 
     setupAudioContext() {
-        // 🖤 Prevent duplicate listener registration 💀
+        // prevent duplicate listener registration
         if (this._audioContextSetup) return;
         this._audioContextSetup = true;
 
@@ -331,10 +331,10 @@ const NPCVoiceChatSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 💬 TEXT GENERATION - summoning NPC responses from the AI void
+    // text generation - summoning NPC responses from the AI void
     // ═══════════════════════════════════════════════════════════
 
-    // 🖤 Retry helper for transient API failures 💀
+    // retry helper for transient API failures
     async _fetchWithRetry(url, options, maxRetries = 2) {
         let lastError;
         for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -342,12 +342,12 @@ const NPCVoiceChatSystem = {
                 const response = await fetch(url, options);
                 if (response.ok) return response;
 
-                // 🦇 Don't retry client errors (4xx), only server errors (5xx)
+                // don't retry client errors (4xx), only server errors (5xx)
                 if (response.status >= 400 && response.status < 500) {
                     throw new Error(`API client error: ${response.status}`);
                 }
 
-                // 🖤 Server error - retry with exponential backoff
+                // server error - retry with exponential backoff
                 lastError = new Error(`API server error: ${response.status}`);
                 if (attempt < maxRetries) {
                     const delay = Math.pow(2, attempt) * 500; // 500ms, 1000ms
@@ -356,7 +356,7 @@ const NPCVoiceChatSystem = {
                 }
             } catch (error) {
                 lastError = error;
-                // 🦇 Network errors - retry
+                // network errors - retry
                 if (attempt < maxRetries && error.name !== 'AbortError') {
                     const delay = Math.pow(2, attempt) * 500;
                     console.warn(`🎙️ Network retry ${attempt + 1}/${maxRetries} after ${delay}ms:`, error.message);
@@ -369,17 +369,17 @@ const NPCVoiceChatSystem = {
 
     async generateNPCResponse(npcData, playerMessage, conversationHistory = [], options = {}) {
         try {
-            // 🖤 Use new NPCInstructionTemplates if action type specified, otherwise fallback to NPCPromptBuilder 💀
+            // use new NPCInstructionTemplates if action type specified, otherwise fallback to NPCPromptBuilder
             let systemPrompt;
 
-            // 🦇 If action specified but templates not loaded yet, try to load them
+            // if action specified but templates not loaded yet, try to load them
             if (options.action && typeof NPCInstructionTemplates !== 'undefined' && !NPCInstructionTemplates._loaded) {
                 console.log('🎙️ NPCInstructionTemplates not loaded yet, loading now...');
                 await NPCInstructionTemplates.loadAllNPCData();
             }
 
             if (options.action && typeof NPCInstructionTemplates !== 'undefined' && NPCInstructionTemplates._loaded) {
-                // 🦇 Build standardized instruction from new template system
+                // build standardized instruction from new template system
                 const context = {
                     npcName: npcData.name || npcData.type,
                     message: playerMessage,
@@ -416,7 +416,7 @@ const NPCVoiceChatSystem = {
                 console.log(`🎙️ Using NPCInstructionTemplates for action: ${options.action}`);
                 console.log(`🎙️ Generated systemPrompt (first 200 chars): ${systemPrompt?.substring(0, 200)}...`);
             } else {
-                // 🦇 Fallback to existing NPCPromptBuilder
+                // fallback to existing NPCPromptBuilder
                 systemPrompt = NPCPromptBuilder.buildPrompt(npcData, this.getGameContext(), playerMessage);
             }
 
@@ -464,7 +464,7 @@ RELATIONSHIP MEMORY:
 
             console.log('🎙️ Sending request to text API...', { model: payload.model, messageCount: messages.length });
 
-            // 🖤 Use retry helper for transient failures 💀
+            // use retry helper for transient failures
             const response = await this._fetchWithRetry(
                 `${this.config.textEndpoint}?referrer=${this.config.referrer}`,
                 {
@@ -482,7 +482,7 @@ RELATIONSHIP MEMORY:
 
             console.log('🎙️ NPC raw response received:', rawAssistantMessage.substring(0, 50) + '...');
 
-            // 🤖 Parse and execute commands from the response
+            // parse and execute commands from the response
             let cleanText = rawAssistantMessage;
             let commands = [];
 
@@ -520,7 +520,7 @@ RELATIONSHIP MEMORY:
             };
 
         } catch (error) {
-            // 🖤 API failed - log detailed error and use fallback response gracefully 💀
+            // API failed - log detailed error and use fallback response gracefully
             console.error('🎙️ NPC Voice API Error:', {
                 npcType: npcData?.type || npcData?.id || 'unknown',
                 npcName: npcData?.name || 'Unknown NPC',
@@ -529,7 +529,7 @@ RELATIONSHIP MEMORY:
                 timestamp: new Date().toISOString()
             });
 
-            // 🦇 Track API failures for debugging
+            // track API failures for debugging
             this._apiFailureCount = (this._apiFailureCount || 0) + 1;
             this._lastApiError = { error: error.message, time: Date.now(), npc: npcData?.type };
 
@@ -544,7 +544,7 @@ RELATIONSHIP MEMORY:
     },
 
     getFallbackResponse(npcData) {
-        // 🖤 NPC-type-specific fallbacks that actually feel like conversations 💀
+        // NPC-type-specific fallbacks that actually feel like conversations
         const npcType = npcData?.type || npcData?.id || 'merchant';
 
         const fallbacksByType = {
@@ -610,7 +610,7 @@ RELATIONSHIP MEMORY:
             ]
         };
 
-        // 🦇 Get type-specific fallbacks or use generic merchant ones
+        // get type-specific fallbacks or use generic merchant ones
         const typeFallbacks = fallbacksByType[npcType] ||
                               fallbacksByType[npcData?.category] ||
                               fallbacksByType.merchant;
@@ -619,7 +619,7 @@ RELATIONSHIP MEMORY:
     },
 
     getGameContext() {
-        // 🖤 gather current game state for NPC context - they need to know what's going on 💀
+        // gather current game state for NPC context - they need to know what's going on
         const weatherContext = this.getWeatherContext();
 
         const context = {
@@ -648,12 +648,12 @@ RELATIONSHIP MEMORY:
         return 'night';
     },
 
-    // 🖤 get full weather context from WeatherSystem - current + recent history + season ⚰️
+    // get full weather context from WeatherSystem - current + recent history + season
     getWeatherContext() {
         if (typeof WeatherSystem !== 'undefined' && WeatherSystem.getWeatherContext) {
             return WeatherSystem.getWeatherContext();
         }
-        // 💀 fallback if WeatherSystem isn't loaded yet
+        // fallback if WeatherSystem isn't loaded yet
         return {
             current: 'clear',
             currentIcon: '☀️',
@@ -683,7 +683,7 @@ RELATIONSHIP MEMORY:
         const locationId = game?.currentLocation?.id;
         if (!locationId) return [];
 
-        // 🖤💀 CityEventSystem.activeEvents[locationId] is a SINGLE event object, not an array!
+        // CityEventSystem.activeEvents[locationId] is a SINGLE event object, not an array!
         const event = CityEventSystem.activeEvents?.[locationId];
         if (!event || !event.active) return [];
 
@@ -696,7 +696,7 @@ RELATIONSHIP MEMORY:
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🗃️ GREETING PRE-FETCH - load greetings before player needs them
+    // greeting pre-fetch - load greetings before player needs them
     // ═══════════════════════════════════════════════════════════
 
     /**
@@ -834,7 +834,7 @@ RELATIONSHIP MEMORY:
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🔊 TEXT-TO-SPEECH - giving NPCs actual voices to haunt you
+    // text-to-speech - giving NPCs actual voices to haunt you
     // ═══════════════════════════════════════════════════════════
 
     async playVoice(text, voiceOverride = null, source = 'NPC') {
@@ -844,7 +844,7 @@ RELATIONSHIP MEMORY:
         }
 
         try {
-            // 🖤 Clear any queued voice to prevent old text playing
+            // clear any queued voice to prevent old text playing
             this.voiceQueue = [];
 
             // clean text for TTS
@@ -858,10 +858,10 @@ RELATIONSHIP MEMORY:
                 return;
             }
 
-            // 🖤💀 Add to voice history for replay 💀
+            // add to voice history for replay
             this.addToVoiceHistory(cleanText, source);
 
-            // 🖤💀 Store current voice source for indicator 💀
+            // store current voice source for indicator
             this._currentVoiceSource = source;
 
             // split into chunks for long text
@@ -879,22 +879,22 @@ RELATIONSHIP MEMORY:
             }
 
         } catch (error) {
-            // 🦇 Voice playback failed - continue without voice
+            // voice playback failed - continue without voice
         }
     },
 
     cleanTextForTTS(text) {
         let clean = text;
 
-        // 🦇 STRIP API COMMANDS - these are for the game engine, not the voice box
+        // strip API commands - these are for the game engine, not the voice box
         // matches {commandName} or {commandName:param1,param2} patterns
-        // the silence where commands once lived... beautiful 🖤
+        // the silence where commands once lived... beautiful
         clean = clean.replace(/\{(\w+)(?::([^}]+))?\}/g, '');
 
-        // 💀 remove action markers like *walks away* - keep the mystery
+        // remove action markers like *walks away* - keep the mystery
         clean = clean.replace(/\*[^*]+\*/g, '');
 
-        // 🖤 remove markdown - TTS doesn't need your fancy formatting
+        // remove markdown - TTS doesn't need your fancy formatting
         clean = clean.replace(/```[\s\S]*?```/g, '');
         clean = clean.replace(/`[^`]+`/g, '');
         clean = clean.replace(/^#{1,6}\s+/gm, '');
@@ -903,10 +903,10 @@ RELATIONSHIP MEMORY:
         clean = clean.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
         clean = clean.replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
 
-        // 🩸 remove HTML tags - raw text only, no markup allowed in the void
+        // remove HTML tags - raw text only, no markup allowed in the void
         clean = clean.replace(/<[^>]*>/g, '');
 
-        // 💔 remove emojis - they sound like garbage when spoken aloud
+        // remove emojis - they sound like garbage when spoken aloud
         clean = clean.replace(/[\u{1F600}-\u{1F64F}]/gu, '');
         clean = clean.replace(/[\u{1F300}-\u{1F5FF}]/gu, '');
         clean = clean.replace(/[\u{1F680}-\u{1F6FF}]/gu, '');
@@ -914,7 +914,7 @@ RELATIONSHIP MEMORY:
         clean = clean.replace(/[\u{2600}-\u{26FF}]/gu, '');
         clean = clean.replace(/[\u{2700}-\u{27BF}]/gu, '');
 
-        // 🖤 clean up double spaces and extra whitespace from all the stripping
+        // clean up double spaces and extra whitespace from all the stripping
         clean = clean.replace(/\s+/g, ' ');
 
         return clean.trim();
@@ -968,14 +968,14 @@ RELATIONSHIP MEMORY:
         if (this.voiceQueue.length === 0 || !this.settings.voiceEnabled) {
             this.isPlayingVoice = false;
             this.currentAudio = null;
-            // 🖤💀 Hide global indicator when done 💀
+            // hide global indicator when done
             this.hideGlobalVoiceIndicator();
             return;
         }
 
         this.isPlayingVoice = true;
 
-        // 🖤💀 Show global voice indicator 💀
+        // show global voice indicator
         this.showGlobalVoiceIndicator(this._currentVoiceSource || 'NPC');
 
         const { text, voice } = this.voiceQueue.shift();
@@ -999,13 +999,13 @@ RELATIONSHIP MEMORY:
             this.currentAudio.setAttribute('webkit-playsinline', '');
             this.currentAudio.preload = 'auto';
 
-            // 🖤 Use property assignment for easier cleanup (vs addEventListener) 💀
+            // use property assignment for easier cleanup (vs addEventListener)
             this.currentAudio.onended = () => {
                 this.playNextVoiceChunk();
             };
 
             this.currentAudio.onerror = (e) => {
-                // 🦇 Audio chunk failed - skip to next
+                // audio chunk failed - skip to next
                 this.playNextVoiceChunk();
             };
 
@@ -1014,17 +1014,17 @@ RELATIONSHIP MEMORY:
                 const playPromise = this.currentAudio.play();
                 if (playPromise !== undefined) {
                     playPromise.catch((error) => {
-                        // 🦇 Autoplay blocked by browser - common on mobile
+                        // autoplay blocked by browser - common on mobile
                         this.playNextVoiceChunk();
                     });
                 }
             } catch (error) {
-                // 🦇 Playback error - skip to next chunk
+                // playback error - skip to next chunk
                 this.playNextVoiceChunk();
             }
 
         } catch (error) {
-            // 🦇 Voice chunk setup failed - continue with next
+            // voice chunk setup failed - continue with next
             this.playNextVoiceChunk();
         }
     },
@@ -1034,7 +1034,7 @@ RELATIONSHIP MEMORY:
         this.isPlayingVoice = false;
 
         if (this.currentAudio) {
-            // 🖤 Remove event listeners before nulling to prevent memory leaks 💀
+            // remove event listeners before nulling to prevent memory leaks
             this.currentAudio.onended = null;
             this.currentAudio.onerror = null;
             this.currentAudio.pause();
@@ -1043,7 +1043,7 @@ RELATIONSHIP MEMORY:
             this.currentAudio = null;
         }
 
-        // 🖤💀 Hide global indicator 💀
+        // hide global indicator
         this.hideGlobalVoiceIndicator();
 
         console.log('🎙️ Voice playback stopped');
@@ -1054,15 +1054,15 @@ RELATIONSHIP MEMORY:
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🔊 GLOBAL VOICE INDICATOR & HISTORY - track all spoken words 💀
+    // global voice indicator & history - track all spoken words
     // ═══════════════════════════════════════════════════════════
 
-    // 🖤 Voice history - stores recent voice playbacks for replay
+    // voice history - stores recent voice playbacks for replay
     _voiceHistory: [],
     _maxHistoryItems: 10,
     _globalIndicator: null,
 
-    // 🖤 Add to voice history 💀
+    // add to voice history
     addToVoiceHistory(text, source = 'NPC') {
         this._voiceHistory.unshift({
             text: text,
@@ -1077,12 +1077,12 @@ RELATIONSHIP MEMORY:
         }
     },
 
-    // 🖤 Get voice history 💀
+    // get voice history
     getVoiceHistory() {
         return this._voiceHistory;
     },
 
-    // 🖤 Replay a voice from history 💀
+    // replay a voice from history
     async replayVoice(historyId) {
         const item = this._voiceHistory.find(h => h.id === historyId);
         if (item) {
@@ -1090,7 +1090,7 @@ RELATIONSHIP MEMORY:
         }
     },
 
-    // 🖤 Create/show global voice indicator 💀
+    // create/show global voice indicator
     showGlobalVoiceIndicator(source = 'NPC') {
         // Create indicator if it doesn't exist
         if (!this._globalIndicator) {
@@ -1192,14 +1192,14 @@ RELATIONSHIP MEMORY:
         this._globalIndicator.style.display = 'block';
     },
 
-    // 🖤 Hide global voice indicator 💀
+    // hide global voice indicator
     hideGlobalVoiceIndicator() {
         if (this._globalIndicator) {
             this._globalIndicator.style.display = 'none';
         }
     },
 
-    // 🖤 Show voice history panel 💀
+    // show voice history panel
     showVoiceHistoryPanel() {
         // Check if ModalSystem is available
         if (typeof ModalSystem === 'undefined') {
@@ -1240,7 +1240,7 @@ RELATIONSHIP MEMORY:
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🎭 CONVERSATION MANAGEMENT - tracking NPC social energy
+    // conversation management - tracking NPC social energy
     // ═══════════════════════════════════════════════════════════
 
     /**
@@ -1314,7 +1314,7 @@ RELATIONSHIP MEMORY:
 
         this.activeConversations.set(persistentId, conversation);
 
-        // 🖤 Dispatch npc-interaction event for quest 'talk' objectives 💀
+        // dispatch npc-interaction event for quest 'talk' objectives
         document.dispatchEvent(new CustomEvent('npc-interaction', {
             detail: {
                 npcId: persistentId,
@@ -1345,7 +1345,7 @@ RELATIONSHIP MEMORY:
 
         // Check if player has active quests involving this NPC
         if (typeof QuestSystem !== 'undefined' && QuestSystem.activeQuests) {
-            // 🖤💀 activeQuests is an OBJECT, not an array - use Object.values() 🦇
+            // activeQuests is an OBJECT, not an array - use Object.values()
             const activeQuests = Object.values(QuestSystem.activeQuests);
             for (const quest of activeQuests) {
                 // Check if this NPC is the quest giver or turn-in target
@@ -1563,7 +1563,7 @@ RELATIONSHIP MEMORY:
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🧹 CLEANUP - Prevent memory leaks when leaving/reloading
+    // cleanup - prevent memory leaks when leaving/reloading
     // ═══════════════════════════════════════════════════════════
 
     /**
@@ -1645,12 +1645,12 @@ RELATIONSHIP MEMORY:
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🏗️ NPC PROMPT BUILDER - crafting the soul of each NPC
+// npc prompt builder - crafting the soul of each NPC
 // ═══════════════════════════════════════════════════════════════
 
 const NPCPromptBuilder = {
     // ═══════════════════════════════════════════════════════════
-    // 🗺️ WORLD MAP ADDENDUM - Geographic knowledge for all NPCs
+    // world map addendum - geographic knowledge for all NPCs
     // ═══════════════════════════════════════════════════════════
     worldMapAddendum: `
 WORLD GEOGRAPHY - You know this land well:
@@ -1988,7 +1988,7 @@ Example: "Take a look at what I have! {openMarket}"`;
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 📜 QUEST CONTEXT - everything the NPC needs to know about quests
+    // quest context - everything the NPC needs to know about quests
     // ═══════════════════════════════════════════════════════════
     getQuestContextSection(npcType, locationId) {
         // get quest context from QuestSystem if available
@@ -2142,12 +2142,12 @@ ${this.getPlayerInventoryContext()}
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🎭 NPC PERSONA DATABASE - the soul library of digital beings
+// npc persona database - the soul library of digital beings
 // ═══════════════════════════════════════════════════════════════
 
 const NPCPersonaDatabase = {
     // ═══════════════════════════════════════════════════════════
-    // 🏪 VENDOR PERSONAS - the merchants who take your gold
+    // vendor personas - the merchants who take your gold
     // ═══════════════════════════════════════════════════════════
     // Each persona includes:
     // - Character traits (voice, personality, speaking style)
@@ -2942,7 +2942,7 @@ ACCENT: Trembling, frightened. Voice of someone who's seen too much.`,
             I stay alive by knowing things others don't. Like which merchants will cheat you... the Greedy ones.`
         },
 
-        // 🖤 ELDER - the wise quest giver of the village
+        // elder - the wise quest giver of the village
         elder: {
             type: 'elder',
             voice: 'sage',
@@ -2975,7 +2975,7 @@ ACCENT: Measured, scholarly with rural roots. Voice of someone who's read ancien
             The fate of the realm may rest on the shoulders of this humble trader. I pray they are ready.`
         },
 
-        // 🖤 GUARD CAPTAIN - second major quest NPC
+        // guard captain - second major quest NPC
         guard_captain: {
             type: 'guard_captain',
             voice: 'onyx',
@@ -3005,7 +3005,7 @@ ACCENT: Military crispness. Voice of command. Occasional softening when speaking
             We must know the scope of the threat before we can mount a defense. Information is our most valuable weapon now.`
         },
 
-        // 🖤 ADDITIONAL QUEST-CAPABLE NPCs - souls who can guide the lost 💀
+        // additional quest-capable NPCs - souls who can guide the lost
 
         sage: {
             type: 'sage',
@@ -3135,11 +3135,11 @@ ACCENT: Military crispness. Voice of command. Occasional softening when speaking
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🎲 DYNAMIC PERSONA GENERATION - creating souls on the fly
+    // dynamic persona generation - creating souls on the fly
     // ═══════════════════════════════════════════════════════════
 
     getPersona(type) {
-        // 🖤 Handle type aliases for quest NPCs
+        // handle type aliases for quest NPCs
         const typeAliases = {
             'guard': 'guard_captain',    // Quests use 'guard' as giver type
             'captain': 'guard_captain',
@@ -3210,7 +3210,7 @@ ACCENT: Military crispness. Voice of command. Occasional softening when speaking
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🎯 PERSONA MATCHING - finding the right voice for the job
+    // persona matching - finding the right voice for the job
     // ═══════════════════════════════════════════════════════════
 
     getPersonaForMerchant(merchant) {
@@ -3261,7 +3261,7 @@ ACCENT: Military crispness. Voice of command. Occasional softening when speaking
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🚀 INITIALIZATION - wake up the voice demons when DOM is ready
+// initialization - wake up the voice demons when DOM is ready
 // ═══════════════════════════════════════════════════════════════
 
 if (document.readyState === 'loading') {

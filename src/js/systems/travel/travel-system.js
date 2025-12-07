@@ -1800,7 +1800,7 @@ const TravelSystem = {
 
         // Priority queue (using array with sorting - not optimal but works)
         const openSet = [startId];
-        const closedSet = new Set(); // ��� Track visited nodes to prevent infinite loops 💀
+        const closedSet = new Set(); // track visited nodes to prevent infinite loops
         const cameFrom = {};
         const gScore = { [startId]: 0 };
         const fScore = { [startId]: this.heuristicDistance(startId, goalId) };

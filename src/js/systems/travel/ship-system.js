@@ -7,7 +7,7 @@
  */
 
 const ShipSystem = {
-    // Ship definitions
+    // ⛵ Vessels for navigating the endless waters - your floating coffins
     ships: {
         rowboat: {
             name: 'Rowboat',
@@ -15,17 +15,17 @@ const ShipSystem = {
             tier: 'basic',
             price: 100,
             stats: {
-                speed: 0.8,           // Travel speed on water
-                cargoCapacity: 50,    // Cargo hold size
-                hull: 30,             // Hull strength
-                crew: 1,              // Required crew
+                speed: 0.8,           // 🌊 Drifting through liquid despair
+                cargoCapacity: 50,    // 📦 Pitiful hold for your pitiful dreams
+                hull: 30,             // 🛡️ How many hits before you sink
+                crew: 1,              // 👤 Minimum souls required to float
                 maxCrew: 2
             },
             upkeep: {
                 daily: 5,
                 dockFee: 2
             },
-            canTrade: false,          // Too small for serious trading
+            canTrade: false,          // 💀 Too pathetic for commerce
             description: 'A simple rowboat for short coastal trips.'
         },
         fishingBoat: {
@@ -39,7 +39,7 @@ const ShipSystem = {
                 hull: 50,
                 crew: 2,
                 maxCrew: 4,
-                fishingBonus: 1.5     // Bonus to fishing
+                fishingBonus: 1.5     // 🎣 Better at catching the dying
             },
             upkeep: {
                 daily: 10,
@@ -225,15 +225,15 @@ const ShipSystem = {
         }
     },
 
-    // Player's ships
+    // 🚢 Your fleet of floating regrets
     ownedShips: [],
     activeShip: null,
     shipStats: {},
 
-    // Current voyage state
+    // 🌊 Currently adrift between nightmares
     currentVoyage: null,
 
-    // Crew management
+    // 👥 The desperate souls you pay to sail with you
     crew: {
         sailors: 0,
         marines: 0,
@@ -252,7 +252,7 @@ const ShipSystem = {
         console.log('⛵ ShipSystem initialized');
     },
 
-    // Load ships from game state
+    // 📂 Drag your fleet from the depths of the save file
     loadShips() {
         if (typeof game !== 'undefined' && game.player) {
             this.ownedShips = game.player.ships || [];
@@ -272,16 +272,16 @@ const ShipSystem = {
         }
     },
 
-    // Setup event listeners
+    // 🎧 Tune into the frequencies of doom
     setupEventListeners() {
         if (typeof EventBus !== 'undefined') {
-            // Daily upkeep
+            // ⏰ Dawn breaks - time to pay for existence
             EventBus.on('time:newDay', () => {
                 this.processDailyUpkeep();
                 this.processCrewWages();
             });
 
-            // Weather effects on voyages
+            // 🌪️ Weather shifts - the sea grows angrier
             EventBus.on('weather:changed', (data) => {
                 if (this.currentVoyage) {
                     this.applyWeatherEffects(data.weather);
@@ -469,7 +469,7 @@ const ShipSystem = {
         return true;
     },
 
-    // Calculate voyage duration
+    // ⏱️ How long until we reach the next hell
     calculateVoyageDuration(routeId) {
         const route = this.seaRoutes[routeId];
         if (!route) return null;
@@ -479,12 +479,12 @@ const ShipSystem = {
 
         let duration = route.baseDuration / ship.definition.stats.speed;
 
-        // Navigator bonus
+        // 🧭 A navigator who actually knows where tf we're going
         if (this.crew.navigator) {
             duration *= 0.85;
         }
 
-        // Weather effects
+        // 🌩️ Weather fucks with everything
         if (typeof WeatherSystem !== 'undefined') {
             const weatherMod = WeatherSystem.getWeatherEffects().travelSpeed || 1;
             duration /= weatherMod;
@@ -493,7 +493,7 @@ const ShipSystem = {
         return Math.ceil(duration);
     },
 
-    // Start a voyage
+    // ⛵ Cast off into the uncaring abyss
     startVoyage(routeId, destinationPortId) {
         const route = this.seaRoutes[routeId];
         if (!route) {
@@ -529,7 +529,7 @@ const ShipSystem = {
             events: []
         };
 
-        // Consume supplies
+        // 🥫 Burn through supplies - survival isn't free
         stats.supplies = Math.max(0, stats.supplies - duration * 5);
 
         this.saveShips();
@@ -544,19 +544,19 @@ const ShipSystem = {
             });
         }
 
-        // Simulate voyage
+        // 🎲 Roll the dice of fate
         this.simulateVoyage();
 
         return true;
     },
 
-    // Simulate voyage events
+    // 🎲 Let chaos decide your fate on the waves
     simulateVoyage() {
         if (!this.currentVoyage) return;
 
         const route = this.seaRoutes[this.currentVoyage.routeId];
 
-        // Check for random events
+        // 🏴‍☠️ Pirates lurking in the darkness
         if (route.pirateRisk && Math.random() < route.pirateRisk) {
             this.currentVoyage.events.push({
                 type: 'pirate_attack',
@@ -565,7 +565,7 @@ const ShipSystem = {
             this.handlePirateAttack();
         }
 
-        // Storm check
+        // ⛈️ The sky turns against us
         if (route.weatherSensitive && typeof WeatherSystem !== 'undefined') {
             const weather = WeatherSystem.currentWeather;
             if (weather === 'storm') {
@@ -577,13 +577,13 @@ const ShipSystem = {
             }
         }
 
-        // Complete voyage after duration
+        // ⏳ Time ticks toward arrival (or oblivion)
         setTimeout(() => {
             this.completeVoyage();
-        }, this.currentVoyage.duration * 1000); // Speed up for demo (normally hours)
+        }, this.currentVoyage.duration * 1000); // ⚡ Sped up for your impatient ass
     },
 
-    // Handle pirate attack
+    // 🏴‍☠️ Pirates - violence on the high seas
     handlePirateAttack() {
         const ship = this.getActiveShip();
         if (!ship) return;
@@ -595,14 +595,14 @@ const ShipSystem = {
         const pirateStrength = 50 + Math.random() * 50;
 
         if (combatStrength > pirateStrength) {
-            // Victory
+            // ⚔️ Victory through bloodshed
             const loot = Math.floor(Math.random() * 200 + 50);
             if (typeof game !== 'undefined' && game.player) {
                 game.player.gold += loot;
             }
             this.showNotification(`Defeated pirates! Found ${loot} gold!`, 'success');
         } else {
-            // Defeat - lose cargo
+            // 💀 Defeat - they take everything
             const stats = this.shipStats[this.activeShip];
             const lostGold = Math.floor(Math.random() * 100 + 50);
 
@@ -615,14 +615,14 @@ const ShipSystem = {
         }
     },
 
-    // Handle storm
+    // ⛈️ Nature's wrath - the sea wants blood
     handleStorm() {
         const stats = this.shipStats[this.activeShip];
 
         const damage = Math.floor(Math.random() * 30 + 10);
         stats.hull = Math.max(10, stats.hull - damage);
 
-        // Crew casualties
+        // 💀 Some crew won't make it
         if (Math.random() < 0.2) {
             const lost = Math.floor(Math.random() * 3 + 1);
             this.crew.sailors = Math.max(0, this.crew.sailors - lost);
@@ -803,7 +803,7 @@ const ShipSystem = {
         return false;
     },
 
-    // Process daily upkeep
+    // 💰 Daily bleeding of your coffers - ships devour gold
     processDailyUpkeep() {
         let totalUpkeep = 0;
 
@@ -811,7 +811,7 @@ const ShipSystem = {
             const ship = this.ships[shipInstance.type];
             totalUpkeep += ship.upkeep.daily;
 
-            // Dock fee if docked
+            // ⚓ Harbors charge for the privilege of stillness
             if (shipInstance.dockedAt) {
                 totalUpkeep += ship.upkeep.dockFee;
             }
@@ -820,9 +820,9 @@ const ShipSystem = {
         if (typeof game !== 'undefined' && game.player && totalUpkeep > 0) {
             if (game.player.gold >= totalUpkeep) {
                 game.player.gold -= totalUpkeep;
-                this.showNotification(`Ship upkeep: ${totalUpkeep} gold`, 'info');
+                this.showNotification(`Ship upkeep: ${totalUpkeup} gold`, 'info');
             } else {
-                // Can't pay - ships deteriorate
+                // 💀 Broke - watch your fleet rot
                 for (const shipInstance of this.ownedShips) {
                     const stats = this.shipStats[shipInstance.id];
                     stats.hull = Math.max(0, stats.hull - 5);
@@ -832,7 +832,7 @@ const ShipSystem = {
         }
     },
 
-    // Process crew wages
+    // 💸 Pay the crew or face mutiny - every fucking day
     processCrewWages() {
         const sailorWage = 2;
         const marineWage = 5;
@@ -850,10 +850,10 @@ const ShipSystem = {
                 game.player.gold -= totalWages;
                 this.crew.morale = Math.min(100, this.crew.morale + 5);
             } else {
-                // Unpaid crew
+                // 😡 Unpaid crew - morale collapses
                 this.crew.morale = Math.max(0, this.crew.morale - 20);
                 if (this.crew.morale <= 0) {
-                    // Crew mutiny!
+                    // ⚔️ MUTINY! They turn on you
                     this.showNotification('MUTINY! Unpaid crew has abandoned ship!', 'danger');
                     this.crew.sailors = Math.floor(this.crew.sailors * 0.3);
                     this.crew.marines = Math.floor(this.crew.marines * 0.3);

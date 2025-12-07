@@ -26,7 +26,7 @@ const NPCEncounterSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 📊 STATE - tracking encounters and cooldowns
+    // state - tracking encounters and cooldowns
     // ═══════════════════════════════════════════════════════════
 
     lastEncounterTime: 0,
@@ -34,7 +34,7 @@ const NPCEncounterSystem = {
     encounterHistory: [],
 
     // ═══════════════════════════════════════════════════════════
-    // 🎲 ENCOUNTER TYPES - different kinds of random NPCs
+    // encounter types - different kinds of random NPCs
     // ═══════════════════════════════════════════════════════════
 
     encounterTypes: {
@@ -57,7 +57,7 @@ const NPCEncounterSystem = {
             ]
         },
 
-        // 🏰 Every location holds souls waiting to speak or strike 👥
+        // every location holds souls waiting to speak or strike
         location: {
             tavern: [
                 { type: 'innkeeper', weight: 30, minRep: -30 },
@@ -109,7 +109,7 @@ const NPCEncounterSystem = {
             ]
         },
 
-        // ⚡ When chaos reigns, special souls emerge from the shadows 🎭
+        // when chaos reigns, special souls emerge from the shadows
         event: {
             festival: [
                 { type: 'drunk', weight: 30, minRep: -100 },
@@ -142,7 +142,7 @@ const NPCEncounterSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🚀 INITIALIZATION - awakening the encounter system
+    // initialization - awakening the encounter system
     // ═══════════════════════════════════════════════════════════
 
     init() {
@@ -173,7 +173,7 @@ const NPCEncounterSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🎲 ENCOUNTER TRIGGERS - checking if encounters should happen
+    // encounter triggers - checking if encounters should happen
     // ═══════════════════════════════════════════════════════════
 
     checkTravelEncounter(fromLocation, toLocation) {
@@ -231,7 +231,7 @@ const NPCEncounterSystem = {
     },
 
     canTriggerEncounter() {
-        // check cooldown
+        // enough time passed since last encounter? enforce the cooldown
         const currentTime = typeof TimeSystem !== 'undefined'
             ? TimeSystem.getTotalMinutes()
             : Date.now() / 60000;
@@ -240,7 +240,7 @@ const NPCEncounterSystem = {
             return false;
         }
 
-        // check max active encounters
+        // too many hollow souls already active? prevent encounter spam
         if (this.activeEncounters.length >= this.config.maxActiveEncounters) {
             return false;
         }
@@ -249,7 +249,7 @@ const NPCEncounterSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🎯 ENCOUNTER SELECTION - choosing which NPC appears
+    // encounter selection - choosing which NPC appears
     // ═══════════════════════════════════════════════════════════
 
     selectEncounter(context, category) {
@@ -284,24 +284,24 @@ const NPCEncounterSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🎭 ENCOUNTER EXECUTION - actually triggering the encounter
+    // encounter execution - actually triggering the encounter
     // ═══════════════════════════════════════════════════════════
 
     triggerEncounter(encounter, context) {
         console.log(`🎭 Triggering ${encounter.type} encounter in ${context}`);
 
-        // ⏸️ Freeze the world - this moment matters 🕰️
+        // freeze the world - this moment matters
         this.pauseTimeForEncounter();
 
-        // update timing
+        // stamp the encounter time - track when this puppet manifested
         this.lastEncounterTime = typeof TimeSystem !== 'undefined'
             ? TimeSystem.getTotalMinutes()
             : Date.now() / 60000;
 
-        // generate NPC data
+        // conjure the NPC data for this encounter - give the puppet form
         const npcData = this.generateEncounterNPC(encounter.type, context);
 
-        // add to active encounters
+        // register this encounter in active memory - the void remembers
         this.activeEncounters.push({
             id: `encounter_${Date.now()}`,
             npc: npcData,
@@ -309,7 +309,7 @@ const NPCEncounterSystem = {
             timestamp: Date.now()
         });
 
-        // add to history
+        // archive this meeting in the history log - permanent record of who crossed paths
         this.encounterHistory.push({
             type: encounter.type,
             context: context,
@@ -325,12 +325,12 @@ const NPCEncounterSystem = {
         this.showEncounterDialog(npcData, context);
     },
 
-    // ⏸️ Halt the march of time - give this encounter your full attention 💀
-    // 🖤💀 FIX: Use interrupt system to properly save and restore user's preferred speed 💀
+    // halt the march of time - give this encounter your full attention
+    // FIX: use interrupt system to properly save and restore user's preferred speed
     pauseTimeForEncounter() {
         if (typeof TimeSystem !== 'undefined') {
             if (TimeSystem.pauseForInterrupt) {
-                // 🖤 New interrupt system - handles nested interrupts and user preferred speed
+                // new interrupt system - handles nested interrupts and user preferred speed
                 TimeSystem.pauseForInterrupt('encounter');
             } else if (!TimeSystem.isPaused) {
                 // Fallback for old API
@@ -344,12 +344,12 @@ const NPCEncounterSystem = {
         }
     },
 
-    // ▶️ Release time from its cage - the encounter has ended 🕰️
-    // 🖤💀 FIX: Use interrupt system to restore user's preferred speed 💀
+    // release time from its cage - the encounter has ended
+    // FIX: use interrupt system to restore user's preferred speed
     resumeTimeAfterEncounter() {
         if (typeof TimeSystem !== 'undefined') {
             if (TimeSystem.resumeFromInterrupt) {
-                // 🖤 New interrupt system - restores previous speed from stack
+                // new interrupt system - restores previous speed from stack
                 TimeSystem.resumeFromInterrupt('encounter');
             } else if (!this.wasTimePaused) {
                 // Fallback for old API
@@ -385,7 +385,7 @@ const NPCEncounterSystem = {
             greetings: persona?.greetings || ["Hello there."]
         };
 
-        // 💼 Some souls carry treasures - give them items to barter 🎒
+        // some souls carry treasures - give them items to barter
         if (this.canTrade(type)) {
             npcData.canTrade = true;
             npcData.inventory = this.generateTravelerInventory(type);
@@ -395,7 +395,7 @@ const NPCEncounterSystem = {
         return npcData;
     },
 
-    // 💱 Can this soul engage in capitalism's cold embrace? 💰
+    // can this soul engage in capitalism's cold embrace?
     canTrade(type) {
         // Most encounter NPCs can trade - criminals fence stolen goods, service NPCs sell their wares
         const tradingTypes = [
@@ -416,7 +416,7 @@ const NPCEncounterSystem = {
         return tradingTypes.includes(type);
     },
 
-    // 🎒 Fill their pockets with survival and sin - what do wanderers carry? 🗡️
+    // fill their pockets with survival and sin - what do wanderers carry?
     generateTravelerInventory(type) {
         const inventoryTemplates = {
             // ═══════════════════════════════════════════════════════════
@@ -617,7 +617,7 @@ const NPCEncounterSystem = {
         const template = inventoryTemplates[type] || inventoryTemplates.traveler;
         const inventory = [];
 
-        // 📦 The basics - bread, water, the mundane necessities of existence 🍞
+        // the basics - bread, water, the mundane necessities of existence
         const commonCount = 2 + Math.floor(Math.random() * 3);
         for (let i = 0; i < commonCount && template.common.length > 0; i++) {
             const item = template.common[Math.floor(Math.random() * template.common.length)];
@@ -627,7 +627,7 @@ const NPCEncounterSystem = {
             });
         }
 
-        // ✨ Something slightly special - the uncommon treasures they've found 🔮
+        // something slightly special - the uncommon treasures they've found
         const uncommonCount = Math.random() > 0.3 ? (Math.random() > 0.5 ? 2 : 1) : 0;
         for (let i = 0; i < uncommonCount && template.uncommon.length > 0; i++) {
             const item = template.uncommon[Math.floor(Math.random() * template.uncommon.length)];
@@ -637,7 +637,7 @@ const NPCEncounterSystem = {
             });
         }
 
-        // 💎 Jackpot - a rare prize hidden among their wares (20% chance) 🎰
+        // jackpot - a rare prize hidden among their wares (20% chance)
         if (Math.random() < 0.2 && template.rare.length > 0) {
             const item = template.rare[Math.floor(Math.random() * template.rare.length)];
             inventory.push({
@@ -649,7 +649,7 @@ const NPCEncounterSystem = {
         return inventory;
     },
 
-    // 💰 How much coin weighs down their purse? Depends on their trade 💸
+    // how much coin weighs down their purse? depends on their trade
     generateTravelerGold(type) {
         const goldRanges = {
             // Original traders
@@ -747,13 +747,13 @@ const NPCEncounterSystem = {
         return title ? `${firstName} ${title}` : firstName;
     },
 
-    // 🖤💀 Show encounter dialog with API TTS for greeting
+    // show encounter dialog with API TTS for greeting
     async showEncounterDialog(npcData, context) {
         // get an appropriate greeting message (fallback)
         const fallbackGreeting = npcData.greetings?.[Math.floor(Math.random() * npcData.greetings.length)]
             || "Greetings, traveler.";
 
-        // 🖤💀 Try to get API-generated greeting
+        // try to get API-generated greeting
         let greeting = fallbackGreeting;
         let useAPIVoice = false;
 
@@ -797,7 +797,7 @@ const NPCEncounterSystem = {
 
         const contextMsg = contextMessages[context] || `You meet ${npcData.name}.`;
 
-        // 🎮 Give the player choices - talk, trade, or walk away 🚪
+        // give the player choices - talk, trade, or walk away
         const buttons = [
             {
                 text: '🗨️ Talk',
@@ -809,7 +809,7 @@ const NPCEncounterSystem = {
             }
         ];
 
-        // 💱 Can we haggle with this soul? Add the trade option 🤝
+        // can we haggle with this soul? add the trade option
         if (npcData.canTrade) {
             buttons.push({
                 text: '💰 Trade',
@@ -846,7 +846,7 @@ const NPCEncounterSystem = {
                 buttons: buttons
             });
 
-            // 🖤💀 Play TTS after modal shows
+            // play TTS after modal shows
             if (useAPIVoice && typeof NPCVoiceChatSystem !== 'undefined') {
                 setTimeout(() => {
                     NPCVoiceChatSystem.playVoice(greeting, npcData.voice || 'nova');
@@ -858,11 +858,11 @@ const NPCEncounterSystem = {
         }
     },
 
-    // 🖤💀 Start conversation - PeoplePanel has ALL the actions (trade, quest, attack, etc.)
-    // NPCChatUI only had Hello/News/Directions - that's garbage for encounters! 💀
+    // start conversation - PeoplePanel has ALL the actions (trade, quest, attack, etc.)
+    // NPCChatUI only had Hello/News/Directions - that's garbage for encounters!
     startEncounterConversation(npcData) {
         if (typeof PeoplePanel !== 'undefined' && PeoplePanel.showSpecialEncounter) {
-            // 🖤💀 Use PeoplePanel's encounter mode - has trade, attack, give gold, quests, etc.
+            // use PeoplePanel's encounter mode - has trade, attack, give gold, quests, etc.
             PeoplePanel.showSpecialEncounter(npcData, {
                 introText: this._getEncounterIntroText(npcData),
                 disableChat: false,  // Allow freeform chat
@@ -870,15 +870,15 @@ const NPCEncounterSystem = {
                 playVoice: true      // Play TTS greeting
             });
         } else if (typeof PeoplePanel !== 'undefined' && PeoplePanel.showNPC) {
-            // 🦇 Fallback to regular NPC view
+            // fallback to regular NPC view
             PeoplePanel.showNPC(npcData);
         } else if (typeof NPCChatUI !== 'undefined') {
-            // 💀 Last resort fallback - limited actions
+            // last resort fallback - limited actions
             NPCChatUI.open(npcData);
         }
     },
 
-    // 🖤 Generate intro text for encounter based on NPC type 💀
+    // generate intro text for encounter based on NPC type
     _getEncounterIntroText(npcData) {
         const type = npcData.type || 'stranger';
         const name = npcData.name || 'A stranger';
@@ -904,13 +904,13 @@ const NPCEncounterSystem = {
         console.log('🎭 NPC inventory:', npcData.inventory);
         console.log('🎭 NPC gold:', npcData.gold);
 
-        // 💼 Open the market interface - let capitalism flow 💸
+        // open the market interface - let capitalism flow
         if (typeof NPCTradeWindow !== 'undefined') {
             NPCTradeWindow.open(npcData);
         } else if (typeof openTradeWindow === 'function') {
             openTradeWindow(npcData);
         } else {
-            // 🦇 No trade window - graceful fallback to conversation
+            // no trade window - graceful fallback to conversation
             console.warn('🎭 Trade window unavailable, starting conversation');
             this.startEncounterConversation(npcData);
         }
@@ -922,7 +922,7 @@ const NPCEncounterSystem = {
         console.log('🎭 Encounter dismissed');
     },
 
-    // 👋 The stranger fades back into the void - encounter over 🌫️
+    // the stranger fades back into the void - encounter over
     endEncounter(npcId) {
         this.activeEncounters = this.activeEncounters.filter(e => e.npc?.id !== npcId);
         this.resumeTimeAfterEncounter();
@@ -930,7 +930,7 @@ const NPCEncounterSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🛠️ HELPER FUNCTIONS - utilities for encounter logic
+    // helper functions - utilities for encounter logic
     // ═══════════════════════════════════════════════════════════
 
     getRouteDanger(from, to) {
@@ -1003,13 +1003,13 @@ const NPCEncounterSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 📢 MANUAL TRIGGERS - for testing and scripted events
+    // manual triggers - for testing and scripted events
     // ═══════════════════════════════════════════════════════════
 
     spawnRandomEncounter(context = 'road', type = null) {
         const contextEncounters = this.encounterTypes[context];
         if (!contextEncounters) {
-            // 🦇 Unknown context - return null, caller handles it
+            // unknown context - return null, caller handles it
             console.warn('🎭 Unknown encounter context:', context);
             return null;
         }
@@ -1038,10 +1038,10 @@ const NPCEncounterSystem = {
         return this.spawnRandomEncounter('road', type);
     },
 
-    // 🦇 FIX: Refresh trader inventories at 8am daily
-    // Called by DynamicMarketSystem.performDailyRefresh()
+    // FIX: refresh trader inventories at 8am daily
+    // called by DynamicMarketSystem.performDailyRefresh()
     refreshTraderInventories() {
-        // 🖤 First, clean up stale encounters older than 1 hour 💀
+        // first, clean up stale encounters older than 1 hour
         const ONE_HOUR = 60 * 60 * 1000;
         this.activeEncounters = this.activeEncounters.filter(e => Date.now() - e.timestamp < ONE_HOUR);
 
@@ -1050,7 +1050,7 @@ const NPCEncounterSystem = {
 
         // Refresh any active encounters that are merchants/traders
         for (const encounter of this.activeEncounters) {
-            // 🦇 Check npc.type not encounter.type - data is nested
+            // check npc.type not encounter.type - data is nested
             const npcType = encounter.npc?.type || encounter.type;
             if (encounter.inventory || npcType === 'merchant' || npcType === 'smuggler') {
                 // Reset inventory with fresh survival items
@@ -1070,7 +1070,7 @@ const NPCEncounterSystem = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🌍 GLOBAL ACCESS - easy encounter triggers
+// global access - easy encounter triggers
 // ═══════════════════════════════════════════════════════════════
 
 window.spawnNPCEncounter = function(context, type) {
@@ -1082,7 +1082,7 @@ window.testNPCChat = function(type) {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🚀 INITIALIZATION - awaken the encounter system
+// initialization - awaken the encounter system
 // ═══════════════════════════════════════════════════════════════
 
 if (document.readyState === 'loading') {

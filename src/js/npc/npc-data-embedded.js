@@ -1,12 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
-// 🖤 NPC DATA EMBEDDED - all NPC specifications in one place 💀
+// NPC DATA EMBEDDED - all NPC specifications in one place
 // ═══════════════════════════════════════════════════════════════
 // Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 //
-// 🦇 This file contains all NPC data embedded directly to avoid
-// 🦇 CORS errors when running from file:// protocol
+// this file contains all NPC data embedded directly to avoid
+// CORS errors when running from file:// protocol
 // ═══════════════════════════════════════════════════════════════
 
 const NPC_EMBEDDED_DATA = {
@@ -371,7 +371,7 @@ const NPC_EMBEDDED_DATA = {
         "farewells": ["Dismissed.", "Don't disappoint me.", "*turns back to tactical work*"]
     },
 
-    // 🖤💀 NEW: Royal Advisor - court sage distinct from village elders 💀
+    // NEW: Royal Advisor - court sage distinct from village elders
     "royal_advisor": {
         "type": "royal_advisor",
         "category": "authority",
@@ -387,7 +387,7 @@ const NPC_EMBEDDED_DATA = {
         "farewells": ["The court remembers those who serve well.", "*returns to scrolls* Information is power. Remember that.", "May your path serve the kingdom's interests."]
     },
 
-    // 🖤💀 NEW: Chieftain - northern village leader distinct from Greendale elder 💀
+    // NEW: Chieftain - northern village leader distinct from Greendale elder
     "chieftain": {
         "type": "chieftain",
         "category": "authority",
@@ -729,7 +729,7 @@ const NPC_EMBEDDED_DATA = {
     }
 };
 
-// 🖤 Make available globally 💀
+// make available globally
 window.NPC_EMBEDDED_DATA = NPC_EMBEDDED_DATA;
 
-console.log(`🎭 NPC_EMBEDDED_DATA loaded - ${Object.keys(NPC_EMBEDDED_DATA).length} NPC types available 🖤💀`);
+console.log(`🎭 NPC_EMBEDDED_DATA loaded - ${Object.keys(NPC_EMBEDDED_DATA).length} NPC types available`);

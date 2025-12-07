@@ -44,7 +44,7 @@ const NPCChatUI = {
     // ═══════════════════════════════════════════════════════════
 
     createPanel() {
-        // create main container
+        // birth the container for digital conversations - a void where hollow souls speak
         this.panelElement = document.createElement('div');
         this.panelElement.id = 'npc-chat-panel';
         this.panelElement.className = 'npc-chat-panel';
@@ -112,10 +112,10 @@ const NPCChatUI = {
             </div>
         `;
 
-        // add styles
+        // inject the visual aesthetics - make these hollow souls look pretty
         this.addStyles();
 
-        // append to body
+        // attach this interface to the body - the chat panel becomes flesh
         document.body.appendChild(this.panelElement);
     },
 
@@ -123,14 +123,14 @@ const NPCChatUI = {
         const style = document.createElement('style');
         style.id = 'npc-chat-ui-styles';
         style.textContent = `
-            /* 🗨️ NPC Chat Panel - the voice of digital souls */
+            /* NPC Chat Panel - the voice of digital souls */
             .npc-chat-panel {
                 position: fixed;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                z-index: 600; /* Z-INDEX STANDARD: Panel overlays */
+                z-index: 600; /* z-index standard: panel overlays */
                 display: none;
             }
 
@@ -594,7 +594,7 @@ const NPCChatUI = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🔌 EVENT LISTENERS - wiring up the conversation machine
+    // event listeners - wiring up the conversation machine
     // ═══════════════════════════════════════════════════════════
 
     setupEventListeners() {
@@ -662,7 +662,7 @@ const NPCChatUI = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 📖 OPEN/CLOSE - summoning and dismissing the conversation
+    // open/close - summoning and dismissing the conversation
     // ═══════════════════════════════════════════════════════════
 
     open(npcData) {
@@ -684,10 +684,10 @@ const NPCChatUI = {
             console.log(`Recorded meeting with ${npcData.name || npcId} - quest availability updated`);
         }
 
-        // update UI with NPC info
+        // paint this puppet's identity onto the UI - show their face to the player
         this.updateNPCInfo(npcData);
 
-        // clear previous messages
+        // wipe the slate clean - erase all previous hollow exchanges
         this.clearMessages();
 
         // start conversation in the voice system
@@ -708,39 +708,39 @@ const NPCChatUI = {
             }
         }
 
-        // Update quick response buttons based on NPC type
+        // adjust quick responses to match this puppet's programmed abilities
         this.updateQuickResponses(npcData);
 
-        // show panel
+        // pull back the curtain - reveal the conversation stage to the player
         this.panelElement.style.display = 'block';
         this.isOpen = true;
 
-        // focus input
+        // summon the cursor to the input field - the player must speak first
         setTimeout(() => {
             const input = document.getElementById('npc-chat-input');
             if (input) input.focus();
         }, 100);
 
-        // update turns display
+        // show how many exchanges remain before this hollow soul dismisses you
         this.updateTurnsDisplay();
 
         console.log('NPCChatUI: Opened chat with', npcData.name || 'Unknown NPC');
     },
 
-    // UPDATE QUICK RESPONSES - show relevant options based on NPC type
-    // Quest givers get quest option, merchants get trade option, etc.
+    // UPDATE QUICK RESPONSES - give the player shortcuts to command these hollow souls
+    // Quest puppets offer tasks, merchants peddle their wares, etc.
     updateQuickResponses(npcData) {
         const quickResponsesContainer = document.getElementById('quick-responses');
         if (!quickResponsesContainer) return;
 
         const npcType = npcData.type || 'villager';
 
-        // Get NPC permissions from config
+        // extract this puppet's programmed abilities from the config tome
         const permissions = GameConfig?.npc?.npcPermissions?.[npcType] || ['basic'];
         const canTrade = permissions.includes('merchant') || npcData.canTrade;
         const canGiveQuests = permissions.includes('questGiver');
 
-        // Build appropriate quick responses
+        // assemble the buttons that command this meat sack
         let buttons = [];
 
         // Always show greeting
@@ -818,7 +818,7 @@ const NPCChatUI = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 💬 MESSAGING - the art of digital dialogue
+    // messaging - the art of digital dialogue
     // ═══════════════════════════════════════════════════════════
 
     async sendMessage() {
@@ -833,14 +833,14 @@ const NPCChatUI = {
         input.value = '';
         document.getElementById('char-count').textContent = '0';
 
-        // add player message to UI
+        // display player's words in the void - record what the living spoke
         this.addPlayerMessage(message);
 
-        // disable input while waiting
+        // silence the player while the puppet formulates its scripted response
         this.setInputEnabled(false);
         this.isWaitingForResponse = true;
 
-        // show typing indicator
+        // show the thinking animation - pretend the hollow soul is pondering
         this.showTypingIndicator();
 
         try {
@@ -849,38 +849,38 @@ const NPCChatUI = {
                 const npcId = this.currentNPC?.id || 'npc_unknown';
                 const response = await NPCVoiceChatSystem.sendMessage(npcId, message);
 
-                // remove typing indicator
+                // erase the false thinking animation - the puppet has spoken
                 this.hideTypingIndicator();
 
                 if (response) {
-                    // add NPC response
+                    // manifest the puppet's scripted words onto the screen
                     this.addNPCMessage(response.text);
 
-                    // update turns display
+                    // refresh the turn counter - count down to dismissal
                     this.updateTurnsDisplay(response);
 
-                    // show voice indicator if playing
+                    // animate the voice waves if this hollow soul is speaking aloud
                     if (NPCVoiceChatSystem.isVoicePlaying()) {
                         this.showVoiceIndicator();
                     }
 
-                    // check if conversation ended
+                    // has this puppet grown tired of you? end the exchange
                     if (response.isDismissal || response.isLastTurn) {
                         this.handleConversationEnd(response);
                     }
                 }
             }
         } catch (error) {
-            // 🦇 API failed - NPC gives a graceful "distracted" response
+            // the API void returned nothing - puppet stares blankly, unresponsive
             this.hideTypingIndicator();
             this.addNPCMessage('*seems distracted and doesn\'t respond*');
         } finally {
-            // 🖤 ALWAYS reset state - no matter what chaos ensued above 💀
+            // reset state no matter what darkness occurred above - always clean up after yourself
             this.isWaitingForResponse = false;
             try {
                 this.setInputEnabled(true);
             } catch (e) {
-                // 🦇 DOM might be gone, that's fine
+                // DOM might be gone, that's fine
             }
         }
     },
@@ -922,7 +922,7 @@ const NPCChatUI = {
         messagesContainer.appendChild(messageEl);
         this.scrollToBottom();
 
-        // 🖋️ Find the message bubble to animate - typewriter magic begins ✍️
+        // locate the bubble that will birth these words - typewriter ritual begins
         const bubbleEl = messageEl.querySelector('.message-bubble');
         if (bubbleEl) {
             this.typewriterEffect(bubbleEl, text);
@@ -933,11 +933,11 @@ const NPCChatUI = {
         }
     },
 
-    // 🎬 Typewriter effect for NPC messages - text appears character by character
+    // typewriter effect for NPC messages - text appears character by character
     typewriterEffect(element, text, speed = 30) {
         if (!element || !text) return;
 
-        // 🖤 Clear any existing typewriter timeouts first 💀
+        // clear any existing typewriter timeouts first
         this.clearTypewriterTimeouts();
 
         const formattedText = this.formatNPCMessage(text);
@@ -946,10 +946,10 @@ const NPCChatUI = {
         let inTag = false;
         let currentTag = '';
 
-        // ⏱️ Character by character - revealing the message like a ritual 🔮
+        // character by character - revealing the message like a ritual
         const typeNext = () => {
             if (charIndex >= formattedText.length) {
-                // 💀 Typing complete - the message has fully manifested 📜
+                // typing complete - the message has fully manifested
                 element.innerHTML = formattedText;
                 this.scrollToBottom();
                 return;
@@ -957,7 +957,7 @@ const NPCChatUI = {
 
             const char = formattedText[charIndex];
 
-            // 🏷️ HTML tag detected - swallow it whole, not char by char 📝
+            // HTML tag detected - swallow it whole, not char by char
             if (char === '<') {
                 inTag = true;
                 currentTag = '<';
@@ -974,11 +974,11 @@ const NPCChatUI = {
 
             charIndex++;
 
-            // 🖥️ Add this character to the visible text ✨
+            // manifest this character onto the screen - one symbol at a time
             element.innerHTML = displayText;
             this.scrollToBottom();
 
-            // ⏰ Calculate typing speed - pauses make it feel human 🎭
+            // adjust the delay between characters - mimic the rhythm of living breath
             let delay = speed;
             if (char === ' ') {
                 delay = speed * 0.5;
@@ -988,16 +988,16 @@ const NPCChatUI = {
                 delay = speed * 2;
             }
 
-            // 🖤 Track timeout for cleanup 💀
+            // track timeout for cleanup
             const timeoutId = setTimeout(typeNext, delay);
             this._typewriterTimeouts.push(timeoutId);
         };
 
-        // 🎬 Begin the performance - start typing the message 📝
+        // begin the performance - start typing the message
         typeNext();
     },
 
-    // 🖤 Clear all typewriter timeouts 💀
+    // clear all typewriter timeouts
     clearTypewriterTimeouts() {
         if (this._typewriterTimeouts) {
             this._typewriterTimeouts.forEach(id => clearTimeout(id));
@@ -1059,7 +1059,7 @@ const NPCChatUI = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🎭 UI UPDATES - keeping the interface in sync
+    // UI updates - keeping the interface in sync
     // ═══════════════════════════════════════════════════════════
 
     updateNPCInfo(npcData) {
@@ -1166,12 +1166,12 @@ const NPCChatUI = {
         if (indicator) {
             indicator.style.display = 'inline-flex';
 
-            // 🖤 hide when voice stops - with safety timeout to prevent memory leak
+            // hide when voice stops - with safety timeout to prevent memory leak
             let checkCount = 0;
             const maxChecks = 120; // 60 seconds max (120 * 500ms)
             const checkVoice = setInterval(() => {
                 checkCount++;
-                // 🛑 Stop the animation if voice ended or timeout hit ⏱️
+                // stop the animation if voice ended or timeout hit
                 if (typeof NPCVoiceChatSystem === 'undefined' ||
                     !NPCVoiceChatSystem.isVoicePlaying() ||
                     !document.getElementById('npc-voice-indicator') ||
@@ -1184,7 +1184,7 @@ const NPCChatUI = {
     },
 
     // ═══════════════════════════════════════════════════════════
-    // 🛠️ UTILITIES - helper functions for the digital dialogue
+    // utilities - helper functions for the digital dialogue
     // ═══════════════════════════════════════════════════════════
 
     escapeHtml(text) {
@@ -1200,7 +1200,7 @@ const NPCChatUI = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🌍 GLOBAL HELPER - easy access for merchants and events
+// global helper - easy access for merchants and events
 // ═══════════════════════════════════════════════════════════════
 
 // helper function to open NPC chat from anywhere
@@ -1208,7 +1208,7 @@ window.openNPCChat = function(npcData) {
     if (typeof NPCChatUI !== 'undefined') {
         NPCChatUI.open(npcData);
     } else {
-        // 🦇 Chat UI not loaded - user sees nothing, no console spam
+        // chat UI not loaded - user sees nothing, no console spam
         addMessage?.('The merchant is unavailable.');
     }
 };
@@ -1216,19 +1216,19 @@ window.openNPCChat = function(npcData) {
 // open merchant chat - gets current merchant from NPCMerchantSystem
 NPCChatUI.openMerchantChat = function() {
     if (typeof NPCMerchantSystem === 'undefined') {
-        // 🦇 Merchant system not loaded - graceful user message
+        // merchant system not loaded - graceful user message
         addMessage?.('The merchant seems to be away...');
         return;
     }
 
     let merchant = NPCMerchantSystem.getCurrentMerchant();
 
-    // 🏪 No merchant here? Summon one from the void if we can 🔮
+    // no merchant here? summon one from the void if we can
     if (!merchant && game?.currentLocation?.id) {
         const locationId = game.currentLocation.id;
         console.log(`🗨️ No merchant for ${locationId}, generating one...`);
 
-        // 💼 Conjure a temporary merchant for this location 🧙
+        // conjure a temporary merchant for this location
         const personalityKeys = Object.keys(NPCMerchantSystem.personalityTypes);
         const personalityId = personalityKeys[Math.floor(Math.random() * personalityKeys.length)];
         const personality = NPCMerchantSystem.personalityTypes[personalityId];
@@ -1258,17 +1258,17 @@ NPCChatUI.openMerchantChat = function() {
     }
 
     if (!merchant) {
-        // 🦇 No merchant available - graceful user message
+        // no merchant available - graceful user message
         addMessage?.('There is no merchant here to talk to.');
         return;
     }
 
     const location = game?.currentLocation;
 
-    // create NPC data from merchant
+    // assemble the puppet's data structure from merchant config - give it a soul (kind of)
     const npcData = window.createNPCDataFromMerchant(merchant, location);
 
-    // open the chat
+    // summon the chat interface - let the player speak to this hollow merchant
     NPCChatUI.open(npcData);
 };
 
@@ -1292,7 +1292,7 @@ window.createNPCDataFromMerchant = function(merchant, location) {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🚀 INITIALIZATION - awaken the chat interface
+// initialization - awaken the chat interface
 // ═══════════════════════════════════════════════════════════════
 
 if (document.readyState === 'loading') {

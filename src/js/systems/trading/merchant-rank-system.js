@@ -1,19 +1,19 @@
-// 
-//  MERCHANT RANK SYSTEM - climb the ladder or die trying
-// 
+//
+// merchant rank system - climb the ladder or die trying
+//
 // File Version: GameConfig.version.file
 // from vagrant filth to royal merchant glory
 // your wealth defines your worth... how depressingly capitalist
 // 
 
 const MerchantRankSystem = {
-    //  FIX: Don't show rank-up celebrations until player has unpaused at least once 
+    // FIX: don't show rank-up celebrations until player has unpaused at least once
     _firstUnpauseOccurred: false,
-    _pendingRankUp: null, // Ÿ¦‡ Store pending rank-up to show after unpause
+    _pendingRankUp: null, // store pending rank-up to show after unpause
 
-    // 
-    //  RANK DEFINITIONS - 10 levels of commercial existence
-    // 
+    //
+    // rank definitions - 10 levels of commercial existence
+    //
     ranks: {
         vagrant: {
             id: 'vagrant',
@@ -243,14 +243,14 @@ const MerchantRankSystem = {
     // current player rank (cached)
     currentRank: null,
 
-    // 
-    //  INITIALIZATION
-    // 
+    //
+    // initialization
+    //
     init() {
         console.log('ðŸ‘‘ MerchantRankSystem awakening... time to judge your worth');
         this.updateRank();
         this.setupEventListeners();
-        //  Update player name display with title on init
+        // update player name display with title on init
         this.updateAllNameDisplays();
         return this;
     },
@@ -262,9 +262,9 @@ const MerchantRankSystem = {
         document.addEventListener('trade-completed', () => this.checkForRankUp());
     },
 
-    // 
-    //  WEALTH CALCULATION - count your sins... i mean gold
-    // 
+    //
+    // wealth calculation - count your sins... i mean gold
+    //
     calculateTotalWealth() {
         if (typeof game === 'undefined' || !game.player) return 0;
 
@@ -306,11 +306,11 @@ const MerchantRankSystem = {
         return Math.floor(wealth);
     },
 
-    // 
-    //  RANK MANAGEMENT
-    // 
+    //
+    // rank management
+    //
     getRankForWealth(wealth) {
-        //  Use findLast for cleaner reverse lookup - finds highest qualifying rank 
+        // use findLast for cleaner reverse lookup - finds highest qualifying rank 
         const qualifyingRankId = this.rankOrder.findLast(rankId => wealth >= this.ranks[rankId].minWealth);
         return qualifyingRankId ? this.ranks[qualifyingRankId] : this.ranks.vagrant;
     },
@@ -319,7 +319,7 @@ const MerchantRankSystem = {
         const wealth = this.calculateTotalWealth();
         const newRank = this.getRankForWealth(wealth);
 
-        //  Ranks are PERMANENT - only allow promotions, never demotions
+        // ranks are PERMANENT - only allow promotions, never demotions
         if (!this.currentRank) {
             // First time setting rank
             this.currentRank = newRank;
@@ -355,9 +355,9 @@ const MerchantRankSystem = {
     checkForRankUp() {
         const result = this.updateRank();
 
-        //  Ranks are PERMANENT - only promotions happen, never demotions
+        // ranks are PERMANENT - only promotions happen, never demotions
         if (result.changed && result.previousRank) {
-            //  FIX: Don't show celebration until player has unpaused at least once 
+            // FIX: don't show celebration until player has unpaused at least once 
             if (!this._firstUnpauseOccurred) {
                 console.log('ðŸ‘‘ Rank up detected but game not unpaused yet - deferring celebration');
                 this._pendingRankUp = result.newRank;
@@ -380,7 +380,7 @@ const MerchantRankSystem = {
             // show celebration (if we have one)
             this.celebrateRankUp(result.newRank);
 
-            //  Notify AchievementSystem that first rank up occurred - enables achievement checking 
+            // notify AchievementSystem that first rank up occurred - enables achievement checking
             if (typeof AchievementSystem !== 'undefined' && AchievementSystem.onFirstRankUp) {
                 AchievementSystem.onFirstRankUp();
             }
@@ -392,9 +392,9 @@ const MerchantRankSystem = {
         return result;
     },
 
-    //  FIX: Called when player first unpauses the game - NOW we can show deferred rank-ups 
+    // FIX: called when player first unpauses the game - NOW we can show deferred rank-ups
     enableRankCelebrations() {
-        if (this._firstUnpauseOccurred) return; // Ÿ¦‡ Already enabled
+        if (this._firstUnpauseOccurred) return; // already enabled
 
         this._firstUnpauseOccurred = true;
         console.log('ðŸ‘‘ Player unpaused! Rank celebrations now ENABLED ðŸ–¤ðŸ’€');
@@ -417,7 +417,7 @@ const MerchantRankSystem = {
             // show celebration
             this.celebrateRankUp(this._pendingRankUp);
 
-            //  Notify AchievementSystem that first rank up occurred - enables achievement checking 
+            // notify AchievementSystem that first rank up occurred - enables achievement checking
             if (typeof AchievementSystem !== 'undefined' && AchievementSystem.onFirstRankUp) {
                 AchievementSystem.onFirstRankUp();
             }
@@ -459,16 +459,16 @@ const MerchantRankSystem = {
         });
     },
 
-    // 
-    //  PLAYER NAME WITH TITLE
-    // 
+    //
+    // player name with title
+    //
     getPlayerNameWithTitle() {
         if (typeof game === 'undefined' || !game.player) return 'Unknown';
 
         const rank = this.getCurrentRank();
         const name = game.player.name || 'Adventurer';
 
-        //  Format: "Riley a Vagrant" (no comma) 
+        // format: "Riley a Vagrant" (no comma) 
         return `${name} ${rank.title}`;
     },
 
@@ -517,9 +517,9 @@ const MerchantRankSystem = {
         });
     },
 
-    // 
-    //  LIMIT CHECKS - keep the peasants in their place
-    // 
+    //
+    // limit checks - keep the peasants in their place
+    //
     getMaxProperties() {
         const rank = this.getCurrentRank();
         return rank.maxProperties;
@@ -564,7 +564,7 @@ const MerchantRankSystem = {
         const rank = this.getCurrentRank();
         const currentIndex = this.rankOrder.indexOf(rank.id);
 
-        //  Guard against indexOf returning -1 (not found) 
+        // guard against indexOf returning -1 (not found) 
         if (currentIndex === -1) return null;
 
         if (currentIndex < this.rankOrder.length - 1) {
@@ -596,9 +596,9 @@ const MerchantRankSystem = {
         };
     },
 
-    // 
-    //  TRADING BENEFITS
-    // 
+    //
+    // trading benefits
+    //
     getTradingBonus() {
         const rank = this.getCurrentRank();
         return rank.benefits.tradingBonus;
@@ -614,9 +614,9 @@ const MerchantRankSystem = {
         return rank.benefits.taxRate;
     },
 
-    // 
-    //  UI HELPERS
-    // 
+    //
+    // ui helpers
+    //
     getRankDisplay() {
         const rank = this.getCurrentRank();
         const progress = this.getProgressToNextRank();
@@ -662,7 +662,7 @@ const MerchantRankSystem = {
         `;
     },
 
-    //  Format gold with compact notation - handles billions 
+    // format gold with compact notation - handles billions 
     formatGold(amount) {
         if (amount >= 1000000000000) return `${(amount / 1000000000000).toFixed(1)}T`;
         if (amount >= 1000000000) return `${(amount / 1000000000).toFixed(1)}B`;
@@ -671,9 +671,9 @@ const MerchantRankSystem = {
         return amount.toString();
     },
 
-    // 
-    //  SAVE/LOAD
-    // 
+    //
+    // save/load
+    //
     getSaveData() {
         return {
             currentRankId: this.currentRank?.id || 'vagrant',
@@ -690,9 +690,9 @@ const MerchantRankSystem = {
     }
 };
 
-// 
-//  GLOBAL BINDING
-// 
+//
+// global binding
+//
 if (typeof window !== 'undefined') {
     window.MerchantRankSystem = MerchantRankSystem;
 }

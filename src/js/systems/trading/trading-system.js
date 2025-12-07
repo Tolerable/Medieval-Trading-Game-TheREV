@@ -8,13 +8,13 @@
 // 
 
 const TradingSystem = {
-    //  Config - how we're gonna hustle today
+    // config - how we're gonna hustle today
     tradeMode: 'single', // 'single' or 'bulk' (for the ambitious)
     selectedTradeItems: new Map(),
     tradeHistory: [],
     priceAlerts: [],
 
-    //  Escape HTML to prevent XSS - sanitize or die 
+    // escape HTML to prevent XSS - sanitize or die 
     _escapeHTML(str) {
         if (str == null) return '';
         return String(str)
@@ -25,14 +25,14 @@ const TradingSystem = {
             .replace(/'/g, '&#039;');
     },
     
-    //  Initialize - let the exploitation begin
+    // initialize - let the exploitation begin
     init() {
         this.setupEventListeners();
         this.updateTradeHistoryDisplay();
         this.updatePriceAlertsDisplay();
     },
     
-    //  Setup event listeners - watching for opportunities (and mistakes)
+    // setup event listeners - watching for opportunities (and mistakes)
     setupEventListeners() {
         // trade mode toggle - single item or going full hoarder
         const singleBtn = document.getElementById('single-trade-btn');
@@ -80,7 +80,7 @@ const TradingSystem = {
         }
     },
     
-    //  Set trade mode - choosing your flavor of capitalism
+    // set trade mode - choosing your flavor of capitalism
     setTradeMode(mode) {
         this.tradeMode = mode;
         
@@ -111,7 +111,7 @@ const TradingSystem = {
         updateMarketDisplay();
     },
     
-    //  Select all buy items - going full shopaholic
+    // select all buy items - going full shopaholic
     selectAllBuyItems() {
         const buyItems = document.querySelectorAll('#buy-items .market-item');
         buyItems.forEach(itemElement => {
@@ -124,7 +124,7 @@ const TradingSystem = {
         this.updateTradeSummary();
     },
     
-    //  Select all sell items - liquidating the hoard
+    // select all sell items - liquidating the hoard
     selectAllSellItems() {
         const sellItems = document.querySelectorAll('#sell-items .market-item');
         sellItems.forEach(itemElement => {
@@ -137,7 +137,7 @@ const TradingSystem = {
         this.updateTradeSummary();
     },
     
-    //  Clear selection - buyer's remorse prevention
+    // clear selection - buyer's remorse prevention
     clearSelection(type) {
         this.selectedTradeItems.clear();
         
@@ -150,7 +150,7 @@ const TradingSystem = {
         this.updateTradeSummary();
     },
     
-    //  Buy selected items - spending money we may not have
+    // buy selected items - spending money we may not have
     buySelectedItems() {
         if (this.selectedTradeItems.size === 0) {
             addMessage('No items selected for purchase!');
@@ -164,7 +164,7 @@ const TradingSystem = {
         this.clearSelection('buy');
     },
     
-    //  Sell selected items - parting with our precious belongings
+    // sell selected items - parting with our precious belongings
     sellSelectedItems() {
         if (this.selectedTradeItems.size === 0) {
             addMessage('No items selected for sale!');
@@ -178,7 +178,7 @@ const TradingSystem = {
         this.clearSelection('sell');
     },
     
-    //  Update trade summary - tallying the damage
+    // count your coins and cry - this is what you chose
     updateTradeSummary() {
         const totalElement = document.getElementById('trade-total');
         const profitElement = document.getElementById('trade-profit');
@@ -201,7 +201,7 @@ const TradingSystem = {
             const price = marketData.price || ItemDatabase.calculatePrice(itemId);
             totalCost += price * quantity;
             
-            // calculate profit - the whole point of this suffering
+            // profit - the only reason we're here rotting in this marketplace
             const sellPrice = Math.round(price * 0.7); // Base sell price
             totalProfit += (sellPrice - price) * quantity;
         }
@@ -210,7 +210,7 @@ const TradingSystem = {
         profitElement.textContent = `Profit: ${totalProfit} gold`;
     },
     
-    //  Update trade preview - see the pain before committing
+    // preview your financial death before you commit to it
     updateTradePreview(itemId, quantity) {
         const previewElement = document.getElementById('trade-preview');
         if (!previewElement) return;
@@ -251,7 +251,7 @@ const TradingSystem = {
         }
     },
     
-    //  Record trade - documenting our financial journey
+    // carve another scar into your ledger - remember what you paid for greed
     recordTrade(type, items, price) {
         const trade = {
             type: type, // 'buy' or 'sell'
@@ -262,13 +262,13 @@ const TradingSystem = {
                 quantity: qty,
                 itemName: ItemDatabase.getItemName(id)
             })),
-            //  Track price to remember what we paid/earned 
+            // track price to remember what we paid/earned 
             price: price || 0
         };
         
         this.tradeHistory.unshift(trade);
         
-        // keep only last 50 trades - can't hoard memories forever
+        // forget the old wounds - we only remember the last 50 mistakes
         if (this.tradeHistory.length > 50) {
             this.tradeHistory = this.tradeHistory.slice(0, 50);
         }
@@ -276,7 +276,7 @@ const TradingSystem = {
         this.updateTradeHistoryDisplay();
     },
     
-    //  Update trade history - a gallery of past choices
+    // display your shameful history of financial decisions
     updateTradeHistoryDisplay() {
         const historyContainer = document.getElementById('trade-history');
         if (!historyContainer) return;
@@ -286,7 +286,7 @@ const TradingSystem = {
             return;
         }
         
-        //  Escape all user-facing data to prevent XSS 
+        // escape all user-facing data to prevent XSS 
         historyContainer.innerHTML = this.tradeHistory.map(trade => `
             <div class="trade-history-item">
                 <div class="trade-type">${this._escapeHTML(trade.type).toUpperCase()}</div>
@@ -297,7 +297,7 @@ const TradingSystem = {
         `).join('');
     },
     
-    //  Add price alert - notifying us when the market moves
+    // set a trap for opportunity - or desperation, hard to tell the difference
     addPriceAlert(itemId, targetPrice, type) {
         this.priceAlerts.push({
             itemId: itemId,
@@ -310,13 +310,13 @@ const TradingSystem = {
         this.updatePriceAlertsDisplay();
     },
     
-    //  Remove price alert - giving up on that dream
+    // kill the alert - some dreams aren't worth chasing anymore
     removePriceAlert(itemId) {
         this.priceAlerts = this.priceAlerts.filter(alert => alert.itemId !== itemId);
         this.updatePriceAlertsDisplay();
     },
     
-    //  Check price alerts - stalking the market like an ex
+    // obsessively check if the market's moved - we're addicted to this shit
     checkPriceAlerts() {
         if (game.state !== GameState.PLAYING) return;
         
@@ -336,7 +336,7 @@ const TradingSystem = {
                 
                 addMessage(`Price Alert: ${alert.itemName} is ${alert.type} your target of ${alert.targetPrice} gold! (Current: ${currentPrice} gold)`);
                 
-                // deactivate one-time alerts - they served their purpose
+                // silence the alert - its screaming is done
                 if (alert.type !== 'persistent') {
                     alert.active = false;
                 }
@@ -344,7 +344,7 @@ const TradingSystem = {
         });
     },
     
-    //  Update price alerts - our market stalker list
+    // show our desperate watch list - these prices haunt us
     updatePriceAlertsDisplay() {
         const alertsContainer = document.getElementById('price-alerts');
         if (!alertsContainer) return;
@@ -366,14 +366,14 @@ const TradingSystem = {
         `).join('');
     },
 
-    //  Clear trade history - erasing the evidence
+    // burn the ledger - pretend the mistakes never happened
     clearTradeHistory() {
         this.tradeHistory = [];
         this.updateTradeHistoryDisplay();
         addMessage('Trade history cleared!');
     },
     
-    //  Export trade history - keeping receipts like a true adult
+    // download your shame - document every gold piece lost to greed
     exportTradeHistory() {
         if (this.tradeHistory.length === 0) {
             addMessage('No trade history to export!');

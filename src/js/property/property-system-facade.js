@@ -8,7 +8,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 const PropertySystem = {
-    // 🏘️ Property types - delegate to PropertyTypes ⚰️
+    // property types - delegate to PropertyTypes
     get propertyTypes() {
         return PropertyTypes.types;
     },
@@ -25,9 +25,9 @@ const PropertySystem = {
         return PropertyTypes.buildingMaterials;
     },
 
-    // 🎯 Initialize property system 🦇
+    // initialize property system
     init() {
-        // 🖤 Guard against early initialization when player doesn't exist yet 💀
+        // guard against early initialization when player doesn't exist yet
         if (!game || !game.player) {
             console.log('🖤 PropertySystem.init() called before player exists... waiting in the shadows');
             return;
@@ -43,7 +43,7 @@ const PropertySystem = {
         }
     },
 
-    // 🏠 Get available properties at current location 🗡️
+    // get available properties at current location
     getAvailableProperties() {
         const location = GameWorld.locations[game.currentLocation.id];
         if (!location) return [];
@@ -79,7 +79,7 @@ const PropertySystem = {
         return availableProperties;
     },
 
-    // 💵 Delegate to PropertyPurchase 🌙
+    // delegate to PropertyPurchase
     calculatePropertyPrice(propertyId, acquisitionType = 'buy') {
         return PropertyPurchase.calculatePrice(propertyId, acquisitionType);
     },
@@ -132,7 +132,7 @@ const PropertySystem = {
         return PropertyTypes.getBuildingMaterials(propertyId);
     },
 
-    // 🔮 Player properties 💀
+    // player properties
     getPlayerProperties() {
         return game.player.ownedProperties || [];
     },
@@ -146,7 +146,7 @@ const PropertySystem = {
     },
 
     getProperty(propertyId) {
-        // 🖤 Guard against null ownedProperties - can't find shit in nothing 💀
+        // guard against null ownedProperties - can't find shit in nothing
         return game.player.ownedProperties?.find(p => p.id === propertyId);
     },
 
@@ -161,7 +161,7 @@ const PropertySystem = {
         this.updatePropertyDisplay();
     },
 
-    // 💰 Delegate to PropertyIncome 🖤
+    // delegate to PropertyIncome
     processDailyIncome() {
         return PropertyIncome.processDailyIncome();
     },
@@ -203,7 +203,7 @@ const PropertySystem = {
         return PropertyIncome.processPropertyEvents(property);
     },
 
-    // 🔧 Delegate to PropertyUpgrades ⚰️
+    // delegate to PropertyUpgrades
     upgradeProperty(propertyId, upgradeId) {
         return PropertyUpgrades.upgrade(propertyId, upgradeId);
     },
@@ -288,7 +288,7 @@ const PropertySystem = {
         return PropertyUpgrades.upgradeLevel(propertyId);
     },
 
-    // 📦 Delegate to PropertyStorage 🦇
+    // delegate to PropertyStorage
     initializePropertyStorage(propertyId) {
         return PropertyStorage.initialize(propertyId);
     },
@@ -365,7 +365,7 @@ const PropertySystem = {
         return PropertyStorage._populateTransferBetweenProperties(fromPropertyId, toPropertyId);
     },
 
-    // ⚒️ Work queue methods 🗡️
+    // work queue methods
     getProductionLimits(propertyId) {
         return PropertyTypes.getProductionLimits(propertyId);
     },
@@ -445,7 +445,7 @@ const PropertySystem = {
         return true;
     },
 
-    // 🎨 Delegate to PropertyUI 🌙
+    // delegate to PropertyUI
     updatePropertyDisplay() {
         return PropertyUI.updatePropertyDisplay();
     },
@@ -520,5 +520,5 @@ const PropertySystem = {
     }
 };
 
-// 🌙 expose to global scope 🦇
+// expose to global scope
 window.PropertySystem = PropertySystem;

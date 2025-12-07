@@ -24,7 +24,7 @@ const UIPolishSystem = {
     tooltipElements: [],
     notificationQueue: [],
     
-    // Initialize UI polish system
+    // awaken the illusion - make these pixels dance
     init() {
         this.loadSettings();
         this.setupGlobalStyles();
@@ -41,7 +41,7 @@ const UIPolishSystem = {
             try {
                 this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
             } catch (error) {
-                // 🖤 Silent fallback - corrupt data just means we use defaults
+                // silent fallback - corrupt data just means we use defaults
                 localStorage.removeItem('tradingGameUIPolishSettings');
             }
         }
@@ -61,7 +61,7 @@ const UIPolishSystem = {
         document.documentElement.setAttribute('data-high-contrast', this.settings.highContrast);
     },
     
-    // Setup global styles
+    // paint the void with style - inject our aesthetic poison
     setupGlobalStyles() {
         const style = document.createElement('style');
         style.id = 'ui-polish-styles';
@@ -328,20 +328,20 @@ const UIPolishSystem = {
         document.head.appendChild(style);
     },
     
-    // Setup event listeners
+    // bind the handlers - let the interface respond to every desperate touch
     setupEventListeners() {
         // Enable transitions based on settings
         document.documentElement.setAttribute('data-transitions-enabled', this.settings.transitionsEnabled);
-        
+
         // Setup button hover effects
         this.setupButtonEffects();
-        
+
         // Setup panel transitions
         this.setupPanelTransitions();
-        
+
         // Setup form input effects
         this.setupInputEffects();
-        
+
         // Setup keyboard navigation enhancements
         this.setupKeyboardNavigation();
     },
@@ -363,7 +363,7 @@ const UIPolishSystem = {
         // Disabled - no focus effects
     },
     
-    // Setup panel transitions
+    // choreograph the reveal - panels materialize from shadow
     setupPanelTransitions() {
         const panels = document.querySelectorAll('.panel, .modal, .popup');
         
@@ -417,7 +417,7 @@ const UIPolishSystem = {
         }, 300);
     },
     
-    // Setup input effects
+    // watch the input fields - they hunger for attention
     setupInputEffects() {
         const inputs = document.querySelectorAll('input, textarea, select');
         
@@ -439,7 +439,7 @@ const UIPolishSystem = {
         }
     },
     
-    // Setup keyboard navigation
+    // arm the keyboard - every key a potential escape route
     setupKeyboardNavigation() {
         EventManager.addEventListener(document, 'keydown', (e) => {
             // Enhanced tab navigation
@@ -476,7 +476,7 @@ const UIPolishSystem = {
     },
     
     handleEscapeKey(event) {
-        // Close any open modals or panels
+        // banish the visible windows back into the dark
         const openPanels = document.querySelectorAll('.panel[style*="display: block"], .modal[style*="display: block"]');
 
         openPanels.forEach(panel => {
@@ -484,18 +484,18 @@ const UIPolishSystem = {
         });
     },
 
-    // 🖤 PANEL TRANSITION METHODS - the darkness fades in and out 💀
+    // panel transition methods - the darkness fades in and out
     fadeIn(element, duration = 300) {
         if (!element) return;
         element.style.opacity = '0';
         element.style.display = '';
         element.style.transition = `opacity ${duration}ms ease-in-out`;
 
-        // 🦇 Force reflow then fade in
+        // force reflow then fade in
         void element.offsetWidth;
         element.style.opacity = '1';
 
-        // ⚰️ Clean up transition after complete
+        // clean up transition after complete
         setTimeout(() => {
             element.style.transition = '';
         }, duration);
@@ -506,7 +506,7 @@ const UIPolishSystem = {
         element.style.transition = `opacity ${duration}ms ease-in-out`;
         element.style.opacity = '0';
 
-        // 🖤 Hide after fade completes
+        // remove from sight once the shadows consume it
         setTimeout(() => {
             element.style.display = 'none';
             element.style.transition = '';
@@ -514,17 +514,17 @@ const UIPolishSystem = {
         }, duration);
     },
 
-    // Tooltip system
+    // tooltips - whispers that appear when you hover over the secrets
     setupTooltipSystem() {
         // Create tooltip container
         this.tooltipContainer = document.createElement('div');
         this.tooltipContainer.className = 'tooltip';
         document.body.appendChild(this.tooltipContainer);
-        
+
         // Setup tooltip triggers
         this.setupTooltipTriggers();
     },
-    
+
     setupTooltipTriggers() {
         const tooltipElements = document.querySelectorAll('[data-tooltip]');
         
@@ -569,7 +569,7 @@ const UIPolishSystem = {
         this.tooltipContainer.classList.remove('show');
     },
     
-    // Notification system
+    // notifications - messages that intrude upon your consciousness
     setupNotificationSystem() {
         // Create notification container
         this.notificationContainer = document.createElement('div');
@@ -629,14 +629,14 @@ const UIPolishSystem = {
     // Icon animations
     animateIcon(iconElement, animationType, duration = 1000) {
         if (!iconElement || !this.settings.animationsEnabled) return;
-        
-        // 🗡️ Exorcise all previous animations from this icon's soul
+
+        // exorcise all previous animations from this icon's soul
         iconElement.classList.remove('icon-bounce', 'icon-spin', 'icon-pulse', 'icon-shake');
 
-        // ⚡ Possess it with new dark energy
+        // possess it with new dark energy
         iconElement.classList.add(`icon-${animationType}`);
 
-        // 🌙 Release the spirit when the ritual is complete
+        // release the spirit when the ritual is complete
         setTimeout(() => {
             iconElement.classList.remove(`icon-${animationType}`);
         }, duration);
@@ -776,7 +776,7 @@ const UIPolishSystem = {
     },
     
     setupScreenReaderAnnouncements() {
-        // Create live region for announcements
+        // summon a voice for the screen readers - unseen but heard
         const liveRegion = document.createElement('div');
         liveRegion.setAttribute('aria-live', 'polite');
         liveRegion.setAttribute('aria-atomic', 'true');

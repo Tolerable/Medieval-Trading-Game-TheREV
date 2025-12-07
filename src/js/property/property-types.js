@@ -8,7 +8,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 const PropertyTypes = {
-    // 🏘️ Property types - various flavors of ownership ⚰️
+    // property types - various flavors of ownership
     types: {
         house: {
             id: 'house',
@@ -161,7 +161,7 @@ const PropertyTypes = {
         }
     },
 
-    // 🔧 Property upgrades - make your property less terrible 🦇
+    // property upgrades - make your property less terrible
     upgrades: {
         expansion: {
             id: 'expansion',
@@ -197,7 +197,7 @@ const PropertyTypes = {
         }
     },
 
-    // 🔨 Construction times in game minutes 🗡️
+    // construction times in game minutes
     constructionTimes: {
         house: 3 * 24 * 60,        // 3 days
         cottage: 5 * 24 * 60,      // 5 days (upgrade from house)
@@ -213,7 +213,7 @@ const PropertyTypes = {
         vault: 21 * 24 * 60        // 21 days - secure construction takes time
     },
 
-    // 🪵 Materials needed to build each property type 🌙
+    // materials needed to build each property type
     buildingMaterials: {
         house: { wood: 20, stone: 10 },
         cottage: { wood: 30, stone: 20, furniture: 5 },
@@ -229,7 +229,7 @@ const PropertyTypes = {
         vault: { stone: 100, iron: 50, steel: 20, tools: 15 }
     },
 
-    // 📦 Production limits per property type 🔮
+    // production limits per property type
     productionLimits: {
         farm: { food: 20, grain: 15 },
         mine: { stone: 30, iron_ore: 15, coal: 20 },
@@ -245,14 +245,14 @@ const PropertyTypes = {
         vault: {}
     },
 
-    // 🏘️ Properties available by location type 💀
+    // properties available by location type
     locationProperties: {
         village: ['house', 'cottage', 'farm', 'market_stall'],
         town: ['house', 'cottage', 'manor', 'shop', 'warehouse', 'tavern', 'craftshop'],
         city: ['house', 'cottage', 'manor', 'estate', 'shop', 'warehouse', 'tavern', 'craftshop', 'mine', 'vault']
     },
 
-    // 🔧 Upgrade restrictions by property type ⚰️
+    // upgrade restrictions by property type
     upgradeRestrictions: {
         efficiency: ['farm', 'mine', 'craftshop', 'tavern'],
         luxury: ['shop', 'tavern', 'warehouse', 'manor', 'estate'],
@@ -260,15 +260,15 @@ const PropertyTypes = {
         security: ['shop', 'warehouse', 'mine', 'tavern', 'vault', 'manor', 'estate']
     },
 
-    // 🎯 Getters for compatibility with PropertySystem 🖤
+    // getters for compatibility with PropertySystem
     get(typeId) {
-        // 🖤 Validate typeId is a string to prevent object key coercion bugs 💀
+        // validate typeId is a string to prevent object key coercion bugs
         if (typeof typeId !== 'string') return null;
         return this.types[typeId] || null;
     },
 
     getUpgrade(upgradeId) {
-        // 🖤 Validate upgradeId is a string 💀
+        // validate upgradeId is a string
         if (typeof upgradeId !== 'string') return null;
         return this.upgrades[upgradeId] || null;
     },
@@ -295,5 +295,5 @@ const PropertyTypes = {
     }
 };
 
-// 🌙 expose to global scope for compatibility 🦇
+// expose to global scope for compatibility
 window.PropertyTypes = PropertyTypes;

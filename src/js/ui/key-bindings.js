@@ -8,7 +8,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 const KeyBindings = {
-    // 🎮 Get defaults from GameConfig (or use fallbacks if config not loaded) ⚰️
+    // get defaults from GameConfig (or use fallbacks if config not loaded)
     get defaults() {
         if (typeof GameConfig !== 'undefined' && GameConfig.keybindings) {
             return GameConfig.keybindings.defaults;
@@ -23,10 +23,10 @@ const KeyBindings = {
         };
     },
 
-    // 🎮 Current bindings (loaded from localStorage or defaults) 🦇
+    // current bindings (loaded from localStorage or defaults)
     current: {},
 
-    // 📝 Get descriptions from GameConfig (or use fallbacks) 🗡️
+    // get descriptions from GameConfig (or use fallbacks)
     get descriptions() {
         if (typeof GameConfig !== 'undefined' && GameConfig.keybindings) {
             return GameConfig.keybindings.descriptions;
@@ -44,7 +44,7 @@ const KeyBindings = {
         };
     },
 
-    // 💾 Get storage key from GameConfig 🌙
+    // get storage key from GameConfig
     get storageKey() {
         if (typeof GameConfig !== 'undefined' && GameConfig.keybindings) {
             return GameConfig.keybindings.storageKey;
@@ -52,18 +52,18 @@ const KeyBindings = {
         return 'tradingGame_keyBindings';
     },
 
-    // 🔄 Is the user currently rebinding a key? 🔮
+    // is the user currently rebinding a key?
     isRebinding: false,
     rebindingAction: null,
 
-    // 🖤 Initialize - wake up from the keyboard slumber 💀
+    // initialize - wake up from the keyboard slumber
     init() {
         this.loadBindings();
         this.setupGlobalKeyListener();
         console.log('⌨️ Keyboard bindings initialized - defaults from config.js');
     },
 
-    // 📂 Load bindings from localStorage or use defaults ⚰️
+    // load bindings from localStorage or use defaults
     loadBindings() {
         try {
             const saved = localStorage.getItem(this.storageKey);
@@ -80,7 +80,7 @@ const KeyBindings = {
         }
     },
 
-    // 💾 Save bindings to localStorage 🦇
+    // save bindings to localStorage
     saveBindings() {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(this.current));
@@ -90,7 +90,7 @@ const KeyBindings = {
         }
     },
 
-    // 🔄 Reset to defaults from config.js 🗡️
+    // reset to defaults from config.js
     resetToDefaults() {
         this.current = { ...this.defaults };
         this.saveBindings();
@@ -98,12 +98,12 @@ const KeyBindings = {
         if (typeof addMessage === 'function') addMessage('🔄 Key bindings reset to defaults');
     },
 
-    // 🔑 Get the key for an action 🌙
+    // get the key for an action
     getKey(action) {
         return this.current[action] || this.defaults[action];
     },
 
-    // 🔑 Set a new key for an action 🔮
+    // set a new key for an action
     setKey(action, key, skipMessage = false) {
         this.current[action] = key;
         this.saveBindings();
@@ -113,7 +113,7 @@ const KeyBindings = {
         return true;
     },
 
-    // 🎨 Format key for display 💀
+    // format key for display
     formatKey(key) {
         const specialKeys = {
             ' ': 'Space', 'Escape': 'Esc', 'ArrowUp': '↑', 'ArrowDown': '↓',
@@ -123,12 +123,12 @@ const KeyBindings = {
         return specialKeys[key] || key.toUpperCase();
     },
 
-    // 🔍 Check if a key matches an action ⚰️
+    // check if a key matches an action
     matches(event, action) {
         const key = this.getKey(action);
         if (!key) return false;
 
-        // 🖤💀 IGNORE keybindings if Ctrl/Alt/Meta are pressed (allow native browser shortcuts like Ctrl+C, Ctrl+V) 💀
+        // IGNORE keybindings if Ctrl/Alt/Meta are pressed (allow native browser shortcuts like Ctrl+C, Ctrl+V)
         // Exception: function keys like F5, F9 should still work
         if (event.ctrlKey || event.altKey || event.metaKey) {
             // Only allow function keys to work with modifiers
@@ -139,7 +139,7 @@ const KeyBindings = {
         return event.key.toLowerCase() === key.toLowerCase() || event.key === key;
     },
 
-    // 👁️ Setup the global key listener - the all-seeing keyboard eye 🦇
+    // setup the global key listener - the all-seeing keyboard eye
     setupGlobalKeyListener() {
         document.addEventListener('keydown', (event) => {
             const target = event.target;
@@ -160,7 +160,7 @@ const KeyBindings = {
         });
     },
 
-    // ⚡ Process a key press - the moment of truth 🗡️
+    // process a key press - the moment of truth
     processKeyPress(event) {
         // Escape always works
         if (this.matches(event, 'escape')) {
@@ -178,21 +178,21 @@ const KeyBindings = {
             }
         }
 
-        // WASD for map panning - always works during gameplay, no conflict with other keys 🖤
+        // WASD for map panning - always works during gameplay, no conflict with other keys
         if (this.matches(event, 'mapUp') || this.matches(event, 'mapDown') ||
             this.matches(event, 'mapLeft') || this.matches(event, 'mapRight')) {
             const mapOverlay = document.getElementById('world-map-overlay');
             const isMapOpen = mapOverlay && mapOverlay.classList.contains('active');
 
-            // 💀 WASD works during PLAYING state OR when map overlay is open
+            // WASD works during PLAYING state OR when map overlay is open
             if (game.state === GameState.PLAYING || isMapOpen) {
-                event.preventDefault(); // ⚰️ Prevent default browser behavior
+                event.preventDefault(); // prevent default browser behavior
                 this.handleMapPan(event);
                 return;
             }
         }
 
-        // 🖤💀 FIXED: Allow panel shortcuts in multiple game states, not just PLAYING 💀
+        // FIXED: allow panel shortcuts in multiple game states, not just PLAYING
         // Panels need to toggle even when another panel is open (MARKET, TRAVEL, INVENTORY, etc.)
         const validStates = [GameState.PLAYING, GameState.MARKET, GameState.TRAVEL, GameState.INVENTORY, GameState.TRANSPORTATION, GameState.PAUSED];
         if (!validStates.includes(game.state)) return;
@@ -228,12 +228,12 @@ const KeyBindings = {
         }
         if (this.matches(event, 'market')) {
             event.preventDefault();
-            this.openMarket(); // 🖤 Use toggle-aware method 💀
+            this.openMarket(); // use toggle-aware method
             return;
         }
         if (this.matches(event, 'travel')) {
             event.preventDefault();
-            this.openTravel(); // 🖤 Use toggle-aware method 💀
+            this.openTravel(); // use toggle-aware method
             return;
         }
         if (this.matches(event, 'map')) {
@@ -292,7 +292,7 @@ const KeyBindings = {
         }
     },
 
-    // ⛔ Handle escape key - the great closer 🌙
+    // handle escape key - the great closer
     handleEscape() {
         if (document.fullscreenElement) {
             document.exitFullscreen();
@@ -317,7 +317,7 @@ const KeyBindings = {
         }
     },
 
-    // ⏸️ Handle pause/resume 🔮
+    // handle pause/resume
     handlePause() {
         if (typeof TimeSystem !== 'undefined') {
             if (TimeSystem.isPaused) {
@@ -333,7 +333,7 @@ const KeyBindings = {
         }
     },
 
-    // 🗺️ Handle map panning with WASD 💀
+    // handle map panning with WASD
     handleMapPan(event) {
         event.preventDefault();
         const panAmount = 50;
@@ -352,7 +352,7 @@ const KeyBindings = {
         }
     },
 
-    // 👤 Toggle character sheet ⚰️
+    // toggle character sheet
     openCharacterSheet() {
         const overlay = document.getElementById('character-sheet-overlay');
         if (overlay && (overlay.classList.contains('active') || overlay.style.display === 'flex')) {
@@ -368,7 +368,7 @@ const KeyBindings = {
         if (typeof addMessage === 'function') addMessage('👤 Character sheet opened [C]');
     },
 
-    // 🎨 Create character sheet overlay dynamically 🦇
+    // create character sheet overlay dynamically
     createCharacterSheetOverlay() {
         let overlay = document.getElementById('character-sheet-overlay');
         if (!overlay) {
@@ -405,7 +405,7 @@ const KeyBindings = {
         }
     },
 
-    // 📊 Populate character sheet with all player info 🗡️
+    // populate character sheet with all player info
     populateCharacterSheet() {
         const body = document.getElementById('character-sheet-body');
         if (!body || !game.player) return;
@@ -490,7 +490,7 @@ const KeyBindings = {
         `;
     },
 
-    // ⚡ Get active effects HTML 🌙
+    // get active effects HTML
     getActiveEffectsHTML() {
         if (!game.player || !game.player.temporaryEffects) {
             return '<div class="no-effects">No active effects</div>';
@@ -507,7 +507,7 @@ const KeyBindings = {
         `).join('');
     },
 
-    // 🎒 Get equipment HTML 🔮
+    // get equipment HTML
     getEquipmentHTML() {
         if (typeof EquipmentSystem !== 'undefined') {
             return EquipmentSystem.createEquipmentHTML();
@@ -532,7 +532,7 @@ const KeyBindings = {
         }).join('');
     },
 
-    // ⭐ Get perks HTML 💀
+    // get perks HTML
     getPerksHTML() {
         if (!game.player || !game.player.perks || game.player.perks.length === 0) {
             return '<div class="no-perks">no perks selected... a blank slate of mediocrity</div>';
@@ -583,7 +583,7 @@ const KeyBindings = {
         }).join('');
     },
 
-    // 🎯 Get current task HTML ⚰️
+    // get current task HTML
     getCurrentTaskHTML() {
         const task = typeof CurrentTaskSystem !== 'undefined' ? CurrentTaskSystem.getCurrentTask() : { type: 'idle', action: 'Idle', icon: '😐' };
         const taskClass = task.type || 'idle';
@@ -600,16 +600,16 @@ const KeyBindings = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎮 UNIFIED PANEL OPENERS - All action bar buttons use these
+    // UNIFIED PANEL OPENERS - all action bar buttons use these
     // ═══════════════════════════════════════════════════════════════
 
-    // 📋 Open game menu
+    // open game menu
     openMenu() {
         if (typeof toggleMenu === 'function') toggleMenu();
         else console.warn('toggleMenu function not found');
     },
 
-    // 🏪 Toggle market panel - 🖤 proper toggle logic 💀
+    // toggle market panel - proper toggle logic
     openMarket() {
         const panel = document.getElementById('market-panel');
         if (panel && !panel.classList.contains('hidden')) {
@@ -625,7 +625,7 @@ const KeyBindings = {
         }
     },
 
-    // 🗺️ Toggle travel panel - 🖤 proper toggle logic 💀
+    // toggle travel panel - proper toggle logic
     openTravel() {
         const panel = document.getElementById('travel-panel');
         if (panel && !panel.classList.contains('hidden')) {
@@ -641,8 +641,8 @@ const KeyBindings = {
         }
     },
 
-    // 🚗 Toggle transportation panel
-    // 🖤💀 FIXED: Was calling openTravel() instead of transportation panel! 💀
+    // toggle transportation panel
+    // FIXED: was calling openTravel() instead of transportation panel!
     openTransportation() {
         const panel = document.getElementById('transportation-panel');
         if (panel && !panel.classList.contains('hidden')) {
@@ -662,8 +662,8 @@ const KeyBindings = {
         }
     },
 
-    // 🎒 Toggle inventory panel
-    // 🖤💀 FIXED: Proper toggle logic like other panels 💀
+    // toggle inventory panel
+    // FIXED: proper toggle logic like other panels
     openInventory() {
         const panel = document.getElementById('inventory-panel');
         if (panel && !panel.classList.contains('hidden')) {
@@ -679,19 +679,19 @@ const KeyBindings = {
         }
     },
 
-    // 👥 Open people panel
+    // open people panel
     openPeople() {
         if (typeof PeoplePanel !== 'undefined' && PeoplePanel.toggle) PeoplePanel.toggle();
         else console.warn('PeoplePanel not found');
     },
 
-    // 📜 Open quests panel
+    // open quests panel
     openQuests() {
         if (typeof QuestSystem !== 'undefined' && QuestSystem.toggleQuestLog) QuestSystem.toggleQuestLog();
         else console.warn('QuestSystem not found');
     },
 
-    // 🏆 Toggle achievements panel
+    // toggle achievements panel
     openAchievements() {
         const overlay = document.getElementById('achievement-overlay');
         if (overlay && overlay.classList.contains('active')) {
@@ -704,21 +704,21 @@ const KeyBindings = {
         }
     },
 
-    // 💾 Open save dialog
+    // open save dialog
     openSave() {
         if (typeof SaveUISystem !== 'undefined' && SaveUISystem.openSaveAsDialog) SaveUISystem.openSaveAsDialog();
         else if (typeof SaveLoadUI !== 'undefined' && SaveLoadUI.show) SaveLoadUI.show('saves');
         else console.warn('Save system not found');
     },
 
-    // 📂 Open load dialog
+    // open load dialog
     openLoad() {
         if (typeof SaveUISystem !== 'undefined' && SaveUISystem.openLoadGameDialog) SaveUISystem.openLoadGameDialog();
         else if (typeof SaveLoadUI !== 'undefined' && SaveLoadUI.show) SaveLoadUI.show('load');
         else console.warn('Load system not found');
     },
 
-    // ⚙️ Toggle settings panel
+    // toggle settings panel
     openSettings() {
         if (typeof SettingsPanel === 'undefined') {
             console.warn('SettingsPanel not found');
@@ -732,7 +732,7 @@ const KeyBindings = {
         }
     },
 
-    // 🏠 Toggle properties panel
+    // toggle properties panel
     openProperties() {
         const panel = document.getElementById('property-employee-panel');
         if (panel) {
@@ -749,7 +749,7 @@ const KeyBindings = {
         }
     },
 
-    // 💰 Toggle financial sheet
+    // toggle financial sheet
     openFinancialSheet() {
         const overlay = document.getElementById('financial-sheet-overlay');
         if (overlay && (overlay.classList.contains('active') || overlay.style.display === 'flex')) {
@@ -761,7 +761,7 @@ const KeyBindings = {
         if (typeof addMessage === 'function') addMessage('💰 Financial sheet opened [F]');
     },
 
-    // 🎨 Create financial sheet overlay 🗡️
+    // create financial sheet overlay
     createFinancialSheetOverlay() {
         let overlay = document.getElementById('financial-sheet-overlay');
         if (!overlay) {
@@ -804,7 +804,7 @@ const KeyBindings = {
         }
     },
 
-    // 📊 Populate financial sheet 🌙
+    // populate financial sheet
     populateFinancialSheet() {
         const body = document.getElementById('financial-sheet-body');
         if (!body) return;
@@ -864,14 +864,14 @@ const KeyBindings = {
         `;
     },
 
-    // 🔄 Start rebinding a key 🔮
+    // start rebinding a key
     startRebind(action) {
         this.isRebinding = true;
         this.rebindingAction = action;
         if (typeof addMessage === 'function') addMessage(`⌨️ Press any key to bind to "${this.descriptions[action]}"...`);
     },
 
-    // ✅ Complete rebinding 💀
+    // complete rebinding
     completeRebind(key) {
         if (this.rebindingAction) {
             this.setKey(this.rebindingAction, key);
@@ -884,7 +884,7 @@ const KeyBindings = {
         }
     },
 
-    // 📋 Get all bindings for settings UI ⚰️
+    // get all bindings for settings UI
     getAllBindings() {
         return Object.entries(this.current).map(([action, key]) => ({
             action,
@@ -895,5 +895,5 @@ const KeyBindings = {
     }
 };
 
-// 🌙 expose to global scope 🦇
+// expose to global scope
 window.KeyBindings = KeyBindings;

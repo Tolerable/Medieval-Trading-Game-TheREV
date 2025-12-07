@@ -78,13 +78,13 @@ const DraggablePanels = {
         // Migrate message-log position if it's in the "bad zone" (overlapping action bar)
         this.migrateMessageLogPosition();
 
-        // Setup global drag events
+        // arm the drag handlers
         this.setupGlobalEvents();
 
-        // Setup click-outside-to-close for overlays
+        // enable click-away dismissal for overlays
         this.setupClickOutsideClose();
 
-        // Setup draggables on all panels
+        // make every panel draggable
         this.setupAllDraggables();
 
         // Observe for new panels
@@ -132,7 +132,7 @@ const DraggablePanels = {
 
             if (!isVisible) return;
 
-            // Close the overlay
+            // dismiss it back to the void
             this.closeOverlay(overlayId);
         });
     },
@@ -205,7 +205,7 @@ const DraggablePanels = {
         this.updateAllPanelZIndices();
     },
 
-    // Update z-indices for all panels based on their stack position
+    // reorganize the layers - stack windows by focus order
     // Lower index = lower z-index (buried), higher index = higher z-index (on top)
     updateAllPanelZIndices() {
         const maxPanels = this.Z_INDEX_MAX - this.Z_INDEX_BASE;
@@ -235,7 +235,7 @@ const DraggablePanels = {
         });
     },
 
-    // Setup click-to-focus on a panel
+    // wire the focus trap - clicking brings window to front
     setupPanelFocus(element) {
         if (!element || element.dataset.focusSetup) return;
 

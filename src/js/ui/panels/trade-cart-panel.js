@@ -1,14 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
-// 🛒 TRADE CART PANEL - the shopping cart for medieval capitalism
+// TRADE CART PANEL - the shopping cart for medieval capitalism
 // ═══════════════════════════════════════════════════════════════
 // File Version: 0.90.01
 // Click buy → add to cart → set quantity → haggle or pay up
-// Like Amazon but with more plague and less Prime shipping 💀
+// Like Amazon but with more plague and less Prime shipping
 // ═══════════════════════════════════════════════════════════════
 
 const TradeCartPanel = {
     // ═══════════════════════════════════════════════════════════════
-    // 📋 STATE - tracking your impulse purchases
+    // state - tracking your impulse purchases
     // ═══════════════════════════════════════════════════════════════
     initialized: false,
     isOpen: false,
@@ -21,7 +21,7 @@ const TradeCartPanel = {
     haggleAttempted: false,
 
     // ═══════════════════════════════════════════════════════════════
-    // 🚀 INITIALIZATION
+    // initialization
     // ═══════════════════════════════════════════════════════════════
     init() {
         if (this.initialized) {
@@ -38,7 +38,7 @@ const TradeCartPanel = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎨 UI CREATION
+    // ui creation
     // ═══════════════════════════════════════════════════════════════
     createPanelUI() {
         if (document.getElementById('trade-cart-panel')) return;
@@ -124,7 +124,7 @@ const TradeCartPanel = {
         this.injectStyles();
     },
 
-    // 🎨 Inject CSS styles for the cart panel
+    // inject CSS styles for the cart panel
     injectStyles() {
         if (document.getElementById('trade-cart-styles')) return;
 
@@ -542,7 +542,7 @@ const TradeCartPanel = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎮 EVENT LISTENERS
+    // event listeners
     // ═══════════════════════════════════════════════════════════════
     setupEventListeners() {
         // Listen for quantity changes via event delegation
@@ -563,7 +563,7 @@ const TradeCartPanel = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🚪 OPEN / CLOSE
+    // open / close
     // ═══════════════════════════════════════════════════════════════
 
     /**
@@ -592,7 +592,7 @@ const TradeCartPanel = {
             const btnText = completeBtn.querySelector('.btn-text');
             if (btnText) btnText.textContent = mode === 'buy' ? 'Complete Purchase' : 'Complete Sale';
         }
-        // 🗣️ Haggle only available when BUYING
+        // haggle only available when BUYING
         if (haggleBtn) {
             haggleBtn.style.display = mode === 'buy' ? '' : 'none';
         }
@@ -617,7 +617,7 @@ const TradeCartPanel = {
         this.currentMerchant = null;
     },
 
-    // 🗑️ Clear all items from cart without closing
+    // clear all items from cart without closing
     clearCart() {
         this.cart = [];
         this.discountPercent = 0;
@@ -626,7 +626,7 @@ const TradeCartPanel = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🛒 CART MANAGEMENT
+    // cart management
     // ═══════════════════════════════════════════════════════════════
 
     /**
@@ -637,7 +637,7 @@ const TradeCartPanel = {
      * @param {object} itemData - Optional item data (can include 'quantity' for bulk adds)
      */
     addItem(itemId, unitPrice, maxStock, itemData = {}) {
-        // 🖤 Support bulk quantity via itemData.quantity (for Shift/Ctrl+Click) 💀
+        // support bulk quantity via itemData.quantity (for Shift/Ctrl+Click)
         const addQty = itemData.quantity || 1;
 
         // Check if already in cart
@@ -710,7 +710,7 @@ const TradeCartPanel = {
     incrementItem(itemId, amount = 1) {
         const item = this.cart.find(i => i.itemId === itemId);
         if (item && item.quantity < item.maxStock) {
-            // 🖤 Clamp to maxStock - no overfilling the cart 💀
+            // clamp to maxStock - no overfilling the cart
             item.quantity = Math.min(item.quantity + amount, item.maxStock);
             item.totalPrice = item.quantity * item.unitPrice;
             this.updateDisplay();
@@ -725,7 +725,7 @@ const TradeCartPanel = {
     decrementItem(itemId, amount = 1) {
         const item = this.cart.find(i => i.itemId === itemId);
         if (item) {
-            // 🖤 Bulk removal - if amount >= quantity, remove entirely 💀
+            // bulk removal - if amount >= quantity, remove entirely
             if (item.quantity <= amount) {
                 this.removeItem(itemId);
             } else {
@@ -737,7 +737,7 @@ const TradeCartPanel = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖤 BULK TRADING SHORTCUTS - Shift = 5, Ctrl = 25 💀
+    // bulk trading shortcuts - Shift = 5, Ctrl = 25
     // ═══════════════════════════════════════════════════════════════
 
     /**
@@ -746,9 +746,9 @@ const TradeCartPanel = {
      * @returns {number} - 1 (normal), 5 (shift), or 25 (ctrl)
      */
     getBulkAmount(event) {
-        if (event.ctrlKey || event.metaKey) return 25; // 🖤 Ctrl/Cmd = 25x bulk
-        if (event.shiftKey) return 5; // 💀 Shift = 5x bulk
-        return 1; // 🦇 Normal click = 1x
+        if (event.ctrlKey || event.metaKey) return 25; // Ctrl/Cmd = 25x bulk
+        if (event.shiftKey) return 5; // Shift = 5x bulk
+        return 1; // normal click = 1x
     },
 
     /**
@@ -772,7 +772,7 @@ const TradeCartPanel = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎨 DISPLAY UPDATE
+    // display update
     // ═══════════════════════════════════════════════════════════════
     updateDisplay() {
         this.renderCartItems();
@@ -806,7 +806,7 @@ const TradeCartPanel = {
             return;
         }
 
-        // 🖤 Bulk trading shortcuts: Shift+Click = 5, Ctrl+Click = 25 💀
+        // bulk trading shortcuts: Shift+Click = 5, Ctrl+Click = 25
         container.innerHTML = this.cart.map(item => `
             <div class="cart-item" data-item-id="${this.escapeHtml(item.itemId)}">
                 <span class="cart-item-icon">${item.icon}</span>
@@ -853,7 +853,7 @@ const TradeCartPanel = {
 
         const playerGold = game?.player?.gold || 0;
 
-        // 💰 For selling, player GAINS gold; for buying, player LOSES gold
+        // for selling, player GAINS gold; for buying, player LOSES gold
         const remaining = this.mode === 'sell' ?
             playerGold + this.finalTotal :
             playerGold - this.finalTotal;
@@ -901,7 +901,7 @@ const TradeCartPanel = {
             return { valid: false, reason: 'empty' };
         }
 
-        // 🛒 BUY MODE validations
+        // buy mode validations
         if (this.mode === 'buy') {
             // Check gold
             if (this.finalTotal > playerGold) {
@@ -930,7 +930,7 @@ const TradeCartPanel = {
             }
         }
 
-        // 💰 SELL MODE validations
+        // sell mode validations
         if (this.mode === 'sell') {
             // Check if player actually has the items
             for (const item of this.cart) {
@@ -998,7 +998,7 @@ const TradeCartPanel = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🗣️ HAGGLE SYSTEM - talk your way to a discount
+    // haggle system - talk your way to a discount
     // ═══════════════════════════════════════════════════════════════
     async attemptHaggle() {
         if (this.haggleAttempted || this.cart.length === 0) return;
@@ -1020,7 +1020,7 @@ const TradeCartPanel = {
         const roll = Math.random() * 100;
         const success = roll < successChance;
 
-        // 🎭 Try to get TTS/API response for haggle dialogue
+        // try to get TTS/API response for haggle dialogue
         let haggleDialogue = '';
         try {
             haggleDialogue = await this.getHaggleDialogue(success);
@@ -1089,7 +1089,7 @@ const TradeCartPanel = {
     },
 
     async getHaggleDialogue(success) {
-        // 🎭 Try to get dialogue from NPC voice system
+        // try to get dialogue from NPC voice system
         if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.generateHaggleResponse) {
             try {
                 return await NPCVoiceChatSystem.generateHaggleResponse(
@@ -1102,7 +1102,7 @@ const TradeCartPanel = {
             }
         }
 
-        // 🔮 Try TTS API if available
+        // try TTS API if available
         if (typeof TextToSpeechAPI !== 'undefined' && TextToSpeechAPI.generateResponse) {
             const prompt = success
                 ? `You are a medieval merchant. The customer successfully haggled. Grudgingly agree to give them a ${this.discountPercent}% discount. Be dramatic but brief.`
@@ -1144,7 +1144,7 @@ const TradeCartPanel = {
         const validation = this.validateCart();
         if (!validation.valid || this.cart.length === 0) return;
 
-        // 🛒 Check if this is a market trade or NPC trade
+        // check if this is a market trade or NPC trade
         const isMarketTrade = this.currentMerchant?.type === 'market';
 
         if (this.mode === 'buy') {
@@ -1153,7 +1153,7 @@ const TradeCartPanel = {
             this.completeSellTransaction(isMarketTrade);
         }
 
-        // 🔄 Update UI
+        // update UI
         if (typeof game !== 'undefined' && game.updateUI) {
             game.updateUI();
         }
@@ -1166,9 +1166,9 @@ const TradeCartPanel = {
         this.close();
     },
 
-    // 🛒 BUY TRANSACTION
+    // buy transaction
     completeBuyTransaction(isMarketTrade) {
-        // 💰 Deduct gold using UniversalGoldManager if available
+        // deduct gold using UniversalGoldManager if available
         if (typeof UniversalGoldManager !== 'undefined') {
             const itemNames = this.cart.map(i => `${i.quantity}x ${i.name}`).join(', ');
             UniversalGoldManager.removeGold(this.finalTotal, `bought ${itemNames}`);
@@ -1177,12 +1177,12 @@ const TradeCartPanel = {
             game.player.gold -= this.finalTotal;
         }
 
-        // 📦 Add items to inventory
+        // add items to inventory
         for (const item of this.cart) {
             this.addToInventory(item.itemId, item.quantity);
         }
 
-        // 🏪 Update merchant/market stock
+        // update merchant/market stock
         if (isMarketTrade && this.currentMerchant?.id) {
             const location = typeof GameWorld !== 'undefined' ?
                 GameWorld.locations[this.currentMerchant.id] : null;
@@ -1205,7 +1205,7 @@ const TradeCartPanel = {
             }
         }
 
-        // 🖤💀 NPC TRADE - Update NPC's persistent inventory 💰
+        // NPC TRADE - update NPC's persistent inventory
         if (!isMarketTrade && this.currentMerchant && typeof NPCTradeWindow !== 'undefined') {
             // Player bought items FROM NPC - remove items from NPC, add gold to NPC
             for (const item of this.cart) {
@@ -1215,17 +1215,17 @@ const TradeCartPanel = {
             console.log(`🛒 NPC Trade: ${this.currentMerchant.name || this.currentMerchant.type} received ${this.finalTotal}g for items`);
         }
 
-        // 📜 Show success message
+        // show success message
         const itemCount = this.cart.reduce((sum, i) => sum + i.quantity, 0);
         const message = `Purchased ${itemCount} item(s) for ${this.finalTotal}g`;
         if (typeof addMessage === 'function') addMessage(message);
 
-        // 📡 Dispatch trade-completed event (for trade objectives)
+        // dispatch trade-completed event (for trade objectives)
         document.dispatchEvent(new CustomEvent('trade-completed', {
             detail: { items: [...this.cart], total: this.finalTotal, discount: this.discountPercent, merchant: this.currentMerchant, mode: 'buy' }
         }));
 
-        // 🖤 Dispatch item-purchased for EACH item (for buy objectives) 💀
+        // dispatch item-purchased for EACH item (for buy objectives)
         for (const item of this.cart) {
             document.dispatchEvent(new CustomEvent('item-purchased', {
                 detail: { itemId: item.itemId, quantity: item.quantity, price: item.price * item.quantity, merchant: this.currentMerchant?.id }
@@ -1233,9 +1233,9 @@ const TradeCartPanel = {
         }
     },
 
-    // 💰 SELL TRANSACTION
+    // sell transaction
     completeSellTransaction(isMarketTrade) {
-        // 🖤💀 NPC TRADE - Check if NPC can afford to buy items 💰
+        // NPC TRADE - check if NPC can afford to buy items
         if (!isMarketTrade && this.currentMerchant && typeof NPCTradeWindow !== 'undefined') {
             const npcGold = NPCTradeWindow.getNPCGold(this.currentMerchant);
             if (npcGold < this.finalTotal) {
@@ -1245,7 +1245,7 @@ const TradeCartPanel = {
             }
         }
 
-        // 💰 Add gold to player
+        // add gold to player
         if (typeof UniversalGoldManager !== 'undefined') {
             const itemNames = this.cart.map(i => `${i.quantity}x ${i.name}`).join(', ');
             UniversalGoldManager.addGold(this.finalTotal, `sold ${itemNames}`);
@@ -1254,12 +1254,12 @@ const TradeCartPanel = {
             game.player.gold += this.finalTotal;
         }
 
-        // 📦 Remove items from inventory
+        // remove items from inventory
         for (const item of this.cart) {
             this.removeFromInventory(item.itemId, item.quantity);
         }
 
-        // 🏪 Add items to market stock (player is selling TO the market)
+        // add items to market stock (player is selling TO the market)
         if (isMarketTrade && this.currentMerchant?.id) {
             const location = typeof GameWorld !== 'undefined' ?
                 GameWorld.locations[this.currentMerchant.id] : null;
@@ -1283,14 +1283,14 @@ const TradeCartPanel = {
                     }
                 }
 
-                // 💰 Remove gold from merchant's coffers
+                // remove gold from merchant's coffers
                 if (typeof NPCMerchantSystem !== 'undefined') {
                     NPCMerchantSystem.removeMerchantGold?.(this.currentMerchant.id, this.finalTotal);
                 }
             }
         }
 
-        // 🖤💀 NPC TRADE - Update NPC's persistent inventory 💰
+        // NPC TRADE - update NPC's persistent inventory
         if (!isMarketTrade && this.currentMerchant && typeof NPCTradeWindow !== 'undefined') {
             // Player sold items TO NPC - add items to NPC, remove gold from NPC
             for (const item of this.cart) {
@@ -1300,18 +1300,18 @@ const TradeCartPanel = {
             console.log(`🛒 NPC Trade: ${this.currentMerchant.name || this.currentMerchant.type} spent ${this.finalTotal}g on items`);
         }
 
-        // 📜 Show success message
+        // show success message
         const itemCount = this.cart.reduce((sum, i) => sum + i.quantity, 0);
         const message = `Sold ${itemCount} item(s) for ${this.finalTotal}g`;
         if (typeof addMessage === 'function') addMessage(message);
 
-        // 📡 Dispatch event
+        // dispatch event
         document.dispatchEvent(new CustomEvent('trade-completed', {
             detail: { items: [...this.cart], total: this.finalTotal, merchant: this.currentMerchant, mode: 'sell' }
         }));
     },
 
-    // 🗑️ Remove items from inventory
+    // remove items from inventory
     removeFromInventory(itemId, quantity) {
         if (game?.player?.inventory) {
             if (game.player.inventory[itemId]) {
@@ -1324,7 +1324,7 @@ const TradeCartPanel = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🛠️ HELPER FUNCTIONS
+    // helper functions
     // ═══════════════════════════════════════════════════════════════
     addToInventory(itemId, quantity) {
         if (game?.player?.inventory) {
@@ -1386,7 +1386,7 @@ const TradeCartPanel = {
     }
 };
 
-// 🖤 Initialize when DOM is ready
+// initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => TradeCartPanel.init(), 500);
@@ -1395,7 +1395,7 @@ if (document.readyState === 'loading') {
     setTimeout(() => TradeCartPanel.init(), 500);
 }
 
-// 💀 Export for the void
+// export for the void
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = TradeCartPanel;
 }

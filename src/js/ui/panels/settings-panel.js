@@ -14,7 +14,7 @@ const SettingsPanel = {
     settingsTabs: {},
 
     // default settings - where hope goes to die
-    // 🖤 defaultSettings now sourced from GameConfig.settings
+    // defaultsettings now sourced from gameconfig.settings
     // one source of truth - change defaults in config.js, not here
     get defaultSettings() {
         // fallback defaults if GameConfig not loaded yet
@@ -39,12 +39,12 @@ const SettingsPanel = {
     // current settings - your personal flavor of chaos
     currentSettings: {},
 
-    // 🖤 Track if we've already initialized 💀
+    // track if we've already initialized
     _initialized: false,
 
     // initialize settings panel - birth of the preference nightmare
     init() {
-        // 🖤 Prevent double initialization that causes duplicate IDs 💀
+        // prevent double initialization that causes duplicate ids
         if (this._initialized) {
             console.log('⚙️ Settings panel already initialized, skipping');
             return;
@@ -66,7 +66,7 @@ const SettingsPanel = {
                 try {
                     this.currentSettings[category] = { ...this.defaultSettings[category], ...JSON.parse(savedSettings) };
                 } catch (error) {
-                    // 🖤 Silent fallback - corrupt data just means we use defaults
+                    // silent fallback - corrupt data just means we use defaults
                     this.currentSettings[category] = { ...this.defaultSettings[category] };
                     localStorage.removeItem(`tradingGame${category.charAt(0).toUpperCase() + category.slice(1)}Settings`);
                 }
@@ -92,12 +92,12 @@ const SettingsPanel = {
 
     // create settings panel - build the cathedral of customization
     createPanel() {
-        // 🖤 Check if panel already exists - prevent duplicate ID nightmare 💀
+        // check if panel already exists - prevent duplicate id nightmare
         const existingPanel = document.getElementById('settings-panel');
         if (existingPanel) {
             this.panelElement = existingPanel;
             console.log('⚙️ Settings panel HTML already exists, reusing element');
-            // 🖤💀 FIXED: Don't return early! We still need to setup event listeners! 💀
+            // fixed: don't return early! we still need to setup event listeners!
             // The HTML might exist from a previous session but listeners are lost on page load
             return; // We'll re-attach listeners in openPanel() if needed
         }
@@ -674,7 +674,7 @@ const SettingsPanel = {
 
     // add styles for settings panel - css wizardry at 3am
     addStyles() {
-        // 🖤 Check if styles already exist - prevent duplicate style injection 💀
+        // check if styles already exist - prevent duplicate style injection
         if (document.getElementById('settings-panel-styles')) {
             return;
         }
@@ -1796,9 +1796,9 @@ const SettingsPanel = {
             clearAllBtn.addEventListener('click', () => this.clearAllData());
         }
 
-        // 🏆 Scores tab - NO controls needed, just displays cached leaderboard 💀
+        // scores tab - no controls needed, just displays cached leaderboard
 
-        // 🎙️ AI Voice tab controls - where NPCs get their voices
+        // ai voice tab controls - where npcs get their voices
         this.setupAIVoiceControls();
 
         // setting controls - bind the inputs to the void
@@ -1869,11 +1869,11 @@ const SettingsPanel = {
         this.setupSelectControl('access-colorblind', 'accessibility', 'colorBlindMode');
         this.setupSelectControl('access-font-size', 'accessibility', 'fontSize');
 
-        // 🎮 gameplay settings - tweak the torture experience
+        // gameplay settings - tweak the torture experience
         this.setupCheckboxControl('tutorial-on-start', 'gameplay', 'showTutorialOnStart');
     },
 
-    // 🖤 setup tab scroll buttons - for when you have too many settings (which is always)
+    // setup tab scroll buttons - for when you have too many settings (which is always)
     setupTabScrollButtons() {
         const tabsContainer = this.panelElement.querySelector('.settings-panel-tabs');
         const scrollLeftBtn = this.panelElement.querySelector('.settings-tabs-scroll-btn.scroll-left');
@@ -1950,7 +1950,7 @@ const SettingsPanel = {
                         break;
                     case 'musicVolume':
                         AudioSystem.setMusicVolume(value);
-                        // 🎵 Also update MusicSystem volume
+                        // also update musicsystem volume
                         if (typeof MusicSystem !== 'undefined') {
                             MusicSystem.setVolume(value);
                         }
@@ -1961,7 +1961,7 @@ const SettingsPanel = {
                 }
             }
 
-            // 🎵 Apply music volume to MusicSystem even if AudioSystem not available
+            // apply music volume to musicsystem even if audiosystem not available
             if (category === 'audio' && settingKey === 'musicVolume' && typeof MusicSystem !== 'undefined') {
                 MusicSystem.setVolume(value);
             }
@@ -1986,7 +1986,7 @@ const SettingsPanel = {
         });
     },
 
-    // 🔇 Setup Mute All control - the nuclear option for audio
+    // setup mute all control - the nuclear option for audio
     setupMuteAllControl() {
         const muteAllCheckbox = this.panelElement.querySelector('#master-mute');
         if (!muteAllCheckbox) return;
@@ -2026,7 +2026,7 @@ const SettingsPanel = {
             };
 
             if (isMuted) {
-                // 🔇 MUTING: Save current values BEFORE zeroing
+                // muting: save current values before zeroing
                 this.previousAudioSettings = {
                     masterVolume: parseFloat(masterVolumeSlider?.value) || 0.7,
                     musicVolume: parseFloat(musicVolumeSlider?.value) || 0.5,
@@ -2052,7 +2052,7 @@ const SettingsPanel = {
                 }
 
             } else {
-                // 🔊 UNMUTING: Restore to 50% for all (as requested)
+                // unmuting: restore to 50% for all (as requested)
                 const restoreVolume = 0.5;
 
                 this.currentSettings.audio.masterVolume = restoreVolume;
@@ -2113,7 +2113,7 @@ const SettingsPanel = {
                             break;
                         case 'isMusicMuted':
                             AudioSystem.toggleMusicMute();
-                            // 🎵 Also toggle MusicSystem
+                            // also toggle musicsystem
                             if (typeof MusicSystem !== 'undefined') {
                                 MusicSystem.setEnabled(!value);
                             }
@@ -2123,7 +2123,7 @@ const SettingsPanel = {
                             break;
                     }
                 }
-                // 🎵 Handle music mute even if AudioSystem not available
+                // handle music mute even if audiosystem not available
                 if (settingKey === 'isMusicMuted' && typeof MusicSystem !== 'undefined') {
                     MusicSystem.setEnabled(!value);
                 }
@@ -2228,7 +2228,7 @@ const SettingsPanel = {
         }
     },
 
-    // 🎙️ setup AI Voice controls - give NPCs their digital souls
+    // setup ai voice controls - give npcs their digital souls
     setupAIVoiceControls() {
         // text model selector - fetch models from API
         const textModelSelect = this.panelElement.querySelector('#ai-text-model');
@@ -2295,7 +2295,7 @@ const SettingsPanel = {
         // default voice selector - populate from GameConfig
         const voiceSelect = this.panelElement.querySelector('#default-voice');
         if (voiceSelect) {
-            // 🖤 Populate voices from GameConfig.api.pollinations.tts.voices
+            // populate voices from gameconfig.api.pollinations.tts.voices
             this.populateVoiceDropdown(voiceSelect);
 
             if (typeof NPCVoiceChatSystem !== 'undefined') {
@@ -2352,7 +2352,7 @@ const SettingsPanel = {
     },
 
     // test voice preview - hear the digital demons speak
-    // 🖤 uses NPCDialogueSystem for unified dialogue generation
+    // uses npcdialoguesystem for unified dialogue generation
     async testVoicePreview() {
         // Get selected NPC personality
         const personality = this.panelElement.querySelector('#test-npc-personality')?.value || 'friendly';
@@ -2418,7 +2418,7 @@ const SettingsPanel = {
             };
 
             this.previewAudio.onerror = (e) => {
-                // 🦇 Audio failed - update UI, no console spam
+                // audio failed - update ui, no console spam
                 this.updateVoicePreviewStatus(`Playback error`, 'error');
                 URL.revokeObjectURL(audioUrl);
                 this.previewAudio = null;
@@ -2428,7 +2428,7 @@ const SettingsPanel = {
             await this.previewAudio.play();
 
         } catch (error) {
-            // 🦇 Voice preview failed - fallback will handle it
+            // voice preview failed - fallback will handle it
             this.updateVoicePreviewStatus(`Text API failed - using fallback`, 'error');
 
             // Fallback to old method if NPCDialogueSystem fails
@@ -2523,7 +2523,7 @@ const SettingsPanel = {
         }
     },
 
-    // 🔊 Populate voice dropdown from GameConfig.api.pollinations.tts.voices
+    // populate voice dropdown from gameconfig.api.pollinations.tts.voices
     populateVoiceDropdown(selectElement) {
         if (!selectElement) return;
 
@@ -2544,7 +2544,7 @@ const SettingsPanel = {
             'amuch': 'Unique'
         };
 
-        // 🖤 Pull voices from GameConfig.api.pollinations.tts.voices
+        // pull voices from gameconfig.api.pollinations.tts.voices
         const voices = (typeof GameConfig !== 'undefined' && GameConfig.api?.pollinations?.tts?.voices)
             ? GameConfig.api.pollinations.tts.voices
             : ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer', 'coral', 'verse', 'ballad', 'ash', 'sage', 'amuch', 'dan'];
@@ -2627,7 +2627,7 @@ const SettingsPanel = {
         }
     },
 
-    // 🤖 Fetch models directly from pollinations API and populate dropdown
+    // fetch models directly from pollinations api and populate dropdown
     async fetchAndPopulateModels(selectElement) {
         if (!selectElement) return;
 
@@ -2685,7 +2685,7 @@ const SettingsPanel = {
             console.log(`🤖 Dropdown populated with ${models.length} models`);
 
         } catch (error) {
-            // 🦇 API unavailable - use fallback models
+            // api unavailable - use fallback models
             console.warn('🤖 Using fallback models');
             selectElement.innerHTML = '';
             const fallbackModels = [
@@ -2750,7 +2750,7 @@ const SettingsPanel = {
             const modelName = typeof model === 'string' ? model : model.name;
             const modelDesc = typeof model === 'object' ? (model.description || '') : '';
 
-            // 🖤 Sanitize model data - XSS is my enemy 💀
+            // sanitize model data - xss is my enemy
             item.innerHTML = `
                 <span class="model-name">${this.escapeHtml(modelName)}</span>
                 <span class="model-desc">${this.escapeHtml(modelDesc)}</span>
@@ -2777,7 +2777,7 @@ const SettingsPanel = {
             if (isActive) activeTab = tab;
         });
 
-        // 🖤 scroll the active tab into view - chase that which you seek
+        // scroll the active tab into view - chase that which you seek
         if (activeTab) {
             activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         }
@@ -2803,13 +2803,13 @@ const SettingsPanel = {
             this.populateAboutTab();
         }
 
-        // 🏆 populate leaderboard tab - show the path to eternal glory
+        // populate leaderboard tab - show the path to eternal glory
         if (tabName === 'leaderboard') {
             this.populateLeaderboardTab();
         }
     },
 
-    // 🏆 Populate leaderboard tab - show the top 100 champions, no config bullshit 💀
+    // populate leaderboard tab - show the top 100 champions, no config bullshit
     populateLeaderboardTab() {
         const container = document.getElementById('settings-leaderboard-full');
         if (!container) return;
@@ -2819,7 +2819,7 @@ const SettingsPanel = {
             return;
         }
 
-        // 🖤 Get cached leaderboard (top 100) - NO API CALL, just use what we have 💀
+        // get cached leaderboard (top 100) - no api call, just use what we have
         const leaderboard = GlobalLeaderboardSystem.leaderboard.slice(0, 100);
 
         if (leaderboard.length === 0) {
@@ -2827,7 +2827,7 @@ const SettingsPanel = {
             return;
         }
 
-        // 🦇 Render the full top 100 list
+        // render the full top 100 list
         container.innerHTML = leaderboard.map((entry, i) => {
             const rank = i + 1;
             const icon = rank === 1 ? '👑' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
@@ -2848,19 +2848,19 @@ const SettingsPanel = {
         }).join('');
     },
 
-    // 🖤 Escape HTML to prevent XSS 💀
+    // escape html to prevent xss
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     },
 
-    // 🖤 populate about tab - display who to blame for this mess 💀
-    // 🖤 FIX: Added error handling and fallback for About section 💀
+    // populate about tab - display who to blame for this mess
+    // fix: added error handling and fallback for about section
     populateAboutTab() {
-        // 🖤 Use panelElement.querySelector for dynamic panel DOM - not document.getElementById
+        // use panelelement.queryselector for dynamic panel dom - not document.getelementbyid
         let aboutContent = this.panelElement?.querySelector('#about-content');
-        // 🦇 Fallback to document search if panel not available
+        // fallback to document search if panel not available
         if (!aboutContent) {
             aboutContent = document.getElementById('about-content');
         }
@@ -2869,7 +2869,7 @@ const SettingsPanel = {
             return;
         }
 
-        // 🖤 FIX: Try GameConfig.getAboutHTML with error handling 💀
+        // fix: try gameconfig.getabouthtml with error handling
         if (typeof GameConfig !== 'undefined' && typeof GameConfig.getAboutHTML === 'function') {
             try {
                 aboutContent.innerHTML = GameConfig.getAboutHTML();
@@ -2880,12 +2880,12 @@ const SettingsPanel = {
             }
         }
 
-        // 🖤 Check if GameConfig exists but method is missing 💀
+        // check if gameconfig exists but method is missing
         if (typeof GameConfig !== 'undefined' && typeof GameConfig.getAboutHTML !== 'function') {
             console.warn('🖤 GameConfig exists but getAboutHTML method is missing');
         }
 
-        // 🖤 FIX: Show fallback content for ANY failure case 💀
+        // fix: show fallback content for any failure case
         // This runs if: GameConfig undefined, getAboutHTML missing, or getAboutHTML threw error
         console.warn('🖤 Using fallback About content');
         aboutContent.innerHTML = `
@@ -2918,7 +2918,7 @@ const SettingsPanel = {
     // refresh keybindings ui - map your keyboard to your suffering
     refreshKeyBindingsUI() {
         console.log('🖤 refreshKeyBindingsUI called');
-        // 🖤 Use panelElement.querySelector for consistency with dynamically created panel
+        // use panelelement.queryselector for consistency with dynamically created panel
         let listContainer = this.panelElement?.querySelector('#keybindings-list');
         // Fallback to document search if panel not available
         if (!listContainer) {
@@ -2929,7 +2929,7 @@ const SettingsPanel = {
             return;
         }
 
-        // 🖤 Ensure KeyBindings is initialized
+        // ensure keybindings is initialized
         if (typeof KeyBindings === 'undefined') {
             listContainer.innerHTML = '<p class="no-saves">Keyboard system not available</p>';
             return;
@@ -2941,7 +2941,7 @@ const SettingsPanel = {
             KeyBindings.init();
         }
 
-        // 🖤 Get keybindings from GameConfig as fallback source of truth
+        // get keybindings from gameconfig as fallback source of truth
         const getKeyBinding = (action) => {
             // First try KeyBindings.current
             if (KeyBindings.current && KeyBindings.current[action]) {
@@ -3092,7 +3092,7 @@ const SettingsPanel = {
             ([act, key]) => key === newKey && act !== action
         );
 
-        // 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+        // fixed: use modal instead of browser confirm()
         if (existingAction) {
             const existingDesc = KeyBindings.descriptions[existingAction[0]] || existingAction[0];
             if (typeof ModalSystem !== 'undefined') {
@@ -3166,11 +3166,11 @@ const SettingsPanel = {
         this.updateStorageInfo();
     },
 
-    // 🖤 Check if we're in a state where saving is allowed 💀
+    // check if we're in a state where saving is allowed
     // FIXED: Allow saving in multiple game states, not just PLAYING
     canSaveNow() {
         if (typeof game === 'undefined' || typeof GameState === 'undefined') return false;
-        // 🖤💀 Allow saving when in-game (any panel open counts as in-game) 💀
+        // allow saving when in-game (any panel open counts as in-game)
         const savableStates = [
             GameState.PLAYING,
             GameState.MARKET,
@@ -3182,7 +3182,7 @@ const SettingsPanel = {
         return savableStates.includes(game.state);
     },
 
-    // 🖤 Update save button states based on game state 💀
+    // update save button states based on game state
     updateSaveButtonStates() {
         const manualSaveBtn = document.getElementById('manual-save-btn');
         const quickSaveBtn = document.getElementById('quick-save-btn');
@@ -3209,7 +3209,7 @@ const SettingsPanel = {
         }
     },
 
-    // 🖤 Handle manual save button click 💀
+    // handle manual save button click
     handleManualSave() {
         if (!this.canSaveNow()) {
             const statusMsg = document.getElementById('save-status-msg');
@@ -3226,7 +3226,7 @@ const SettingsPanel = {
         }
     },
 
-    // 🖤 Handle quick save button click 💀
+    // handle quick save button click
     handleQuickSave() {
         if (!this.canSaveNow()) {
             const statusMsg = document.getElementById('save-status-msg');
@@ -3243,19 +3243,19 @@ const SettingsPanel = {
         }
     },
 
-    // 🖤 populate auto-save list - scan localStorage for ALL auto-saves 💀
+    // populate auto-save list - scan localstorage for all auto-saves
     populateAutoSaveList() {
         const listContainer = document.getElementById('auto-save-list');
         if (!listContainer) return;
 
-        // 🦇 Scan localStorage directly for auto-saves (more reliable than metadata)
+        // scan localstorage directly for auto-saves (more reliable than metadata)
         const autoSaves = [];
         for (let i = 0; i < 10; i++) {
             const key = `tradingGameAutoSave_${i}`;
             const saveData = localStorage.getItem(key);
             if (saveData) {
                 try {
-                    // 🖤💀 FIX: Use SaveManager's decompression for compressed saves! 💀
+                    // fix: use savemanager's decompression for compressed saves!
                     let parsed;
                     if (typeof SaveManager !== 'undefined' && SaveManager.decompressSaveData) {
                         parsed = SaveManager.decompressSaveData(saveData);
@@ -3278,7 +3278,7 @@ const SettingsPanel = {
                         version: parsed.version || '?'
                     });
                 } catch (e) {
-                    // 💀 Corrupt save - skip it
+                    // corrupt save - skip it
                     console.warn(`💀 Auto-save ${i} corrupted:`, e.message);
                 }
             }
@@ -3313,19 +3313,19 @@ const SettingsPanel = {
         `).join('');
     },
 
-    // 🖤 populate manual save list - scan localStorage for ALL manual saves 💀
+    // populate manual save list - scan localstorage for all manual saves
     populateManualSaveList() {
         const listContainer = document.getElementById('manual-save-list');
         if (!listContainer) return;
 
-        // 🦇 Scan localStorage directly for manual saves (more reliable than metadata)
+        // scan localstorage directly for manual saves (more reliable than metadata)
         const manualSaves = [];
         for (let i = 1; i <= 10; i++) {
             const key = `tradingGameSave_${i}`;
             const saveData = localStorage.getItem(key);
             if (saveData) {
                 try {
-                    // 🖤💀 FIX: Use SaveManager's decompression for compressed saves! 💀
+                    // fix: use savemanager's decompression for compressed saves!
                     let parsed;
                     if (typeof SaveManager !== 'undefined' && SaveManager.decompressSaveData) {
                         parsed = SaveManager.decompressSaveData(saveData);
@@ -3350,7 +3350,7 @@ const SettingsPanel = {
                         version: parsed.version || '?'
                     });
                 } catch (e) {
-                    // 💀 Corrupt save - skip it
+                    // corrupt save - skip it
                     console.warn(`💀 Manual save ${i} corrupted:`, e.message);
                 }
             }
@@ -3385,7 +3385,7 @@ const SettingsPanel = {
         `).join('');
     },
 
-    // 🖤 Populate emergency save section - crash recovery 💀
+    // populate emergency save section - crash recovery
     populateEmergencySaveSection() {
         const container = document.getElementById('emergency-save-section');
         if (!container) return;
@@ -3438,14 +3438,14 @@ const SettingsPanel = {
         }
     },
 
-    // 🖤 Populate corrupted saves section - find and display broken saves 💀
+    // populate corrupted saves section - find and display broken saves
     populateCorruptedSavesSection() {
         const container = document.getElementById('corrupted-saves-section');
         if (!container) return;
 
         const corruptedSaves = [];
 
-        // 🖤💀 FIX: Check saves using proper decompression - compressed saves aren't "corrupted" 💀
+        // fix: check saves using proper decompression - compressed saves aren't "corrupted"
         const tryParseSave = (data) => {
             if (!data) return null;
             try {
@@ -3501,7 +3501,7 @@ const SettingsPanel = {
         `;
     },
 
-    // 🖤 Recover emergency save - load it into the game 💀
+    // recover emergency save - load it into the game
     recoverEmergencySave() {
         const emergencyData = localStorage.getItem('tradingGameEmergencySave');
         if (!emergencyData) {
@@ -3524,14 +3524,14 @@ const SettingsPanel = {
         }
     },
 
-    // 🖤 Delete emergency save 💀
+    // delete emergency save
     deleteEmergencySave() {
         localStorage.removeItem('tradingGameEmergencySave');
         this.refreshSaveLists();
         if (typeof addMessage === 'function') addMessage('Emergency save deleted', 'info');
     },
 
-    // 🖤 Export all saves to JSON file 💀
+    // export all saves to json file
     exportAllSaves() {
         const exportData = {
             exportVersion: '1.0',
@@ -3580,7 +3580,7 @@ const SettingsPanel = {
         if (typeof addMessage === 'function') addMessage('💾 All saves exported successfully!', 'success');
     },
 
-    // 🖤 Import saves from JSON file 💀
+    // import saves from json file
     importSaves(fileInput) {
         const file = fileInput.files[0];
         if (!file) return;
@@ -3632,7 +3632,7 @@ const SettingsPanel = {
         fileInput.value = '';
     },
 
-    // 🖤 Update storage info display 💀
+    // update storage info display
     updateStorageInfo() {
         const container = document.getElementById('storage-info');
         if (!container) return;
@@ -3661,14 +3661,14 @@ const SettingsPanel = {
 
     // open settings panel - welcome to configuration hell
     openPanel() {
-        // 🖤💀 FIXED: Force full re-init if panel doesn't exist or is broken 💀
+        // fixed: force full re-init if panel doesn't exist or is broken
         // This fixes the "dead buttons" bug where HTML exists but listeners don't
         if (!this.panelElement || !document.getElementById('settings-panel')) {
             this._initialized = false; // Reset init flag to allow full re-init
             this.init();
         }
 
-        // 🖤💀 SAFETY: Verify listeners are attached by checking if close button works 💀
+        // safety: verify listeners are attached by checking if close button works
         const closeBtn = this.panelElement?.querySelector('.settings-close-btn');
         if (closeBtn && !closeBtn._listenerAttached) {
             console.log('⚙️ Re-attaching settings panel event listeners (were missing)');
@@ -3676,7 +3676,7 @@ const SettingsPanel = {
             closeBtn._listenerAttached = true; // Mark so we don't re-attach every open
         }
 
-        // 🖤 Ensure KeyBindings is initialized before showing panel
+        // ensure keybindings is initialized before showing panel
         if (typeof KeyBindings !== 'undefined' && (!KeyBindings.current || Object.keys(KeyBindings.current).length === 0)) {
             KeyBindings.init();
         }
@@ -3684,7 +3684,7 @@ const SettingsPanel = {
         this.isOpen = true;
         this.panelElement.style.display = 'block';
 
-        // 🖤 Force high z-index to appear above EVERYTHING including main-menu
+        // force high z-index to appear above everything including main-menu
         this.panelElement.style.zIndex = '99999';
 
         // add entrance animation - fade in like regret
@@ -3695,12 +3695,12 @@ const SettingsPanel = {
         // prevent body scroll - trap you in here with us
         document.body.style.overflow = 'hidden';
 
-        // 🖤 Pre-populate keybindings UI in case Controls tab is visible or will be clicked
+        // pre-populate keybindings ui in case controls tab is visible or will be clicked
         setTimeout(() => {
             this.refreshKeyBindingsUI();
         }, 50);
 
-        // 🖤 Pre-populate About tab with GameConfig data - the fucking legends need to be shown 💀
+        // pre-populate about tab with gameconfig data - the fucking legends need to be shown
         setTimeout(() => {
             this.populateAboutTab();
         }, 50);
@@ -3731,7 +3731,7 @@ const SettingsPanel = {
 
     // alias for show - another way in
     show() {
-        // 🖤💀 Just delegate to openPanel() which handles all the init/listener checks now 💀
+        // just delegate to openpanel() which handles all the init/listener checks now
         this.openPanel();
     },
 
@@ -3745,7 +3745,7 @@ const SettingsPanel = {
         // save all settings - persist your decisions
         this.saveSettings();
 
-        // 🖤💀 FIX: Only apply settings that use SET methods (not toggle) 💀
+        // fix: only apply settings that use set methods (not toggle)
         // Toggle methods flip the state, which breaks when re-applying unchanged settings
         // Audio and theme settings use SET methods, so those are safe to reapply
         const safeToReapplySettings = {
@@ -3820,7 +3820,7 @@ const SettingsPanel = {
             try {
                 this.currentSettings = JSON.parse(JSON.stringify(this.defaultSettings));
             } catch (error) {
-                // 🦇 Clone failed - shouldn't happen, but handle it
+                // clone failed - shouldn't happen, but handle it
                 this.currentSettings = { ...this.defaultSettings };
             }
 
@@ -3897,11 +3897,11 @@ const SettingsPanel = {
         }
     },
 
-    // 🖤💀 Extracted clear logic for modal callback 💀
+    // extracted clear logic for modal callback
     _performDataClear() {
         try {
             // ═══════════════════════════════════════════════════════════
-            // 🧹 STEP 1: Clear ALL localStorage - everything goes
+            // step 1: clear all localstorage - everything goes
             // ═══════════════════════════════════════════════════════════
             const localStorageKeys = [];
             for (let i = 0; i < localStorage.length; i++) {
@@ -3915,13 +3915,13 @@ const SettingsPanel = {
             console.log('✓ LocalStorage completely cleared');
 
             // ═══════════════════════════════════════════════════════════
-            // 🧹 STEP 2: Clear ALL sessionStorage
+            // step 2: clear all sessionstorage
             // ═══════════════════════════════════════════════════════════
             sessionStorage.clear();
             console.log('✓ SessionStorage cleared');
 
             // ═══════════════════════════════════════════════════════════
-            // 🧹 STEP 3: Clear ALL IndexedDB databases
+            // step 3: clear all indexeddb databases
             // ═══════════════════════════════════════════════════════════
             if (window.indexedDB) {
                 // Known database names
@@ -3956,7 +3956,7 @@ const SettingsPanel = {
             console.log('✓ IndexedDB cleared');
 
             // ═══════════════════════════════════════════════════════════
-            // 🧹 STEP 4: Clear ALL cookies for this domain
+            // step 4: clear all cookies for this domain
             // ═══════════════════════════════════════════════════════════
             const cookies = document.cookie.split(';');
             cookies.forEach(cookie => {
@@ -3972,7 +3972,7 @@ const SettingsPanel = {
             console.log('✓ All cookies cleared');
 
             // ═══════════════════════════════════════════════════════════
-            // 🧹 STEP 5: Clear Cache Storage (Service Worker caches)
+            // step 5: clear cache storage (service worker caches)
             // ═══════════════════════════════════════════════════════════
             if ('caches' in window) {
                 caches.keys().then(cacheNames => {
@@ -3985,7 +3985,7 @@ const SettingsPanel = {
             console.log('✓ Cache Storage cleared');
 
             // ═══════════════════════════════════════════════════════════
-            // 🧹 STEP 6: Unregister Service Workers
+            // step 6: unregister service workers
             // ═══════════════════════════════════════════════════════════
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -3997,7 +3997,7 @@ const SettingsPanel = {
             }
 
             // ═══════════════════════════════════════════════════════════
-            // 🧹 STEP 7: Clear in-memory caches in our systems
+            // step 7: clear in-memory caches in our systems
             // ═══════════════════════════════════════════════════════════
             if (typeof GlobalLeaderboardSystem !== 'undefined') {
                 GlobalLeaderboardSystem.leaderboard = [];
@@ -4033,7 +4033,7 @@ const SettingsPanel = {
             }
 
         } catch (error) {
-            // 🦇 Clear failed - show error 🖤💀 FIXED: Use modal instead of browser alert() 💀
+            // clear failed - show error - fixed: use modal instead of browser alert()
             if (typeof ModalSystem !== 'undefined') {
                 ModalSystem.show({
                     title: '❌ Error',
@@ -4149,7 +4149,7 @@ const SettingsPanel = {
         try {
             return JSON.parse(JSON.stringify(this.currentSettings));
         } catch (error) {
-            // 🦇 Clone failed - return empty object
+            // clone failed - return empty object
             return {};
         }
     },
@@ -4175,7 +4175,7 @@ const SettingsPanel = {
         }
     },
 
-    // 🗑️ Clear all auto-saves to free up space 🖤💀 FIXED: Use modal instead of browser confirm() 💀
+    // clear all auto-saves to free up space - fixed: use modal instead of browser confirm()
     clearAutoSaves() {
         const doClear = () => {
             let clearedCount = 0;
@@ -4208,7 +4208,7 @@ const SettingsPanel = {
         }
     },
 
-    // ⏱️ Load autosave interval into dropdown
+    // load autosave interval into dropdown
     loadAutoSaveIntervalUI() {
         const dropdown = document.getElementById('autosave-interval');
         if (dropdown && typeof SaveManager !== 'undefined') {
@@ -4216,7 +4216,7 @@ const SettingsPanel = {
         }
     },
 
-    // ⏱️ Set autosave interval
+    // set autosave interval
     setAutoSaveInterval(intervalMs) {
         const interval = parseInt(intervalMs, 10);
         if (typeof SaveManager !== 'undefined') {
@@ -4226,7 +4226,7 @@ const SettingsPanel = {
         }
     },
 
-    // 🧹 Clear cache data (price history, events, etc)
+    // clear cache data (price history, events, etc)
     clearCacheData() {
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
@@ -4249,7 +4249,7 @@ const SettingsPanel = {
         addMessage(`🧹 Cleared ${keysToRemove.length} cache entries!`, 'success');
     },
 
-    // 📊 Update storage info display
+    // update storage info display
     updateStorageInfo() {
         const storageInfo = document.getElementById('storage-info');
         if (!storageInfo) return;
@@ -4282,14 +4282,14 @@ const SettingsPanel = {
     }
 };
 
-// 🖤 Update storage info when settings panel opens
+// update storage info when settings panel opens
 const originalShow = SettingsPanel.show;
 SettingsPanel.show = function() {
     originalShow.call(this);
     setTimeout(() => this.updateStorageInfo(), 100);
 };
 
-// 🖤 Auto-initialize SettingsPanel when DOM is ready
+// auto-initialize settingspanel when dom is ready
 // This ensures the panel is ready BEFORE user clicks settings on main menu
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {

@@ -8,7 +8,7 @@
 // 
 
 const CityEventSystem = {
-    //  Event types - varieties of disruption to ruin your plans
+    // All the ways cities can fuck with your perfectly laid plans
     eventTypes: {
         FESTIVAL: 'festival',
         RAID: 'raid',
@@ -21,7 +21,7 @@ const CityEventSystem = {
         POLITICS: 'politics'
     },
 
-    // Active city events
+    // What chaos is currently unfolding in each shithole town
     activeEvents: {},
 
     // Event templates - using string keys directly (not this.eventTypes)
@@ -121,20 +121,20 @@ const CityEventSystem = {
         }
     },
 
-    // Initialize event system
+    // Wake up the chaos engine
     init() {
         this.loadEvents();
         this.startEventTimer();
     },
 
-    // Load events from localStorage
+    // Drag the saved chaos out of storage
     loadEvents() {
         const saved = localStorage.getItem('tradingGameCityEvents');
         if (saved) {
             try {
                 this.activeEvents = JSON.parse(saved);
             } catch (e) {
-                //  Corrupt data? Nuke it and start fresh - silent fallback
+                // Data's corrupted - burn it and start over, silently
                 localStorage.removeItem('tradingGameCityEvents');
                 this.activeEvents = {};
             }
@@ -150,18 +150,18 @@ const CityEventSystem = {
         }
     },
 
-    // Start event timer
+    // Start the clock - chaos waits for no one
     startEventTimer() {
-        // Check for random events every game minute
+        // Every game minute, fate rolls the dice on disaster
         TimerManager.setInterval(() => {
             if (game.state === GameState.PLAYING && !TimeSystem.isPaused) {
                 this.checkRandomEvents();
                 this.updateEvents();
             }
-        }, 60000); // Check every minute of game time
+        }, 60000); // 60 seconds - the wheel spins again
     },
 
-    // Check for random events
+    // See if fate wants to ruin someone's day today
     checkRandomEvents(cityId = null) {
         const targetCityId = cityId || (game.currentLocation && game.currentLocation.id);
         if (!targetCityId) return;

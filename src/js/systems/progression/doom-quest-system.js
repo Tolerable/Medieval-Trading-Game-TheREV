@@ -474,14 +474,14 @@ const DoomQuestSystem = {
 
         const available = [];
 
-        // Check main quests
+        // Sift through the main questline of despair
         Object.values(this.mainQuests).forEach(quest => {
             if (quest.location === locationId && this._meetsPrerequisites(quest)) {
                 available.push(quest);
             }
         });
 
-        // Check side quests
+        // Scan the tragedies that wait in the shadows
         Object.values(this.sideQuests).forEach(quest => {
             if (quest.location === locationId && this._meetsPrerequisites(quest)) {
                 available.push(quest);
@@ -494,14 +494,14 @@ const DoomQuestSystem = {
     _meetsPrerequisites(quest) {
         if (!quest.prerequisite) return true;
 
-        // Check if prerequisite quest is completed
+        // Some paths require blood already spilled
         if (typeof QuestSystem !== 'undefined') {
             return QuestSystem.isQuestCompleted(quest.prerequisite);
         }
         return false;
     },
 
-    // Get doom-specific quest dialogue
+    // Extract the whispered words of the damned
     getQuestDialogue(questId, stage) {
         const quest = this.getQuest(questId);
         if (!quest) return null;
@@ -563,7 +563,7 @@ const DoomQuestSystem = {
         Object.values(allDoomQuests).forEach(quest => {
             // Quest giver matches
             if (quest.giver === npcType && this._meetsPrerequisites(quest)) {
-                // Check if not already active or completed
+                // Avoid the ones you've already lived through
                 if (typeof QuestSystem !== 'undefined') {
                     const isActive = QuestSystem.activeQuests?.[quest.id];
                     const isCompleted = QuestSystem.completedQuests?.includes(quest.id);

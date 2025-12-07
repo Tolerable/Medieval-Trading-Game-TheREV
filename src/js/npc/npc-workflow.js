@@ -12,7 +12,7 @@ console.log('🎭 NPCWorkflowSystem loading... teaching NPCs how to actually do 
 const NPCWorkflowSystem = {
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎯 INTERACTION TYPES - every way a player can interact with NPCs
+    // interaction types - every way a player can interact with NPCs
     // ═══════════════════════════════════════════════════════════════
 
     INTERACTION_TYPES: {
@@ -94,7 +94,7 @@ const NPCWorkflowSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📜 COMMAND REFERENCE - all commands NPCs can use
+    // command reference - all commands NPCs can use
     // ═══════════════════════════════════════════════════════════════
 
     COMMAND_REFERENCE: `
@@ -193,7 +193,7 @@ FORMAT: {commandName:param1,param2}
 `,
 
     // ═══════════════════════════════════════════════════════════════
-    // 🏪 TRADING WORKFLOW - how to handle buying and selling
+    // trading workflow - how to handle buying and selling
     // ═══════════════════════════════════════════════════════════════
 
     getTradingContext(npcData, playerData, interactionType) {
@@ -263,7 +263,7 @@ PLAYER IS BROWSING:
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖤 PRE-VALIDATED QUEST CHECKER - client-side validation to reduce API lag 💀
+    // pre-validated quest checker - client-side validation to reduce API lag
     // ═══════════════════════════════════════════════════════════════
 
     /**
@@ -275,7 +275,7 @@ PLAYER IS BROWSING:
         const activeQuests = playerData?.activeQuests || (typeof QuestSystem !== 'undefined' ? QuestSystem.activeQuests : {});
         const completedQuests = playerData?.completedQuests || (typeof QuestSystem !== 'undefined' ? QuestSystem.completedQuests : []);
 
-        // 🦇 Check 1: Does player have a quest READY TO TURN IN to this NPC?
+        // priority check: player completed a quest for this puppet - reward them
         for (const [questId, quest] of Object.entries(activeQuests)) {
             const isReady = typeof QuestSystem !== 'undefined' ?
                 QuestSystem.checkProgress(questId)?.status === 'ready_to_complete' : false;
@@ -312,7 +312,7 @@ PLAYER IS BROWSING:
             }
         }
 
-        // 🦇 Check 2: Does player have an ACTIVE quest from this NPC (progress check)?
+        // second check: player has active quest from this hollow soul - give progress update
         for (const [questId, quest] of Object.entries(activeQuests)) {
             if (quest.giver === npcType || quest.turnInNpc === npcType) {
                 const progress = typeof QuestSystem !== 'undefined' ? QuestSystem.checkProgress(questId) : null;
@@ -327,7 +327,7 @@ PLAYER IS BROWSING:
             }
         }
 
-        // 🦇 Check 3: Can this NPC OFFER a new quest?
+        // final check: does this puppet have a fresh quest to offer the player?
         const npcQuests = npcData?.quests || [];
         for (const quest of npcQuests) {
             const qId = quest.id || quest;
@@ -350,7 +350,7 @@ PLAYER IS BROWSING:
             }
         }
 
-        // 🦇 No quest actions available
+        // no quest actions available
         return {
             action: 'NO_QUEST',
             message: 'No quest actions available with this NPC - have normal conversation'
@@ -377,16 +377,16 @@ PLAYER IS BROWSING:
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📜 QUEST WORKFLOW - how to handle quest interactions
+    // quest workflow - how to handle quest interactions
     // ═══════════════════════════════════════════════════════════════
 
     getQuestContext(npcData, playerData, interactionType, questData = null) {
-        // 🖤 Use pre-validated quest checker to reduce API context size 💀
+        // use pre-validated quest checker to reduce API context size
         const preValidated = this.getPreValidatedQuestAction(npcData, playerData);
 
         let context = `\n=== QUEST STATUS (PRE-VALIDATED) ===\n`;
 
-        // 🦇 Simple, direct instructions based on pre-validation
+        // simple, direct instructions based on pre-validation
         switch (preValidated.action) {
             case 'COMPLETE_QUEST':
                 context += `QUEST READY TO COMPLETE: "${preValidated.questName}"
@@ -429,7 +429,7 @@ EXAMPLE: "I have a task for you... [describe quest]. Will you help? ${preValidat
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💬 GOSSIP & INFORMATION WORKFLOW
+    // gossip & information workflow
     // ═══════════════════════════════════════════════════════════════
 
     getGossipContext(npcData, locationData, worldState) {
@@ -466,7 +466,7 @@ You: "Word is there's a hidden cave north of here... full of treasure, they say.
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🏨 SERVICES WORKFLOW - Inn, Blacksmith, Healer, etc.
+    // services workflow - Inn, Blacksmith, Healer, etc.
     // ═══════════════════════════════════════════════════════════════
 
     getServicesContext(npcData, playerData, serviceType) {
@@ -632,7 +632,7 @@ DEATH EXAMPLES:
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // ⚔️ COMBAT CONTEXT - for all combat interactions
+    // combat context - for all combat interactions
     // ═══════════════════════════════════════════════════════════════
 
     getCombatContext(enemyData, playerData, interactionType) {
@@ -780,7 +780,7 @@ Short victory line. Can loot with {takeGold:X} or {takeItem:X,Y}.
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🌿 GATHERING CONTEXT - for resource gathering events
+    // gathering context - for resource gathering events
     // ═══════════════════════════════════════════════════════════════
 
     getGatheringContext(gatheringData, playerData, interactionType) {
@@ -871,7 +871,7 @@ Include {damage:X} if harm occurs. Can trigger combat.
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💰 LOOT CONTEXT - for treasure and loot finds
+    // loot context - for treasure and loot finds
     // ═══════════════════════════════════════════════════════════════
 
     getLootContext(lootData, playerData, interactionType) {
@@ -962,7 +962,7 @@ Include {damage:X}. Player may still get partial loot after.
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎲 RANDOM EVENT CONTEXT - for world events
+    // random event context - for world events
     // ═══════════════════════════════════════════════════════════════
 
     getRandomEventContext(eventData, playerData, interactionType) {
@@ -1108,7 +1108,7 @@ Include {damage:X} or negative effects. Ominous tone.
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🏰 DUNGEON CONTEXT - for dungeon exploration events
+    // dungeon context - for dungeon exploration events
     // ═══════════════════════════════════════════════════════════════
 
     getDungeonContext(dungeonData, playerData, interactionType) {
@@ -1157,7 +1157,7 @@ Summarize their success or escape. End on appropriate note.
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 👋 GREETING CONTEXT - varies by NPC type
+    // greeting context - varies by NPC type
     // ═══════════════════════════════════════════════════════════════
 
     getGreetingContext(npcData, playerData, interactionType) {
@@ -1249,7 +1249,7 @@ You are a CIVILIAN. Base greeting on personality and reputation:
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎭 BUILD FULL CONTEXT - combines everything for the AI
+    // build full context - combines everything for the AI
     // ═══════════════════════════════════════════════════════════════
 
     buildFullContext(options) {
@@ -1422,7 +1422,7 @@ Continue the conversation naturally based on above history.
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔧 DETECT INTERACTION TYPE - figure out what player wants
+    // detect interaction type - figure out what player wants
     // ═══════════════════════════════════════════════════════════════
 
     detectInteractionType(playerMessage, npcData, context = {}) {
@@ -1495,7 +1495,7 @@ Continue the conversation naturally based on above history.
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎮 PARSE AND EXECUTE COMMANDS FROM RESPONSE
+    // parse and execute commands from response
     // ═══════════════════════════════════════════════════════════════
 
     parseCommands(responseText) {
@@ -1697,7 +1697,7 @@ Continue the conversation naturally based on above history.
                 return { success: true };
             }
 
-            // 🖤 Collection quest commands - "bring me 20 wheat" 💀
+            // collection quest commands - "bring me 20 wheat"
             case 'takecollection': {
                 const [itemId, qty = 1] = params;
                 const quantity = parseInt(qty);
@@ -1708,14 +1708,14 @@ Continue the conversation naturally based on above history.
                 if (game.player.inventory[itemId] <= 0) delete game.player.inventory[itemId];
                 if (typeof addMessage === 'function') addMessage(`Gave ${quantity}x ${itemId}`, 'info');
                 if (typeof InventorySystem !== 'undefined') InventorySystem.updateInventoryDisplay();
-                // Update collect objective progress
+                // mark quest collection progress - the puppet remembers what you gave them
                 if (typeof QuestSystem !== 'undefined') {
                     QuestSystem.updateProgress('collect', { item: itemId, count: quantity });
                 }
                 return { success: true };
             }
 
-            // 🖤 Delivery quest confirmation - NPC confirms receipt 💀
+            // delivery quest confirmation - NPC confirms receipt
             case 'confirmdelivery': {
                 const [questId, questItemId] = params;
                 if (typeof QuestSystem === 'undefined') {
@@ -1742,7 +1742,7 @@ Continue the conversation naturally based on above history.
                 return { success: true };
             }
 
-            // 🖤 Check if player has collection items 💀
+            // verify player owns the collection items - inventory check before acceptance
             case 'checkcollection': {
                 const [itemId, qty = 1] = params;
                 const quantity = parseInt(qty);

@@ -132,11 +132,11 @@ const NPCMerchantSystem = {
     // Merchant reputation system
     reputation: {},
 
-    // 💰 Daily economy tracking - because even NPCs need income
+    // daily economy tracking - because even NPCs need income
     lastEconomyUpdate: null,
     economyUpdateInterval: 60, // minutes between NPC purchase simulations
 
-    // Initialize the system
+    // awaken the merchant puppets - breathe digital life into the shopkeepers
     init() {
         this.generateMerchants();
         this.loadReputation();
@@ -144,7 +144,7 @@ const NPCMerchantSystem = {
         console.log('NPC Merchant System initialized - merchants now have actual wallets');
     },
 
-    // 💰 Initialize merchant economy - giving shopkeepers their daily allowance
+    // give merchants their starting capital - every hollow soul needs gold to function
     initializeMerchantEconomy() {
         Object.values(this.merchants).forEach(merchant => {
             this.calculateMerchantWealth(merchant);
@@ -152,7 +152,7 @@ const NPCMerchantSystem = {
         this.lastEconomyUpdate = TimeSystem ? TimeSystem.getTotalMinutes() : 0;
     },
 
-    // 💵 Calculate merchant's current wealth based on inventory value
+    // tally this puppet's wealth by counting their inventory - gold equals stock value
     calculateMerchantWealth(merchant) {
         if (!merchant || !merchant.location) return;
 
@@ -162,7 +162,7 @@ const NPCMerchantSystem = {
         let totalInventoryValue = 0;
         let startingStock = {};
 
-        // Calculate total value of merchant's inventory
+        // sum the value of every item this merchant hoards - their net worth
         Object.entries(location.marketPrices).forEach(([itemId, marketData]) => {
             const item = ItemDatabase?.getItem?.(itemId);
             if (item && marketData.stock > 0) {
@@ -185,7 +185,7 @@ const NPCMerchantSystem = {
         return totalInventoryValue;
     },
 
-    // 💸 Check if merchant can afford to buy from player
+    // does this hollow merchant have enough gold? check their wallet before purchasing
     canMerchantAfford(merchantId, amount) {
         const merchant = this.merchants[merchantId] || this.getCurrentMerchant();
         if (!merchant) return false;
@@ -198,7 +198,7 @@ const NPCMerchantSystem = {
         return merchant.currentGold >= amount;
     },
 
-    // 💰 Deduct gold from merchant (when buying from player)
+    // drain gold from merchant's purse when they buy from player - empty their wallet
     deductMerchantGold(merchantId, amount, reason = '') {
         const merchant = this.merchants[merchantId] || this.getCurrentMerchant();
         if (!merchant) return false;
@@ -212,7 +212,7 @@ const NPCMerchantSystem = {
         return true;
     },
 
-    // 💵 Add gold to merchant (when selling to player)
+    // fatten the merchant's wallet when they sell to the player - fill their purse
     addMerchantGold(merchantId, amount) {
         const merchant = this.merchants[merchantId] || this.getCurrentMerchant();
         if (!merchant) return;
@@ -226,7 +226,7 @@ const NPCMerchantSystem = {
         merchant.currentGold = Math.min(merchant.maxGold, (merchant.currentGold || 0) + amount);
     },
 
-    // 🛒 Simulate NPC purchases throughout the day - the invisible customers
+    // simulate NPC purchases throughout the day - the invisible customers
     simulateNPCPurchases() {
         if (!TimeSystem) return;
 
@@ -236,7 +236,7 @@ const NPCMerchantSystem = {
         // Only simulate during business hours (6 AM to 10 PM)
         if (currentHour < 6 || currentHour > 22) return;
 
-        // Calculate how far through the day we are (6 AM = 0, 10 PM = 1)
+        // measure how much of the business day has elapsed - dawn to dusk progression
         const dayProgress = Math.min(1, Math.max(0, (currentHour - 6) / 16));
 
         // Target: items deplete to 25% by end of day
@@ -259,7 +259,7 @@ const NPCMerchantSystem = {
                     // Random chance to not deplete (makes it feel organic)
                     if (Math.random() > 0.7) return;
 
-                    // Calculate how many NPCs buy (1-3 items per interval)
+                    // simulate invisible customer purchases - phantom buyers drain stock
                     const purchaseAmount = Math.min(
                         currentStock - targetStock,
                         Math.floor(Math.random() * 3) + 1
@@ -286,7 +286,7 @@ const NPCMerchantSystem = {
         this.lastEconomyUpdate = currentTime;
     },
 
-    // 🌅 Reset daily economy - new day, new hustle
+    // reset daily economy - new day, new hustle
     resetDailyEconomy() {
         Object.values(this.merchants).forEach(merchant => {
             if (!merchant.location) return;
@@ -306,7 +306,7 @@ const NPCMerchantSystem = {
         console.log('Daily merchant economy reset - fresh wallets for all');
     },
 
-    // 📊 Get merchant's current financial status
+    // assess this puppet's financial health - how full is their coin purse?
     getMerchantFinances(merchantId) {
         const merchant = this.merchants[merchantId] || this.getCurrentMerchant();
         if (!merchant) return null;
@@ -334,7 +334,7 @@ const NPCMerchantSystem = {
         };
     },
 
-    // 🗣️ Get wealth-based dialogue - merchants complain when broke
+    // let broke merchants whine about their empty wallets - poverty has a voice
     getWealthDialogue(merchant) {
         const finances = this.getMerchantFinances(merchant?.id);
         if (!finances) return '';
@@ -375,19 +375,19 @@ const NPCMerchantSystem = {
         return dialogues[Math.floor(Math.random() * dialogues.length)];
     },
 
-    // ⏰ Update economy (call this from game loop)
+    // tick the economic engine - simulate the invisible market every hour
     updateEconomy() {
         if (!TimeSystem) return;
 
         const currentTime = TimeSystem.getTotalMinutes();
         const timeSinceUpdate = currentTime - (this.lastEconomyUpdate || 0);
 
-        // Update every hour of game time
+        // hourly tick - phantom customers drain stock, merchants gain gold
         if (timeSinceUpdate >= this.economyUpdateInterval) {
             this.simulateNPCPurchases();
         }
 
-        // Check for new day
+        // midnight passed? reset the economy for a new day
         const currentDay = TimeSystem.currentTime?.day || 1;
         if (this.lastEconomyDay !== currentDay) {
             this.resetDailyEconomy();
@@ -671,7 +671,7 @@ const NPCMerchantSystem = {
 
             console.log('Merchant reputation loaded');
         } catch (error) {
-            // 🦇 Corrupt reputation data - start fresh
+            // corrupt reputation data - start fresh
             console.warn('Merchant reputation reset - previous data corrupt');
         }
     },
@@ -703,7 +703,7 @@ const NPCMerchantSystem = {
         return '🔴 Hostile';
     },
 
-    // 🖤 Get save data for per-slot persistence - no more global localStorage exploit! 💀
+    // get save data for per-slot persistence - no more global localStorage exploit!
     getSaveData() {
         const merchantData = {};
 
@@ -728,10 +728,10 @@ const NPCMerchantSystem = {
         };
     },
 
-    // 🖤 Load save data - restore merchant economy from save slot 💀
+    // load save data - restore merchant economy from save slot
     loadSaveData(saveData) {
         if (!saveData || !saveData.merchants) {
-            console.warn('🖤 No merchant save data to load');
+            console.warn('No merchant save data to load');
             return;
         }
 
@@ -754,7 +754,7 @@ const NPCMerchantSystem = {
         this.lastEconomyUpdate = saveData.lastEconomyUpdate ?? null;
         this.lastEconomyDay = saveData.lastEconomyDay ?? null;
 
-        console.log('🖤 Merchant economy state restored from save 💀');
+        console.log('Merchant economy state restored from save');
     }
 };
 

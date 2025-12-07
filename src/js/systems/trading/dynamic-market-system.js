@@ -8,7 +8,7 @@
 // 
 
 const DynamicMarketSystem = {
-    //  Market chaos configuration
+    // market chaos configuration
     updateInterval: 5, // Update every 5 game minutes
     volatilityFactor: 0.1, // 10% price volatility
     saturationThreshold: 10, // Items bought/sold affect prices
@@ -16,9 +16,9 @@ const DynamicMarketSystem = {
     // Market saturation tracking
     marketSaturation: {},
 
-    // 
-    //  DAILY MERCHANT GOLD SUPPLY - they aint infinite you know
-    // 
+    //
+    // daily merchant gold supply - they aint infinite you know
+    //
     // each merchant has a daily gold limit based on market size
 
     // Base gold supply by market size
@@ -34,14 +34,14 @@ const DynamicMarketSystem = {
     merchantGold: {},
     lastGoldResetDay: 0,
 
-    // Get merchant's remaining gold for today
+    // see how much coin the merchant has left to bleed from today
     getMerchantGold(locationId) {
         this.checkDailyGoldReset();
 
         const location = GameWorld.locations[locationId];
         if (!location) return 0;
 
-        // Initialize if not tracked
+        // first contact with this merchant - time to drain them dry
         if (this.merchantGold[locationId] === undefined) {
             const marketSize = location.marketSize || 'small';
             this.merchantGold[locationId] = this.MARKET_GOLD_LIMITS[marketSize] || 1500;
@@ -50,13 +50,13 @@ const DynamicMarketSystem = {
         return this.merchantGold[locationId];
     },
 
-    // Check if merchant can afford to buy item
+    // check if the merchant has enough blood in their veins to buy your shit
     canMerchantAfford(locationId, price) {
         const availableGold = this.getMerchantGold(locationId);
         return availableGold >= price;
     },
 
-    // Deduct gold when merchant buys from player
+    // drain the merchant's purse - watch them bleed gold
     deductMerchantGold(locationId, amount) {
         this.checkDailyGoldReset();
 
@@ -66,7 +66,7 @@ const DynamicMarketSystem = {
 
         this.merchantGold[locationId] = Math.max(0, this.merchantGold[locationId] - amount);
 
-        // Warn if merchant is running low
+        // watch them squirm as their coffers empty
         const remaining = this.merchantGold[locationId];
         const location = GameWorld.locations[locationId];
         const maxGold = this.MARKET_GOLD_LIMITS[location?.marketSize || 'small'];
@@ -78,7 +78,7 @@ const DynamicMarketSystem = {
         }
     },
 
-    // Add gold back when player buys from merchant
+    // player pays the merchant - refilling their veins so we can bleed them again tomorrow
     addMerchantGold(locationId, amount) {
         this.checkDailyGoldReset();
 
@@ -89,11 +89,11 @@ const DynamicMarketSystem = {
         const location = GameWorld.locations[locationId];
         const maxGold = this.MARKET_GOLD_LIMITS[location?.marketSize || 'small'];
 
-        // Gold from sales goes back to merchant pool (up to max)
+        // their gold returns like blood circulating - but there's always a cap on how rich they can get
         this.merchantGold[locationId] = Math.min(maxGold, this.merchantGold[locationId] + amount);
     },
 
-    // Check if day has changed and reset gold
+    // new day - merchant wallets magically refill (capitalism's endless resurrection)
     checkDailyGoldReset() {
         if (typeof TimeSystem === 'undefined') return;
 
@@ -104,18 +104,18 @@ const DynamicMarketSystem = {
         }
     },
 
-    // Reset all merchant gold at start of new day
+    // dawn breaks - all the merchants are flush with gold again (how convenient)
     resetDailyGold() {
         this.merchantGold = {};
         console.log('💰 DynamicMarketSystem: Daily merchant gold reset');
     },
 
-    // Get merchant gold status for UI -  with division guard 
+    // get merchant gold status for UI - with division guard 
     getMerchantGoldStatus(locationId) {
         const current = this.getMerchantGold(locationId);
         const location = GameWorld.locations[locationId];
         const max = this.MARKET_GOLD_LIMITS[location?.marketSize || 'small'];
-        //  Prevent division by zero
+        // prevent division by zero
         const percent = max > 0 ? (current / max) * 100 : 0;
 
         let status, color;
@@ -145,16 +145,16 @@ const DynamicMarketSystem = {
         };
     },
 
-    // 
-    //  DAILY ITEM DECAY SYSTEM - stock decreases over the day
-    // 
+    //
+    // daily item decay system - stock decreases over the day
+    //
     // items reduce to 25% by end of day via explicit timer
 
     // Track original stock levels at day start
     originalStock: {},
     lastStockResetDay: 0,
 
-    // Initialize stock tracking for a location
+    // set up shop inventory - before we ravage it like locusts
     initLocationStock(locationId) {
         const location = GameWorld.locations[locationId];
         if (!location?.sells) return;
@@ -163,7 +163,7 @@ const DynamicMarketSystem = {
 
         for (const itemId of location.sells) {
             if (this.originalStock[locationId][itemId] === undefined) {
-                //  Random initial stock based on market size - BALANCED UP for better availability
+                // spawning inventory out of thin air - merchants are magic apparently
                 const marketSizes = { tiny: 12, small: 25, medium: 45, large: 65, grand: 90 };
                 const baseStock = marketSizes[location.marketSize] || 25;
                 const variance = Math.floor(Math.random() * baseStock * 0.5);
@@ -172,28 +172,28 @@ const DynamicMarketSystem = {
         }
     },
 
-    // Get current stock level accounting for daily decay
+    // watch inventory rot away as the day dies - everything decays, even stock
     getItemStock(locationId, itemId) {
         this.checkDailyStockReset();
         this.initLocationStock(locationId);
 
         const original = this.originalStock[locationId]?.[itemId] || 10;
 
-        // Calculate decay based on time of day
+        // time kills everything - even merchant shelves
         if (typeof TimeSystem === 'undefined') return original;
 
         const currentHour = TimeSystem.currentHour || 6; // Default to 6am
         const hoursIntoDay = currentHour - 6; // Day starts at 6am
         const dayLength = 18; // 18 waking hours (6am to midnight)
 
-        // Linear decay: 100% at 6am  25% at midnight
+        // morning's bounty withers to midnight scraps - entropy wins again
         const decayProgress = Math.max(0, Math.min(1, hoursIntoDay / dayLength));
         const stockMultiplier = 1 - (decayProgress * 0.75); // Decays to 25%
 
         return Math.max(1, Math.floor(original * stockMultiplier));
     },
 
-    // Reduce stock when player buys
+    // you bought it - now watch their shelves get emptier
     reduceStock(locationId, itemId, amount) {
         this.initLocationStock(locationId);
 
@@ -204,23 +204,23 @@ const DynamicMarketSystem = {
         }
     },
 
-    // Add stock when player sells (merchants restock from purchases)
+    // you sold them your shit - now they can sell it to some other sucker
     addStock(locationId, itemId, amount) {
         this.initLocationStock(locationId);
 
         const location = GameWorld.locations[locationId];
-        //  maxStock values - BALANCED UP for better merchant inventory capacity
+        // maxStock values - BALANCED UP for better merchant inventory capacity
         const marketSizes = { tiny: 25, small: 40, medium: 70, large: 110, grand: 150 };
         const maxStock = marketSizes[location?.marketSize] || 40;
 
         if (this.originalStock[locationId]?.[itemId] !== undefined) {
             this.originalStock[locationId][itemId] = Math.min(maxStock,
-                this.originalStock[locationId][itemId] + Math.floor(amount * 0.5) // Only half goes to stock
+                this.originalStock[locationId][itemId] + Math.floor(amount * 0.5) // they only keep half - rest vanishes into the void
             );
         }
     },
 
-    // Check if day changed and reset stock
+    // checking if the calendar flipped - time for fresh inventory out of nowhere
     checkDailyStockReset() {
         if (typeof TimeSystem === 'undefined') return;
 
@@ -231,21 +231,21 @@ const DynamicMarketSystem = {
         }
     },
 
-    //  Market size lookup table - cached outside loop for performance 
+    // market size lookup table - cached outside loop for performance 
     _marketSizes: { tiny: 12, small: 25, medium: 45, large: 65, grand: 90 },
 
-    // Reset all stock at start of new day
+    // new dawn - merchants wake up with magically restocked shelves
     resetDailyStock() {
-        // Keep some items from previous day (50% carry over)
+        // yesterday's dregs linger like a bad hangover
         for (const locationId of Object.keys(this.originalStock)) {
-            //  Cache location lookup ONCE per location instead of per-item 
+            // cache location lookup ONCE per location instead of per-item 
             const location = GameWorld.locations[locationId];
             const baseStock = this._marketSizes[location?.marketSize] || 10;
 
             for (const itemId of Object.keys(this.originalStock[locationId])) {
                 const variance = Math.floor(Math.random() * baseStock * 0.3);
 
-                // Fresh restock + some leftover
+        // fresh goods mixed with yesterday's garbage
                 const leftover = Math.floor(this.originalStock[locationId][itemId] * 0.25);
                 this.originalStock[locationId][itemId] = baseStock + variance + leftover;
             }
@@ -254,7 +254,7 @@ const DynamicMarketSystem = {
         console.log('📦 DynamicMarketSystem: Daily stock reset');
     },
 
-    // Get stock status for UI
+    // check how bare the shelves are - scarcity is just delayed desperation
     getStockStatus(locationId, itemId) {
         const current = this.getItemStock(locationId, itemId);
         const original = this.originalStock[locationId]?.[itemId] || 10;
@@ -293,9 +293,9 @@ const DynamicMarketSystem = {
         };
     },
 
-    // Initialize dynamic market system
+    // wake the market system from its slumber
     init() {
-        //  Validate ItemDatabase exists before initializing 
+        // make sure the item database exists or everything crashes like the economy in 2008 
         if (typeof ItemDatabase === 'undefined') {
             console.warn('⚠️ DynamicMarketSystem: ItemDatabase not loaded, skipping init');
             return;
@@ -304,20 +304,20 @@ const DynamicMarketSystem = {
         this.loadMarketSaturation();
         this.startUpdateTimer();
 
-        //  FIX: Ensure all locations have survival items on startup
+        // FIX: ensure all locations have survival items on startup
         this.ensureAllLocationsSurvivalItems();
 
         console.log('💰 DynamicMarketSystem: Initialized with survival items and daily refresh');
     },
     
-    // Load market saturation from localStorage
+    // dig up old market data from the digital graveyard
     loadMarketSaturation() {
         const saved = localStorage.getItem('tradingGameMarketSaturation');
         if (saved) {
             try {
                 this.marketSaturation = JSON.parse(saved);
             } catch (e) {
-                //  Corrupt data? Nuke it and start fresh 
+                // corrupt data? Nuke it and start fresh 
                 console.warn('⚠️ DynamicMarketSystem: localStorage data corrupted, clearing and resetting');
                 localStorage.removeItem('tradingGameMarketSaturation');
                 this.marketSaturation = {};
@@ -325,12 +325,12 @@ const DynamicMarketSystem = {
         }
     },
     
-    // Save market saturation to localStorage
+    // bury market data in localStorage for resurrection later
     saveMarketSaturation() {
         try {
             localStorage.setItem('tradingGameMarketSaturation', JSON.stringify(this.marketSaturation));
         } catch (e) {
-            //  Storage full or blocked - silent fail, not critical
+            // storage full or blocked - silent fail, not critical
         }
     },
     
@@ -343,7 +343,7 @@ const DynamicMarketSystem = {
         }, this.updateInterval * 60000); // Convert minutes to milliseconds
     },
     
-    // Update market prices based on dynamic factors
+    // prices shift like moods - chaotic, unpredictable, cruel
     updateMarketPrices() {
         for (const [cityId, cityData] of Object.entries(GameWorld.locations)) {
             if (!cityData.marketPrices) continue;
@@ -352,23 +352,23 @@ const DynamicMarketSystem = {
                 const item = ItemDatabase.getItem(itemId);
                 if (!item) continue;
                 
-                // Get base price
+                // what it SHOULD cost in a fair world (spoiler: this isn't one)
                 const basePrice = ItemDatabase.calculatePrice(itemId);
                 
-                // Apply market saturation
+                // flood the market and watch prices drown
                 const saturation = this.getMarketSaturation(cityId, itemId);
                 let saturationModifier = 1.0;
                 
                 if (saturation > this.saturationThreshold) {
-                    // High saturation reduces prices
+                    // too much supply - value collapses like self-worth on a bad day
                     saturationModifier = 1.0 - ((saturation - this.saturationThreshold) / 100) * 0.3;
                 }
                 
-                // Apply random volatility
+                // throw chaos into the mix because markets are never stable
                 const volatility = (Math.random() - 0.5) * this.volatilityFactor;
                 const priceModifier = saturationModifier * (1 + volatility);
                 
-                // Update price with bounds checking
+                // calculate the new price - may it bring suffering or salvation
                 const newPrice = Math.round(basePrice * priceModifier);
                 const minPrice = Math.round(basePrice * 0.5); // Minimum 50% of base price
                 const maxPrice = Math.round(basePrice * 2.0); // Maximum 200% of base price
@@ -378,7 +378,7 @@ const DynamicMarketSystem = {
         }
     },
     
-    // Update supply and demand based on transactions
+    // every transaction leaves a scar on the market's flesh
     updateSupplyDemand(cityId, itemId, quantity) {
         const saturationKey = `${cityId}_${itemId}`;
         if (!this.marketSaturation[saturationKey]) {
@@ -389,7 +389,7 @@ const DynamicMarketSystem = {
             };
         }
         
-        // Update volumes
+        // track buying and selling like counting wounds
         if (quantity > 0) {
             this.marketSaturation[saturationKey].buyVolume += quantity;
         } else {
@@ -400,7 +400,7 @@ const DynamicMarketSystem = {
         this.saveMarketSaturation();
     },
     
-    // Get market saturation for an item
+    // measure how oversold this market's soul is
     getMarketSaturation(cityId, itemId) {
         const saturationKey = `${cityId}_${itemId}`;
         const saturation = this.marketSaturation[saturationKey];
@@ -409,12 +409,12 @@ const DynamicMarketSystem = {
             return 0;
         }
         
-        // Calculate total volume and decay over time
+        // add up all the greed and desperation
         const totalVolume = saturation.buyVolume + saturation.sellVolume;
         const timeSinceUpdate = Date.now() - saturation.lastUpdate;
         const daysSinceUpdate = timeSinceUpdate / (24 * 60 * 60 * 1000); // Convert to days
         
-        // Decay saturation over time (5% per day)
+        // memories fade - even the market forgets your mistakes (slowly)
         const decayFactor = Math.max(0.5, 1 - (daysSinceUpdate * 0.05));
         
         return totalVolume * decayFactor;
@@ -521,10 +521,10 @@ const DynamicMarketSystem = {
         addMessage('Market saturation has been reset!');
     },
 
-    // 
-    //  SURVIVAL ITEMS SYSTEM - Essential food/water always available
-    // 
-    // Every market sells basic survival items so players don't die from lack of supplies
+    //
+    // survival items system - essential food/water always available
+    //
+    // every market sells basic survival items so players don't die from lack of supplies
 
     // Essential survival items that EVERY market sells
     ESSENTIAL_ITEMS: ['water', 'bread', 'food', 'meat', 'ale'],
@@ -570,13 +570,13 @@ const DynamicMarketSystem = {
         console.log('🍖 DynamicMarketSystem: Survival items ensured for all locations');
     },
 
-    // 
-    //  TIME-OF-DAY PRICE FLUCTUATION - Prices change morning to night
-    // 
-    // Morning (8am): Lowest prices, freshest stock
-    // Midday (12pm): Standard prices
-    // Evening (6pm): Higher prices, depleted stock
-    // Night (10pm+): Premium prices for late shoppers
+    //
+    // time-of-day price fluctuation - prices change morning to night
+    //
+    // morning (8am): lowest prices, freshest stock
+    // midday (12pm): standard prices
+    // evening (6pm): higher prices, depleted stock
+    // night (10pm+): premium prices for late shoppers
 
     TIME_PRICE_MODIFIERS: {
         morning: 0.85,    // 8am-11am: 15% discount (fresh from suppliers)
@@ -625,17 +625,17 @@ const DynamicMarketSystem = {
         return Math.round(basePrice * effectiveModifier);
     },
 
-    // 
-    //  8AM DAILY REFRESH - Vendors restock at dawn
-    // 
-    // Every morning at 8am:
-    // - Stock refreshes to full
-    // - Prices reset to base
-    // - Merchant gold replenishes
+    //
+    // 8am daily refresh - vendors restock at dawn
+    //
+    // every morning at 8am:
+    // - stock refreshes to full
+    // - prices reset to base
+    // - merchant gold replenishes
     // - NPCs refresh their inventory
 
     lastRefreshHour: -1,
-    //  Market refreshes at 8am each day - merchants restock, gold resets, NPCs refresh 
+    // market refreshes at 8am each day - merchants restock, gold resets, NPCs refresh 
     REFRESH_HOUR: 8, // 8am daily refresh
 
     // Check if it's time for the daily 8am refresh
@@ -686,7 +686,7 @@ const DynamicMarketSystem = {
             const location = GameWorld.locations[locationId];
             if (!location) continue;
 
-            //  Morning restock values - BALANCED UP for better daily availability
+            // morning restock values - BALANCED UP for better daily availability
             const marketSizes = { tiny: 15, small: 28, medium: 50, large: 70, grand: 100 };
             const baseStock = marketSizes[location.marketSize] || 28;
 
@@ -734,8 +734,8 @@ const DynamicMarketSystem = {
         console.log('🧑‍🌾 DynamicMarketSystem: NPC merchants refreshed');
     },
 
-    // 
-    //  ECONOMY SUPPLY/DEMAND - Prices react to player actions
+    //
+    // economy supply/demand - prices react to player actions
     // 
 
     // Track when player buys survival items - increase scarcity

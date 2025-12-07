@@ -8,7 +8,7 @@
 // 
 
 const CityReputationSystem = {
-    //  Reputation levels - from "loved" to "shoot on sight"
+    // The spectrum of how much they hate you - from worshipped to wanted dead
     levels: {
         HOSTILE: { name: 'Hostile', min: -100, max: -50, color: '#ff0000' },
         UNTRUSTED: { name: 'Untrusted', min: -49, max: -25, color: '#ff4444' },
@@ -19,7 +19,7 @@ const CityReputationSystem = {
         ELITE: { name: 'Elite', min: 75, max: 100, color: '#0088ff' }
     },
 
-    // City reputation data
+    // How much each town actually gives a fuck about you
     cityReputation: {},
 
     // Initialize reputation system
@@ -34,7 +34,7 @@ const CityReputationSystem = {
             try {
                 this.cityReputation = JSON.parse(saved);
             } catch (e) {
-                //  Corrupt data? Nuke it and start fresh - silent fallback
+                // Corrupted rep data - burn it and pretend nothing happened
                 localStorage.removeItem('tradingGameCityReputation');
                 this.cityReputation = {};
             }
@@ -46,7 +46,7 @@ const CityReputationSystem = {
         try {
             localStorage.setItem('tradingGameCityReputation', JSON.stringify(this.cityReputation));
         } catch (e) {
-            //  Storage full or blocked - silent fail, not critical
+            // Storage fucked - who cares, reputation isn't life or death
         }
     },
 
@@ -70,7 +70,7 @@ const CityReputationSystem = {
 
         this.saveReputation();
 
-        // Fire event for UI updates (trade locks, etc)
+        // Broadcast the shift - let the UI know your standing changed
         document.dispatchEvent(new CustomEvent('city-reputation-changed', {
             detail: {
                 cityId: cityId,
@@ -98,7 +98,7 @@ const CityReputationSystem = {
         const reputation = this.getReputation(cityId);
         const level = this.getReputationLevel(reputation);
         
-        // Price modifiers based on reputation level
+        // How much they'll price-gouge you based on whether they like you
         const modifiers = {
             HOSTILE: 1.2,      // 20% higher prices
             UNTRUSTED: 1.1,   // 10% higher prices

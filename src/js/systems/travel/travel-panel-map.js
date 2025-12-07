@@ -42,7 +42,7 @@ const TravelPanelMap = {
     //  Uses shared styles from MapRendererBase.LOCATION_STYLES with 0.8x size multiplier
     get locationStyles() {
         const styles = {};
-        const sizeMultiplier = 0.8; // ��� Mini map uses smaller icons
+        const sizeMultiplier = 0.8; // mini map uses smaller icons
         if (typeof MapRendererBase !== 'undefined') {
             Object.entries(MapRendererBase.LOCATION_STYLES).forEach(([type, base]) => {
                 styles[type] = {
@@ -682,7 +682,7 @@ const TravelPanelMap = {
         const locationName = location.name || location.id;
         label.textContent = (isDiscovered && !isGate) ? '???' : locationName;
 
-        // 🖤 Position label ABOVE icon for consistency 💀
+        // position label ABOVE icon for consistency
         label.style.cssText = `
             position: absolute;
             left: 50%;

@@ -9,7 +9,7 @@
 
 const NPCTradeWindow = {
     // ═══════════════════════════════════════════════════════════════
-    // 📋 STATE
+    // state
     // ═══════════════════════════════════════════════════════════════
     initialized: false,
     isOpen: false,
@@ -19,13 +19,13 @@ const NPCTradeWindow = {
     npcOffer: { items: {}, gold: 0 },
     currentDiscount: 0,
 
-    // 🖤💀 PERSISTENT NPC INVENTORY CACHE - Each NPC has their own inventory! 💰
-    // Key: NPC ID (e.g., "riverdale_innkeeper")
-    // Value: { gold: number, items: { itemId: quantity } }
+    // persistent NPC inventory cache - each NPC has their own inventory!
+    // key: NPC ID (e.g., "riverdale_innkeeper")
+    // value: { gold: number, items: { itemId: quantity } }
     _npcInventoryCache: {},
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎭 INTERACTION TYPES
+    // interaction types
     // ═══════════════════════════════════════════════════════════════
     interactionTypes: {
         trade: {
@@ -66,7 +66,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎲 RANDOM EVENT POOL - events that can happen anywhere
+    // random event pool - events that can happen anywhere
     // ═══════════════════════════════════════════════════════════════
     randomEvents: {
         robbery: {
@@ -104,7 +104,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🚀 INITIALIZATION
+    // initialization
     // ═══════════════════════════════════════════════════════════════
     init() {
         if (this.initialized) {
@@ -121,7 +121,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎨 UI CREATION
+    // UI creation
     // ═══════════════════════════════════════════════════════════════
     createWindowUI() {
         if (document.getElementById('npc-trade-window')) return;
@@ -186,7 +186,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🚪 OPEN / CLOSE
+    // open / close
     // ═══════════════════════════════════════════════════════════════
 
     /**
@@ -206,7 +206,7 @@ const NPCTradeWindow = {
         this.npcOffer = { items: {}, gold: 0 };
         this.currentDiscount = npcData.currentDiscount || 0;
 
-        // 🏷️ Did we earn a discount earlier? Check the session's memory 💾
+        // did we earn a discount earlier? check the session's memory
         if (typeof sessionStorage !== 'undefined') {
             const storedDiscount = parseInt(sessionStorage.getItem('merchant_discount')) || 0;
             if (storedDiscount > this.currentDiscount) {
@@ -226,7 +226,7 @@ const NPCTradeWindow = {
             this.isOpen = true;
         }
 
-        // 📡 Broadcast to the void - the trade window has awakened 🔔
+        // broadcast to the void - the trade window has awakened
         const event = new CustomEvent('trade-window-opened', {
             detail: { npc: npcData, type }
         });
@@ -243,7 +243,7 @@ const NPCTradeWindow = {
             this.isOpen = false;
         }
 
-        // 🗑️ Erase the discount from memory - this deal is done 💸
+        // erase the discount from memory - this deal is done
         if (typeof sessionStorage !== 'undefined') {
             sessionStorage.removeItem('merchant_discount');
             sessionStorage.removeItem('merchant_discount_npc');
@@ -254,13 +254,13 @@ const NPCTradeWindow = {
         this.playerOffer = { items: {}, gold: 0 };
         this.npcOffer = { items: {}, gold: 0 };
 
-        // 📡 Signal to the world - the merchant has closed their shop 🚪
+        // signal to the world - the merchant has closed their shop
         const event = new CustomEvent('trade-window-closed', {});
         document.dispatchEvent(event);
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎨 UI UPDATES
+    // UI updates
     // ═══════════════════════════════════════════════════════════════
 
     updateHeader(npcData, type) {
@@ -279,7 +279,7 @@ const NPCTradeWindow = {
     },
 
     async updateNPCSection(npcData) {
-        // 🎭 Draw their face in pixels - every NPC gets an avatar 👤
+        // draw their face in pixels - every NPC gets an avatar
         const portrait = document.getElementById('npc-portrait');
         if (portrait) {
             const avatar = portrait.querySelector('.npc-avatar');
@@ -288,11 +288,11 @@ const NPCTradeWindow = {
             }
         }
 
-        // 😊 How do they feel about you today? Update their emotional state 💭
+        // how do they feel about you today? update their emotional state
         const moodEl = document.getElementById('npc-mood');
         if (moodEl) {
             const mood = this.getNPCMood(npcData);
-            // 🖤 Null checks because DOM elements are fickle bitches 💀
+            // null checks because DOM elements are fickle bitches
             const moodIcon = moodEl.querySelector('.mood-icon');
             const moodText = moodEl.querySelector('.mood-text');
             if (moodIcon) moodIcon.textContent = mood.icon;
@@ -300,7 +300,7 @@ const NPCTradeWindow = {
             moodEl.className = `npc-mood mood-${mood.level}`;
         }
 
-        // Update initial dialogue - now async for API greetings 🖤
+        // update initial dialogue - now async for API greetings
         const dialogueEl = document.getElementById('npc-dialogue');
         if (dialogueEl) {
             dialogueEl.textContent = '...'; // Show loading
@@ -345,9 +345,9 @@ const NPCTradeWindow = {
         }
     },
 
-    // 🎭 Get NPC greeting - ALL greetings from API, no hardcoded fallbacks 🖤
+    // get NPC greeting - ALL greetings from API, no hardcoded fallbacks
     async getGreeting(npcData) {
-        // 🔮 Try to get greeting from NPC voice/dialogue system 💀
+        // try to get greeting from NPC voice/dialogue system
         if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.generateGreeting) {
             try {
                 const greeting = await NPCVoiceChatSystem.generateGreeting(npcData);
@@ -357,7 +357,7 @@ const NPCTradeWindow = {
             }
         }
 
-        // 🎤 Try NPCDialogueSystem as backup ⚰️
+        // try NPCDialogueSystem as backup
         if (typeof NPCDialogueSystem !== 'undefined' && NPCDialogueSystem.getGreeting) {
             try {
                 const greeting = await NPCDialogueSystem.getGreeting(npcData);
@@ -367,14 +367,14 @@ const NPCTradeWindow = {
             }
         }
 
-        // 💀 No fallback - return loading indicator, API will provide real greeting 🦇
+        // no fallback - return loading indicator, API will provide real greeting
         return '...';
     },
 
     updatePlayerGold() {
         const goldDisplay = document.getElementById('player-gold-display');
         if (goldDisplay && typeof game !== 'undefined') {
-            // 🖤💀 Get gold from GoldManager if available for consistency 💰
+            // get gold from GoldManager if available for consistency
             const gold = (typeof GoldManager !== 'undefined' && GoldManager.getGold)
                 ? GoldManager.getGold()
                 : (game.player?.gold || 0);
@@ -383,7 +383,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📦 CONTENT RENDERING - based on interaction type
+    // content rendering - based on interaction type
     // ═══════════════════════════════════════════════════════════════
 
     renderContent(type, npcData) {
@@ -478,7 +478,7 @@ const NPCTradeWindow = {
             return '<div class="empty-inventory">No items</div>';
         }
 
-        // 🖤 Filter out sell-only items from NPC side - trash loot ain't for sale 💀
+        // filter out sell-only items from NPC side - trash loot ain't for sale
         const filteredEntries = Object.entries(inventory).filter(([itemId, data]) => {
             if (side !== 'npc') return true; // Player can sell anything
             const item = typeof ItemDatabase !== 'undefined' ? ItemDatabase.getItem(itemId) : null;
@@ -489,7 +489,7 @@ const NPCTradeWindow = {
             return '<div class="empty-inventory">No items</div>';
         }
 
-        // 🖤💀 SORT INVENTORY: Gold → Weather → Food → Water → Everything else 💰
+        // sort inventory: Gold → Weather → Food → Water → Everything else
         const sortedEntries = this._sortInventoryByPriority(filteredEntries);
 
         return sortedEntries.map(([itemId, data]) => {
@@ -510,10 +510,10 @@ const NPCTradeWindow = {
                 console.log(`💰 Gold pricing: isCurrency=${isCurrency}, displayPrice=${displayPrice}, side=${side}`);
             }
 
-            // 🛒 Get item data for cart
+            // get item data for cart
             const itemData = typeof ItemDatabase !== 'undefined' ? ItemDatabase.getItem(itemId) : null;
 
-            // 🖤 Click on the item box to add to cart - no separate buttons needed!
+            // click on the item box to add to cart - no separate buttons needed!
             return `
                 <div class="inventory-item clickable-item"
                      data-item="${this.escapeHtml(itemId)}"
@@ -570,7 +570,7 @@ const NPCTradeWindow = {
     },
 
     renderQuestContent(npcData) {
-        // 🖤 Fixed: was getQuestsFromNPC, correct method is getQuestsForNPC 💀
+        // fixed: was getQuestsFromNPC, correct method is getQuestsForNPC
         const availableQuests = typeof QuestSystem !== 'undefined' ?
             QuestSystem.getQuestsForNPC(npcData.type, npcData.location) : [];
 
@@ -630,7 +630,7 @@ const NPCTradeWindow = {
             { id: 'leave', label: 'Leave', icon: '🚶' }
         ];
 
-        // 🖤 Data attributes only - no onclick string injection in my domain
+        // data attributes only - no onclick string injection in my domain
         return options.map(opt => `
             <button class="event-option-btn" data-event-option="${this.escapeHtml(opt.id)}">
                 <span class="option-icon">${this.escapeHtml(opt.icon || '')}</span>
@@ -641,7 +641,7 @@ const NPCTradeWindow = {
 
     renderRobberyContent(npcData) {
         const demandedGold = npcData.demandedGold || Math.floor((game?.player?.gold || 100) * 0.3);
-        // 🖤 Escaping all the things - robbery doesn't mean we tolerate XSS
+        // escaping all the things - robbery doesn't mean we tolerate XSS
         return `
             <div class="robbery-content">
                 <div class="robbery-warning">
@@ -694,7 +694,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎮 ACTION BUTTONS
+    // action buttons
     // ═══════════════════════════════════════════════════════════════
 
     updateActions(type) {
@@ -748,7 +748,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💱 TRADING LOGIC
+    // trading logic
     // ═══════════════════════════════════════════════════════════════
 
     addToOffer(itemId, side) {
@@ -790,8 +790,8 @@ const NPCTradeWindow = {
     },
 
     updateOfferDisplay() {
-        // 👤 What are you putting on the table? Show your offer 🎁
-        // 🖤 Using data attributes instead of inline onclick to prevent XSS
+        // what are you putting on the table? show your offer
+        // using data attributes instead of inline onclick to prevent XSS
         const playerOfferEl = document.getElementById('player-offer-items');
         if (playerOfferEl) {
             playerOfferEl.innerHTML = Object.entries(this.playerOffer.items).map(([itemId, qty]) => `
@@ -799,13 +799,13 @@ const NPCTradeWindow = {
                     ${this.getItemIcon(itemId)} ${this.formatItemName(itemId)} x${qty}
                 </div>
             `).join('') || '<span class="empty">Nothing</span>';
-            // 💀 Attach event listeners safely
+            // attach event listeners safely
             playerOfferEl.querySelectorAll('.offer-item[data-item-id]').forEach(el => {
                 el.onclick = () => this.removeFromOffer(el.dataset.itemId, el.dataset.offerType);
             });
         }
 
-        // 🧑‍💼 What are they willing to give? Display their counter-offer 💼
+        // what are they willing to give? display their counter-offer
         const npcOfferEl = document.getElementById('npc-offer-items');
         if (npcOfferEl) {
             npcOfferEl.innerHTML = Object.entries(this.npcOffer.items).map(([itemId, qty]) => `
@@ -813,31 +813,31 @@ const NPCTradeWindow = {
                     ${this.getItemIcon(itemId)} ${this.formatItemName(itemId)} x${qty}
                 </div>
             `).join('') || '<span class="empty">Nothing</span>';
-            // 🦇 Attach event listeners safely
+            // attach event listeners safely
             npcOfferEl.querySelectorAll('.offer-item[data-item-id]').forEach(el => {
                 el.onclick = () => this.removeFromOffer(el.dataset.itemId, el.dataset.offerType);
             });
         }
     },
 
-    // 🖤 HTML escape Map - cached for performance instead of creating object each call 💀
+    // HTML escape Map - cached for performance instead of creating object each call
     _escapeMap: new Map([['&', '&amp;'], ['<', '&lt;'], ['>', '&gt;'], ['"', '&quot;'], ["'", '&#39;']]),
 
-    // 🖤 Escape HTML to prevent XSS attacks - dark magic for security
+    // escape HTML to prevent XSS attacks - dark magic for security
     escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>"']/g, char => this._escapeMap.get(char));
     },
 
     updateTradeValue() {
-        // 💰 How much gold are you throwing into the deal? Extract the numbers 🪙
+        // how much gold are you throwing into the deal? extract the numbers
         const playerGoldOffer = parseInt(document.getElementById('player-gold-offer')?.value) || 0;
         const npcGoldRequest = parseInt(document.getElementById('npc-gold-request')?.value) || 0;
 
         this.playerOffer.gold = playerGoldOffer;
         this.npcOffer.gold = npcGoldRequest;
 
-        // 📊 Add up the value of your offerings - every item has a price ⚖️
+        // add up the value of your offerings - every item has a price
         let playerItemValue = 0;
         for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
             // Gold/currency is always 1:1
@@ -856,13 +856,13 @@ const NPCTradeWindow = {
         const playerTotalValue = playerItemValue + playerGoldOffer;
         const npcTotalValue = npcItemValue + npcGoldRequest;
 
-        // 🖥️ Refresh the UI with the new values - let them see the deal 👁️
+        // refresh the UI with the new values - let them see the deal
         document.getElementById('player-offer-gold').textContent = `${playerGoldOffer}g`;
         document.getElementById('npc-offer-gold').textContent = `${npcGoldRequest}g`;
         document.getElementById('player-offer-value').textContent = playerTotalValue;
         document.getElementById('npc-offer-value').textContent = npcTotalValue;
 
-        // ⚖️ Is it fair? Favorable? Calculate the balance of the trade 📉
+        // is it fair? favorable? calculate the balance of the trade
         const statusEl = document.getElementById('trade-status');
         if (statusEl) {
             const diff = playerTotalValue - npcTotalValue;
@@ -895,7 +895,7 @@ const NPCTradeWindow = {
     proposeTrade() {
         if (!this.currentNPC) return;
 
-        // 🧮 Crunch the numbers - is this trade worthy of acceptance? 💎
+        // crunch the numbers - is this trade worthy of acceptance?
         let playerTotalValue = this.playerOffer.gold;
         for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
             // Gold/currency is always 1:1
@@ -911,7 +911,7 @@ const NPCTradeWindow = {
             npcTotalValue += discountedPrice * qty;
         }
 
-        // 💸 Can you even afford this? Check your pockets before promising gold 🪙
+        // can you even afford this? check your pockets before promising gold
         if (typeof game !== 'undefined' && game.player) {
             if (this.playerOffer.gold > game.player.gold) {
                 this.showNPCResponse("You don't have enough gold for that offer.");
@@ -919,11 +919,11 @@ const NPCTradeWindow = {
             }
         }
 
-        // 🎭 Will they accept? Their personality determines the threshold 🎲
+        // will they accept? their personality determines the threshold
         const personality = this.currentNPC.personality || 'friendly';
         let acceptanceThreshold = 0; // How much extra value NPC requires
 
-        // 🐟 QUEST BYPASS: Harbor Dealings quest - accept fair trades in Greendale
+        // quest bypass: Harbor Dealings quest - accept fair trades in Greendale
         const isHarborDealingsQuest = typeof QuestSystem !== 'undefined' &&
                                       QuestSystem.activeQuests?.act1_quest4 &&
                                       typeof game !== 'undefined' &&
@@ -965,7 +965,7 @@ const NPCTradeWindow = {
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // 🔒 ATOMIC TRANSACTION SYSTEM - VERIFY BEFORE COMMIT 🔒
+        // atomic transaction system - verify before commit
         // ═══════════════════════════════════════════════════════════════
 
         const transactionLog = {
@@ -979,7 +979,7 @@ const NPCTradeWindow = {
             errors: []
         };
 
-        // 📸 SNAPSHOT PRE-STATE for rollback verification
+        // snapshot pre-state for rollback verification
         transactionLog.preState = {
             playerGold: game.player.gold || 0,
             playerInventory: { ...game.player.inventory },
@@ -992,7 +992,7 @@ const NPCTradeWindow = {
         console.log('💰 Pre-trade player gold:', transactionLog.preState.playerGold);
 
         // ═══════════════════════════════════════════════════════════════
-        // ✅ PHASE 1: VALIDATION - Check everything BEFORE any changes
+        // phase 1: validation - check everything BEFORE any changes
         // ═══════════════════════════════════════════════════════════════
 
         // Verify player has items they're offering
@@ -1043,11 +1043,11 @@ const NPCTradeWindow = {
         console.log('✅ Validation passed - executing trade...');
 
         // ═══════════════════════════════════════════════════════════════
-        // 💫 PHASE 2: EXECUTION - All changes happen here
+        // phase 2: execution - all changes happen here
         // ═══════════════════════════════════════════════════════════════
 
         try {
-            // 📦 Remove items from player inventory
+            // remove items from player inventory
             for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
                 game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) - qty;
                 if (game.player.inventory[itemId] <= 0) {
@@ -1056,7 +1056,7 @@ const NPCTradeWindow = {
                 console.log(`  📤 Player gave: ${qty}x ${itemId}`);
             }
 
-            // 🎁 Add items to player inventory from NPC
+            // add items to player inventory from NPC
             for (const [itemId, qty] of Object.entries(this.npcOffer.items)) {
                 game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + qty;
                 console.log(`  📥 Player received: ${qty}x ${itemId}`);
@@ -1070,12 +1070,12 @@ const NPCTradeWindow = {
                 this.removeNPCItem(this.currentNPC, itemId, qty);
             }
 
-            // 📦 Add items player sold TO NPC inventory
+            // add items player sold TO NPC inventory
             for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
                 this.addNPCItem(this.currentNPC, itemId, qty);
             }
 
-            // 💰 Calculate and apply gold exchange
+            // calculate and apply gold exchange
             const playerGoldChange = this.npcOffer.gold - this.playerOffer.gold;
             const newPlayerGold = (game.player.gold || 0) + playerGoldChange;
 
@@ -1093,7 +1093,7 @@ const NPCTradeWindow = {
             }
 
             // ═══════════════════════════════════════════════════════════════
-            // 🔍 PHASE 3: VERIFICATION - Confirm trade was successful
+            // phase 3: verification - confirm trade was successful
             // ═══════════════════════════════════════════════════════════════
 
             transactionLog.postState = {
@@ -1134,13 +1134,13 @@ const NPCTradeWindow = {
         // Log the transaction for debooger
         this._logTransaction(transactionLog);
 
-        // ✅ Success feedback
+        // success feedback
         this.showNPCResponse("Pleasure doing business with you!");
         if (typeof addMessage === 'function') {
             addMessage('Trade completed successfully!', 'success');
         }
 
-        // 📡 Dispatch events for quest system
+        // dispatch events for quest system
         document.dispatchEvent(new CustomEvent('trade-completed', {
             detail: {
                 npc: this.currentNPC,
@@ -1150,40 +1150,40 @@ const NPCTradeWindow = {
             }
         }));
 
-        // 📡 Fire item-purchased events for items player received
+        // fire item-purchased events for items player received
         for (const itemId of Object.keys(this.npcOffer.items)) {
             document.dispatchEvent(new CustomEvent('item-purchased', {
                 detail: { itemId, npc: this.currentNPC }
             }));
         }
 
-        // 📡 Fire item-sold events for items player gave away (for quest tracking)
+        // fire item-sold events for items player gave away (for quest tracking)
         for (const [itemId, quantity] of Object.entries(this.playerOffer.items)) {
             document.dispatchEvent(new CustomEvent('item-sold', {
                 detail: { item: itemId, quantity: quantity, gold: 0 }
             }));
         }
 
-        // 🧹 Clean up and refresh UI
+        // clean up and refresh UI
         this.clearOffer();
         this.updatePlayerGold();
         this.renderContent(this.interactionType, this.currentNPC);
     },
 
-    // 🔍 Get NPC's item count (returns null if not tracked)
-    // 🖤💀 FIXED: Use same key format as getNPCInventory() 💀
+    // get NPC's item count (returns null if not tracked)
+    // fixed: use same key format as getNPCInventory()
     getNPCItemCount(npc, itemId) {
         if (!this._npcInventoryCache) return null;
-        // 🦇 Use same key format as getNPCInventory - not just npc.id!
+        // use same key format as getNPCInventory - not just npc.id!
         const npcId = npc?.id || `${npc?.location || 'unknown'}_${npc?.type}`;
         const cacheEntry = this._npcInventoryCache[npcId];
         if (!cacheEntry?.items) return null;
         return cacheEntry.items[itemId] || 0;
     },
 
-    // 🖤💀 DELETED: Duplicate getNPCGold was here - using the proper one at line ~1431 instead 💀
+    // deleted: duplicate getNPCGold was here - using the proper one at line ~1431 instead
 
-    // 📝 Log transaction to debooger history
+    // log transaction to debooger history
     _transactionHistory: [],
     _logTransaction(log) {
         this._transactionHistory.push(log);
@@ -1199,7 +1199,7 @@ const NPCTradeWindow = {
         }
     },
 
-    // 🔍 DEBOOGER: Get transaction history
+    // debooger: get transaction history
     getTransactionHistory() {
         return this._transactionHistory;
     },
@@ -1212,7 +1212,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 👥 HIRING LOGIC
+    // hiring logic
     // ═══════════════════════════════════════════════════════════════
 
     confirmHire() {
@@ -1232,7 +1232,7 @@ const NPCTradeWindow = {
                 return;
             }
 
-            // 🖤💀 Use GoldManager to sync ALL gold displays! 💰
+            // use GoldManager to sync ALL gold displays!
             const newGold = game.player.gold - totalCost;
             if (typeof GoldManager !== 'undefined' && GoldManager.setGold) {
                 GoldManager.setGold(newGold, `Hired ${this.currentNPC.name}`);
@@ -1240,7 +1240,7 @@ const NPCTradeWindow = {
                 game.player.gold = newGold;
             }
 
-            // 👥 Add them to your crew - they work for you now 🤝
+            // add them to your crew - they work for you now
             game.player.employees = game.player.employees || [];
             game.player.employees.push({
                 ...this.currentNPC,
@@ -1260,7 +1260,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📜 QUEST LOGIC
+    // quest logic
     // ═══════════════════════════════════════════════════════════════
 
     acceptQuest(questId) {
@@ -1277,7 +1277,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🗡️ ROBBERY LOGIC
+    // robbery logic
     // ═══════════════════════════════════════════════════════════════
 
     handleRobbery(action, amount = 0) {
@@ -1285,7 +1285,7 @@ const NPCTradeWindow = {
 
         switch (action) {
             case 'fight':
-                // ⚔️ Roll the dice of combat - strength vs strength 🎲
+                // roll the dice of combat - strength vs strength
                 const playerStrength = game.player.attributes?.strength || 5;
                 const banditStrength = this.currentNPC.strength || 5;
                 const playerLuck = game.player.attributes?.luck || 5;
@@ -1293,7 +1293,7 @@ const NPCTradeWindow = {
                 const winChance = 0.3 + (playerStrength - banditStrength) * 0.05 + playerLuck * 0.02;
 
                 if (Math.random() < winChance) {
-                    // 🏆 Victory! Strip the corpse of its coin 💀
+                    // victory! strip the corpse of its coin
                     const loot = Math.floor(Math.random() * 50) + 20;
                     game.player.gold += loot;
                     this.showNPCResponse("Argh! You win this time!");
@@ -1301,13 +1301,13 @@ const NPCTradeWindow = {
                         addMessage(`You defeated the bandit and found ${loot} gold!`, 'success');
                     }
 
-                    // 📡 Broadcast your triumph - the quest system cares 🎯
+                    // broadcast your triumph - the quest system cares
                     const event = new CustomEvent('enemy-defeated', {
                         detail: { enemyType: 'bandit' }
                     });
                     document.dispatchEvent(event);
                 } else {
-                    // 💔 Defeat tastes bitter - they take your health and gold 🩸
+                    // defeat tastes bitter - they take your health and gold
                     const damage = Math.floor(Math.random() * 30) + 10;
                     game.player.health = Math.max(1, (game.player.health || 100) - damage);
                     const stolenGold = Math.floor(game.player.gold * 0.5);
@@ -1366,16 +1366,16 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💬 CHAT LOGIC
+    // chat logic
     // ═══════════════════════════════════════════════════════════════
 
     async startChat(topic) {
-        // 🎭 ALL dialogue from API systems - no hardcoded fallbacks 🖤
+        // all dialogue from API systems - no hardcoded fallbacks
         if (typeof NPCVoiceChatSystem !== 'undefined') {
             NPCVoiceChatSystem.startConversation(this.currentNPC, topic);
             this.close();
         } else if (typeof NPCDialogueSystem !== 'undefined' && NPCDialogueSystem.getResponse) {
-            // 🎤 Use dialogue system for API responses ⚰️
+            // use dialogue system for API responses
             try {
                 this.showNPCResponse('...'); // Loading
                 const response = await NPCDialogueSystem.getResponse(this.currentNPC, topic);
@@ -1385,7 +1385,7 @@ const NPCTradeWindow = {
                 this.showNPCResponse('...');
             }
         } else {
-            // 💀 No fallback - show loading, API will populate 🦇
+            // no fallback - show loading, API will populate
             this.showNPCResponse('...');
         }
     },
@@ -1411,7 +1411,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔧 UTILITIES
+    // utilities
     // ═══════════════════════════════════════════════════════════════
 
     getPlayerInventory() {
@@ -1426,11 +1426,11 @@ const NPCTradeWindow = {
     },
 
     getNPCInventory(npcData) {
-        // 🖤💀 Build NPC key consistently 💀
+        // build NPC key consistently
         const npcId = npcData.id || `${npcData.location || 'unknown'}_${npcData.type}`;
 
-        // 🎒 Do they have a custom inventory? Cache it and return! 📦
-        // 🖤💀 FIX: Always add to cache so getNPCItemCount() works! 💀
+        // do they have a custom inventory? cache it and return!
+        // fix: always add to cache so getNPCItemCount() works!
         if (npcData.inventory && !this._npcInventoryCache[npcId]) {
             this._npcInventoryCache[npcId] = {
                 gold: npcData.gold || 0,
@@ -1441,20 +1441,20 @@ const NPCTradeWindow = {
             console.log(`🏪 NPCTrade: Cached custom inventory for ${npcId}`);
         }
 
-        // 🖤💀 Check cache for persistent NPC inventory 💰
+        // check cache for persistent NPC inventory
 
         if (!this._npcInventoryCache[npcId]) {
-            // 🏪 First time seeing this NPC - initialize their inventory
+            // first time seeing this NPC - initialize their inventory
             const baseInventory = this.generateNPCInventory(npcData.type);
             const baseGold = this._getNPCGoldAmount(npcData.type);
 
-            // 🖤💀 Add gold AS AN ITEM in the inventory so it displays! 💰
+            // add gold AS AN ITEM in the inventory so it displays!
             const inventoryWithGold = { ...baseInventory };
             if (baseGold > 0) {
                 inventoryWithGold.gold = baseGold;
             }
 
-            // 🖤 Store as persistent inventory
+            // store as persistent inventory
             this._npcInventoryCache[npcId] = {
                 gold: baseGold,
                 items: inventoryWithGold,
@@ -1465,11 +1465,11 @@ const NPCTradeWindow = {
             console.log(`🏪 NPCTrade: Initialized inventory for ${npcId} with ${baseGold}g`);
         }
 
-        // 🦇 Return items (includes gold as an item for display)
+        // return items (includes gold as an item for display)
         return this._npcInventoryCache[npcId].items;
     },
 
-    // 🪙 Get NPC's current gold amount 💰
+    // get NPC's current gold amount
     getNPCGold(npcData) {
         const npcId = npcData?.id || `${npcData?.location || 'unknown'}_${npcData?.type}`;
         if (this._npcInventoryCache[npcId]) {
@@ -1480,7 +1480,7 @@ const NPCTradeWindow = {
         return this._npcInventoryCache[npcId]?.gold || 0;
     },
 
-    // 🖤 Modify NPC's gold (for trades) 💀
+    // modify NPC's gold (for trades)
     modifyNPCGold(npcData, amount) {
         const npcId = npcData?.id || `${npcData?.location || 'unknown'}_${npcData?.type}`;
         if (!this._npcInventoryCache[npcId]) {
@@ -1489,7 +1489,7 @@ const NPCTradeWindow = {
         if (this._npcInventoryCache[npcId]) {
             const newGold = Math.max(0, this._npcInventoryCache[npcId].gold + amount);
             this._npcInventoryCache[npcId].gold = newGold;
-            // 🖤💀 Also update gold in the items object so inventory display updates! 💰
+            // also update gold in the items object so inventory display updates!
             if (newGold > 0) {
                 this._npcInventoryCache[npcId].items.gold = newGold;
             } else {
@@ -1500,7 +1500,7 @@ const NPCTradeWindow = {
         return 0;
     },
 
-    // 🦇 Add item to NPC's inventory 📦
+    // add item to NPC's inventory
     addNPCItem(npcData, itemId, quantity = 1) {
         const npcId = npcData?.id || `${npcData?.location || 'unknown'}_${npcData?.type}`;
         if (!this._npcInventoryCache[npcId]) {
@@ -1513,7 +1513,7 @@ const NPCTradeWindow = {
         }
     },
 
-    // 💀 Remove item from NPC's inventory 📦
+    // remove item from NPC's inventory
     removeNPCItem(npcData, itemId, quantity = 1) {
         const npcId = npcData?.id || `${npcData?.location || 'unknown'}_${npcData?.type}`;
         if (!this._npcInventoryCache[npcId]) {
@@ -1530,8 +1530,8 @@ const NPCTradeWindow = {
         return false;
     },
 
-    // 🪙 Get base gold amount for NPC type 💰
-    // 🖤💀 1000x GOLD BOOST - NPCs need real money to trade properly! 💰
+    // get base gold amount for NPC type
+    // 1000x gold boost - NPCs need real money to trade properly!
     _getNPCGoldAmount(npcType) {
         const npcGoldAmounts = {
             // === WEALTHY NPCs (100k-500k gold) ===
@@ -1559,7 +1559,7 @@ const NPCTradeWindow = {
             // === SHADY (varies - they hide their wealth) ===
             smuggler: 100000, thief: 50000, fence: 150000,
 
-            // === DOOM WORLD - Still have SOME gold even in apocalypse 💀 ===
+            // === doom world - still have SOME gold even in apocalypse ===
             fallen_noble: 10000, deposed_noble: 5000, ruined_banker: 1000,
             desperate_guard: 5000, hollow_guard: 3000, paranoid_guard: 8000,
             crazed_blacksmith: 15000, one_armed_blacksmith: 10000,
@@ -1585,13 +1585,13 @@ const NPCTradeWindow = {
         return typeof data === 'number' ? data : (data?.quantity || 0);
     },
 
-    // 🏪 PROFESSION-BASED INVENTORY SYSTEM 💀
+    // profession-based inventory system
     // Each NPC type has inventory based on who they are and what they do
     // Innkeepers sell food/drinks, blacksmiths sell weapons, etc.
     // Everyone has a SMALL amount of personal food/water based on their location
-    // 🖤 Note: Gold is now handled by _getNPCGoldAmount() and stored in _npcInventoryCache 💀
+    // note: gold is now handled by _getNPCGoldAmount() and stored in _npcInventoryCache
     generateNPCInventory(npcType) {
-        // 🖤💀 DOOM WORLD SPECIFIC INVENTORIES - Dark/corrupted versions 💀🖤
+        // doom world specific inventories - dark/corrupted versions
         // Check if this is a doom world NPC type
         const doomInventories = {
             // === DOOM WORLD - DESPERATE NOBILITY ===
@@ -1848,12 +1848,12 @@ const NPCTradeWindow = {
             }
         };
 
-        // 🖤 Check if this is a doom NPC type - return dark inventory 💀
+        // check if this is a doom NPC type - return dark inventory
         if (doomInventories[npcType]) {
             return doomInventories[npcType];
         }
 
-        // 🖤 Regular world inventories for normal NPCs 🛒
+        // regular world inventories for normal NPCs
         const inventories = {
             // === HOSPITALITY / FOOD SERVICE ===
             innkeeper: {
@@ -2293,14 +2293,14 @@ const NPCTradeWindow = {
                 herbs: 8, medicinal_herbs: 5, scroll: 4,
                 candle: 10, water: 12
             },
-            // 🖤💀 NEW: Royal Advisor - court sage for Royal Capital (distinct from village elders) 💀
+            // new: royal Advisor - court sage for Royal Capital (distinct from village elders)
             royal_advisor: {
                 scroll: 15, ink: 10, quill: 8, parchment: 12,
                 fine_wine: 5, wine: 8, bread: 5, cheese: 3,
                 candle: 12, lantern_oil: 6, book: 4, map: 3,
                 seal_wax: 6, royal_decree: 2
             },
-            // 🖤💀 NEW: Chieftain - northern village leader for Frostholm 💀
+            // new: chieftain - northern village leader for Frostholm
             chieftain: {
                 furs: 15, leather: 10, hide: 8, meat: 12,
                 dried_meat: 8, warm_clothing: 5, wolf_pelt: 3,
@@ -2322,7 +2322,7 @@ const NPCTradeWindow = {
                 water: 8, bread: 5
             },
 
-            // 🏰 GRAND MARKET MERCHANT - Royal Capital only 👑
+            // grand market merchant - Royal Capital only
             // Has access to ALL goods from across the realm
             grand_market_merchant: {
                 // Food & Drink
@@ -2346,7 +2346,7 @@ const NPCTradeWindow = {
     },
 
     getItemPrice(itemId) {
-        // 🐟💰 SPECIAL CASE: Harbor Dealings quest - small premium for fish in Greendale
+        // special case: Harbor Dealings quest - small premium for fish in Greendale
         if (itemId === 'fish' &&
             typeof QuestSystem !== 'undefined' &&
             QuestSystem.activeQuests?.act1_quest4 &&
@@ -2359,7 +2359,7 @@ const NPCTradeWindow = {
             return 19;
         }
 
-        // 🖤💀 PRIORITY 1: Check ItemDatabase - the authoritative source 💀
+        // priority 1: check ItemDatabase - the authoritative source
         if (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem) {
             const item = ItemDatabase.getItem(itemId);
             if (item?.basePrice !== undefined) {
@@ -2367,7 +2367,7 @@ const NPCTradeWindow = {
             }
         }
 
-        // 💎 PRIORITY 2: Check GameConfig price list 📋
+        // priority 2: check GameConfig price list
         const categories = ['consumables', 'resources', 'tools', 'luxury'];
         for (const category of categories) {
             const items = GameConfig?.items?.[category];
@@ -2376,7 +2376,7 @@ const NPCTradeWindow = {
             }
         }
 
-        // 💰 PRIORITY 3: Fallback values for common items 🪙
+        // priority 3: fallback values for common items
         const fallbackPrices = {
             gold: 1, // 🖤💀 1 gold = 1 gold (not 5!) 💀
             food: 5, water: 2, bread: 3, fish: 8, ale: 10,
@@ -2404,7 +2404,7 @@ const NPCTradeWindow = {
         return itemId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     },
 
-    // 🖤💀 INVENTORY PRIORITY SORTING - Gold → Weather → Food → Water → Everything else 💰
+    // inventory priority sorting - Gold → Weather → Food → Water → Everything else
     _sortInventoryByPriority(items) {
         const getPriority = (itemId) => {
             const item = typeof ItemDatabase !== 'undefined' ? ItemDatabase.getItem(itemId) : null;
@@ -2457,32 +2457,32 @@ const NPCTradeWindow = {
     },
 
     setupTradeListeners() {
-        // 🎧 Hook up additional UI listeners if we need them later 🔌
+        // hook up additional UI listeners if we need them later
     },
 
     setupEventListeners() {
-        // 📡 Listen for external commands to open the trade window 🎮
+        // listen for external commands to open the trade window
         document.addEventListener('open-trade-window', (e) => {
             if (e.detail?.npc) {
                 this.open(e.detail.npc, e.detail.type || 'trade');
             }
         });
 
-        // ⌨️ Escape key closes the window - quick exit from capitalism ❌
+        // escape key closes the window - quick exit from capitalism
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isOpen) {
                 this.close();
             }
         });
 
-        // 🖤 Event delegation for all trade window interactions
-        // No inline onclick handlers = no XSS vulnerabilities = happy Unity 💀
+        // event delegation for all trade window interactions
+        // no inline onclick handlers = no XSS vulnerabilities = happy Unity
         const tradeWindow = document.getElementById('npc-trade-window');
         if (tradeWindow) {
             tradeWindow.addEventListener('click', (e) => {
                 const target = e.target;
 
-                // 📦 Inventory item click - add to offer
+                // inventory item click - add to offer
                 const inventoryItem = target.closest('.inventory-item');
                 if (inventoryItem) {
                     const itemId = inventoryItem.dataset.item;
@@ -2491,21 +2491,21 @@ const NPCTradeWindow = {
                     return;
                 }
 
-                // 📜 Quest accept button
+                // quest accept button
                 const questBtn = target.closest('.accept-quest-btn');
                 if (questBtn && questBtn.dataset.questId) {
                     this.acceptQuest(questBtn.dataset.questId);
                     return;
                 }
 
-                // ⚡ Event option button
+                // event option button
                 const eventBtn = target.closest('.event-option-btn');
                 if (eventBtn && eventBtn.dataset.eventOption) {
                     this.handleEventOption(eventBtn.dataset.eventOption);
                     return;
                 }
 
-                // 🗡️ Robbery action button
+                // robbery action button
                 const robberyBtn = target.closest('.robbery-btn');
                 if (robberyBtn && robberyBtn.dataset.robberyAction) {
                     const action = robberyBtn.dataset.robberyAction;
@@ -2515,8 +2515,8 @@ const NPCTradeWindow = {
                     return;
                 }
 
-                // 🛒 Click on inventory item - opens TradeCartPanel
-                // 🖤 BULK SHORTCUTS: Shift+Click = 5, Ctrl+Click = 25 💀
+                // click on inventory item - opens TradeCartPanel
+                // bulk shortcuts: Shift+Click = 5, Ctrl+Click = 25
                 const clickableItem = target.closest('.clickable-item');
                 if (clickableItem) {
                     const action = clickableItem.dataset.action;
@@ -2533,12 +2533,12 @@ const NPCTradeWindow = {
                         console.log(`💰 Gold clicked: priceAttr="${priceAttr}", parsed price=${price}, stock=${stock}`);
                     }
 
-                    // 🖤 Bulk quantity from modifier keys: Ctrl = 25, Shift = 5, Normal = 1 💀
+                    // bulk quantity from modifier keys: Ctrl = 25, Shift = 5, Normal = 1
                     let bulkQty = 1;
                     if (e.ctrlKey || e.metaKey) bulkQty = 25;
                     else if (e.shiftKey) bulkQty = 5;
 
-                    // 🛒 Open TradeCartPanel and add item
+                    // open TradeCartPanel and add item
                     if (typeof TradeCartPanel !== 'undefined') {
                         // Ensure cart is open with current merchant
                         if (!TradeCartPanel.isOpen) {
@@ -2565,7 +2565,7 @@ const NPCTradeWindow = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎲 RANDOM ENCOUNTER GENERATOR
+    // random encounter generator
     // ═══════════════════════════════════════════════════════════════
 
     /**
@@ -2576,10 +2576,10 @@ const NPCTradeWindow = {
     triggerRandomEncounter(location) {
         const playerGold = (typeof game !== 'undefined' && game.player?.gold) || 0;
 
-        // 🎲 Create a lottery of possible encounters - weighted by chance 🎰
+        // create a lottery of possible encounters - weighted by chance
         const possibleEvents = [];
         for (const [eventId, event] of Object.entries(this.randomEvents)) {
-            // 💰 Can this event trigger? Check if you have enough gold 🪙
+            // can this event trigger? check if you have enough gold
             if (event.minGold && playerGold < event.minGold) continue;
 
             for (let i = 0; i < event.weight; i++) {
@@ -2589,11 +2589,11 @@ const NPCTradeWindow = {
 
         if (possibleEvents.length === 0) return null;
 
-        // 🎰 Spin the wheel of fate - which encounter wins? 🔮
+        // spin the wheel of fate - which encounter wins?
         const selected = possibleEvents[Math.floor(Math.random() * possibleEvents.length)];
         const { eventId, event } = selected;
 
-        // 👤 Summon a soul for this encounter - who appears? 🎭
+        // summon a soul for this encounter - who appears?
         const npcType = event.npcTypes[Math.floor(Math.random() * event.npcTypes.length)];
         const npc = this.generateEventNPC(npcType, eventId, event);
 
@@ -2622,7 +2622,7 @@ const NPCTradeWindow = {
             personality: this.getPersonalityForType(npcType)
         };
 
-        // 🗡️ Customize them based on what's happening - robbers want gold 💰
+        // customize them based on what's happening - robbers want gold
         if (eventId === 'robbery') {
             npc.demandedGold = Math.floor((game?.player?.gold || 100) * (0.2 + Math.random() * 0.2));
             npc.strength = 4 + Math.floor(Math.random() * 4);
@@ -2650,7 +2650,7 @@ const NPCTradeWindow = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🌍 GLOBAL BINDING
+// global binding
 // ═══════════════════════════════════════════════════════════════
 if (typeof window !== 'undefined') {
     window.NPCTradeWindow = NPCTradeWindow;

@@ -10,16 +10,16 @@
 console.log('💀 Game Over System loading... preparing for inevitable failures...');
 
 const GameOverSystem = {
-    //  Bankruptcy threshold - below this and you're jailed
+    //  Debt deep enough to bury you alive - the law has no mercy
     BANKRUPTCY_THRESHOLD: -1000,
 
-    //  Track if game over is already being processed
+    //  Death is already knocking - don't let it knock twice
     isProcessingGameOver: false,
 
-    //  Last known game stats for display
+    //  Your corpse's stats - what you died with matters
     finalStats: null,
 
-    //  Player's ranking result
+    //  Where you ranked among the fallen - legends and losers
     rankingResult: null,
 
     // boot up the reaper - we're all gonna need this eventually
@@ -30,7 +30,7 @@ const GameOverSystem = {
         this.rankingResult = null;
     },
 
-    //  Check for bankruptcy - called after any gold transaction
+    //  Count your debts - poverty is a slow death sentence
     checkBankruptcy() {
         if (this.isProcessingGameOver) return false;
 
@@ -43,13 +43,13 @@ const GameOverSystem = {
         return false;
     },
 
-    //  Trigger bankruptcy game over
+    //  The collectors have arrived - your poverty became your prison
     triggerBankruptcy() {
         if (this.isProcessingGameOver) return;
 
         const gold = game?.player?.gold ?? 0;
 
-        // Track bankruptcy in DeathCauseSystem
+        // Carve "died broke" on your tombstone
         if (typeof DeathCauseSystem !== 'undefined') {
             DeathCauseSystem.recordBankruptcy(gold);
         }
@@ -63,41 +63,41 @@ const GameOverSystem = {
         this.handleGameOver(causeOfDeath);
     },
 
-    //  Main game over handler
+    //  The end has come - process your demise
     async handleGameOver(causeOfDeath = 'unknown causes') {
         if (this.isProcessingGameOver) return;
         this.isProcessingGameOver = true;
 
         console.log('💀 Game Over triggered:', causeOfDeath);
 
-        // Pause the game
+        // Time stops when you die - no more ticking clocks
         if (typeof TimeSystem !== 'undefined') {
             TimeSystem.setSpeed('PAUSED');
         }
 
-        // Calculate final stats
+        // Tally your life's worth - numbers don't lie
         this.finalStats = this.calculateFinalStats(causeOfDeath);
 
-        // Submit to leaderboards
+        // Etch your name in the hall of the dead
         await this.submitToLeaderboards();
 
-        // Show the game over screen
+        // Display your failure for all to see
         this.showGameOverScreen();
     },
 
-    //  Calculate comprehensive final stats
+    //  Count what you died with - every coin, every day survived
     calculateFinalStats(causeOfDeath) {
         const player = game?.player;
         if (!player) return this.getDefaultStats(causeOfDeath);
 
-        // Calculate days survived - get starting date from config (single source of truth)
+        // How long did you cling to life? Every sunrise was a victory
         const startDate = typeof GameConfig !== 'undefined' ? GameConfig.time.startingDate : { year: 1111, month: 4, day: 1 };
         const time = typeof TimeSystem !== 'undefined' ? TimeSystem.currentTime : { day: startDate.day, month: startDate.month, year: startDate.year };
         const startDays = startDate.day + (startDate.month - 1) * 30 + (startDate.year - 1) * 360;
         const currentDays = time.day + (time.month - 1) * 30 + (time.year - 1) * 360;
         const daysSurvived = Math.max(0, currentDays - startDays);
 
-        // Calculate inventory value
+        // Price your corpse's pockets - dead merchants carry treasures
         let inventoryValue = 0;
         if (player.inventory && typeof ItemDatabase !== 'undefined') {
             for (const [itemId, quantity] of Object.entries(player.inventory)) {
@@ -108,7 +108,7 @@ const GameOverSystem = {
             }
         }
 
-        // Get property stats
+        // Count your empire of dirt and stone - all meaningless now
         const properties = typeof PropertySystem !== 'undefined' ?
             PropertySystem.getOwnedProperties?.() || [] : [];
         const propertyCount = properties.length;
@@ -120,22 +120,22 @@ const GameOverSystem = {
             }
         });
 
-        // Get achievement count
+        // How many legends did you become? Achievements are vanity
         const achievements = typeof AchievementSystem !== 'undefined' ?
             AchievementSystem.unlockedAchievements?.size || 0 : 0;
 
-        // Get trade history
+        // Business deals closed before the casket - commerce never sleeps
         const tradesCompleted = typeof TradingSystem !== 'undefined' ?
             TradingSystem.tradeHistory?.length || 0 : 0;
 
-        // Get employee count
+        // Workers you left behind - they'll find new masters
         const employees = typeof EmployeeSystem !== 'undefined' ?
             EmployeeSystem.getEmployees?.()?.length || 0 : 0;
 
-        // Calculate total net worth
+        // Your total wealth - can't take it with you to the grave
         const netWorth = (player.gold || 0) + inventoryValue + propertyValue;
 
-        // Calculate final score
+        // Calculate your legacy in cold numbers - death loves math
         let score = Math.max(0, player.gold || 0);
         score += daysSurvived * 10;
         score += propertyCount * 500;
@@ -143,7 +143,7 @@ const GameOverSystem = {
         score += Math.floor(inventoryValue * 0.5);
         score += tradesCompleted * 5;
 
-        // Apply difficulty multiplier
+        // Harder deaths earn more respect - suffering has value
         const difficultyMultipliers = {
             easy: 0.5,
             normal: 1.0,
@@ -173,7 +173,7 @@ const GameOverSystem = {
         };
     },
 
-    //  Format survival time nicely
+    //  Make your survival time readable - humans prefer words to numbers
     formatSurvivalTime(days) {
         if (days < 7) {
             return `${days} day${days !== 1 ? 's' : ''}`;
@@ -192,7 +192,7 @@ const GameOverSystem = {
         }
     },
 
-    //  Get default stats when player data unavailable
+    //  Fallback stats for unknown corpses - even ghosts get records
     getDefaultStats(causeOfDeath) {
         return {
             playerName: 'Unknown Soul',
@@ -213,11 +213,11 @@ const GameOverSystem = {
         };
     },
 
-    //  Submit to Hall of Champions (unified leaderboard)
+    //  Carve your name among legends - or losers, depends on your score
     async submitToLeaderboards() {
         if (!this.finalStats) return;
 
-        // Submit to Hall of Champions (GlobalLeaderboardSystem is the single source of truth)
+        // Immortalize your failure (or triumph) in the eternal records
         if (typeof GlobalLeaderboardSystem !== 'undefined') {
             try {
                 const scoreData = {
@@ -238,7 +238,7 @@ const GameOverSystem = {
 
                 await GlobalLeaderboardSystem.submitScore(scoreData);
 
-                // Check ranking position in the Hall of Champions (top 100)
+                // See where you rank among the dead - top 100 or forgotten
                 const leaderboard = await GlobalLeaderboardSystem.fetchLeaderboard();
                 const playerRank = leaderboard.findIndex(e =>
                     e.score === this.finalStats.score &&
@@ -260,13 +260,13 @@ const GameOverSystem = {
                     addMessage('Your score didn\'t make the top 100 champions...');
                 }
             } catch (error) {
-                //  Network error - silent fail, not critical for game over flow
+                //  The network died before you - your legend stays local
                 console.warn('⚠️ Hall of Champions submit failed:', error.message);
             }
         }
     },
 
-    // Get ranking message based on position in Hall of Champions (top 100)
+    // Craft your eulogy based on where you placed - glory or mediocrity
     getRankingMessage(rank) {
         const messages = {
             1: '👑 SUPREME CHAMPION! The realm shall remember your name forever!',
@@ -288,7 +288,7 @@ const GameOverSystem = {
         return `Rank #${rank} - a footnote in history.`;
     },
 
-    // Show the game over screen
+    // Display your ending - every story needs a final page
     showGameOverScreen() {
         const overlay = document.getElementById('game-over-overlay');
         if (!overlay) {
@@ -300,7 +300,7 @@ const GameOverSystem = {
             return;
         }
 
-        // Set title based on cause
+        // Different deaths deserve different titles - context matters
         const titleEl = document.getElementById('game-over-title');
         const causeEl = document.getElementById('game-over-cause');
 
@@ -318,17 +318,17 @@ const GameOverSystem = {
             causeEl.textContent = this.finalStats.causeOfDeath;
         }
 
-        // Populate stats grid
+        // Fill the screen with your life's numbers - cold and final
         this.populateStatsGrid();
 
-        // Show ranking if applicable
+        // Display your place among the champions (if you earned it)
         this.populateRanking();
 
-        // Show the overlay
+        // Unveil your demise to the world
         overlay.classList.remove('hidden');
     },
 
-    // Populate the stats grid
+    // Build your death statistics display - numbers tell the truth
     populateStatsGrid() {
         const statsGrid = document.getElementById('game-over-stats-grid');
         if (!statsGrid || !this.finalStats) return;
@@ -353,7 +353,7 @@ const GameOverSystem = {
         `).join('');
     },
 
-    // Populate ranking section
+    // Show where you placed - legends or forgotten dust
     populateRanking() {
         const rankingEl = document.getElementById('game-over-ranking');
         if (!rankingEl) return;
@@ -375,7 +375,7 @@ const GameOverSystem = {
         }
     },
 
-    // Reset and restart - skip credits, go straight to character creation
+    // Death is just the beginning - rise again and try not to fail this time
     resetAndRestart() {
         const overlay = document.getElementById('game-over-overlay');
         if (overlay) {
@@ -386,7 +386,7 @@ const GameOverSystem = {
         this.finalStats = null;
         this.rankingResult = null;
 
-        // Restart game
+        // Resurrect into a new life - same world, different corpse
         if (typeof game !== 'undefined' && typeof game.startNewGame === 'function') {
             game.startNewGame();
         } else if (typeof startNewGame === 'function') {
@@ -396,14 +396,14 @@ const GameOverSystem = {
         }
     },
 
-    // Return to menu - show credits first, then main menu
+    // Retreat to the menu - show credits for your suffering first
     returnToMenu() {
         const overlay = document.getElementById('game-over-overlay');
         if (overlay) {
             overlay.classList.add('hidden');
         }
 
-        // Determine ending message based on cause of death
+        // Craft a poetic ending based on how you died - death deserves poetry
         let endingMessage = 'Your journey has ended...';
         if (this.finalStats) {
             if (this.finalStats.causeOfDeath.includes('retired')) {
@@ -417,7 +417,7 @@ const GameOverSystem = {
             }
         }
 
-        // Use unified CreditsSystem to show credits, then return to menu
+        // Roll the credits - honor those who built your demise
         if (typeof CreditsSystem !== 'undefined') {
             CreditsSystem.showCredits({
                 endingMessage: endingMessage,

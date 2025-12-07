@@ -14,10 +14,10 @@ const DeathCauseSystem = {
     //  DEATH TRACKING STATE
     // 
 
-    // Current pending death cause (set before death is triggered)
+    // The reaper's next appointment - this is how you're about to fucking die
     pendingDeathCause: null,
 
-    // History of recent damage/events that could have caused death
+    // Blood trail of recent suffering - every wound that led you here
     recentEvents: [],
     maxRecentEvents: 10,
 
@@ -232,7 +232,7 @@ const DeathCauseSystem = {
     //  CORE FUNCTIONS
     // 
 
-    // Record an event that could contribute to death
+    // Carve another tally mark on your tombstone - death is patient
     recordEvent(category, subtype = null, details = null) {
         const event = {
             timestamp: Date.now(),
@@ -243,7 +243,7 @@ const DeathCauseSystem = {
 
         this.recentEvents.unshift(event);
 
-        // Keep only recent events
+        // The past bleeds away, only fresh wounds matter
         if (this.recentEvents.length > this.maxRecentEvents) {
             this.recentEvents.pop();
         }
@@ -251,7 +251,7 @@ const DeathCauseSystem = {
         console.log('💀 Death event recorded:', event);
     },
 
-    // Set pending death cause (call before death triggers)
+    // Mark the manner of your impending demise - the void is calling
     setPendingCause(category, subtype = null, customMessage = null) {
         this.pendingDeathCause = {
             category: category,
@@ -262,14 +262,14 @@ const DeathCauseSystem = {
         console.log('💀 Pending death cause set:', this.pendingDeathCause);
     },
 
-    // Clear pending cause
+    // Death cancelled - you get to suffer longer
     clearPendingCause() {
         this.pendingDeathCause = null;
     },
 
-    // Get the death cause message when player dies
+    // Narrate your final moment - what killed you matters
     getDeathCause() {
-        // First check if there's a pending cause
+        // The reaper knows exactly what brought you here
         if (this.pendingDeathCause) {
             const cause = this.pendingDeathCause;
             this.clearPendingCause();
@@ -281,20 +281,20 @@ const DeathCauseSystem = {
             return this.generateDeathMessage(cause.category, cause.subtype);
         }
 
-        // Check recent events for context
+        // Dig through the blood trail for clues
         if (this.recentEvents.length > 0) {
             const recentEvent = this.recentEvents[0];
-            // Only use if event is recent (within last 30 seconds)
+            // Fresh wounds tell the story - old scars are just background noise
             if (Date.now() - recentEvent.timestamp < 30000) {
                 return this.generateDeathMessage(recentEvent.category, recentEvent.subtype);
             }
         }
 
-        // Analyze player stats to determine cause
+        // No clues? Time to read the corpse's condition
         return this.analyzeDeathCause();
     },
 
-    // Analyze player stats to determine most likely death cause
+    // Autopsy the corpse - what finally broke you?
     analyzeDeathCause() {
         if (typeof game === 'undefined' || !game.player || !game.player.stats) {
             return this.getRandomMessage('unknown');
@@ -302,7 +302,7 @@ const DeathCauseSystem = {
 
         const stats = game.player.stats;
 
-        // Check for starvation/dehydration
+        // Your body's final screams before the lights went out
         const isStarving = stats.hunger <= 0;
         const isDehydrated = stats.thirst <= 0;
         const isExhausted = stats.stamina <= 0;
@@ -317,16 +317,16 @@ const DeathCauseSystem = {
             return this.getRandomMessage('exhaustion');
         }
 
-        // Check for bankruptcy
+        // Debt collectors are just legal murderers
         if (stats.gold !== undefined && stats.gold < -100) {
             return this.getRandomMessage('bankruptcy');
         }
 
-        // Default to unknown
+        // Died mysteriously - the void doesn't always explain itself
         return this.getRandomMessage('unknown');
     },
 
-    // Generate a death message based on category and subtype
+    // Craft the epitaph - make your death poetic
     generateDeathMessage(category, subtype = null) {
         const messages = this.deathMessages[category];
 
@@ -334,23 +334,23 @@ const DeathCauseSystem = {
             return this.getRandomMessage('unknown');
         }
 
-        // If messages is an object with subtypes
+        // Death comes in many flavors - pick the right poison
         if (typeof messages === 'object' && !Array.isArray(messages)) {
             if (subtype && messages[subtype]) {
                 return this.getRandomFromArray(messages[subtype]);
             }
-            // Try generic subtype
+            // Fallback to the generic way to die - boring but functional
             if (messages.generic) {
                 return this.getRandomFromArray(messages.generic);
             }
-            // Get from first available subtype
+            // Just pick whatever kills you first
             const keys = Object.keys(messages);
             if (keys.length > 0) {
                 return this.getRandomFromArray(messages[keys[0]]);
             }
         }
 
-        // Messages is an array
+        // Simple list of ways to die - straight to the point
         if (Array.isArray(messages)) {
             return this.getRandomFromArray(messages);
         }
@@ -358,7 +358,7 @@ const DeathCauseSystem = {
         return this.getRandomMessage('unknown');
     },
 
-    // Get a random message from a category
+    // Spin the death wheel - every ending is unique
     getRandomMessage(category) {
         const messages = this.deathMessages[category];
         if (Array.isArray(messages)) {
@@ -367,7 +367,7 @@ const DeathCauseSystem = {
         return 'the void simply called';
     },
 
-    // Helper: get random element from array
+    // Chaos picks your eulogy - fate loves randomness
     getRandomFromArray(arr) {
         if (!arr || arr.length === 0) return 'unknown causes';
         return arr[Math.floor(Math.random() * arr.length)];
@@ -377,50 +377,50 @@ const DeathCauseSystem = {
     //  GAME INTEGRATION HELPERS
     // 
 
-    // Call when player takes damage from combat
+    // Blood spills in battle - mark the wound before it kills you
     recordCombatDamage(enemyType = 'generic', damage = 0) {
         this.recordEvent(this.categories.COMBAT, enemyType, { damage });
         this.setPendingCause(this.categories.COMBAT, enemyType);
     },
 
-    // Call when player is affected by dungeon events
+    // The dungeon bit you - traps and curses leave scars
     recordDungeonEvent(eventType = 'generic', details = null) {
         this.recordEvent(this.categories.DUNGEON, eventType, details);
         this.setPendingCause(this.categories.DUNGEON, eventType);
     },
 
-    // Call when player is affected by travel hazards
+    // The road claimed another victim - travel is violence
     recordTravelHazard(hazardType = 'generic', details = null) {
         this.recordEvent(this.categories.TRAVEL, hazardType, details);
         this.setPendingCause(this.categories.TRAVEL, hazardType);
     },
 
-    // Call when player encounters hostile NPC
+    // Wrong place, wrong time, wrong person - violence finds you
     recordHostileEncounter(encounterType = 'generic', details = null) {
         this.recordEvent(this.categories.ENCOUNTER, encounterType, details);
         this.setPendingCause(this.categories.ENCOUNTER, encounterType);
     },
 
-    // Call when player goes bankrupt
+    // Broke and broken - poverty kills slower but just as dead
     recordBankruptcy(debt = 0) {
         this.recordEvent(this.categories.BANKRUPTCY, null, { debt });
         this.setPendingCause(this.categories.BANKRUPTCY, null,
             `jailed for bankruptcy (${Math.abs(debt).toLocaleString()} gold debt)`);
     },
 
-    // Call when player starves
+    // The hunger gnaws until there's nothing left to gnaw
     recordStarvation() {
         this.recordEvent(this.categories.STARVATION);
         this.setPendingCause(this.categories.STARVATION);
     },
 
-    // Call when player dehydrates
+    // Thirst dries you from the inside - slow and cruel
     recordDehydration() {
         this.recordEvent(this.categories.DEHYDRATION);
         this.setPendingCause(this.categories.DEHYDRATION);
     },
 
-    // Call when player is exhausted
+    // Your body finally gave up - flesh has limits
     recordExhaustion() {
         this.recordEvent(this.categories.EXHAUSTION);
         this.setPendingCause(this.categories.EXHAUSTION);

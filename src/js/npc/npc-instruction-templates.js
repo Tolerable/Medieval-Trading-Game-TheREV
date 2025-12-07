@@ -1,23 +1,23 @@
 // ═══════════════════════════════════════════════════════════════
-// 🖤 NPC INSTRUCTION TEMPLATES - the soul of every conversation 💀
+// NPC INSTRUCTION TEMPLATES - the soul of every conversation
 // ═══════════════════════════════════════════════════════════════
 // Version: 0.90.00 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
 // www.unityailab.com | github.com/Unity-Lab-AI/Medieval-Trading-Game
 //
-// 🦇 This system uses embedded NPC data (no fetch required) and generates
-// 🦇 standardized API instructions using template placeholders
+// this system uses embedded NPC data (no fetch required) and generates
+// standardized API instructions using template placeholders
 // ═══════════════════════════════════════════════════════════════
 
 console.log('🎭 NPCInstructionTemplates loading... giving NPCs their voices 🖤💀');
 
 const NPCInstructionTemplates = {
-    // 🖤 NPC data loaded from embedded source (no CORS issues!) 💀
+    // NPC data loaded from embedded source (no CORS issues!)
     _npcData: {},
     _loaded: false,
 
     // ═══════════════════════════════════════════════════════════════
-    // 📦 DATA LOADING - use embedded data (no fetch required!)
+    // DATA LOADING - use embedded data (no fetch required!)
     // ═══════════════════════════════════════════════════════════════
 
     async loadAllNPCData() {
@@ -25,7 +25,7 @@ const NPCInstructionTemplates = {
 
         console.log('🎭 Loading NPC specifications from embedded data...');
 
-        // 🖤 Use embedded data instead of fetch - no CORS errors! 💀
+        // use embedded data instead of fetch - no CORS errors!
         if (typeof NPC_EMBEDDED_DATA !== 'undefined') {
             this._npcData = { ...NPC_EMBEDDED_DATA };
             this._loaded = true;
@@ -38,20 +38,20 @@ const NPCInstructionTemplates = {
         return this._npcData;
     },
 
-    // 🖤 Get NPC spec by type, with fallback to generic 💀
+    // get NPC spec by type, with fallback to generic
     getNPCSpec(npcType) {
-        // 🦇 Try exact match first
+        // try exact match first
         if (this._npcData[npcType]) {
             return this._npcData[npcType];
         }
 
-        // 🦇 Try lowercase
+        // try lowercase
         const lower = npcType?.toLowerCase();
         if (this._npcData[lower]) {
             return this._npcData[lower];
         }
 
-        // 🦇 Try without underscores
+        // try without underscores
         const noUnderscore = lower?.replace(/_/g, '');
         for (const [key, spec] of Object.entries(this._npcData)) {
             if (key.replace(/_/g, '') === noUnderscore) {
@@ -59,11 +59,11 @@ const NPCInstructionTemplates = {
             }
         }
 
-        // 🦇 Return generic fallback
+        // return generic fallback
         return this._getGenericSpec(npcType);
     },
 
-    // 🖤 Generic fallback spec for unknown NPC types 💀
+    // generic fallback spec for unknown NPC types
     _getGenericSpec(npcType) {
         return {
             type: npcType || 'stranger',
@@ -83,22 +83,22 @@ const NPCInstructionTemplates = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎯 ACTION TYPES - all possible player actions
+    // ACTION TYPES - all possible player actions
     // ═══════════════════════════════════════════════════════════════
 
     ACTIONS: {
         GREETING: 'greeting',
         FAREWELL: 'farewell',
-        CHAT: 'chat',  // 🖤💀 General chat with full quest context
+        CHAT: 'chat',  // general chat with full quest context
         BROWSE_GOODS: 'browse_goods',
         BUY: 'buy',
         SELL: 'sell',
         HAGGLE: 'haggle',
         ASK_QUEST: 'ask_quest',
-        OFFER_QUEST: 'OFFER_QUEST',      // 🖤💀 Unified quest button - offer a quest
+        OFFER_QUEST: 'OFFER_QUEST',      // unified quest button - offer a quest
         TURN_IN_QUEST: 'turn_in_quest',
-        DELIVER_ITEM: 'DELIVER_ITEM',    // 🖤💀 Unified quest button - deliver item to NPC
-        CHECK_PROGRESS: 'CHECK_PROGRESS', // 🖤💀 Unified quest button - check quest progress
+        DELIVER_ITEM: 'DELIVER_ITEM',    // unified quest button - deliver item to NPC
+        CHECK_PROGRESS: 'CHECK_PROGRESS', // unified quest button - check quest progress
         ASK_RUMORS: 'ask_rumors',
         ASK_DIRECTIONS: 'ask_directions',
         REST: 'rest',
@@ -114,36 +114,36 @@ const NPCInstructionTemplates = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📝 TEMPLATE RESOLUTION - fill in {placeholders}
+    // TEMPLATE RESOLUTION - fill in {placeholders}
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Resolve all {placeholders} in a template string 💀
+    // resolve all {placeholders} in a template string
     resolveTemplate(template, context) {
         if (!template) return '';
 
         let result = template;
 
-        // 🦇 Replace all {npc.xxx} placeholders
+        // replace all {npc.xxx} placeholders
         result = result.replace(/\{npc\.(\w+)\}/g, (match, key) => {
             return context.npc?.[key] ?? match;
         });
 
-        // 🦇 Replace all {player.xxx} placeholders
+        // replace all {player.xxx} placeholders
         result = result.replace(/\{player\.(\w+)\}/g, (match, key) => {
             return context.player?.[key] ?? match;
         });
 
-        // 🦇 Replace all {location.xxx} placeholders
+        // replace all {location.xxx} placeholders
         result = result.replace(/\{location\.(\w+)\}/g, (match, key) => {
             return context.location?.[key] ?? match;
         });
 
-        // 🦇 Replace all {game.xxx} placeholders
+        // replace all {game.xxx} placeholders
         result = result.replace(/\{game\.(\w+)\}/g, (match, key) => {
             return context.game?.[key] ?? match;
         });
 
-        // 🦇 Replace simple {xxx} placeholders
+        // replace simple {xxx} placeholders
         result = result.replace(/\{(\w+)\}/g, (match, key) => {
             return context[key] ?? match;
         });
@@ -152,17 +152,17 @@ const NPCInstructionTemplates = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎭 INSTRUCTION BUILDERS - generate full API instructions
+    // INSTRUCTION BUILDERS - generate full API instructions
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Master instruction builder - routes to specific action handlers 💀
+    // master instruction builder - routes to specific action handlers
     buildInstruction(npcType, action, context = {}) {
         console.log(`🎭 NPCInstructionTemplates.buildInstruction called:`);
         console.log(`   - npcType: ${npcType}`);
         console.log(`   - action: ${action}`);
         console.log(`   - _loaded: ${this._loaded}`);
 
-        // 🖤💀 DOOM WORLD CHECK - Use doom instructions when in doom world
+        // DOOM WORLD CHECK - use doom instructions when in doom world
         const inDoom = (typeof game !== 'undefined' && game.inDoomWorld) ||
                        (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
                        (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive);
@@ -175,7 +175,7 @@ const NPCInstructionTemplates = {
         const spec = this.getNPCSpec(npcType);
         console.log(`   - spec found: ${spec ? spec.type : 'NO SPEC FOUND'}`);
 
-        // 🦇 Build base context with NPC data
+        // build base context with NPC data
         const fullContext = {
             ...context,
             npc: {
@@ -190,7 +190,7 @@ const NPCInstructionTemplates = {
             }
         };
 
-        // 🦇 Route to specific action builder
+        // route to specific action builder
         switch (action) {
             case this.ACTIONS.GREETING:
                 return this._buildGreetingInstruction(spec, fullContext);
@@ -209,13 +209,13 @@ const NPCInstructionTemplates = {
             case this.ACTIONS.ASK_QUEST:
                 return this._buildQuestInstruction(spec, fullContext);
             case this.ACTIONS.OFFER_QUEST:
-            case 'OFFER_QUEST':  // 🖤💀 Handle both enum and string versions
+            case 'OFFER_QUEST':  // handle both enum and string versions
                 return this._buildOfferQuestInstruction(spec, fullContext);
             case this.ACTIONS.DELIVER_ITEM:
-            case 'DELIVER_ITEM':  // 🖤💀 Handle both enum and string versions
+            case 'DELIVER_ITEM':  // handle both enum and string versions
                 return this._buildDeliverItemInstruction(spec, fullContext);
             case this.ACTIONS.CHECK_PROGRESS:
-            case 'CHECK_PROGRESS':  // 🖤💀 Handle both enum and string versions
+            case 'CHECK_PROGRESS':  // handle both enum and string versions
                 return this._buildCheckProgressInstruction(spec, fullContext);
             case this.ACTIONS.ASK_RUMORS:
                 return this._buildRumorsInstruction(spec, fullContext);
@@ -237,33 +237,33 @@ const NPCInstructionTemplates = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 📜 SPECIFIC ACTION BUILDERS
+    // SPECIFIC ACTION BUILDERS
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 GREETING - first contact 💀
+    // GREETING - first contact
     _buildGreetingInstruction(spec, context) {
         return `You are a ${spec.type}. Personality: ${spec.personality}. Say ONE short greeting sentence in character. Examples: "${spec.greetings?.[0] || 'Hello.'}"`;
     },
 
-    // 🖤 FAREWELL - ending conversation 💀
+    // FAREWELL - ending conversation
     _buildFarewellInstruction(spec, context) {
         return `You are a ${spec.type}. Say ONE short farewell sentence in character. Example: "${spec.farewells?.[0] || 'Goodbye.'}"`;
     },
 
-    // 🖤💀 CHAT - Full conversation with quest context! 💀
+    // CHAT - full conversation with quest context!
     _buildChatInstruction(spec, context) {
         const npcName = context.npc?.name || spec.type;
         const npcType = spec.type;
         const location = context.location?.name || 'this place';
 
-        // 🖤 Build quest context from QuestSystem
+        // build quest context from QuestSystem
         let questContext = '';
         if (typeof QuestSystem !== 'undefined') {
             const locationId = context.location?.id || game?.currentLocation?.id;
             questContext = QuestSystem.getQuestContextForNPC?.(npcType, locationId) || '';
         }
 
-        // 🖤 Build comprehensive instruction with full quest info
+        // build comprehensive instruction with full quest info
         let instruction = `You are ${npcName}, a ${npcType} in ${location}.
 
 CHARACTER:
@@ -302,7 +302,7 @@ Respond in character:`;
         return instruction;
     },
 
-    // 🖤 BROWSE GOODS - player wants to see what you sell 💀
+    // BROWSE GOODS - player wants to see what you sell
     _buildBrowseGoodsInstruction(spec, context) {
         const inventory = context.npc.inventory || spec.defaultInventory || [];
         const items = Array.isArray(inventory) ? inventory.slice(0, 4).join(', ') : 'various goods';
@@ -310,17 +310,17 @@ Respond in character:`;
         return `You are a ${spec.type}. Player wants to browse your wares. Say ONE sentence inviting them to look at your goods (${items}). Then include the command {openMarket} to open the trade panel. Example: "Take a look at what I have! {openMarket}"`;
     },
 
-    // 🖤 BUY - player wants to purchase 💀
+    // BUY - player wants to purchase
     _buildBuyInstruction(spec, context) {
         return `You are a ${spec.type}. Player wants to buy. Say ONE sentence acknowledging and include {openMarket} to open trade. Example: "Let's see what catches your eye. {openMarket}"`;
     },
 
-    // 🖤 SELL - player wants to sell to you 💀
+    // SELL - player wants to sell to you
     _buildSellInstruction(spec, context) {
         return `You are a ${spec.type}. Player wants to sell items. Say ONE sentence and include {openMarket}. Example: "Show me what you've got. {openMarket}"`;
     },
 
-    // 🖤 HAGGLE - player trying to negotiate 💀
+    // HAGGLE - player trying to negotiate
     _buildHaggleInstruction(spec, context) {
         const accepts = Math.random() < (spec.priceModifiers?.haggleChance || 0.3);
         if (accepts) {
@@ -329,9 +329,9 @@ Respond in character:`;
         return `You are a ${spec.type}. Reject the haggle. Say ONE firm sentence refusing. Example: "My prices are fair. Take it or leave it."`;
     },
 
-    // 🖤 ASK QUEST - player wants work 💀
+    // ASK QUEST - player wants work
     _buildQuestInstruction(spec, context) {
-        // 🖤 Use NPCWorkflowSystem's pre-validated checker for reduced API lag 💀
+        // use NPCWorkflowSystem's pre-validated checker for reduced API lag
         if (typeof NPCWorkflowSystem !== 'undefined') {
             const npcData = { type: spec.type, quests: context.availableQuests || [] };
             const preValidated = NPCWorkflowSystem.getPreValidatedQuestAction(npcData, context.player || {});
@@ -341,7 +341,7 @@ Respond in character:`;
             }
         }
 
-        // 🦇 Fallback to old logic
+        // fallback to old logic
         const availableQuests = context.availableQuests || [];
         if (availableQuests.length > 0) {
             const q = availableQuests[0];
@@ -350,9 +350,9 @@ Respond in character:`;
         return `You are a ${spec.type}. Say ONE sentence: you have no work available right now.`;
     },
 
-    // 🖤 TURN IN QUEST - player delivering/completing a quest 💀
+    // TURN IN QUEST - player delivering/completing a quest
     _buildTurnInQuestInstruction(spec, context) {
-        // 🖤 Use NPCWorkflowSystem's pre-validated checker for reduced API lag 💀
+        // use NPCWorkflowSystem's pre-validated checker for reduced API lag
         if (typeof NPCWorkflowSystem !== 'undefined') {
             const npcData = { type: spec.type };
             const preValidated = NPCWorkflowSystem.getPreValidatedQuestAction(npcData, context.player || {});
@@ -366,24 +366,24 @@ Respond in character:`;
             }
         }
 
-        // 🦇 Fallback to old logic
+        // fallback to old logic
         return `You are a ${spec.type}. Say ONE sentence: you weren't expecting any delivery. Example: "I'm not expecting anything from you."`;
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖤💀 UNIFIED QUEST BUTTON INSTRUCTIONS - Synced with PeoplePanel buttons
+    // UNIFIED QUEST BUTTON INSTRUCTIONS - synced with PeoplePanel buttons
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 OFFER QUEST - Player clicked "📜 Ask about: [Quest Name]" button 💀
+    // OFFER QUEST - player clicked "Ask about: [Quest Name]" button
     _buildOfferQuestInstruction(spec, context) {
-        // 🦇 Get quest context from the button click
+        // get quest context from the button click
         const questContext = context.questContext || context.questAction?.quest || {};
         const questId = questContext.questId || questContext.id;
         const questName = questContext.questName || questContext.name || 'a task';
         const questType = questContext.questType || questContext.type || 'task';
         const rewards = questContext.rewards || {};
 
-        // 🖤 Build reward description
+        // build reward description
         let rewardDesc = '';
         if (rewards.gold) rewardDesc += `${rewards.gold} gold`;
         if (rewards.experience) rewardDesc += `${rewardDesc ? ', ' : ''}${rewards.experience} XP`;
@@ -393,12 +393,12 @@ Respond in character:`;
         }
         if (!rewardDesc) rewardDesc = 'a fair reward';
 
-        // 🦇 Check if NPC can actually offer this quest
+        // check if NPC can actually offer this quest
         if (!questId) {
             return `You are a ${spec.type}. Player is asking about work. Say ONE sentence: you don't have any tasks available right now. Be apologetic but brief.`;
         }
 
-        // 🖤 Generate instruction for offering the specific quest
+        // generate instruction for offering the specific quest
         return `You are a ${spec.type}. Player clicked "Ask about: ${questName}" button.
 
 QUEST TO OFFER:
@@ -414,9 +414,9 @@ YOUR RESPONSE:
 Example: "I need someone to ${questType === 'delivery' ? 'deliver a package' : 'handle a task'}. I'll pay ${rewardDesc}. {assignQuest:${questId}}"`;
     },
 
-    // 🖤 DELIVER ITEM - Player clicked "📦 Deliver: [Item]" button 💀
+    // DELIVER ITEM - player clicked "Deliver: [Item]" button
     _buildDeliverItemInstruction(spec, context) {
-        // 🦇 Get delivery context from the button click
+        // get delivery context from the button click
         const questContext = context.questContext || context.questAction || {};
         const questId = questContext.questId;
         const itemName = questContext.itemName || 'the package';
@@ -426,7 +426,7 @@ Example: "I need someone to ${questType === 'delivery' ? 'deliver a package' : '
             return `You are a ${spec.type}. Player claims to have a delivery but you don't recognize it. Say ONE confused sentence. Example: "A delivery? I wasn't expecting anything..."`;
         }
 
-        // 🖤 Generate instruction for accepting the delivery
+        // generate instruction for accepting the delivery
         return `You are a ${spec.type}. Player clicked "📦 Deliver: ${itemName}" button.
 
 DELIVERY DETAILS:
@@ -442,16 +442,16 @@ YOUR RESPONSE:
 Example: "Ah, the ${itemName} from ${giverName}! Finally! Thank you for bringing this. {confirmDelivery:${questId}}"`;
     },
 
-    // 🖤 CHECK PROGRESS - Player clicked "⏳ Progress: [Quest Name]" button 💀
+    // CHECK PROGRESS - player clicked "Progress: [Quest Name]" button
     _buildCheckProgressInstruction(spec, context) {
-        // 🦇 Get progress context from the button click
+        // get progress context from the button click
         const questContext = context.questContext || context.questAction?.quest || {};
         const progressInfo = context.progressInfo || {};
         const questName = questContext.questName || questContext.name || 'the task';
         const progress = progressInfo.progress || 'in progress';
         const objectives = progressInfo.objectives || [];
 
-        // 🖤 Build objective status description
+        // build objective status description
         let objectiveDesc = '';
         if (objectives.length > 0) {
             const objList = objectives.map(obj => {
@@ -463,7 +463,7 @@ Example: "Ah, the ${itemName} from ${giverName}! Finally! Thank you for bringing
             objectiveDesc = `\nObjectives:\n${objList}`;
         }
 
-        // 🖤 Generate instruction for checking progress
+        // generate instruction for checking progress
         return `You are a ${spec.type}. Player clicked "⏳ Progress: ${questName}" button.
 
 QUEST STATUS:
@@ -481,55 +481,55 @@ DO NOT include any command tags. Just provide information.
 Example: "Ah yes, ${questName}. You're ${progress}. ${objectives.length > 0 && objectives.every(o => o.completed) ? 'Looks like you have everything - come back when ready!' : 'Keep at it, you are making progress.'}"`;
     },
 
-    // 🖤 ASK RUMORS - player wants gossip 💀
+    // ASK RUMORS - player wants gossip
     _buildRumorsInstruction(spec, context) {
         const rumors = context.rumors || [];
         const rumor = rumors[0] || 'Things have been quiet lately';
         return `You are a ${spec.type}. Share ONE rumor in ONE sentence: "${rumor}". Example: "I heard ${rumor.toLowerCase()}."`;
     },
 
-    // 🖤 ASK DIRECTIONS - player wants navigation help 💀
+    // ASK DIRECTIONS - player wants navigation help
     _buildDirectionsInstruction(spec, context) {
         const nearbyLocations = context.nearbyLocations || [];
         const places = nearbyLocations.slice(0, 2).map(l => l.name).join(' and ') || 'other settlements';
         return `You are a ${spec.type}. Give directions in ONE sentence mentioning: ${places}. Example: "Head east for ${places}."`;
     },
 
-    // 🖤 REST - player wants to rest at inn (10 gold, 6 hours, 100% vitals restored) 💀
+    // REST - player wants to rest at inn (10 gold, 6 hours, 100% vitals restored)
     _buildRestInstruction(spec, context) {
         const restCost = spec.restCost || 10;
         return `You are an innkeeper. Offer rest in ONE sentence: ${restCost} gold for a room (6 hours, fully restores all vitals). Include {offerRest:${restCost}}. Example: "A room's ${restCost} gold for the night. {offerRest:${restCost}}"`;
     },
 
-    // 🖤 HEAL - player wants healing 💀
+    // HEAL - player wants healing
     _buildHealInstruction(spec, context) {
         const healCost = spec.healCost || 50;
         const healAmount = spec.healAmount || 50;
         return `You are a healer. Offer healing in ONE sentence: ${healCost} gold restores ${healAmount} health. Include {offerHeal:${healAmount},${healCost}}. Example: "I can heal you for ${healCost} gold. {offerHeal:${healAmount},${healCost}}"`;
     },
 
-    // 🖤 COMBAT TAUNT - boss taunting during fight 💀
+    // COMBAT TAUNT - boss taunting during fight
     _buildCombatTauntInstruction(spec, context) {
         const taunt = spec.encounter?.taunt?.responses?.[0] || 'You cannot defeat me!';
         return `You are a ${spec.type} in combat. Say ONE aggressive taunt. Example: "${taunt}"`;
     },
 
-    // 🖤 ROBBERY DEMAND - criminal demanding money 💀
+    // ROBBERY DEMAND - criminal demanding money
     _buildRobberyDemandInstruction(spec, context) {
         const demandAmount = Math.floor(Math.random() * 150 + 50);
         return `You are a ${spec.type} robbing the player. Demand ${demandAmount} gold in ONE threatening sentence. Include {robDemand:${demandAmount}}. Example: "Give me ${demandAmount} gold or else! {robDemand:${demandAmount}}"`;
     },
 
-    // 🖤 CUSTOM - freeform player message 💀
+    // CUSTOM - freeform player message
     _buildCustomInstruction(spec, context, playerMessage) {
         return `You are a ${spec.type}. Player says: "${playerMessage || 'Hello.'}". Respond in ONE sentence, in character. Use {openMarket} if they want to trade.`;
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🛠️ UTILITY METHODS
+    // UTILITY METHODS
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Format NPC type to display name 💀
+    // format NPC type to display name
     formatNPCName(type) {
         if (!type) return 'Stranger';
         return type.split('_')
@@ -537,19 +537,19 @@ Example: "Ah yes, ${questName}. You're ${progress}. ${objectives.length > 0 && o
             .join(' ');
     },
 
-    // 🖤 Get random response from array 💀
+    // get random response from array
     getRandomResponse(responses) {
         if (!responses || !responses.length) return '';
         return responses[Math.floor(Math.random() * responses.length)];
     },
 
-    // 🖤 Get voice for NPC type 💀
+    // get voice for NPC type
     getVoice(npcType) {
         const spec = this.getNPCSpec(npcType);
         return spec?.voice || 'nova';
     },
 
-    // 🖤 Check if NPC type is a vendor 💀
+    // check if NPC type is a vendor
     isVendor(npcType) {
         const spec = this.getNPCSpec(npcType);
         return spec?.category === 'vendor' ||
@@ -557,7 +557,7 @@ Example: "Ah yes, ${questName}. You're ${progress}. ${objectives.length > 0 && o
                spec?.services?.includes('sell_items');
     },
 
-    // 🖤 Check if NPC is hostile 💀
+    // check if NPC is hostile
     isHostile(npcType) {
         const spec = this.getNPCSpec(npcType);
         return spec?.category === 'criminal' ||
@@ -565,7 +565,7 @@ Example: "Ah yes, ${questName}. You're ${progress}. ${objectives.length > 0 && o
                ['robber', 'bandit', 'thief'].includes(npcType);
     },
 
-    // 🖤 Get all NPC types by category 💀
+    // get all NPC types by category
     getByCategory(category) {
         return Object.entries(this._npcData)
             .filter(([_, spec]) => spec.category === category)
@@ -573,7 +573,7 @@ Example: "Ah yes, ${questName}. You're ${progress}. ${objectives.length > 0 && o
     }
 };
 
-// 🖤 Initialize on load 💀
+// initialize on load
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         NPCInstructionTemplates.loadAllNPCData();
@@ -582,7 +582,7 @@ if (document.readyState === 'loading') {
     NPCInstructionTemplates.loadAllNPCData();
 }
 
-// 🖤 Global access 💀
+// global access
 window.NPCInstructionTemplates = NPCInstructionTemplates;
 
 console.log('🎭 NPCInstructionTemplates ready - NPCs now have standardized voices 🖤💀');

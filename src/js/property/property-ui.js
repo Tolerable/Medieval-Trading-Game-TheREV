@@ -8,7 +8,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 const PropertyUI = {
-    // 🖤 Escape HTML to prevent XSS attacks - dark magic for security
+    // escape HTML to prevent XSS attacks - dark magic for security
     escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>"']/g, char => ({
@@ -16,7 +16,7 @@ const PropertyUI = {
         })[char]);
     },
 
-    // 🔄 Update property display 🦇
+    // update property display
     updatePropertyDisplay() {
         const container = document.getElementById('properties-list');
         if (!container) return;
@@ -36,7 +36,7 @@ const PropertyUI = {
         });
     },
 
-    // 🏠 Create property element 🗡️
+    // create property element
     createPropertyElement(property) {
         const propertyType = PropertyTypes.get(property.type);
         const location = GameWorld.locations[property.location];
@@ -85,7 +85,7 @@ const PropertyUI = {
             </div>
         `;
 
-        // 🖤 Attach event listeners safely - no inline onclick XSS risk
+        // attach event listeners safely - no inline onclick XSS risk
         element.querySelectorAll('.property-action-btn[data-action]').forEach(btn => {
             btn.onclick = () => {
                 const propId = btn.dataset.property;
@@ -101,7 +101,7 @@ const PropertyUI = {
         return element;
     },
 
-    // 📋 Show property details 🌙
+    // show property details
     showPropertyDetails(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return;
@@ -115,7 +115,7 @@ const PropertyUI = {
 
         const workQueue = PropertySystem.getWorkQueue(propertyId);
 
-        // 🖤 Escape all dynamic content to prevent XSS
+        // escape all dynamic content to prevent XSS
         const safePropertyId = this.escapeHtml(propertyId);
         const safePropertyName = this.escapeHtml(propertyType.name);
         const safeLocationName = this.escapeHtml(location ? location.name : 'Unknown');
@@ -229,7 +229,7 @@ const PropertyUI = {
         addMessage(`Viewing details for ${propertyType.name} in ${location ? location.name : 'Unknown'}`);
     },
 
-    // 🔧 Show upgrade interface 🔮
+    // show upgrade interface
     showUpgradeInterface(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return;
@@ -267,7 +267,7 @@ const PropertyUI = {
         this._populateUpgradesGrid(availableUpgrades, propertyId);
     },
 
-    // 📦 Show storage management 💀
+    // show storage management
     showStorageManagement(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return;
@@ -296,7 +296,7 @@ const PropertyUI = {
 
         addMessage(`Managing storage for ${propertyType.name} in ${location ? location.name : 'Unknown'}`);
 
-        // 🖤 Attach tab event listeners after content is in DOM
+        // attach tab event listeners after content is in DOM
         setTimeout(() => {
             document.querySelectorAll('.storage-tab[data-action]').forEach(btn => {
                 btn.onclick = () => {
@@ -311,10 +311,10 @@ const PropertyUI = {
         PropertyStorage.updateTransferDisplay(propertyId);
     },
 
-    // 🛒 Show property purchase interface 🖤
-    // 🖤💀 Now supports buying at ANY location via map picker! 💀
+    // show property purchase interface
+    // now supports buying at ANY location via map picker!
     showPropertyPurchaseInterface(locationId = null) {
-        // 🖤 If no locationId provided, use current location
+        // if no locationId provided, use current location
         const targetLocationId = locationId || game?.currentLocation?.id;
         const targetLocation = GameWorld.locations[targetLocationId];
 
@@ -323,7 +323,7 @@ const PropertyUI = {
             return;
         }
 
-        // 🦇 Get properties available at target location (not just current!)
+        // get properties available at target location (not just current!)
         const availableProperties = this.getPropertiesForLocation(targetLocationId);
 
         const purchaseHtml = `
@@ -350,21 +350,21 @@ const PropertyUI = {
 
         addMessage(`Browsing properties in ${targetLocation.name}...`);
 
-        // 🖤 Store current target location for purchases
+        // store current target location for purchases
         this._currentPurchaseLocation = targetLocationId;
 
         if (availableProperties.length > 0) {
             this._populatePropertiesPurchaseGrid(availableProperties, targetLocationId);
         }
 
-        // 🦇 Attach map picker button handler after DOM update
+        // attach map picker button handler after DOM update
         setTimeout(() => {
             const mapBtn = document.getElementById('open-property-map-btn');
             if (mapBtn) {
                 mapBtn.addEventListener('click', () => {
                     if (typeof PropertyMapPicker !== 'undefined') {
                         PropertyMapPicker.open((selectedLocationId) => {
-                            // 🖤 Re-open purchase interface at selected location
+                            // re-open purchase interface at selected location
                             this.showPropertyPurchaseInterface(selectedLocationId);
                         });
                     } else {
@@ -375,7 +375,7 @@ const PropertyUI = {
         }, 100);
     },
 
-    // 🖤💀 Get properties available at ANY location (for map picker integration) 💀
+    // get properties available at ANY location (for map picker integration)
     getPropertiesForLocation(locationId) {
         const location = GameWorld.locations[locationId];
         if (!location) return [];
@@ -409,7 +409,7 @@ const PropertyUI = {
         return availableProperties;
     },
 
-    // 🖤💀 Calculate property price for ANY location (not just current) 💀
+    // calculate property price for ANY location (not just current)
     calculatePriceForLocation(propertyId, locationId) {
         const propertyType = PropertyTypes.get(propertyId);
         if (!propertyType) return 0;
@@ -419,18 +419,18 @@ const PropertyUI = {
 
         let price = propertyType.basePrice;
 
-        // 🌙 Location type modifier 🦇
+        // location type modifier
         const locationModifiers = { village: 0.8, town: 1.0, city: 1.3, capital: 1.5, port: 1.2 };
         price *= locationModifiers[location.type] || 1.0;
 
-        // ⭐ Reputation modifier 🔮
+        // reputation modifier
         if (typeof CityReputationSystem !== 'undefined') {
             const reputation = CityReputationSystem.getReputation(locationId);
             const reputationModifier = 1 - (reputation * 0.002);
             price *= Math.max(0.7, reputationModifier);
         }
 
-        // 📊 Merchant rank bonus 💀
+        // merchant rank bonus
         if (typeof MerchantRankSystem !== 'undefined') {
             const bonus = MerchantRankSystem.getTradingBonus();
             price *= (1 - bonus);
@@ -439,7 +439,7 @@ const PropertyUI = {
         return Math.round(price);
     },
 
-    // 📋 Show property purchase details ⚰️
+    // show property purchase details
     showPropertyPurchaseDetails(propertyId) {
         const propertyType = PropertyTypes.get(propertyId);
         if (!propertyType) return;
@@ -449,7 +449,7 @@ const PropertyUI = {
         const roiDays = projectedIncome > 0 ? Math.round(calculatedPrice / projectedIncome) : Infinity;
         const requirements = PropertyPurchase.getRequirements(propertyId);
 
-        // 🖤 Escape propertyId to prevent XSS
+        // escape propertyId to prevent XSS
         const safePropertyId = this.escapeHtml(propertyId);
         const detailsHtml = `
             <div class="property-details-modal" data-property-id="${safePropertyId}">
@@ -566,7 +566,7 @@ const PropertyUI = {
 
         this.showModal(detailsHtml);
 
-        // 🖤 Add purchase-property handler to the modal event listeners
+        // add purchase-property handler to the modal event listeners
         const modal = document.querySelector('.property-details-modal');
         if (modal) {
             const purchaseBtn = modal.querySelector('[data-action="purchase-property"]');
@@ -576,7 +576,7 @@ const PropertyUI = {
         }
     },
 
-    // 🎯 Helper - get item icon 🦇
+    // helper - get item icon
     getItemIcon(itemId) {
         if (typeof ItemDatabase !== 'undefined') {
             const item = ItemDatabase.getItem(itemId);
@@ -592,7 +592,7 @@ const PropertyUI = {
         return iconMap[itemId] || '📦';
     },
 
-    // 🎯 Helper - get item name 🗡️
+    // helper - get item name
     getItemName(itemId) {
         if (typeof ItemDatabase !== 'undefined') {
             const item = ItemDatabase.getItem(itemId);
@@ -608,7 +608,7 @@ const PropertyUI = {
         return nameMap[itemId] || itemId.charAt(0).toUpperCase() + itemId.slice(1);
     },
 
-    // 📦 Show modal helper 🌙
+    // show modal helper
     showModal(html) {
         if (typeof ModalSystem !== 'undefined' && ModalSystem.showModal) {
             const result = ModalSystem.showModal(html, 'property-modal-container');
@@ -629,7 +629,7 @@ const PropertyUI = {
         this._attachModalEventListeners();
     },
 
-    // 🖤 Attach event listeners to modal buttons - XSS-safe event delegation
+    // attach event listeners to modal buttons - XSS-safe event delegation
     _attachModalEventListeners() {
         const modal = document.querySelector('.property-details-modal, .property-upgrade-modal, .storage-management-modal');
         if (!modal) return;
@@ -651,7 +651,7 @@ const PropertyUI = {
         });
     },
 
-    // ❌ Close property details 🔮
+    // close property details
     closePropertyDetails() {
         const modalContainer = document.getElementById('property-modal-container');
         if (modalContainer) {
@@ -660,7 +660,7 @@ const PropertyUI = {
         }
     },
 
-    // 🔧 Populate upgrades grid 💀
+    // populate upgrades grid
     _populateUpgradesGrid(upgrades, propertyId) {
         const grid = document.getElementById('upgrades-grid');
         if (!grid) return;
@@ -673,7 +673,7 @@ const PropertyUI = {
         });
     },
 
-    // 🔧 Create upgrade card 🖤
+    // create upgrade card
     _createUpgradeCard(upgrade, propertyId) {
         const card = document.createElement('div');
         card.className = `upgrade-card ${upgrade.affordability && upgrade.requirementsMet ? 'available' : 'unavailable'}`;
@@ -745,7 +745,7 @@ const PropertyUI = {
         return card;
     },
 
-    // 🛒 Populate properties purchase grid ⚰️
+    // populate properties purchase grid
     _populatePropertiesPurchaseGrid(properties) {
         const grid = document.getElementById('properties-purchase-grid');
         if (!grid) return;
@@ -758,7 +758,7 @@ const PropertyUI = {
         });
     },
 
-    // 🛒 Create property purchase card 🦇
+    // create property purchase card
     _createPropertyPurchaseCard(property) {
         const card = document.createElement('div');
         card.className = `property-purchase-card ${property.affordability ? 'affordable' : 'unaffordable'}`;
@@ -825,7 +825,7 @@ const PropertyUI = {
             </div>
         `;
 
-        // 🖤 Attach event listeners safely - no inline onclick
+        // attach event listeners safely - no inline onclick
         card.querySelectorAll('[data-action]').forEach(btn => {
             btn.onclick = () => {
                 const propId = btn.dataset.property;
@@ -840,5 +840,5 @@ const PropertyUI = {
     }
 };
 
-// 🌙 expose to global scope 🦇
+// expose to global scope
 window.PropertyUI = PropertyUI;

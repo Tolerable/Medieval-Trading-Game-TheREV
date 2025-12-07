@@ -8,9 +8,9 @@
 // 
 
 const TradeRouteSystem = {
-    // Initialize trade route system
+    // boot up the trade route machine
     init() {
-        //  Guard against early initialization when player doesn't exist yet 
+        // make sure the player exists before we try to drain their soul 
         if (!game || !game.player) {
             console.log('🖤 TradeRouteSystem.init() called before player exists... routes await their merchants');
             return;
@@ -42,7 +42,7 @@ const TradeRouteSystem = {
         };
     },
     
-    // Create a new trade route
+    // forge a path for automated greed - money while you sleep
     createRoute(routeData) {
         const route = {
             id: Date.now().toString(),
@@ -66,7 +66,7 @@ const TradeRouteSystem = {
         return route;
     },
     
-    // Get active routes
+    // which money machines are running right now?
     getActiveRoutes() {
         return game.player.tradeRoutes.filter(route => route.isActive);
     },
@@ -97,13 +97,13 @@ const TradeRouteSystem = {
         return game.player.tradeRoutes.find(route => route.id === routeId);
     },
     
-    // Delete route
+    // kill the route - it's not profitable anymore
     deleteRoute(routeId) {
         game.player.tradeRoutes = game.player.tradeRoutes.filter(route => route.id !== routeId);
         this.saveRouteHistory();
     },
     
-    // Toggle route active status
+    // pause or resume the cash flow - your choice, capitalist
     toggleRoute(routeId) {
         const route = this.getRoute(routeId);
         if (!route) return false;
@@ -114,7 +114,7 @@ const TradeRouteSystem = {
         return route.isActive;
     },
     
-    // Process daily trade routes
+    // watch the gold roll in while you do nothing - passive income is still greed
     processDailyRoutes() {
         const activeRoutes = this.getActiveRoutes();
         
@@ -127,19 +127,19 @@ const TradeRouteSystem = {
         this.saveRouteHistory();
     },
     
-    // Process individual route
+    // run one route - extract profit from the commerce machine
     processRoute(route) {
         const warehouse = PropertySystem.getProperty(route.warehouseId);
         const destination = GameWorld.locations[route.destinationId];
         
         if (!warehouse || !destination) return;
         
-        // Check if warehouse has the item
+        // do we even have the goods to sell? check the shelves
         const item = ItemDatabase.getItem(route.itemId);
         if (!item) return;
         
         // Check if it's time to trade (once per day)
-        //  Use HOURS_PER_DAY * MINUTES_PER_HOUR (24 * 60 = 1440 minutes per day) 
+        // use HOURS_PER_DAY * MINUTES_PER_HOUR (24 * 60 = 1440 minutes per day) 
         const currentTime = TimeSystem.getTotalMinutes();
         const MINUTES_PER_DAY = (TimeSystem.HOURS_PER_DAY || 24) * (TimeSystem.MINUTES_PER_HOUR || 60);
         if (currentTime - route.lastTradeTime < MINUTES_PER_DAY) {
@@ -151,40 +151,40 @@ const TradeRouteSystem = {
         const availableAmount = warehouseInventory[route.itemId] || 0;
         
         if (availableAmount < route.amount) {
-            // Not enough items to trade
+            // warehouse is empty - can't sell what you don't have
             addMessage(`⚠️ Route ${route.name}: Insufficient ${item.name} in warehouse!`);
             return;
         }
         
-        // Get market prices ( null check warehouseLocation.marketPrices )
+        // get market prices (null check warehouseLocation.marketPrices)
         const warehouseLocation = GameWorld.locations[warehouse.location];
         const warehousePrice = warehouseLocation?.marketPrices?.[route.itemId]?.price || ItemDatabase.calculatePrice(route.itemId);
         const destinationPrice = destination?.marketPrices?.[route.itemId]?.price || ItemDatabase.calculatePrice(route.itemId);
         
-        // Check if trade is profitable
+        // is this trade even worth it? let's do the depressing math
         const buyPrice = Math.min(warehousePrice, route.buyLimit || warehousePrice);
         const sellPrice = Math.max(destinationPrice, route.sellTarget || destinationPrice);
         const profitPerItem = sellPrice - buyPrice;
         
         if (profitPerItem <= 0) {
-            // Not profitable
+            // you'd LOSE money on this - abort abort abort
             addMessage(`⚠️ Route ${route.name}: Not profitable (buy: ${buyPrice}, sell: ${sellPrice})`);
             return;
         }
         
-        // Execute trade -  with profit cap to prevent exploit 
+        // rake in the gold - but not too much or it breaks reality
         let totalProfit = profitPerItem * route.amount;
-        //  Cap daily profit per route to prevent infinite gold exploit
+        // cap profit because infinite wealth would ruin the illusion of scarcity
         const MAX_DAILY_PROFIT = 10000;
         totalProfit = Math.min(totalProfit, MAX_DAILY_PROFIT);
 
-        // Remove items from warehouse
+        // empty the warehouse shelves
         this.removeFromWarehouseInventory(warehouse, route.itemId, route.amount);
 
-        // Add gold to player
+        // gold in your pocket - the trade gods smile on you today
         game.player.gold += totalProfit;
         
-        // Update route statistics
+        // tally another successful exploitation of supply and demand
         route.totalTrades++;
         route.totalProfit += totalProfit;
         route.lastTradeTime = currentTime;
@@ -195,9 +195,9 @@ const TradeRouteSystem = {
         updatePlayerInfo();
     },
     
-    // Get warehouse inventory (items stored in warehouse)
+    // peek inside the warehouse - what riches do we hoard?
     getWarehouseInventory(warehouse) {
-        // For now, use a simplified inventory system
+        // simplified system - reality is too complicated for this economy
         // In a full implementation, this would track actual items stored
         const warehouseInventory = warehouse.inventory || {};
         
@@ -232,7 +232,7 @@ const TradeRouteSystem = {
         return warehouseInventory;
     },
     
-    // Remove items from warehouse inventory
+    // yank items off the shelf - they're sold, gone, profit
     removeFromWarehouseInventory(warehouse, itemId, amount) {
         if (!warehouse.inventory) {
             warehouse.inventory = {};
@@ -245,7 +245,7 @@ const TradeRouteSystem = {
         }
     },
     
-    // Test route profitability
+    // calculate if this route would make you richer or just waste time
     testRoute(routeData) {
         const warehouse = PropertySystem.getProperty(routeData.warehouseId);
         const destination = GameWorld.locations[routeData.destinationId];
@@ -314,7 +314,7 @@ const TradeRouteSystem = {
         }
     },
     
-    // Get route statistics
+    // tally up all the gold your routes have bled from the world
     getRouteStatistics() {
         const allRoutes = this.getAllRoutes();
         
@@ -342,7 +342,7 @@ const TradeRouteSystem = {
         };
     },
     
-    // Optimize routes (find most profitable routes)
+    // find the most profitable paths - where greed meets geography
     optimizeRoutes() {
         const warehouses = PropertySystem.getPlayerProperties().filter(p => p.type === 'warehouse');
         if (warehouses.length === 0) {

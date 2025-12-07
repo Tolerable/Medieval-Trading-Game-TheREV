@@ -8,41 +8,41 @@
 // 
 
 const MarketPriceHistory = {
-    //  Price history data - memories of better prices
+    // price history data - memories of better prices
     priceHistory: {},
     
     // Maximum history entries per item per city
     maxHistoryEntries: 50,
     
-    // Initialize price history system
+    // wake up the price tracker - time to document financial pain
     init() {
         this.loadPriceHistory();
     },
     
-    // Load price history from localStorage
+    // resurrect old price data from the digital tomb
     loadPriceHistory() {
         const saved = localStorage.getItem('tradingGamePriceHistory');
         if (saved) {
             try {
                 this.priceHistory = JSON.parse(saved);
             } catch (e) {
-                //  Corrupt data? Nuke it and start fresh - silent fallback
+                // corrupt data? Nuke it and start fresh - silent fallback
                 localStorage.removeItem('tradingGamePriceHistory');
                 this.priceHistory = {};
             }
         }
     },
     
-    // Save price history to localStorage
+    // bury price memories in localStorage for future torment
     savePriceHistory() {
         try {
             localStorage.setItem('tradingGamePriceHistory', JSON.stringify(this.priceHistory));
         } catch (e) {
-            //  Storage full or blocked - silent fail, not critical
+            // storage full or blocked - silent fail, not critical
         }
     },
     
-    // Record price for an item in a city
+    // carve another price into history's flesh - never forget what you paid
     recordPrice(cityId, itemId, price) {
         if (!this.priceHistory[cityId]) {
             this.priceHistory[cityId] = {};
@@ -60,7 +60,7 @@ const MarketPriceHistory = {
         
         this.priceHistory[cityId][itemId].push(priceEntry);
         
-        // Keep only recent entries
+        // forget ancient prices - we only keep fresh wounds
         if (this.priceHistory[cityId][itemId].length > this.maxHistoryEntries) {
             this.priceHistory[cityId][itemId] = this.priceHistory[cityId][itemId].slice(-this.maxHistoryEntries);
         }
@@ -68,7 +68,7 @@ const MarketPriceHistory = {
         this.savePriceHistory();
     },
     
-    // Get price trend for an item in a city
+    // watch prices rise or fall like your self-esteem during market hours
     getPriceTrend(cityId, itemId, timeRange = 7) {
         const history = this.priceHistory[cityId]?.[itemId];
         if (!history || history.length < 2) {
@@ -83,13 +83,13 @@ const MarketPriceHistory = {
             return 'stable';
         }
         
-        // Calculate trend
+        // crunch the numbers - is this going up or down to hell?
         const prices = recentPrices.map(entry => entry.price);
         const firstPrice = prices[0];
         const lastPrice = prices[prices.length - 1];
         const avgPrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
         
-        // Determine trend
+        // is it rising (pain) or falling (missed opportunity)?
         if (lastPrice > firstPrice * 1.05) { // 5% increase
             return 'rising';
         } else if (lastPrice < firstPrice * 0.95) { // 5% decrease
@@ -103,7 +103,7 @@ const MarketPriceHistory = {
         }
     },
     
-    // Get price statistics for an item in a city
+    // compile the damage - min, max, avg prices to haunt you
     getPriceStats(cityId, itemId) {
         const history = this.priceHistory[cityId]?.[itemId];
         if (!history || history.length === 0) {
@@ -125,7 +125,7 @@ const MarketPriceHistory = {
         };
     },
     
-    // Compare prices across cities
+    // shop around - find which city bleeds you the least
     comparePrices(itemId) {
         const comparisons = [];
         
@@ -150,7 +150,7 @@ const MarketPriceHistory = {
             });
         }
         
-        // Sort by best price (lowest)
+        // sort by who'll screw you over the least
         comparisons.sort((a, b) => a.currentPrice - b.currentPrice);
         
         return comparisons;
@@ -184,7 +184,7 @@ const MarketPriceHistory = {
         this.savePriceHistory();
     },
     
-    // Clear price history
+    // erase the past - pretend you never paid those prices
     clearPriceHistory(cityId = null, itemId = null) {
         if (cityId && itemId) {
             // Clear specific item history in specific city
@@ -203,7 +203,7 @@ const MarketPriceHistory = {
         addMessage('Price history cleared!');
     },
     
-    // Export price history
+    // download all your financial regrets as a nice JSON file
     exportPriceHistory() {
         const dataStr = JSON.stringify(this.priceHistory, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });

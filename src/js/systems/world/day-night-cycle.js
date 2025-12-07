@@ -13,9 +13,9 @@ const DayNightCycle = {
     // 
     currentPhase: 'day',
     transitionProgress: 0,
-    _updateIntervalId: null, // ��� Store interval ID for cleanup 💀
+    _updateIntervalId: null, // store interval ID for cleanup
 
-    // Time phases (24-hour format)
+    // The wheel turns - 24 hours of light bleeding into darkness and back again
     phases: {
         dawn: {
             id: 'dawn',
@@ -23,12 +23,12 @@ const DayNightCycle = {
             icon: '🌅',
             startHour: 5,
             endHour: 7,
-            description: 'The sun rises, a new day begins.',
+            description: 'Another fucking sunrise. The cycle begins again.',
             ambientColor: 'rgba(255, 180, 100, 0.15)',
             overlayGradient: 'linear-gradient(to bottom, rgba(255, 150, 80, 0.2), rgba(100, 150, 200, 0.1))',
             brightness: 0.7,
             effects: {
-                shopModifier: 0.8, // Shops opening
+                shopModifier: 0.8, // Greedy merchants crawl from their beds
                 dangerLevel: 0.5,
                 encounterChance: 0.6,
                 npcActivity: 0.5
@@ -113,7 +113,7 @@ const DayNightCycle = {
             overlayGradient: 'linear-gradient(to bottom, rgba(10, 10, 30, 0.4), rgba(20, 20, 50, 0.3))',
             brightness: 0.3,
             effects: {
-                shopModifier: 0.3, // Most shops closed
+                shopModifier: 0.3, // The world sleeps, but darkness never does
                 dangerLevel: 1.5,
                 encounterChance: 1.3,
                 npcActivity: 0.2
@@ -132,31 +132,31 @@ const DayNightCycle = {
         this.createOverlay();
         this.setupTimeListener();
 
-        // Set initial phase based on current time
+        // Check where we are in the endless fucking cycle
         this.updatePhase();
 
         console.log('🌅 DayNightCycle: Ready!');
     },
 
     setupTimeListener() {
-        // Update every game minute
+        // Watch time crawl forward, minute by agonizing minute
         if (typeof EventBus !== 'undefined') {
             EventBus.on('time-minute-passed', () => this.updatePhase());
             EventBus.on('time-hour-passed', () => this.onHourChanged());
         }
 
-        // Also use interval as backup
-        //  Store interval ID for proper cleanup 
+        // Backup heartbeat - because systems fail and time keeps moving anyway
+        // store interval ID for proper cleanup 
         if (typeof TimerManager !== 'undefined') {
             this._updateIntervalId = TimerManager.setInterval(() => {
                 if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
                     this.updatePhase();
                 }
-            }, 10000); // Every 10 seconds real-time
+            }, 10000); // 10 seconds of your real life - tick, tick, tick
         }
     },
 
-    //  Cleanup method for proper resource management 
+    // cleanup method for proper resource management 
     cleanup() {
         if (this._updateIntervalId && typeof TimerManager !== 'undefined') {
             TimerManager.clearInterval(this._updateIntervalId);
@@ -175,12 +175,12 @@ const DayNightCycle = {
     getPhaseForHour(hour) {
         for (const [phaseId, phase] of Object.entries(this.phases)) {
             if (phase.startHour <= phase.endHour) {
-                // Normal range (e.g., 7-12)
+                // Simple times - start before end, like most of existence
                 if (hour >= phase.startHour && hour < phase.endHour) {
                     return phaseId;
                 }
             } else {
-                // Wrapping range (e.g., 21-5 for night)
+                // Night wraps around midnight - darkness doesn't respect your calendar
                 if (hour >= phase.startHour || hour < phase.endHour) {
                     return phaseId;
                 }
@@ -194,7 +194,7 @@ const DayNightCycle = {
         const minute = typeof TimeSystem !== 'undefined' ? (TimeSystem.currentTime?.minute || 0) : 0;
         const newPhase = this.getPhaseForHour(hour);
 
-        // Calculate transition progress within current phase
+        // How far through this slice of time are we? Measure the decay
         const phase = this.phases[newPhase];
         if (phase) {
             let phaseHours;
@@ -202,7 +202,7 @@ const DayNightCycle = {
                 phaseHours = phase.endHour - phase.startHour;
                 this.transitionProgress = ((hour - phase.startHour) * 60 + minute) / (phaseHours * 60);
             } else {
-                // Night wraps around midnight
+                // Night bleeds across the midnight divide
                 phaseHours = (24 - phase.startHour) + phase.endHour;
                 const hoursIntoPhase = hour >= phase.startHour ?
                     hour - phase.startHour :
@@ -211,7 +211,7 @@ const DayNightCycle = {
             }
         }
 
-        // Check if phase changed
+        // Did we cross a threshold? Did the light shift?
         if (newPhase !== this.currentPhase) {
             const oldPhase = this.currentPhase;
             this.currentPhase = newPhase;
@@ -225,12 +225,12 @@ const DayNightCycle = {
         const phase = this.phases[newPhase];
         if (!phase) return;
 
-        // Announce phase change
+        // Tell them the sky has changed - like they couldn't see it themselves
         if (typeof addMessage === 'function') {
             addMessage(`${phase.icon} ${phase.name}: ${phase.description}`, 'info');
         }
 
-        // Fire event
+        // Scream it into the event bus - let all systems feel the shift
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('day-phase-changed', {
                 oldPhase,
@@ -239,7 +239,7 @@ const DayNightCycle = {
             });
         }
 
-        // Special night warnings
+        // When darkness falls, remind the idiots that danger lurks
         if (newPhase === 'night') {
             if (typeof addMessage === 'function') {
                 addMessage('⚠️ Traveling at night is dangerous! Bandits and worse prowl the roads.', 'warning');
@@ -250,7 +250,7 @@ const DayNightCycle = {
     onHourChanged() {
         const hour = this.getCurrentHour();
 
-        // Special hour announcements
+        // Specific hours get their own little announcements - capitalism never sleeps
         if (hour === 6) {
             if (typeof addMessage === 'function') {
                 addMessage('🛒 Shops are opening for the day.', 'info');
@@ -317,7 +317,7 @@ const DayNightCycle = {
     createOverlay() {
         if (document.getElementById('daynight-overlay')) return;
 
-        //  Day/night overlay goes in map-container, NOT body - so it doesn't cover panels! 
+        // day/night overlay goes in map-container, NOT body - so it doesn't cover panels! 
         const mapContainer = document.getElementById('map-container');
         if (!mapContainer) {
             console.warn('🌅 DayNightCycle: map-container not found, delaying overlay creation');
@@ -330,12 +330,12 @@ const DayNightCycle = {
         overlay.className = 'daynight-overlay';
         mapContainer.appendChild(overlay);
 
-        //  Stars container is SEPARATE and goes on body but BEHIND everything 
-        // Stars/moon should only be visible in the outer margins, not over the game world
+        // stars container is SEPARATE and goes on body but BEHIND everything
+        // stars/moon should only be visible in the outer margins, not over the game world
         const stars = document.createElement('div');
         stars.id = 'stars-container';
         stars.className = 'stars-container';
-        document.body.insertBefore(stars, document.body.firstChild); // ��� Very back of body
+        document.body.insertBefore(stars, document.body.firstChild); // very back of body
 
         // Time phase indicator is now created in top-bar by WeatherSystem
     },
@@ -492,8 +492,8 @@ const DayNightCycle = {
         }
     },
 
-    // 
-    // DEBOOGER 
+    //
+    // debugger
     // 
     setPhase(phaseId) {
         if (this.phases[phaseId]) {

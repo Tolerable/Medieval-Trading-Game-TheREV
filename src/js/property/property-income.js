@@ -8,7 +8,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 const PropertyIncome = {
-    // Configurable multipliers - no more magic numbers scattered everywhere
+    // Your buildings rot or thrive - these numbers control the decay
     config: {
         levelIncomeMultiplier: 0.2,    // 20% income boost per level
         taxRate: 0.1,                   // 10% tax on gross income
@@ -16,16 +16,16 @@ const PropertyIncome = {
         conditionPenaltyMultiplier: 2,  // Max maintenance multiplier at 0 condition
     },
 
-    // Shared income calculation helper - DRY'd the fuck up
+    // Calculate how much gold your crumbling empire generates
     _calculateBaseIncome(property, propertyType) {
         const level = property.level ?? 1;
         const condition = property.condition ?? 100;
         const upgrades = property.upgrades || [];
 
-        // Base income with level multiplier
+        // Your empire grows stronger with each level - for now
         let income = propertyType.baseIncome * (1 + (level - 1) * this.config.levelIncomeMultiplier);
 
-        // Upgrade income bonuses
+        // Upgrades make the gold flow faster
         upgrades.forEach(upgradeId => {
             const upgrade = PropertyTypes.getUpgrade(upgradeId);
             if (upgrade?.effects?.incomeBonus) {
@@ -33,17 +33,17 @@ const PropertyIncome = {
             }
         });
 
-        // Condition modifier
+        // Decay takes its toll - broken buildings make less gold
         income *= (condition / 100);
 
         return { income, level, condition, upgrades };
     },
 
-    // Shared maintenance calculation helper
+    // How much it costs to keep your properties from crumbling into dust
     _calculateMaintenance(propertyType, upgrades, condition, includeConditionPenalty = false) {
         let maintenance = propertyType.maintenanceCost;
 
-        // Upgrade maintenance reductions
+        // Upgrades slow the rot - slightly
         upgrades.forEach(upgradeId => {
             const upgrade = PropertyTypes.getUpgrade(upgradeId);
             if (upgrade?.effects?.maintenanceReduction) {
@@ -51,7 +51,7 @@ const PropertyIncome = {
             }
         });
 
-        // Poor condition increases maintenance (only in daily processing)
+        // Broken shit costs more to keep standing
         const threshold = this.config.conditionPenaltyThreshold;
         if (includeConditionPenalty && condition < threshold) {
             maintenance *= (this.config.conditionPenaltyMultiplier - condition / threshold);
@@ -60,7 +60,7 @@ const PropertyIncome = {
         return maintenance;
     },
 
-    // Calculate income for a single property (preview/UI purposes)
+    // See what a single property will earn before time takes it
     calculateIncome(property) {
         const propertyType = PropertyTypes.get(property.type);
         if (!propertyType) return 0;
@@ -68,14 +68,14 @@ const PropertyIncome = {
         const { income, upgrades, condition } = this._calculateBaseIncome(property, propertyType);
         const maintenance = this._calculateMaintenance(propertyType, upgrades, condition, false);
 
-        // Tax
+        // The crown always takes its cut
         const tax = Math.round(income * this.config.taxRate);
         const netIncome = Math.round(income - maintenance - tax);
 
         return Math.max(0, netIncome);
     },
 
-    // Process daily income for all properties
+    // Each day your empire either grows or withers - let's count the gold
     processDailyIncome() {
         if (!game.player.ownedProperties || game.player.ownedProperties.length === 0) return;
 
@@ -85,31 +85,31 @@ const PropertyIncome = {
         let totalTax = 0;
 
         game.player.ownedProperties.forEach(property => {
-            // skip properties under construction
+            // Unfinished buildings don't make gold - shocking, I know
             if (property.underConstruction) return;
 
             const propertyType = PropertyTypes.get(property.type);
             if (!propertyType) return;
 
-            // Initialize storage if needed
+            // Give this property a place to hoard your shit
             if (!property.storageCapacity) {
                 PropertyStorage.initialize(property.id);
             }
 
-            // Auto-store produced items
+            // Store what you've produced before it vanishes
             PropertyStorage.autoStoreProducedItems(property.id);
 
-            // Use shared helpers for base calculations - DRY
+            // Calculate the baseline before workers and other variables corrupt it
             const { income: baseIncome, condition, upgrades: propUpgrades } = this._calculateBaseIncome(property, propertyType);
             let income = baseIncome;
 
-            // Employee bonuses (only in daily processing)
+            // Skilled workers make you richer - unskilled ones just cost you
             const propEmployees = property.employees || [];
             const assignedEmployees = propEmployees.map(empId =>
                 PropertyEmployeeBridge?.getEmployee?.(empId)
             ).filter(emp => emp && emp.assignedProperty === property.id);
 
-            // Note: employeeBonus has no upper limit - this is intentional game design
+            // Stack enough skilled workers and watch your income explode - no cap, no mercy
             let employeeBonus = 1;
             assignedEmployees.forEach(employee => {
                 if (employee.skills?.management) {
@@ -121,10 +121,10 @@ const PropertyIncome = {
             });
             income *= employeeBonus;
 
-            // Use shared maintenance helper with condition penalty enabled
+            // Now see how much it costs to keep this decaying shit operational
             const maintenance = this._calculateMaintenance(propertyType, propUpgrades, condition, true);
 
-            // Tax
+            // The crown always gets 10% - death and taxes, babe
             const tax = Math.round(income * 0.1);
             const netIncome = Math.round(income - maintenance - tax);
 
@@ -133,11 +133,11 @@ const PropertyIncome = {
             totalTax += tax;
             totalExpenses += Math.round(maintenance) + tax;
 
-            // Update property stats
+            // Track how much this property has earned over its rotting lifespan
             property.totalIncome += netIncome;
             property.lastIncomeTime = TimeSystem.getTotalMinutes();
 
-            // Reputation bonus
+            // Fancy properties make people like you more - briefly
             if (propertyType.reputationBonus && typeof CityReputationSystem !== 'undefined') {
                 property.upgrades.forEach(upgradeId => {
                     const upgrade = PropertyTypes.getUpgrade(upgradeId);
@@ -147,7 +147,7 @@ const PropertyIncome = {
                 });
             }
 
-            // Condition degradation
+            // Time rots all things - watch your property crumble
             let conditionLoss = 1;
             if (property.upgrades.includes('security')) conditionLoss *= 0.5;
 
@@ -158,11 +158,11 @@ const PropertyIncome = {
 
             property.condition = Math.max(20, property.condition - conditionLoss);
 
-            // Random events
+            // Chaos might strike - or fortune might smile
             this.processPropertyEvents(property);
         });
 
-        // Apply to player
+        // Pour the day's gold into your pockets
         game.player.gold += totalIncome;
         game.player.propertyIncome = totalIncome;
         game.player.propertyExpenses = totalExpenses;
@@ -172,12 +172,12 @@ const PropertyIncome = {
         }
     },
 
-    // Process random property events
+    // Roll the dice - maybe vandals, maybe fortune, maybe just another shitty day
     processPropertyEvents(property) {
         const propertyType = PropertyTypes.get(property.type);
         if (!propertyType) return;
 
-        // 5% chance per day
+        // 5% chance the universe decides to fuck with you today
         if (Math.random() > 0.05) return;
 
         const events = [
@@ -224,7 +224,7 @@ const PropertyIncome = {
         }
     },
 
-    // Process construction progress
+    // Check if anything you're building is finally ready
     processConstruction() {
         if (!game.player.ownedProperties) return;
 
@@ -249,13 +249,12 @@ const PropertyIncome = {
         });
     },
 
-    // Process rent payments
-    // Fixed race condition - collect properties to remove AFTER iteration
+    // Rent is due - pay up or lose your shit
     processRentPayments() {
         if (!game.player.ownedProperties) return;
 
         const currentTime = TimeSystem.getTotalMinutes();
-        const propertiesToRemove = []; // Collect IDs first, remove after loop
+        const propertiesToRemove = []; // Mark the failures first, purge them after
 
         game.player.ownedProperties.forEach(property => {
             if (property.isRented && property.rentDueTime) {
@@ -275,17 +274,17 @@ const PropertyIncome = {
                         if (typeof addMessage === 'function') {
                             addMessage(`❌ Couldn't pay rent for ${propertyType?.name}! Property lost.`, 'danger');
                         }
-                        propertiesToRemove.push(property.id); // Mark for removal, don't modify yet
+                        propertiesToRemove.push(property.id); // Condemned - execution pending
                     }
                 }
             }
         });
 
-        // Now safely remove all marked properties after iteration complete
+        // Purge the condemned properties from existence
         propertiesToRemove.forEach(id => this.loseProperty(id));
     },
 
-    // Lose a property
+    // Watch your investment vanish into the void
     loseProperty(propertyId) {
         const index = game.player.ownedProperties.findIndex(p => p.id === propertyId);
         if (index !== -1) {
@@ -296,7 +295,7 @@ const PropertyIncome = {
         }
     },
 
-    // Get construction progress percentage
+    // How close is this building to actually existing
     getConstructionProgress(property) {
         if (!property.underConstruction) return 100;
 
@@ -307,7 +306,7 @@ const PropertyIncome = {
         return Math.min(100, Math.round((elapsed / totalTime) * 100));
     },
 
-    // Process work queues for all properties
+    // Let your workers actually produce the shit you told them to make
     processWorkQueues() {
         if (!game.player.ownedProperties || game.player.ownedProperties.length === 0) return;
 
@@ -349,7 +348,7 @@ const PropertyIncome = {
         });
     },
 
-    // Process repair bonuses
+    // Repairs don't last forever - countdown to decay
     processRepairBonuses() {
         if (!game.player.ownedProperties || game.player.ownedProperties.length === 0) return;
 

@@ -16,7 +16,7 @@ const EventManager = {
     // O(1) lookup map for element+eventType duplicate detection
     elementEventMap: new Map(),
 
-    // Generate a stable key for element+eventType pair
+    // create a unique identifier for this element + event combo
     _getElementEventKey(element, eventType) {
         // WHY ._eventManagerId INSTEAD OF WeakMap:
         // - WeakMap requires keeping element refs in memory, defeating garbage collection
@@ -31,7 +31,7 @@ const EventManager = {
         return `${element._eventManagerId}::${eventType}`;
     },
 
-    // Add event listener with tracking - prevents duplicates, prevents obsession
+    // attach listener with anti-duplicate protection - no double bonding allowed
     addListener(element, eventType, handler, options = {}) {
         // silently skip if element doesn't exist - ghosts can't listen
         // expected during initialization when the DOM is still loading its soul
@@ -39,37 +39,37 @@ const EventManager = {
             return null;
         }
 
-        // 🖤 O(1) duplicate check using computed key 💀
+        // instant duplicate detection - O(1) lookup magic
         const elementEventKey = this._getElementEventKey(element, eventType);
         if (this.elementEventMap.has(elementEventKey)) {
-            // 🗡️ Already has a listener for this event type, skip - no double attachments
+            // already listening to this event - back off, no stalking
             return null;
         }
 
-        // 🔮 Create unique key for this listener - every bond needs a name
+        // generate a key for this listener - gotta track it somehow
         const elementKey = element.id || element.className || 'unnamed';
         const key = `${elementKey}_${eventType}_${Date.now()}_${Math.random()}`;
 
-        // 💾 Store listener info - documenting the relationship
+        // save the listener data - evidence of the attachment
         this.listeners.set(key, {
             element,
             eventType,
             handler,
             options,
             active: true,
-            elementEventKey // 🖤 Store for O(1) cleanup 
+            elementEventKey // Store for O(1) cleanup
         });
 
-        // 🖤 Track in O(1) lookup map 
+        // index it for instant retrieval
         this.elementEventMap.set(elementEventKey, key);
 
-        // ⚡ Add the actual event listener - forming the bond
+        // attach the listener - the bond is formed
         element.addEventListener(eventType, handler, options);
 
-        return key; // 🗡️ Return key for removal - in case you need to cut ties
+        return key; // keep the key if you need to sever this later
     },
 
-    // Remove event listener by key - severing the connection
+    // kill a listener by its key - cut the connection
     removeListener(key) {
         if (!this.listeners.has(key)) {
             console.warn(`⚠️ EventManager: No listener found for key ${key}`);
@@ -80,19 +80,19 @@ const EventManager = {
 
         try {
             listener.element.removeEventListener(listener.eventType, listener.handler, listener.options);
-            // 🖤 Clean up both maps for O(1) consistency 
+            // delete from both indexes - keep them in sync
             if (listener.elementEventKey) {
                 this.elementEventMap.delete(listener.elementEventKey);
             }
             this.listeners.delete(key);
             return true;
         } catch (error) {
-            // 🦇 Listener removal failed - may already be removed
+            // couldn't remove - probably already dead
             return false;
         }
     },
     
-    // 🗡️ Remove all listeners for a specific element - complete detachment
+    // nuke every listener on this element - total detachment
     removeListenersForElement(element) {
         const keysToRemove = [];
         
@@ -106,7 +106,7 @@ const EventManager = {
         return keysToRemove.length;
     },
     
-    // Remove all listeners for a specific event type - nuclear option
+    // delete all listeners for this event - scorched earth approach
     removeListenersForEventType(eventType) {
         const keysToRemove = [];
         
@@ -120,23 +120,23 @@ const EventManager = {
         return keysToRemove.length;
     },
     
-    // Remove all listeners - scorched earth, complete isolation
+    // kill every single listener - burn it all down
     removeAllListeners() {
         const count = this.listeners.size;
         this.listeners.forEach((listener, key) => {
             try {
                 listener.element.removeEventListener(listener.eventType, listener.handler, listener.options);
             } catch (error) {
-                // Listener removal failed during cleanup
+                // removal crashed during cleanup - oh well
             }
         });
         this.listeners.clear();
-        // Also clear O(1) lookup map
+        // wipe the lookup index too
         this.elementEventMap.clear();
         return count;
     },
 
-    // Get active listeners count - how many connections we're maintaining
+    // count how many listeners are still breathing
     getActiveListenersCount() {
         return this.listeners.size;
     },
@@ -151,9 +151,9 @@ const EventManager = {
         }));
     },
     
-    // Cleanup on page unload - death is the ultimate detachment
+    // set up the death ritual - clean everything when the page dies
     init() {
-        // Add cleanup on page unload - severing all ties before the void
+        // murder all listeners before the browser closes the void
         window.addEventListener('beforeunload', () => {
             this.removeAllListeners();
         });
@@ -161,11 +161,11 @@ const EventManager = {
         console.log('EventManager initialized - ready to manage attachments');
     },
 
-    // Utility method for one-time listeners - brief connections, no commitment
+    // one-night-stand listener - fires once then ghosts you
     addOneTimeListener(element, eventType, handler, options = {}) {
         const oneTimeHandler = (e) => {
             handler(e);
-            // Find and remove this listener
+            // hunt down and kill this listener
             this.listeners.forEach((listener, key) => {
                 if (listener.element === element &&
                     listener.eventType === eventType &&
@@ -178,14 +178,14 @@ const EventManager = {
         return this.addListener(element, eventType, oneTimeHandler, options);
     },
 
-    // Alias for addEventListener - many parts of the code use this name
+    // alias for the masses who prefer standard naming
     addEventListener(element, eventType, handler, options = {}) {
         return this.addListener(element, eventType, handler, options);
     },
 
-    // Alias for removeEventListener - cutting ties the standard way
+    // standard-named detachment function
     removeEventListener(element, eventType, handler) {
-        // Find and remove the matching listener - surgical detachment
+        // find the exact match and destroy it
         const keysToRemove = [];
         this.listeners.forEach((listener, key) => {
             if (listener.element === element &&
@@ -199,7 +199,7 @@ const EventManager = {
     }
 };
 
-// Initialize event manager - begin the surveillance
+// wake the event manager and start tracking everything
 if (typeof document !== 'undefined') {
     EventManager.init();
 }

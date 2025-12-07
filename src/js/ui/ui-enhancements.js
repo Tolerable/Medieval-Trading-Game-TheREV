@@ -137,7 +137,7 @@ const KeyboardShortcuts = {
         }
     },
     
-    // Initialize keyboard shortcuts
+    // bind every key to its purpose - the interface becomes responsive
     init() {
         this.setupEventListeners();
         this.createHelpOverlay();
@@ -148,7 +148,7 @@ const KeyboardShortcuts = {
         this.createConfirmationDialogs();
     },
     
-    // Setup event listeners
+    // tether the listeners to reality - watching for every click and keystroke
     setupEventListeners() {
         EventManager.addEventListener(document, 'keydown', (e) => this.handleKeyPress(e));
         EventManager.addEventListener(document, 'keyup', (e) => this.handleKeyRelease(e));
@@ -219,7 +219,7 @@ const KeyboardShortcuts = {
         }
     },
 
-    // 🖤 Handle key release - placeholder for any keyup actions 💀
+    // handle key release - placeholder for any keyup actions
     handleKeyRelease(event) {
         // Currently no specific keyup handlers needed
         // This function exists to prevent the error when keyup fires
@@ -227,7 +227,7 @@ const KeyboardShortcuts = {
 
     // Announce to screen reader
     announceToScreenReader(message) {
-        // Create or get live region
+        // conjure the announcement void - where messages echo for those who listen
         let liveRegion = document.getElementById('screen-reader-announcements');
         if (!liveRegion) {
             liveRegion = document.createElement('div');
@@ -264,7 +264,7 @@ const KeyboardShortcuts = {
         }
     },
     
-    // Create help overlay
+    // craft the help mask - instructions wrapped in darkness
     createHelpOverlay() {
         const helpOverlay = document.createElement('div');
         helpOverlay.id = 'help-overlay';
@@ -330,7 +330,7 @@ const KeyboardShortcuts = {
         container.appendChild(helpOverlay);
     },
 
-    // Show help overlay
+    // unveil the guide - let confusion meet clarity
     showHelpOverlay() {
         const helpOverlay = document.getElementById('help-overlay');
         if (helpOverlay) {
@@ -384,13 +384,13 @@ const KeyboardShortcuts = {
         const gameControls = document.getElementById('game-controls');
         if (!gameControls) {
             // the void consumed our container... how very on brand
-            console.log('🖤 game-controls element not found... quick actions drift into the ether');
+            console.log('game-controls element not found... quick actions drift into the ether');
             return;
         }
 
         // dont spawn duplicates - one set of existential shortcuts is enough
         if (document.getElementById('quick-actions')) {
-            console.log('🖤 quick actions already exist... no need for clones');
+            console.log('quick actions already exist... no need for clones');
             return;
         }
 
@@ -410,7 +410,7 @@ const KeyboardShortcuts = {
         this.setupQuickActionListeners();
     },
 
-    // Setup quick action listeners
+    // wire the quick actions - instant gratification at your fingertips
     setupQuickActionListeners() {
         EventManager.addEventListener(document.getElementById('quick-save-btn'), 'click', () => this.quickSave());
         EventManager.addEventListener(document.getElementById('quick-load-btn'), 'click', () => this.quickLoad());
@@ -447,7 +447,7 @@ const KeyboardShortcuts = {
                     game.loadState(parsedData);
                     this.showNotification('Game loaded successfully!', 'success');
                 } catch (parseError) {
-                    // 🖤 Corrupt save - nuke it and tell the user
+                    // corrupt save - nuke it and tell the user
                     localStorage.removeItem('tradingGameQuickSave');
                     this.showNotification('Save data is corrupted!', 'error');
                 }
@@ -519,7 +519,7 @@ const KeyboardShortcuts = {
         }
     },
     
-    // Create notification system
+    // build the notification altar - where messages spawn and die
     createNotificationSystem() {
         const notificationContainer = document.createElement('div');
         notificationContainer.id = 'notification-container';
@@ -530,12 +530,12 @@ const KeyboardShortcuts = {
         document.body.appendChild(notificationContainer);
     },
     
-    // Show notification - 🖤 with null guards 💀
+    // show notification - with null guards
     showNotification(message, type = 'info') {
         const notificationContainer = document.getElementById('notification-container');
-        if (!notificationContainer) return; // 🦇 container not ready yet
+        if (!notificationContainer) return; // container not ready yet
         const notificationList = notificationContainer.querySelector('.notification-list');
-        if (!notificationList) return; // 🦇 list not ready yet
+        if (!notificationList) return; // list not ready yet
 
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
@@ -554,7 +554,7 @@ const KeyboardShortcuts = {
         }, 5000);
     },
     
-    // Create loading indicators
+    // forge the waiting screen - suspended animation between states
     createLoadingIndicators() {
         const loadingOverlay = document.createElement('div');
         loadingOverlay.id = 'loading-overlay';
@@ -575,7 +575,7 @@ const KeyboardShortcuts = {
         container.appendChild(loadingOverlay);
     },
 
-    // Show loading indicator
+    // cast the loading veil - obscure reality while we reshape it
     showLoadingIndicator(text = 'Loading...') {
         const loadingOverlay = document.getElementById('loading-overlay');
         if (!loadingOverlay) return;
@@ -587,17 +587,17 @@ const KeyboardShortcuts = {
         loadingOverlay.classList.remove('hidden');
     },
     
-    // Hide loading indicator
+    // lift the veil - let them see what we've wrought
     hideLoadingIndicator() {
         const loadingOverlay = document.getElementById('loading-overlay');
         loadingOverlay.classList.add('hidden');
     },
     
-    // Update loading progress
+    // track the transformation - watch the bar fill with anticipation
     updateLoadingProgress(percent) {
-        // 🖤 FIXED: Added null check for loading-overlay element 💀
+        // fixed: added null check for loading-overlay element
         const overlay = document.getElementById('loading-overlay');
-        if (!overlay) return; // 🦇 Guard against missing overlay
+        if (!overlay) return; // guard against missing overlay
         const progressFill = overlay.querySelector('.progress-fill');
         if (progressFill) {
             progressFill.style.width = `${percent}%`;
@@ -610,7 +610,7 @@ const KeyboardShortcuts = {
         // Additional accessibility improvements can be added here
     },
     
-    // Create visual effects
+    // infuse animations - breathe false life into static elements
     createVisualEffects() {
         // Add CSS classes for animations and transitions
         const style = document.createElement('style');
@@ -679,16 +679,16 @@ const KeyboardShortcuts = {
 
     // Create game statistics
     createGameStats() {
-        // 🖤 check if container exists before spawning stats into the void
+        // check if container exists before spawning stats into the void
         const gameControls = document.getElementById('game-controls');
         if (!gameControls) {
-            console.log('🖤 game-controls element not found... stats fade into darkness');
+            console.log('game-controls element not found... stats fade into darkness');
             return;
         }
 
         // prevent duplicate stats containers
         if (document.getElementById('game-stats-container')) {
-            console.log('🖤 game stats already exist... no need for duplicates');
+            console.log('game stats already exist... no need for duplicates');
             return;
         }
 
@@ -731,7 +731,7 @@ const KeyboardShortcuts = {
         this.setupStatsListeners();
     },
     
-    // Setup stats listeners
+    // bind the stat watchers - numbers that define your existence
     setupStatsListeners() {
         const toggleBtn = document.getElementById('toggle-stats-btn');
         const statsContent = document.querySelector('.stats-content');
@@ -743,8 +743,8 @@ const KeyboardShortcuts = {
         // Update stats periodically
         TimerManager.setInterval(() => this.updateStats(), 5000);
     },
-    
-    // Update statistics
+
+    // refresh the numbers - cold reality distilled to digits
     updateStats() {
         if (game.player) {
             const days = TimeSystem.currentTime.day;
@@ -763,7 +763,7 @@ const KeyboardShortcuts = {
         }
     },
     
-    // Create confirmation dialogs
+    // prepare the question box - forcing choice upon the indecisive
     createConfirmationDialogs() {
         const confirmationOverlay = document.createElement('div');
         confirmationOverlay.id = 'confirmation-overlay';
@@ -787,7 +787,7 @@ const KeyboardShortcuts = {
         container.appendChild(confirmationOverlay);
     },
 
-    // Show confirmation dialog - 🖤 with null guards 💀
+    // show confirmation dialog - with null guards
     showConfirmationDialog(title, message, onConfirm, onCancel = null) {
         const overlay = document.getElementById('confirmation-overlay');
         const titleElement = document.getElementById('confirmation-title');
@@ -795,7 +795,7 @@ const KeyboardShortcuts = {
         const yesBtn = document.getElementById('confirm-yes-btn');
         const noBtn = document.getElementById('confirm-no-btn');
 
-        // 🦇 Guard against missing elements
+        // guard against missing elements
         if (!overlay || !titleElement || !messageElement || !yesBtn || !noBtn) {
             console.warn('⚠️ Confirmation dialog elements not found');
             return;
@@ -804,7 +804,7 @@ const KeyboardShortcuts = {
         titleElement.textContent = title;
         messageElement.textContent = message;
 
-        // Remove existing listeners - 🖤 with null guards
+        // remove existing listeners - with null guards
         const newYesBtn = yesBtn.cloneNode(true);
         const newNoBtn = noBtn.cloneNode(true);
 
@@ -849,7 +849,7 @@ const KeyboardShortcuts = {
                 newIndex = currentIndex - 1;
                 break;
             case 'right':
-                newIndex = currentIndex + 1; // 🖤 FIXED: was using undefined newIndex 💀
+                newIndex = currentIndex + 1; // fixed: was using undefined newIndex
                 break;
         }
         
@@ -873,8 +873,8 @@ const KeyboardShortcuts = {
         const activeTab = document.querySelector('.tab-btn.active');
         if (!activeTab) return;
 
-        // 🖤 FIXED: was using undefined 'activeElement', should be 'activeTab' 💀
-        if (!activeTab.parentElement) return; // 🦇 Guard against orphaned tabs
+        // fixed: was using undefined 'activeElement', should be 'activeTab'
+        if (!activeTab.parentElement) return; // guard against orphaned tabs
         const allTabs = Array.from(activeTab.parentElement.querySelectorAll('.tab-btn'));
         const currentIndex = allTabs.findIndex(tab => tab === activeTab);
 
@@ -1004,7 +1004,7 @@ const KeyboardShortcuts = {
             }
             SettingsPanel.show();
         } else {
-            // 🖤 SettingsPanel not loaded yet - silent fail, user can try again
+            // settingsPanel not loaded yet - silent fail, user can try again
             console.warn('⚙️ SettingsPanel not ready yet');
         }
     },
@@ -1063,7 +1063,7 @@ const KeyboardShortcuts = {
         addMessage('Redo action not yet implemented');
     },
     
-    // 🖤 Debooger functions 💀 - Unity's dark diagnostic realm ⚰️
+    // debooger functions - Unity's dark diagnostic realm
     toggleDeboogerMode() {
         document.body.classList.toggle('debooger-mode');
         addMessage('Debooger mode ' + (document.body.classList.contains('debooger-mode') ? 'enabled' : 'disabled'));
@@ -1106,7 +1106,7 @@ const KeyboardShortcuts = {
         });
     },
     
-    // Initialize all enhancements
+    // summon the entire facade - all illusions at once
     initialize() {
         this.init();
         // loadSettings was moved to SettingsPanel - load via that instead
@@ -1120,14 +1120,14 @@ const KeyboardShortcuts = {
         this.createTutorialSystem();
     },
     
-    // Create tooltips
+    // spawn the tooltip system - hover hints that materialize from nothing
     createTooltips() {
         // Add tooltip containers
         const tooltipContainer = document.createElement('div');
         tooltipContainer.id = 'tooltip-container';
         tooltipContainer.setAttribute('role', 'tooltip');
         document.body.appendChild(tooltipContainer);
-        
+
         // Add screen reader announcements container
         const announcementsContainer = document.createElement('div');
         announcementsContainer.id = 'screen-reader-announcements';
@@ -1135,17 +1135,17 @@ const KeyboardShortcuts = {
         announcementsContainer.setAttribute('aria-atomic', 'true');
         announcementsContainer.className = 'sr-only';
         document.body.appendChild(announcementsContainer);
-        
+
         // Setup tooltip listeners
         EventManager.addEventListener(document, 'mouseover', (e) => this.showTooltip(e));
         EventManager.addEventListener(document, 'mouseout', () => this.hideTooltip());
         EventManager.addEventListener(document, 'focus', (e) => this.showTooltip(e));
         EventManager.addEventListener(document, 'blur', () => this.hideTooltip());
     },
-    
-    // Show tooltip
+
+    // manifest the hint - reveal knowledge on hover
     showTooltip(event) {
-        // 🖤💀 Safety check - some targets (SVG, etc) may not have closest() 💀
+        // safety check - some targets (SVG, etc) may not have closest()
         if (!event?.target?.closest) return;
         const element = event.target.closest('[title], [data-tooltip]');
         if (!element || !this.currentSettings?.enableTooltips) return;
@@ -1187,10 +1187,10 @@ const KeyboardShortcuts = {
         }, 10);
     },
     
-    // Hide tooltip - 🖤 with null guard 💀
+    // hide tooltip - with null guard
     hideTooltip() {
         const tooltipContainer = document.getElementById('tooltip-container');
-        if (!tooltipContainer) return; // 🦇 container doesn't exist yet
+        if (!tooltipContainer) return; // container doesn't exist yet
         const tooltips = tooltipContainer.querySelectorAll('.tooltip');
         tooltips.forEach(tooltip => {
             tooltip.classList.remove('visible');
@@ -1202,14 +1202,14 @@ const KeyboardShortcuts = {
         });
     },
     
-    // Create particle effects
+    // birth the particle realm - ephemeral specks of visual feedback
     createParticleEffects() {
         const particleContainer = document.createElement('div');
         particleContainer.id = 'particle-container';
         document.body.appendChild(particleContainer);
     },
     
-    // Create particle effect
+    // release a particle - brief spark of animated illusion
     createParticleEffect(x, y, type = 'success') {
         if (!this.currentSettings?.enableAnimations) return;
         
@@ -1266,10 +1266,10 @@ const KeyboardShortcuts = {
     
     // Create auto-save indicator
     createAutoSaveIndicator() {
-        // 🖤 check for container before summoning the save icon from the void
+        // check for container before summoning the save icon from the void
         const gameHeader = document.getElementById('game-header') || document.getElementById('top-bar') || document.getElementById('game-container');
         if (!gameHeader) {
-            console.warn('🖤 No suitable container for auto-save indicator... it fades into nothing');
+            console.warn('No suitable container for auto-save indicator... it fades into nothing');
             return;
         }
 
@@ -1289,20 +1289,20 @@ const KeyboardShortcuts = {
         gameHeader.appendChild(autoSaveIndicator);
     },
     
-    // Show auto-save indicator
+    // flash the save icon - brief reassurance in the face of impermanence
     showAutoSaveIndicator() {
         const indicator = document.getElementById('auto-save-indicator');
         if (indicator) {
             indicator.classList.remove('hidden');
-            
+
             // Hide after 2 seconds
             TimerManager.setTimeout(() => {
                 indicator.classList.add('hidden');
             }, 2000);
         }
     },
-    
-    // Create tutorial system
+
+    // construct the tutorial labyrinth - guide the lost through their first steps
     createTutorialSystem() {
         const tutorialOverlay = document.createElement('div');
         tutorialOverlay.id = 'tutorial-overlay';
@@ -1359,7 +1359,7 @@ const KeyboardShortcuts = {
         this.setupTutorialListeners();
     },
     
-    // Setup tutorial listeners
+    // wire the tutorial controls - bind progression and escape
     setupTutorialListeners() {
         const skipBtn = document.getElementById('skip-tutorial-btn');
         const prevBtn = document.getElementById('prev-tutorial-btn');
@@ -1378,7 +1378,7 @@ const KeyboardShortcuts = {
         });
     },
     
-    // Show tutorial
+    // begin the lessons - unveil the guided path
     showTutorial() {
         if (!this.currentSettings?.showTutorial) return;
         
@@ -1412,16 +1412,16 @@ const KeyboardShortcuts = {
         this.updateTutorialStep();
     },
     
-    // Update tutorial step
+    // advance the guide - move through the instructional sequence
     updateTutorialStep() {
         const prevBtn = document.getElementById('prev-tutorial-btn');
         const nextBtn = document.getElementById('next-tutorial-btn');
         const steps = document.querySelectorAll('.tutorial-step');
-        
+
         // Update navigation buttons
         prevBtn.disabled = this.currentTutorialStep <= 1;
         nextBtn.disabled = this.currentTutorialStep >= steps.length;
-        
+
         // Update step indicators
         steps.forEach((step, index) => {
             const stepNumber = step.querySelector('.step-number');
@@ -1445,7 +1445,7 @@ const KeyboardShortcuts = {
         // Mark tutorial as completed
         localStorage.setItem('tutorialCompleted', 'true');
         
-        // Show notification
+        // announce completion
         this.showNotification('Tutorial completed! You can always access it from the settings menu.', 'success');
     },
     

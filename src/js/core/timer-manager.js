@@ -9,7 +9,7 @@
 // centralized timer management - because memory leaks are scarier than ghosts
 // tick tock goes the existential clock - we document every scheduled doom
 //
-// ⚠️ CRITICAL: ALL TIMERS IN THIS CODEBASE MUST USE TimerManager! ⚠️
+// CRITICAL: ALL TIMERS IN THIS CODEBASE MUST USE TimerManager!
 //
 // DO NOT USE:                      USE INSTEAD:
 // setTimeout(fn, delay)    →       TimerManager.setTimeout(fn, delay)
@@ -52,10 +52,10 @@ const TimerManager = {
             createdAt: Date.now()
         });
         
-        return key; // 🗡️ Return key for cancellation - defuse if needed
+        return key; // hand back the key so you can kill this timer later
     },
 
-    // 🔮 Set an interval with tracking - endless repetition, captured
+    // set an interval with tracking - endless repetition, captured
     setInterval(callback, interval, ...args) {
         const intervalId = setInterval(callback, interval, ...args);
         const key = `interval_${Date.now()}_${Math.random()}`;
@@ -69,10 +69,10 @@ const TimerManager = {
             createdAt: Date.now()
         });
         
-        return key; // 🗡️ Return key for cancellation - stop the cycle
+        return key; // the key to break the infinite loop when you're done
     },
 
-    // 💀 Clear a timeout by key - defusing the time bomb
+    // kill a timer by its key - cancel the scheduled doom
     clearTimeout(key) {
         if (!this.timers.has(key)) {
             console.warn(`⚠️ TimerManager: No timer found for key ${key}`);
@@ -108,7 +108,7 @@ const TimerManager = {
         return count;
     },
     
-    // 🗡️ Clear all timeouts - defuse every scheduled bomb
+    // cancel every timeout - no more scheduled chaos
     clearTimeouts() {
         const keysToClear = [];
         
@@ -123,7 +123,7 @@ const TimerManager = {
         return keysToClear.length;
     },
     
-    // 🦇 Clear all intervals - end every repeating cycle
+    // stop all intervals - silence the endless loops
     clearIntervals() {
         const keysToClear = [];
         
@@ -138,12 +138,12 @@ const TimerManager = {
         return keysToClear.length;
     },
     
-    // 📊 Get active timers count - how many time bombs are still ticking
+    // get active timers count - how many time bombs are still ticking
     getActiveTimersCount() {
         return this.timers.size;
     },
     
-    // 🔍 Get timers for deboogering 🦇 - peer into the scheduled chaos
+    // get timers for deboogering - peer into the scheduled chaos
     getTimers() {
         return Array.from(this.timers.entries()).map(([key, timer]) => ({
             key,
@@ -154,12 +154,12 @@ const TimerManager = {
         }));
     },
     
-    // 💀 Check if timer is still active - is it still ticking?
+    // check if this timer's still breathing
     isTimerActive(key) {
         return this.timers.has(key) && this.timers.get(key).active;
     },
     
-    // 🦇 Deactivate a timer without clearing it - mute the alarm
+    // mute the timer but keep it alive - suspended animation
     deactivateTimer(key) {
         if (this.timers.has(key)) {
             const timer = this.timers.get(key);
@@ -169,7 +169,7 @@ const TimerManager = {
         return false;
     },
     
-    // ⚡ Reactivate a timer - resume the countdown
+    // wake a sleeping timer back up
     reactivateTimer(key) {
         if (this.timers.has(key)) {
             const timer = this.timers.get(key);
@@ -179,9 +179,9 @@ const TimerManager = {
         return false;
     },
     
-    // 🖤 Cleanup on page unload - silence before the void
+    // prepare for death - clean up when the page dies
     init() {
-        // 💀 Add cleanup on page unload - defuse everything before oblivion
+        // murder every timer before the browser closes
         window.addEventListener('beforeunload', () => {
             this.clearAllTimers();
         });
@@ -190,7 +190,7 @@ const TimerManager = {
     }
 };
 
-// 🖤 Initialize timer manager - begin the countdown surveillance
+// wake the timer manager - start watching all the ticking bombs
 if (typeof document !== 'undefined') {
     TimerManager.init();
 }

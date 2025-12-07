@@ -8,7 +8,7 @@
 // 
 
 const AchievementSystem = {
-    //  Achievement data - every flex you can earn
+    // Every hollow victory you'll cling to in the darkness - achievements for the desperate
     achievements: {
         // --- WEALTH ACHIEVEMENTS ---
         first_gold: {
@@ -20,7 +20,7 @@ const AchievementSystem = {
             rarity: 'common',
             unlocked: false,
             unlockedAt: null,
-            condition: () => AchievementSystem.stats.totalGoldEarned >= 1 // Ÿ–¤ FIX: Track EARNED gold, not starting gold ðŸ’€
+            condition: () => AchievementSystem.stats.totalGoldEarned >= 1 // First taste of greed - the addiction begins
         },
         merchant_apprentice: {
             id: 'merchant_apprentice',
@@ -1433,7 +1433,7 @@ const AchievementSystem = {
         // trading stats - receipts of your capitalism addiction
         tradesCompleted: 0,
         highestProfit: 0,
-        totalGoldEarned: 0, // Ÿ–¤ Track EARNED gold, not starting gold ðŸ’€
+        totalGoldEarned: 0, // ï¿½ï¿½ï¿½ Track EARNED gold, not starting gold ðŸ’€
         nightTrades: 0,
         maxMerchantTrades: 0,
         merchantTradeCount: {},
@@ -1442,7 +1442,7 @@ const AchievementSystem = {
         locationsVisited: 0,
         uniqueLocationsVisited: new Set(),
         distanceTraveled: 0,
-        journeysStarted: 0,    // Ÿ–¤ tracks when you BEGIN a journey
+        journeysStarted: 0,    // ï¿½ï¿½ï¿½ tracks when you BEGIN a journey
         journeysCompleted: 0,
         dungeonVisits: 0,
         dungeonVisitsIn5Years: 0,
@@ -1453,7 +1453,7 @@ const AchievementSystem = {
         banditsDefeated: 0,
         narrowEscapes: 0,
         banditEncounters: 0,
-        stealthyExplorer: false, // Ÿ–¤ FIX: Must EARN this by visiting all locations without bandits ðŸ’€
+        stealthyExplorer: false, // ï¿½ï¿½ï¿½ FIX: Must EARN this by visiting all locations without bandits ðŸ’€
 
         // collection stats - hoarding is self care actually
         rareItemsOwned: 0,
@@ -1565,14 +1565,14 @@ const AchievementSystem = {
         this.onFirstUnpause();
     },
 
-    // check all achievements - wrapped in try-catch cuz errors at 3am hit different
-    // collects all newly unlocked achievements like pokemon cards of sadness
+    // Judge every deed - wrapped in safety because even perfection can crash at 3am
+    // Collect your hollow victories like trophies of temporary joy
     checkAchievements() {
         if (!game.player) return;
 
         //  FIX: Don't check achievements until player has unpaused at least once 
         if (!this._achievementsEnabled) {
-            return; // Ÿ¦‡ Achievements not enabled yet - player hasn't unpaused
+            return; // ï¿½ï¿½ï¿½ Achievements not enabled yet - player hasn't unpaused
         }
 
         //  DEBUG: Log first_journey stats to trace why it's not unlocking 
@@ -1611,7 +1611,7 @@ const AchievementSystem = {
         //  FIX: Don't unlock achievements until player has unpaused at least once 
         if (!this._achievementsEnabled) {
             console.log(`ðŸ† Achievement ${achievementId} deferred - waiting for first unpause`);
-            return; // Ÿ¦‡ Achievements not enabled yet - player hasn't unpaused
+            return; // ï¿½ï¿½ï¿½ Achievements not enabled yet - player hasn't unpaused
         }
 
         const achievement = this.achievements[achievementId];
@@ -1620,7 +1620,7 @@ const AchievementSystem = {
         achievement.unlocked = true;
         achievement.unlockedAt = Date.now();
 
-        // Handle special rewards for achievements
+        // Bestow gifts upon the worthy - power for progress
         this.grantAchievementRewards(achievement);
 
         // Save progress
@@ -1680,8 +1680,8 @@ const AchievementSystem = {
         }
     },
 
-    // Check if debooger is unlocked for current save (via Super Hacker achievement) 
-    //  NOW RESPECTS CONFIG - if config says NO, this ALWAYS returns false 
+    // Has the player earned the right to bend reality? (Super Hacker achievement check)
+    // Config is god - no achievement overrides the master switch 
     isDeboogerUnlockedForSave() {
         //  CONFIG IS THE MASTER - need BOTH enabled AND allowAchievementUnlock
         const deboogerConfig = (typeof GameConfig !== 'undefined' && GameConfig.debooger) ? GameConfig.debooger : null;
@@ -1738,7 +1738,7 @@ const AchievementSystem = {
             }
         }
 
-        // Get all pending achievements to show count
+        // Count the victories awaiting their moment of glory
         const totalPending = this.pendingAchievements.length;
         const achievement = this.pendingAchievements.shift();
 
@@ -1751,7 +1751,7 @@ const AchievementSystem = {
         const existingPopup = document.getElementById('achievement-popup-overlay');
         if (existingPopup) existingPopup.remove();
 
-        // Get rarity colors
+        // Paint each achievement with its deserved hue
         const rarityColors = {
             common: { bg: '#4a5568', border: '#718096', glow: 'rgba(113, 128, 150, 0.5)' },
             uncommon: { bg: '#2f855a', border: '#48bb78', glow: 'rgba(72, 187, 120, 0.5)' },
@@ -1867,7 +1867,7 @@ const AchievementSystem = {
             const overlay = document.getElementById('achievement-popup-overlay');
             if (overlay) {
                 overlay.style.animation = 'achievementFadeOut 0.2s ease-in';
-                overlay.style.pointerEvents = 'none'; // Ÿ–¤ Prevent clicks during animation ðŸ’€
+                overlay.style.pointerEvents = 'none'; // ï¿½ï¿½ï¿½ Prevent clicks during animation ðŸ’€
                 setTimeout(() => {
                     try {
                         if (overlay.parentNode) {
@@ -2244,7 +2244,7 @@ const AchievementSystem = {
             }
         }
 
-        // Check for narrow escape
+        // Did you cheat death itself?
         if (survived && game.player && game.player.gold < 10) {
             AchievementSystem.stats.narrowEscapes++;
         }
@@ -2262,14 +2262,14 @@ const AchievementSystem = {
     trackRagsToRiches() {
         if (!AchievementSystem.stats.ragsToRiches && game.player) {
             if (game.player.gold >= 5000) {
-                // Check transaction history to see if they were ever below 10
+                // Verify they crawled up from poverty's depths
                 AchievementSystem.stats.ragsToRiches = true;
                 this.checkAchievements();
             }
         }
     },
 
-    // Get achievement progress
+    // Measure how close you are to glory
     getProgress() {
         const total = Object.keys(this.achievements).length;
         const unlocked = Object.values(this.achievements).filter(a => a.unlocked).length;
@@ -2278,17 +2278,17 @@ const AchievementSystem = {
         return { total, unlocked, percentage };
     },
 
-    // Get achievements by category
+    // Filter victories by their nature
     getByCategory(category) {
         return Object.values(this.achievements).filter(a => a.category === category);
     },
 
-    // Get unlocked achievements
+    // Retrieve your earned trophies from the void
     getUnlocked() {
         return Object.values(this.achievements).filter(a => a.unlocked);
     },
 
-    // Get locked achievements
+    // Glimpse the glory still beyond your reach
     getLocked() {
         return Object.values(this.achievements).filter(a => !a.unlocked);
     },
@@ -2363,7 +2363,7 @@ const AchievementSystem = {
             // Trading stats
             tradesCompleted: 0,
             highestProfit: 0,
-            totalGoldEarned: 0, // Ÿ–¤ Track EARNED gold, not starting gold ðŸ’€
+            totalGoldEarned: 0, // ï¿½ï¿½ï¿½ Track EARNED gold, not starting gold ðŸ’€
             nightTrades: 0,
             maxMerchantTrades: 0,
             merchantTradeCount: {},
@@ -2383,7 +2383,7 @@ const AchievementSystem = {
             banditsDefeated: 0,
             narrowEscapes: 0,
             banditEncounters: 0,
-            stealthyExplorer: false, // Ÿ–¤ FIX: Must EARN this by visiting all locations without bandits ðŸ’€
+            stealthyExplorer: false, // ï¿½ï¿½ï¿½ FIX: Must EARN this by visiting all locations without bandits ðŸ’€
 
             // Collection stats
             rareItemsOwned: 0,
@@ -2529,7 +2529,7 @@ function filterAchievements(button, category) {
     populateAchievements(category);
 }
 
-// Update achievement progress display
+// Refresh the scoreboard of your life
 function updateAchievementProgress() {
     const progress = AchievementSystem.getProgress();
     const progressText = document.getElementById('achievement-progress-text');
@@ -2544,7 +2544,7 @@ function updateAchievementProgress() {
     }
 }
 
-// Setup achievement category buttons
+// Bind the category filters to their dark purpose
 function setupAchievementCategoryButtons() {
     const categoryButtons = document.querySelectorAll('.achievement-category-btn');
 
@@ -2556,7 +2556,7 @@ function setupAchievementCategoryButtons() {
             // Add active class to clicked button
             button.classList.add('active');
 
-            // Get category
+            // Extract which flavor of victory we're viewing
             const category = button.getAttribute('data-category');
 
             // Populate achievements for this category
@@ -2565,7 +2565,7 @@ function setupAchievementCategoryButtons() {
     });
 }
 
-// Initialize on game load
+// Awaken when the game breathes its first breath
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {

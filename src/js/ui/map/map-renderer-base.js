@@ -9,11 +9,11 @@
 
 const MapRendererBase = {
     // ═══════════════════════════════════════════════════════════════════════
-    // 🎨 SHARED LOCATION STYLES - The look of the world
+    // shared location styles - the look of the world
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * 🖤 Location type styles (icons, colors, sizes)
+     * location type styles (icons, colors, sizes)
      * Override size in child renderers if needed
      */
     LOCATION_STYLES: {
@@ -33,11 +33,11 @@ const MapRendererBase = {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // 🗡️ MAP STATE DEFAULTS - How the map behaves
+    // map state defaults - how the map behaves
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * 🦇 Create default map state object
+     * create default map state object
      * @param {Object} overrides - Values to override defaults
      * @returns {Object} Map state object
      */
@@ -59,11 +59,11 @@ const MapRendererBase = {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // 💀 TOOLTIP MANAGEMENT - Hover info shared between renderers
+    // tooltip management - hover info shared between renderers
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * 🖤 Create or get a tooltip element
+     * create or get a tooltip element
      * @param {string} id - Tooltip element ID
      * @returns {HTMLElement} The tooltip element
      */
@@ -95,7 +95,7 @@ const MapRendererBase = {
     },
 
     /**
-     * 🦇 Show tooltip at position
+     * show tooltip at position
      * @param {HTMLElement} tooltip - Tooltip element
      * @param {string} content - HTML content
      * @param {number} x - Mouse X position
@@ -107,14 +107,14 @@ const MapRendererBase = {
         tooltip.innerHTML = content;
         tooltip.style.display = 'block';
 
-        // 🖤 Position tooltip near cursor but avoid edges
+        // position tooltip near cursor but avoid edges
         const rect = tooltip.getBoundingClientRect();
         const padding = 15;
 
         let left = x + padding;
         let top = y + padding;
 
-        // 🗡️ Keep within viewport
+        // keep within viewport
         if (left + rect.width > window.innerWidth) {
             left = x - rect.width - padding;
         }
@@ -127,7 +127,7 @@ const MapRendererBase = {
     },
 
     /**
-     * ⚰️ Hide tooltip
+     * hide tooltip
      * @param {HTMLElement} tooltip - Tooltip element
      */
     hideTooltip(tooltip) {
@@ -137,11 +137,11 @@ const MapRendererBase = {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // 🌙 TRANSFORM & ZOOM - Shared pan/zoom logic
+    // transform & zoom - shared pan/zoom logic
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * 🖤 Update map transform based on state
+     * update map transform based on state
      * @param {HTMLElement} mapElement - The map element to transform
      * @param {Object} mapState - Current map state
      */
@@ -155,7 +155,7 @@ const MapRendererBase = {
     },
 
     /**
-     * 🦇 Handle zoom with constraints
+     * handle zoom with constraints
      * @param {Object} mapState - Map state to modify
      * @param {number} delta - Zoom delta (positive = zoom in)
      * @param {number} [centerX] - X position to zoom toward
@@ -167,11 +167,11 @@ const MapRendererBase = {
         const zoomSpeed = 0.1;
         let newZoom = oldZoom + (delta > 0 ? zoomSpeed : -zoomSpeed);
 
-        // 🗡️ Clamp zoom to bounds
+        // clamp zoom to bounds
         newZoom = Math.max(mapState.minZoom, Math.min(mapState.maxZoom, newZoom));
 
         if (newZoom !== oldZoom && centerX !== null && centerY !== null) {
-            // ⚰️ Zoom toward cursor position
+            // zoom toward cursor position
             const zoomRatio = newZoom / oldZoom;
             mapState.offsetX = centerX - (centerX - mapState.offsetX) * zoomRatio;
             mapState.offsetY = centerY - (centerY - mapState.offsetY) * zoomRatio;
@@ -182,7 +182,7 @@ const MapRendererBase = {
     },
 
     /**
-     * 🌙 Start drag operation
+     * start drag operation
      * @param {Object} mapState - Map state to modify
      * @param {number} x - Start X position
      * @param {number} y - Start Y position
@@ -196,7 +196,7 @@ const MapRendererBase = {
     },
 
     /**
-     * 💀 Update drag position
+     * update drag position
      * @param {Object} mapState - Map state to modify
      * @param {number} x - Current X position
      * @param {number} y - Current Y position
@@ -211,7 +211,7 @@ const MapRendererBase = {
     },
 
     /**
-     * 🔮 End drag operation
+     * end drag operation
      * @param {Object} mapState - Map state to modify
      */
     endDrag(mapState) {
@@ -219,11 +219,11 @@ const MapRendererBase = {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // 🔮 LOCATION ELEMENT CREATION - Building map markers
+    // location element creation - building map markers
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * 🖤 Get style for a location type
+     * get style for a location type
      * @param {string} type - Location type
      * @param {number} [sizeMultiplier=1] - Size multiplier
      * @returns {Object} Style object with color, icon, size
@@ -237,7 +237,7 @@ const MapRendererBase = {
     },
 
     /**
-     * 🦇 Create base location element structure
+     * create base location element structure
      * @param {Object} location - Location data
      * @param {Object} options - Rendering options
      * @returns {HTMLElement} The location marker element
@@ -254,7 +254,7 @@ const MapRendererBase = {
         const style = this.getLocationStyle(location.type, sizeMultiplier);
         const pos = location.mapPosition || { x: 400, y: 300 };
 
-        // 🗡️ Create marker container
+        // create marker container
         const marker = document.createElement('div');
         marker.className = 'map-location';
         marker.dataset.locationId = location.id;
@@ -270,7 +270,7 @@ const MapRendererBase = {
             transition: transform 0.2s ease, opacity 0.2s ease;
         `;
 
-        // ⚰️ Create icon
+        // create icon
         const icon = document.createElement('div');
         icon.className = 'location-icon';
         icon.textContent = style.icon;
@@ -281,7 +281,7 @@ const MapRendererBase = {
         `;
         marker.appendChild(icon);
 
-        // 🌙 Create label if enabled
+        // create label if enabled
         if (showLabel) {
             const label = document.createElement('div');
             label.className = 'location-label';
@@ -309,11 +309,11 @@ const MapRendererBase = {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // 💀 CONNECTION LINES - Drawing paths between locations
+    // connection lines - drawing paths between locations
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * 🖤 Create an SVG line element for connections
+     * create an SVG line element for connections
      * @param {Object} from - Start position {x, y}
      * @param {Object} to - End position {x, y}
      * @param {Object} options - Line options
@@ -341,7 +341,7 @@ const MapRendererBase = {
     },
 
     /**
-     * 🦇 Create SVG container for connection lines
+     * create SVG container for connection lines
      * @param {number} width - SVG width
      * @param {number} height - SVG height
      * @returns {SVGElement} SVG container
@@ -361,11 +361,11 @@ const MapRendererBase = {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // 🌙 UTILITY FUNCTIONS - Shared helpers
+    // utility functions - shared helpers
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * 🖤 Calculate distance between two points
+     * calculate distance between two points
      * @param {Object} a - Point A {x, y}
      * @param {Object} b - Point B {x, y}
      * @returns {number} Distance
@@ -377,7 +377,7 @@ const MapRendererBase = {
     },
 
     /**
-     * 🦇 Check if two labels would overlap
+     * check if two labels would overlap
      * @param {Object} rect1 - First rectangle {x, y, width, height}
      * @param {Object} rect2 - Second rectangle
      * @returns {boolean} True if overlapping
@@ -392,7 +392,7 @@ const MapRendererBase = {
     },
 
     /**
-     * ⚰️ Calculate label offsets to prevent overlap
+     * calculate label offsets to prevent overlap
      * @param {Object} locations - Location objects with mapPosition
      * @returns {Object} Map of locationId to offset value
      */
@@ -415,7 +415,7 @@ const MapRendererBase = {
                 height: labelHeight
             };
 
-            // 🌙 Check against previously processed labels
+            // check against previously processed labels
             for (const other of processed) {
                 const otherRect = {
                     x: other.pos.x - 50,
@@ -438,7 +438,7 @@ const MapRendererBase = {
     },
 
     /**
-     * 💀 Format travel info for tooltip
+     * format travel info for tooltip
      * @param {Object} location - Destination location
      * @param {Object} currentLocation - Current location
      * @returns {string} Formatted tooltip HTML
@@ -455,7 +455,7 @@ const MapRendererBase = {
             </div>
         `;
 
-        // 🔮 Add travel info if we have current location
+        // add travel info if we have current location
         if (currentLocation && typeof GameWorld !== 'undefined') {
             const distance = GameWorld.calculateTravelTime?.(currentLocation.id, location.id);
             const cost = GameWorld.calculateTravelCost?.(currentLocation.id, location.id);
@@ -473,9 +473,9 @@ const MapRendererBase = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY - Let all maps share the darkness
+// expose globally - let all maps share the darkness
 // ═══════════════════════════════════════════════════════════════════════════
 
 window.MapRendererBase = MapRendererBase;
 
-console.log('🖤 MapRendererBase loaded - shared map rendering foundation ready');
+console.log('MapRendererBase loaded - shared map rendering foundation ready');

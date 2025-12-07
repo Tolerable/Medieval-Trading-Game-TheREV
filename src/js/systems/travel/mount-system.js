@@ -7,19 +7,19 @@
  */
 
 const MountSystem = {
-    // Mount definitions
+    // 🐴 Your companions on this endless road - beasts as doomed as you
     mounts: {
-        // Basic mounts
+        // 💀 Starter tier - broke and desperate
         donkey: {
             name: 'Donkey',
             icon: '🫏',
             tier: 'basic',
             price: 50,
             stats: {
-                speed: 1.2,           // Travel speed multiplier
-                cargoCapacity: 100,   // Additional carry weight
-                stamina: 80,          // Mount stamina
-                staminaDrain: 1.0     // Stamina drain rate
+                speed: 1.2,           // 🛤️ How fast you run from your problems
+                cargoCapacity: 100,   // 💼 Burdens this creature must bear
+                stamina: 80,          // 💔 How long before it collapses like everything else
+                staminaDrain: 1.0     // ⏳ Watching life drain away, one step at a time
             },
             terrain: {
                 road: 1.0,
@@ -30,9 +30,9 @@ const MountSystem = {
                 swamp: 0.5
             },
             maintenance: {
-                feedCost: 2,          // Gold per day for feed
+                feedCost: 2,          // 💰 Daily price of keeping something alive
                 feedType: 'hay',
-                stableCost: 1         // Gold per day for stabling
+                stableCost: 1         // 🏚️ Rent for a temporary shelter from darkness
             },
             description: 'A reliable, if slow, beast of burden.'
         },
@@ -68,18 +68,18 @@ const MountSystem = {
             tier: 'standard',
             price: 200,
             stats: {
-                speed: 1.8,
+                speed: 1.8,           // 💨 Fast enough to outrun regret (almost)
                 cargoCapacity: 80,
                 stamina: 120,
-                staminaDrain: 1.2
+                staminaDrain: 1.2     // ⚡ Burns bright, fades fast
             },
             terrain: {
                 road: 1.2,
                 dirt: 1.0,
-                mountain: 0.5,
+                mountain: 0.5,        // 🏔️ Mountains break even the swiftest
                 forest: 0.7,
                 desert: 0.7,
-                swamp: 0.3
+                swamp: 0.3            // 🌫️ Swamps swallow hooves like hope
             },
             maintenance: {
                 feedCost: 5,
@@ -98,7 +98,7 @@ const MountSystem = {
                 cargoCapacity: 100,
                 stamina: 150,
                 staminaDrain: 1.0,
-                combatBonus: 10      // Bonus to combat stats
+                combatBonus: 10      // ⚔️ Trained to inflict suffering
             },
             terrain: {
                 road: 1.1,
@@ -131,8 +131,8 @@ const MountSystem = {
                 dirt: 0.9,
                 mountain: 0.4,
                 forest: 0.5,
-                desert: 1.5,          // Excellent in desert
-                swamp: 0.2
+                desert: 1.5,          // 🏜️ Born for wasteland wandering
+                swamp: 0.2            // 💀 Even camels hate the marsh
             },
             maintenance: {
                 feedCost: 3,
@@ -147,8 +147,8 @@ const MountSystem = {
             tier: 'standard',
             price: 150,
             stats: {
-                speed: 0.9,           // Slow but sturdy
-                cargoCapacity: 300,   // Massive cargo capacity
+                speed: 0.9,           // 🐢 Slow like a funeral march
+                cargoCapacity: 300,   // 📦 Carries the weight of the world (and your bullshit)
                 stamina: 200,
                 staminaDrain: 0.5
             },
@@ -200,19 +200,19 @@ const MountSystem = {
             tier: 'legendary',
             price: 10000,
             stats: {
-                speed: 3.0,           // Flying mount - very fast
+                speed: 3.0,           // 🦅 Soar above this dying world - if only you could escape yourself too
                 cargoCapacity: 50,
                 stamina: 100,
-                staminaDrain: 2.0,
-                canFly: true
+                staminaDrain: 2.0,    // ⚡ Freedom burns like fire
+                canFly: true          // 🌌 Wings to escape, nowhere to go
             },
             terrain: {
                 road: 1.5,
                 dirt: 1.5,
-                mountain: 2.0,        // Great for mountains
+                mountain: 2.0,        // ⛰️ Peaks bow before wings
                 forest: 1.2,
                 desert: 1.5,
-                swamp: 1.5
+                swamp: 1.5            // 🌫️ Flies above the filth
             },
             maintenance: {
                 feedCost: 50,
@@ -223,16 +223,16 @@ const MountSystem = {
         }
     },
 
-    // Player's owned mounts
+    // 🖤 Creatures you've claimed as companions on this lonely road
     ownedMounts: [],
 
-    // Currently active mount
+    // 🐴 The one bearing your burdens today
     activeMount: null,
 
-    // Mount stats (health, happiness, etc.)
+    // 💔 Their suffering, quantified
     mountStats: {},
 
-    // Initialize the system
+    // ⚙️ Boot up this wheel of misery
     init() {
         this.loadMounts();
         this.createStyles();
@@ -241,7 +241,7 @@ const MountSystem = {
         console.log('🐴 MountSystem initialized');
     },
 
-    // Load mounts from game state
+    // 📂 Resurrect your stable from the save file
     loadMounts() {
         if (typeof game !== 'undefined' && game.player) {
             this.ownedMounts = game.player.mounts || [];
@@ -250,7 +250,7 @@ const MountSystem = {
         }
     },
 
-    // Save mounts to game state
+    // 💾 Preserve this collection of suffering
     saveMounts() {
         if (typeof game !== 'undefined' && game.player) {
             game.player.mounts = this.ownedMounts;
@@ -259,26 +259,27 @@ const MountSystem = {
         }
     },
 
-    // Setup event listeners
+    // 🎧 Listen for the march of time and consequences
     setupEventListeners() {
         if (typeof EventBus !== 'undefined') {
-            // Daily maintenance
+            // ⏰ Another dawn, another drain on your gold
             EventBus.on('time:newDay', () => {
                 this.processDailyMaintenance();
             });
 
-            // Travel effects
+            // 🛤️ The journey begins - watch them struggle
             EventBus.on('travel:started', (data) => {
                 this.onTravelStarted(data);
             });
 
+            // 🏁 Arrival - exhausted, damaged, but still breathing
             EventBus.on('travel:completed', (data) => {
                 this.onTravelCompleted(data);
             });
         }
     },
 
-    // Buy a mount
+    // 💰 Purchase a companion (really just buying their servitude)
     buyMount(mountId, stableLocation = 'current') {
         const mount = this.mounts[mountId];
         if (!mount) {
@@ -292,10 +293,10 @@ const MountSystem = {
                 return false;
             }
 
-            // Deduct gold
+            // 💸 Watch your wealth bleed away
             game.player.gold -= mount.price;
 
-            // Create mount instance
+            // 🐴 Birth a new mount into this cruel world
             const mountInstance = {
                 id: `${mountId}_${Date.now()}`,
                 type: mountId,
@@ -304,7 +305,7 @@ const MountSystem = {
                 location: stableLocation
             };
 
-            // Initialize stats
+            // 📊 Set them up for inevitable decline
             this.mountStats[mountInstance.id] = {
                 health: 100,
                 happiness: 100,
@@ -329,7 +330,7 @@ const MountSystem = {
         return false;
     },
 
-    // Sell a mount
+    // 💔 Betray a companion for half their worth
     sellMount(instanceId) {
         const mountInstance = this.ownedMounts.find(m => m.id === instanceId);
         if (!mountInstance) {
@@ -343,13 +344,13 @@ const MountSystem = {
         }
 
         const mount = this.mounts[mountInstance.type];
-        const sellPrice = Math.floor(mount.price * 0.5); // 50% resale value
+        const sellPrice = Math.floor(mount.price * 0.5); // 💸 Half price for a broken bond
 
         if (typeof game !== 'undefined' && game.player) {
             game.player.gold += sellPrice;
         }
 
-        // Remove mount
+        // 🗑️ Erase them from your life like they never mattered
         this.ownedMounts = this.ownedMounts.filter(m => m.id !== instanceId);
         delete this.mountStats[instanceId];
         this.saveMounts();
@@ -359,7 +360,7 @@ const MountSystem = {
         return true;
     },
 
-    // Set active mount
+    // 🐴 Choose which beast bears your weight today
     setActiveMount(instanceId) {
         if (instanceId === null) {
             this.activeMount = null;
@@ -375,7 +376,7 @@ const MountSystem = {
         }
 
         const stats = this.mountStats[instanceId];
-        //  Validate mountStats exists before accessing health 
+        // 💀 Check if they even exist (sanity in a dying world)
         if (!stats) {
             this.showNotification('Mount stats not found!', 'error');
             return false;
@@ -411,7 +412,7 @@ const MountSystem = {
         };
     },
 
-    // Get travel speed modifier
+    // 🏃 Calculate how fast we flee through this terrain
     getTravelSpeedModifier(terrainType = 'road') {
         const mount = this.getActiveMount();
         if (!mount) return 1.0;
@@ -419,10 +420,10 @@ const MountSystem = {
         const baseSpeed = mount.definition.stats.speed;
         const terrainModifier = mount.definition.terrain[terrainType] || 1.0;
 
-        // Apply mount level bonus
+        // 📈 Experience makes them slightly less pathetic
         const levelBonus = 1 + (mount.stats.level - 1) * 0.05;
 
-        // Apply health penalty
+        // 💔 Wounds slow everything
         const healthModifier = mount.stats.health / 100;
 
         return baseSpeed * terrainModifier * levelBonus * healthModifier;
@@ -452,7 +453,7 @@ const MountSystem = {
         return mount.definition.stats.canFly || false;
     },
 
-    // Process daily maintenance
+    // 💰 Daily reminder that nothing is free, not even companionship
     processDailyMaintenance() {
         let totalCost = 0;
         const notifications = [];
@@ -461,22 +462,22 @@ const MountSystem = {
             const mount = this.mounts[mountInstance.type];
             const stats = this.mountStats[mountInstance.id];
 
-            // Calculate maintenance cost
+            // 💸 The price of keeping things alive
             const dailyCost = mount.maintenance.feedCost + mount.maintenance.stableCost;
             totalCost += dailyCost;
 
-            // Check if player can afford
+            // 🪙 Can you afford to care?
             if (typeof game !== 'undefined' && game.player) {
                 if (game.player.gold >= dailyCost) {
                     game.player.gold -= dailyCost;
 
-                    // Restore some stamina
+                    // 💪 Fed and rested, ready for more suffering tomorrow
                     stats.stamina = Math.min(stats.maxStamina, stats.stamina + 30);
 
-                    // Slight happiness boost if fed
+                    // 😊 A full belly brings fleeting joy
                     stats.happiness = Math.min(100, stats.happiness + 5);
                 } else {
-                    // Can't afford - mount suffers
+                    // 😢 Starvation is its own cruelty
                     stats.happiness = Math.max(0, stats.happiness - 15);
                     stats.health = Math.max(0, stats.health - 5);
 
@@ -491,41 +492,41 @@ const MountSystem = {
             notifications.unshift(`Mount maintenance: ${totalCost} gold`);
         }
 
-        // Show notifications
+        // 📢 Share the news of another day survived (barely)
         notifications.forEach(msg => this.showNotification(msg, 'info'));
     },
 
-    // Handle travel started
+    // 🛤️ The journey begins - check if they can even walk
     onTravelStarted(data) {
         const mount = this.getActiveMount();
         if (!mount) return;
 
-        // Check stamina
+        // 🥱 Too tired to continue this endless march
         if (mount.stats.stamina <= 0) {
             this.showNotification(`${mount.instance.name} is too tired to travel!`, 'warning');
         }
     },
 
-    // Handle travel completed
+    // 🏁 Journey's end - battered but breathing
     onTravelCompleted(data) {
         const mount = this.getActiveMount();
         if (!mount) return;
 
-        // Calculate stamina drain
+        // 💀 Every mile exacts its toll
         const distance = data.distance || 1;
         const drainRate = mount.definition.stats.staminaDrain;
         const staminaLost = Math.floor(distance * drainRate * 5);
 
         mount.stats.stamina = Math.max(0, mount.stats.stamina - staminaLost);
 
-        // Gain experience
+        // 📈 Pain is growth (allegedly)
         mount.stats.experience += distance;
         this.checkLevelUp(mount);
 
         this.saveMounts();
     },
 
-    // Check for mount level up
+    // 🎉 Suffering rewarded with marginal improvement
     checkLevelUp(mountData) {
         const xpForNextLevel = mountData.stats.level * 100;
 

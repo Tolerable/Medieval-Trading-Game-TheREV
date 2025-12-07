@@ -14,7 +14,7 @@
 
 const QuestSystem = {
     // 
-    //  QUEST METADATA CATEGORIES - for classification and filtering 
+    // Task categories - ways to label your endless servitude 
     // 
     QUEST_TYPES: Object.freeze({
         MAIN: 'main',     // Main story quests (35 total across 5 acts)
@@ -40,7 +40,7 @@ const QuestSystem = {
         NIGHTMARE: 'nightmare' // Doom world end-game
     }),
 
-    //  Helper: Get quest category info 
+    // Dissect the quest - understand exactly how they're using you 
     getQuestCategory(quest) {
         return {
             type: quest?.type || this.QUEST_TYPES.SIDE,
@@ -53,25 +53,24 @@ const QuestSystem = {
     },
 
     // 
-    //  STATE - tracking your endless servitude
+    // Your progress through the grind - every task you've sold your soul for
     // 
     initialized: false,
     activeQuests: {},
     completedQuests: [],
     failedQuests: [],
-    discoveredQuests: [], // quests the player knows about (shows details in log)
-    questCompletionTimes: {}, // when quests were completed (for cooldowns and display)
+    discoveredQuests: [], // Tasks you've uncovered - knowledge of suffering to come
+    questCompletionTimes: {}, // Timestamps of victory - brief moments of relief before the next grind
     questLogOpen: false,
 
-    //  TRACKED QUEST - the one quest to rule them all (only one at a time)
+    // The ONE quest burning in your obsessed little heart right now
     trackedQuestId: null,
     questMarkerElement: null,
-    trackerHidden: false, // ���💀 Track if user manually hid the tracker widget 💀
+    trackerHidden: false, // Did you hide it? Can't escape destiny that easily
 
     // 
-    //  QUEST ITEMS - special items that exist only for quests
-    // 
-    // these weigh nothing and can't be dropped because we're not monsters
+    // Quest items - weightless shackles binding you to your fate
+    // You can't drop them, can't escape them - destiny clings tight
     questItems: {
         // delivery packages
         greendale_package: { name: 'Package for Ironforge', description: 'Sealed merchant goods', quest: 'delivery_ironforge', icon: '📦' },
@@ -309,7 +308,7 @@ const QuestSystem = {
             description: 'Giant rats infest the inn storehouse. Clear them out.',
             giver: 'innkeeper',
             giverName: 'Martha the Innkeep',
-            location: 'riverside_inn', // ���💀 Fixed: Innkeeper is at the inn!
+            location: 'riverside_inn', // fixed: innkeeper is at the inn!
             type: 'combat',
             difficulty: 'easy',
             objectives: [
@@ -439,7 +438,7 @@ const QuestSystem = {
             description: 'The inn is hosting a feast. They need fresh fish from Jade Harbor.',
             giver: 'innkeeper',
             giverName: 'Madame Chen',
-            location: 'silk_road_inn', // ���💀 Fixed: Innkeeper is at Silk Road Inn (connects to jade_harbor)
+            location: 'silk_road_inn', // fixed: innkeeper is at Silk Road Inn (connects to jade_harbor)
             type: 'collect',
             difficulty: 'easy',
             objectives: [
@@ -1261,7 +1260,7 @@ const QuestSystem = {
                         break;
 
                     case 'visit':
-                    case 'travel': // ���💀 Travel is alias for visit - doom quests use this 💀
+                    case 'travel': // travel is alias for visit - doom quests use this
                         //  Support both 'location' and 'to' properties for objectives 
                         const targetLocation = objective.location || objective.to;
                         if (data.location === targetLocation) {
@@ -1377,8 +1376,8 @@ const QuestSystem = {
         if (questUpdated) {
             this.saveQuestProgress();
             this.updateQuestLogUI();
-            this.updateQuestTracker(); // ��� FIX: Update tracker widget when progress changes 💀
-            this.updateQuestMapMarker(); // ��� FIX: Update map marker when objectives complete - moves to next objective location! 💀
+            this.updateQuestTracker(); // fix: update tracker widget when progress changes
+            this.updateQuestMapMarker(); // fix: update map marker when objectives complete - moves to next objective location!
             this.checkForAutoComplete();
         }
     },
@@ -1513,7 +1512,7 @@ const QuestSystem = {
             addMessage(`Quest Complete: ${quest.name}!`, 'success');
             if (rewardsGiven.gold) addMessage(`+${rewardsGiven.gold} gold`, 'success');
             if (rewardsGiven.experience) addMessage(`+${rewardsGiven.experience} XP`, 'success');
-            if (rewardsGiven.reputation) addMessage(`+${rewardsGiven.reputation} reputation`, 'success'); // ���💀 FIXED: Show rep reward message
+            if (rewardsGiven.reputation) addMessage(`+${rewardsGiven.reputation} reputation`, 'success'); // fixed: show rep reward message
             for (const [item, qty] of Object.entries(rewardsGiven.items)) {
                 addMessage(`+${qty}x ${item}`, 'success');
             }
@@ -2132,7 +2131,7 @@ const QuestSystem = {
                         isFailed,
                         isDiscovered,
                         isMain,
-                        isAvailable // ��� track if quest is actually available from a met NPC
+                        isAvailable // track if quest is actually available from a met NPC
                     });
                 }
             });
@@ -2170,8 +2169,8 @@ const QuestSystem = {
         if (isActive) stateClass = 'active';
         else if (isCompleted) stateClass = 'completed';
         else if (isFailed) stateClass = 'failed';
-        else if (isAvailable) stateClass = 'available'; // ��� actually available from a met NPC
-        else if (isDiscovered) stateClass = 'discovered'; // ��� discovered but not available yet
+        else if (isAvailable) stateClass = 'available'; // actually available from a met NPC
+        else if (isDiscovered) stateClass = 'discovered'; // discovered but not available yet
 
         card.className = `quest-card ${stateClass} ${isMain ? 'main-quest' : ''} ${quest.difficulty || ''}`;
 
@@ -2355,13 +2354,13 @@ const QuestSystem = {
             case 'collect': return `Collect ${objective.item}`;
             case 'defeat': return `Defeat ${objective.enemy}`;
             case 'visit': return `Visit ${objective.location}`;
-            case 'travel': return `Travel to ${objective.to || objective.location}`; // ���💀 Doom quests use travel 💀
+            case 'travel': return `Travel to ${objective.to || objective.location}`; // doom quests use travel
             case 'talk': return `Talk to ${objective.npc}`;
             case 'buy': return 'Make a purchase';
             case 'trade': return 'Complete a trade';
             case 'carry': return `Carry ${objective.item}`;
             case 'explore': return `Explore ${objective.dungeon}`;
-            case 'investigate': return `Search ${objective.location}`; // ���💀 Investigation objectives 💀
+            case 'investigate': return `Search ${objective.location}`; // investigation objectives
             default: return objective.type;
         }
     },
@@ -2551,7 +2550,7 @@ const QuestSystem = {
             const isCompleted = this.completedQuests.includes(quest.id);
             const isActive = !!this.activeQuests[quest.id];
             const isTracked = this.trackedQuestId === quest.id;
-            const isExpanded = this._expandedQuestId === quest.id; // ���💀 NEW: Check if this quest is expanded
+            const isExpanded = this._expandedQuestId === quest.id; // new: check if this quest is expanded
 
             //  Determine quest status for styling - only active or completed possible here!
             let status = 'active';
@@ -3049,7 +3048,7 @@ const QuestSystem = {
         }
         const overlay = document.getElementById('quest-overlay');
         if (overlay) {
-            overlay.style.display = 'flex'; // ���💀 SHOW overlay 💀
+            overlay.style.display = 'flex'; // show overlay
             overlay.classList.add('active');
             this.questLogOpen = true;
             this.updateQuestLogUI();
@@ -3059,7 +3058,7 @@ const QuestSystem = {
     hideQuestLog() {
         const overlay = document.getElementById('quest-overlay');
         if (overlay) {
-            overlay.style.display = 'none'; // ���💀 HIDE overlay 💀
+            overlay.style.display = 'none'; // hide overlay
             overlay.classList.remove('active');
             this.questLogOpen = false;
         }
@@ -3243,7 +3242,7 @@ const QuestSystem = {
             questId: quest.id,
             objective: currentObjective,
             isTracked: true,
-            isDoom: quest.isDoom || quest.id?.startsWith('doom_') // ���💀 Flag for doom quest styling
+            isDoom: quest.isDoom || quest.id?.startsWith('doom_') // flag for doom quest styling
         };
     },
 
@@ -3893,7 +3892,7 @@ const QuestSystem = {
         document.addEventListener('player-location-changed', (e) => {
             //  CRITICAL FIX: Event detail uses locationId, not location!
             this.updateProgress('visit', { location: e.detail.locationId });
-            this.updateProgress('travel', { location: e.detail.locationId }); // ���💀 Also trigger travel objectives 💀
+            this.updateProgress('travel', { location: e.detail.locationId }); // also trigger travel objectives
         });
 
         //  NPC interaction event - DON'T auto-complete talk objectives just from opening chat! 

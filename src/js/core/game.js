@@ -9,9 +9,9 @@
 // this whole file is basically my 3 AM coding aesthetic
 // if you're reading this during normal human hours, i'm judging you
 
-// 🖤 IMMEDIATE GLOBAL EXPORTS - ensure functions are available for onclick handlers
-// This runs after script fully parses (setTimeout 0 = next event loop tick)
-// Silent no-ops as fallback - functions should always exist, no need to spam console
+// throw functions into global scope so onclick handlers can find them
+// setTimeout(0) = runs after the script finishes loading
+// fallback to silent no-ops - if they don't exist, fake it quietly
 setTimeout(() => {
     window.startNewGame = typeof startNewGame === 'function' ? startNewGame : () => {};
     window.loadGame = typeof loadGame === 'function' ? loadGame : () => {};
@@ -21,7 +21,7 @@ setTimeout(() => {
     console.log('🖤 game.js exports ready');
 }, 0);
 
-// 🖤 NOTE: DeboogerSystem is defined in debooger-system.js (loaded before this file)
+// note: DeboogerSystem is defined in debooger-system.js (loaded before this file)
 // Removed duplicate declaration to prevent "Identifier already declared" error
 
 // escape HTML to prevent XSS attacks - sanitize or die
@@ -74,12 +74,12 @@ const DedupeLogger = {
         const lastMsg = this.lastMessages[key];
         const lastTime = this.lastTimes[key] || 0;
 
-        // Skip if same message within interval
+                // ignore duplicates within the spam window
         if (lastMsg === message && (now - lastTime) < this.minInterval) {
             return false;
         }
 
-        // Log and update tracking
+        // log it and remember we said it
         console.log(message, ...args);
         this.lastMessages[key] = message;
         this.lastTimes[key] = now;
@@ -103,12 +103,12 @@ const DedupeLogger = {
         return true;
     },
 
-    // Log only when value changes (for numeric values like particle counts)
+    // log only if the value actually changed - no spam for static shit
     logOnChange(category, message, value) {
         const key = 'val_' + category;
         const lastVal = this.lastMessages[key];
 
-        // Skip if value is the same
+        // ignore if nothing changed
         if (lastVal === value) {
             return false;
         }
@@ -118,7 +118,7 @@ const DedupeLogger = {
         return true;
     },
 
-    // Clear tracking for a category (use when context changes)
+    // wipe tracking for one category - fresh start
     clear(category) {
         delete this.lastMessages[category];
         delete this.lastMessages['warn_' + category];
@@ -127,14 +127,14 @@ const DedupeLogger = {
         delete this.lastTimes['warn_' + category];
     },
 
-    // Clear all tracking
+    // nuke everything - total memory wipe
     clearAll() {
         this.lastMessages = {};
         this.lastTimes = {};
     },
 
-    // Rate-limited log - logs at most once per interval regardless of message
-    // Use for things that naturally spam but you want occasional visibility
+    // rate-limited spam control - one log per time window max
+    // for when you want to see it occasionally but not 600 times
     rateLimit(category, message, intervalMs = 10000, ...args) {
         const now = Date.now();
         const key = 'rate_' + category;
@@ -150,14 +150,14 @@ const DedupeLogger = {
     }
 };
 
-// Make globally available
+// expose to the global void
 window.DedupeLogger = DedupeLogger;
 
-// 🖤 REFACTORED: Removed global click handler that caught EVERY click
-// Instead, use targeted event delegation on specific containers
-// This is set up in setupEventListeners() below
+// killed the global click handler that was catching everything like a psycho
+// now we use targeted delegation - surgical, not fucking nuclear
+// setupEventListeners() handles the smart way
 
-// Character name sync - kept but simplified (no excessive logging)
+// sync character name input - simple and quiet
 document.addEventListener('input', function(e) {
     if (e.target.id === 'character-name-input') {
         const name = e.target.value.trim() || 'Player';
@@ -168,27 +168,27 @@ document.addEventListener('input', function(e) {
     }
 }, { passive: true });
 
-// 🦇 Expose for manual deboogering
+// make it global so you can poke at it from the console
 window.DeboogerSystem = DeboogerSystem;
 
-// 🖤 NOTE: CurrentTaskSystem is defined in current-task-system.js (loaded before this file)
+// note: CurrentTaskSystem is defined in current-task-system.js (loaded before this file)
 // Removed duplicate declaration to prevent "Identifier already declared" error
 
 // ═══════════════════════════════════════════════════════════════
-// 🏆 LEADERBOARD FEATURES - retire, preview, and active scores
+// leaderboard features - retire, preview, and active scores
 // ═══════════════════════════════════════════════════════════════
 const LeaderboardFeatures = {
     // Storage key for active high scores
     ACTIVE_SCORES_KEY: 'trader-claude-active-high-scores',
 
-    // Calculate current score (same formula as game over)
+    // run the score math - identical to game over calculation
     calculateCurrentScore() {
         if (!game || !game.player) return null;
 
         const player = game.player;
         const daysSurvived = typeof TimeSystem !== 'undefined' ? TimeSystem.currentDay : 1;
 
-        // Calculate inventory value
+        // add up all the crap in your pockets
         let inventoryValue = 0;
         if (player.inventory && Array.isArray(player.inventory)) {
             inventoryValue = player.inventory.reduce((sum, item) => {
@@ -196,7 +196,7 @@ const LeaderboardFeatures = {
             }, 0);
         }
 
-        // Calculate property value
+        // count up your real estate empire
         let propertyValue = 0;
         let propertyCount = 0;
         if (typeof PropertySystem !== 'undefined' && PropertySystem.ownedProperties) {
@@ -206,10 +206,10 @@ const LeaderboardFeatures = {
             }, 0);
         }
 
-        // Net worth calculation
+        // total wealth - gold + inventory + properties
         const netWorth = (player.gold || 0) + inventoryValue + propertyValue;
 
-        // Score formula: base on survival + wealth + achievements
+        // score formula - survival time + money + bragging rights
         const survivalBonus = daysSurvived * 10;
         const wealthBonus = Math.floor(netWorth / 100);
         const tradeBonus = (player.tradesCompleted || 0) * 5;
@@ -229,7 +229,7 @@ const LeaderboardFeatures = {
             tradesCompleted: player.tradesCompleted || 0,
             achievementsUnlocked: player.achievementsUnlocked || 0,
             difficulty: game.difficulty || 'normal',
-            // Breakdown
+            // how we got to this number
             survivalBonus: survivalBonus,
             wealthBonus: wealthBonus,
             tradeBonus: tradeBonus,
@@ -237,7 +237,7 @@ const LeaderboardFeatures = {
         };
     },
 
-    // Show score preview modal
+    // display what your score would be right now
     showScorePreview() {
         const scoreData = this.calculateCurrentScore();
         if (!scoreData) {
@@ -299,7 +299,7 @@ const LeaderboardFeatures = {
         modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     },
 
-    // Show active high scores from saved games
+    // show the leaderboard of still-living characters
     showActiveHighScores() {
         const activeScores = this.getActiveHighScores();
         const currentScore = this.calculateCurrentScore();
@@ -357,7 +357,7 @@ const LeaderboardFeatures = {
         modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     },
 
-    // Get active high scores from storage
+    // pull the high scores from localStorage
     getActiveHighScores() {
         try {
             const saved = localStorage.getItem(this.ACTIVE_SCORES_KEY);
@@ -371,7 +371,7 @@ const LeaderboardFeatures = {
         return [];
     },
 
-    // Update/add current game to active high scores
+    // save or update your current score to the list
     updateActiveScore() {
         const scoreData = this.calculateCurrentScore();
         if (!scoreData) {
@@ -381,7 +381,7 @@ const LeaderboardFeatures = {
 
         const scores = this.getActiveHighScores();
 
-        // Check if this player already has an entry
+        // see if you're already on the board
         const existingIndex = scores.findIndex(s => s.playerName === scoreData.playerName);
 
         const entry = {
@@ -391,7 +391,7 @@ const LeaderboardFeatures = {
         };
 
         if (existingIndex >= 0) {
-            // Update existing entry if score is higher
+            // replace your old score if this one's better
             if (scoreData.score > scores[existingIndex].score) {
                 scores[existingIndex] = entry;
                 addMessage(`📊 High score updated: ${scoreData.score.toLocaleString()} points!`);
@@ -399,12 +399,12 @@ const LeaderboardFeatures = {
                 addMessage(`Your current score (${scoreData.score.toLocaleString()}) is lower than your best (${scores[existingIndex].score.toLocaleString()})`);
             }
         } else {
-            // Add new entry
+            // first time on the board
             scores.push(entry);
             addMessage(`📊 Score saved: ${scoreData.score.toLocaleString()} points!`);
         }
 
-        // Sort and trim
+        // rank them and cut off the losers
         scores.sort((a, b) => b.score - a.score);
         const trimmed = scores.slice(0, 20);
 
@@ -423,13 +423,13 @@ const LeaderboardFeatures = {
         }
     },
 
-    // Clear all active high scores  FIXED: Use modal instead of browser confirm()
+    // nuke the entire leaderboard - uses modal, not browser confirm()
     clearActiveScores() {
         const doClear = () => {
             localStorage.removeItem(this.ACTIVE_SCORES_KEY);
             addMessage('🗑️ Active high scores cleared');
 
-            // Refresh the modal if open
+            // reload modal if still visible
             const modal = document.getElementById('active-scores-modal');
             if (modal) {
                 modal.remove();
@@ -451,7 +451,7 @@ const LeaderboardFeatures = {
         }
     },
 
-    // Confirm retirement
+    // ask if you really wanna retire this character
     confirmRetire() {
         const scoreData = this.calculateCurrentScore();
         if (!scoreData) {
@@ -501,17 +501,17 @@ const LeaderboardFeatures = {
         modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     },
 
-    // Execute retirement
+    // retire the character - game over but victorious
     executeRetire() {
-        // Close the modal
+        // kill the confirmation modal
         const modal = document.getElementById('retire-confirm-modal');
         if (modal) modal.remove();
 
-        // Close character sheet if open
+        // close the character sheet too if it's up
         const charSheet = document.getElementById('character-sheet-overlay');
         if (charSheet) charSheet.remove();
 
-        // Trigger game over with retirement
+        // end the game in retirement mode
         if (typeof GameOverSystem !== 'undefined') {
             GameOverSystem.handleGameOver('retired wealthy');
             addMessage('🏖️ You have retired from trading. Your legacy is secured!');
@@ -524,20 +524,20 @@ const LeaderboardFeatures = {
 // Expose globally
 window.LeaderboardFeatures = LeaderboardFeatures;
 
-// 🖤 KEYBOARD BINDINGS - MOVED TO src/js/ui/key-bindings.js 
-// 🦇 800+ lines of dead code removed by Unity on 2025-12-01
+// keyboard bindings - MOVED TO src/js/ui/key-bindings.js
+// 800+ lines of dead code removed by Unity on 2025-12-01
 // Keyboard bindings live in src/js/ui/key-bindings.js now
-// ⚰️ RIP dead code - 750+ lines removed here 
+// RIP dead code - 750+ lines removed here 
 
 // ═══════════════════════════════════════════════════════════════
-// 📝 GAME LOG MANAGER - tracking everything for deboogering 🦇
+// game log manager - tracking everything for deboogering
 // ═══════════════════════════════════════════════════════════════
 const GameLogger = {
     logs: [],
     maxLogs: 500, // keep last 500 logs
     startTime: Date.now(),
 
-    // 📝 log anything and everything
+    // record whatever the fuck happened
     log: function(category, message, data = null) {
         const timestamp = Date.now() - this.startTime;
         const logEntry = {
@@ -550,12 +550,12 @@ const GameLogger = {
 
         this.logs.push(logEntry);
 
-        // keep only the last maxLogs entries
+        // trim old logs - can't keep everything forever
         if (this.logs.length > this.maxLogs) {
             this.logs.shift();
         }
 
-        // also log to console with fancy formatting
+        // spit it to console with emoji decoration
         const emoji = this.getCategoryEmoji(category);
         if (data) {
             console.log(`${emoji} [${category}] ${message}`, data);
@@ -566,7 +566,7 @@ const GameLogger = {
         return logEntry;
     },
 
-    // 🎨 get emoji for category
+    // pick the right emoji for this category
     getCategoryEmoji: function(category) {
         const emojis = {
             'INIT': '🌙',
@@ -585,22 +585,22 @@ const GameLogger = {
         return emojis[category] || '📝';
     },
 
-    // 📋 get all logs
+    // dump the entire log history
     getAllLogs: function() {
         return this.logs;
     },
 
-    // 📋 get logs by category
+    // filter logs to one category
     getLogsByCategory: function(category) {
         return this.logs.filter(log => log.category === category);
     },
 
-    // 📋 get recent logs
+    // grab the last N logs
     getRecentLogs: function(count = 50) {
         return this.logs.slice(-count);
     },
 
-    // 💾 export logs as text
+    // format all logs as plain text for export
     exportLogs: function() {
         let text = '═══════════════════════════════════════\n';
         text += '📝 GAME LOG EXPORT\n';
@@ -618,7 +618,7 @@ const GameLogger = {
         return text;
     },
 
-    // 📤 download logs as file
+    // save logs to a .txt file and download it
     downloadLogs: function() {
         const text = this.exportLogs();
         const blob = new Blob([text], { type: 'text/plain' });
@@ -633,7 +633,7 @@ const GameLogger = {
         console.log('✅ Logs downloaded!');
     },
 
-    // 🖨️ print logs to console
+    // dump logs into the browser console
     printLogs: function(count = 50) {
         console.log('═══════════════════════════════════════');
         console.log('📝 GAME LOGS (Last', count, 'entries)');
@@ -650,22 +650,22 @@ const GameLogger = {
         console.log('💡 Tip: Use GameLogger.downloadLogs() to save logs to file');
     },
 
-    // 🗑️ clear logs
+    // wipe the log history
     clear: function() {
         this.logs = [];
         console.log('🗑️ Logs cleared');
     }
 };
 
-// expose globally so you can access it from console
+// make it global for console access
 window.GameLogger = GameLogger;
 
-// add helper commands
+// shortcut commands for lazy typing
 window.showLogs = () => GameLogger.printLogs();
 window.downloadLogs = () => GameLogger.downloadLogs();
 window.clearLogs = () => GameLogger.clear();
 
-// 🔍 DEBOOGER HELPER - test difficulty system manually from console 🦇
+// debooger helper - test difficulty system manually from console
 window.testDifficulty = (difficulty = 'easy') => {
     console.log('🔥🔥🔥 MANUAL DIFFICULTY TEST 🔥🔥🔥');
     console.log('Testing difficulty:', difficulty);
@@ -700,7 +700,7 @@ window.testDifficulty = (difficulty = 'easy') => {
     console.log('Call showLogs() to see all logs');
 };
 
-// 🔍 DEBOOGER HELPER - test attribute system manually from console 💀
+// debooger helper - test attribute system manually from console
 window.testAttribute = (attr = 'strength', direction = 'up') => {
     console.log('🔥🔥🔥 MANUAL ATTRIBUTE TEST 🔥🔥🔥');
     console.log('Testing attribute:', attr, 'direction:', direction);
@@ -725,7 +725,7 @@ window.testAttribute = (attr = 'strength', direction = 'up') => {
     });
 };
 
-// 🔍 DEBOOGER HELPER - check button states 🦇
+// debooger helper - check button states
 window.checkButtons = () => {
     console.log('🔥🔥🔥 CHECKING ALL ATTRIBUTE BUTTONS 🔥🔥🔥');
     const buttons = document.querySelectorAll('.attr-btn');
@@ -760,15 +760,15 @@ const GameState = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🖤 TIME SYSTEM - EXTRACTED TO src/js/core/time-machine.js
+// time system - EXTRACTED TO src/js/core/time-machine.js
 // ═══════════════════════════════════════════════════════════════
-// ⚰️ RIP inline TimeSystem - you've been promoted to your own file
-// 🦇 The darkness demanded better code organization
-// 💀 If TimeSystem is undefined, something's wrong with script loading
+// RIP inline TimeSystem - you've been promoted to your own file
+// the darkness demanded better code organization
+// if TimeSystem is undefined, something's wrong with script loading
 // ═══════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════════════════════
-// 🎲 EVENT SYSTEM - because chaos is more fun than order
+// event system - because chaos is more fun than order
 // ═══════════════════════════════════════════════════════════════
 // random events popping off like my intrusive thoughts
 const EventSystem = {
@@ -776,16 +776,16 @@ const EventSystem = {
     scheduledEvents: [],
     randomEventChance: 0.05,  // 5% chaos factor (seems low but trust me)
 
-    // 🌙 init - summoning the event demons
+    // init - summoning the event demons
     init() {
         this.events = [];
         this.scheduledEvents = [];
         this.setupRandomEvents();
     },
 
-    // 📜 setupRandomEvents - defining the chaos that awaits
+    // setupRandomEvents - defining the chaos that awaits
     setupRandomEvents() {
-        // 💰 market events (capitalism but make it medieval)
+        // market events (capitalism but make it medieval)
         this.addEventType('market_boom', {
             name: 'Market Boom',
             description: 'The merchant guild prospers! Prices are favorable.',
@@ -802,8 +802,8 @@ const EventSystem = {
             chance: 0.01
         });
         
-        // 🖤 REMOVED: merchant_arrival - was fake event with no actual NPC or goods 💀
-        // 🖤 REMOVED: rain_storm and clear_skies events - WeatherSystem controls all weather now 💀
+        // removed: merchant_arrival - was fake event with no actual NPC or goods
+        // removed: rain_storm and clear_skies events - WeatherSystem controls all weather now
         // Travel event
         this.addEventType('travel_complete', {
             name: 'Travel Complete',
@@ -813,10 +813,10 @@ const EventSystem = {
             chance: 0
         });
         
-        // 🖤 REMOVED: weekly_market, merchant_caravan - were fake events with no real implementation 💀
+        // removed: weekly_market, merchant_caravan - were fake events with no real implementation
         // TODO: If we want traveling merchants, build actual NPC spawning system
 
-        // 🍀 Lucky events - trigger lucky achievements!
+        // lucky events - trigger lucky achievements!
         this.addEventType('lucky_find', {
             name: 'Lucky Find!',
             description: 'You stumble upon a small pouch of gold coins hidden in the road! Fortune smiles upon you today.',
@@ -828,7 +828,7 @@ const EventSystem = {
         this.addEventType('treasure_found', {
             name: 'Hidden Treasure!',
             description: 'While resting, you notice something glinting in the dirt. You\'ve found a buried treasure chest!',
-            effects: { goldReward: 200, itemReward: 'rare_gem' }, // 🖤 rare_gem now exists in ItemDatabase 💀
+            effects: { goldReward: 200, itemReward: 'rare_gem' }, // rare_gem now exists in ItemDatabase
             duration: 0,
             chance: 0.002 // Very rare!
         });
@@ -841,10 +841,10 @@ const EventSystem = {
             chance: 0.01
         });
 
-        // 🖤 NUKED: festival event - was fake popup with no real price implementation 💀
+        // nuked: festival event - was fake popup with no real price implementation
         // Deleted 2025-12-02 by Unity - Gee said nuke it
 
-        // 🖤 Negative events - balance the luck!
+        // negative events - balance the luck!
         this.addEventType('tax_collector', {
             name: 'Tax Collector',
             description: 'The king\'s tax collector approaches. You must pay a small toll for using the road.',
@@ -878,23 +878,23 @@ const EventSystem = {
         });
     },
     
-    // 🖤 Trigger random events - weather events removed, WeatherSystem handles all weather 💀
+    // trigger random events - weather events removed, WeatherSystem handles all weather
     // Added cooldown to prevent spam - was triggering every frame at 5% = ~3 events/second!
     lastEventCheck: 0,
-    eventCheckCooldown: 120000, // 🖤💀 Check for random events once per 2 minutes (was 1 min)
+    eventCheckCooldown: 120000, // check for random events once per 2 minutes (was 1 min)
 
-    // 🖤💀 DAILY EVENT LIMIT - max 2 events per game day
+    // daily event limit - max 2 events per game day
     eventsToday: 0,
     MAX_EVENTS_PER_DAY: 2,
     lastEventDay: -1, // Track which game day we're on
 
     checkRandomEvents() {
         const now = Date.now();
-        // 🖤 Cooldown check - don't spam events every frame!
+        // cooldown check - don't spam events every frame!
         if (now - this.lastEventCheck < this.eventCheckCooldown) return;
         this.lastEventCheck = now;
 
-        // 🖤💀 Check daily limit - reset counter on new day
+        // check daily limit - reset counter on new day
         const currentDay = typeof TimeSystem !== 'undefined' ? TimeSystem.currentDay : 0;
         if (currentDay !== this.lastEventDay) {
             this.lastEventDay = currentDay;
@@ -902,7 +902,7 @@ const EventSystem = {
             console.log(`🎲 New day ${currentDay} - event counter reset`);
         }
 
-        // 🖤💀 If we've hit the daily limit, no more events today!
+        // if we've hit the daily limit, no more events today!
         if (this.eventsToday >= this.MAX_EVENTS_PER_DAY) {
             return; // Already had 2 events today, no more!
         }
@@ -912,7 +912,7 @@ const EventSystem = {
             if (eventTypes.length > 0) {
                 const randomType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
                 this.triggerEvent(randomType);
-                this.eventsToday++; // 🖤💀 Track that we triggered an event
+                this.eventsToday++; // track that we triggered an event
                 console.log(`🎲 Event triggered (${this.eventsToday}/${this.MAX_EVENTS_PER_DAY} today)`);
             }
         }
@@ -936,7 +936,7 @@ const EventSystem = {
         this.events.push(event);
         this.applyEventEffects(event);
 
-        // 🖤💀 Dispatch custom event - RandomEventPanel listens for this and shows the popup
+        // dispatch custom event - RandomEventPanel listens for this and shows the popup
         // DO NOT call RandomEventPanel.showEvent() directly - that causes DOUBLE popups!
         // The panel's event listener in setupEventListeners() handles display.
         const isSilent = eventType.silent || eventId === 'travel_complete';
@@ -944,7 +944,7 @@ const EventSystem = {
             detail: { event, silent: isSilent }
         }));
 
-        // 🖤 Message log notification - always show for non-travel events 💀
+        // message log notification - always show for non-travel events
         if (eventId !== 'travel_complete') {
             const icon = eventType.silent ? '🐫' : '🎲';
             addMessage(`${icon} ${event.name}: ${event.description}`, 'event');
@@ -972,18 +972,18 @@ const EventSystem = {
             game.travelSpeedModifier = (game.travelSpeedModifier || 1) * (1 + event.effects.travelSpeedPenalty);
         }
 
-        // 🍀 Gold reward from lucky events
+        // gold reward from lucky events
         if (event.effects.goldReward && game.player) {
             game.player.gold = (game.player.gold || 0) + event.effects.goldReward;
             addMessage(`💰 You found ${event.effects.goldReward} gold!`, 'success');
 
-            // 🏆 Track for achievements
+            // track for achievements
             if (typeof AchievementSystem !== 'undefined') {
                 AchievementSystem.stats.treasuresFound = (AchievementSystem.stats.treasuresFound || 0) + 1;
             }
         }
 
-        // 💸 Gold lost from negative events
+        // gold lost from negative events
         if (event.effects.goldLost && game.player) {
             const lostAmount = Math.min(event.effects.goldLost, game.player.gold || 0);
             game.player.gold = Math.max(0, (game.player.gold || 0) - lostAmount);
@@ -992,12 +992,12 @@ const EventSystem = {
             }
         }
 
-        // 🎁 Item reward from events
+        // item reward from events
         if (event.effects.itemReward && game.player) {
             const itemId = event.effects.itemReward;
             game.player.inventory = game.player.inventory || {};
             game.player.inventory[itemId] = (game.player.inventory[itemId] || 0) + 1;
-            // 🖤 Emit item-received for quest progress tracking 💀
+            // emit item-received for quest progress tracking
             document.dispatchEvent(new CustomEvent('item-received', {
                 detail: { item: itemId, quantity: 1, source: 'event_reward' }
             }));
@@ -1013,7 +1013,7 @@ const EventSystem = {
             this.refreshMarketItems();
         }
 
-        // 🖤💀 UPDATE UI after applying effects so gold/inventory changes show immediately!
+        // update UI after applying effects so gold/inventory changes show immediately!
         if (event.effects.goldReward || event.effects.goldLost || event.effects.itemReward) {
             this.updateUI();
             // Also emit event for any listeners
@@ -1028,7 +1028,7 @@ const EventSystem = {
         Object.keys(GameWorld.locations).forEach(locationId => {
             const location = GameWorld.locations[locationId];
 
-            // 🖤 Skip if location has no specialties array 💀
+            // skip if location has no specialties array
             if (!location.specialties || !Array.isArray(location.specialties)) return;
 
             // Add new items based on location specialties
@@ -1117,7 +1117,7 @@ const EventSystem = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖤 SAVE/LOAD INTEGRATION - Restore events on game load 💀
+    // save/load integration - restore events on game load
     // ═══════════════════════════════════════════════════════════════
 
     /**
@@ -1139,12 +1139,12 @@ const EventSystem = {
     loadSaveData(data) {
         if (!data) return;
 
-        // 🖤 Restore active events
+        // restore active events
         this.events = data.events || data.activeEvents || [];
         this.scheduledEvents = data.scheduledEvents || [];
         this.lastEventCheck = data.lastEventCheck || 0;
 
-        // 🦇 Re-apply effects for active events
+        // re-apply effects for active events
         const activeEvents = this.events.filter(e => e.active);
         activeEvents.forEach(event => {
             console.log(`🎲 Restoring event effects: ${event.name}`);
@@ -1156,7 +1156,7 @@ const EventSystem = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🎮 GAME STATE OBJECT - the beating heart of this dark empire
+// game state object - the beating heart of this dark empire
 // ═══════════════════════════════════════════════════════════════
 const game = {
     state: GameState.MENU,
@@ -1198,7 +1198,7 @@ const game = {
     
     // Initialize game engine
     init() {
-        // 🖤 TIME MACHINE handles its own init - just ensure it's ready
+        // time machine handles its own init - just ensure it's ready
         if (typeof TimeMachine !== 'undefined' && !TimeMachine.isRunning) {
             TimeMachine.init();
         }
@@ -1259,18 +1259,18 @@ const game = {
     },
     
     // Update game state
-    // 🖤 NOTE: TIME MACHINE now handles time updates via TimeMachine.tick()
+    // note: TIME MACHINE now handles time updates via TimeMachine.tick()
     // This function only updates game-specific logic, not time progression
     update(deltaTime) {
         if (this.state !== GameState.PLAYING) return;
 
-        // 🖤 TIME MACHINE handles TimeSystem.update() in its own tick() loop
+        // time machine handles TimeSystem.update() in its own tick() loop
         // We just update the EventSystem and check for scheduled events here
         EventSystem.update();
         this.updateMarketPrices();
         this.checkScheduledEvents();
 
-        // 🖤 NOTE: The following are now handled by TimeMachine.onTimeAdvance():
+        // note: the following are now handled by TimeMachine.onTimeAdvance():
         // - CityEventSystem.updateEvents()
         // - DynamicMarketSystem.updateMarketPrices()
         // - PropertySystem.processWorkQueues()
@@ -1278,7 +1278,7 @@ const game = {
         // - TradeRouteSystem.processDailyTrade()
         // - EmployeeSystem.processWeeklyWages()
 
-        // 💸 Check for bankruptcy after financial operations
+        // check for bankruptcy after financial operations
         if (typeof GameOverSystem !== 'undefined' && GameOverSystem.checkBankruptcy) {
             if (GameOverSystem.checkBankruptcy()) {
                 return; // Game over - stop processing
@@ -1295,41 +1295,41 @@ const game = {
             CityEventSystem.checkRandomEvents(this.currentLocation.id);
         }
 
-        // 💰 Update merchant economy (NPC purchases, gold tracking)
+        // update merchant economy (NPC purchases, gold tracking)
         if (typeof NPCMerchantSystem !== 'undefined') {
             NPCMerchantSystem.updateEconomy();
         }
 
-        // 🖤 Process player stats over time - the body's slow decay (and recovery)
+        // process player stats over time - the body's slow decay (and recovery)
         // Death timer logic is handled within processPlayerStatsOverTime (starvation/dehydration)
         this.processPlayerStatsOverTime();
 
         // Update UI
         this.updateUI();
 
-        // Auto-save check - 🖤 DISABLED in game loop, SaveLoadSystem handles this via TimerManager
+        // Auto-save check - disabled in game loop, SaveLoadSystem handles this via TimerManager
         // the old code was spamming auto-save every frame... absolute chaos
         // if (this.settings.autoSave && Date.now() - this.lastSaveTime > this.settings.autoSaveInterval) {
         //     this.autoSave();
         // }
     },
 
-    // 🖤 Track last processed minute to prevent multi-frame decay 💀
+    // track last processed minute to prevent multi-frame decay
     _lastProcessedMinute: -1,
     _lastProcessedDay: -1,
 
-    // 🖤 Update player stats over time - hunger, thirst, stamina decay and health regen
+    // update player stats over time - hunger, thirst, stamina decay and health regen
     // all values pulled from GameConfig.survival - the dark heart of balance
-    // 🖤 Track total minutes for proper stat decay across time speeds 💀
+    // track total minutes for proper stat decay across time speeds
     _lastProcessedTotalMinutes: -1,
 
     processPlayerStatsOverTime() {
         if (!game.player || !game.player.stats) return;
 
-        // 🖤 FIX: Stats only decay when TIME is flowing - paused = frozen in time 💀
+        // fix: stats only decay when TIME is flowing - paused = frozen in time
         if (typeof TimeMachine !== 'undefined' && TimeMachine.isPaused) return;
 
-        // 🖤 FIX: Use total minutes to properly handle FAST speeds 💀
+        // fix: use total minutes to properly handle FAST speeds
         // At fast speeds, time might jump from minute 3 to minute 7, SKIPPING minute 5
         // So we calculate how many 5-minute intervals have PASSED and apply decay for ALL of them
         const totalMinutes = TimeSystem.getTotalMinutes();
@@ -1351,8 +1351,8 @@ const game = {
         // Update tracked time
         this._lastProcessedTotalMinutes = totalMinutes;
 
-        // 🖤 Pull survival config from GameConfig (or use defaults if config isn't loaded)
-        // 🦇 FIX: Fallback values now match config.js exactly - 5 day hunger, 3 day thirst 💀
+        // pull survival config from GameConfig (or use defaults if config isn't loaded)
+        // fix: fallback values now match config.js exactly - 5 day hunger, 3 day thirst
         const survivalConfig = (typeof GameConfig !== 'undefined' && GameConfig.survival) ? GameConfig.survival : {
             hunger: { decayPerUpdate: 0.0694, criticalThreshold: 20 },  // 5 days: 100/(5*1440/5) = 0.0694
             thirst: { decayPerUpdate: 0.1157, criticalThreshold: 20 },  // 3 days: 100/(3*1440/5) = 0.1157
@@ -1361,7 +1361,7 @@ const game = {
             healthRegen: { baseRegenPerUpdate: 0.5, wellFedBonus: 1.0, wellFedThreshold: 70, enduranceBonusMultiplier: 0.05 }
         };
 
-        // 🦇 FIX: Apply seasonal effects to hunger/thirst decay
+        // fix: apply seasonal effects to hunger/thirst decay
         // Seasons modify decay rates (e.g., winter = more hunger, summer = more thirst)
         const season = (typeof TimeMachine !== 'undefined' && TimeMachine.getSeasonData)
             ? TimeMachine.getSeasonData()
@@ -1369,26 +1369,26 @@ const game = {
         const hungerSeasonMod = season.effects?.hungerDrain || 1.0;
         const thirstSeasonMod = season.effects?.thirstDrain || 1.0;
 
-        // 🖤💀 DOOM WORLD MULTIPLIER - Double stat drain in the apocalypse! 💀
+        // doom world multiplier - double stat drain in the apocalypse!
         // Survival is brutal in doom world - hunger and thirst drain 2x faster
         const isInDoomWorld = (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
                               (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
                               (typeof game !== 'undefined' && game.inDoomWorld);
         const doomMultiplier = isInDoomWorld ? 2.0 : 1.0;
 
-        // 🖤 FIX: Apply decay for ALL intervals that passed (handles fast speeds!) 💀
+        // fix: apply decay for ALL intervals that passed (handles fast speeds!)
         // At FAST speed, multiple 5-minute intervals can pass in one frame
-        // 🖤💀 Doom world applies 2x multiplier to hunger/thirst decay
+        // doom world applies 2x multiplier to hunger/thirst decay
         const hungerDecay = survivalConfig.hunger.decayPerUpdate * hungerSeasonMod * doomMultiplier * intervalsPassed;
         const thirstDecay = survivalConfig.thirst.decayPerUpdate * thirstSeasonMod * doomMultiplier * intervalsPassed;
 
-        // 🍖 HUNGER DECAY - dragged from the config's cold embrace
+        // hunger decay - dragged from the config's cold embrace
         game.player.stats.hunger = Math.max(0, game.player.stats.hunger - hungerDecay);
 
-        // 💧 THIRST DECAY - dehydration comes for us all
+        // thirst decay - dehydration comes for us all
         game.player.stats.thirst = Math.max(0, game.player.stats.thirst - thirstDecay);
 
-        // ⚡ STAMINA REGENERATION - rest restores energy when idle 🖤
+        // stamina regeneration - rest restores energy when idle
         // 0% to 100% in 5 game hours when not gathering or traveling
         // Updates every 5 minutes = 60 updates in 5 hours = 1.667 per update
         const isGathering = typeof ResourceGatheringSystem !== 'undefined' && ResourceGatheringSystem.activeGathering;
@@ -1396,8 +1396,8 @@ const game = {
         const isIdle = !isGathering && !isTraveling;
 
         if (isIdle) {
-            // 😴 Regenerate stamina when resting (idle)
-            // 🖤 FIX: Apply for ALL intervals that passed 💀
+            // regenerate stamina when resting (idle)
+            // fix: apply for ALL intervals that passed
             const staminaRegenRate = (survivalConfig.stamina?.regenPerUpdate || 1.667) * intervalsPassed;
             const maxStamina = game.player.stats.maxStamina || 100;
             const currentStamina = game.player.stats.stamina;
@@ -1413,7 +1413,7 @@ const game = {
         }
         // Note: Stamina is drained by gathering (ResourceGatheringSystem) and traveling (TravelSystem) directly
 
-        // 💚 PASSIVE HEALTH REGENERATION - slow but steady recovery
+        // passive health regeneration - slow but steady recovery
         // Only regenerate if hunger and thirst are above critical levels
         const hungerCrit = survivalConfig.hunger.criticalThreshold;
         const thirstCrit = survivalConfig.thirst.criticalThreshold;
@@ -1444,14 +1444,14 @@ const game = {
             }
         }
 
-        // 💀 DEATH TIMER: If hunger OR thirst is at 0%, health degrades
+        // death timer: if hunger OR thirst is at 0%, health degrades
         // uses percentage-based damage so high HP and low HP players die in same time
         const isStarving = game.player.stats.hunger <= 0;
         const isDehydrated = game.player.stats.thirst <= 0;
 
         if (isStarving || isDehydrated) {
             // Calculate damage as percentage of max health from config
-            // 🖤 FIX: Apply for ALL intervals that passed (handles fast speeds!) 💀
+            // fix: apply for ALL intervals that passed (handles fast speeds!)
             const maxHealthForDeath = game.player.stats.maxHealth || 100;
             const percentageDamage = maxHealthForDeath * survivalConfig.starvationDeath.healthDrainPercent * intervalsPassed;
             game.player.stats.health = Math.max(0, game.player.stats.health - percentageDamage);
@@ -1485,7 +1485,7 @@ const game = {
             }
         }
 
-        // 💀 check if the void claims another soul
+        // check if the void claims another soul
         if (game.player.stats.health <= 0) {
             // Use DeathCauseSystem if available, otherwise fallback
             let deathCause = 'the void simply called';
@@ -1639,14 +1639,14 @@ const game = {
         addMessage('The market has refreshed with new goods!');
     },
     
-    // Apply day/night visual effects - 🖤 fixed CSS filter syntax
+    // Apply day/night visual effects - fixed CSS filter syntax
     applyDayNightEffects() {
         const timeInfo = TimeSystem.getTimeInfo();
         const canvas = elements.gameCanvas;
 
         if (!canvas) return;
 
-        // 🖤 use proper CSS filter functions - brightness and sepia for day/night vibes
+        // use proper CSS filter functions - brightness and sepia for day/night vibes
         let filterValue = 'none';
 
         if (timeInfo.isNight) {
@@ -1674,13 +1674,13 @@ const game = {
         // Update time control buttons
         this.updateTimeControls();
 
-        // 🖤💀 UNIVERSAL FINANCIAL TRACKING - Update gold display every tick 💰
+        // universal financial tracking - update gold display every tick
         // This ensures all sales, purchases, wages, and income show immediately
         if (typeof updatePlayerInfo === 'function') {
             updatePlayerInfo();
         }
 
-        // 🖤💀 Sync game.player.gold with GoldManager/UniversalGoldManager if available 💰
+        // sync game.player.gold with GoldManager/UniversalGoldManager if available
         if (typeof UniversalGoldManager !== 'undefined' && this.player) {
             const currentGold = UniversalGoldManager.getPersonalGold();
             if (this.player.gold !== currentGold) {
@@ -1711,7 +1711,7 @@ const game = {
         });
     },
     
-    // Save game state - 🖤 with proper null checks for systems that might not exist
+    // Save game state - with proper null checks for systems that might not exist
     saveState() {
         return {
             player: this.player,
@@ -1733,7 +1733,7 @@ const game = {
     
     // Load game state
     loadState(saveData) {
-        // 🖤 Reset stat decay tracker on load - prevents multi-frame decay from previous session 💀
+        // reset stat decay tracker on load - prevents multi-frame decay from previous session
         this._lastProcessedMinute = -1;
 
         this.player = saveData.player;
@@ -2093,11 +2093,11 @@ const TransportSystem = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🖤 GAME WORLD SYSTEM - EXTRACTED TO src/js/data/game-world.js
+// game world system - EXTRACTED TO src/js/data/game-world.js
 // ═══════════════════════════════════════════════════════════════
-// ⚰️ RIP inline GameWorld - you've been promoted to your own file
-// 🦇 ~1500 lines of medieval world-building glory
-// 💀 If GameWorld is undefined, something's wrong with script loading
+// RIP inline GameWorld - you've been promoted to your own file
+// ~1500 lines of medieval world-building glory
+// if GameWorld is undefined, something's wrong with script loading
 // ═══════════════════════════════════════════════════════════════
 
 /* EXTRACTED - GameWorld now lives at src/js/data/game-world.js
@@ -3184,7 +3184,7 @@ const GameWorld = {
     },
     
     // Calculate travel time between locations
-    // 🖤 UNIFIED: All travel time calculations MUST use weather/seasonal modifiers from TimeMachine 💀
+    // unified: all travel time calculations MUST use weather/seasonal modifiers from TimeMachine
     calculateTravelTime(fromId, toId) {
         const fromLocation = this.locations[fromId];
         const toLocation = this.locations[toId];
@@ -3200,7 +3200,7 @@ const GameWorld = {
         // Apply travel speed modifier from events
         const eventModifier = game.travelSpeedModifier || 1.0;
 
-        // 🖤 Apply weather and seasonal modifiers - MUST match TravelSystem 💀
+        // apply weather and seasonal modifiers - MUST match TravelSystem
         let weatherSpeedMod = 1.0;
         let seasonalSpeedMod = 1.0;
 
@@ -3253,7 +3253,7 @@ const GameWorld = {
             cost: travelCost
         });
 
-        // 🖤 Track journey start for achievements (Start Your Journey!)
+        // track journey start for achievements (Start Your Journey!)
         if (typeof AchievementSystem !== 'undefined' && AchievementSystem.trackJourneyStart) {
             AchievementSystem.trackJourneyStart(locationId);
         }
@@ -3651,7 +3651,7 @@ const GameWorld = {
 /* END OF EXTRACTED GameWorld */
 
 // ═══════════════════════════════════════════════════════════════
-// ✨ PERK SYSTEM - your tragic backstory determines your stats
+// perk system - your tragic backstory determines your stats
 // ═══════════════════════════════════════════════════════════════
 // medieval character backgrounds (aka choose your trauma)
 const perks = {
@@ -3661,15 +3661,15 @@ const perks = {
         description: "You spent years in the forest, felling trees with axe and saw.",
         startingLocation: 'darkwood_village', // Start at the logging village
         startingItems: {
-            // 🪓 Tools of the trade
+            // tools of the trade
             axe: 1,
-            // 🧥 Rugged work clothes
+            // rugged work clothes
             simple_clothes: 1,
             leather_boots: 1,
-            // 📦 Resources from the forest
+            // resources from the forest
             timber: 3,
             rope: 2,
-            // 🍞 Basic provisions
+            // basic provisions
             bread: 2,
             water: 1
         },
@@ -3690,14 +3690,14 @@ const perks = {
         description: "You served in the king's army until the regiment was disbanded.",
         startingLocation: 'royal_capital', // Start near capital
         startingItems: {
-            // ⚔️ Military gear you kept
+            // military gear you kept
             iron_sword: 1,
             leather_armor: 1,
             helmet: 1,
-            // 🧥 Worn uniform
+            // worn uniform
             simple_clothes: 1,
             leather_boots: 1,
-            // 🍖 Army provisions
+            // army provisions
             military_rations: 2,
             bandages: 2,
             water: 1
@@ -3720,14 +3720,14 @@ const perks = {
         description: "Once a noble, you lost your lands but retained your wealth and connections.",
         startingLocation: 'royal_capital', // Start at capital
         startingItems: {
-            // 👑 Remnants of nobility
+            // remnants of nobility
             silk_garments: 1,
             jewelry: 1,
-            // 🗡️ A noble's sidearm
+            // a noble's sidearm
             dagger: 1,
-            // 🧥 Fine traveling attire
+            // fine traveling attire
             leather_boots: 1,
-            // 🍷 Luxuries you couldn't part with
+            // luxuries you couldn't part with
             fine_wine: 2,
             cheese: 2,
             bread: 1
@@ -3750,15 +3750,15 @@ const perks = {
         description: "You come from humble beginnings, knowing the value of hard work and every coin.",
         startingLocation: 'greendale', // Start at village
         startingItems: {
-            // 🌾 Farm tools you brought
+            // farm tools you brought
             scythe: 1,
-            // 🧥 Simple farmer's clothes
+            // simple farmer's clothes
             simple_clothes: 1,
             leather_boots: 1,
-            // 📦 Harvest from your farm
+            // harvest from your farm
             wheat: 3,
             vegetables: 2,
-            // 🍞 Basic provisions
+            // basic provisions
             bread: 3,
             water: 2
         },
@@ -3780,14 +3780,14 @@ const perks = {
         description: "You were sworn to service, trained in combat and honor.",
         startingLocation: 'royal_capital', // Start at capital
         startingItems: {
-            // ⚔️ Knight's armaments
+            // knight's armaments
             steel_sword: 1,
             shield: 1,
-            // 🛡️ Full armor set
+            // full armor set
             chainmail: 1,
             helmet: 1,
             leather_boots: 1,
-            // 🍖 Travel provisions
+            // travel provisions
             military_rations: 2,
             water: 1
         },
@@ -3809,15 +3809,15 @@ const perks = {
         description: "You learned trade from a master merchant in the bustling markets.",
         startingLocation: 'jade_harbor', // Start at the trading port
         startingItems: {
-            // 📊 Tools of trade
+            // tools of trade
             merchant_ledger: 1,
-            // 🧥 Respectable merchant attire
+            // respectable merchant attire
             simple_clothes: 1,
             leather_boots: 1,
-            // 📦 Sample trade goods
+            // sample trade goods
             trade_goods: 3,
             spices: 2,
-            // 🍞 Provisions
+            // provisions
             bread: 2,
             water: 1
         },
@@ -3839,14 +3839,14 @@ const perks = {
         description: "You traveled the land singing tales, learning many secrets.",
         startingLocation: 'silk_road_inn', // Start at the famous waystation
         startingItems: {
-            // 🎵 Your beloved instrument
+            // your beloved instrument
             lute: 1,
-            // 🧥 Colorful performer's garb
+            // colorful performer's garb
             simple_clothes: 1,
             leather_boots: 1,
-            // 🗡️ Protection for the road
+            // protection for the road
             dagger: 1,
-            // 🍷 Provisions for the journey
+            // provisions for the journey
             wine: 2,
             bread: 2,
             cheese: 1
@@ -3869,15 +3869,15 @@ const perks = {
         description: "You've lived a long life and gained wisdom through experience.",
         startingLocation: 'vineyard_village', // Start at peaceful village
         startingItems: {
-            // 🧙 Elder's accessories
+            // elder's accessories
             walking_staff: 1,
-            // 🧥 Comfortable elder's robes
+            // comfortable elder's robes
             simple_clothes: 1,
             leather_boots: 1,
-            // 🌿 Medicinal knowledge
+            // medicinal knowledge
             herbs: 3,
             bandages: 2,
-            // ☕ Comforts of home
+            // comforts of home
             tea: 2,
             bread: 2,
             honey: 1
@@ -3901,17 +3901,17 @@ const perks = {
         description: "You served in the sacred temples, learning ancient knowledge.",
         startingLocation: 'royal_capital', // Start at capital (has temples)
         startingItems: {
-            // ⛪ Sacred items
+            // sacred items
             holy_symbol: 1,
             incense: 2,
             holy_water: 2,
-            // 🧥 Temple robes
+            // temple robes
             simple_clothes: 1,
             leather_boots: 1,
-            // 🌿 Healing supplies
+            // healing supplies
             herbs: 2,
             bandages: 1,
-            // 🍞 Simple provisions
+            // simple provisions
             bread: 2,
             water: 1
         },
@@ -3929,7 +3929,7 @@ const perks = {
     }
 };
 
-// 🖤 Make perks globally accessible for character sheet lookups
+// make perks globally accessible for character sheet lookups
 window.perks = perks;
 
 // Character attributes
@@ -3995,14 +3995,14 @@ const elements = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 💰 UNIFIED GOLD MANAGEMENT SYSTEM - one source of truth to rule them all
+// unified gold management system - one source of truth to rule them all
 // ═══════════════════════════════════════════════════════════════
 // this is basically how i wish my bank account worked
 const GoldManager = {
     _gold: 100,  // the sacred number (single source of truth)
     _displays: [],  // all the places we flex our wealth
 
-    // 🌙 init - birth of the gold empire
+    // init - birth of the gold empire
     init: function(initialGold = 100) {
         console.log('🪙 GoldManager initialized with', initialGold, 'gold');
         this._gold = initialGold;
@@ -4010,7 +4010,7 @@ const GoldManager = {
         this.updateAllDisplays();
     },
 
-    // 📝 registerDisplay - telling UI elements to show off the gold
+    // registerDisplay - telling UI elements to show off the gold
     registerDisplay: function(elementId, formatter = null) {
         const element = document.getElementById(elementId);
         if (element) {
@@ -4023,12 +4023,12 @@ const GoldManager = {
         }
     },
 
-    // 💎 getGold - check how much we're worth
+    // getGold - check how much we're worth
     getGold: function() {
         return this._gold;
     },
 
-    // 💸 setGold - changing our fortune (for better or worse)
+    // setGold - changing our fortune (for better or worse)
     setGold: function(amount, reason = '') {
         const oldGold = this._gold;
         this._gold = Math.max(0, Math.round(amount));  // no negatives, we're not THAT broke
@@ -4046,12 +4046,12 @@ const GoldManager = {
         return this._gold;
     },
 
-    // ✨ addGold - making it rain (medieval style)
+    // addGold - making it rain (medieval style)
     addGold: function(amount, reason = '') {
         return this.setGold(this._gold + amount, reason || `+${amount}`);
     },
 
-    // 💀 removeGold - watching our dreams disappear
+    // removeGold - watching our dreams disappear
     removeGold: function(amount, reason = '') {
         if (this._gold >= amount) {
             this.setGold(this._gold - amount, reason || `-${amount}`);
@@ -4062,12 +4062,12 @@ const GoldManager = {
         }
     },
 
-    // 🤔 canAfford - reality check before we make bad decisions
+    // canAfford - reality check before we make bad decisions
     canAfford: function(amount) {
         return this._gold >= amount;
     },
 
-    // 🔄 updateAllDisplays - sync the gold count everywhere
+    // updateAllDisplays - sync the gold count everywhere
     updateAllDisplays: function() {
         console.log(`🪙 Updating ${this._displays.length} displays with gold: ${this._gold}`);
         this._displays.forEach(({ element, formatter }, index) => {
@@ -4614,13 +4614,13 @@ function setupEventListeners() {
         });
     });
 
-    // ⏰ TIME CONTROL BUTTONS - REMOVED: GameEngine.setupTimeControls() handles these now
-    // 🖤 Keeping this comment as a grave marker for the duplicate handlers that once lived here
-    // ⚰️ RIP redundant event listeners - you caused the time freeze bug
+    // time control buttons - REMOVED: GameEngine.setupTimeControls() handles these now
+    // keeping this comment as a grave marker for the duplicate handlers that once lived here
+    // RIP redundant event listeners - you caused the time freeze bug
     // TIME MACHINE handles time buttons via onclick, starts the engine properly when unpausing
     console.log('⏰ Time control buttons now handled by TimeMachine.setupTimeControls()');
 
-    // 🖤 TIME MACHINE handles setSpeed internally now - just update game UI when speed changes
+    // time machine handles setSpeed internally now - just update game UI when speed changes
     if (typeof TimeMachine !== 'undefined') {
         const originalSetSpeed = TimeMachine.setSpeed.bind(TimeMachine);
         TimeMachine.setSpeed = function(speed) {

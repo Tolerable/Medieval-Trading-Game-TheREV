@@ -1,5 +1,5 @@
 //
-// GATEHOUSE SYSTEM - pay to escape your current hell
+// GATEHOUSE SYSTEM - 💰 pay the toll to walk new roads of suffering 💀
 //
 // Version: 0.90.01 | Unity AI Lab
 // Creators: Hackall360, Sponge, GFourteen
@@ -10,10 +10,10 @@
 //
 
 const GatehouseSystem = {
-    // Track which gatehouses have been paid for (unlocked)
+    // 🗝️ Which gates you've bought passage through (freedom costs gold)
     unlockedGates: new Set(),
 
-    // Track the player's starting zone (determines which zones are free)
+    // 🏡 Where this nightmare began
     startingZone: 'starter',
 
     // Helper to get fee from config (with fallback)
@@ -31,8 +31,8 @@ const GatehouseSystem = {
         return fallbackFees[gatehouseId] || 0;
     },
 
-    // Define travel zones and their gatehouses
-    // Capital is ALWAYS accessible from any starting location
+    // 🗺️ Regions of this dying world - some locked, some free
+    // Capital always open (even hell needs a throne)
     ZONES: {
         starter: {
             name: 'Starter Region',
@@ -71,7 +71,7 @@ const GatehouseSystem = {
         southern: {
             name: 'Southern Coast',
             description: 'The Glendale region - a natural expansion from the starter area. Free passage for all traders.',
-            accessible: true, // ��� FREE! Natural progression from starter
+            accessible: true, // FREE! natural progression from starter
             gatehouse: null, // No gatehouse - always open
             fee: 0
         },
@@ -84,8 +84,8 @@ const GatehouseSystem = {
         }
     },
 
-    // Gatehouse definitions - cities/locations that control access to zones
-    // Players can travel TO these, but can't pass THROUGH without paying
+    // 🏰 The guardhouses where you pay for passage deeper into darkness
+    // You can reach them, but not pass through without gold
     GATEHOUSES: {
         // Northern zone gate - Northern Outpost - MID GAME 10k
         northern_outpost: {
@@ -133,8 +133,8 @@ const GatehouseSystem = {
         // Starter has NO gatehouse - always accessible!
     },
 
-    // Map zones to their controlling gatehouses
-    // Progression: starter -> south (FREE) -> east (1k at Jade Harbor) -> north (10k at Northern Outpost) -> west (50k at Western Watch)
+    // 🗺️ Which gate controls which region - your roadmap to ruin
+    // Progression: starter -> south (FREE) -> east (1k) -> north (10k) -> west (50k)
     ZONE_GATEHOUSES: {
         'northern': 'northern_outpost',      // 10,000g - mid game (Northern Outpost gate → Ironforge City)
         'western': 'western_watch',          // 50,000g - late game (Western Watch gate → Stonebridge village)
@@ -144,7 +144,7 @@ const GatehouseSystem = {
         'starter': null                    // Starter always accessible
     },
 
-    // Locations mapped to their zones (for quick lookup)
+    // 📍 Every location mapped to its region of despair
     LOCATION_ZONES: {
         // Capital zone - ALWAYS accessible
         'royal_capital': 'capital',
@@ -286,7 +286,7 @@ const GatehouseSystem = {
         });
     },
 
-    // Load unlocked gates from localStorage
+    // 💾 Resurrect your purchased freedoms from storage
     loadUnlockedGates() {
         try {
             const saved = localStorage.getItem('trader-claude-unlocked-gates');
@@ -335,9 +335,9 @@ const GatehouseSystem = {
         console.log('🏰 Registered', Object.keys(this.GATEHOUSES).length, 'gatehouses');
     },
 
-    // Check if a location is accessible
-    // Gates BLOCK travel INTO locked zones - you must pay at the gatehouse to enter
-    // Once unlocked, you can travel freely within the zone
+    // 🚫 Can you walk this path or is it still locked by greed?
+    // Gates block you until gold opens the way
+    // Once paid, roam freely (within that zone of suffering)
     canAccessLocation(locationId, fromLocationId = null) {
         // Get destination zone
         const destZone = this.LOCATION_ZONES[locationId] || this.getLocationZone(locationId);
@@ -348,8 +348,8 @@ const GatehouseSystem = {
 
         console.log(`🏰 canAccessLocation check: ${locationId} (zone: ${destZone}) from ${fromId} (zone: ${fromZone})`);
 
-        // ALWAYS ACCESSIBLE ZONES - no gates needed
-        // Capital, starter, and southern are always free
+        // 🏛️ FREE ZONES - no toll required (yet)
+        // Capital, starter, southern - your starting playground
         if (destZone === 'capital') {
             return { accessible: true, reason: null, zoneType: 'capital' };
         }
@@ -359,16 +359,16 @@ const GatehouseSystem = {
         if (destZone === 'southern') {
             return { accessible: true, reason: null, zoneType: 'free' };
         }
-        // Eastern, Northern, Western require gate fees
+        // 💰 PAID ZONES - Eastern, Northern, Western demand gold
 
-        // Check if destination IS a gatehouse/outpost - always accessible so you can interact
-        // But the locked zone BEYOND the gatehouse requires payment
+        // 🏰 Gatehouses themselves are always reachable
+        // (You can reach the gate - passing through costs gold)
         const destIsGatehouse = Object.values(this.GATEHOUSES).find(g => g.id === locationId);
         if (destIsGatehouse) {
             return { accessible: true, reason: null, isGatehouse: true };
         }
 
-        // Check if zone is already unlocked (paid at gatehouse)
+        // 🗝️ Already bought passage? Walk free.
         const gatehouseId = this.ZONE_GATEHOUSES[destZone];
         if (gatehouseId && this.unlockedGates.has(gatehouseId)) {
             return { accessible: true, reason: null, zoneType: 'unlocked' };
@@ -383,20 +383,20 @@ const GatehouseSystem = {
             return { accessible: true, reason: null, zoneType: 'accessible' };
         }
 
-        // ALREADY IN ZONE - can move freely within the locked zone once you're in
-        // (This only matters if you snuck in via back path or were placed there)
+        // 🗺️ ALREADY INSIDE - roam freely within your current cage
+        // (If you're already in, move around - how you got there doesn't matter now)
         if (fromZone === destZone) {
             return { accessible: true, reason: null, zoneType: 'sameZone' };
         }
 
-        // AT A GATEHOUSE - Check if we're at the gatehouse that controls this zone
-        // If so, allow travel INTO the locked zone ONLY if we've paid
+        // 🏰 STANDING AT THE GATE - can you pass through or are you blocked?
+        // Guards watch, hands outstretched for coin
         const fromIsGatehouse = fromId ? Object.values(this.GATEHOUSES).find(g => g.id === fromId) : null;
         if (fromIsGatehouse) {
-            // We're at a gatehouse
+            // 💂 You're at the gate
             if (fromIsGatehouse.unlocksZone === destZone) {
-                // Trying to go INTO the locked zone from its controlling gatehouse
-                // This requires payment!
+                // 🚪 Trying to pass through - better have paid the toll
+                // No gold? No entry.
                 if (!this.unlockedGates.has(fromIsGatehouse.id)) {
                     console.log(`🏰 BLOCKED: At ${fromIsGatehouse.name}, trying to enter ${destZone} without paying`);
                     return {
@@ -408,14 +408,14 @@ const GatehouseSystem = {
                     };
                 }
             } else {
-                // Going back/away from the gatehouse to a non-locked direction
+                // 🚶 Turning back from the gate - that's allowed
                 console.log(`🏰 Leaving ${fromIsGatehouse.name} - going back, allowed`);
                 return { accessible: true, reason: null, leavingGate: true };
             }
         }
 
-        // TRYING TO BYPASS GATEHOUSE - traveling to a locked zone from a non-gatehouse location
-        // Must go through the gatehouse first!
+        // 🚫 TRYING TO SNEAK AROUND - nice try, asshole
+        // Can't bypass the gatehouse - go pay your toll like everyone else
         const gateInfo = this.GATEHOUSES[gatehouseId];
         console.log(`🏰 BLOCKED: Trying to enter ${destZone} from ${fromZone} - must go through ${gateInfo?.name || 'gatehouse'}`);
         return {
@@ -455,7 +455,7 @@ const GatehouseSystem = {
         return 'starter';
     },
 
-    // Pay passage fee to unlock a gatehouse
+    // 💰 Hand over the gold - buy your passage through the gate
     payPassageFee(gatehouseId) {
         const gatehouse = this.GATEHOUSES[gatehouseId];
         if (!gatehouse) {
@@ -463,13 +463,13 @@ const GatehouseSystem = {
             return false;
         }
 
-        // Check if already unlocked
+        // 🗝️ Already paid? Stop wasting my time.
         if (this.unlockedGates.has(gatehouseId)) {
             addMessage(`${gatehouse.name} is already unlocked!`, 'info');
             return true;
         }
 
-        // Check if player has enough gold
+        // 💸 Can you afford freedom?
         if (typeof game === 'undefined' || !game.player) {
             addMessage('Cannot access player data!', 'error');
             return false;
@@ -480,12 +480,12 @@ const GatehouseSystem = {
             return false;
         }
 
-        // Deduct gold and unlock
+        // 💸 Watch your wealth drain away for the illusion of progress
         game.player.gold -= gatehouse.fee;
         this.unlockedGates.add(gatehouseId);
         this.saveUnlockedGates();
 
-        // Update zone accessibility
+        // 🗺️ The zone opens - new paths of suffering await
         const zone = gatehouse.unlocksZone;
         if (this.ZONES[zone]) {
             this.ZONES[zone].accessible = true;
@@ -912,12 +912,12 @@ const GatehouseSystem = {
         return { accessible, locked };
     },
 
-    // 
-    //  ZONE-BASED PRICE MODIFIERS - balanced trade route profits
-    // 
-    //  Each zone has specialty items that are cheaper to BUY there
+    //
+    // zone-based price modifiers - balanced trade route profits
+    //
+    // each zone has specialty items that are cheaper to BUY there
     // and items that are in demand (higher SELL price)
-    // This creates natural trade routes without one trade = millionaire
+    // this creates natural trade routes without one trade = millionaire
     ZONE_TRADE_BONUSES: {
         starter: {
             // Starter zone - basic goods, balanced prices
@@ -969,7 +969,7 @@ const GatehouseSystem = {
         }
     },
 
-    //  Get price modifier for an item at a location
+    // get price modifier for an item at a location
     getZonePriceModifier(locationId, itemId, isBuying) {
         const zone = this.LOCATION_ZONES[locationId] || this.getLocationZone(locationId);
         const zoneBonus = this.ZONE_TRADE_BONUSES[zone];
@@ -991,7 +991,7 @@ const GatehouseSystem = {
         return 1.0; // No special modifier
     },
 
-    //  Get trade route suggestion for a zone
+    // get trade route suggestion for a zone
     getTradeRouteSuggestion(fromZone) {
         const routes = {
             starter: { to: 'southern', buy: 'wheat/grain', sell: 'fish/wine', profit: '~20-30%' },

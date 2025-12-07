@@ -12,7 +12,7 @@ const CombatSystem = {
     // UTILITIES - Security first, bitches
     // 
 
-    // Escape HTML to prevent XSS - Unity says "sanitize or die"
+    // Sanitize enemy names or get XSS fucked - security before blood
     escapeHtml(text) {
         if (text == null) return '';
         const div = document.createElement('div');
@@ -33,10 +33,10 @@ const CombatSystem = {
         maxRounds: 20
     },
 
-    // Combat state
+    // The current bloodbath - who's dying right now
     activeCombat: null,
     combatLog: [],
-    isProcessingAction: false, // Mutex flag to prevent double-click race conditions
+    isProcessingAction: false, // Lock this shit - one murder at a time
 
     // 
     // ENEMY DEFINITIONS
@@ -166,7 +166,7 @@ const CombatSystem = {
     },
 
     setupEventListeners() {
-        // Listen for combat-related events
+        // Hook into violence triggers - death calls from everywhere
         if (typeof EventBus !== 'undefined') {
             EventBus.on('encounter-combat', (data) => this.startCombat(data));
             EventBus.on('robbery-resist', (data) => this.startRobberyDefense(data));
@@ -184,14 +184,14 @@ const CombatSystem = {
         let defense = this.config.baseDefense;
         let speed = 5;
 
-        // Add attribute bonuses
+        // Strength makes you hit harder - simple fucking math
         if (player.attributes) {
             attack += (player.attributes.strength || 0) * 2;
             defense += (player.attributes.endurance || 0);
             speed += (player.attributes.agility || 0);
         }
 
-        // Add equipment bonuses
+        // Armor and weapons make the difference between living and bleeding out
         if (player.equipment && typeof EquipmentSystem !== 'undefined') {
             const bonuses = EquipmentSystem.getTotalBonuses?.() || {};
             attack += bonuses.attack || 0;
@@ -199,7 +199,7 @@ const CombatSystem = {
             speed += bonuses.speed || 0;
         }
 
-        // Add skill bonuses
+        // Practice makes you lethal - every fight teaches
         if (player.skills?.combat) {
             attack += Math.floor(player.skills.combat / 10);
             defense += Math.floor(player.skills.combat / 20);
@@ -226,7 +226,7 @@ const CombatSystem = {
             return null;
         }
 
-        // Scale enemy based on options
+        // Make the enemy match your level - fair fights or brutal ones
         const scaledEnemy = this.scaleEnemy(enemy, options.level || 1);
 
         this.activeCombat = {
@@ -240,7 +240,7 @@ const CombatSystem = {
         this.combatLog = [];
         this.addCombatLog(`Combat begins! You face a ${scaledEnemy.name}!`);
 
-        // Show combat UI
+        // Throw up the battle screen - time to fucking fight
         this.showCombatUI();
 
         return this.activeCombat;
@@ -265,15 +265,15 @@ const CombatSystem = {
     // COMBAT ACTIONS
     // 
     playerAttack() {
-        // Mutex check - prevent double-click race conditions
+        // Lock check - no button spamming you impatient fuck
         if (!this.activeCombat || this.activeCombat.state !== 'active') return;
-        if (this.isProcessingAction) return; // Already processing, fuck off
+        if (this.isProcessingAction) return; // Already swinging, calm down
         this.isProcessingAction = true;
 
         const combat = this.activeCombat;
         combat.round++;
 
-        // Player attacks
+        // Swing your weapon - steel meets flesh
         const playerDamage = this.calculateDamage(
             combat.player.attack,
             combat.enemy.defense,
@@ -288,47 +288,47 @@ const CombatSystem = {
             this.addCombatLog(`You attack for ${playerDamage.damage} damage.`);
         }
 
-        // Check if enemy is dead
+        // Did you kill it? Check the corpse
         if (combat.enemy.currentHealth <= 0) {
             this.victory();
             return;
         }
 
-        // Enemy attacks back
+        // Still breathing? Now it's their turn to hurt you
         this.enemyTurn();
     },
 
     playerDefend() {
-        // Mutex check - darkness waits for no one
+        // Lock check - you can't defend twice at once
         if (!this.activeCombat || this.activeCombat.state !== 'active') return;
-        if (this.isProcessingAction) return; // Already processing
+        if (this.isProcessingAction) return; // Shield's already up
         this.isProcessingAction = true;
 
         const combat = this.activeCombat;
         combat.round++;
 
-        // Defending doubles defense for this turn
+        // Turtle up - temporarily double your armor
         const originalDefense = combat.player.defense;
         combat.player.defense *= 2;
 
         this.addCombatLog(`🛡️ You raise your guard, doubling your defense!`);
 
-        // Enemy attacks
+        // Let the enemy take their swing while you hide
         this.enemyTurn();
 
-        // Reset defense
+        // Defense bonus fades - back to normal armor
         combat.player.defense = originalDefense;
     },
 
     playerFlee() {
-        // Mutex check - can't escape twice at once
+        // Lock check - you're either running or you're not
         if (!this.activeCombat || this.activeCombat.state !== 'active') return;
-        if (this.isProcessingAction) return; // Already processing
+        if (this.isProcessingAction) return; // Already booking it
         this.isProcessingAction = true;
 
         const combat = this.activeCombat;
 
-        // Calculate flee chance based on speed difference
+        // Run like hell - faster than them means better odds
         let fleeChance = this.config.fleeChance;
         const speedDiff = combat.player.speed - combat.enemy.speed;
         fleeChance += speedDiff * 0.05;
@@ -339,25 +339,25 @@ const CombatSystem = {
             this.endCombat('fled');
         } else {
             this.addCombatLog(`You failed to escape!`);
-            // Enemy gets a free attack
+            // They catch you - now you eat a free hit for being a coward
             this.enemyTurn();
         }
     },
 
     useItem(itemId) {
-        // Mutex check - one potion at a time, mortal
+        // Lock check - chug one healing potion at a time
         if (!this.activeCombat || this.activeCombat.state !== 'active') return;
-        if (this.isProcessingAction) return; // Already processing
+        if (this.isProcessingAction) return; // Already drinking
         this.isProcessingAction = true;
 
         const item = typeof ItemDatabase !== 'undefined' ? ItemDatabase.getItem(itemId) : null;
-        // Reset mutex if item invalid - don't trap the player in processing hell
+        // Invalid item? Unlock and bail - don't softlock the player
         if (!item || !item.consumable) {
             this.isProcessingAction = false;
             return;
         }
 
-        // Use the item
+        // Consume the fucking thing - pray it helps
         if (game.player.inventory[itemId] > 0) {
             const effects = item.effects || {};
 
@@ -369,7 +369,7 @@ const CombatSystem = {
                 this.addCombatLog(`🧪 You use ${item.name} and heal ${healed} HP!`);
             }
 
-            // Remove item from inventory
+            // One less potion - you used it, it's gone
             game.player.inventory[itemId]--;
             if (game.player.inventory[itemId] <= 0) {
                 delete game.player.inventory[itemId];
@@ -386,7 +386,7 @@ const CombatSystem = {
         const combat = this.activeCombat;
         if (!combat || combat.state !== 'active') return;
 
-        // Apply special abilities
+        // Some monsters heal - because fuck you that's why
         if (combat.enemy.special === 'regeneration') {
             const heal = Math.round(combat.enemy.health * 0.05);
             combat.enemy.currentHealth = Math.min(
@@ -396,7 +396,7 @@ const CombatSystem = {
             this.addCombatLog(`🩹 The ${combat.enemy.name} regenerates ${heal} HP!`);
         }
 
-        // Enemy attacks - distribute among party members
+        // Pick a target - you or your companions bleed
         const aliveCompanions = combat.player.companions?.filter(c => c.health > 0) || [];
         const alivePartyMembers = aliveCompanions.length + 1; // +1 for player
 
@@ -404,7 +404,7 @@ const CombatSystem = {
         let targetName = game.player?.name || 'You';
         let targetDefense = combat.player.defense;
 
-        // Random target selection: 50% player, 50% companions
+        // Coin flip: attack you or attack your friends
         if (aliveCompanions.length > 0 && Math.random() < 0.5) {
             const randomCompanion = aliveCompanions[Math.floor(Math.random() * aliveCompanions.length)];
             target = randomCompanion.id;
@@ -418,23 +418,23 @@ const CombatSystem = {
             false
         );
 
-        // Apply damage to target
+        // Damage lands - somebody bleeds
         if (target === 'player') {
             game.player.stats.health -= enemyDamage.damage;
             combat.player.health = game.player.stats.health;
         } else {
-            // Find companion in actual game data and apply damage
+            // Your companion takes the hit - they're bleeding for you
             if (typeof CompanionSystem !== 'undefined') {
                 const companion = CompanionSystem.getCompanion(target);
                 if (companion) {
                     companion.health = Math.max(0, companion.health - enemyDamage.damage);
 
-                    // Check if companion died
+                    // Companion death - someone you trusted just died for you
                     if (companion.health <= 0) {
                         this.addCombatLog(`💀 ${companion.name} has fallen in battle!`);
                     }
 
-                    // Recalculate player stats (companions may have died)
+                    // Companion died? Recalc stats - you just got weaker
                     combat.player = this.getPlayerCombatStats();
                 }
             }
@@ -446,23 +446,23 @@ const CombatSystem = {
             this.addCombatLog(`🔪 ${combat.enemy.name} attacks ${targetName} for ${enemyDamage.damage} damage.`);
         }
 
-        // Check if player is dead
+        // Are you dead yet? Check your pulse
         if (game.player.stats.health <= 0) {
             game.player.stats.health = 0;
             this.defeat();
             return;
         }
 
-        // Update UI
+        // Refresh the battle display with fresh blood
         this.updateCombatUI();
 
-        // Check max rounds
+        // Fight dragging on? Both sides retreat before exhaustion kills
         if (combat.round >= this.config.maxRounds) {
             this.addCombatLog(`The battle drags on... both combatants retreat.`);
             this.endCombat('draw');
         }
 
-        // Reset mutex - action complete, ready for next move
+        // Unlock action - your turn again, make it count
         this.isProcessingAction = false;
     },
 
@@ -470,16 +470,16 @@ const CombatSystem = {
     // DAMAGE CALCULATION
     // 
     calculateDamage(attack, defense, ignoreDefense = false) {
-        // Base damage with some randomness
+        // Roll the damage dice - chaos makes it real
         let damage = attack * (0.8 + Math.random() * 0.4);
 
-        // Apply defense (unless ignored)
+        // Armor reduces pain (unless you're fighting ghosts)
         if (!ignoreDefense) {
             const reduction = defense / (defense + 20); // Diminishing returns
             damage *= (1 - reduction);
         }
 
-        // Check for critical hit
+        // Critical strike - when luck meets violence
         const crit = Math.random() < this.config.critChance;
         if (crit) {
             damage *= this.config.critMultiplier;
@@ -497,14 +497,14 @@ const CombatSystem = {
         const combat = this.activeCombat;
         combat.state = 'victory';
 
-        // Set enemy health to 0 for display
+        // Enemy is dead - fucking DEAD
         combat.enemy.currentHealth = 0;
 
         this.addCombatLog(`🏆 Victory! You defeated the ${combat.enemy.name}!`);
         this.addCombatLog(`❤️ Enemy health: 0 / ${combat.enemy.health}`);
         this.addCombatLog(`❤️ Your health: ${combat.player.health} / ${combat.player.maxHealth}`);
 
-        // Calculate rewards
+        // Loot the corpse - violence pays in gold
         const goldReward = Math.floor(
             combat.enemy.goldDrop.min +
             Math.random() * (combat.enemy.goldDrop.max - combat.enemy.goldDrop.min)
@@ -515,32 +515,32 @@ const CombatSystem = {
             this.addCombatLog(`💰 You found ${goldReward} gold!`);
         }
 
-        // XP reward
+        // Every kill makes you stronger - learn from blood
         if (combat.enemy.xpReward && game.player.experience !== undefined) {
             game.player.experience += combat.enemy.xpReward;
             this.addCombatLog(`✨ Gained ${combat.enemy.xpReward} XP!`);
 
-            // Check level up
+            // Did you level up? Growth through slaughter
             if (typeof checkLevelUp === 'function') {
                 checkLevelUp();
             }
         }
 
-        // Combat skill increase
+        // Fighting teaches you how to fight better - simple
         if (game.player.skills) {
             game.player.skills.combat = (game.player.skills.combat || 0) + 1;
         }
 
-        // Loot drops
+        // Check the body for treasure - dead enemies drop shit
         if (combat.enemy.loot && combat.enemy.loot.length > 0) {
-            // 50% chance for each loot item
+            // Coin flip for each item - RNG is cruel
             combat.enemy.loot.forEach(itemId => {
                 if (Math.random() < 0.5) {
                     if (!game.player.inventory[itemId]) {
                         game.player.inventory[itemId] = 0;
                     }
                     game.player.inventory[itemId]++;
-                    // Emit item-received for quest progress tracking
+                    // Alert the quest system - loot counts for objectives
                     document.dispatchEvent(new CustomEvent('item-received', {
                         detail: { item: itemId, quantity: 1, source: 'combat_loot' }
                     }));
@@ -551,7 +551,7 @@ const CombatSystem = {
             });
         }
 
-        // Fire event for quest tracking
+        // Broadcast the kill - quests need to know you murdered this thing
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('enemy-defeated', {
                 enemyType: combat.enemy.id,
@@ -560,12 +560,12 @@ const CombatSystem = {
             });
         }
 
-        // Also fire DOM event for compatibility
+        // Legacy event broadcast - backwards compatibility for old code
         document.dispatchEvent(new CustomEvent('enemy-defeated', {
             detail: { enemyType: combat.enemy.id, count: 1 }
         }));
 
-        // Achievement check
+        // Did this kill unlock anything? Check achievements
         if (typeof AchievementSystem !== 'undefined') {
             AchievementSystem.checkAchievement?.('first_blood');
             AchievementSystem.incrementStat?.('enemies_defeated', 1);
@@ -579,56 +579,56 @@ const CombatSystem = {
         const combat = this.activeCombat;
         combat.state = 'defeat';
 
-        // Keep health at 0 - player actually died in combat
+        // You're fucking dead - zero health, zero hope
         game.player.stats.health = 0;
         combat.player.health = 0;
 
         this.addCombatLog(`💀 Defeat! The ${combat.enemy.name} has bested you!`);
         this.addCombatLog(`❤️ Your health: 0 / ${combat.player.maxHealth}`);
 
-        // Fire event
+        // Broadcast your death - the world needs to know you failed
         if (typeof EventBus !== 'undefined') {
             EventBus.emit('combat-defeat', { enemy: combat.enemy.id });
         }
 
-        // Update UI to show final 0 health state
+        // Show your corpse on screen - death needs display
         this.updateCombatUI();
         this.showDefeatUI();
     },
 
     endCombat(result) {
-        // Always reset mutex when combat ends
+        // Unlock the action system - combat's over
         this.isProcessingAction = false;
 
         if (this.activeCombat) {
             this.activeCombat.state = result;
         }
 
-        // Update player stats display immediately
+        // Refresh the stat display with your battered body
         if (typeof updatePlayerStats === 'function') {
             updatePlayerStats();
         }
 
-        // Check if player died - trigger game over
+        // Did you die? Trigger the death sequence
         const playerDied = result === 'defeat' && game.player.stats.health <= 0;
 
-        // Close combat UI after delay
+        // Wait a beat, then close - let the result sink in
         setTimeout(() => {
             this.closeCombatUI();
             this.activeCombat = null;
 
-            // Resume game if it was paused
+            // Unpause the world - time flows again
             if (typeof TimeSystem !== 'undefined' && TimeSystem.isPaused) {
                 TimeSystem.resume();
             }
 
-            // If player died in combat, trigger death sequence
+            // Player died? Time to trigger game over
             if (playerDied) {
-                // Set death cause for combat
+                // Mark cause of death - slain in battle
                 if (typeof DeathCauseSystem !== 'undefined') {
                     DeathCauseSystem.recordCause('combat', 'slain in combat');
                 }
-                // Trigger game over
+                // Roll credits on your failure
                 if (typeof handlePlayerDeath === 'function') {
                     handlePlayerDeath('slain in combat');
                 } else if (typeof GameOverSystem !== 'undefined') {
@@ -642,7 +642,7 @@ const CombatSystem = {
     // COMBAT UI
     // 
     showCombatUI() {
-        // Remove existing
+        // Clear any old battle UI first - fresh canvas
         const existing = document.getElementById('combat-overlay');
         if (existing) existing.remove();
 
@@ -714,12 +714,12 @@ const CombatSystem = {
             z-index: 900; /* Z-INDEX STANDARD: Critical overlays (combat) */
         `;
 
-        // Inject component styles
+        // Load the battle styles - make it pretty (and deadly)
         this.injectCombatStyles();
 
         document.body.appendChild(overlay);
 
-        // Pause game
+        // Freeze time - the world stops when you fight
         if (typeof TimeSystem !== 'undefined') {
             TimeSystem.setSpeed('PAUSED');
         }
@@ -729,7 +729,7 @@ const CombatSystem = {
         const combat = this.activeCombat;
         if (!combat) return;
 
-        // Update health bars
+        // Refresh all the battle stats - show the carnage
         const playerHealth = document.querySelector('.player-health');
         const enemyHealth = document.querySelector('.enemy-health');
         const playerText = document.querySelector('.player-side .health-text');
@@ -752,7 +752,7 @@ const CombatSystem = {
             roundText.textContent = `Round ${combat.round}`;
         }
 
-        // Update combat log - Sanitized against XSS
+        // Refresh the battle log - sanitize to prevent XSS bullshit
         const logDisplay = document.getElementById('combat-log-display');
         if (logDisplay) {
             logDisplay.innerHTML = this.combatLog.map(msg =>
@@ -783,7 +783,7 @@ const CombatSystem = {
     },
 
     showItemMenu() {
-        // Show consumable items that can be used in combat
+        // Display potions and shit you can chug mid-battle
         const consumables = [];
         if (game.player?.inventory) {
             for (const [itemId, qty] of Object.entries(game.player.inventory)) {
@@ -832,7 +832,7 @@ const CombatSystem = {
 
     addCombatLog(message) {
         this.combatLog.push(message);
-        // Keep last 10 messages
+        // Only keep recent history - old blood doesn't matter
         if (this.combatLog.length > 10) {
             this.combatLog.shift();
         }
@@ -1019,12 +1019,12 @@ const CombatSystem = {
         const playerPower = player.attack + player.defense + (playerAdvantage * 10);
         const enemyPower = enemy.attack + enemy.defense;
 
-        // Calculate win chance
+        // Math decides who lives and who dies - fast resolution
         const winChance = playerPower / (playerPower + enemyPower);
         const roll = Math.random();
 
         if (roll < winChance) {
-            // Victory
+            // Victory - you won without the full battle UI
             const goldReward = Math.floor(
                 enemy.goldDrop.min + Math.random() * (enemy.goldDrop.max - enemy.goldDrop.min)
             );
@@ -1033,7 +1033,7 @@ const CombatSystem = {
             game.player.gold += goldReward;
             game.player.stats.health = Math.max(1, game.player.stats.health - damage);
 
-            // Fire event
+            // Broadcast the kill event for quest tracking
             document.dispatchEvent(new CustomEvent('enemy-defeated', {
                 detail: { enemyType: enemyId, count: 1 }
             }));
@@ -1045,7 +1045,7 @@ const CombatSystem = {
                 message: `You defeated the ${enemy.name}! Gained ${goldReward} gold, took ${damage} damage.`
             };
         } else {
-            // Defeat
+            // Defeat - you got your ass kicked offscreen
             const damage = Math.floor(enemy.attack * (0.3 + Math.random() * 0.4));
             const goldLost = Math.min(game.player.gold, Math.floor(game.player.gold * 0.1));
 
@@ -1061,13 +1061,13 @@ const CombatSystem = {
         }
     },
 
-    // 
+    //
     // ROBBERY DEFENSE (Special combat for robbery events)
-    // 
+    //
     startRobberyDefense(options) {
         const numBandits = options.bandits || 1;
 
-        // Scale difficulty based on number of bandits
+        // More bandits = harder fight - scale the threat
         const scaledBandit = {
             ...this.enemies.bandit,
             name: numBandits > 1 ? `${numBandits} Bandits` : 'Bandit',

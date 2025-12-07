@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// 👥 UNIFIED PEOPLE PANEL - talk, trade, quest, exist... all in one dark place
+// unified people panel - talk, trade, quest, exist... all in one dark place
 // ═══════════════════════════════════════════════════════════════
 // File Version: 0.90.01
 // conjured by Unity AI Lab - every soul, every transaction, every whisper
@@ -7,7 +7,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 const PeoplePanel = {
-    // 🔧 CONFIG - the bones of this beast
+    // config - the bones of this beast
     panelId: 'people-panel',
     isOpen: false,
     currentNPC: null,
@@ -15,12 +15,12 @@ const PeoplePanel = {
     isWaitingForResponse: false,
     viewMode: 'list', // 'list' or 'chat'
 
-    // 🚀 INITIALIZE - wake the panel from its slumber
+    // initialize - wake the panel from its slumber
     init() {
         this.createPanelHTML();
         this.setupEventListeners();
 
-        // 🖤 Stop voice playback on page unload to prevent memory leaks 💀
+        // stop voice playback on page unload to prevent memory leaks
         window.addEventListener('beforeunload', () => {
             if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.stopVoicePlayback) {
                 NPCVoiceChatSystem.stopVoicePlayback();
@@ -30,7 +30,7 @@ const PeoplePanel = {
         console.log('👥 PeoplePanel: unified interface ready... talk, trade, quest, all in one place 🖤');
     },
 
-    // 🏗️ CREATE PANEL HTML - the entire unified interface
+    // create panel html - the entire unified interface
     createPanelHTML() {
         if (document.getElementById(this.panelId)) {
             return;
@@ -137,14 +137,14 @@ const PeoplePanel = {
         console.log('👥 PeoplePanel: Unified panel created');
     },
 
-    // 🎨 ADD STYLES - making it not look like garbage
+    // add styles - making it not look like garbage
     addStyles() {
         if (document.getElementById('people-panel-styles')) return;
 
         const styles = document.createElement('style');
         styles.id = 'people-panel-styles';
         styles.textContent = `
-            /* 🖤 People Panel Unified Styles */
+            /* people panel unified styles */
             #people-panel {
                 min-width: 400px;
                 max-width: 500px;
@@ -189,7 +189,7 @@ const PeoplePanel = {
                 position: relative;
             }
 
-            /* 🖤💀 WOW-STYLE QUEST MARKERS - Exclamation Points & Question Marks 💀 */
+            /* wow-style quest markers - exclamation points & question marks */
             .quest-badge {
                 position: absolute;
                 top: -4px;
@@ -427,7 +427,7 @@ const PeoplePanel = {
                 border-color: rgba(255,215,0,0.4);
             }
 
-            /* 🖤 Quest Action Buttons - special styling 💀 */
+            /* quest action buttons - special styling */
             .quick-action-btn.quest-action-btn {
                 background: rgba(255,215,0,0.15);
                 border-color: rgba(255,215,0,0.4);
@@ -564,7 +564,7 @@ const PeoplePanel = {
         document.head.appendChild(styles);
     },
 
-    // 👂 SETUP EVENT LISTENERS
+    // setup event listeners
     setupEventListeners() {
         document.addEventListener('location-changed', (e) => {
             if (this.isOpen && this.viewMode === 'list') {
@@ -576,7 +576,7 @@ const PeoplePanel = {
             if (e.target.matches(`[data-close-overlay="${this.panelId}"]`)) {
                 this.close();
             }
-            // 🖤💀 Handle panel button actions - no more inline onclick garbage
+            // handle panel button actions - no more inline onclick garbage
             if (e.target.matches('[data-action="back-to-list"]')) {
                 this.showListView();
             }
@@ -589,33 +589,33 @@ const PeoplePanel = {
             }
         });
 
-        // 🖤 listen for quest updates
+        // listen for quest updates
         document.addEventListener('quest-assigned', () => {
             this.updateQuestItems();
-            // 🖤💀 CRITICAL: Refresh NPC list to update quest markers (! and ?) on portraits
+            // critical: refresh npc list to update quest markers (! and ?) on portraits
             if (this.viewMode === 'list') {
                 this.showNPCList(); // Rebuild cards with updated markers
             }
         });
         document.addEventListener('quest-completed', () => {
             this.updateQuestItems();
-            // 🖤💀 Also refresh stats bar AND trade section to show updated reputation after quest reward
+            // also refresh stats bar and trade section to show updated reputation after quest reward
             if (this.currentNPC && this.viewMode === 'chat') {
                 this.updateNPCStatsBar(this.currentNPC);
                 this.updateTradeSection(this.currentNPC); // 🖤💀 FIXED: Refresh trade section too!
             }
-            // 🖤💀 CRITICAL: Refresh NPC list to update quest markers (! and ?) on portraits
+            // critical: refresh npc list to update quest markers (! and ?) on portraits
             if (this.viewMode === 'list') {
                 this.showNPCList(); // Rebuild cards with updated markers
             }
         });
 
-        // 🖤💀 FIXED: Listen for reputation changes to update stats bar AND trade section in real-time 💀
+        // fixed: listen for reputation changes to update stats bar and trade section in real-time
         document.addEventListener('npc-reputation-changed', (e) => {
             if (this.currentNPC && this.viewMode === 'chat') {
                 const npcId = this.currentNPC.id || this.currentNPC.type;
                 const npcType = this.currentNPC.type;
-                // 🦇 Refresh if the changed NPC matches by id, type, or contains the type
+                // refresh if the changed npc matches by id, type, or contains the type
                 if (e.detail.npcId === npcId || e.detail.npcId === npcType || e.detail.npcId.includes(npcType)) {
                     this.updateNPCStatsBar(this.currentNPC);
                     this.updateTradeSection(this.currentNPC); // 🖤💀 Also refresh trade section to update rep requirement display!
@@ -634,7 +634,7 @@ const PeoplePanel = {
         });
     },
 
-    // 🔓 OPEN PANEL
+    // open panel
     open() {
         const panel = document.getElementById(this.panelId);
         if (!panel) {
@@ -649,7 +649,7 @@ const PeoplePanel = {
         console.log('👥 PeoplePanel: Opened');
     },
 
-    // 🔒 CLOSE PANEL
+    // close panel
     close() {
         const panel = document.getElementById(this.panelId);
         if (panel) {
@@ -666,7 +666,7 @@ const PeoplePanel = {
         else this.open();
     },
 
-    // 📋 SHOW LIST VIEW
+    // show list view
     showListView() {
         this.viewMode = 'list';
         document.getElementById('people-list-view')?.classList.remove('hidden');
@@ -675,7 +675,7 @@ const PeoplePanel = {
         this.stopVoice();
     },
 
-    // 💬 SHOW CHAT VIEW
+    // show chat view
     showChatView(npcData) {
         this.viewMode = 'chat';
         this.currentNPC = npcData;
@@ -684,7 +684,7 @@ const PeoplePanel = {
         document.getElementById('people-list-view')?.classList.add('hidden');
         document.getElementById('people-chat-view')?.classList.remove('hidden');
 
-        // 🦇 Record NPC meeting for quest availability
+        // record npc meeting for quest availability
         const npcId = npcData.id || npcData.type;
         if (typeof NPCRelationshipSystem !== 'undefined' && npcId) {
             NPCRelationshipSystem.recordInteraction(npcId, 'conversation', { npcData });
@@ -697,7 +697,7 @@ const PeoplePanel = {
         this.updateQuestItems();
         this.updateTradeSection(npcData);
 
-        // 🖤 Start conversation with greeting
+        // start conversation with greeting
         this.sendGreeting(npcData);
 
         // Focus input
@@ -706,7 +706,7 @@ const PeoplePanel = {
         }, 100);
     },
 
-    // 🔄 REFRESH NPC LIST
+    // refresh npc list
     refresh() {
         const locationContext = document.getElementById('people-location-context');
         const peopleList = document.getElementById('people-list');
@@ -719,7 +719,7 @@ const PeoplePanel = {
         const currentLocation = game?.currentLocation;
         const locationId = currentLocation?.id || null;
 
-        // 🖤 Use doom-aware location name if DoomWorldSystem is active 💀
+        // use doom-aware location name if doomworldsystem is active
         let locationName = currentLocation?.name || 'Unknown Location';
         if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive && DoomWorldSystem.getCurrentLocationName && locationId) {
             locationName = DoomWorldSystem.getCurrentLocationName(locationId);
@@ -729,21 +729,21 @@ const PeoplePanel = {
             locationContext.textContent = `📍 ${locationName}`;
         }
 
-        // 🦇 Get NPCs from GameWorld's spawn system
+        // get npcs from gameworld's spawn system
         let npcs = [];
         if (typeof GameWorld !== 'undefined' && locationId) {
             npcs = GameWorld.getNPCDataForLocation(locationId) || [];
         }
 
-        // 💀 Fallback sources
+        // fallback sources
         if (npcs.length === 0 && typeof NPCManager !== 'undefined' && locationId) {
             npcs = NPCManager.getAvailableNPCs(locationId) || [];
         }
 
-        // 🖤 Add Boatman NPC if available at this location 💀
+        // add boatman npc if available at this location
         if (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isBoatmanHere(locationId)) {
             const boatman = DoomWorldSystem.getBoatmanNPC();
-            // 🦇 Don't add duplicate
+            // don't add duplicate
             if (!npcs.find(n => n.id === 'boatman' || n.type === 'boatman')) {
                 npcs.unshift(boatman); // Add at beginning for visibility
             }
@@ -762,24 +762,24 @@ const PeoplePanel = {
         console.log(`👥 PeoplePanel: Showing ${npcs.length} NPCs at ${locationName}`);
     },
 
-    // 🎴 CREATE NPC CARD
+    // create npc card
     createNPCCard(npc) {
         const card = document.createElement('div');
         card.className = 'npc-card';
         card.dataset.npcId = npc.id;
 
         const icon = this.getNPCIcon(npc.type || npc.id);
-        // 🖤💀 Escape NPC data for XSS safety - never trust external data
+        // escape npc data for xss safety - never trust external data
         const name = this.escapeHtml(npc.name || this.formatNPCName(npc.id));
         const title = this.escapeHtml(npc.title || this.getNPCTitle(npc.type || npc.id));
         const description = this.escapeHtml(npc.description || this.getNPCDescription(npc.type || npc.id));
 
-        // 🖤💀 WOW-STYLE QUEST MARKERS - Check for quest status 💀
+        // wow-style quest markers - check for quest status
         const npcTypeForQuest = npc.type || npc.id;
         console.log(`🎴 createNPCCard: NPC "${name}" (id: ${npc.id}, type: ${npc.type}, using: ${npcTypeForQuest})`);
         const questMarker = this.getQuestMarker(npcTypeForQuest);
         const hasDelivery = this.npcHasDeliveryForThem(npc.type || npc.id);
-        // 🖤💀 Also check npc.canTrade for random encounters (smuggler, courier, pilgrim) 💀
+        // also check npc.canTrade for random encounters (smuggler, courier, pilgrim)
         const canTrade = this.npcCanTrade(npc.type || npc.id) || npc.canTrade;
 
         let badges = '';
@@ -810,11 +810,11 @@ const PeoplePanel = {
         return card;
     },
 
-    // 🗨️ TALK TO NPC - opens chat view
+    // talk to npc - opens chat view
     talkTo(npc) {
         let npcData = npc;
 
-        // 🖤💀 SPECIAL HANDLER: Hooded Stranger - offers initial quest if not accepted yet 💀
+        // special handler: hooded stranger - offers initial quest if not accepted yet
         if ((npc.type === 'hooded_stranger' || npc.id?.includes('hooded_stranger')) &&
             typeof InitialEncounterSystem !== 'undefined' &&
             InitialEncounterSystem.needsInitialQuest?.()) {
@@ -823,7 +823,7 @@ const PeoplePanel = {
             return;
         }
 
-        // 🖤 Enrich with persona data if available
+        // enrich with persona data if available
         if (typeof NPCPersonaDatabase !== 'undefined') {
             const persona = NPCPersonaDatabase.getPersona(npc.type || npc.id);
             if (persona) {
@@ -835,7 +835,7 @@ const PeoplePanel = {
         this.showChatView(npcData);
     },
 
-    // 🖤💀 Show the Hooded Stranger quest offer (for players who declined initially) 💀
+    // show the hooded stranger quest offer (for players who declined initially)
     _showHoodedStrangerQuestOffer(npc) {
         const playerName = typeof game !== 'undefined' ? game.player?.name : 'Traveler';
         const questOffer = InitialEncounterSystem.offerInitialQuestFromStranger?.();
@@ -847,7 +847,7 @@ const PeoplePanel = {
             return;
         }
 
-        // 🖤 Show special encounter with quest offer
+        // show special encounter with quest offer
         this.showSpecialEncounter(InitialEncounterSystem.mysteriousStranger, {
             introText: 'The hooded figure turns to face you, ancient eyes gleaming beneath the cowl...',
             greeting: questOffer.dialogue,
@@ -878,7 +878,7 @@ const PeoplePanel = {
         });
     },
 
-    // 📝 UPDATE CHAT HEADER
+    // update chat header
     updateChatHeader(npcData) {
         const icon = this.getNPCIcon(npcData.type || npcData.id);
         const name = npcData.name || this.formatNPCName(npcData.id);
@@ -888,11 +888,11 @@ const PeoplePanel = {
         document.getElementById('chat-npc-name').textContent = name;
         document.getElementById('chat-npc-title').textContent = title;
 
-        // 🖤 Update badges
+        // update badges
         const badges = document.getElementById('chat-npc-badges');
         badges.innerHTML = '';
 
-        // 🖤💀 WOW-STYLE QUEST BADGES 💀
+        // wow-style quest badges
         const questMarker = this.getQuestMarker(npcData.type || npcData.id);
         if (questMarker) {
             if (questMarker.marker === '?') {
@@ -918,18 +918,18 @@ const PeoplePanel = {
         }
     },
 
-    // 📊 UPDATE NPC STATS BAR - horizontal relationship/trade stats
+    // update npc stats bar - horizontal relationship/trade stats
     updateNPCStatsBar(npcData) {
         const npcId = npcData.id || npcData.type;
 
-        // 🖤 Get relationship data from NPCRelationshipSystem
+        // get relationship data from npcrelationshipsystem
         let relationship = { level: 'neutral', reputation: 0 };
         let tradeStats = { timesTraded: 0, totalGoldTraded: 0 };
 
         if (typeof NPCRelationshipSystem !== 'undefined') {
             const rel = NPCRelationshipSystem.relationships?.[npcId];
             if (rel) {
-                // 🖤💀 getRelationshipLevel returns { key, icon, label, min, max } object
+                // getrelationshiplevel returns { key, icon, label, min, max } object
                 const levelInfo = NPCRelationshipSystem.getRelationshipLevel(rel.reputation || 0);
                 relationship = {
                     levelInfo: levelInfo,
@@ -942,18 +942,18 @@ const PeoplePanel = {
             }
         }
 
-        // 🦇 Get level info for icon and label - already retrieved from getRelationshipLevel
+        // get level info for icon and label - already retrieved from getrelationshiplevel
         const levelInfo = relationship.levelInfo;
 
         const icon = levelInfo?.icon || '😐';
         const label = levelInfo?.label || 'Neutral';
 
-        // 🖤💀 Get the trade requirement for this NPC type 💀
+        // get the trade requirement for this npc type
         const npcType = npcData.type || npcData.id;
         const repRequired = this.getTradeRepRequirement(npcType);
         const canTrade = this.npcCanTrade(npcType) || npcData.canTrade;
 
-        // 🖤 Update UI elements
+        // update ui elements
         const relationIcon = document.getElementById('npc-relation-icon');
         const relationLabel = document.getElementById('npc-relation-label');
         const reputationValue = document.getElementById('npc-reputation-value');
@@ -965,7 +965,7 @@ const PeoplePanel = {
         if (relationLabel) relationLabel.textContent = label;
         if (reputationValue) {
             reputationValue.textContent = relationship.reputation;
-            // 🖤💀 Color code: green if trade unlocked, yellow if close, red if far 💀
+            // color code: green if trade unlocked, yellow if close, red if far
             if (canTrade) {
                 reputationValue.style.color = '#4a9';
             } else if (relationship.reputation >= repRequired * 0.5) {
@@ -976,23 +976,23 @@ const PeoplePanel = {
         }
         if (repRequiredEl) {
             repRequiredEl.textContent = repRequired;
-            // 🖤 Show requirement in muted color, or green if already met
+            // show requirement in muted color, or green if already met
             repRequiredEl.style.color = canTrade ? '#4a9' : '#888';
         }
         if (tradesValue) tradesValue.textContent = tradeStats.timesTraded;
         if (goldTradedValue) goldTradedValue.textContent = tradeStats.totalGoldTraded.toLocaleString();
     },
 
-    // 💬 SEND GREETING - 🖤 Now uses NPCInstructionTemplates for NPC-specific greetings 💀
+    // send greeting - now uses npcinstructiontemplates for npc-specific greetings
     async sendGreeting(npcData) {
         this.addChatMessage('*Approaching...*', 'system');
 
-        // 🖤 Generate greeting via API with standardized GREETING action 💀
+        // generate greeting via api with standardized greeting action
         if (typeof NPCVoiceChatSystem !== 'undefined') {
             NPCVoiceChatSystem.startConversation(npcData.id, npcData);
 
             try {
-                // 🦇 Use GREETING action type for proper NPC-specific instructions
+                // use greeting action type for proper npc-specific instructions
                 const options = {
                     action: 'greeting',
                     availableQuests: this.getAvailableQuestsForNPC(),
@@ -1017,7 +1017,7 @@ const PeoplePanel = {
                 this.addChatMessage(response.text, 'npc');
                 this.chatHistory.push({ role: 'assistant', content: response.text });
 
-                // 🔊 Play TTS with NPC-specific voice from templates
+                // play tts with npc-specific voice from templates
                 if (NPCVoiceChatSystem.settings?.voiceEnabled) {
                     const voice = this.getNPCVoice(npcData);
                     NPCVoiceChatSystem.playVoice(response.text, voice);
@@ -1047,7 +1047,7 @@ const PeoplePanel = {
         return greetings[npcData.type] || greetings.default;
     },
 
-    // 💬 SEND MESSAGE
+    // send message
     async sendMessage() {
         if (this.isWaitingForResponse || !this.currentNPC) return;
 
@@ -1064,7 +1064,7 @@ const PeoplePanel = {
 
         try {
             if (typeof NPCVoiceChatSystem !== 'undefined') {
-                // 🖤💀 INCLUDE QUEST CONTEXT so the AI knows what quests to offer/check/complete!
+                // include quest context so the ai knows what quests to offer/check/complete!
                 const options = {
                     action: 'chat',  // Specify action for template system
                     availableQuests: this.getAvailableQuestsForNPC(),
@@ -1080,7 +1080,7 @@ const PeoplePanel = {
                     options  // 🖤💀 Pass the quest context!
                 );
 
-                // 🖤 Remove typing indicator
+                // remove typing indicator
                 const messages = document.getElementById('people-chat-messages');
                 const typing = messages?.querySelector('.typing-indicator');
                 if (typing) typing.remove();
@@ -1088,19 +1088,19 @@ const PeoplePanel = {
                 this.addChatMessage(response.text, 'npc');
                 this.chatHistory.push({ role: 'assistant', content: response.text });
 
-                // 🔊 Play TTS with NPC-specific voice
+                // play tts with npc-specific voice
                 if (NPCVoiceChatSystem.settings?.voiceEnabled) {
                     const voice = this.getNPCVoice(this.currentNPC);
                     NPCVoiceChatSystem.playVoice(response.text, voice);
                 }
 
-                // 🖤 Update quest items in case something changed
+                // update quest items in case something changed
                 this.updateQuestItems();
-                // 🖤💀 Also update quick actions in case quest status changed
+                // also update quick actions in case quest status changed
                 this.updateQuickActions(this.currentNPC);
             }
         } catch (e) {
-            // 🖤 API error - NPC gracefully deflects with in-character response
+            // api error - npc gracefully deflects with in-character response
             console.error('🖤 Chat error:', e);
             const messages = document.getElementById('people-chat-messages');
             const typing = messages?.querySelector('.typing-indicator');
@@ -1111,7 +1111,7 @@ const PeoplePanel = {
         this.isWaitingForResponse = false;
     },
 
-    // 💬 ADD CHAT MESSAGE
+    // add chat message
     addChatMessage(text, type) {
         const container = document.getElementById('people-chat-messages');
         if (!container) return;
@@ -1128,7 +1128,7 @@ const PeoplePanel = {
         if (container) container.innerHTML = '';
     },
 
-    // 🎯 UPDATE QUICK ACTIONS
+    // update quick actions
     updateQuickActions(npcData) {
         const container = document.getElementById('people-quick-actions');
         if (!container) return;
@@ -1138,9 +1138,9 @@ const PeoplePanel = {
         const actions = [];
         const location = game?.currentLocation?.id;
 
-        // 🖤 QUEST ACTIONS - Check what quests are available with this NPC 💀
+        // quest actions - check what quests are available with this npc
         if (typeof QuestSystem !== 'undefined') {
-            // 🎉 TURN IN QUEST - Player has completed quest objectives, NPC is the giver
+            // turn in quest - player has completed quest objectives, npc is the giver
             const readyToComplete = this.getQuestsReadyToComplete(npcType);
             if (readyToComplete.length > 0) {
                 readyToComplete.forEach(quest => {
@@ -1156,7 +1156,7 @@ const PeoplePanel = {
                 });
             }
 
-            // 📦 DELIVERY - Player has delivery FOR this NPC (different from completing AT quest giver)
+            // delivery - player has delivery for this npc (different from completing at quest giver)
             const deliveriesForNPC = this.getDeliveriesForNPC(npcType);
             if (deliveriesForNPC.length > 0) {
                 deliveriesForNPC.forEach(quest => {
@@ -1169,7 +1169,7 @@ const PeoplePanel = {
                 });
             }
 
-            // 📋 START QUEST - NPC has quests to offer
+            // start quest - npc has quests to offer
             const availableQuests = QuestSystem.getQuestsForNPC(npcType, location);
             if (availableQuests.length > 0) {
                 availableQuests.forEach(quest => {
@@ -1182,8 +1182,8 @@ const PeoplePanel = {
                 });
             }
 
-            // 💬 COMPLETE TALK OBJECTIVE - Player needs to talk to this NPC for quest progress
-            // 🖤💀 CRITICAL: Only show if ALL PREVIOUS objectives are complete! 💀
+            // complete talk objective - player needs to talk to this npc for quest progress
+            // critical: only show if all previous objectives are complete!
             const allActiveQuests = Object.values(QuestSystem.activeQuests || {});
             allActiveQuests.forEach(quest => {
                 const talkObjectiveIndex = quest.objectives?.findIndex(o =>
@@ -1196,7 +1196,7 @@ const PeoplePanel = {
                 if (talkObjectiveIndex >= 0) {
                     const talkObjective = quest.objectives[talkObjectiveIndex];
 
-                    // 🖤💀 Check if ALL previous objectives are complete
+                    // check if all previous objectives are complete
                     let previousObjectivesComplete = true;
                     for (let i = 0; i < talkObjectiveIndex; i++) {
                         const prevObj = quest.objectives[i];
@@ -1233,8 +1233,8 @@ const PeoplePanel = {
                 }
             });
 
-            // ⏳ CHECK PROGRESS - Player has active quests from this NPC
-            // 🖤💀 Show INDIVIDUAL buttons for each quest, not one generic button!
+            // check progress - player has active quests from this npc
+            // show individual buttons for each quest, not one generic button!
             const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType, location);
             const inProgress = activeFromNPC.filter(q => {
                 const progress = QuestSystem.checkProgress(q.id);
@@ -1242,7 +1242,7 @@ const PeoplePanel = {
             });
             if (inProgress.length > 0) {
                 inProgress.forEach(quest => {
-                    // 🖤💀 Don't show progress button if there's already a talk objective button for this quest
+                    // don't show progress button if there's already a talk objective button for this quest
                     const hasTalkButton = actions.some(a =>
                         a.questRelated && a.label.includes(quest.name) && a.label.startsWith('💬')
                     );
@@ -1258,12 +1258,12 @@ const PeoplePanel = {
             }
         }
 
-        // 🖤 Trade-related actions - vendors and service NPCs
+        // trade-related actions - vendors and service npcs
         // 🖤💀 Also check npcData.canTrade for random encounters (smuggler, courier, pilgrim) 💀
         if (this.npcCanTrade(npcType) || npcData.canTrade) {
             actions.push({ label: '💰 Browse wares', action: () => this.askAboutWares(), priority: 10 });
 
-            // 🖤💀 "Open market" button ONLY at Royal Capital with merchant NPC 💀
+            // "open market" button only at royal capital with merchant npc
             // This opens the grand city market, not the NPC's personal inventory
             const currentLocationId = game?.currentLocation?.id;
             if (currentLocationId === 'royal_capital' && npcType === 'merchant') {
@@ -1271,23 +1271,23 @@ const PeoplePanel = {
             }
         }
 
-        // 🖤 Rumors - innkeepers, travelers, merchants know gossip
+        // rumors - innkeepers, travelers, merchants know gossip
         const gossipNPCs = ['innkeeper', 'merchant', 'traveler', 'drunk', 'sailor', 'informant'];
         if (gossipNPCs.includes(npcType)) {
             actions.push({ label: '🗣️ Ask for rumors', action: () => this.askRumors(), priority: 20 });
         }
 
-        // 🖤 Rest action - innkeeper only
+        // rest action - innkeeper only
         if (npcType === 'innkeeper') {
             actions.push({ label: '🛏️ I need rest', action: () => this.askForRest(), priority: 21 });
         }
 
-        // 🖤 Heal action - healers only
+        // heal action - healers only
         if (['healer', 'priest', 'apothecary'].includes(npcType)) {
             actions.push({ label: '💚 I need healing', action: () => this.askForHealing(), priority: 22 });
         }
 
-        // 🏰 GATEHOUSE PAYMENT - Guards at gatehouses can accept passage fees
+        // gatehouse payment - guards at gatehouses can accept passage fees
         if (npcType === 'guard' && typeof GatehouseSystem !== 'undefined') {
             const gatehouse = GatehouseSystem.GATEHOUSES[location];
             if (gatehouse && !GatehouseSystem.isGatehouseUnlocked(location)) {
@@ -1302,7 +1302,7 @@ const PeoplePanel = {
             }
         }
 
-        // 🖤 BOATMAN PORTAL ACTION - Special case for doom world access 💀
+        // boatman portal action - special case for doom world access
         if (npcType === 'boatman') {
             const inDoom = typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive;
             if (inDoom) {
@@ -1323,16 +1323,16 @@ const PeoplePanel = {
             actions.push({ label: '🔮 Ask about the other world', action: () => this.askAboutDoomWorld(), priority: 1 });
         }
 
-        // 🖤💀 ENCOUNTER-SPECIFIC ACTIONS - Give gold, Attack, etc. 💀
+        // encounter-specific actions - give gold, attack, etc.
         // These show for ALL NPCs as interaction options
         const isEncounter = npcData.isEncounter || this._isSpecialEncounter;
 
-        // 🏷️ Get NPC category for smarter button placement
+        // get npc category for smarter button placement
         const npcCategory = this._getNPCCategory(npcType);
 
-        // 🖤💀 CATEGORY-SPECIFIC ACTIONS - Different NPCs have different interaction buttons 💀
+        // category-specific actions - different npcs have different interaction buttons
 
-        // 🏛️ AUTHORITY NPCs - guards, elders, nobles
+        // authority npcs - guards, elders, nobles
         if (npcCategory === 'authority') {
             actions.push({ label: '📜 Ask about the law', action: () => this.askAboutLaw(), priority: 25 });
             if (npcType === 'elder' || npcType === 'chieftain') {
@@ -1340,7 +1340,7 @@ const PeoplePanel = {
             }
         }
 
-        // 💀 CRIMINAL NPCs - thieves, bandits, informants
+        // criminal npcs - thieves, bandits, informants
         if (npcCategory === 'criminal') {
             if (npcType === 'informant') {
                 actions.push({ label: '👂 Buy information', action: () => this.askBuyInformation(), priority: 25 });
@@ -1358,7 +1358,7 @@ const PeoplePanel = {
                 priority: 30
             });
         } else {
-            // 💰 Give Gold - charity for non-criminals
+            // give gold - charity for non-criminals
             actions.push({
                 label: '💰 Give Gold',
                 action: () => this.giveGoldToNPC(),
@@ -1366,14 +1366,14 @@ const PeoplePanel = {
             });
         }
 
-        // 🎁 Give Item - gift an item from inventory (available to all)
+        // give item - gift an item from inventory (available to all)
         actions.push({
             label: '🎁 Give Item',
             action: () => this.giveItemToNPC(),
             priority: 31
         });
 
-        // 👹 BOSS NPCs - Show intimidate option if brave
+        // boss npcs - show intimidate option if brave
         if (npcCategory === 'boss') {
             actions.push({
                 label: '😤 Intimidate',
@@ -1382,7 +1382,7 @@ const PeoplePanel = {
             });
         }
 
-        // 🚶 TRAVELER NPCs - travelers, pilgrims, beggars
+        // traveler npcs - travelers, pilgrims, beggars
         if (npcCategory === 'traveler') {
             if (npcType === 'beggar') {
                 actions.push({ label: '🪙 Give alms', action: () => this.giveGoldToNPC(), priority: 25 });
@@ -1392,7 +1392,7 @@ const PeoplePanel = {
             }
         }
 
-        // ⚔️ Attack - violence is always an option (but has consequences)
+        // attack - violence is always an option (but has consequences)
         // Protected NPCs: mystical (boatman), authority (guards/nobles) unless encounter
         // Quest NPCs: NEVER attackable unless quest requires defeating them
         const unattackableNPCs = ['noble', 'king', 'queen', 'boatman', 'ferryman'];
@@ -1422,7 +1422,7 @@ const PeoplePanel = {
         }
         // Quest NPCs with reason 'quest_npc' get NO attack option at all
 
-        // 🗡️ Rob/Pickpocket - for the morally flexible (not from authority or bosses)
+        // rob/pickpocket - for the morally flexible (not from authority or bosses)
         if (['merchant', 'traveler', 'noble', 'pilgrim', 'beggar', 'drunk'].includes(npcType)) {
             actions.push({
                 label: '🗡️ Pickpocket',
@@ -1431,7 +1431,7 @@ const PeoplePanel = {
             });
         }
 
-        // 🏃 Flee - get the fuck out (encounters and criminals only)
+        // flee - get the fuck out (encounters and criminals only)
         if (isEncounter || npcCategory === 'criminal' || npcCategory === 'boss') {
             actions.push({
                 label: '🏃 Flee',
@@ -1440,11 +1440,11 @@ const PeoplePanel = {
             });
         }
 
-        // 🖤 Generic actions - always available
+        // generic actions - always available
         actions.push({ label: '❓ Ask for directions', action: () => this.askDirections(), priority: 50 });
         actions.push({ label: '👋 Say goodbye', action: () => this.sayGoodbye(), priority: 100 });
 
-        // 🖤 Sort by priority (quest actions first) 💀
+        // sort by priority (quest actions first)
         actions.sort((a, b) => (a.priority || 50) - (b.priority || 50));
 
         container.innerHTML = '';
@@ -1467,23 +1467,23 @@ const PeoplePanel = {
         container.classList.remove('hidden');
     },
 
-    // 🎉 GET QUESTS READY TO COMPLETE - where this NPC is the quest GIVER or TURN-IN target
+    // get quests ready to complete - where this npc is the quest giver or turn-in target
     getQuestsReadyToComplete(npcType) {
         if (typeof QuestSystem === 'undefined') return [];
 
         const location = game?.currentLocation?.id;
         console.log(`  📋 getQuestsReadyToComplete('${npcType}') at '${location}'`);
 
-        // 🖤💀 Get quests where this NPC is the GIVER
+        // get quests where this npc is the giver
         const activeFromNPC = QuestSystem.getActiveQuestsForNPC(npcType, location);
         console.log(`    activeFromNPC:`, activeFromNPC.map(q => `${q.id} (giver:${q.giver})`));
 
-        // 🖤💀 ALSO get quests where this NPC is the TURN-IN target (might be different from giver!)
+        // also get quests where this npc is the turn-in target (might be different from giver!)
         const allActive = Object.values(QuestSystem.activeQuests || {});
         console.log(`    allActive:`, allActive.map(q => `${q.id} (turnIn:${q.turnInNpc}, loc:${q.turnInLocation})`))
 
         const turnInQuests = allActive.filter(q => {
-            // 🖤💀 FIX: More precise matching for turn-in NPCs 💀
+            // fix: more precise matching for turn-in npcs
             // Check if turnInNpc EXACTLY matches (use strict comparison)
             const turnInMatches = q.turnInNpc && q.turnInNpc === npcType;
             // Check if final talk objective EXACTLY targets this NPC type AND location
@@ -1491,14 +1491,14 @@ const PeoplePanel = {
             const talkNpcMatches = talkObj && talkObj.npc === npcType;
             const talkLocationMatches = !talkObj || !talkObj.location || talkObj.location === location || talkObj.location === 'any';
             const talkMatches = talkNpcMatches && talkLocationMatches;
-            // 🖤 LOCATION CHECK: Ensure turn-in is at THIS location
+            // location check: ensure turn-in is at this location
             const locationMatches = !location || !q.turnInLocation || q.turnInLocation === location || q.turnInLocation === 'any';
 
             return (turnInMatches || talkMatches) && locationMatches;
         });
         console.log(`    turnInQuests:`, turnInQuests.map(q => q.id));
 
-        // 🦇 Combine and dedupe
+        // combine and dedupe
         const combined = [...activeFromNPC, ...turnInQuests];
         const uniqueQuests = [...new Map(combined.map(q => [q.id, q])).values()];
         console.log(`    uniqueQuests (before ready filter):`, uniqueQuests.map(q => q.id));
@@ -1507,10 +1507,10 @@ const PeoplePanel = {
             const progress = QuestSystem.checkProgress(q.id);
             console.log(`    ${q.id} progress:`, progress.status, 'objectives:', q.objectives?.map(o => `${o.type}:${o.completed}`));
 
-            // 🖤💀 Standard check - all objectives complete
+            // standard check - all objectives complete
             if (progress.status === 'ready_to_complete') return true;
 
-            // 🖤💀 SPECIAL CASE: If only the final "talk" objective remains AND we're talking to that NPC
+            // special case: if only the final "talk" objective remains and we're talking to that npc
             // Then treat as ready_to_complete (talking IS the completion action!)
             if (progress.status === 'in_progress') {
                 const incompleteObjs = q.objectives?.filter(o => {
@@ -1530,7 +1530,7 @@ const PeoplePanel = {
                     const npcMatches = QuestSystem._npcMatchesObjective?.(npcType, talkTarget);
                     const locationMatches = !talkLocation || talkLocation === location || talkLocation === 'any';
 
-                    // 🖤💀 SEQUENTIAL CHECK: Ensure all PREVIOUS objectives are complete! 💀
+                    // sequential check: ensure all previous objectives are complete!
                     const talkObjIndex = q.objectives?.indexOf(talkObj) ?? -1;
                     let previousObjectivesComplete = true;
                     if (talkObjIndex > 0) {
@@ -1567,7 +1567,7 @@ const PeoplePanel = {
         return result;
     },
 
-    // 📦 GET DELIVERIES FOR NPC - where this NPC is the RECIPIENT (not the giver)
+    // get deliveries for npc - where this npc is the recipient (not the giver)
     getDeliveriesForNPC(npcType) {
         if (typeof QuestSystem === 'undefined') return [];
         const deliveries = [];
@@ -1595,24 +1595,24 @@ const PeoplePanel = {
         return deliveries;
     },
 
-    // 📜 ASK ABOUT QUEST - Prompt NPC to offer this quest
-    // 🖤💀 FIXED: Directly assign the quest, API is just for flavor text! 💀
+    // ask about quest - prompt npc to offer this quest
+    // fixed: directly assign the quest, api is just for flavor text!
     async askAboutQuest(quest) {
         const questId = quest.id || quest.questId;
 
-        // 🖤 Display player message
+        // display player message
         const message = `I heard you might have work available? Tell me about "${quest.name}".`;
         this.addChatMessage(message, 'player');
         this.chatHistory.push({ role: 'user', content: message });
 
-        // 🖤💀 CRITICAL: DIRECTLY assign the quest - don't wait for API! 💀
+        // critical: directly assign the quest - don't wait for api!
         let assignResult = null;
         if (typeof QuestSystem !== 'undefined' && QuestSystem.assignQuest) {
             assignResult = QuestSystem.assignQuest(questId, { name: this.currentNPC?.name || 'NPC' });
             console.log(`🎭 Quest assignment result for ${questId}:`, assignResult);
         }
 
-        // 🖤 Generate NPC response (flavor text only - quest already assigned!)
+        // generate npc response (flavor text only - quest already assigned!)
         let npcResponse;
 
         if (assignResult?.success) {
@@ -1631,7 +1631,7 @@ const PeoplePanel = {
         this.addChatMessage(npcResponse, 'npc');
         this.chatHistory.push({ role: 'assistant', content: npcResponse });
 
-        // 🔊 Play TTS
+        // play tts
         if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
             const voice = this.getNPCVoice(this.currentNPC);
             NPCVoiceChatSystem.playVoice(npcResponse, voice);
@@ -1642,12 +1642,12 @@ const PeoplePanel = {
         this.updateQuickActions(this.currentNPC);
     },
 
-    // ✅ ASK TO COMPLETE QUEST - Tell NPC we've finished
+    // ask to complete quest - tell npc we've finished
     // 🖤💀 FIXED: Directly complete the quest, API is just for flavor text! 💀
     async askToCompleteQuest(quest) {
         const questId = quest.id || quest.questId;
 
-        // 🖤 Display player message
+        // display player message
         let message;
         if (quest.type === 'delivery') {
             message = `I've completed the delivery you asked for. The "${quest.name}" task is done.`;
@@ -1661,7 +1661,7 @@ const PeoplePanel = {
         this.addChatMessage(message, 'player');
         this.chatHistory.push({ role: 'user', content: message });
 
-        // 🖤💀 CRITICAL: DIRECTLY complete the quest - don't wait for API! 💀
+        // critical: directly complete the quest - don't wait for api!
         let completionResult = null;
         if (typeof QuestSystem !== 'undefined' && QuestSystem.completeQuest) {
             completionResult = QuestSystem.completeQuest(questId);
@@ -1690,7 +1690,7 @@ const PeoplePanel = {
         this.addChatMessage(npcResponse, 'npc');
         this.chatHistory.push({ role: 'assistant', content: npcResponse });
 
-        // 🔊 Play TTS
+        // play tts
         if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
             const voice = this.getNPCVoice(this.currentNPC);
             NPCVoiceChatSystem.playVoice(npcResponse, voice);
@@ -1701,12 +1701,12 @@ const PeoplePanel = {
         this.updateQuickActions(this.currentNPC);
     },
 
-    // 💬 COMPLETE TALK OBJECTIVE - Player talks to NPC for mid-quest progression
+    // complete talk objective - player talks to npc for mid-quest progression
     async completeTalkObjective(quest, talkObjective) {
         const questId = quest.id || quest.questId;
         const npcType = this.currentNPC?.type || 'stranger';
 
-        // 🖤💀 VALIDATE: Check that ALL previous objectives are complete! 💀
+        // validate: check that all previous objectives are complete!
         const talkObjectiveIndex = quest.objectives?.indexOf(talkObjective) || 0;
         for (let i = 0; i < talkObjectiveIndex; i++) {
             const prevObj = quest.objectives[i];
@@ -1731,12 +1731,12 @@ const PeoplePanel = {
             }
         }
 
-        // 🖤 Display player message
+        // display player message
         const message = talkObjective.description || `I need to talk to you about "${quest.name}".`;
         this.addChatMessage(message, 'player');
         this.chatHistory.push({ role: 'user', content: message });
 
-        // 🖤💀 CRITICAL: Complete the talk objective using QuestSystem 💀
+        // critical: complete the talk objective using questsystem
         if (typeof QuestSystem !== 'undefined') {
             QuestSystem.updateProgress('talk', { npc: npcType, npcType: npcType });
             console.log(`💬 Completed talk objective for ${questId} with ${npcType}`);
@@ -1764,7 +1764,7 @@ const PeoplePanel = {
         this.addChatMessage(npcResponse, 'npc');
         this.chatHistory.push({ role: 'assistant', content: npcResponse });
 
-        // 🔊 Play TTS
+        // play tts
         if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
             const voice = this.getNPCVoice(this.currentNPC);
             NPCVoiceChatSystem.playVoice(npcResponse, voice);
@@ -1775,19 +1775,19 @@ const PeoplePanel = {
         this.updateQuickActions(this.currentNPC);
     },
 
-    // 📦 DELIVER QUEST ITEM - Hand over delivery to recipient NPC
+    // deliver quest item - hand over delivery to recipient npc
     // 🖤💀 FIXED: Directly deliver item and complete quest! 💀
     async deliverQuestItem(quest) {
         const questId = quest.questId || quest.id;
         const itemId = quest.itemId;
         const itemName = quest.itemName || itemId;
 
-        // 🖤 Display player message
+        // display player message
         const message = `I have a delivery for you - a ${itemName} from ${quest.giverName || 'someone'}.`;
         this.addChatMessage(message, 'player');
         this.chatHistory.push({ role: 'user', content: message });
 
-        // 🖤💀 CRITICAL: Take the quest item and complete the quest! 💀
+        // critical: take the quest item and complete the quest!
         let deliverySuccess = false;
 
         // Take the quest item
@@ -1819,7 +1819,7 @@ const PeoplePanel = {
         this.addChatMessage(npcResponse, 'npc');
         this.chatHistory.push({ role: 'assistant', content: npcResponse });
 
-        // 🔊 Play TTS
+        // play tts
         if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
             const voice = this.getNPCVoice(this.currentNPC);
             NPCVoiceChatSystem.playVoice(npcResponse, voice);
@@ -1830,13 +1830,13 @@ const PeoplePanel = {
         this.updateQuickActions(this.currentNPC);
     },
 
-    // ⏳ ASK QUEST PROGRESS - Check status of active quests (generic)
+    // ask quest progress - check status of active quests (generic)
     async askQuestProgress() {
         const message = `How am I doing on the tasks you gave me?`;
         await this.sendQuestActionMessage('CHECK_PROGRESS', message, null);
     },
 
-    // 🖤💀 ASK QUEST PROGRESS SPECIFIC - Check status of a SPECIFIC quest
+    // ask quest progress specific - check status of a specific quest
     async askQuestProgressSpecific(quest) {
         const message = `What's the status on "${quest.name}"? How am I doing?`;
 
@@ -1850,7 +1850,7 @@ const PeoplePanel = {
         await this.sendQuestActionMessage('CHECK_PROGRESS', message, quest);
     },
 
-    // 🖤💀 NEW: Send quest-specific action message with full quest context 💀
+    // new: send quest-specific action message with full quest context
     async sendQuestActionMessage(actionType, displayMessage, quest) {
         if (this.isWaitingForResponse || !this.currentNPC) return;
 
@@ -1865,7 +1865,7 @@ const PeoplePanel = {
                 throw new Error('NPCVoiceChatSystem not available');
             }
 
-            // 🖤 Build quest-specific context for API instructions 💀
+            // build quest-specific context for api instructions
             const questContext = quest ? {
                 questId: quest.id || quest.questId,
                 questName: quest.name || quest.questName,
@@ -1876,7 +1876,7 @@ const PeoplePanel = {
                 giverName: quest.giverName
             } : null;
 
-            // 🦇 Get progress info if checking progress
+            // get progress info if checking progress
             let progressInfo = null;
             if (actionType === 'CHECK_PROGRESS' && quest && typeof QuestSystem !== 'undefined') {
                 progressInfo = QuestSystem.checkProgress(quest.id);
@@ -1910,7 +1910,7 @@ const PeoplePanel = {
                 throw new Error('Empty response from API');
             }
 
-            // 🖤💀 CRITICAL: Parse and execute commands from API response! 💀
+            // critical: parse and execute commands from api response!
             // The API returns {completeQuest:questId} etc. that need to be executed
             let cleanText = response.text;
             if (typeof NPCWorkflowSystem !== 'undefined' && NPCWorkflowSystem.parseCommands) {
@@ -1925,7 +1925,7 @@ const PeoplePanel = {
             this.addChatMessage(cleanText, 'npc');
             this.chatHistory.push({ role: 'assistant', content: cleanText });
 
-            // 🔊 Play TTS with NPC-specific voice (use clean text without commands)
+            // play tts with NPC-specific voice (use clean text without commands)
             if (NPCVoiceChatSystem.settings?.voiceEnabled) {
                 const voice = this.getNPCVoice(this.currentNPC);
                 NPCVoiceChatSystem.playVoice(cleanText, voice);
@@ -1942,12 +1942,12 @@ const PeoplePanel = {
             const typing = messages?.querySelector('.typing-indicator');
             if (typing) typing.remove();
 
-            // 🦇 Use quest-specific fallback responses
+            // use quest-specific fallback responses
             const fallback = this.getQuestActionFallback(actionType, quest);
             this.addChatMessage(fallback, 'npc');
             this.chatHistory.push({ role: 'assistant', content: fallback });
 
-            // 🖤💀 CRITICAL: Actually execute the quest action even in fallback! 💀
+            // critical: actually execute the quest action even in fallback!
             // If API fails but user clicked "Complete Quest", we should still complete it
             this.executeQuestActionFallback(actionType, quest);
         }
@@ -1955,12 +1955,12 @@ const PeoplePanel = {
         this.isWaitingForResponse = false;
         this._currentQuestAction = null;
 
-        // 🖤 Update UI after quest action
+        // update ui after quest action
         this.updateQuestItems();
         this.updateQuickActions(this.currentNPC);
     },
 
-    // 🖤💀 Execute quest action when API fails - the fallback must work! 💀
+    // execute quest action when api fails - the fallback must work!
     executeQuestActionFallback(actionType, quest) {
         if (!quest) return;
 
@@ -2016,11 +2016,11 @@ const PeoplePanel = {
         }
     },
 
-    // 🖤 Get fallback response for quest actions 💀
+    // get fallback response for quest actions
     getQuestActionFallback(actionType, quest) {
         const questName = quest?.name || quest?.questName || 'the task';
 
-        // 🖤💀 CHECK_PROGRESS: Check actual quest status to give accurate fallback 💀
+        // check_progress: check actual quest status to give accurate fallback
         if (actionType === 'CHECK_PROGRESS' && quest?.id && typeof QuestSystem !== 'undefined') {
             const progress = QuestSystem.checkProgress(quest.id);
             if (progress.status === 'ready_to_complete') {
@@ -2041,7 +2041,7 @@ const PeoplePanel = {
         return fallbacks[actionType] || `*nods* I understand.`;
     },
 
-    // 📦 UPDATE QUEST ITEMS SECTION
+    // update quest items section
     updateQuestItems() {
         const container = document.getElementById('people-quest-items');
         const list = document.getElementById('quest-items-list');
@@ -2049,11 +2049,11 @@ const PeoplePanel = {
 
         list.innerHTML = '';
 
-        // 🖤 Get player's quest items
+        // get player's quest items
         const questItems = game?.player?.questItems || {};
         const npcType = this.currentNPC.type || this.currentNPC.id;
 
-        // 🖤 Find deliveries meant for this NPC
+        // find deliveries meant for this npc
         let relevantItems = [];
         if (typeof QuestSystem !== 'undefined') {
             const activeQuests = Object.values(QuestSystem.activeQuests || {});
@@ -2101,14 +2101,14 @@ const PeoplePanel = {
         }
     },
 
-    // 📦 GIVE QUEST ITEM
+    // give quest item
     async giveQuestItem(questId, itemId) {
         const message = `Here, I have a delivery for you. *hands over the package*`;
         document.getElementById('people-chat-input').value = message;
         await this.sendMessage();
     },
 
-    // 🛒 UPDATE TRADE SECTION
+    // update trade section
     updateTradeSection(npcData) {
         const container = document.getElementById('people-trade-section');
         const preview = document.getElementById('trade-preview');
@@ -2120,8 +2120,8 @@ const PeoplePanel = {
         const repRequired = this.getTradeRepRequirement(npcType);
         const currentRep = this.getNPCReputation(npcType);
 
-        // 🖤 Always show trade section for potential traders, but indicate locked status
-        // 🖤💀 Also include NPCs with canTrade flag from encounters 💀
+        // always show trade section for potential traders, but indicate locked status
+        // also include npcs with cantrade flag from encounters
         const potentialTrader = npcData.canTrade || repRequired > 0 || ['merchant', 'innkeeper', 'general_store', 'baker',
             'farmer', 'fisherman', 'ferryman', 'traveler', 'blacksmith', 'apothecary',
             'tailor', 'herbalist', 'miner', 'jeweler', 'banker', 'guild_master', 'noble'].includes(npcType);
@@ -2130,8 +2130,8 @@ const PeoplePanel = {
             container.classList.remove('hidden');
 
             if (canTrade) {
-                // 💰 Can trade - show ACTUAL NPC inventory, not location config!
-                // 🖤💀 FIX: Use NPCTradeWindow.getNPCInventory() to get real items 💀
+                // can trade - show actual npc inventory, not location config!
+                // fix: use npctradewindow.getnpcinventory() to get real items
                 let actualItems = [];
                 if (typeof NPCTradeWindow !== 'undefined' && this.currentNPC) {
                     const npcInv = NPCTradeWindow.getNPCInventory(this.currentNPC);
@@ -2142,7 +2142,7 @@ const PeoplePanel = {
                 }
 
                 if (actualItems.length > 0) {
-                    // 🖤 Show actual items this NPC has - format nicely 💀
+                    // show actual items this npc has - format nicely
                     const displayItems = actualItems.slice(0, 4).map(itemId => {
                         // Try to get display name from ItemDatabase
                         let name = itemId.replace(/_/g, ' ');
@@ -2157,7 +2157,7 @@ const PeoplePanel = {
                     preview.innerHTML = '<span style="color:#4a9">✓ Trade Available</span><br>Various goods for trade';
                 }
 
-                // 🖤 Update button to be active - opens NPC's inventory
+                // update button to be active - opens npc's inventory
                 const btn = container.querySelector('.trade-btn');
                 if (btn) {
                     btn.disabled = false;
@@ -2165,11 +2165,11 @@ const PeoplePanel = {
                     btn.style.opacity = '1';
                 }
             } else {
-                // 🔒 Trade locked - show rep requirement
+                // trade locked - show rep requirement
                 const repNeeded = repRequired - currentRep;
                 preview.innerHTML = `<span style="color:#c66">🔒 Trade Locked</span><br>Reputation: ${currentRep}/${repRequired} (need ${repNeeded} more)<br><span style="color:#888;font-size:0.85em">Complete quests, trade, or help them to gain rep</span>`;
 
-                // 🖤 Disable button
+                // disable button
                 const btn = container.querySelector('.trade-btn');
                 if (btn) {
                     btn.disabled = true;
@@ -2182,16 +2182,16 @@ const PeoplePanel = {
         }
     },
 
-    // 🎯 QUICK ACTION METHODS - 🖤 Now use NPCInstructionTemplates for proper API instructions 💀
+    // quick action methods - now use npcinstructiontemplates for proper api instructions
     async askAboutWares() {
         if (!this.currentNPC) return;
 
-        // 🖤💀 "Browse Wares" directly opens NPC's inventory - no API needed! 💀
+        // "browse wares" directly opens npc's inventory - no api needed!
         // The player clicked "Browse Wares" - they want to SEE the wares, not hear about them
         this.addChatMessage("Show me what you have for sale.", 'player');
         this.chatHistory.push({ role: 'user', content: "Show me what you have for sale." });
 
-        // 🖤 Quick NPC response then open trade
+        // quick npc response then open trade
         const npcType = this.currentNPC.type || this.currentNPC.id;
         const responses = {
             merchant: "*spreads hands over the goods* Take a look at what I've got.",
@@ -2205,13 +2205,13 @@ const PeoplePanel = {
         this.addChatMessage(response, 'npc');
         this.chatHistory.push({ role: 'assistant', content: response });
 
-        // 🖤 Play TTS for the response
+        // play tts for the response
         if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
             const voice = this.getNPCVoice(this.currentNPC);
             NPCVoiceChatSystem.playVoice(response, voice);
         }
 
-        // 🖤 Open the NPC's inventory after a short delay for the message to show
+        // open the npc's inventory after a short delay for the message to show
         console.log('🛒 askAboutWares: About to call openFullTrade in 500ms');
         setTimeout(() => {
             console.log('🛒 askAboutWares: setTimeout fired, calling openFullTrade now');
@@ -2222,28 +2222,28 @@ const PeoplePanel = {
     async askAboutWork() {
         if (!this.currentNPC) return;
 
-        // 🖤 Send standardized ASK_QUEST instruction to API 💀
+        // send standardized ask_quest instruction to api
         await this.sendActionMessage('ask_quest', "Do you have any work for me?");
     },
 
     async mentionDelivery() {
         if (!this.currentNPC) return;
 
-        // 🖤 Send standardized TURN_IN_QUEST instruction to API 💀
+        // send standardized turn_in_quest instruction to api
         await this.sendActionMessage('turn_in_quest', "I have a delivery for you.");
     },
 
     async askDirections() {
         if (!this.currentNPC) return;
 
-        // 🖤 Send standardized ASK_DIRECTIONS instruction to API 💀
+        // send standardized ask_directions instruction to api
         await this.sendActionMessage('ask_directions', "Can you tell me about nearby places?");
     },
 
     async sayGoodbye() {
         if (!this.currentNPC) return;
 
-        // 🖤 Send standardized FAREWELL instruction to API 💀
+        // send standardized farewell instruction to api
         await this.sendActionMessage('farewell', "I should be going. Farewell.");
         setTimeout(() => this.showListView(), 2000);
     },
@@ -2251,25 +2251,25 @@ const PeoplePanel = {
     async askRumors() {
         if (!this.currentNPC) return;
 
-        // 🖤 Send standardized ASK_RUMORS instruction to API 💀
+        // send standardized ask_rumors instruction to api
         await this.sendActionMessage('ask_rumors', "Heard any interesting rumors lately?");
     },
 
     async askForRest() {
         if (!this.currentNPC) return;
 
-        // 🖤 Send standardized REST instruction to API 💀
+        // send standardized rest instruction to api
         await this.sendActionMessage('rest', "I need a room to rest.");
     },
 
     async askForHealing() {
         if (!this.currentNPC) return;
 
-        // 🖤 Send standardized HEAL instruction to API 💀
+        // send standardized heal instruction to api
         await this.sendActionMessage('heal', "I'm injured. Can you help me?");
     },
 
-    // 🏛️ AUTHORITY NPC ACTIONS
+    // authority npc actions
 
     async askAboutLaw() {
         if (!this.currentNPC) return;
@@ -2281,7 +2281,7 @@ const PeoplePanel = {
         await this.sendActionMessage('ask_blessing', "I seek your wisdom and blessing, elder.");
     },
 
-    // 💀 CRIMINAL NPC ACTIONS
+    // criminal npc actions
 
     async askBuyInformation() {
         if (!this.currentNPC) return;
@@ -2298,14 +2298,14 @@ const PeoplePanel = {
         await this.sendActionMessage('ask_loan', "I need some gold. What are your terms?");
     },
 
-    // 👹 BOSS NPC ACTIONS
+    // boss npc actions
 
     async attemptIntimidate() {
         if (!this.currentNPC) return;
         await this.sendActionMessage('intimidate', "*steps forward menacingly* You don't scare me.");
     },
 
-    // 🚶 TRAVELER NPC ACTIONS
+    // traveler npc actions
 
     async askAboutTravels() {
         if (!this.currentNPC) return;
@@ -2313,7 +2313,7 @@ const PeoplePanel = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🏰 GATEHOUSE PAYMENT - Pay passage fee to guard
+    // gatehouse payment - pay passage fee to guard
     // ═══════════════════════════════════════════════════════════════
 
     payGatehouseFee(gatehouseId, gatehouse) {
@@ -2347,10 +2347,10 @@ const PeoplePanel = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 💀 BOATMAN PORTAL METHODS - Doom World Access 🦇
+    // boatman portal methods - doom world access
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Use the boatman's portal to travel between worlds
+    // use the boatman's portal to travel between worlds
     async useBoatmanPortal(destination) {
         if (!this.currentNPC || this.currentNPC.type !== 'boatman') {
             console.warn('💀 useBoatmanPortal called without boatman NPC');
@@ -2359,22 +2359,22 @@ const PeoplePanel = {
 
         const currentLocation = game?.currentLocation?.id || 'shadow_dungeon';
 
-        // 🦇 Display atmospheric message in chat
+        // display atmospheric message in chat
         if (destination === 'doom') {
             this.addChatMessage("*reaches toward the shimmering portal*", 'player');
             this.addChatMessage("*The Boatman's hollow voice echoes* So you choose to witness what could have been... Step through, and may your resolve not falter.", 'npc');
 
-            // 🖤 Small delay for dramatic effect
+            // small delay for dramatic effect
             await new Promise(r => setTimeout(r, 1500));
 
-            // 🦇 Enter doom world
+            // enter doom world
             if (typeof DoomWorldSystem !== 'undefined') {
                 DoomWorldSystem.enterDoomWorld(currentLocation);
             } else if (typeof TravelSystem !== 'undefined') {
                 TravelSystem.portalToDoomWorld(currentLocation);
             }
 
-            // 🖤 Close the panel after transition
+            // close the panel after transition
             this.close();
 
         } else {
@@ -2383,7 +2383,7 @@ const PeoplePanel = {
 
             await new Promise(r => setTimeout(r, 1500));
 
-            // 🦇 Exit doom world
+            // exit doom world
             if (typeof DoomWorldSystem !== 'undefined') {
                 DoomWorldSystem.exitDoomWorld(currentLocation);
             } else if (typeof TravelSystem !== 'undefined') {
@@ -2394,7 +2394,7 @@ const PeoplePanel = {
         }
     },
 
-    // 🖤 Ask about the doom world
+    // ask about the doom world
     async askAboutDoomWorld() {
         const inDoom = typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive;
 
@@ -2405,7 +2405,7 @@ const PeoplePanel = {
         }
     },
 
-    // 🖤 Get boatman-specific instruction for API calls
+    // get boatman-specific instruction for api calls
     getBoatmanInstruction(action) {
         if (typeof DoomWorldSystem !== 'undefined') {
             return DoomWorldSystem.getBoatmanInstruction(action);
@@ -2417,11 +2417,11 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🖤💀 ENCOUNTER ACTIONS - Give Gold, Attack, Pickpocket, Flee 💀
+    // encounter actions - give gold, attack, pickpocket, flee
     // ═══════════════════════════════════════════════════════════════
 
-    // 💰 Give Gold to NPC - charity, bribery, or appeasement
-    // 🖤💀 FIXED: Use modal instead of browser prompt() 💀
+    // give gold to npc - charity, bribery, or appeasement
+    // fixed: use modal instead of browser prompt()
     giveGoldToNPC() {
         if (!this.currentNPC) return;
 
@@ -2432,13 +2432,13 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             return;
         }
 
-        // 🖤💀 Build quick amount buttons based on player gold 💀
+        // build quick amount buttons based on player gold
         const amounts = [10, 50, 100, 500, 1000, 5000, 10000, 50000].filter(a => a <= playerGold);
         const amountButtons = amounts.map(a =>
             `<button class="gold-amount-btn" data-amount="${a}" style="margin:3px;padding:8px 12px;cursor:pointer;background:#2a2a2a;border:1px solid #4a4a4a;color:#ffd700;border-radius:4px;">${a.toLocaleString()}g</button>`
         ).join('');
 
-        // 🖤💀 Create modal content with input and quick buttons 💀
+        // create modal content with input and quick buttons
         const content = `
             <div style="text-align:center;padding:10px;">
                 <p style="color:#ccc;margin-bottom:15px;">You have <strong style="color:#ffd700;">${playerGold.toLocaleString()}</strong> gold</p>
@@ -2454,7 +2454,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             </div>
         `;
 
-        // 🖤💀 Show modal using ModalSystem 💀
+        // show modal using modalsystem
         if (typeof ModalSystem !== 'undefined') {
             ModalSystem.show({
                 title: '💰 Give Gold',
@@ -2478,7 +2478,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
                 ]
             });
 
-            // 🦇 Wire up quick amount buttons after modal is shown
+            // wire up quick amount buttons after modal is shown
             setTimeout(() => {
                 document.querySelectorAll('.gold-amount-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -2488,25 +2488,25 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
                 });
             }, 50);
         } else {
-            // 🖤 Fallback if ModalSystem not available
+            // fallback if modalsystem not available
             this.addChatMessage("*tries to offer gold but something went wrong*", 'player');
         }
     },
 
-    // 🖤💀 Execute the actual gold transfer 💀
+    // execute the actual gold transfer
     _executeGoldGift(amount, playerGold) {
         if (isNaN(amount) || amount <= 0 || amount > playerGold) {
             this.addChatMessage("*fumbles with coin pouch*", 'player');
             return;
         }
 
-        // 🦇 Transfer gold
+        // transfer gold
         game.player.gold -= amount;
         if (this.currentNPC.gold !== undefined) {
             this.currentNPC.gold += amount;
         }
 
-        // 💰 Increase reputation with this NPC AND their faction/guild
+        // increase reputation with this npc and their faction/guild
         const npcType = this.currentNPC.type || this.currentNPC.id;
         const repGain = Math.floor(amount / 5);
 
@@ -2539,12 +2539,12 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         if (typeof updateDisplay === 'function') updateDisplay();
     },
 
-    // 🎁 Give Item to NPC
-    // 🖤💀 FIXED: Use modal instead of browser prompt() 💀
+    // give item to npc
+    // fixed: use modal instead of browser prompt()
     giveItemToNPC() {
         if (!this.currentNPC) return;
 
-        // 🖤💀 Get inventory as object {itemId: quantity} and convert to array 💀
+        // get inventory as object {itemid: quantity} and convert to array
         const inventoryObj = game?.player?.inventory || {};
         const inventoryItems = Object.entries(inventoryObj)
             .filter(([id, qty]) => qty > 0 && id !== 'gold')
@@ -2555,7 +2555,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             return;
         }
 
-        // 🖤💀 Build item buttons for modal 💀
+        // build item buttons for modal
         const itemButtons = inventoryItems.map(([itemId, qty]) => {
             let name = itemId.replace(/_/g, ' ');
             let icon = '📦';
@@ -2581,7 +2581,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             </div>
         `;
 
-        // 🖤💀 Show modal 💀
+        // show modal
         if (typeof ModalSystem !== 'undefined') {
             ModalSystem.show({
                 title: '🎁 Give Item',
@@ -2595,7 +2595,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
                 ]
             });
 
-            // 🦇 Wire up item buttons
+            // wire up item buttons
             setTimeout(() => {
                 document.querySelectorAll('.give-item-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -2608,7 +2608,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         }
     },
 
-    // 🖤💀 Execute the actual item transfer 💀
+    // execute the actual item transfer
     _executeItemGift(itemId) {
         if (!itemId || !game?.player?.inventory) return;
 
@@ -2618,7 +2618,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             return;
         }
 
-        // 🖤 Remove 1 of the item from inventory
+        // remove 1 of the item from inventory
         game.player.inventory[itemId]--;
         if (game.player.inventory[itemId] <= 0) {
             delete game.player.inventory[itemId];
@@ -2633,7 +2633,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             if (item?.basePrice) itemValue = item.basePrice;
         }
 
-        // 💚 Increase reputation with this NPC AND their faction/guild
+        // increase reputation with this npc and their faction/guild
         const npcType = this.currentNPC.type || this.currentNPC.id;
 
         if (typeof NPCRelationshipSystem !== 'undefined') {
@@ -2665,7 +2665,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // ⚔️ COMBAT SYSTEM - Quest-aware attack logic
+    // combat system - quest-aware attack logic
     // ═══════════════════════════════════════════════════════════════
 
     // Check if an NPC can be attacked - considers quest involvement
@@ -2757,7 +2757,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         return npcType === target;
     },
 
-    // ⚔️ Attack NPC - violence has consequences
+    // attack npc - violence has consequences
     // Now uses Combat Modal system for proper stat-based combat
     attackNPC(attackContext = {}) {
         if (!this.currentNPC) return;
@@ -2822,18 +2822,18 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         }
     },
 
-    // 🖤💀 Execute the actual attack 💀
+    // execute the actual attack
     _executeAttack() {
         this.addChatMessage("*draws weapon and attacks!*", 'player');
 
-        // 🦇 Simple combat resolution
+        // simple combat resolution
         const playerStrength = game?.player?.stats?.strength || 10;
         const npcStrength = this.currentNPC.strength || 10;
         const playerRoll = Math.floor(Math.random() * 20) + playerStrength;
         const npcRoll = Math.floor(Math.random() * 20) + npcStrength;
 
         if (playerRoll > npcRoll) {
-            // 🏆 Player wins
+            // player wins
             const loot = this.currentNPC.gold || Math.floor(Math.random() * 50) + 10;
             game.player.gold = (game.player.gold || 0) + loot;
 
@@ -2842,15 +2842,15 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
                 addMessage(`⚔️ Defeated ${this.currentNPC.name}! Looted ${loot} gold.`);
             }
 
-            // 🖤 Decrease reputation significantly
+            // decrease reputation significantly
             if (typeof NPCRelationshipSystem !== 'undefined') {
                 NPCRelationshipSystem.modifyReputation(this.currentNPC.type || this.currentNPC.id, -50);
             }
 
-            // 🦇 End encounter
+            // end encounter
             setTimeout(() => this.close(), 1500);
         } else {
-            // 💀 NPC wins or escapes
+            // npc wins or escapes
             const damage = Math.floor(Math.random() * 20) + 5;
             if (game?.player?.stats?.health !== undefined) {
                 game.player.stats.health = Math.max(0, game.player.stats.health - damage);
@@ -2865,19 +2865,19 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         if (typeof updateDisplay === 'function') updateDisplay();
     },
 
-    // 🗡️ Pickpocket NPC
+    // pickpocket npc
     pickpocketNPC() {
         if (!this.currentNPC) return;
 
         this.addChatMessage("*tries to discreetly reach for their coin pouch*", 'player');
 
-        // 🦇 Skill check
+        // skill check
         const dexterity = game?.player?.stats?.dexterity || 10;
         const roll = Math.floor(Math.random() * 20) + 1;
         const success = roll + dexterity > 15;
 
         if (success) {
-            // 🏆 Successful steal
+            // successful steal
             const stolen = Math.floor(Math.random() * 30) + 5;
             game.player.gold = (game.player.gold || 0) + stolen;
 
@@ -2886,7 +2886,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
                 addMessage(`🗡️ Stole ${stolen} gold from ${this.currentNPC.name}!`);
             }
         } else {
-            // 🚨 Caught!
+            // caught!
             this.addChatMessage("*grabs your wrist* THIEF!", 'npc');
             if (typeof addMessage === 'function') {
                 addMessage(`🚨 Caught pickpocketing ${this.currentNPC.name}!`);
@@ -2897,7 +2897,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
                 NPCRelationshipSystem.modifyReputation(this.currentNPC.type || this.currentNPC.id, -30);
             }
 
-            // 🦇 Might trigger guards
+            // might trigger guards
             if (Math.random() < 0.5 && typeof NPCEncounters !== 'undefined') {
                 setTimeout(() => {
                     NPCEncounters.triggerGuardEncounter?.();
@@ -2908,7 +2908,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         if (typeof updateDisplay === 'function') updateDisplay();
     },
 
-    // 🏃 Flee from encounter
+    // flee from encounter
     fleeFromEncounter() {
         if (!this.currentNPC) return;
 
@@ -2929,7 +2929,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
 
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 NEW: Send message with standardized action type to NPCInstructionTemplates 💀
+    // new: send message with standardized action type to npcinstructiontemplates
     async sendActionMessage(actionType, displayMessage) {
         if (this.isWaitingForResponse || !this.currentNPC) return;
 
@@ -2940,12 +2940,12 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         this.addChatMessage('...', 'npc typing-indicator');
 
         try {
-            // 🖤 Check if NPCVoiceChatSystem is available
+            // check if npcvoicechatsystem is available
             if (typeof NPCVoiceChatSystem === 'undefined') {
                 throw new Error('NPCVoiceChatSystem not available');
             }
 
-            // 🦇 Build context for instruction templates
+            // build context for instruction templates
             const options = {
                 action: actionType,
                 availableQuests: this.getAvailableQuestsForNPC(),
@@ -2969,12 +2969,12 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             const typing = messages?.querySelector('.typing-indicator');
             if (typing) typing.remove();
 
-            // 🦇 Check if we got a valid response
+            // check if we got a valid response
             if (!response || !response.text) {
                 throw new Error('Empty response from API');
             }
 
-            // 🖤💀 CRITICAL: Parse and execute commands from API response! 💀
+            // critical: parse and execute commands from api response!
             // The API returns {openMarket}, {assignQuest:id}, etc. that need to be executed
             let cleanText = response.text;
             if (typeof NPCWorkflowSystem !== 'undefined' && NPCWorkflowSystem.parseCommands) {
@@ -2989,7 +2989,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             this.addChatMessage(cleanText, 'npc');
             this.chatHistory.push({ role: 'assistant', content: cleanText });
 
-            // 🔊 Play TTS with NPC-specific voice (use clean text without commands)
+            // play tts with NPC-specific voice (use clean text without commands)
             if (NPCVoiceChatSystem.settings?.voiceEnabled) {
                 const voice = this.getNPCVoice(this.currentNPC);
                 NPCVoiceChatSystem.playVoice(cleanText, voice);
@@ -2999,8 +2999,8 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             this.updateQuestItems();
 
         } catch (e) {
-            // 🖤💀 Only log as warning for expected fallbacks (like farewell when panel closes)
-            // This prevents console spam for normal interactions 💀
+            // only log as warning for expected fallbacks (like farewell when panel closes)
+            // this prevents console spam for normal interactions
             const isExpectedFallback = !this.currentNPC || actionType === 'farewell';
             if (isExpectedFallback) {
                 console.log(`🎭 Using fallback for ${actionType} action (NPC context lost or expected)`);
@@ -3012,19 +3012,19 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             const typing = messages?.querySelector('.typing-indicator');
             if (typing) typing.remove();
 
-            // 🖤💀 CRITICAL: Fallback must ALSO execute the action! 💀
+            // critical: fallback must also execute the action!
             const fallback = this.getActionFallback(actionType, this.currentNPC);
             this.addChatMessage(fallback, 'npc');
             this.chatHistory.push({ role: 'assistant', content: fallback });
 
-            // 🖤 Execute the action even on fallback - the fallback message is just flavor
+            // execute the action even on fallback - the fallback message is just flavor
             this.executeActionFallback(actionType);
         }
 
         this.isWaitingForResponse = false;
     },
 
-    // 🖤💀 Execute action when API fails - fallback must still work! 💀
+    // execute action when api fails - fallback must still work!
     executeActionFallback(actionType) {
         console.log(`🎭 Executing fallback action: ${actionType}`);
 
@@ -3061,7 +3061,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         }
     },
 
-    // 🖤 Get fallback response based on action type 💀
+    // get fallback response based on action type
     getActionFallback(actionType, npcData) {
         const npcType = npcData?.type || npcData?.id || 'stranger';
         const fallbacks = {
@@ -3078,7 +3078,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         return fallbacks[actionType] || `*looks at you expectantly*`;
     },
 
-    // 🖤 Get NPC voice from new template system or fallback 💀
+    // get npc voice from new template system or fallback
     getNPCVoice(npcData) {
         if (typeof NPCInstructionTemplates !== 'undefined' && NPCInstructionTemplates._loaded) {
             return NPCInstructionTemplates.getVoice(npcData.type || npcData.id);
@@ -3086,7 +3086,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         return npcData.voice || 'nova';
     },
 
-    // 🖤 Get available quests for current NPC 💀
+    // get available quests for current npc
     getAvailableQuestsForNPC() {
         if (typeof QuestSystem === 'undefined' || !this.currentNPC) return [];
 
@@ -3100,13 +3100,13 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         });
     },
 
-    // 🖤 Get active quests that can be turned in to current NPC 💀
+    // get active quests that can be turned in to current npc
     getActiveQuestsForNPC() {
         if (typeof QuestSystem === 'undefined' || !this.currentNPC) return [];
 
         const npcType = this.currentNPC.type || this.currentNPC.id;
         return Object.values(QuestSystem.activeQuests || {}).filter(q => {
-            // 🦇 Quest giver matches OR has a turn-in objective for this NPC
+            // quest giver matches or has a turn-in objective for this npc
             const giverMatches = q.giver === npcType;
             const hasTurnInObj = q.objectives?.some(o =>
                 (o.type === 'talk' || o.type === 'deliver') && o.npc === npcType
@@ -3115,9 +3115,9 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         });
     },
 
-    // 🖤 Get rumors from game context 💀
+    // get rumors from game context
     getRumors() {
-        // 🦇 Try to get rumors from various sources
+        // try to get rumors from various sources
         const rumors = [];
 
         // Check QuestSystem for rumors
@@ -3133,9 +3133,9 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         return rumors.length > 0 ? rumors : ['Things are quiet around here lately.'];
     },
 
-    // 🖤💀 Open the Grand Market at Royal Capital 💀
+    // open the grand market at royal capital
     openGrandMarket() {
-        // 🏛️ This opens the city-wide market, not an NPC's personal inventory
+        // this opens the city-wide market, not an npc's personal inventory
         if (game?.currentLocation?.id !== 'royal_capital') {
             if (typeof addMessage === 'function') {
                 addMessage('The Grand Market is only available at the Royal Capital.');
@@ -3143,14 +3143,14 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             return;
         }
 
-        // 🖤 Add chat messages for flavor
+        // add chat messages for flavor
         this.addChatMessage("I'd like to browse the Grand Market.", 'player');
         this.chatHistory.push({ role: 'user', content: "I'd like to browse the Grand Market." });
 
         this.addChatMessage("*gestures toward the bustling market square* The Grand Market awaits - finest goods in all the realm!", 'npc');
         this.chatHistory.push({ role: 'assistant', content: "*gestures toward the bustling market square* The Grand Market awaits - finest goods in all the realm!" });
 
-        // 🖤 Open the market using the global function
+        // open the market using the global function
         if (typeof openMarket === 'function') {
             openMarket();
         } else if (typeof updateMarketDisplay === 'function') {
@@ -3163,7 +3163,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         }
     },
 
-    // 🖤 Get nearby locations for directions 💀
+    // get nearby locations for directions
     getNearbyLocations() {
         if (typeof GameWorld === 'undefined' || !game?.currentLocation?.id) return [];
 
@@ -3182,7 +3182,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         }).slice(0, 5);
     },
 
-    // 🖤 Calculate direction to a location (basic) 💀
+    // calculate direction to a location (basic)
     getDirectionTo(from, to) {
         if (!from?.x || !to?.x) return 'nearby';
 
@@ -3197,7 +3197,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
     },
 
     openFullTrade() {
-        // 🖤 Open NPC trade window for this specific NPC 💀
+        // open npc trade window for this specific npc
         console.log('🛒 openFullTrade called, currentNPC:', this.currentNPC);
         console.log('🛒 NPCTradeWindow defined:', typeof NPCTradeWindow !== 'undefined');
 
@@ -3206,12 +3206,12 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             return;
         }
 
-        // 🛒 Open the NPC trade window
+        // open the npc trade window
         if (typeof NPCTradeWindow !== 'undefined') {
             console.log('🛒 Calling NPCTradeWindow.open with:', this.currentNPC);
             NPCTradeWindow.open(this.currentNPC, 'trade');
         } else {
-            // 🖤 Fallback to grand market if at capital
+            // fallback to grand market if at capital
             if (typeof openMarket === 'function' && typeof locationHasMarket === 'function' && locationHasMarket()) {
                 openMarket();
             } else {
@@ -3223,7 +3223,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         }
     },
 
-    // 🔊 STOP VOICE
+    // stop voice
     stopVoice() {
         if (typeof NPCVoiceChatSystem !== 'undefined') {
             NPCVoiceChatSystem.stopVoicePlayback?.();
@@ -3231,10 +3231,10 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🔍 NPC CHECKS - figuring out what this NPC can do
+    // npc checks - figuring out what this npc can do
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤💀 WOW-STYLE QUEST MARKER SYSTEM 💀
+    // wow-style quest marker system
     // Returns object with: { marker: '!' or '?', style: 'quest-available', 'quest-main', etc. }
     getQuestMarker(npcType) {
         if (typeof QuestSystem === 'undefined') return null;
@@ -3242,7 +3242,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         const location = typeof game !== 'undefined' ? game.currentLocation?.id : null;
         console.log(`🔍 getQuestMarker('${npcType}') at location '${location}'`);
 
-        // 🖤 PRIORITY 1: Quest ready to turn in (? markers)
+        // priority 1: quest ready to turn in (? markers)
         const readyToComplete = this.getQuestsReadyToComplete(npcType);
         console.log(`  readyToComplete:`, readyToComplete.map(q => q.id));
         if (readyToComplete.length > 0) {
@@ -3259,19 +3259,19 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             }
         }
 
-        // 🖤 PRIORITY 2: Quest in progress from this NPC (grey ? markers)
+        // priority 2: quest in progress from this npc (grey ? markers)
         const activeFromNPC = QuestSystem.getActiveQuestsForNPC?.(npcType, location) || [];
         const inProgress = activeFromNPC.filter(q => {
             const progress = QuestSystem.checkProgress?.(q.id);
             return progress?.status === 'in_progress';
         });
 
-        // 🦇 Also check if this NPC is the turn-in target for any active quest
+        // also check if this npc is the turn-in target for any active quest
         const turnInQuests = Object.values(QuestSystem.activeQuests || {}).filter(q => {
-            // 🖤 Check if NPC type matches AND location matches (for multiple merchants/NPCs of same type)
+            // check if npc type matches and location matches (for multiple merchants/npcs of same type)
             const turnInNpcMatches = q.turnInNpc === npcType;
 
-            // 🖤💀 Check for ANY talk objectives to this NPC (even if locked by previous objectives) 💀
+            // check for any talk objectives to this npc (even if locked by previous objectives)
             // This shows the grey ? marker indicating they're involved in an active quest
             const hasTalkObjective = q.objectives?.some(o =>
                 o.type === 'talk' &&
@@ -3280,7 +3280,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
                 (!o.location || o.location === location || o.location === 'any')
             );
 
-            // 🖤💀 If this NPC has a talk objective in this quest, show the marker 💀
+            // if this npc has a talk objective in this quest, show the marker
             if (hasTalkObjective) {
                 return true;
             }
@@ -3298,7 +3298,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             return { marker: '?', style: 'quest-progress' }; // Silver/grey ?
         }
 
-        // 🖤 PRIORITY 3: Quest available to pick up (! markers)
+        // priority 3: quest available to pick up (! markers)
         const availableQuests = QuestSystem.getQuestsForNPC?.(npcType, location) || [];
         if (availableQuests.length > 0) {
             // Find the highest priority quest type
@@ -3343,49 +3343,49 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
     },
 
     npcCanTrade(npcType) {
-        // 🖤 TRADE AVAILABILITY - not just merchants anymore, it's a whole economy
+        // trade availability - not just merchants anymore, it's a whole economy
         // some NPCs trade freely, others need you to earn their trust first
 
-        // 💀 ALWAYS TRADEABLE - no rep required, these folks just want your gold
+        // always tradeable - no rep required, these folks just want your gold
         const alwaysTrade = [
             'merchant', 'innkeeper', 'general_store', 'baker', 'farmer',
             'fisherman', 'ferryman', 'traveler'
         ];
         if (alwaysTrade.includes(npcType)) return true;
 
-        // 🦇 TRADE WITH LOW REP (10+) - they need to at least know you
+        // trade with low rep (10+) - they need to at least know you
         const lowRepTrade = ['blacksmith', 'apothecary', 'tailor', 'herbalist', 'miner'];
         if (lowRepTrade.includes(npcType)) {
             return this.getNPCReputation(npcType) >= 10;
         }
 
-        // 💎 TRADE WITH MEDIUM REP (25+) - specialty traders, gotta prove yourself
+        // trade with medium rep (25+) - specialty traders, gotta prove yourself
         const medRepTrade = ['jeweler', 'banker', 'guild_master'];
         if (medRepTrade.includes(npcType)) {
             return this.getNPCReputation(npcType) >= 25;
         }
 
-        // 👑 TRADE WITH HIGH REP (50+) - elite traders, only for the trusted
+        // trade with high rep (50+) - elite traders, only for the trusted
         const highRepTrade = ['noble'];
         if (highRepTrade.includes(npcType)) {
             return this.getNPCReputation(npcType) >= 50;
         }
 
-        // 🖤 Everyone else - check if they have decent rep (15+) to unlock barter
+        // everyone else - check if they have decent rep (15+) to unlock barter
         // this way even guards, healers, etc can trade if you're friendly enough
         return this.getNPCReputation(npcType) >= 15;
     },
 
-    // 🔮 GET NPC REPUTATION - how much does this NPC type trust us?
-    // 🖤💀 FIX: Search relationships by npcType field, not just key 💀
+    // get npc reputation - how much does this npc type trust us?
+    // fix: search relationships by npctype field, not just key
     getNPCReputation(npcTypeOrId) {
         if (typeof NPCRelationshipSystem === 'undefined') return 0;
 
-        // 🖤 First check direct lookup by ID
+        // first check direct lookup by id
         const directRel = NPCRelationshipSystem.relationships?.[npcTypeOrId];
         if (directRel) return directRel.reputation || 0;
 
-        // 🦇 Search all relationships for matching npcType
+        // search all relationships for matching npctype
         // This finds "blacksmith_royal_capital_123" when passed "blacksmith"
         for (const rel of Object.values(NPCRelationshipSystem.relationships || {})) {
             if (rel.npcType === npcTypeOrId) {
@@ -3393,14 +3393,14 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             }
         }
 
-        // 💀 Check faction/type reputation as fallback
+        // check faction/type reputation as fallback
         const factionRep = NPCRelationshipSystem.factionReputation?.[npcTypeOrId];
         if (factionRep !== undefined) return factionRep;
 
         return 0;
     },
 
-    // 💰 GET TRADE REP REQUIREMENT - show players what they need
+    // get trade rep requirement - show players what they need
     getTradeRepRequirement(npcType) {
         const alwaysTrade = ['merchant', 'innkeeper', 'general_store', 'baker', 'farmer', 'fisherman', 'ferryman', 'traveler'];
         if (alwaysTrade.includes(npcType)) return 0;
@@ -3418,7 +3418,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎨 HELPER METHODS - the mundane but necessary
+    // helper methods - the mundane but necessary
     // ═══════════════════════════════════════════════════════════════
 
     getNPCIcon(type) {
@@ -3486,7 +3486,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         return id.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     },
 
-    // 🖤 Escape HTML - sanitize or die 💀
+    // escape html - sanitize or die
     escapeHtml(text) {
         if (text == null) return '';
         const div = document.createElement('div');
@@ -3494,7 +3494,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         return div.innerHTML;
     },
 
-    // 🏛️ Get the faction/guild an NPC belongs to
+    // get the faction/guild an npc belongs to
     _getNPCFaction(npcType) {
         if (typeof NPCRelationshipSystem === 'undefined') return null;
 
@@ -3507,7 +3507,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         return null;
     },
 
-    // 🏷️ Get NPC category for button layouts
+    // get npc category for button layouts
     _getNPCCategory(npcType) {
         // Check NPC embedded data first
         if (typeof NPC_EMBEDDED_DATA !== 'undefined' && NPC_EMBEDDED_DATA[npcType]) {
@@ -3531,10 +3531,10 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // 🎭 SPECIAL ENCOUNTER - for intro/quest-specific NPC popups
+    // special encounter - for intro/quest-specific npc popups
     // ═══════════════════════════════════════════════════════════════
 
-    // 🖤 Show a special one-time encounter (like intro Hooded Stranger) 💀
+    // show a special one-time encounter (like intro hooded stranger)
     // This opens the panel directly to chat view with custom actions
     showSpecialEncounter(npcData, options = {}) {
         const {
@@ -3549,16 +3549,16 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
 
         console.log(`🎭 PeoplePanel: Opening special encounter with ${npcData.name} 🖤💀`);
 
-        // 🦇 Store callback for later
+        // store callback for later
         this._specialEncounterOnClose = onClose;
         this._isSpecialEncounter = true;
         this._specialEncounterActions = customActions;
         this._disableChat = disableChat;
 
-        // 🖤 Open panel directly to chat view
+        // open panel directly to chat view
         this.open();
 
-        // 🦇 Skip list view entirely - go straight to chat
+        // skip list view entirely - go straight to chat
         this.viewMode = 'chat';
         this.currentNPC = npcData;
         this.chatHistory = [];
@@ -3566,13 +3566,13 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         document.getElementById('people-list-view')?.classList.add('hidden');
         document.getElementById('people-chat-view')?.classList.remove('hidden');
 
-        // 🖤 Optionally hide back button for forced encounters
+        // optionally hide back button for forced encounters
         const backBtn = document.querySelector('#people-panel .back-btn');
         if (backBtn) {
             backBtn.style.display = disableBack ? 'none' : '';
         }
 
-        // 🖤 Optionally hide chat input for scripted encounters
+        // optionally hide chat input for scripted encounters
         const chatInputArea = document.querySelector('#people-panel .chat-input-area');
         if (chatInputArea) {
             chatInputArea.style.display = disableChat ? 'none' : '';
@@ -3581,42 +3581,42 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         this.updateChatHeader(npcData);
         this.clearChatMessages();
 
-        // 🖤 Show intro narrative text first (if provided)
+        // show intro narrative text first (if provided)
         if (introText) {
             this.addChatMessage(introText, 'system');
         }
 
-        // 🖤 Show NPC greeting
+        // show npc greeting
         if (greeting) {
-            // 🦇 Use provided greeting
+            // use provided greeting
             setTimeout(() => {
                 this.addChatMessage(greeting, 'npc');
                 this.chatHistory.push({ role: 'assistant', content: greeting });
 
-                // 🔊 Play TTS - pass NPC name as source for indicator 🖤💀
+                // play tts - pass NPC name as source for indicator 🖤💀
                 if (playVoice && typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.settings?.voiceEnabled) {
                     NPCVoiceChatSystem.playVoice(greeting, npcData.voice || 'onyx', npcData.name || 'Stranger');
                 }
             }, 300);
         } else {
-            // 🦇 Generate greeting via API (standard flow)
+            // generate greeting via api (standard flow)
             this.sendGreeting(npcData);
         }
 
-        // 🖤 Update quick actions with custom actions (after a delay for greeting to render)
+        // update quick actions with custom actions (after a delay for greeting to render)
         setTimeout(() => {
             this.updateSpecialEncounterActions(customActions);
         }, 500);
     },
 
-    // 🖤 Update quick actions with custom actions for special encounters 💀
+    // update quick actions with custom actions for special encounters
     updateSpecialEncounterActions(customActions) {
         const container = document.getElementById('people-quick-actions');
         if (!container) return;
 
         container.innerHTML = '';
 
-        // 🦇 Add custom actions
+        // add custom actions
         customActions.forEach(a => {
             const btn = document.createElement('button');
             btn.className = 'quick-action-btn';
@@ -3624,7 +3624,7 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             if (a.primary) btn.classList.add('primary-action-btn');
             btn.textContent = a.label;
             btn.addEventListener('click', () => {
-                // 🖤 Execute action and potentially close encounter
+                // execute action and potentially close encounter
                 if (typeof a.action === 'function') {
                     a.action();
                 }
@@ -3638,39 +3638,39 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
         container.classList.remove('hidden');
     },
 
-    // 🖤 Close special encounter and cleanup 💀
+    // close special encounter and cleanup
     closeSpecialEncounter() {
         console.log('🎭 PeoplePanel: Closing special encounter 🖤💀');
 
-        // 🦇 Restore normal UI
+        // restore normal ui
         const backBtn = document.querySelector('#people-panel .back-btn');
         if (backBtn) backBtn.style.display = '';
 
         const chatInputArea = document.querySelector('#people-panel .chat-input-area');
         if (chatInputArea) chatInputArea.style.display = '';
 
-        // 🖤 Fire callback if provided
+        // fire callback if provided
         if (typeof this._specialEncounterOnClose === 'function') {
             this._specialEncounterOnClose();
         }
 
-        // 🖤 Reset special encounter state
+        // reset special encounter state
         this._isSpecialEncounter = false;
         this._specialEncounterOnClose = null;
         this._specialEncounterActions = [];
         this._disableChat = false;
 
-        // 🖤 Close the panel
+        // close the panel
         this.close();
     },
 
-    // 🖤 Add system message to chat (for narrative intro text) 💀
+    // add system message to chat (for narrative intro text)
     addSystemMessage(text) {
         this.addChatMessage(text, 'system');
     }
 };
 
-// 🖤 Add CSS for special encounter styling 💀
+// add css for special encounter styling
 (function() {
     const style = document.createElement('style');
     style.textContent = `
@@ -3700,14 +3700,14 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
 })();
 
 // ═══════════════════════════════════════════════════════════════
-// 🌍 GLOBAL ACCESS
+// global access
 // ═══════════════════════════════════════════════════════════════
 window.PeoplePanel = PeoplePanel;
 window.openPeoplePanel = function() { PeoplePanel.open(); };
 window.closePeoplePanel = function() { PeoplePanel.close(); };
 window.togglePeoplePanel = function() { PeoplePanel.toggle(); };
 
-// 🚀 INITIALIZE on DOM ready
+// initialize on dom ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => PeoplePanel.init(), 500);

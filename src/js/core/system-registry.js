@@ -22,7 +22,7 @@ const SystemRegistry = {
     _deboogerMode: false,
 
     // ═══════════════════════════════════════════════════════════════════════
-    // 💀 CORE METHODS - The dark API
+    // CORE METHODS - The dark API
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
@@ -31,12 +31,12 @@ const SystemRegistry = {
      * @returns {boolean} - True if system exists
      */
     has(name) {
-        // check cache first - the void remembers what it's seen
+        // hit the cache first - faster than window lookups
         if (this._cache.has(name)) {
             return this._cache.get(name) !== null;
         }
 
-        // 🗡️ Check window object
+        // check if it's alive in the window object
         const exists = typeof window[name] !== 'undefined' && window[name] !== null;
         this._cache.set(name, exists ? window[name] : null);
 
@@ -48,17 +48,17 @@ const SystemRegistry = {
     },
 
     /**
-     * 🦇 Get a system safely (returns null if not available)
+     * Get a system safely (returns null if not available)
      * @param {string} name - System name
      * @returns {Object|null} - The system or null
      */
     get(name) {
-        // ⚰️ Check cache
+        // try the cache before we go digging
         if (this._cache.has(name)) {
             return this._cache.get(name);
         }
 
-        // 🌙 Look up and cache
+        // find it and stash it for next time
         const system = typeof window[name] !== 'undefined' ? window[name] : null;
         this._cache.set(name, system);
 
@@ -66,7 +66,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 💀 Get a system or throw if not available
+     * Get a system or throw if not available
      * @param {string} name - System name
      * @returns {Object} - The system
      * @throws {Error} - If system not found
@@ -80,7 +80,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🌙 Execute a callback if a system exists
+     * Execute a callback if a system exists
      * @param {string} name - System name
      * @param {Function} callback - Function to call with system as argument
      * @param {*} [fallback] - Value to return if system doesn't exist
@@ -95,7 +95,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🔮 Execute a method on a system if it exists
+     * Execute a method on a system if it exists
      * @param {string} systemName - System name
      * @param {string} methodName - Method to call
      * @param {...*} args - Arguments to pass
@@ -110,7 +110,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🗡️ Check multiple systems at once
+     * Check multiple systems at once
      * @param {...string} names - System names to check
      * @returns {boolean} - True if ALL systems exist
      */
@@ -119,7 +119,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🦇 Check if any of the systems exist
+     * Check if any of the systems exist
      * @param {...string} names - System names to check
      * @returns {boolean} - True if ANY system exists
      */
@@ -128,7 +128,7 @@ const SystemRegistry = {
     },
 
     /**
-     * ⚰️ Get multiple systems as an object
+     * Get multiple systems as an object
      * @param {...string} names - System names
      * @returns {Object} - Object with system names as keys
      */
@@ -141,11 +141,11 @@ const SystemRegistry = {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // 🔮 CONVENIENCE METHODS - Common system access patterns
+    // CONVENIENCE METHODS - Common system access patterns
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * 🖤 Get the game object safely
+     * Get the game object safely
      * @returns {Object|null}
      */
     get game() {
@@ -153,7 +153,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🖤 Get the game object or throw - use when game MUST exist 💀
+     * Get the game object or throw - use when game MUST exist
      * @returns {Object}
      * @throws {Error} If game is not registered
      */
@@ -166,7 +166,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🦇 Get the player object safely
+     * Get the player object safely
      * @returns {Object|null}
      */
     get player() {
@@ -175,7 +175,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🦇 Get the player object or throw - use when player MUST exist 💀
+     * Get the player object or throw - use when player MUST exist
      * @returns {Object}
      * @throws {Error} If player is not available
      */
@@ -188,7 +188,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🗡️ Get TimeSystem safely
+     * Get TimeSystem safely
      * @returns {Object|null}
      */
     get time() {
@@ -196,7 +196,7 @@ const SystemRegistry = {
     },
 
     /**
-     * ⚰️ Get TravelSystem safely
+     * Get TravelSystem safely
      * @returns {Object|null}
      */
     get travel() {
@@ -204,7 +204,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🌙 Get GameWorld safely
+     * Get GameWorld safely
      * @returns {Object|null}
      */
     get world() {
@@ -212,7 +212,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 💀 Get AudioManager safely
+     * Get AudioManager safely
      * @returns {Object|null}
      */
     get audio() {
@@ -220,11 +220,11 @@ const SystemRegistry = {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // 🌙 CACHE MANAGEMENT - Keep the darkness fresh
+    // CACHE MANAGEMENT - Keep the darkness fresh
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * 🖤 Clear the cache (call after systems are reloaded)
+     * Clear the cache (call after systems are reloaded)
      */
     clearCache() {
         this._cache.clear();
@@ -232,7 +232,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🦇 Invalidate a specific system in cache
+     * Invalidate a specific system in cache
      * @param {string} name - System name to invalidate
      */
     invalidate(name) {
@@ -240,7 +240,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🗡️ Register a system manually (useful for dynamic systems)
+     * Register a system manually (useful for dynamic systems)
      * @param {string} name - System name
      * @param {Object} system - System object
      */
@@ -251,11 +251,11 @@ const SystemRegistry = {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // ⚰️ DEBOOGER METHODS 🦇 - Peer into the void
+    // DEBOOGER METHODS - Peer into the void
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * 💀 Enable debooger mode 💀 (logs all access attempts)
+     * Enable debooger mode (logs all access attempts)
      */
     enableDebooger() {
         this._deboogerMode = true;
@@ -263,7 +263,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🌙 Disable debooger mode
+     * Disable debooger mode
      */
     disableDebooger() {
         this._deboogerMode = false;
@@ -271,7 +271,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🔮 Get access log (debooger mode only)
+     * Get access log (debooger mode only)
      * @returns {Array}
      */
     getAccessLog() {
@@ -279,7 +279,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🖤 List all registered/cached systems
+     * List all registered/cached systems
      * @returns {Array<string>}
      */
     listCached() {
@@ -287,7 +287,7 @@ const SystemRegistry = {
     },
 
     /**
-     * 🦇 Get stats about cache usage
+     * Get stats about cache usage
      * @returns {Object}
      */
     getStats() {
@@ -309,14 +309,14 @@ const SystemRegistry = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🔮 SHORTHAND ALIAS - For the lazy dark coders
+// SHORTHAND ALIAS - For the lazy dark coders
 // ═══════════════════════════════════════════════════════════════════════════
 
-// 💀 Short alias: Sys.has('TimeSystem') instead of SystemRegistry.has('TimeSystem')
+// Short alias: Sys.has('TimeSystem') instead of SystemRegistry.has('TimeSystem')
 const Sys = SystemRegistry;
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY - Let the darkness spread
+// EXPOSE GLOBALLY - Let the darkness spread
 // ═══════════════════════════════════════════════════════════════════════════
 
 window.SystemRegistry = SystemRegistry;

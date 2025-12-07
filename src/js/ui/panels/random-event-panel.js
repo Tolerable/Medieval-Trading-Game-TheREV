@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// 🎲 RANDOM EVENT PANEL - when fate decides to mess with you
+// RANDOM EVENT PANEL - when fate decides to mess with you
 // ═══════════════════════════════════════════════════════════════
 // File Version: 0.90.01
 // conjured by Unity AI Lab - showing players what chaos befalls them
@@ -7,7 +7,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 const RandomEventPanel = {
-    // 🔧 CONFIG
+    // config
     panelId: 'random-event-panel',
     isOpen: false,
     currentEvent: null,
@@ -16,7 +16,7 @@ const RandomEventPanel = {
     isDragging: false,
     dragOffset: { x: 0, y: 0 },
 
-    // EVENT ICONS - matching event types to visual flair
+    // event icons - matching event types to visual flair
     eventIcons: {
         market_boom: '📈',
         market_crash: '📉',
@@ -34,7 +34,7 @@ const RandomEventPanel = {
         default: '🎲'
     },
 
-    // EVENT COLORS - visual mood setting
+    // event colors - visual mood setting
     eventColors: {
         market_boom: '#4ade80',      // green - good
         market_crash: '#f87171',     // red - bad
@@ -50,14 +50,14 @@ const RandomEventPanel = {
         default: '#94a3b8'           // slate - neutral
     },
 
-    // 🚀 INITIALIZE
+    // initialize
     init() {
         this.createPanelHTML();
         this.setupEventListeners();
         console.log('🎲 RandomEventPanel: Ready to deliver fate\'s whims... 🖤');
     },
 
-    // 🏗️ CREATE PANEL HTML
+    // create panel html
     createPanelHTML() {
         if (document.getElementById(this.panelId)) {
             return;
@@ -117,7 +117,7 @@ const RandomEventPanel = {
         console.log('🎲 RandomEventPanel: Panel created');
     },
 
-    // 🎨 ADD STYLES
+    // add styles
     addStyles() {
         if (document.getElementById('random-event-panel-styles')) return;
 
@@ -338,16 +338,16 @@ const RandomEventPanel = {
         document.head.appendChild(styles);
     },
 
-    // 🎧 EVENT LISTENERS
+    // event listeners
     setupEventListeners() {
-        // 🖤 Close button - ONLY works if event is acknowledged 💀
+        // close button - only works if event is acknowledged
         document.addEventListener('click', (e) => {
             if (e.target.matches(`[data-close-overlay="${this.panelId}"]`)) {
                 if (this.eventAcknowledged) {
                     this.close();
                 } else {
                     console.log('🎲 RandomEventPanel: Cannot close until event is acknowledged! 💀');
-                    // 🦇 Shake the panel to indicate it can't be closed
+                    // shake the panel to indicate it can't be closed
                     const panel = document.getElementById(this.panelId);
                     if (panel) {
                         panel.style.animation = 'none';
@@ -358,10 +358,10 @@ const RandomEventPanel = {
             }
         });
 
-        // 🦇 Listen for random events from EventSystem
+        // listen for random events from EventSystem
         document.addEventListener('random-event-triggered', (e) => {
             if (e.detail && e.detail.event) {
-                // 🖤💀 Skip silent events (they only log to message panel, no popup)
+                // skip silent events (they only log to message panel, no popup)
                 if (e.detail.silent) {
                     console.log('🎲 RandomEventPanel: Silent event, no popup');
                     return;
@@ -370,13 +370,13 @@ const RandomEventPanel = {
             }
         });
 
-        // 🖤 DRAGGABLE: Mouse events for dragging 💀
+        // draggable: mouse events for dragging
         document.addEventListener('mousedown', (e) => this.startDrag(e));
         document.addEventListener('mousemove', (e) => this.drag(e));
         document.addEventListener('mouseup', () => this.endDrag());
     },
 
-    // 🖤 START DRAG - only from header 💀
+    // start drag - only from header
     startDrag(e) {
         const panel = document.getElementById(this.panelId);
         if (!panel || !this.isOpen) return;
@@ -397,7 +397,7 @@ const RandomEventPanel = {
         e.preventDefault();
     },
 
-    // 🦇 DRAG - move panel with mouse
+    // drag - move panel with mouse
     drag(e) {
         if (!this.isDragging) return;
 
@@ -416,7 +416,7 @@ const RandomEventPanel = {
         panel.style.transform = 'none'; // Remove centering transform while dragging
     },
 
-    // 💀 END DRAG
+    // end drag
     endDrag() {
         if (!this.isDragging) return;
 
@@ -429,11 +429,11 @@ const RandomEventPanel = {
         }
     },
 
-    // 🎲 SHOW EVENT - main display method
+    // show event - main display method
     showEvent(event) {
         if (!event) return;
 
-        // 🦇 If panel is already showing an event, queue this one
+        // if panel is already showing an event, queue this one
         if (this.isOpen && this.currentEvent) {
             this.eventQueue.push(event);
             console.log('🎲 Event queued:', event.name);
@@ -444,31 +444,31 @@ const RandomEventPanel = {
         this.updateDisplay(event);
         this.open();
 
-        // 🎵 Play event sound if available
+        // play event sound if available
         this.playEventSound(event);
     },
 
-    // 🎨 UPDATE DISPLAY
+    // update display
     updateDisplay(event) {
         const eventId = event.id || 'default';
         const icon = this.eventIcons[eventId] || this.eventIcons.default;
         const color = this.eventColors[eventId] || this.eventColors.default;
 
-        // 🖤 Update icon
+        // update icon
         const iconEl = document.getElementById('event-icon');
         if (iconEl) {
             iconEl.textContent = icon;
             iconEl.style.color = color;
         }
 
-        // 🦇 Update title
+        // update title
         const titleEl = document.getElementById('event-title');
         if (titleEl) {
             titleEl.textContent = event.name || 'Mysterious Event';
             titleEl.style.color = color;
         }
 
-        // 🗡️ Update subtitle based on event type
+        // update subtitle based on event type
         const subtitleEl = document.getElementById('event-subtitle');
         if (subtitleEl) {
             subtitleEl.textContent = this.getEventSubtitle(event);
@@ -480,17 +480,17 @@ const RandomEventPanel = {
             descEl.textContent = event.description || 'Something strange is happening...';
         }
 
-        // 📊 Update effects
+        // update effects
         this.updateEffects(event);
 
-        // ⏱️ Update duration
+        // update duration
         this.updateDuration(event);
 
-        // 🎨 Update panel styling
+        // update panel styling
         this.updatePanelStyle(event);
     },
 
-    // 📜 GET SUBTITLE
+    // get subtitle
     getEventSubtitle(event) {
         const subtitles = {
             market_boom: 'The economy favors the bold!',
@@ -509,7 +509,7 @@ const RandomEventPanel = {
         return subtitles[event.id] || 'Fate has decided...';
     },
 
-    // 📊 UPDATE EFFECTS DISPLAY
+    // update effects display
     updateEffects(event) {
         const effectsEl = document.getElementById('event-effects');
         if (!effectsEl) return;
@@ -544,7 +544,7 @@ const RandomEventPanel = {
         }
     },
 
-    // UPDATE DURATION DISPLAY
+    // update duration display
     updateDuration(event) {
         const durationEl = document.getElementById('event-duration-text');
         if (!durationEl) return;
@@ -562,7 +562,7 @@ const RandomEventPanel = {
         }
     },
 
-    // 🎨 UPDATE PANEL STYLE
+    // update panel style
     updatePanelStyle(event) {
         const panel = document.getElementById(this.panelId);
         if (!panel) return;
@@ -581,7 +581,7 @@ const RandomEventPanel = {
         }
     },
 
-    // 🎵 PLAY EVENT SOUND
+    // play event sound
     playEventSound(event) {
         if (typeof AudioManager === 'undefined') return;
 
@@ -595,45 +595,45 @@ const RandomEventPanel = {
         }
     },
 
-    // ✅ ACKNOWLEDGE EVENT - marks event as acknowledged and closes panel 💀
+    // acknowledge event - marks event as acknowledged and closes panel
     acknowledgeEvent() {
-        // 🖤 Mark event as acknowledged 💀
+        // mark event as acknowledged
         this.eventAcknowledged = true;
         this.updateCloseButtonVisibility();
 
-        // 🦇 Track for achievements
+        // track for achievements
         if (typeof AchievementSystem !== 'undefined') {
             AchievementSystem.stats.eventsWitnessed = (AchievementSystem.stats.eventsWitnessed || 0) + 1;
         }
 
-        // 🖤 Now close the panel 💀
+        // now close the panel
         this.close();
     },
 
-    // 📂 OPEN PANEL
+    // open panel
     open() {
         const panel = document.getElementById(this.panelId);
         if (!panel) return;
 
-        // 🖤 Reset acknowledged state - event must be acknowledged before closing 💀
+        // reset acknowledged state - event must be acknowledged before closing
         this.eventAcknowledged = false;
         this.updateCloseButtonVisibility();
 
         panel.classList.remove('hidden');
         this.isOpen = true;
 
-        // 🖤 CENTER THE PANEL ON SCREEN 💀
+        // center the panel on screen
         panel.style.position = 'fixed';
         panel.style.left = '50%';
         panel.style.top = '50%';
         panel.style.transform = 'translate(-50%, -50%)';
         panel.style.zIndex = '9999'; // Make sure it's on top
 
-        // 🦇 Make header look draggable
+        // make header look draggable
         const header = panel.querySelector('.event-header');
         if (header) header.style.cursor = 'grab';
 
-        // 🖤 Use panel manager if available
+        // use panel manager if available
         if (typeof PanelManager !== 'undefined' && PanelManager.showOverlay) {
             PanelManager.showOverlay(this.panelId);
         }
@@ -641,7 +641,7 @@ const RandomEventPanel = {
         console.log('🎲 RandomEventPanel: Opened (centered) -', this.currentEvent?.name);
     },
 
-    // 🖤 UPDATE CLOSE BUTTON VISIBILITY 💀
+    // update close button visibility
     updateCloseButtonVisibility() {
         const panel = document.getElementById(this.panelId);
         if (!panel) return;
@@ -653,13 +653,13 @@ const RandomEventPanel = {
                 closeBtn.style.opacity = '1';
                 closeBtn.style.cursor = 'pointer';
             } else {
-                // 🦇 Hide the X button until event is acknowledged
+                // hide the X button until event is acknowledged
                 closeBtn.style.display = 'none';
             }
         }
     },
 
-    // 📕 CLOSE PANEL
+    // close panel
     close() {
         const panel = document.getElementById(this.panelId);
         if (!panel) return;
@@ -668,12 +668,12 @@ const RandomEventPanel = {
         this.isOpen = false;
         this.currentEvent = null;
 
-        // 🖤 Use panel manager if available
+        // use panel manager if available
         if (typeof PanelManager !== 'undefined' && PanelManager.hideOverlay) {
             PanelManager.hideOverlay(this.panelId);
         }
 
-        // 🦇 Check for queued events
+        // check for queued events
         if (this.eventQueue.length > 0) {
             const nextEvent = this.eventQueue.shift();
             setTimeout(() => this.showEvent(nextEvent), 500);
@@ -682,7 +682,7 @@ const RandomEventPanel = {
         console.log('🎲 RandomEventPanel: Closed');
     },
 
-    // 🔄 TOGGLE PANEL
+    // toggle panel
     toggle() {
         if (this.isOpen) {
             this.close();
@@ -693,13 +693,13 @@ const RandomEventPanel = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🌐 GLOBAL BINDING
+// GLOBAL BINDING
 // ═══════════════════════════════════════════════════════════════
 if (typeof window !== 'undefined') {
     window.RandomEventPanel = RandomEventPanel;
 }
 
-// 🚀 Auto-init when DOM ready
+// auto-init when DOM ready
 if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => RandomEventPanel.init());

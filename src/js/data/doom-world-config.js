@@ -11,7 +11,7 @@
 
 const DoomWorldConfig = {
     // ═══════════════════════════════════════════════════════════════
-    // WORLD STATE
+    // WORLD STATE - The pulse of a dying realm
     // ═══════════════════════════════════════════════════════════════
     worldState: {
         name: 'The Doom',
@@ -34,9 +34,9 @@ const DoomWorldConfig = {
         goldMultiplier: 0.01, // Gold is worth 1% of normal
         barterEnabled: true,  // Trade item for item
 
-        // Item value tiers in doom (for barter calculations)
+        // What the fuck actually matters when the world's dead - barter values carved in ash
         valueTiers: {
-            // CRITICAL SURVIVAL - Most valuable
+            // CRITICAL SURVIVAL - Breathe, drink, eat, or die screaming
             water: 100,
             clean_water: 150,
             food: 80,
@@ -47,7 +47,7 @@ const DoomWorldConfig = {
             bandages: 85,
             plague_cure: 200,
 
-            // WEAPONS AND DEFENSE - Very valuable
+            // WEAPONS AND DEFENSE - Steel is salvation, armor is prayer
             iron_sword: 70,
             steel_sword: 90,
             bow: 60,
@@ -57,7 +57,7 @@ const DoomWorldConfig = {
             chainmail: 75,
             plate_armor: 100,
 
-            // SURVIVAL TOOLS - Valuable
+            // SURVIVAL TOOLS - Light, rope, hope in your hands
             torch: 45,
             lamp: 50,
             rope: 35,
@@ -65,7 +65,7 @@ const DoomWorldConfig = {
             pickaxe: 45,
             axe: 45,
 
-            // MATERIALS - Moderate value
+            // MATERIALS - Build, repair, endure another fucking day
             leather: 30,
             cloth: 25,
             wood: 20,
@@ -74,16 +74,16 @@ const DoomWorldConfig = {
             coal: 30,
             furs: 40,
 
-            // CLOTHING - Moderate value (protection matters)
+            // CLOTHING - Cover your flesh or let the cold claim you
             winter_clothing: 50,
             hide: 35,
 
-            // CONSUMABLES - Some value
+            // CONSUMABLES - Numb the pain, forget for a moment
             ale: 20, // Morale matters
             wine: 15,
             herbs: 25,
 
-            // FORMER LUXURIES - Nearly worthless
+            // FORMER LUXURIES - Gold means nothing when you're rotting
             gold: 1,
             gold_bar: 2,
             gold_ore: 1,
@@ -100,7 +100,7 @@ const DoomWorldConfig = {
             artifacts: 10 // Historical/mystical value
         },
 
-        // What NPCs desperately need (affects their barter rates)
+        // What they'll kill for - desperation shapes the market
         desperateNeeds: {
             food: ['water', 'bread', 'meat', 'vegetables'],
             medicine: ['medical_plants', 'bandages', 'plague_cure'],
@@ -109,13 +109,13 @@ const DoomWorldConfig = {
             light: ['torch', 'lamp', 'oil']
         },
 
-        // Calculate doom barter value
+        // Calculate what your survival is worth in this hell
         getBarterValue(itemId, quantity = 1) {
             const baseValue = this.valueTiers[itemId] || 10;
             return baseValue * quantity;
         },
 
-        // Check if trade is fair in doom
+        // Nothing's fair in doom - but this checks if you're getting fucked too hard
         isTradeValid(offeredItems, requestedItems) {
             let offeredValue = 0;
             let requestedValue = 0;
@@ -134,10 +134,10 @@ const DoomWorldConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // DANGER SYSTEM
+    // DANGER SYSTEM - How fast the darkness finds you
     // ═══════════════════════════════════════════════════════════════
     danger: {
-        // Base danger levels by location type
+        // Every place wants you dead - some just want it more
         baseLevels: {
             capital: 80,
             city: 70,
@@ -153,14 +153,14 @@ const DoomWorldConfig = {
             port: 60
         },
 
-        // Random encounter chances (per travel segment)
+        // Odds something finds you while you're exposed and moving
         encounterChance: {
             day: 0.3,    // 30% chance during "day"
             night: 0.6,  // 60% at "night"
             dusk: 0.4    // 40% at dusk (eternal dusk = always this)
         },
 
-        // Types of encounters
+        // The beautiful variety of ways you can die out there
         encounterTypes: [
             { type: 'blight_creature', weight: 30, difficulty: 'medium' },
             { type: 'shadow_beast', weight: 20, difficulty: 'hard' },
@@ -171,10 +171,10 @@ const DoomWorldConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // UI CONFIGURATION - Doom aesthetic
+    // UI CONFIGURATION - Paint it all in blood and shadows
     // ═══════════════════════════════════════════════════════════════
     ui: {
-        // Color scheme
+        // The palette of apocalypse - reds, blacks, and dying light
         colors: {
             background: '#1a0a0a', // Dark blood red/black
             text: '#8b0000', // Dark red
@@ -186,7 +186,7 @@ const DoomWorldConfig = {
             hope: '#44aa44' // Rare moments of hope - green
         },
 
-        // Message prefixes
+        // Flavor the messages with appropriate doom icons
         messagePrefix: {
             info: '',
             warning: '',
@@ -197,7 +197,7 @@ const DoomWorldConfig = {
             hope: ''
         },
 
-        // Atmosphere text for locations
+        // Random dark poetry to set the fucking mood
         atmosphereText: {
             arrival: [
                 'The air tastes of ash and despair.',
@@ -222,15 +222,15 @@ const DoomWorldConfig = {
     },
 
     // ═══════════════════════════════════════════════════════════════
-    // INTEGRATION FUNCTIONS
+    // INTEGRATION FUNCTIONS - How doom bleeds into the game's veins
     // ═══════════════════════════════════════════════════════════════
 
-    // Check if doom world is active
+    // Are we in hell right now? Check the state
     isActive() {
         return this.worldState.isActive || (typeof game !== 'undefined' && game.inDoomWorld === true);
     },
 
-    // Activate doom world
+    // Trigger the apocalypse - let the darkness consume everything
     activate() {
         this.worldState.isActive = true;
         if (typeof game !== 'undefined') {
@@ -240,7 +240,7 @@ const DoomWorldConfig = {
         this._applyDoomEffects();
     },
 
-    // Deactivate (return to normal world via Ferryman)
+    // Escape back to the living world - if you can
     deactivate() {
         this.worldState.isActive = false;
         if (typeof game !== 'undefined') {
@@ -250,7 +250,7 @@ const DoomWorldConfig = {
         this._removeDoomEffects();
     },
 
-    // Apply doom visual/audio effects
+    // Corrupt the UI with doom's aesthetic - make it FEEL wrong
     _applyDoomEffects() {
         // Apply CSS class for doom styling
         document.body.classList.add('doom-world');
@@ -266,7 +266,7 @@ const DoomWorldConfig = {
         }
     },
 
-    // Remove doom effects
+    // Cleanse the corruption - return to normalcy
     _removeDoomEffects() {
         document.body.classList.remove('doom-world');
 
@@ -279,7 +279,7 @@ const DoomWorldConfig = {
         }
     },
 
-    // Get location data for doom world
+    // Fetch the cursed version of any location
     getLocationData(locationId) {
         // Get base location from GameWorld
         const baseLocation = GameWorld?.locations?.[locationId];
@@ -302,7 +302,7 @@ const DoomWorldConfig = {
         };
     },
 
-    // Get NPC instruction for doom world
+    // Build the prompt for broken, traumatized NPCs
     getNPCInstruction(npcType, action, context = {}) {
         if (typeof DoomNPCInstructionTemplates !== 'undefined') {
             return DoomNPCInstructionTemplates.buildDoomInstruction(npcType, action, context);
@@ -311,7 +311,7 @@ const DoomWorldConfig = {
         return `You are a survivor in the apocalypse. Be desperate and traumatized. ${action}`;
     },
 
-    // Get available quests at location
+    // See what desperate tasks the damned need done
     getAvailableQuests(locationId) {
         if (typeof DoomQuestSystem !== 'undefined') {
             return DoomQuestSystem.getAvailableQuests(locationId);
@@ -319,7 +319,7 @@ const DoomWorldConfig = {
         return [];
     },
 
-    // Calculate price in doom economy
+    // Convert normal prices to apocalypse values
     getDoomPrice(itemId, normalPrice) {
         if (typeof DoomWorldNPCs !== 'undefined') {
             return DoomWorldNPCs.getDoomPrice(itemId, normalPrice);
@@ -329,13 +329,13 @@ const DoomWorldConfig = {
         return Math.round(normalPrice * modifier);
     },
 
-    // Get random atmosphere text
+    // Pull some dark flavor text from the void
     getAtmosphereText(situation = 'arrival') {
         const texts = this.ui.atmosphereText[situation] || this.ui.atmosphereText.arrival;
         return texts[Math.floor(Math.random() * texts.length)];
     },
 
-    // Check for random encounter during travel
+    // Roll the dice - does something horrific find you?
     checkRandomEncounter() {
         const chance = this.danger.encounterChance.dusk; // Eternal dusk
         if (Math.random() < chance) {
@@ -355,7 +355,7 @@ const DoomWorldConfig = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🌐 EXPOSE GLOBALLY
+// Make it global so the apocalypse can spread everywhere
 // ═══════════════════════════════════════════════════════════════
 window.DoomWorldConfig = DoomWorldConfig;
 

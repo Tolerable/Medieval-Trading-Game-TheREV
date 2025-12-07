@@ -8,7 +8,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 const PropertyUpgrades = {
-    // 🔧 Upgrade property ⚰️
+    // upgrade property
     upgrade(propertyId, upgradeId) {
         const property = PropertySystem.getProperty(propertyId);
         const upgrade = PropertyTypes.getUpgrade(upgradeId);
@@ -18,13 +18,13 @@ const PropertyUpgrades = {
             return false;
         }
 
-        // 🔍 Check if already upgraded 🦇
+        // check if already upgraded
         if (property.upgrades.includes(upgradeId)) {
             addMessage('Property already has this upgrade!');
             return false;
         }
 
-        // 📋 Check requirements 🗡️
+        // check requirements
         const requirements = this.getRequirements(propertyId, upgradeId);
         const unmetRequirements = requirements.filter(req => !req.met);
 
@@ -34,7 +34,7 @@ const PropertyUpgrades = {
             return false;
         }
 
-        // 💰 Calculate cost 🌙
+        // calculate cost
         const upgradeCost = this.calculateCost(propertyId, upgradeId);
 
         if (game.player.gold < upgradeCost) {
@@ -42,7 +42,7 @@ const PropertyUpgrades = {
             return false;
         }
 
-        // 🎯 Apply upgrade 🔮
+        // apply upgrade
         game.player.gold -= upgradeCost;
         property.upgrades.push(upgradeId);
         this.applyEffects(propertyId, upgradeId);
@@ -50,14 +50,14 @@ const PropertyUpgrades = {
         const propertyType = PropertyTypes.get(property.type);
         addMessage(`Upgraded ${propertyType.name} with ${upgrade.name} for ${upgradeCost} gold!`);
 
-        // 🔄 Update UI 💀
+        // update UI
         if (typeof updatePlayerInfo === 'function') updatePlayerInfo();
         if (typeof PropertySystem !== 'undefined') PropertySystem.updatePropertyDisplay();
 
         return true;
     },
 
-    // 📋 Get upgrade requirements 🖤
+    // get upgrade requirements
     getRequirements(propertyId, upgradeId) {
         const property = PropertySystem.getProperty(propertyId);
         const upgrade = PropertyTypes.getUpgrade(upgradeId);
@@ -65,7 +65,7 @@ const PropertyUpgrades = {
 
         const requirements = [];
 
-        // 💰 Gold requirement ⚰️
+        // gold requirement
         const upgradeCost = this.calculateCost(propertyId, upgradeId);
         requirements.push({
             type: 'gold',
@@ -74,7 +74,7 @@ const PropertyUpgrades = {
             description: `${upgradeCost} gold`
         });
 
-        // 📊 Property level requirements 🦇
+        // property level requirements
         if (upgradeId === 'luxury') {
             requirements.push({
                 type: 'level',
@@ -84,7 +84,7 @@ const PropertyUpgrades = {
             });
         }
 
-        // 🔧 Prerequisite upgrades 🗡️
+        // prerequisite upgrades
         if (upgradeId === 'efficiency') {
             const hasSecurity = property.upgrades.includes('security');
             requirements.push({
@@ -98,7 +98,7 @@ const PropertyUpgrades = {
         return requirements;
     },
 
-    // 💵 Calculate upgrade cost 🌙
+    // calculate upgrade cost
     calculateCost(propertyId, upgradeId) {
         const property = PropertySystem.getProperty(propertyId);
         const upgrade = PropertyTypes.getUpgrade(upgradeId);
@@ -107,10 +107,10 @@ const PropertyUpgrades = {
         const propertyType = PropertyTypes.get(property.type);
         let baseCost = propertyType.basePrice * upgrade.costMultiplier;
 
-        // 📈 Level modifier 🔮
+        // level modifier
         baseCost *= (1 + (property.level - 1) * 0.2);
 
-        // ⭐ Reputation modifier 💀
+        // reputation modifier
         if (typeof CityReputationSystem !== 'undefined') {
             const reputation = CityReputationSystem.getReputation(property.location);
             const reputationModifier = 1 - (reputation * 0.001);
@@ -120,22 +120,22 @@ const PropertyUpgrades = {
         return Math.round(baseCost);
     },
 
-    // 🎯 Apply upgrade effects 🖤
+    // apply upgrade effects
     applyEffects(propertyId, upgradeId) {
         const property = PropertySystem.getProperty(propertyId);
         const upgrade = PropertyTypes.getUpgrade(upgradeId);
         if (!property || !upgrade) return;
 
-        // 📦 Storage bonus ⚰️
+        // storage bonus
         if (upgrade.effects.storageBonus) {
             PropertyStorage.initialize(propertyId);
         }
 
-        // 🏠 Apply property-specific benefits 🦇
+        // apply property-specific benefits
         this.applyPropertyBenefits(propertyId);
     },
 
-    // 🏠 Apply property-specific benefits 🗡️
+    // apply property-specific benefits
     applyPropertyBenefits(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return;
@@ -143,12 +143,12 @@ const PropertyUpgrades = {
         const propertyType = PropertyTypes.get(property.type);
         property.benefits = property.benefits || {};
 
-        // 📦 Storage benefit 🌙
+        // storage benefit
         if (propertyType.storageBonus) {
             property.benefits.storageCapacity = PropertyStorage.getCapacity(propertyId);
         }
 
-        // ⚒️ Production benefit 🔮
+        // production benefit
         if (propertyType.production) {
             property.benefits.production = { ...propertyType.production };
 
@@ -159,7 +159,7 @@ const PropertyUpgrades = {
             }
         }
 
-        // 👥 Employee slots 💀
+        // employee slots
         if (propertyType.workerSlots) {
             property.benefits.workerSlots = propertyType.workerSlots;
         }
@@ -168,11 +168,11 @@ const PropertyUpgrades = {
             property.benefits.merchantSlots = propertyType.merchantSlots;
         }
 
-        // 🌟 Special benefits 🖤
+        // special benefits
         if (propertyType.restBonus) property.benefits.restBonus = true;
         if (propertyType.reputationBonus) property.benefits.reputationBonus = propertyType.reputationBonus;
 
-        // 🔧 Upgrade-based benefits ⚰️
+        // upgrade-based benefits
         property.upgrades.forEach(upgradeId => {
             const upgrade = PropertyTypes.getUpgrade(upgradeId);
             if (upgrade?.effects.storageBonus) {
@@ -183,7 +183,7 @@ const PropertyUpgrades = {
         });
     },
 
-    // 📊 Get property benefits 🦇
+    // get property benefits
     getPropertyBenefits(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return {};
@@ -192,13 +192,13 @@ const PropertyUpgrades = {
         return property.benefits || {};
     },
 
-    // ⚒️ Get production capacity 🗡️
+    // get production capacity
     getProductionCapacity(propertyId) {
         const benefits = this.getPropertyBenefits(propertyId);
         return benefits.production || {};
     },
 
-    // 👥 Get employee capacity 🌙
+    // get employee capacity
     getEmployeeCapacity(propertyId) {
         const benefits = this.getPropertyBenefits(propertyId);
         const capacity = {
@@ -219,7 +219,7 @@ const PropertyUpgrades = {
         return capacity;
     },
 
-    // 👤 Check if property can accept more employees 🔮
+    // check if property can accept more employees
     canAcceptEmployee(propertyId, employeeRole) {
         const capacity = this.getEmployeeCapacity(propertyId);
         const property = PropertySystem.getProperty(propertyId);
@@ -240,7 +240,7 @@ const PropertyUpgrades = {
         return true;
     },
 
-    // 🌟 Get property special abilities 💀
+    // get property special abilities
     getSpecialAbilities(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return [];
@@ -286,7 +286,7 @@ const PropertyUpgrades = {
         return abilities;
     },
 
-    // 📋 Get available upgrades for a property 🖤
+    // get available upgrades for a property
     getAvailable(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return [];
@@ -315,7 +315,7 @@ const PropertyUpgrades = {
         return availableUpgrades;
     },
 
-    // 📊 Calculate upgrade benefits preview ⚰️
+    // calculate upgrade benefits preview
     calculateBenefits(propertyId, upgradeId) {
         const property = PropertySystem.getProperty(propertyId);
         const upgrade = PropertyTypes.getUpgrade(upgradeId);
@@ -351,7 +351,7 @@ const PropertyUpgrades = {
         return benefits;
     },
 
-    // ⬆️ Upgrade property level 🦇
+    // upgrade property level
     upgradeLevel(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return false;
@@ -375,7 +375,7 @@ const PropertyUpgrades = {
         return true;
     },
 
-    // 🔨 Repair property 🗡️
+    // repair property
     repair(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) {
@@ -398,7 +398,7 @@ const PropertyUpgrades = {
         game.player.gold -= repairCost;
         property.condition = 100;
 
-        // 🌟 Apply repair bonus 🌙
+        // apply repair bonus
         property.repairBonus = {
             active: true,
             duration: 7,
@@ -416,7 +416,7 @@ const PropertyUpgrades = {
         return true;
     },
 
-    // 💵 Calculate repair cost 🔮
+    // calculate repair cost
     calculateRepairCost(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return 0;
@@ -426,15 +426,15 @@ const PropertyUpgrades = {
 
         let baseCost = propertyType.basePrice * 0.1 * (conditionDeficit / 100);
 
-        // 🔒 Security discount 💀
+        // security discount
         if (property.upgrades.includes('security')) baseCost *= 0.8;
 
-        // ⚒️ Skill discount 🖤
+        // skill discount
         const craftingSkill = game.player.skills?.crafting || 0;
         const repairDiscount = Math.min(0.3, craftingSkill * 0.05);
         baseCost *= (1 - repairDiscount);
 
-        // ⭐ Reputation discount ⚰️
+        // reputation discount
         if (typeof CityReputationSystem !== 'undefined') {
             const reputation = CityReputationSystem.getReputation(property.location);
             const reputationDiscount = Math.min(0.2, reputation * 0.002);
@@ -444,7 +444,7 @@ const PropertyUpgrades = {
         return Math.round(baseCost);
     },
 
-    // 📊 Get condition status 🦇
+    // get condition status
     getConditionStatus(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return 'unknown';
@@ -456,7 +456,7 @@ const PropertyUpgrades = {
         return 'critical';
     },
 
-    // 🎨 Get condition color 🗡️
+    // get condition color
     getConditionColor(propertyId) {
         const status = this.getConditionStatus(propertyId);
 
@@ -472,13 +472,13 @@ const PropertyUpgrades = {
         return colors[status] || colors.unknown;
     },
 
-    // 🚨 Check if needs urgent repair 🌙
+    // check if needs urgent repair
     needsUrgentRepair(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         return property && property.condition < 30;
     },
 
-    // 📋 Get repair recommendations 🔮
+    // get repair recommendations
     getRepairRecommendations(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return [];
@@ -516,7 +516,7 @@ const PropertyUpgrades = {
         return recommendations;
     },
 
-    // 🏠 Upgrade home to next tier 🖤
+    // upgrade home to next tier
     upgradeHomeTier(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) {
@@ -536,7 +536,7 @@ const PropertyUpgrades = {
             return false;
         }
 
-        // 💰 Calculate upgrade cost (difference + 20% labor) 🗡️
+        // calculate upgrade cost (difference + 20% labor)
         const upgradeCost = Math.round((nextType.basePrice - currentType.basePrice) * 1.2);
 
         if (game.player.gold < upgradeCost) {
@@ -544,7 +544,7 @@ const PropertyUpgrades = {
             return false;
         }
 
-        // 🪵 Check materials 🌙
+        // check materials
         const materials = PropertyTypes.getBuildingMaterials(nextType.id);
         const missingMaterials = [];
 
@@ -561,7 +561,7 @@ const PropertyUpgrades = {
             return false;
         }
 
-        // 🎯 Deduct gold and materials 🔮
+        // deduct gold and materials
         game.player.gold -= upgradeCost;
 
         for (const [material, amount] of Object.entries(materials)) {
@@ -570,15 +570,15 @@ const PropertyUpgrades = {
             }
         }
 
-        // 🏠 Upgrade the property type 💀
+        // upgrade the property type
         const oldType = property.type;
         property.type = nextType.id;
         property.tier = nextType.tier || 1;
 
-        // 🔧 Preserve upgrades that apply to new tier ⚰️
+        // preserve upgrades that apply to new tier
         // Keep expansion and security if they were purchased
 
-        // 🌟 Apply new tier benefits 🦇
+        // apply new tier benefits
         this.applyPropertyBenefits(propertyId);
 
         addMessage(`🏠 Upgraded ${currentType.name} to ${nextType.name} for ${upgradeCost} gold!`);
@@ -591,14 +591,14 @@ const PropertyUpgrades = {
             addMessage(`👥 Can now house ${nextType.workerSlots} workers!`);
         }
 
-        // 🔄 Update UI 🖤
+        // update UI
         if (typeof updatePlayerInfo === 'function') updatePlayerInfo();
         if (typeof PropertySystem !== 'undefined') PropertySystem.updatePropertyDisplay();
 
         return true;
     },
 
-    // 📋 Get available home tier upgrade 🗡️
+    // get available home tier upgrade
     getHomeTierUpgrade(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return null;
@@ -612,7 +612,7 @@ const PropertyUpgrades = {
         const upgradeCost = Math.round((nextType.basePrice - currentType.basePrice) * 1.2);
         const materials = PropertyTypes.getBuildingMaterials(nextType.id);
 
-        // 🔍 Check material availability 🌙
+        // check material availability
         const materialStatus = {};
         let allMaterialsMet = true;
 
@@ -646,7 +646,7 @@ const PropertyUpgrades = {
         };
     },
 
-    // 🏠 Check if property is a home type 🔮
+    // check if property is a home type
     isHomeType(propertyId) {
         const property = PropertySystem.getProperty(propertyId);
         if (!property) return false;
@@ -656,5 +656,5 @@ const PropertyUpgrades = {
     }
 };
 
-// 🌙 expose to global scope 🦇
+// expose to global scope
 window.PropertyUpgrades = PropertyUpgrades;

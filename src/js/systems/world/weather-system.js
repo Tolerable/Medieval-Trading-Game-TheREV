@@ -11,23 +11,23 @@ const WeatherSystem = {
     // 
     // CONFIGURATION
     // 
-    initialized: false, // ��� Prevent double initialization
+    initialized: false, // prevent double initialization
     currentWeather: 'clear',
     currentIntensity: 0.5, // 0-1 scale
-    weatherEndTime: 0, // ��� REAL timestamp when weather ends (prevents speed spam)
+    weatherEndTime: 0, // real timestamp when weather ends (prevents speed spam)
     seasonalModifier: 1,
 
-    //  Weather history for NPC context (last 5 weather events)
+    // Remember the sky's moods - NPCs need context for their bitching
     weatherHistory: [],
     MAX_WEATHER_HISTORY: 5,
 
-    //  Minimum weather durations in REAL seconds (not affected by game speed)
-    MIN_WEATHER_DURATION_SECONDS: 60,   // ��� At least 1 real minute per weather
-    MAX_WEATHER_DURATION_SECONDS: 300,  // ��� Up to 5 real minutes per weather
+    // Real seconds of YOUR life - the weather doesn't care about your game speed
+    MIN_WEATHER_DURATION_SECONDS: 60,   // at least 1 real minute per weather
+    MAX_WEATHER_DURATION_SECONDS: 300,  // up to 5 real minutes per weather
 
-    //  BAD WEATHER PROTECTION - prevents endless storms/blizzards
+    // Even nature needs a fucking break from its own cruelty
     // Bad weather = rain, storm, blizzard, thundersnow, heatwave
-    // After MAX bad weather cycles, FORCE good weather for MIN good cycles
+    // After MAX bad cycles, I FORCE mercy - clear skies or you'll riot
     badWeatherStreak: 0,           // How many bad weather periods in a row
     goodWeatherStreak: 0,          // How many good weather periods in a row
     MAX_BAD_WEATHER_STREAK: 2,     // Max 2 bad weather periods (~10 min real time = ~1 game day)
@@ -35,19 +35,19 @@ const WeatherSystem = {
     forcingGoodWeather: false,     // Currently forcing good weather?
     lastWeatherCheck: 0, // Prevent multiple checks per frame
 
-    // Weather progression map - what weather can escalate/de-escalate to
-    // Format: { weatherId: { escalate: [possible worse weather], deescalate: [possible better weather], chance: escalation probability } }
+    // How the sky spirals from bad to worse, or mercifully improves
+    // Each weather can get better or worse - nature's mood swings
     weatherProgression: {
         clear: { escalate: ['cloudy', 'windy'], deescalate: [], chance: 0.2 },
         cloudy: { escalate: ['rain', 'fog', 'windy'], deescalate: ['clear'], chance: 0.35 },
         windy: { escalate: ['storm', 'cloudy'], deescalate: ['clear'], chance: 0.25 },
         rain: { escalate: ['storm'], deescalate: ['cloudy', 'clear'], chance: 0.4 },
-        storm: { escalate: ['rain'], deescalate: ['rain', 'cloudy'], chance: 0.3 }, // Storm can bring more rain
+        storm: { escalate: ['rain'], deescalate: ['rain', 'cloudy'], chance: 0.3 }, // Storms birth more rain before they die
         fog: { escalate: ['rain'], deescalate: ['cloudy', 'clear'], chance: 0.2 },
         snow: { escalate: ['blizzard', 'thundersnow'], deescalate: ['cloudy', 'clear'], chance: 0.35 },
         blizzard: { escalate: ['thundersnow'], deescalate: ['snow', 'cloudy'], chance: 0.15 },
-        thundersnow: { escalate: [], deescalate: ['blizzard', 'snow'], chance: 0 }, // Can only get better
-        heatwave: { escalate: ['storm'], deescalate: ['clear', 'cloudy'], chance: 0.25 } // Heat can cause storms
+        thundersnow: { escalate: [], deescalate: ['blizzard', 'snow'], chance: 0 }, // Rock bottom - nowhere to go but up
+        heatwave: { escalate: ['storm'], deescalate: ['clear', 'cloudy'], chance: 0.25 } // Scorching heat breeds violent storms
     },
 
     // Weather types and their effects
@@ -90,7 +90,7 @@ const WeatherSystem = {
             icon: '🌧️',
             description: 'Roads turn to mud, spirits dampen.',
             effects: {
-                travelSpeed: 0.9, // ��� Was 0.7 - too harsh! Now only 10% slower 💀
+                travelSpeed: 0.9, // was 0.7 - too harsh! now only 10% slower
                 priceModifier: 1.1, // Indoor goods more valuable
                 encounterChance: 0.6,
                 staminaDrain: 1.3,
@@ -107,7 +107,7 @@ const WeatherSystem = {
             icon: '⛈️',
             description: 'Lightning cracks, thunder rolls. Dangerous to travel.',
             effects: {
-                travelSpeed: 0.75, // ��� Was 0.4 - way too harsh! Now 25% slower 💀
+                travelSpeed: 0.75, // was 0.4 - way too harsh! now 25% slower
                 priceModifier: 1.25,
                 encounterChance: 0.3,
                 staminaDrain: 1.8,
@@ -125,7 +125,7 @@ const WeatherSystem = {
             icon: '🌫️',
             description: 'Visibility near zero. Easy to get lost.',
             effects: {
-                travelSpeed: 0.85, // ��� Was 0.5 - too harsh! Now 15% slower 💀
+                travelSpeed: 0.85, // was 0.5 - too harsh! now 15% slower
                 priceModifier: 1.05,
                 encounterChance: 1.5, // Easier to be ambushed
                 staminaDrain: 1.1,
@@ -141,7 +141,7 @@ const WeatherSystem = {
             icon: '🌨️',
             description: 'Winter descends. Cold bites deep.',
             effects: {
-                travelSpeed: 0.85, // ��� Was 0.6 - too harsh! Now 15% slower 💀
+                travelSpeed: 0.85, // was 0.6 - too harsh! now 15% slower
                 priceModifier: 1.15, // Warm goods premium
                 encounterChance: 0.5,
                 staminaDrain: 1.5,
@@ -158,7 +158,7 @@ const WeatherSystem = {
             icon: '❄️',
             description: 'Deadly cold. Only fools travel in this.',
             effects: {
-                travelSpeed: 0.7, // ��� Was 0.25 - way too harsh! Now 30% slower 💀
+                travelSpeed: 0.7, // was 0.25 - way too harsh! now 30% slower
                 priceModifier: 1.4,
                 encounterChance: 0.2,
                 staminaDrain: 2.5,
@@ -177,7 +177,7 @@ const WeatherSystem = {
             icon: '❄️',
             description: 'Thunder echoes through the blinding snow. A rare and terrifying phenomenon.',
             effects: {
-                travelSpeed: 0.6, // ��� Was 0.15 - insanely harsh! Now 40% slower (worst weather) 💀
+                travelSpeed: 0.6, // was 0.15 - insanely harsh! now 40% slower (worst weather)
                 priceModifier: 1.6,
                 encounterChance: 0.1,
                 staminaDrain: 3.0,
@@ -242,7 +242,7 @@ const WeatherSystem = {
             probability: { spring: 0, summer: 0, autumn: 0, winter: 0 }, // Never occurs naturally
             particles: true,
             lightning: true,
-            meteors: true // ��� Special meteor effect
+            meteors: true // special meteor effect
         }
     },
 
@@ -537,20 +537,20 @@ const WeatherSystem = {
     },
 
     setupTimeListener() {
-        //  Check weather every 10 REAL seconds to prevent spam
-        // Weather duration is tracked in REAL time now, not game time
+        // Pulse check every 10 seconds - the sky shifts on MY time, not yours
+        // Real seconds tick by - game speed can't touch this
         if (typeof TimerManager !== 'undefined') {
             TimerManager.setInterval(() => {
                 if (typeof TimeSystem !== 'undefined' && !TimeSystem.isPaused) {
                     this.updateWeather();
                 }
-            }, 10000); // Check every 10 real seconds
+            }, 10000); // 10 real seconds - tick tock, the world turns
         }
 
-        //  Also check on hour change for escalation events
+        // Every game hour, roll the dice - will the sky get angrier?
         if (typeof EventBus !== 'undefined') {
             EventBus.on('time-hour-passed', () => {
-                // Only escalate, don't change weather here
+                // Just escalation checks - full changes happen elsewhere
                 if (!TimeSystem.isPaused) {
                     this.checkWeatherEscalation();
                 }
@@ -584,7 +584,7 @@ const WeatherSystem = {
             }
         }
 
-        // Weighted random selection
+        // Roll the weighted dice - not all weather is created equal
         let random = Math.random() * totalWeight;
         for (const item of weights) {
             random -= item.weight;
@@ -887,7 +887,7 @@ const WeatherSystem = {
             icon: weather?.icon || '❓',
             description: weather?.description || '',
             intensity: this.currentIntensity,
-            remainingSeconds: remainingSeconds, // ��� REAL seconds remaining
+            remainingSeconds: remainingSeconds, // real seconds remaining
             effects: this.getWeatherEffects(),
             season: this.getCurrentSeason()
         };
@@ -957,7 +957,7 @@ const WeatherSystem = {
         }
 
         const overlay = document.createElement('div');
-        overlay.id = 'game-weather-overlay'; // ��� Unique ID to avoid conflicts with VisualEffectsSystem
+        overlay.id = 'game-weather-overlay'; // unique ID to avoid conflicts with VisualEffectsSystem
         overlay.className = 'weather-overlay';
         //  Append to map-container so particles fall over the map
         mapContainer.appendChild(overlay);
@@ -1137,7 +1137,7 @@ const WeatherSystem = {
     },
 
     lightningInterval: null,
-    meteorInterval: null, // ��� Meteor shower interval
+    meteorInterval: null, // meteor shower interval
 
     startLightning() {
         if (this.lightningInterval) return;
@@ -1188,7 +1188,7 @@ const WeatherSystem = {
 
         setTimeout(() => {
             flashEl.style.opacity = '0';
-        }, 150); // ��� Flash duration to match bolt animation
+        }, 150); // flash duration to match bolt animation
 
         // Create lightning bolt that strikes the ground at random position
         const particles = document.getElementById('weather-particles');
