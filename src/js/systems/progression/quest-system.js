@@ -3630,22 +3630,15 @@ const QuestSystem = {
             </div>
         `;
 
-        // Show next quest (if known)
-        if (nextQuestId) {
-            const nextQuest = this.quests[nextQuestId];
-            const nextName = nextQuest?.name || nextQuestId;
-            const nextActive = !!this.activeQuests[nextQuestId];
-            const nextCompleted = this.completedQuests.includes(nextQuestId);
-            const nextStatus = nextCompleted ? 'completed' : (nextActive ? 'active' : 'locked');
+        // Show turn-in info instead of next quest (no spoilers!)
+        // Figure out where/how to complete this quest
+        const turnInInfo = this.getQuestTurnInInfo(quest);
+        if (turnInInfo) {
             html += `
-                <div class="quest-chain-link next-quest">
-                    <span class="chain-arrow">⬇</span>
-                    <span class="chain-label">Next:</span>
-                    <span class="chain-quest-name ${nextStatus}"
-                          onclick="QuestSystem.toggleQuestInfoPanel('${nextQuestId}')"
-                          style="cursor: pointer; text-decoration: underline;">
-                        ${nextCompleted ? '✓' : (nextActive ? '○' : '🔒')} ${nextName}
-                    </span>
+                <div class="quest-chain-link turn-in-quest">
+                    <span class="chain-arrow">🎯</span>
+                    <span class="chain-label">Turn in:</span>
+                    <span class="chain-quest-name turn-in">${turnInInfo}</span>
                 </div>
             `;
         }
@@ -3653,6 +3646,52 @@ const QuestSystem = {
         html += '</div></div>';
 
         return { html, hasChain: true };
+    },
+
+    // Get turn-in info for a quest - who/where/what to complete it
+    getQuestTurnInInfo(quest) {
+        if (!quest) return null;
+
+        // Check last objective for turn-in clues
+        const objectives = quest.objectives || [];
+        const lastObj = objectives[objectives.length - 1];
+
+        // Delivery quests - return to giver or deliver to target
+        if (quest.type === 'delivery') {
+            const talkObj = objectives.find(o => o.type === 'talk');
+            if (talkObj) {
+                const npcName = talkObj.npc || 'recipient';
+                const locName = talkObj.location ? this.getLocationDisplayName(talkObj.location) : '';
+                return locName ? `${npcName} at ${locName}` : npcName;
+            }
+        }
+
+        // Talk objective at end - that's the turn-in NPC
+        if (lastObj?.type === 'talk') {
+            const npcName = lastObj.npc || 'NPC';
+            const locName = lastObj.location ? this.getLocationDisplayName(lastObj.location) : '';
+            return locName ? `${npcName} at ${locName}` : npcName;
+        }
+
+        // Quest has a giver - return to them
+        if (quest.giver || quest.giverName) {
+            const giverName = quest.giverName || quest.giver;
+            const locName = quest.location ? this.getLocationDisplayName(quest.location) : '';
+            return locName ? `${giverName} at ${locName}` : giverName;
+        }
+
+        // Visit objective at end - go to that location
+        if (lastObj?.type === 'visit') {
+            return this.getLocationDisplayName(lastObj.location) || lastObj.location;
+        }
+
+        // Explore objective - explore that dungeon
+        if (lastObj?.type === 'explore') {
+            return `Explore ${this.getLocationDisplayName(lastObj.dungeon) || lastObj.dungeon}`;
+        }
+
+        // Default - complete objectives
+        return 'Complete all objectives';
     },
 
     //  Unified Quest Info Panel - used for ALL quest displays
