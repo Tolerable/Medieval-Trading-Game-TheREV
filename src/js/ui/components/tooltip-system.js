@@ -344,12 +344,12 @@ const TooltipSystem = {
             shortcut: 'T'
         },
         '#bottom-transport-btn': {
-            title: '🚗 Transportation',
+            title: '🐴 Transportation',
             desc: 'Manage your mounts and vehicles. Better transport = more cargo.',
             shortcut: 'W'
         },
         '#bottom-inventory-btn': {
-            title: '🎒 Inventory',
+            title: '🧺 Inventory',
             desc: 'View and manage your items, equipment, and cargo.',
             shortcut: 'I'
         },
