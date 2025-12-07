@@ -125,7 +125,7 @@ const GameWorld = {
             marketSize: 'large',
             travelCost: { base: 8 },
             connections: ['royal_capital', 'vineyard_village', 'wheat_farm', 'riverside_inn'],
-            mapPosition: { x: 400, y: 440 },
+            mapPosition: { x: 340, y: 460 },
             sells: ['bread', 'ale', 'flour', 'cheese', 'butter', 'eggs', 'meat', 'vegetables', 'livestock'],
             buys: ['wheat', 'grain', 'milk', 'honey', 'salt', 'herbs', 'wool'],
             npcs: ['elder', 'baker', 'apothecary', 'merchant', 'farmer', 'guard'] // Quest: act1_quest1 (First Steps) needs elder (innkeeper only at inns!)
