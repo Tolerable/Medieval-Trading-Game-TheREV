@@ -3476,8 +3476,9 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             return this.getNPCReputation(npcType) >= 5;
         }
 
-        // everyone else - check if they have decent rep (10+) to unlock barter
-        return this.getNPCReputation(npcType) >= 10;
+        // everyone else NOT in any list - they don't trade
+        // This prevents random NPCs from showing trade badges
+        return false;
     },
 
     // get npc reputation - how much does this npc type trust us?
