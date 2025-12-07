@@ -1481,10 +1481,11 @@ const GameWorldRenderer = {
         const locationName = location.name || location.id;
         label.textContent = (isDiscovered && !isGate) ? '???' : locationName;
 
+        // 🖤 Position label ABOVE icon so YOU ARE HERE marker doesn't cover it 💀
         label.style.cssText = `
             position: absolute;
             left: 50%;
-            top: ${style.size + 4}px;
+            bottom: ${style.size + 4}px;
             transform: translateX(-50%);
             color: ${isDiscovered ? '#aabbcc' : '#fff'};
             font-size: 12px;
@@ -2141,65 +2142,10 @@ const GameWorldRenderer = {
         this.updateLabelPositions(zoom, markerScale);
     },
 
-    // 🖤 Dynamically reposition labels based on zoom to avoid icon/label collisions
+    // 🖤 Labels now positioned ABOVE icons as children, no dynamic repositioning needed 💀
     updateLabelPositions(zoom, markerScale) {
-        if (!this.mapElement) return;
-
-        const labels = this.mapElement.querySelectorAll('.map-location-label');
-        const markers = this.mapElement.querySelectorAll('.map-location');
-
-        // Build a map of marker positions for collision detection
-        const markerPositions = [];
-        markers.forEach(marker => {
-            const rect = marker.getBoundingClientRect();
-            const left = parseFloat(marker.style.left);
-            const top = parseFloat(marker.style.top);
-            // Estimate scaled size (base ~40px icons)
-            const scaledSize = 40 * markerScale;
-            markerPositions.push({
-                id: marker.dataset.locationId,
-                x: left,
-                y: top,
-                size: scaledSize
-            });
-        });
-
-        // Check each label for collisions with OTHER markers
-        labels.forEach(label => {
-            const left = parseFloat(label.style.left);
-            const baseTop = parseFloat(label.style.top);
-
-            // Find this label's associated marker
-            const associatedMarker = markerPositions.find(m => {
-                return Math.abs(m.x - left) < 5; // Same x position = same location
-            });
-            if (!associatedMarker) return;
-
-            // Check if label position would collide with nearby markers (not its own)
-            let shouldMoveAbove = false;
-            const labelWidth = label.textContent.length * 7 * (zoom < 0.6 ? 0.8 : 1); // Estimate text width
-            const labelHeight = 14;
-
-            for (const marker of markerPositions) {
-                if (marker.id === associatedMarker.id) continue; // Skip own marker
-
-                // Check if label rectangle overlaps marker circle
-                const xDist = Math.abs(marker.x - left);
-                const yDist = Math.abs(marker.y - baseTop);
-
-                // If horizontally overlapping and vertically close
-                if (xDist < (labelWidth / 2 + marker.size / 2) && yDist < (labelHeight + marker.size / 2)) {
-                    shouldMoveAbove = true;
-                    break;
-                }
-            }
-
-            // 🦇 Move label ABOVE the icon if it would collide with another marker
-            if (shouldMoveAbove && associatedMarker) {
-                const aboveOffset = -(associatedMarker.size / 2 + 20); // Above the icon
-                label.style.top = `${associatedMarker.y + aboveOffset}px`;
-            }
-        });
+        // Labels are now children of location elements and positioned with 'bottom'
+        // They stay tied to their icons - no collision repositioning needed
     },
 
     // 🚧 don't let the map escape the container (we've all wanted to escape)

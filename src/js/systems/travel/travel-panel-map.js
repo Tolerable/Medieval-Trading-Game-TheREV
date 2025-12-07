@@ -682,10 +682,11 @@ const TravelPanelMap = {
         const locationName = location.name || location.id;
         label.textContent = (isDiscovered && !isGate) ? '???' : locationName;
 
+        // 🖤 Position label ABOVE icon for consistency 💀
         label.style.cssText = `
             position: absolute;
             left: 50%;
-            top: ${style.size + 2}px;
+            bottom: ${style.size + 2}px;
             transform: translateX(-50%);
             color: ${isDiscovered ? '#888' : '#fff'};
             font-size: 10px;

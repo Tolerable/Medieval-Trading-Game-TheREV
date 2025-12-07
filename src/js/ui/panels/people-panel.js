@@ -3368,15 +3368,24 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
     },
 
     // 🔮 GET NPC REPUTATION - how much does this NPC type trust us?
-    getNPCReputation(npcType) {
+    // 🖤💀 FIX: Search relationships by npcType field, not just key 💀
+    getNPCReputation(npcTypeOrId) {
         if (typeof NPCRelationshipSystem === 'undefined') return 0;
 
-        // 🖤 Check specific NPC relationship
-        const rel = NPCRelationshipSystem.relationships?.[npcType];
-        if (rel) return rel.reputation || 0;
+        // 🖤 First check direct lookup by ID
+        const directRel = NPCRelationshipSystem.relationships?.[npcTypeOrId];
+        if (directRel) return directRel.reputation || 0;
 
-        // 🦇 Check faction/type reputation as fallback
-        const factionRep = NPCRelationshipSystem.factionReputation?.[npcType];
+        // 🦇 Search all relationships for matching npcType
+        // This finds "blacksmith_royal_capital_123" when passed "blacksmith"
+        for (const rel of Object.values(NPCRelationshipSystem.relationships || {})) {
+            if (rel.npcType === npcTypeOrId) {
+                return rel.reputation || 0;
+            }
+        }
+
+        // 💀 Check faction/type reputation as fallback
+        const factionRep = NPCRelationshipSystem.factionReputation?.[npcTypeOrId];
         if (factionRep !== undefined) return factionRep;
 
         return 0;

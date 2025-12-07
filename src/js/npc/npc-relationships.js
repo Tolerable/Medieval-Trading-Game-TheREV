@@ -21,6 +21,7 @@ const NPCRelationshipSystem = {
     // ═══════════════════════════════════════════════════════════════
     // RELATIONSHIP LEVELS
     // ═══════════════════════════════════════════════════════════════
+    // 🖤 Levels use min (inclusive) to max (exclusive), except beloved caps at 101 💀
     levels: {
         hostile:    { min: -100, max: -50, label: 'Hostile', icon: '😠', color: '#ff4444' },
         unfriendly: { min: -50,  max: -20, label: 'Unfriendly', icon: '😒', color: '#ff8844' },
@@ -28,7 +29,7 @@ const NPCRelationshipSystem = {
         neutral:    { min: 0,    max: 20,  label: 'Neutral', icon: '😐', color: '#aaaaaa' },
         friendly:   { min: 20,   max: 50,  label: 'Friendly', icon: '😊', color: '#88cc44' },
         trusted:    { min: 50,   max: 80,  label: 'Trusted', icon: '😄', color: '#44cc88' },
-        beloved:    { min: 80,   max: 100, label: 'Beloved', icon: '🥰', color: '#44aaff' }
+        beloved:    { min: 80,   max: 101, label: 'Beloved', icon: '🥰', color: '#44aaff' }
     },
 
     // ═══════════════════════════════════════════════════════════════

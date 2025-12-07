@@ -4469,10 +4469,11 @@ function setupEventListeners() {
         });
     });
     
-    // 🖤💀 Location Panel collapse toggle 💀
-    const locationPanelHeader = document.getElementById('location-panel-header');
-    if (locationPanelHeader) {
-        EventManager.addEventListener(locationPanelHeader, 'click', () => {
+    // 🖤💀 Location Panel collapse toggle - ONLY on collapse icon, not entire header 💀
+    const locationCollapseIcon = document.getElementById('location-collapse-icon');
+    if (locationCollapseIcon) {
+        EventManager.addEventListener(locationCollapseIcon, 'click', (e) => {
+            e.stopPropagation(); // Don't trigger parent clicks
             const locationPanel = document.getElementById('location-panel');
             if (locationPanel) {
                 locationPanel.classList.toggle('collapsed');

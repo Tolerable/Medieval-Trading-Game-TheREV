@@ -416,10 +416,11 @@ const PropertyMapPicker = {
             const label = document.createElement('div');
             label.className = 'property-location-label';
             label.textContent = location.name;
+            // 🖤 Position label ABOVE icon for consistency 💀
             label.style.cssText = `
                 position: absolute;
                 left: 50%;
-                top: ${style.size + 5}px;
+                bottom: ${style.size + 5}px;
                 transform: translateX(-50%);
                 font-size: 11px;
                 color: ${isBuildable ? '#fff' : '#888'};
