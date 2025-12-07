@@ -1478,18 +1478,27 @@ const GameWorldRenderer = {
         // Add location name label with stagger offset for overlapping labels
         const label = document.createElement('div');
         label.className = 'map-location-label' + (isDiscovered ? ' discovered' : '');
-        // Show "Unknown" or "???" for discovered but unexplored locations
-        // 🖤 Use getLocationName() to get doom names when in doom world 💀
-        // EXCEPTION: Gatehouses always show their real name so players know which gate is which
-        const isGate = this.isGatehouse(location.id);
-        label.textContent = (isDiscovered && !isGate) ? '???' : this.getLocationName(location.id);
-        const labelColor = isDiscovered ? '#aabbcc' : '#fff'; // 🖤 Lighter grey-blue for unexplored - actually visible!
 
         // 🖤 Check if this is an area label (like GREENDALE) - make it BIG and BOLD 💀
+        // Area labels and capital ALWAYS show their real name (no ??? mystery)
         const isAreaLabel = location.isAreaLabel || location.type === 'capital';
-        const fontSize = isAreaLabel ? '24px' : '12px'; // 2x bigger for areas
-        const fontWeight = isAreaLabel ? 'bold' : 'normal';
-        const textShadow = isAreaLabel ?
+        const isGate = this.isGatehouse(location.id);
+
+        // Show "???" for discovered but unexplored locations
+        // EXCEPTION: Gatehouses and area labels always show their real name
+        if (isDiscovered && !isGate && !isAreaLabel) {
+            label.textContent = '???';
+        } else {
+            label.textContent = this.getLocationName(location.id);
+        }
+
+        const labelColor = isDiscovered ? '#aabbcc' : '#fff'; // 🖤 Lighter grey-blue for unexplored - actually visible!
+
+        // Area labels only get big styling when visited (not when discovered/unexplored)
+        const useAreaLabelStyle = isAreaLabel && !isDiscovered;
+        const fontSize = useAreaLabelStyle ? '24px' : '12px';
+        const fontWeight = useAreaLabelStyle ? 'bold' : 'normal';
+        const textShadow = useAreaLabelStyle ?
             '2px 2px 4px #000, -2px -2px 4px #000, 0 0 8px #000, 0 0 12px #000' :
             '1px 1px 3px #000, -1px -1px 3px #000, 0 0 6px #000';
 
