@@ -1803,8 +1803,11 @@ svg.map-paths,
 #overlay-container > .overlay,
 #overlay-container > .achievement-overlay,
 #overlay-container > .leaderboard-overlay,
-#overlay-container > .game-over-overlay {
-    pointer-events: auto; /* Re-enable clicks on actual overlays */
+#overlay-container > .game-over-overlay,
+#overlay-container > .panel,
+#overlay-container > .overlay-panel,
+#overlay-container > #people-panel {
+    pointer-events: auto; /* Re-enable clicks on actual overlays and panels */
 }
 
 /* Enhanced Overlay System */
@@ -10348,6 +10351,28 @@ button,
     z-index: 2100;
     display: flex;
     flex-direction: column;
+    pointer-events: auto;
+}
+
+/* Ensure people panel is visible when not hidden */
+#people-panel:not(.hidden) {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Ensure overlay-panel class panels are visible when not hidden */
+.overlay-panel:not(.hidden) {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Make sure chat view shows when not hidden */
+#people-chat-view:not(.hidden) {
+    display: block !important;
+    visibility: visible !important;
 }
 
 #people-panel .panel-header {

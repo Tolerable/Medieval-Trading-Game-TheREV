@@ -382,7 +382,8 @@ const KeyBindings = {
                     <div id="character-sheet-body"></div>
                 </div>
             `;
-            document.getElementById('overlay-container').appendChild(overlay);
+            // append to body for reliable z-index stacking
+            document.body.appendChild(overlay);
 
             overlay.querySelector('.overlay-close').addEventListener('click', () => {
                 overlay.classList.remove('active');
@@ -609,73 +610,75 @@ const KeyBindings = {
         else console.warn('toggleMenu function not found');
     },
 
-    // toggle market panel - proper toggle logic
+    // toggle market panel - proper toggle using global open/close functions
     openMarket() {
         const panel = document.getElementById('market-panel');
-        if (panel && !panel.classList.contains('hidden')) {
-            // Panel is open - close it
-            panel.classList.add('hidden');
-            if (typeof PanelManager !== 'undefined') PanelManager.updateToolbarButtons();
-            if (typeof addMessage === 'function') addMessage('🏪 Market closed [M]');
+        const isOpen = panel && !panel.classList.contains('hidden');
+        if (isOpen) {
+            // Panel is open - close it using proper close function
+            if (typeof closeMarket === 'function') closeMarket();
+            else {
+                panel.classList.add('hidden');
+                if (typeof PanelManager !== 'undefined') PanelManager.updateToolbarButtons();
+            }
         } else {
-            // Panel is closed - open it
+            // Panel is closed - open it using proper open function
             if (typeof openMarket === 'function') openMarket();
             else console.warn('openMarket function not found');
-            if (typeof addMessage === 'function') addMessage('🏪 Market opened [M]');
         }
     },
 
-    // toggle travel panel - proper toggle logic
+    // toggle travel panel - proper toggle using global open/close functions
     openTravel() {
         const panel = document.getElementById('travel-panel');
-        if (panel && !panel.classList.contains('hidden')) {
-            // Panel is open - close it
-            panel.classList.add('hidden');
-            if (typeof PanelManager !== 'undefined') PanelManager.updateToolbarButtons();
-            if (typeof addMessage === 'function') addMessage('🗺️ Travel closed [T]');
+        const isOpen = panel && !panel.classList.contains('hidden');
+        if (isOpen) {
+            // Panel is open - close it using proper close function
+            if (typeof closeTravel === 'function') closeTravel();
+            else {
+                panel.classList.add('hidden');
+                if (typeof PanelManager !== 'undefined') PanelManager.updateToolbarButtons();
+            }
         } else {
-            // Panel is closed - open it
+            // Panel is closed - open it using proper open function
             if (typeof openTravel === 'function') openTravel();
             else console.warn('openTravel function not found');
-            if (typeof addMessage === 'function') addMessage('🗺️ Travel opened [T]');
         }
     },
 
-    // toggle transportation panel
-    // FIXED: was calling openTravel() instead of transportation panel!
+    // toggle transportation panel - proper toggle using global open/close functions
     openTransportation() {
         const panel = document.getElementById('transportation-panel');
-        if (panel && !panel.classList.contains('hidden')) {
-            // Panel is open - close it
-            panel.classList.add('hidden');
-            if (typeof PanelManager !== 'undefined') PanelManager.updateToolbarButtons();
-            if (typeof addMessage === 'function') addMessage('🚗 Transportation closed [W]');
-        } else {
-            // Panel is closed - open it
-            if (panel) {
-                panel.classList.remove('hidden');
+        const isOpen = panel && !panel.classList.contains('hidden');
+        if (isOpen) {
+            // Panel is open - close it using proper close function
+            if (typeof closeTransportation === 'function') closeTransportation();
+            else {
+                panel.classList.add('hidden');
                 if (typeof PanelManager !== 'undefined') PanelManager.updateToolbarButtons();
-                if (typeof addMessage === 'function') addMessage('🚗 Transportation opened [W]');
-            } else {
-                console.warn('transportation-panel not found');
             }
+        } else {
+            // Panel is closed - open it using proper open function
+            if (typeof openTransportation === 'function') openTransportation();
+            else console.warn('openTransportation function not found');
         }
     },
 
-    // toggle inventory panel
-    // FIXED: proper toggle logic like other panels
+    // toggle inventory panel - proper toggle using global open/close functions
     openInventory() {
         const panel = document.getElementById('inventory-panel');
-        if (panel && !panel.classList.contains('hidden')) {
-            // Panel is open - close it
-            panel.classList.add('hidden');
-            if (typeof PanelManager !== 'undefined') PanelManager.updateToolbarButtons();
-            if (typeof addMessage === 'function') addMessage('🎒 Inventory closed [I]');
+        const isOpen = panel && !panel.classList.contains('hidden');
+        if (isOpen) {
+            // Panel is open - close it using proper close function
+            if (typeof closeInventory === 'function') closeInventory();
+            else {
+                panel.classList.add('hidden');
+                if (typeof PanelManager !== 'undefined') PanelManager.updateToolbarButtons();
+            }
         } else {
-            // Panel is closed - open it
+            // Panel is closed - open it using proper open function
             if (typeof openInventory === 'function') openInventory();
             else console.warn('openInventory function not found');
-            if (typeof addMessage === 'function') addMessage('🎒 Inventory opened [I]');
         }
     },
 
@@ -775,12 +778,8 @@ const KeyBindings = {
                     <div id="financial-sheet-body"></div>
                 </div>
             `;
-            const container = document.getElementById('overlay-container');
-            if (container) {
-                container.appendChild(overlay);
-            } else {
-                document.body.appendChild(overlay);
-            }
+            // append to body for reliable z-index stacking
+            document.body.appendChild(overlay);
 
             overlay.querySelector('.overlay-close').addEventListener('click', () => {
                 overlay.classList.remove('active');

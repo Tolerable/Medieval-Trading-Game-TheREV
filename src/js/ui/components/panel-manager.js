@@ -15,29 +15,39 @@ const PanelManager = {
 
     // safe toggle handlers registry - NO EVAL ALLOWED IN THIS REALM
     // Maps customToggle string names to actual functions
+    // ALL handlers must be proper TOGGLE actions (open if closed, close if open)
     toggleHandlers: {
         'KeyBindings.openMenu()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openMenu?.(),
         'KeyBindings.openPeople()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openPeople?.(),
         'KeyBindings.openQuests()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openQuests?.(),
+        'KeyBindings.openCharacterSheet()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openCharacterSheet?.(),
+        'KeyBindings.openFinancialSheet()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openFinancialSheet?.(),
+        'KeyBindings.openInventory()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openInventory?.(),
+        'KeyBindings.openTravel()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openTravel?.(),
+        'KeyBindings.openTransportation()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openTransportation?.(),
+        'KeyBindings.openMarket()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openMarket?.(),
+        'KeyBindings.openAchievements()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openAchievements?.(),
         'QuestSystem.toggleQuestTracker()': () => typeof QuestSystem !== 'undefined' && QuestSystem.toggleQuestTracker?.(),
-        'openMarket()': () => typeof openMarket === 'function' && openMarket()
+        'PartyPanel.togglePanel()': () => typeof PartyPanel !== 'undefined' && PartyPanel.togglePanel?.(),
+        'toggleMarket()': () => typeof toggleMarket === 'function' ? toggleMarket() : (typeof KeyBindings !== 'undefined' && KeyBindings.openMarket?.())
     },
 
     // All managed panel IDs and their info
     // order should match bottom action bar for consistency
+    // ALL panels with customToggle use KeyBindings toggle functions for consistent behavior
     panelInfo: {
         'game-setup-panel': { name: 'New Game', icon: '🎮', shortcut: '' },
         'game-menu-overlay': { name: 'Menu', icon: '⚙️', shortcut: 'Escape', useActiveClass: true, customToggle: 'KeyBindings.openMenu()' },
-        'market-panel': { name: 'Market', icon: '🏪', shortcut: 'M', customToggle: 'openMarket()' },
-        'travel-panel': { name: 'Travel', icon: '🗺️', shortcut: 'T' },
-        'transportation-panel': { name: 'Transport', icon: '🚗', shortcut: 'W' },
-        'inventory-panel': { name: 'Inventory', icon: '🎒', shortcut: 'I' },
-        'character-sheet-overlay': { name: 'Character', icon: '👤', shortcut: 'C', useActiveClass: true },
-        'people-panel': { name: 'People', icon: '👥', shortcut: 'O', customToggle: 'KeyBindings.openPeople()' },  // added
-        'party-panel': { name: 'Party', icon: '🤝', shortcut: 'Y', customToggle: 'PartyPanel.togglePanel()' },  // party management
-        'financial-sheet-overlay': { name: 'Finances', icon: '💰', shortcut: 'F', useActiveClass: true },
+        'market-panel': { name: 'Market', icon: '🏪', shortcut: 'M', customToggle: 'KeyBindings.openMarket()' },
+        'travel-panel': { name: 'Travel', icon: '🗺️', shortcut: 'T', customToggle: 'KeyBindings.openTravel()' },
+        'transportation-panel': { name: 'Transport', icon: '🚗', shortcut: 'W', customToggle: 'KeyBindings.openTransportation()' },
+        'inventory-panel': { name: 'Inventory', icon: '🎒', shortcut: 'I', customToggle: 'KeyBindings.openInventory()' },
+        'character-sheet-overlay': { name: 'Character', icon: '👤', shortcut: 'C', useActiveClass: true, customToggle: 'KeyBindings.openCharacterSheet()' },
+        'people-panel': { name: 'People', icon: '👥', shortcut: 'O', customToggle: 'KeyBindings.openPeople()' },
+        'party-panel': { name: 'Party', icon: '🤝', shortcut: 'Y', customToggle: 'PartyPanel.togglePanel()' },
+        'financial-sheet-overlay': { name: 'Finances', icon: '💰', shortcut: 'F', useActiveClass: true, customToggle: 'KeyBindings.openFinancialSheet()' },
         'quest-overlay': { name: 'Quests', icon: '📜', shortcut: 'Q', customToggle: 'KeyBindings.openQuests()', useActiveClass: true },
-        'achievement-overlay': { name: 'Achievements', icon: '🏆', shortcut: 'A', useActiveClass: true },
+        'achievement-overlay': { name: 'Achievements', icon: '🏆', shortcut: 'A', useActiveClass: true, customToggle: 'KeyBindings.openAchievements()' },
         'settings-panel': { name: 'Settings', icon: '⚙️', shortcut: ',' },
         'property-employee-panel': { name: 'Properties', icon: '🏠', shortcut: 'P', useActiveClass: true },
         'location-panel': { name: 'Location', icon: '📍', shortcut: '' },

@@ -36,12 +36,7 @@ const PeoplePanel = {
             return;
         }
 
-        const overlayContainer = document.getElementById('overlay-container');
-        if (!overlayContainer) {
-            console.warn('👥 PeoplePanel: overlay-container not found');
-            return;
-        }
-
+        // append directly to body for better z-index handling
         const panel = document.createElement('section');
         panel.id = this.panelId;
         panel.className = 'panel overlay-panel hidden';
@@ -132,9 +127,10 @@ const PeoplePanel = {
             </div>
         `;
 
-        overlayContainer.appendChild(panel);
+        // append to body directly for reliable z-index stacking
+        document.body.appendChild(panel);
         this.addStyles();
-        console.log('👥 PeoplePanel: Unified panel created');
+        console.log('👥 PeoplePanel: Unified panel created (appended to body)');
     },
 
     // add styles - making it not look like garbage
