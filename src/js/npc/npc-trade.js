@@ -1496,7 +1496,14 @@ const NPCTradeWindow = {
 
         if (!this._npcInventoryCache[npcId]) {
             // first time seeing this NPC - initialize their inventory
-            const baseInventory = this.generateNPCInventory(npcData.type);
+            let baseInventory = this.generateNPCInventory(npcData.type);
+
+            // IMPORTANT: Add location-specific items so merchants have what their location sells
+            // (e.g., Jade Harbor merchants have silk, Frostholm merchants have furs)
+            if (npcData.location) {
+                baseInventory = this._addLocationItems(baseInventory, npcData.location);
+            }
+
             const baseGold = this._getNPCGoldAmount(npcData.type);
 
             // add gold AS AN ITEM in the inventory so it displays!
@@ -1513,7 +1520,7 @@ const NPCTradeWindow = {
                 location: npcData.location
             };
 
-            console.log(`🏪 NPCTrade: Initialized inventory for ${npcId} with ${baseGold}g`);
+            console.log(`🏪 NPCTrade: Initialized inventory for ${npcId} at ${npcData.location || 'unknown'} with ${baseGold}g`);
         }
 
         // return items (includes gold as an item for display)
@@ -2394,6 +2401,54 @@ const NPCTradeWindow = {
         };
 
         return inventories[npcType] || { bread: 3, water: 5 };
+    },
+
+    // Add location-specific items to NPC inventory using DynamicMarketSystem
+    // This ensures merchants have items their location sells (silk in Jade Harbor, furs in Frostholm, etc.)
+    _addLocationItems(inventory, location) {
+        if (!location) return inventory;
+
+        // Try DynamicMarketSystem first - it has proper stock management
+        if (typeof DynamicMarketSystem !== 'undefined' && typeof GameWorld !== 'undefined') {
+            const locationData = GameWorld.locations?.[location];
+            if (locationData?.sells) {
+                const enhanced = { ...inventory };
+                locationData.sells.forEach(item => {
+                    // Skip if already has this item
+                    if (enhanced[item]) return;
+                    // Get stock from DynamicMarketSystem
+                    const stock = DynamicMarketSystem.getItemStock(location, item);
+                    if (stock > 0) {
+                        enhanced[item] = Math.floor(stock);
+                    }
+                });
+                return enhanced;
+            }
+        }
+
+        // Fallback: use game.locations directly
+        if (typeof game !== 'undefined') {
+            const locationData = game.locations?.[location];
+            if (locationData?.sells) {
+                const enhanced = { ...inventory };
+                const luxuryItems = ['silk', 'jewelry', 'gems', 'perfume', 'exotic_goods', 'artifacts', 'rare_gems', 'gold_bar'];
+                const commonItems = ['bread', 'ale', 'water', 'fish', 'meat', 'cheese', 'vegetables', 'grain'];
+
+                locationData.sells.forEach(item => {
+                    if (enhanced[item]) return;
+                    if (luxuryItems.includes(item)) {
+                        enhanced[item] = 5 + Math.floor(Math.random() * 10);
+                    } else if (commonItems.includes(item)) {
+                        enhanced[item] = 15 + Math.floor(Math.random() * 20);
+                    } else {
+                        enhanced[item] = 8 + Math.floor(Math.random() * 12);
+                    }
+                });
+                return enhanced;
+            }
+        }
+
+        return inventory;
     },
 
     getItemPrice(itemId) {
