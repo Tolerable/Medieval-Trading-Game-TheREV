@@ -1,8 +1,53 @@
-# 🖤 FINISHED.md - Completed Bug Fixes & Features 💀
+# FINISHED.md - Completed Bug Fixes & Features
 
 **Purpose:** Archive of ALL completed work from todo.md. This file is the graveyard where fixed bugs and completed features rest in peace.
 
-**Last Updated:** 2025-12-06
+**Last Updated:** 2025-12-07
+
+---
+
+## SESSION #48 (2025-12-07) - Travel Reroute/Cancel Path Position Fix
+
+### Travel System Overhaul
+- [x] **Fixed reroute using wrong position** - Was snapping to start/destination based on 50% threshold, now uses actual X,Y path position
+- [x] **Fixed cancel teleporting to start** - Was instant teleport, now animates return journey from current position
+- [x] **New `_startRerouteTravelWithDuration()`** - Starts travel from any X,Y with pre-calculated duration
+- [x] **New `_travelToDestinationWithDuration()`** - Handles travel from virtual positions
+- [x] **Updated `updateTravelMarker()`** - Now checks for `rerouteFromPosition` first
+- [x] **Updated `GameWorldRenderer.animateTravel()`** - Uses `_rerouteFromPosition` for direct coords
+
+### Files Modified
+- `src/js/systems/travel/travel-panel-map.js` - Lines 1215-1464, 2162-2340
+- `src/js/ui/map/game-world-renderer.js` - Lines 1720-1747
+
+---
+
+## SESSION #47 (2025-12-06) - Massive NPC Inventory Build-Out
+
+### Normal World Inventories
+- [x] Expanded `canTrade()` to 30+ NPC types
+- [x] 25+ unique inventory templates with common/uncommon/rare tiers
+- [x] Gold ranges for all encounter types
+
+### Doom World Inventories
+- [x] New `doomInventoryTemplates` - 20+ doom-specific sets
+- [x] New `generateDoomInventory(npcType)` function
+- [x] New `generateDoomGold(npcType)` function
+- [x] New `canDoomTrade(npcType)` function
+
+---
+
+## SESSION #46 (2025-12-06) - Greendale Bidirectional Connections
+
+- [x] Added `sunhaven` and `riverwood` to Greendale's connections
+- [x] Fixed one-way travel bug from southern locations
+
+---
+
+## SESSION #45 (2025-12-06) - UI Fixes
+
+- [x] Travel marker text position swap (TRAVELING... above walking emoji)
+- [x] Quest tracker dynamic sizing (80vh max-height)
 
 ---
 

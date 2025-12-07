@@ -1717,19 +1717,33 @@ const GameWorldRenderer = {
 
     // 🚶 animate your little marker wandering across the map like it has purpose
     // travelTimeMinutes: how long you'll suffer on this journey
-    // 🖤 FIX: Now accepts optional route array for multi-hop path animation 💀
+    // FIX: Now accepts optional route array for multi-hop path animation
+    // Also supports reroute with direct position via TravelSystem._rerouteFromPosition
     animateTravel(fromLocationId, toLocationId, travelTimeMinutes, route = null) {
         const locations = typeof GameWorld !== 'undefined' ? GameWorld.locations : {};
-        const fromLoc = locations[fromLocationId];
         const toLoc = locations[toLocationId];
 
-        if (!fromLoc?.mapPosition || !toLoc?.mapPosition) {
-            console.warn('🗺️ Cannot animate travel - missing location positions');
+        // Check for reroute position first (travel from current path position, not location)
+        let fromPosition = null;
+        if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?._rerouteFromPosition) {
+            fromPosition = TravelSystem.playerPosition._rerouteFromPosition;
+            console.log('AnimateTravel: Using reroute position:', fromPosition);
+            // Clear it after use
+            delete TravelSystem.playerPosition._rerouteFromPosition;
+        } else {
+            const fromLoc = locations[fromLocationId];
+            if (fromLoc?.mapPosition) {
+                fromPosition = fromLoc.mapPosition;
+            }
+        }
+
+        if (!fromPosition || !toLoc?.mapPosition) {
+            console.warn('Cannot animate travel - missing location positions');
             return;
         }
 
-        // 🖤 Scale positions for the larger map
-        const scaledFrom = this.scalePosition(fromLoc.mapPosition);
+        // Scale positions for the larger map
+        const scaledFrom = this.scalePosition(fromPosition);
         const scaledTo = this.scalePosition(toLoc.mapPosition);
         if (!scaledFrom || !scaledTo) return;
 

@@ -1814,81 +1814,281 @@ const game = {
     }
 };
 
-// 🐴 MEDIEVAL TRANSPORTATION - from walking sadly to riding majestically
-// carry weights in pounds because medieval people didn't do metric
+// MEDIEVAL TRANSPORTATION MARKETPLACE SYSTEM
+// Separate animals from vehicles - animals pull vehicles for combined capacity
+// Buy/sell at specific locations - farms sell animals, blacksmiths sell carts
+
+// Transport Categories
+const TRANSPORT_CATEGORY = {
+    CARRIER: 'carrier',    // No animal needed (satchel, hand cart)
+    ANIMAL: 'animal',      // Animals that can pull vehicles
+    VEHICLE: 'vehicle'     // Requires animal to use
+};
+
+// Location types that sell transport
+const TRANSPORT_SELLERS = {
+    farm: ['horse', 'mule', 'oxen'],  // Farms sell animals
+    village: ['hand_cart'],            // Villages have basic carts
+    town: ['hand_cart', 'cart'],       // Towns have carts
+    city: ['hand_cart', 'cart', 'wagon', 'horse', 'mule'],  // Cities have most
+    capital: ['horse', 'mule', 'oxen', 'hand_cart', 'cart', 'wagon'],  // Capital has all at markup
+    port: ['mule', 'hand_cart', 'cart']  // Ports have cargo transport
+};
+
+// Price multipliers by location type
+const TRANSPORT_PRICE_MULTIPLIERS = {
+    farm: 1.0,      // Base price for animals
+    village: 1.0,   // Base price
+    town: 1.1,      // Slight markup
+    city: 1.25,     // City markup
+    capital: 1.75,  // Royal Capital premium
+    port: 1.15      // Port markup
+};
+
+// The main transport definitions
 const transportationOptions = {
+    // CARRIERS - No animal required, always available
     satchel: {
         id: 'satchel',
         name: 'Leather Satchel',
-        price: 0,
+        category: TRANSPORT_CATEGORY.CARRIER,
+        basePrice: 0,
+        sellPrice: 0,
         carryCapacity: 40,
-        description: 'A simple leather satchel for carrying basic supplies.',
         speedModifier: 1.0,
-        required: false
+        icon: '👝',
+        description: 'A simple leather satchel. Everyone starts with one.',
+        canSell: false  // Can't sell your only bag
     },
-    handCart: {
+    hand_cart: {
         id: 'hand_cart',
         name: 'Hand Cart',
-        price: 30,
-        carryCapacity: 180,
-        description: 'A small wooden cart that you pull by hand.',
-        speedModifier: 0.8,
-        required: false
+        category: TRANSPORT_CATEGORY.CARRIER,
+        basePrice: 35,
+        sellPrice: 20,
+        carryCapacity: 150,
+        speedModifier: 0.85,
+        icon: '🛒',
+        description: 'A wooden cart you push by hand. Good early game option.'
+    },
+
+    // ANIMALS - Can carry goods AND pull vehicles
+    horse: {
+        id: 'horse',
+        name: 'Horse',
+        category: TRANSPORT_CATEGORY.ANIMAL,
+        basePrice: 200,
+        sellPrice: 120,
+        carryCapacity: 100,
+        speedModifier: 1.4,
+        icon: '🐴',
+        description: 'Fast but carries less. Perfect for quick trading runs.',
+        canPullVehicle: true
     },
     mule: {
         id: 'mule',
         name: 'Mule',
-        price: 85,
-        carryCapacity: 160,
-        description: 'A sturdy mule for carrying moderate loads over rough terrain.',
+        category: TRANSPORT_CATEGORY.ANIMAL,
+        basePrice: 90,
+        sellPrice: 50,
+        carryCapacity: 180,
         speedModifier: 0.9,
-        required: false
-    },
-    warhorse: {
-        id: 'warhorse',
-        name: 'Warhorse',
-        price: 180,
-        carryCapacity: 120,
-        description: 'A swift warhorse for quick travel and light loads.',
-        speedModifier: 1.5,
-        required: false
-    },
-    cart: {
-        id: 'cart',
-        name: 'Merchant Cart',
-        price: 220,
-        carryCapacity: 450,
-        description: 'A sturdy wooden cart for heavy loads.',
-        speedModifier: 0.7,
-        required: false,
-        requiresAnimal: true
-    },
-    horseAndCart: {
-        id: 'horse_and_cart',
-        name: 'Horse & Cart',
-        price: 380,
-        carryCapacity: 550,
-        description: 'A horse pulling a cart for balanced speed and capacity.',
-        speedModifier: 1.2,
-        required: false
+        icon: '🫏',
+        description: 'Sturdy and reliable. Great balance of speed and capacity.',
+        canPullVehicle: true
     },
     oxen: {
         id: 'oxen',
         name: 'Oxen',
-        price: 120,
-        carryCapacity: 220,
-        description: 'Strong oxen for pulling heavy loads through mud.',
+        category: TRANSPORT_CATEGORY.ANIMAL,
+        basePrice: 150,
+        sellPrice: 85,
+        carryCapacity: 250,
         speedModifier: 0.6,
-        required: false
+        icon: '🐂',
+        description: 'Slow but incredibly strong. Best for heavy loads.',
+        canPullVehicle: true
     },
-    oxenAndCart: {
-        id: 'oxen_and_cart',
-        name: 'Oxen & Cart',
-        price: 320,
-        carryCapacity: 750,
-        description: 'Oxen pulling a heavy cart for maximum capacity.',
-        speedModifier: 0.5,
-        required: false
+
+    // VEHICLES - Require an animal to pull them
+    cart: {
+        id: 'cart',
+        name: 'Merchant Cart',
+        category: TRANSPORT_CATEGORY.VEHICLE,
+        basePrice: 180,
+        sellPrice: 100,
+        carryCapacity: 350,
+        speedModifier: 0.8,  // Reduces animal speed
+        icon: '🛞',
+        description: 'A sturdy cart. Requires a horse, mule, or oxen to pull.',
+        requiresAnimal: true
+    },
+    wagon: {
+        id: 'wagon',
+        name: 'Large Wagon',
+        category: TRANSPORT_CATEGORY.VEHICLE,
+        basePrice: 400,
+        sellPrice: 220,
+        carryCapacity: 600,
+        speedModifier: 0.65,  // Heavier, slower
+        icon: '🚛',
+        description: 'A large wagon for serious hauling. Requires an animal.',
+        requiresAnimal: true
+    }
+};
+
+// Transport System Helper Functions
+const TransportSystem = {
+    // Get available transport at current location
+    getAvailableTransport(locationType) {
+        const available = TRANSPORT_SELLERS[locationType] || [];
+        return available.map(id => transportationOptions[id]).filter(Boolean);
+    },
+
+    // Get price at location (with markup)
+    getPrice(transportId, locationType, isSelling = false) {
+        const transport = transportationOptions[transportId];
+        if (!transport) return 0;
+
+        if (isSelling) {
+            return transport.sellPrice || Math.floor(transport.basePrice * 0.5);
+        }
+
+        const multiplier = TRANSPORT_PRICE_MULTIPLIERS[locationType] || 1.0;
+        return Math.floor(transport.basePrice * multiplier);
+    },
+
+    // Count owned animals
+    countOwnedAnimals(player) {
+        if (!player.ownedTransport) return 0;
+        return player.ownedTransport.filter(id => {
+            const t = transportationOptions[id];
+            return t && t.category === TRANSPORT_CATEGORY.ANIMAL;
+        }).length;
+    },
+
+    // Count owned vehicles (that require animals)
+    countOwnedVehicles(player) {
+        if (!player.ownedTransport) return 0;
+        return player.ownedTransport.filter(id => {
+            const t = transportationOptions[id];
+            return t && t.category === TRANSPORT_CATEGORY.VEHICLE && t.requiresAnimal;
+        }).length;
+    },
+
+    // Check if player can buy a vehicle
+    canBuyVehicle(player) {
+        const animals = this.countOwnedAnimals(player);
+        const vehicles = this.countOwnedVehicles(player);
+        return animals > vehicles;  // Need more animals than vehicles
+    },
+
+    // Check if player can sell an animal
+    canSellAnimal(player) {
+        const animals = this.countOwnedAnimals(player);
+        const vehicles = this.countOwnedVehicles(player);
+        return animals > vehicles;  // Can only sell if we'd still have enough for vehicles
+    },
+
+    // Calculate total carry capacity from all owned transport
+    calculateTotalCapacity(player) {
+        if (!player.ownedTransport || player.ownedTransport.length === 0) {
+            // Default satchel
+            return transportationOptions.satchel.carryCapacity;
+        }
+
+        let total = 0;
+        const animals = [];
+        const vehicles = [];
+        const carriers = [];
+
+        // Sort owned transport by category
+        player.ownedTransport.forEach(id => {
+            const t = transportationOptions[id];
+            if (!t) return;
+
+            if (t.category === TRANSPORT_CATEGORY.ANIMAL) {
+                animals.push(t);
+            } else if (t.category === TRANSPORT_CATEGORY.VEHICLE) {
+                vehicles.push(t);
+            } else {
+                carriers.push(t);
+            }
+        });
+
+        // Add carrier capacities (satchel, hand cart)
+        carriers.forEach(c => total += c.carryCapacity);
+
+        // Pair animals with vehicles for combined capacity
+        // Each animal can pull one vehicle
+        const pairedAnimals = Math.min(animals.length, vehicles.length);
+
+        // Paired animals contribute their capacity + vehicle capacity
+        for (let i = 0; i < pairedAnimals; i++) {
+            total += animals[i].carryCapacity + vehicles[i].carryCapacity;
+        }
+
+        // Unpaired animals just contribute their own capacity
+        for (let i = pairedAnimals; i < animals.length; i++) {
+            total += animals[i].carryCapacity;
+        }
+
+        // Unpaired vehicles contribute nothing (need animal to use)
+        // But we validate this shouldn't happen
+
+        return total;
+    },
+
+    // Calculate effective speed modifier
+    calculateSpeedModifier(player) {
+        if (!player.ownedTransport || player.ownedTransport.length === 0) {
+            return 1.0;  // Walking speed
+        }
+
+        const animals = [];
+        const vehicles = [];
+
+        player.ownedTransport.forEach(id => {
+            const t = transportationOptions[id];
+            if (!t) return;
+            if (t.category === TRANSPORT_CATEGORY.ANIMAL) animals.push(t);
+            if (t.category === TRANSPORT_CATEGORY.VEHICLE) vehicles.push(t);
+        });
+
+        // No animals? Use base speed (hand cart slows you down)
+        if (animals.length === 0) {
+            const handCart = player.ownedTransport.includes('hand_cart');
+            return handCart ? 0.85 : 1.0;
+        }
+
+        // With animals, speed is determined by slowest animal
+        // Vehicles further reduce speed
+        let baseSpeed = Math.min(...animals.map(a => a.speedModifier));
+
+        if (vehicles.length > 0) {
+            // Apply vehicle penalty (average of vehicle modifiers)
+            const vehiclePenalty = vehicles.reduce((sum, v) => sum + v.speedModifier, 0) / vehicles.length;
+            baseSpeed *= vehiclePenalty;
+        }
+
+        return Math.max(0.3, baseSpeed);  // Minimum 0.3x speed
+    },
+
+    // Get transport summary for UI
+    getTransportSummary(player) {
+        const animals = this.countOwnedAnimals(player);
+        const vehicles = this.countOwnedVehicles(player);
+        const capacity = this.calculateTotalCapacity(player);
+        const speed = this.calculateSpeedModifier(player);
+
+        return {
+            animals,
+            vehicles,
+            capacity,
+            speed,
+            canBuyVehicle: animals > vehicles,
+            canSellAnimal: animals > vehicles
+        };
     }
 };
 
@@ -6233,7 +6433,8 @@ function createCharacter(event) {
         },
         attributes: {...characterCreationState.attributes},
         transportation: playerConfig.startingTransportation,
-        ownedTransportation: [playerConfig.startingTransportation],
+        ownedTransportation: [playerConfig.startingTransportation],  // Legacy - keep for backwards compat
+        ownedTransport: ['satchel'],  // New transport system - start with just satchel
         currentLoad: 0, // Current weight carried
         lastRestTime: 0,
         perks: selectedPerks
@@ -7687,122 +7888,218 @@ function updateMarketNews() {
 
 function populateMarketItems() {
     updateMarketDisplay();
-    
+
     const sellItemsContainer = document.getElementById('sell-items');
     if (!sellItemsContainer) return;
-    
+
     sellItemsContainer.innerHTML = '';
-    
-    if (!game.player.inventory || Object.keys(game.player.inventory).length === 0) {
-        sellItemsContainer.innerHTML = '<p>You have no items to sell.</p>';
-        return;
-    }
-    
+
     const currentLocation = GameWorld.locations[game.currentLocation.id];
+    let hasItems = false;
 
-    for (const [itemId, quantity] of Object.entries(game.player.inventory)) {
-        if (quantity <= 0) continue;
+    // REGULAR INVENTORY ITEMS
+    if (game.player.inventory) {
+        for (const [itemId, quantity] of Object.entries(game.player.inventory)) {
+            if (quantity <= 0) continue;
 
-        const item = ItemDatabase.getItem(itemId);
-        if (!item) continue;
+            const item = ItemDatabase.getItem(itemId);
+            if (!item) continue;
 
-        const reputationModifier = CityReputationSystem.getPriceModifier(currentLocation.id);
-        const baseSellPrice = Math.round(ItemDatabase.calculatePrice(itemId) * 0.7);
-        const sellPrice = Math.round(baseSellPrice * reputationModifier);
+            hasItems = true;
+            const reputationModifier = CityReputationSystem.getPriceModifier(currentLocation.id);
 
-        const itemElement = document.createElement('div');
-        itemElement.className = `market-item ${item.rarity} ${TradingSystem.selectedTradeItems.has(itemId) ? 'selected' : ''}`;
-        itemElement.dataset.itemId = itemId;
-
-        // 🖤 Click on item to add to sell cart - no separate buttons needed!
-        itemElement.innerHTML = `
-            <div class="item-icon">${item.icon}</div>
-            <div class="item-name">${item.name}</div>
-            <div class="item-quantity">×${quantity}</div>
-            <div class="item-price">${sellPrice} gold</div>
-            <div class="item-weight">${ItemDatabase.calculateWeight(itemId, quantity).toFixed(1)} lbs</div>
-        `;
-
-        // 🛒 Store data on the element for cart
-        itemElement.dataset.price = sellPrice;
-        itemElement.dataset.stock = quantity;
-        itemElement.dataset.itemName = item.name;
-        itemElement.dataset.itemIcon = item.icon;
-        itemElement.dataset.itemWeight = item.weight;
-
-        // 💀 Click anywhere on the item box to add to sell cart
-        // 🖤 BULK SHORTCUTS: Shift+Click = 5, Ctrl+Click = 25 💀
-        itemElement.style.cursor = 'pointer';
-        itemElement.title = 'Click to sell (Shift: ×5, Ctrl: ×25)';
-        itemElement.onclick = (e) => {
-            // Don't interfere with bulk mode selection
-            if (TradingSystem.tradeMode === 'bulk' && (e.shiftKey || e.ctrlKey || e.altKey)) return;
-
-            // 🛒 Open TradeCartPanel in SELL mode and add item
-            if (typeof TradeCartPanel !== 'undefined') {
-                const price = parseInt(itemElement.dataset.price, 10) || 0;
-                const stock = parseInt(itemElement.dataset.stock, 10) || 1;
-                const itemName = itemElement.dataset.itemName || itemId;
-                const itemIcon = itemElement.dataset.itemIcon || '📦';
-                const itemWeight = parseFloat(itemElement.dataset.itemWeight) || 1;
-
-                // 🖤 Bulk quantity from modifier keys: Ctrl = 25, Shift = 5, Normal = 1 💀
-                let bulkQty = 1;
-                if (e.ctrlKey || e.metaKey) bulkQty = 25;
-                else if (e.shiftKey) bulkQty = 5;
-
-                // Create merchant data from current location
-                const merchantData = {
-                    name: currentLocation.name + ' Market',
-                    id: currentLocation.id,
-                    type: 'market',
-                    inventory: currentLocation.marketPrices
-                };
-
-                // Ensure cart is open in SELL mode
-                if (!TradeCartPanel.isOpen) {
-                    TradeCartPanel.open(merchantData, 'sell');
-                }
-                // Add item to cart (with bulk quantity support)
-                TradeCartPanel.addItem(itemId, price, stock, {
-                    name: itemName,
-                    icon: itemIcon,
-                    weight: itemWeight,
-                    quantity: bulkQty // 🖤 Bulk sell support 💀
-                });
-
-                // Visual feedback - flash the item
-                itemElement.classList.add('added-to-cart');
-                setTimeout(() => itemElement.classList.remove('added-to-cart'), 300);
+            // Use regional economy sell price if available
+            let sellPrice;
+            if (typeof GameWorld !== 'undefined' && GameWorld.calculateSellPrice) {
+                // Get item's origin region for regional trade bonus
+                const originRegion = GameWorld.getItemOriginRegion(itemId);
+                sellPrice = GameWorld.calculateSellPrice(currentLocation.id, itemId, originRegion);
+                sellPrice = Math.round(sellPrice * reputationModifier);
             } else {
-                // Fallback to direct sell if TradeCartPanel not loaded
-                sellItem(itemId);
+                // Fallback to old system
+                const baseSellPrice = Math.round(ItemDatabase.calculatePrice(itemId) * 0.7);
+                sellPrice = Math.round(baseSellPrice * reputationModifier);
             }
-        };
 
-        // Add event listeners for bulk selection
-        if (TradingSystem.tradeMode === 'bulk') {
-            EventManager.addEventListener(itemElement, 'click', (e) => {
-                if (e.shiftKey || e.ctrlKey || e.altKey) return;
+            const itemElement = document.createElement('div');
+            itemElement.className = `market-item ${item.rarity} ${TradingSystem.selectedTradeItems.has(itemId) ? 'selected' : ''}`;
+            itemElement.dataset.itemId = itemId;
 
-                if (TradingSystem.selectedTradeItems.has(itemId)) {
-                    TradingSystem.selectedTradeItems.delete(itemId);
-                    itemElement.classList.remove('selected');
+            itemElement.innerHTML = `
+                <div class="item-icon">${item.icon}</div>
+                <div class="item-name">${item.name}</div>
+                <div class="item-quantity">x${quantity}</div>
+                <div class="item-price">${sellPrice} gold</div>
+                <div class="item-weight">${ItemDatabase.calculateWeight(itemId, quantity).toFixed(1)} lbs</div>
+            `;
+
+            itemElement.dataset.price = sellPrice;
+            itemElement.dataset.stock = quantity;
+            itemElement.dataset.itemName = item.name;
+            itemElement.dataset.itemIcon = item.icon;
+            itemElement.dataset.itemWeight = item.weight;
+
+            itemElement.style.cursor = 'pointer';
+            itemElement.title = 'Click to sell (Shift: x5, Ctrl: x25)';
+            itemElement.onclick = (e) => {
+                if (TradingSystem.tradeMode === 'bulk' && (e.shiftKey || e.ctrlKey || e.altKey)) return;
+
+                if (typeof TradeCartPanel !== 'undefined') {
+                    const price = parseInt(itemElement.dataset.price, 10) || 0;
+                    const stock = parseInt(itemElement.dataset.stock, 10) || 1;
+                    const itemName = itemElement.dataset.itemName || itemId;
+                    const itemIcon = itemElement.dataset.itemIcon || '';
+                    const itemWeight = parseFloat(itemElement.dataset.itemWeight) || 1;
+
+                    let bulkQty = 1;
+                    if (e.ctrlKey || e.metaKey) bulkQty = 25;
+                    else if (e.shiftKey) bulkQty = 5;
+
+                    const merchantData = {
+                        name: currentLocation.name + ' Market',
+                        id: currentLocation.id,
+                        type: 'market',
+                        inventory: currentLocation.marketPrices
+                    };
+
+                    if (!TradeCartPanel.isOpen) {
+                        TradeCartPanel.open(merchantData, 'sell');
+                    }
+                    TradeCartPanel.addItem(itemId, price, stock, {
+                        name: itemName,
+                        icon: itemIcon,
+                        weight: itemWeight,
+                        quantity: bulkQty
+                    });
+
+                    itemElement.classList.add('added-to-cart');
+                    setTimeout(() => itemElement.classList.remove('added-to-cart'), 300);
                 } else {
-                    TradingSystem.selectedTradeItems.set(itemId, 1);
-                    itemElement.classList.add('selected');
+                    sellItem(itemId);
                 }
+            };
 
-                TradingSystem.updateTradeSummary();
-            });
+            if (TradingSystem.tradeMode === 'bulk') {
+                EventManager.addEventListener(itemElement, 'click', (e) => {
+                    if (e.shiftKey || e.ctrlKey || e.altKey) return;
+                    if (TradingSystem.selectedTradeItems.has(itemId)) {
+                        TradingSystem.selectedTradeItems.delete(itemId);
+                        itemElement.classList.remove('selected');
+                    } else {
+                        TradingSystem.selectedTradeItems.set(itemId, 1);
+                        itemElement.classList.add('selected');
+                    }
+                    TradingSystem.updateTradeSummary();
+                });
+            }
 
-            EventManager.addEventListener(itemElement, 'contextmenu', (e) => {
-                e.preventDefault();
-                TradingSystem.updateTradePreview(itemId, 1);
-            });
+            sellItemsContainer.appendChild(itemElement);
         }
+    }
 
-        sellItemsContainer.appendChild(itemElement);
+    // OWNED TRANSPORT - show for selling
+    const ownedTransport = game.player.ownedTransport || [];
+    const sellableTransport = ownedTransport.filter(id => {
+        const t = ItemDatabase.getItem(id);
+        return t && t.isTransport && t.basePrice > 0 && id !== 'satchel';
+    });
+
+    if (sellableTransport.length > 0) {
+        // Add transport header
+        const transportHeader = document.createElement('div');
+        transportHeader.className = 'sell-section-header';
+        transportHeader.innerHTML = '<h5>Your Transport</h5>';
+        sellItemsContainer.appendChild(transportHeader);
+
+        // Count animals and vehicles for sell validation
+        const ownedAnimals = ownedTransport.filter(id => {
+            const t = ItemDatabase.getItem(id);
+            return t && t.transportType === 'animal';
+        }).length;
+        const ownedVehicles = ownedTransport.filter(id => {
+            const t = ItemDatabase.getItem(id);
+            return t && t.transportType === 'vehicle';
+        }).length;
+
+        sellableTransport.forEach(transportId => {
+            hasItems = true;
+            const transport = ItemDatabase.getItem(transportId);
+            if (!transport) return;
+
+            // Calculate sell price (50-60% of base)
+            const sellPrice = Math.round(transport.basePrice * 0.55);
+
+            // Check if selling would strand a vehicle
+            let canSell = true;
+            let sellBlockReason = '';
+            if (transport.transportType === 'animal' && ownedAnimals <= ownedVehicles) {
+                canSell = false;
+                sellBlockReason = 'Would strand vehicle';
+            }
+
+            // Check if selling would reduce capacity below current load
+            if (canSell) {
+                const newCapacity = TransportSystem.calculateTotalCapacity({
+                    ...game.player,
+                    ownedTransport: ownedTransport.filter(id => id !== transportId)
+                });
+                if (game.player.currentLoad > newCapacity) {
+                    canSell = false;
+                    sellBlockReason = 'Overloaded';
+                }
+            }
+
+            const itemElement = document.createElement('div');
+            itemElement.className = `market-item transport-item sellable ${transport.rarity} ${canSell ? '' : 'blocked'}`;
+            itemElement.dataset.itemId = transportId;
+            itemElement.dataset.isTransport = 'true';
+
+            const speedPercent = Math.round((transport.speedModifier - 1) * 100);
+            const speedDisplay = speedPercent >= 0 ? `+${speedPercent}%` : `${speedPercent}%`;
+
+            itemElement.innerHTML = `
+                <div class="item-icon">${transport.icon}</div>
+                <div class="item-name">${transport.name}</div>
+                <div class="transport-type">${transport.transportType.toUpperCase()}</div>
+                <div class="item-price sell-price">+${sellPrice}g</div>
+                <div class="transport-stats">
+                    <span class="capacity">-${transport.carryCapacity} lbs</span>
+                    <span class="speed">${speedDisplay} speed</span>
+                </div>
+                ${!canSell ? `<div class="transport-blocked">${sellBlockReason}</div>` : ''}
+            `;
+
+            itemElement.style.cursor = canSell ? 'pointer' : 'not-allowed';
+            itemElement.title = canSell ? 'Click to sell' : sellBlockReason;
+
+            if (canSell) {
+                itemElement.onclick = () => {
+                    // Sell transport
+                    game.player.gold += sellPrice;
+                    game.player.ownedTransport = game.player.ownedTransport.filter(id => id !== transportId);
+
+                    // Update legacy array
+                    if (game.player.ownedTransportation) {
+                        game.player.ownedTransportation = game.player.ownedTransportation.filter(id => id !== transportId);
+                    }
+
+                    // Recalculate capacity
+                    if (typeof TransportSystem !== 'undefined') {
+                        game.player.carryCapacity = TransportSystem.calculateTotalCapacity(game.player);
+                    }
+
+                    addMessage(`You sold your ${transport.name} for ${sellPrice} gold! ${transport.icon}`);
+                    updatePlayerInfo();
+                    populateMarketItems();  // Refresh sell list
+                };
+            }
+
+            sellItemsContainer.appendChild(itemElement);
+        });
+    }
+
+    if (!hasItems) {
+        sellItemsContainer.innerHTML = '<p>You have no items to sell.</p>';
     }
 }
 
@@ -8114,9 +8411,9 @@ function populateInventory() {
     updateInventoryDisplay();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 🐎 TRANSPORTATION FUNCTIONS - upgrading your sad walk
-// ═══════════════════════════════════════════════════════════════
+// TRANSPORTATION MARKETPLACE FUNCTIONS
+// Buy/sell animals and vehicles at specific locations
+
 function openTransportation() {
     changeState(GameState.TRANSPORTATION);
     updateTransportationInfo();
@@ -8129,108 +8426,313 @@ function closeTransportation() {
 }
 
 function updateTransportationInfo() {
-    if (game.player) {
-        const currentTransport = transportationOptions[game.player.transportation];
-        document.getElementById('current-transport').textContent = currentTransport.name;
-        document.getElementById('carry-capacity').textContent = `${currentTransport.carryCapacity} lbs`;
-        document.getElementById('current-load').textContent = `${game.player.currentLoad} lbs`;
+    if (!game.player) return;
+
+    // Get transport summary using new system
+    const summary = TransportSystem.getTransportSummary(game.player);
+
+    // Update capacity display
+    const capacityEl = document.getElementById('carry-capacity');
+    if (capacityEl) {
+        capacityEl.textContent = `${summary.capacity} lbs`;
+    }
+
+    // Update current load
+    const loadEl = document.getElementById('current-load');
+    if (loadEl) {
+        loadEl.textContent = `${game.player.currentLoad} lbs`;
+    }
+
+    // Update current transport display
+    const transportEl = document.getElementById('current-transport');
+    if (transportEl) {
+        const owned = game.player.ownedTransport || ['satchel'];
+        const animals = owned.filter(id => transportationOptions[id]?.category === TRANSPORT_CATEGORY.ANIMAL);
+        const vehicles = owned.filter(id => transportationOptions[id]?.category === TRANSPORT_CATEGORY.VEHICLE);
+        const carriers = owned.filter(id => transportationOptions[id]?.category === TRANSPORT_CATEGORY.CARRIER);
+
+        let displayParts = [];
+        if (animals.length > 0) {
+            displayParts.push(`${animals.length} Animal${animals.length > 1 ? 's' : ''}`);
+        }
+        if (vehicles.length > 0) {
+            displayParts.push(`${vehicles.length} Vehicle${vehicles.length > 1 ? 's' : ''}`);
+        }
+        if (carriers.length > 0 && carriers.some(c => c !== 'satchel')) {
+            displayParts.push('Hand Cart');
+        }
+        if (displayParts.length === 0) {
+            displayParts.push('Satchel only');
+        }
+
+        transportEl.textContent = displayParts.join(' + ');
+    }
+
+    // Update speed display if exists
+    const speedEl = document.getElementById('travel-speed');
+    if (speedEl) {
+        speedEl.textContent = `${Math.round(summary.speed * 100)}%`;
     }
 }
 
 function populateTransportationOptions() {
     const container = document.getElementById('transportation-options');
-    if (!container) return; // 🖤 Null check 💀
+    if (!container) return;
+
     container.innerHTML = '';
 
-    let hasOptions = false; // 🦇 Track if we added anything (fix empty check)
+    // Get current location type
+    const locationType = game.currentLocation?.type || 'town';
+    const locationName = game.currentLocation?.name || 'Unknown';
 
-    for (const [key, transport] of Object.entries(transportationOptions)) {
-        // Skip if player already owns this transportation
-        if (game.player.ownedTransportation.includes(key)) {
-            continue;
-        }
+    // Get what's available at this location
+    const availableIds = TRANSPORT_SELLERS[locationType] || [];
+    const available = availableIds.map(id => transportationOptions[id]).filter(Boolean);
 
-        hasOptions = true; // 🖤 We have at least one option
-        const transportElement = document.createElement('div');
-        transportElement.className = 'item';
-        // 🛡️ XSS fix: escape all user-facing data 🦇
-        transportElement.innerHTML = `
-            <div class="item-name">${escapeHtml(transport.name)}</div>
-            <div class="item-price">${escapeHtml(String(transport.price))} gold</div>
-            <div class="item-quantity">Capacity: ${escapeHtml(String(transport.carryCapacity))} lbs</div>
-        `;
+    // Get transport summary for validation
+    const summary = TransportSystem.getTransportSummary(game.player);
+    const owned = game.player.ownedTransport || ['satchel'];
 
-        EventManager.addEventListener(transportElement, 'click', () => purchaseTransportation(key));
-        container.appendChild(transportElement);
+    // Location header
+    const headerEl = document.createElement('div');
+    headerEl.className = 'transport-location-header';
+    headerEl.innerHTML = `
+        <h4>${escapeHtml(locationName)} - Transport Market</h4>
+        <div class="transport-stats">
+            <span>Animals: ${summary.animals}</span>
+            <span>Vehicles: ${summary.vehicles}</span>
+            <span>Capacity: ${summary.capacity} lbs</span>
+            <span>Speed: ${Math.round(summary.speed * 100)}%</span>
+        </div>
+    `;
+    container.appendChild(headerEl);
+
+    // BUY SECTION
+    const buySection = document.createElement('div');
+    buySection.className = 'transport-section';
+    buySection.innerHTML = '<h5>For Sale</h5>';
+
+    if (available.length === 0) {
+        buySection.innerHTML += '<p class="no-items">No transport available at this location.</p>';
+    } else {
+        available.forEach(transport => {
+            const price = TransportSystem.getPrice(transport.id, locationType);
+            const canAfford = game.player.gold >= price;
+
+            // Check vehicle restriction
+            let canBuy = canAfford;
+            let restriction = '';
+            if (transport.requiresAnimal && !summary.canBuyVehicle) {
+                canBuy = false;
+                restriction = 'Need animal first';
+            }
+
+            const itemEl = document.createElement('div');
+            itemEl.className = `transport-item ${canBuy ? '' : 'disabled'}`;
+            itemEl.innerHTML = `
+                <div class="transport-icon">${transport.icon}</div>
+                <div class="transport-info">
+                    <div class="transport-name">${escapeHtml(transport.name)}</div>
+                    <div class="transport-desc">${escapeHtml(transport.description)}</div>
+                    <div class="transport-stats-row">
+                        <span>+${transport.carryCapacity} lbs</span>
+                        <span>${transport.speedModifier > 1 ? '+' : ''}${Math.round((transport.speedModifier - 1) * 100)}% speed</span>
+                    </div>
+                </div>
+                <div class="transport-price">
+                    <span class="${canAfford ? 'can-afford' : 'cannot-afford'}">${price}g</span>
+                    ${restriction ? `<span class="restriction">${restriction}</span>` : ''}
+                </div>
+            `;
+
+            if (canBuy) {
+                EventManager.addEventListener(itemEl, 'click', () => purchaseTransport(transport.id));
+            }
+
+            buySection.appendChild(itemEl);
+        });
     }
+    container.appendChild(buySection);
 
-    // 🖤 FIXED: check hasOptions flag instead of innerHTML (which would never be empty after loop) 💀
-    if (!hasOptions) {
-        container.innerHTML = '<p>You own all available transportation options!</p>';
+    // SELL SECTION - show owned transport that can be sold
+    const sellSection = document.createElement('div');
+    sellSection.className = 'transport-section';
+    sellSection.innerHTML = '<h5>Sell Your Transport</h5>';
+
+    const sellable = owned.filter(id => {
+        const t = transportationOptions[id];
+        return t && t.canSell !== false && t.sellPrice > 0;
+    });
+
+    if (sellable.length === 0) {
+        sellSection.innerHTML += '<p class="no-items">Nothing to sell.</p>';
+    } else {
+        sellable.forEach(id => {
+            const transport = transportationOptions[id];
+            const sellPrice = transport.sellPrice;
+
+            // Check if selling animal would strand a vehicle
+            let canSell = true;
+            let restriction = '';
+            if (transport.category === TRANSPORT_CATEGORY.ANIMAL && !summary.canSellAnimal) {
+                canSell = false;
+                restriction = 'Would strand vehicle';
+            }
+
+            const itemEl = document.createElement('div');
+            itemEl.className = `transport-item sellable ${canSell ? '' : 'disabled'}`;
+            itemEl.innerHTML = `
+                <div class="transport-icon">${transport.icon}</div>
+                <div class="transport-info">
+                    <div class="transport-name">${escapeHtml(transport.name)}</div>
+                    <div class="transport-stats-row">
+                        <span>-${transport.carryCapacity} lbs capacity</span>
+                    </div>
+                </div>
+                <div class="transport-price sell-price">
+                    <span>+${sellPrice}g</span>
+                    ${restriction ? `<span class="restriction">${restriction}</span>` : ''}
+                </div>
+            `;
+
+            if (canSell) {
+                EventManager.addEventListener(itemEl, 'click', () => sellTransport(id));
+            }
+
+            sellSection.appendChild(itemEl);
+        });
     }
+    container.appendChild(sellSection);
+
+    // OWNED SECTION - summary of what you have
+    const ownedSection = document.createElement('div');
+    ownedSection.className = 'transport-section';
+    ownedSection.innerHTML = '<h5>Your Transport</h5>';
+
+    const ownedList = document.createElement('div');
+    ownedList.className = 'owned-transport-list';
+
+    owned.forEach(id => {
+        const t = transportationOptions[id];
+        if (!t) return;
+
+        const itemEl = document.createElement('span');
+        itemEl.className = 'owned-transport-item';
+        itemEl.textContent = `${t.icon} ${t.name}`;
+        ownedList.appendChild(itemEl);
+    });
+
+    ownedSection.appendChild(ownedList);
+    container.appendChild(ownedSection);
 }
 
-function purchaseTransportation(transportId) {
+function purchaseTransport(transportId) {
     const transport = transportationOptions[transportId];
-    
     if (!transport) {
-        addMessage('Invalid transportation option.');
+        addMessage('Invalid transport option.');
         return;
     }
-    
-    if (game.player.gold < transport.price) {
-        addMessage(`You don't have enough gold to purchase a ${transport.name}.`);
+
+    const locationType = game.currentLocation?.type || 'town';
+    const price = TransportSystem.getPrice(transportId, locationType);
+
+    // Check gold
+    if (game.player.gold < price) {
+        addMessage(`You need ${price} gold to buy a ${transport.name}. You only have ${game.player.gold}.`);
         return;
     }
-    
-    // Check for requirements (e.g., need an animal for wagon)
-    if (transport.requiresAnimal) {
-        const hasAnimal = game.player.ownedTransportation.includes('horse') ||
-                         game.player.ownedTransportation.includes('donkey') ||
-                         game.player.ownedTransportation.includes('oxen');
-        
-        if (!hasAnimal) {
-            addMessage(`You need an animal (horse, donkey, or oxen) to use a ${transport.name}.`);
-            return;
-        }
+
+    // Check vehicle restriction
+    if (transport.requiresAnimal && !TransportSystem.canBuyVehicle(game.player)) {
+        addMessage(`You need an animal to pull a ${transport.name}! Buy a horse, mule, or oxen first.`);
+        return;
     }
-    
-    // Purchase transportation
-    game.player.gold -= transport.price;
-    game.player.ownedTransportation.push(transportId);
-    
-    addMessage(`You purchased a ${transport.name} for ${transport.price} gold!`);
-    
-    // Update UI
+
+    // Initialize ownedTransport if needed
+    if (!game.player.ownedTransport) {
+        game.player.ownedTransport = ['satchel'];
+    }
+
+    // Purchase!
+    game.player.gold -= price;
+    game.player.ownedTransport.push(transportId);
+
+    // Update legacy array for backwards compat
+    if (!game.player.ownedTransportation.includes(transportId)) {
+        game.player.ownedTransportation.push(transportId);
+    }
+
+    addMessage(`You bought a ${transport.name} for ${price} gold! ${transport.icon}`);
+
+    // Recalculate capacity
+    updateCarryCapacity();
     updatePlayerInfo();
-    updateTransportationInfo();
     populateTransportationOptions();
 }
 
-function switchTransportation(transportId) {
+function sellTransport(transportId) {
     const transport = transportationOptions[transportId];
-    
     if (!transport) {
-        addMessage('Invalid transportation option.');
+        addMessage('Invalid transport option.');
         return;
     }
-    
-    if (!game.player.ownedTransportation.includes(transportId)) {
+
+    // Check ownership
+    if (!game.player.ownedTransport || !game.player.ownedTransport.includes(transportId)) {
         addMessage(`You don't own a ${transport.name}.`);
         return;
     }
-    
-    // Check if current load exceeds new capacity
-    if (game.player.currentLoad > transport.carryCapacity) {
-        addMessage(`You cannot switch to ${transport.name} - your current load (${game.player.currentLoad} lbs) exceeds its capacity (${transport.carryCapacity} lbs).`);
+
+    // Check if can sell (animals can't be sold if they'd strand vehicles)
+    if (transport.category === TRANSPORT_CATEGORY.ANIMAL && !TransportSystem.canSellAnimal(game.player)) {
+        addMessage(`You can't sell your ${transport.name} - it's pulling a cart or wagon!`);
         return;
     }
-    
-    game.player.transportation = transportId;
-    addMessage(`You are now using ${transport.name}.`);
-    
-    // Update UI
-    updateTransportationInfo();
+
+    // Check can't sell satchel
+    if (transport.canSell === false) {
+        addMessage(`You can't sell your ${transport.name}.`);
+        return;
+    }
+
+    const sellPrice = transport.sellPrice;
+
+    // Check if selling would reduce capacity below current load
+    const newCapacity = TransportSystem.calculateTotalCapacity({
+        ...game.player,
+        ownedTransport: game.player.ownedTransport.filter(id => id !== transportId)
+    });
+
+    if (game.player.currentLoad > newCapacity) {
+        addMessage(`Can't sell - you're carrying ${game.player.currentLoad} lbs but would only have ${newCapacity} lbs capacity!`);
+        return;
+    }
+
+    // Sell!
+    game.player.gold += sellPrice;
+    game.player.ownedTransport = game.player.ownedTransport.filter(id => id !== transportId);
+
+    // Update legacy array
+    game.player.ownedTransportation = game.player.ownedTransportation.filter(id => id !== transportId);
+
+    addMessage(`You sold your ${transport.name} for ${sellPrice} gold! ${transport.icon}`);
+
+    // Recalculate capacity
+    updateCarryCapacity();
+    updatePlayerInfo();
+    populateTransportationOptions();
+}
+
+function updateCarryCapacity() {
+    if (!game.player) return;
+
+    // Use new transport system for capacity
+    game.player.carryCapacity = TransportSystem.calculateTotalCapacity(game.player);
+}
+
+// Legacy function for backwards compatibility
+function switchTransportation(transportId) {
+    addMessage('Transport switching is now automatic based on what you own.');
 }
 
 function calculateCurrentLoad() {
@@ -8606,20 +9108,53 @@ function updateInventoryDisplay() {
 function updateMarketDisplay() {
     const buyItemsContainer = document.getElementById('buy-items');
     if (!buyItemsContainer) return;
-    
+
     buyItemsContainer.innerHTML = '';
-    
+
     const currentLocation = GameWorld.locations[game.currentLocation.id];
-    if (!currentLocation || !currentLocation.marketPrices) {
+    if (!currentLocation) {
         buyItemsContainer.innerHTML = '<p>No items available at this market.</p>';
         return;
     }
-    
+
+    // Get transport items available at this location type
+    const locationType = currentLocation.type || 'town';
+    const transportItems = ItemDatabase.getTransportForLocation(locationType);
+
+    // Build combined market items - regular market + transport
+    const allMarketItems = { ...(currentLocation.marketPrices || {}) };
+
+    // Add transport items with dynamic pricing
+    const priceMultiplier = locationType === 'capital' ? 1.75 :
+                           locationType === 'city' ? 1.25 :
+                           locationType === 'town' ? 1.1 : 1.0;
+
+    transportItems.forEach(transport => {
+        // Check if player already owns this (single ownership for most transport)
+        const alreadyOwned = game.player.ownedTransport && game.player.ownedTransport.includes(transport.id);
+        // For now, allow multiple animals/carts (realistic)
+
+        allMarketItems[transport.id] = {
+            price: Math.round(transport.basePrice * priceMultiplier),
+            stock: alreadyOwned ? 1 : 3,  // Limited stock
+            isTransport: true,
+            transportType: transport.transportType,
+            carryCapacity: transport.carryCapacity,
+            speedModifier: transport.speedModifier,
+            requiresAnimal: transport.requiresAnimal || false
+        };
+    });
+
+    if (Object.keys(allMarketItems).length === 0) {
+        buyItemsContainer.innerHTML = '<p>No items available at this market.</p>';
+        return;
+    }
+
     // Get filter value
     const itemFilter = document.getElementById('item-filter');
     const filterValue = itemFilter ? itemFilter.value : 'all';
-    
-    for (const [itemId, marketData] of Object.entries(currentLocation.marketPrices)) {
+
+    for (const [itemId, marketData] of Object.entries(allMarketItems)) {
         const item = ItemDatabase.getItem(itemId);
         if (!item) continue;
 
@@ -8636,9 +9171,13 @@ function updateMarketDisplay() {
                      item.category === ItemDatabase.categories.RAW_ORES) itemCategory = 'resources';
             else if (item.category === ItemDatabase.categories.TOOLS) itemCategory = 'tools';
             else if (item.category === ItemDatabase.categories.LUXURY) itemCategory = 'luxury';
-            
+            else if (item.category === ItemDatabase.categories.TRANSPORT) itemCategory = 'transport';
+
             if (itemCategory !== filterValue) continue;
         }
+
+        // Special handling for transport items
+        const isTransport = item.isTransport || marketData.isTransport;
         
         // Get price trend
         const trend = MarketPriceHistory.getPriceTrend(currentLocation.id, itemId);
@@ -8660,47 +9199,133 @@ function updateMarketDisplay() {
         
         // Check if item is special
         const isSpecial = marketData.special || false;
-        
-        const itemElement = document.createElement('div');
-        itemElement.className = `market-item ${item.rarity} ${isSpecial ? 'special' : ''} ${TradingSystem.selectedTradeItems.has(itemId) ? 'selected' : ''}`;
-        itemElement.dataset.itemId = itemId;
-        
-        // 🖤 XSS fix: use data attributes
-        // 🛒 Clicking the item box adds to TradeCartPanel - no separate Buy button needed!
-        itemElement.innerHTML = `
-            ${trend !== 'stable' ? `<div class="item-trend ${trendClass}">${trendIcon}</div>` : ''}
-            <div class="item-icon">${item.icon}</div>
-            <div class="item-name">${item.name}</div>
-            <div class="item-price">${marketData.price} gold</div>
-            <div class="item-stock">Stock: ${marketData.stock}</div>
-            <div class="item-weight">${item.weight} lbs</div>
-            ${demandText ? `<div class="item-demand ${demandClass}">${demandText}</div>` : ''}
-        `;
 
-        // 🛒 Store data on the element for cart
+        // Check transport validation
+        let transportBlocked = false;
+        let transportBlockReason = '';
+        if (isTransport && marketData.requiresAnimal) {
+            // Vehicle requires animal - check if player has more animals than vehicles
+            const ownedAnimals = (game.player.ownedTransport || []).filter(id => {
+                const t = ItemDatabase.getItem(id);
+                return t && t.transportType === 'animal';
+            }).length;
+            const ownedVehicles = (game.player.ownedTransport || []).filter(id => {
+                const t = ItemDatabase.getItem(id);
+                return t && t.transportType === 'vehicle';
+            }).length;
+            if (ownedAnimals <= ownedVehicles) {
+                transportBlocked = true;
+                transportBlockReason = 'Need animal first';
+            }
+        }
+
+        const itemElement = document.createElement('div');
+        itemElement.className = `market-item ${item.rarity} ${isSpecial ? 'special' : ''} ${isTransport ? 'transport-item' : ''} ${transportBlocked ? 'blocked' : ''} ${TradingSystem.selectedTradeItems.has(itemId) ? 'selected' : ''}`;
+        itemElement.dataset.itemId = itemId;
+
+        // Build item HTML - transport items show capacity/speed instead of weight
+        let itemInfoHtml;
+        if (isTransport) {
+            const capacityInfo = marketData.carryCapacity || item.carryCapacity || 0;
+            const speedInfo = marketData.speedModifier || item.speedModifier || 1.0;
+            const speedPercent = Math.round((speedInfo - 1) * 100);
+            const speedDisplay = speedPercent >= 0 ? `+${speedPercent}%` : `${speedPercent}%`;
+            const typeLabel = marketData.transportType || item.transportType || 'transport';
+
+            itemInfoHtml = `
+                ${trend !== 'stable' ? `<div class="item-trend ${trendClass}">${trendIcon}</div>` : ''}
+                <div class="item-icon">${item.icon}</div>
+                <div class="item-name">${item.name}</div>
+                <div class="transport-type">${typeLabel.toUpperCase()}</div>
+                <div class="item-price">${marketData.price} gold</div>
+                <div class="transport-stats">
+                    <span class="capacity">+${capacityInfo} lbs</span>
+                    <span class="speed">${speedDisplay} speed</span>
+                </div>
+                ${transportBlocked ? `<div class="transport-blocked">${transportBlockReason}</div>` : ''}
+            `;
+        } else {
+            itemInfoHtml = `
+                ${trend !== 'stable' ? `<div class="item-trend ${trendClass}">${trendIcon}</div>` : ''}
+                <div class="item-icon">${item.icon}</div>
+                <div class="item-name">${item.name}</div>
+                <div class="item-price">${marketData.price} gold</div>
+                <div class="item-stock">Stock: ${marketData.stock}</div>
+                <div class="item-weight">${item.weight} lbs</div>
+                ${demandText ? `<div class="item-demand ${demandClass}">${demandText}</div>` : ''}
+            `;
+        }
+        itemElement.innerHTML = itemInfoHtml;
+
+        // Store data on the element for cart
         itemElement.dataset.price = marketData.price;
         itemElement.dataset.stock = marketData.stock;
         itemElement.dataset.itemName = item.name;
         itemElement.dataset.itemIcon = item.icon;
         itemElement.dataset.itemWeight = item.weight;
+        itemElement.dataset.isTransport = isTransport ? 'true' : 'false';
+        itemElement.dataset.transportBlocked = transportBlocked ? 'true' : 'false';
 
-        // 💀 Click anywhere on the item box to add to cart
-        // 🖤 BULK SHORTCUTS: Shift+Click = 5, Ctrl+Click = 25 💀
-        itemElement.style.cursor = 'pointer';
-        itemElement.title = 'Click to buy (Shift: ×5, Ctrl: ×25)';
+        // Click anywhere on the item box to add to cart
+        // BULK SHORTCUTS: Shift+Click = 5, Ctrl+Click = 25 (not for transport)
+        itemElement.style.cursor = transportBlocked ? 'not-allowed' : 'pointer';
+        itemElement.title = isTransport ? 'Click to buy' : 'Click to buy (Shift: x5, Ctrl: x25)';
+
         itemElement.onclick = (e) => {
+            // Block if transport validation failed
+            if (itemElement.dataset.transportBlocked === 'true') {
+                addMessage('You need an animal (horse, mule, or oxen) before you can buy a cart or wagon!');
+                return;
+            }
+
             // Don't interfere with bulk mode selection
             if (TradingSystem.tradeMode === 'bulk' && (e.shiftKey || e.ctrlKey || e.altKey)) return;
 
-            // 🛒 Open TradeCartPanel and add item
+            // TRANSPORT ITEMS - direct purchase, add to ownedTransport
+            if (itemElement.dataset.isTransport === 'true') {
+                const price = parseInt(itemElement.dataset.price, 10) || 0;
+                const itemName = itemElement.dataset.itemName || itemId;
+
+                if (game.player.gold < price) {
+                    addMessage(`You need ${price} gold to buy a ${itemName}. You have ${game.player.gold}.`);
+                    return;
+                }
+
+                // Purchase transport
+                game.player.gold -= price;
+                if (!game.player.ownedTransport) {
+                    game.player.ownedTransport = ['satchel'];
+                }
+                game.player.ownedTransport.push(itemId);
+
+                // Update legacy array
+                if (!game.player.ownedTransportation) {
+                    game.player.ownedTransportation = [];
+                }
+                if (!game.player.ownedTransportation.includes(itemId)) {
+                    game.player.ownedTransportation.push(itemId);
+                }
+
+                // Update carry capacity
+                if (typeof TransportSystem !== 'undefined') {
+                    game.player.carryCapacity = TransportSystem.calculateTotalCapacity(game.player);
+                }
+
+                addMessage(`You bought a ${itemName} for ${price} gold! ${item.icon}`);
+                updatePlayerInfo();
+                updateMarketDisplay();  // Refresh to update validation states
+                return;
+            }
+
+            // REGULAR ITEMS - Open TradeCartPanel and add item
             if (typeof TradeCartPanel !== 'undefined') {
                 const price = parseInt(itemElement.dataset.price, 10) || 0;
                 const stock = parseInt(itemElement.dataset.stock, 10) || 1;
                 const itemName = itemElement.dataset.itemName || itemId;
-                const itemIcon = itemElement.dataset.itemIcon || '📦';
+                const itemIcon = itemElement.dataset.itemIcon || '';
                 const itemWeight = parseFloat(itemElement.dataset.itemWeight) || 1;
 
-                // 🖤 Bulk quantity from modifier keys: Ctrl = 25, Shift = 5, Normal = 1 💀
+                // Bulk quantity from modifier keys: Ctrl = 25, Shift = 5, Normal = 1
                 let bulkQty = 1;
                 if (e.ctrlKey || e.metaKey) bulkQty = 25;
                 else if (e.shiftKey) bulkQty = 5;
@@ -8722,7 +9347,7 @@ function updateMarketDisplay() {
                     name: itemName,
                     icon: itemIcon,
                     weight: itemWeight,
-                    quantity: bulkQty // 🖤 Bulk buy support 💀
+                    quantity: bulkQty
                 });
 
                 // Visual feedback - flash the item

@@ -20,8 +20,9 @@ const ItemDatabase = {
         LUXURY: 'luxury',
         WEAPONS: 'weapons',
         ARMOR: 'armor',
-        DUNGEON_LOOT: 'dungeon_loot',  //  Sell-only trash from dungeons 
-        TREASURE: 'treasure'            //  Valuable finds from events/dungeons
+        DUNGEON_LOOT: 'dungeon_loot',  //  Sell-only trash from dungeons
+        TREASURE: 'treasure',           //  Valuable finds from events/dungeons
+        TRANSPORT: 'transport'          // Animals, carts, wagons
     },
 
     // ✨ Rarity levels - how special is your junk?
@@ -3128,6 +3129,117 @@ const ItemDatabase = {
             lore: 'Only the mightiest warriors who have slain a dragon may wield this terrible weapon.',
             special: true,
             unique: true
+        },
+
+        // === TRANSPORT - Animals and Vehicles ===
+        // These appear in trade windows at specific locations
+        // Buying adds to player.ownedTransport, selling removes from it
+
+        // CARRIERS (no animal required)
+        hand_cart: {
+            id: 'hand_cart',
+            name: 'Hand Cart',
+            description: 'A sturdy wooden cart you push by hand. Perfect for new merchants.',
+            icon: '🛒',
+            category: 'transport',
+            transportType: 'carrier',
+            rarity: 'common',
+            weight: 0,  // Transport items don't add weight - they ADD capacity
+            basePrice: 35,
+            carryCapacity: 150,
+            speedModifier: 0.85,
+            isTransport: true,
+            availableAt: ['village', 'town', 'city', 'capital', 'port'],
+            tradeable: true
+        },
+
+        // ANIMALS (can pull vehicles)
+        horse: {
+            id: 'horse',
+            name: 'Horse',
+            description: 'A swift horse for quick trading runs. Fast but carries less than oxen.',
+            icon: '🐴',
+            category: 'transport',
+            transportType: 'animal',
+            rarity: 'uncommon',
+            weight: 0,
+            basePrice: 200,
+            carryCapacity: 100,
+            speedModifier: 1.4,
+            canPullVehicle: true,
+            isTransport: true,
+            availableAt: ['farm', 'city', 'capital'],
+            tradeable: true
+        },
+        mule: {
+            id: 'mule',
+            name: 'Mule',
+            description: 'A sturdy mule. Good balance of speed and carrying capacity.',
+            icon: '🫏',
+            category: 'transport',
+            transportType: 'animal',
+            rarity: 'common',
+            weight: 0,
+            basePrice: 90,
+            carryCapacity: 180,
+            speedModifier: 0.9,
+            canPullVehicle: true,
+            isTransport: true,
+            availableAt: ['farm', 'city', 'capital', 'port'],
+            tradeable: true
+        },
+        oxen: {
+            id: 'oxen',
+            name: 'Oxen',
+            description: 'Slow but incredibly strong. Best for hauling heavy loads.',
+            icon: '🐂',
+            category: 'transport',
+            transportType: 'animal',
+            rarity: 'uncommon',
+            weight: 0,
+            basePrice: 150,
+            carryCapacity: 250,
+            speedModifier: 0.6,
+            canPullVehicle: true,
+            isTransport: true,
+            availableAt: ['farm', 'capital'],
+            tradeable: true
+        },
+
+        // VEHICLES (require animal to pull)
+        cart: {
+            id: 'cart',
+            name: 'Merchant Cart',
+            description: 'A sturdy cart for hauling goods. Requires a horse, mule, or oxen to pull.',
+            icon: '🛞',
+            category: 'transport',
+            transportType: 'vehicle',
+            rarity: 'uncommon',
+            weight: 0,
+            basePrice: 180,
+            carryCapacity: 350,
+            speedModifier: 0.8,
+            requiresAnimal: true,
+            isTransport: true,
+            availableAt: ['town', 'city', 'capital', 'port'],
+            tradeable: true
+        },
+        wagon: {
+            id: 'wagon',
+            name: 'Large Wagon',
+            description: 'A large wagon for serious merchants. Massive capacity but needs an animal.',
+            icon: '🚛',
+            category: 'transport',
+            transportType: 'vehicle',
+            rarity: 'rare',
+            weight: 0,
+            basePrice: 400,
+            carryCapacity: 600,
+            speedModifier: 0.65,
+            requiresAnimal: true,
+            isTransport: true,
+            availableAt: ['city', 'capital'],
+            tradeable: true
         }
     },
 
@@ -3238,6 +3350,40 @@ const ItemDatabase = {
     getItemIcon(itemId) {
         const item = this.getItem(itemId);
         return item ? item.icon : '';
+    },
+
+    // Get transport items available at a location type
+    getTransportForLocation(locationType) {
+        const items = [];
+        for (const [id, item] of Object.entries(this.items)) {
+            if (item.isTransport && item.availableAt && item.availableAt.includes(locationType)) {
+                items.push({ id, ...item });
+            }
+        }
+        return items;
+    },
+
+    // Check if item is a transport item
+    isTransportItem(itemId) {
+        const item = this.getItem(itemId);
+        return item && item.isTransport === true;
+    },
+
+    // Get transport type (carrier, animal, vehicle)
+    getTransportType(itemId) {
+        const item = this.getItem(itemId);
+        return item ? item.transportType : null;
+    },
+
+    // Check if item requires an animal (vehicles)
+    requiresAnimal(itemId) {
+        const item = this.getItem(itemId);
+        return item && item.requiresAnimal === true;
+    },
+
+    // Get all transport items
+    getAllTransport() {
+        return this.getItemsByCategory('transport');
     },
 
     // Check if item is consumable

@@ -1391,6 +1391,379 @@ const GameWorld = {
     },
 
     // ═══════════════════════════════════════════════════════════════
+    // REGIONAL ECONOMY SYSTEM - specialized pricing by location
+    // Locations charge less for what they PRODUCE (sells array)
+    // Locations pay more for what they NEED (buys array)
+    // Capital has premium pricing, regional trade bonuses exist
+    // DOOM WORLD has massive trade bonuses both ways
+    // ═══════════════════════════════════════════════════════════════
+
+    // Regional trade bonuses - goods from ANY other region are worth more
+    // FULL BIDIRECTIONAL MATRIX - every region values every other region's goods
+    regionTradeBonus: {
+        // Northern - cold climate, values warm-region goods highly
+        northern: {
+            southern: 1.45,  // Opposite climate - highest bonus
+            eastern: 1.25,   // Exotic goods from the east
+            western: 1.20,   // Frontier goods
+            starter: 1.15,   // Central goods
+            capital: 1.10,   // Luxury from capital
+            doom: 2.0        // Doom goods are rare and valuable!
+        },
+        // Southern - warm climate, values cold-region goods highly
+        southern: {
+            northern: 1.45,  // Opposite climate - highest bonus
+            eastern: 1.25,   // Exotic goods
+            western: 1.20,   // Frontier goods
+            starter: 1.15,   // Central goods
+            capital: 1.10,   // Luxury from capital
+            doom: 2.0        // Doom goods are rare!
+        },
+        // Eastern - exotic, values western frontier and far regions
+        eastern: {
+            western: 1.35,   // Opposite side of map
+            northern: 1.25,  // Cold region specialties
+            southern: 1.25,  // Warm region specialties
+            starter: 1.10,   // Central goods
+            capital: 1.10,   // Royal goods
+            doom: 2.0        // Doom goods!
+        },
+        // Western - frontier, values eastern exotic and far regions
+        western: {
+            eastern: 1.35,   // Opposite side of map
+            northern: 1.25,  // Cold region goods
+            southern: 1.25,  // Warm region goods
+            starter: 1.10,   // Central goods
+            capital: 1.10,   // Royal goods
+            doom: 2.0        // Doom goods!
+        },
+        // Starter - central region, moderate bonuses for all distant regions
+        starter: {
+            northern: 1.20,  // Distant cold region
+            southern: 1.20,  // Distant warm region
+            eastern: 1.15,   // Exotic region
+            western: 1.15,   // Frontier region
+            capital: 1.05,   // Close to capital
+            doom: 2.0        // Doom goods valuable anywhere!
+        },
+        // Capital - values ALL regional goods, hub of trade
+        capital: {
+            northern: 1.30,  // Northern furs, iron, cold goods
+            southern: 1.30,  // Southern wines, fish, warm goods
+            eastern: 1.30,   // Eastern silks, spices, exotic goods
+            western: 1.30,   // Western timber, stone, frontier goods
+            starter: 1.15,   // Local region goods
+            doom: 2.5        // Capital pays TOP DOLLAR for doom artifacts!
+        },
+        // DOOM WORLD - normal world goods are incredibly valuable here
+        doom: {
+            northern: 2.0,   // Fresh goods from the living world!
+            southern: 2.0,   // Untainted food and wine!
+            eastern: 2.0,    // Clean silks and spices!
+            western: 2.0,    // Uncorrupted timber and stone!
+            starter: 2.0,    // Pure goods from the heartland!
+            capital: 2.5     // Royal goods are legendary in doom!
+        }
+    },
+
+    // Capital market premium modifiers
+    capitalPricing: {
+        buyMultiplier: 1.5,  // Items cost 50% more to BUY at capital
+        sellMultiplier: 1.35 // You get 35% more when SELLING at capital
+    },
+
+    // Doom World pricing - BARTER ECONOMY, gold is worthless!
+    // Food/water = most valuable, gold/luxury = nearly worthless
+    doomPricing: {
+        // When bringing normal goods TO doom world
+        normalGoodsInDoom: 1.5,   // Untainted goods are valuable
+        // When bringing doom goods TO normal world
+        doomGoodsInNormal: 1.8,   // Rare doom artifacts/materials
+        // When selling food/water in doom
+        survivalGoodsBonus: 3.0,  // Survival essentials are GOLD in doom
+        // When selling luxury in doom
+        luxuryPenalty: 0.1        // Gold/gems/silk nearly worthless
+    },
+
+    // Check if currently in doom world
+    isInDoomWorld() {
+        return (typeof TravelSystem !== 'undefined' && TravelSystem.isInDoomWorld?.()) ||
+               (typeof DoomWorldSystem !== 'undefined' && DoomWorldSystem.isActive) ||
+               (typeof game !== 'undefined' && game.inDoomWorld);
+    },
+
+    // Check if an item is a doom-world item (from the doom dimension)
+    isDoomItem(itemId) {
+        const doomItems = [
+            'corrupted_flesh', 'dark_ichor', 'blight_crystal', 'shadow_wisp',
+            'void_essence', 'nightmare_eye', 'doom_artifact', 'cursed_relic',
+            'blighted_herb', 'shadow_ore', 'doom_crystal', 'corrupted_gem',
+            'soul_fragment', 'dark_essence', 'blight_seed', 'nightmare_shard',
+            'moldy_bread', 'dirty_water', 'tattered_cloth', 'rusty_knife',
+            'crude_bandage', 'salvaged_rope', 'hidden_food_cache', 'stolen_medicine'
+        ];
+        return doomItems.includes(itemId) || (itemId && itemId.startsWith('doom_'));
+    },
+
+    // Check if item is a survival essential (extremely valuable in doom)
+    isSurvivalItem(itemId) {
+        const survivalItems = [
+            'food', 'water', 'bread', 'meat', 'fish', 'vegetables', 'cheese', 'fruits',
+            'medical_plants', 'bandages', 'herbs', 'clean_water', 'preserved_meat',
+            'rations', 'ale', 'wine', 'mead', 'grain', 'flour', 'eggs', 'milk'
+        ];
+        return survivalItems.includes(itemId);
+    },
+
+    // Check if item is a luxury (nearly worthless in doom)
+    isLuxuryItem(itemId) {
+        const luxuryItems = [
+            'gold', 'gold_bar', 'gold_ore', 'jewelry', 'gems', 'rare_gems', 'silk',
+            'perfume', 'royal_goods', 'luxury_items', 'fine_clothes', 'crown',
+            'jade', 'porcelain', 'crystals', 'artifacts', 'mirror'
+        ];
+        return luxuryItems.includes(itemId);
+    },
+
+    // Get doom economy modifier for an item (uses DoomWorldNPCs if available)
+    getDoomEconomyModifier(itemId) {
+        // Use DoomWorldNPCs economy modifiers if available
+        if (typeof DoomWorldNPCs !== 'undefined' && DoomWorldNPCs.economyModifiers) {
+            const doomMod = DoomWorldNPCs.economyModifiers[itemId];
+            if (doomMod !== undefined) {
+                return doomMod;
+            }
+        }
+
+        // Fallback category-based modifiers
+        if (this.isSurvivalItem(itemId)) {
+            return 40.0; // Survival goods are extremely valuable
+        }
+        if (this.isLuxuryItem(itemId)) {
+            return 0.05; // Luxuries are nearly worthless
+        }
+        if (this.isDoomItem(itemId)) {
+            return 1.0; // Doom items at base value in doom
+        }
+
+        // Weapons/tools moderately valuable
+        const item = ItemDatabase?.getItem?.(itemId);
+        if (item) {
+            if (item.category === 'COMBAT' || item.category === 'WEAPONS') return 12.0;
+            if (item.category === 'TOOLS') return 6.0;
+            if (item.category === 'MATERIALS') return 3.0;
+        }
+
+        return 1.0; // Default
+    },
+
+    // Get the price modifier for buying an item at a location
+    // Lower = cheaper to buy, Higher = more expensive
+    getBuyPriceModifier(locationId, itemId) {
+        const location = this.locations[locationId];
+        if (!location) return 1.0;
+
+        let modifier = 1.0;
+        const inDoom = this.isInDoomWorld();
+
+        // ═══════════════════════════════════════════════════════════
+        // DOOM WORLD BARTER ECONOMY - completely different value system
+        // ═══════════════════════════════════════════════════════════
+        if (inDoom) {
+            // Apply doom economy modifier (survival goods expensive, luxury cheap)
+            const doomMod = this.getDoomEconomyModifier(itemId);
+            modifier *= doomMod;
+
+            // Doom items cost more in doom (merchants know their value)
+            if (this.isDoomItem(itemId)) {
+                modifier *= 1.3;
+            }
+
+            // Normal world goods are valuable imports in doom
+            if (!this.isDoomItem(itemId) && !this.isLuxuryItem(itemId)) {
+                modifier *= this.doomPricing.normalGoodsInDoom;
+            }
+
+            return modifier; // Skip normal world modifiers in doom
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // NORMAL WORLD ECONOMY
+        // ═══════════════════════════════════════════════════════════
+
+        // Capital premium - everything costs more here
+        if (location.type === 'capital' || location.region === 'capital') {
+            modifier *= this.capitalPricing.buyMultiplier;
+        }
+
+        // If location SELLS this item (produces it), it's CHEAPER to buy here
+        if (location.sells && location.sells.includes(itemId)) {
+            modifier *= 0.65; // 35% discount on locally produced goods
+        }
+
+        // If location BUYS this item (needs it), it's more EXPENSIVE
+        // (they import it, so markup)
+        if (location.buys && location.buys.includes(itemId)) {
+            modifier *= 1.25; // 25% markup on imported goods
+        }
+
+        return modifier;
+    },
+
+    // Get the price modifier for selling an item at a location
+    // Higher = you get more gold when selling
+    getSellPriceModifier(locationId, itemId, itemOriginRegion = null) {
+        const location = this.locations[locationId];
+        if (!location) return 1.0;
+
+        let modifier = 1.0;
+        const inDoom = this.isInDoomWorld();
+        const isDoomItem = this.isDoomItem(itemId);
+        const isSurvival = this.isSurvivalItem(itemId);
+        const isLuxury = this.isLuxuryItem(itemId);
+
+        // ═══════════════════════════════════════════════════════════
+        // DOOM WORLD BARTER ECONOMY - survival goods are king!
+        // ═══════════════════════════════════════════════════════════
+        if (inDoom) {
+            // Apply doom economy modifier
+            const doomMod = this.getDoomEconomyModifier(itemId);
+            modifier *= doomMod;
+
+            // Bringing survival goods from normal world = HUGE bonus
+            if (isSurvival && !isDoomItem) {
+                modifier *= this.doomPricing.survivalGoodsBonus;
+                // Regional origin bonus on top
+                if (itemOriginRegion) {
+                    const doomBonuses = this.regionTradeBonus.doom;
+                    if (doomBonuses && doomBonuses[itemOriginRegion]) {
+                        modifier *= doomBonuses[itemOriginRegion];
+                    }
+                }
+            }
+
+            // Luxury goods are nearly worthless in doom
+            if (isLuxury) {
+                modifier *= this.doomPricing.luxuryPenalty;
+            }
+
+            // Regular normal goods still get a bonus
+            if (!isDoomItem && !isSurvival && !isLuxury) {
+                modifier *= this.doomPricing.normalGoodsInDoom;
+            }
+
+            return modifier; // Skip normal world modifiers
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // NORMAL WORLD ECONOMY
+        // ═══════════════════════════════════════════════════════════
+
+        // Doom goods are rare and valuable in the normal world!
+        if (isDoomItem) {
+            modifier *= this.doomPricing.doomGoodsInNormal;
+            // Apply regional bonus for doom goods
+            const regionBonuses = this.regionTradeBonus[location.region];
+            if (regionBonuses && regionBonuses.doom) {
+                modifier *= regionBonuses.doom;
+            }
+        }
+
+        // Capital premium - you get more for selling here
+        if (location.type === 'capital' || location.region === 'capital') {
+            modifier *= this.capitalPricing.sellMultiplier;
+        }
+
+        // If location BUYS this item (needs it), pay MORE for it
+        if (location.buys && location.buys.includes(itemId)) {
+            modifier *= 1.4; // 40% bonus - they want this!
+        }
+
+        // If location SELLS this item (produces it), pay LESS
+        // (they have plenty, don't need yours)
+        if (location.sells && location.sells.includes(itemId)) {
+            modifier *= 0.75; // 25% penalty - oversupplied
+        }
+
+        // Regional trade bonus - goods from far away are worth more
+        if (!isDoomItem && itemOriginRegion && location.region) {
+            const regionBonuses = this.regionTradeBonus[location.region];
+            if (regionBonuses && regionBonuses[itemOriginRegion]) {
+                modifier *= regionBonuses[itemOriginRegion];
+            }
+        }
+
+        return modifier;
+    },
+
+    // Get stock modifier for an item at a location
+    // Items location SELLS have MORE stock, items they BUY have LESS
+    getStockModifier(locationId, itemId) {
+        const location = this.locations[locationId];
+        if (!location) return 1.0;
+
+        // Producing locations have lots of stock
+        if (location.sells && location.sells.includes(itemId)) {
+            return 2.5; // 2.5x stock of items they produce
+        }
+
+        // Importing locations have scarce stock
+        if (location.buys && location.buys.includes(itemId)) {
+            return 0.3; // Only 30% stock of items they need to import
+        }
+
+        return 1.0;
+    },
+
+    // Calculate final buy price for an item at a location
+    calculateBuyPrice(locationId, itemId) {
+        const item = ItemDatabase?.getItem?.(itemId);
+        if (!item) return 0;
+
+        const basePrice = ItemDatabase.calculatePrice(itemId);
+        const locationMod = this.getBuyPriceModifier(locationId, itemId);
+
+        return Math.round(basePrice * locationMod);
+    },
+
+    // Calculate final sell price for an item at a location
+    calculateSellPrice(locationId, itemId, itemOriginRegion = null) {
+        const item = ItemDatabase?.getItem?.(itemId);
+        if (!item) return 0;
+
+        // Base sell price is 60% of base (40% cut for merchant)
+        const basePrice = ItemDatabase.calculatePrice(itemId);
+        const baseSellPrice = Math.round(basePrice * 0.6);
+        const locationMod = this.getSellPriceModifier(locationId, itemId, itemOriginRegion);
+
+        return Math.round(baseSellPrice * locationMod);
+    },
+
+    // Get region for an item based on where it's commonly produced
+    getItemOriginRegion(itemId) {
+        // Check all locations to find where this item is commonly sold
+        const regionCounts = {};
+        for (const loc of Object.values(this.locations)) {
+            if (loc.sells && loc.sells.includes(itemId)) {
+                const region = loc.region || 'starter';
+                regionCounts[region] = (regionCounts[region] || 0) + 1;
+            }
+        }
+
+        // Return the region that produces this item most
+        let maxCount = 0;
+        let originRegion = null;
+        for (const [region, count] of Object.entries(regionCounts)) {
+            if (count > maxCount) {
+                maxCount = count;
+                originRegion = region;
+            }
+        }
+
+        return originRegion;
+    },
+
+    // ═══════════════════════════════════════════════════════════════
     //  MARKET SYSTEM - Setup and management
     // ═══════════════════════════════════════════════════════════════
     setupMarketPrices() {
@@ -1399,7 +1772,7 @@ const GameWorld = {
             if (!window.ItemDatabase) {
                 throw new Error('ItemDatabase not on window object');
             }
-            console.log(' ItemDatabase is available, setting up market prices...');
+            console.log(' ItemDatabase is available, setting up market prices with regional economy...');
         } catch (error) {
             //  ItemDatabase not ready - use empty markets
             console.warn(' ItemDatabase not loaded - using fallback market pricing');
@@ -1412,54 +1785,95 @@ const GameWorld = {
         Object.values(this.locations).forEach(location => {
             location.marketPrices = {};
 
-            //  Base items available everywhere
-            const baseItems = ['food', 'water', 'bread'];
-            baseItems.forEach(itemId => {
-                const item = ItemDatabase.getItem(itemId);
-                if (item) {
-                    location.marketPrices[itemId] = {
-                        price: ItemDatabase.calculatePrice(itemId),
-                        stock: Math.floor(Math.random() * 20) + 10
-                    };
-                }
-            });
+            // Stock bases by location type and market size
+            const marketSizeStock = { grand: 25, large: 18, medium: 12, small: 8, tiny: 4 };
+            const locationStockBase = marketSizeStock[location.marketSize] || 10;
+            const rarityMultiplier = { common: 2, uncommon: 1.5, rare: 1, epic: 0.5, legendary: 0.2 };
 
-            //  Specialties with better prices ( check both 'sells' and 'specialties' for backwards compat )
-            const locationItems = location.sells || location.specialties;
-            if (locationItems && Array.isArray(locationItems)) {
-                locationItems.forEach(specialty => {
-                    const item = ItemDatabase.getItem(specialty);
+            //  PRIORITY 1: Items this location SELLS (produces) - cheap + high stock
+            const locationSells = location.sells || location.specialties || [];
+            if (Array.isArray(locationSells)) {
+                locationSells.forEach(itemId => {
+                    const item = ItemDatabase.getItem(itemId);
                     if (item) {
-                        location.marketPrices[specialty] = {
-                            price: ItemDatabase.calculatePrice(specialty, { locationMultiplier: 0.8 }),
-                            stock: Math.floor(Math.random() * 15) + 5
+                        // Producing locations have LOW prices and HIGH stock
+                        const basePrice = ItemDatabase.calculatePrice(itemId);
+                        const priceMod = this.getBuyPriceModifier(location.id, itemId);
+                        const stockMod = this.getStockModifier(location.id, itemId);
+                        const baseStock = locationStockBase * (rarityMultiplier[item.rarity] || 1);
+
+                        location.marketPrices[itemId] = {
+                            price: Math.round(basePrice * priceMod),
+                            stock: Math.max(3, Math.floor(baseStock * stockMod + Math.random() * 10)),
+                            isLocalProduct: true
                         };
                     }
                 });
             }
 
-            //  Add random additional items based on location type
-            this.addRandomMarketItems(location);
+            //  PRIORITY 2: Items this location BUYS (needs) - expensive + low stock
+            const locationBuys = location.buys || [];
+            if (Array.isArray(locationBuys)) {
+                locationBuys.forEach(itemId => {
+                    // Don't override if already set (sells takes priority)
+                    if (location.marketPrices[itemId]) return;
 
-            //  Lookup tables for stock calculation - avoids if-else chains 
-            const locationStockBase = { city: 15, town: 10, village: 5 };
-            const rarityMultiplier = { common: 2, uncommon: 1.5, rare: 1, epic: 0.5, legendary: 0.2 };
-
-            //  Ensure ALL items from ItemDatabase are available
-            Object.keys(ItemDatabase.items).forEach(itemId => {
-                if (!location.marketPrices[itemId]) {
                     const item = ItemDatabase.getItem(itemId);
                     if (item) {
-                        const baseStock = (locationStockBase[location.type] || 5) * (rarityMultiplier[item.rarity] || 1);
+                        // Importing locations have HIGH prices and LOW stock (scarcity)
+                        const basePrice = ItemDatabase.calculatePrice(itemId);
+                        const priceMod = this.getBuyPriceModifier(location.id, itemId);
+                        const stockMod = this.getStockModifier(location.id, itemId);
+                        const baseStock = locationStockBase * (rarityMultiplier[item.rarity] || 1);
 
                         location.marketPrices[itemId] = {
-                            price: ItemDatabase.calculatePrice(itemId),
-                            stock: Math.max(1, Math.floor(baseStock + Math.random() * 10))
+                            price: Math.round(basePrice * priceMod),
+                            stock: Math.max(0, Math.floor(baseStock * stockMod + Math.random() * 3)),
+                            isImported: true
                         };
                     }
+                });
+            }
+
+            //  PRIORITY 3: Base items available everywhere
+            const baseItems = ['food', 'water', 'bread'];
+            baseItems.forEach(itemId => {
+                if (location.marketPrices[itemId]) return; // Don't override
+
+                const item = ItemDatabase.getItem(itemId);
+                if (item) {
+                    const basePrice = ItemDatabase.calculatePrice(itemId);
+                    const priceMod = this.getBuyPriceModifier(location.id, itemId);
+
+                    location.marketPrices[itemId] = {
+                        price: Math.round(basePrice * priceMod),
+                        stock: Math.floor(Math.random() * 15) + 8
+                    };
+                }
+            });
+
+            //  PRIORITY 4: Add location-type specific items
+            this.addRandomMarketItems(location);
+
+            //  PRIORITY 5: Fill in remaining items from ItemDatabase
+            Object.keys(ItemDatabase.items).forEach(itemId => {
+                if (location.marketPrices[itemId]) return; // Don't override
+
+                const item = ItemDatabase.getItem(itemId);
+                if (item) {
+                    const basePrice = ItemDatabase.calculatePrice(itemId);
+                    const priceMod = this.getBuyPriceModifier(location.id, itemId);
+                    const baseStock = locationStockBase * (rarityMultiplier[item.rarity] || 1);
+
+                    location.marketPrices[itemId] = {
+                        price: Math.round(basePrice * priceMod),
+                        stock: Math.max(1, Math.floor(baseStock * 0.5 + Math.random() * 5))
+                    };
                 }
             });
         });
+
+        console.log(' Market prices configured with regional economy system');
     },
 
     //  Add random items to market based on location type
@@ -1467,7 +1881,15 @@ const GameWorld = {
         const locationItemPools = {
             village: ['herbs', 'logs', 'stone', 'seeds', 'wool', 'clay', 'wood', 'food', 'water', 'bread', 'vegetables'],
             town: ['meat', 'fish', 'vegetables', 'fruits', 'cheese', 'tools', 'arrows', 'grain', 'ale', 'mead', 'wool', 'timber', 'bread'],
-            city: ['iron_ore', 'copper_ore', 'tin', 'coal', 'hammer', 'axe', 'pickaxe', 'sword', 'spear', 'bow', 'bricks', 'mortar', 'nails', 'armor', 'steel_bar', 'iron_bar', 'gems', 'silk']
+            city: ['iron_ore', 'copper_ore', 'tin', 'coal', 'hammer', 'axe', 'pickaxe', 'sword', 'spear', 'bow', 'bricks', 'mortar', 'nails', 'armor', 'steel_bar', 'iron_bar', 'gems', 'silk'],
+            capital: ['silk', 'gems', 'jewelry', 'perfume', 'wine', 'spices', 'fine_clothes', 'gold_bar', 'artifacts', 'royal_goods'],
+            mine: ['iron_ore', 'coal', 'stone', 'copper_ore', 'silver_ore', 'gold_ore', 'pickaxe', 'torch', 'lamp'],
+            farm: ['wheat', 'grain', 'vegetables', 'eggs', 'milk', 'cheese', 'meat', 'wool', 'seeds'],
+            forest: ['herbs', 'wood', 'timber', 'mushrooms', 'berries', 'furs', 'hide', 'meat'],
+            port: ['fish', 'salt', 'rope', 'canvas', 'oil', 'pearls', 'exotic_goods'],
+            inn: ['ale', 'bread', 'cheese', 'meat', 'wine', 'mead', 'food'],
+            cave: ['crystals', 'mushrooms', 'stone', 'gems', 'fish'],
+            dungeon: ['artifacts', 'gems', 'gold_bar', 'torch', 'rope']
         };
 
         const itemPool = locationItemPools[location.type] || locationItemPools.town;
@@ -1478,9 +1900,13 @@ const GameWorld = {
             const item = ItemDatabase.getItem(randomItemId);
 
             if (item && !location.marketPrices[randomItemId]) {
+                // Use the regional economy pricing
+                const basePrice = ItemDatabase.calculatePrice(randomItemId);
+                const priceMod = this.getBuyPriceModifier(location.id, randomItemId);
+
                 location.marketPrices[randomItemId] = {
-                    price: ItemDatabase.calculatePrice(randomItemId),
-                    stock: Math.floor(Math.random() * 20) + 10
+                    price: Math.round(basePrice * priceMod),
+                    stock: Math.floor(Math.random() * 15) + 5
                 };
             }
         }

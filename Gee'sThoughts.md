@@ -1,6 +1,212 @@
-# 🧠 Gee's Thoughts - The Master Log
+# Gee's Thoughts - The Master Log
 
 **Purpose:** This file captures ALL of Gee's requests, thoughts, ideas, and Unity's session logs in totality. Claude MUST update this file BEFORE doing any work and WITH every todo update.
+
+---
+
+## 2025-12-07 - SESSION #50: ECONOMY OVERHAUL - SPECIALIZED MERCHANT PRICING
+
+**Request:** Gee wants NPCs/merchants to have specialized pricing based on what they produce vs buy:
+- Decreased prices for items they PRODUCE (sells array) + more stock
+- Increased prices for items they NEED (buys array) + less stock
+- Capital market has overarching premium (higher costs AND higher sell values)
+- Regional trade bonuses (south goods worth more in north, vice versa)
+- Trade routes should always be profitable
+
+**Status:** COMPLETE
+
+### What Was Built:
+
+**REGIONAL ECONOMY SYSTEM (game-world.js):**
+
+**1. Location-Based Buy Price Modifiers (`getBuyPriceModifier`):**
+- Items in location's `sells` array: 0.65x price (35% cheaper - locally produced)
+- Items in location's `buys` array: 1.25x price (25% markup - imported)
+- Capital locations: 1.5x multiplier on top (expensive to buy)
+
+**2. Location-Based Sell Price Modifiers (`getSellPriceModifier`):**
+- Items in location's `buys` array: 1.4x price (40% bonus - they want this!)
+- Items in location's `sells` array: 0.75x price (25% penalty - oversupplied)
+- Capital locations: 1.35x multiplier (good place to sell)
+
+**3. Regional Trade Bonuses (`regionTradeBonus`):**
+- Northern <-> Southern: 1.35x bonus (opposite climates)
+- Eastern <-> Western: 1.25x bonus (opposite sides)
+- Cross-adjacent: 1.1-1.15x bonus
+- Capital values ALL regional goods at 1.2x
+
+**4. Stock Modifiers (`getStockModifier`):**
+- Producing locations: 2.5x stock
+- Importing locations: 0.3x stock (scarce)
+- Normal locations: 1x stock
+
+**5. Helper Functions:**
+- `calculateBuyPrice(locationId, itemId)` - Final buy price with all modifiers
+- `calculateSellPrice(locationId, itemId, originRegion)` - Final sell price with regional bonus
+- `getItemOriginRegion(itemId)` - Determines where an item is commonly produced
+
+**6. Market Setup (`setupMarketPrices`) Updated:**
+- Priority 1: Location sells (cheap, high stock)
+- Priority 2: Location buys (expensive, low stock)
+- Priority 3: Base items (food, water, bread)
+- Priority 4: Location-type items (expanded pools for capital, mine, farm, etc.)
+- Priority 5: All other items
+
+**PLAYER SELL PRICES (game.js):**
+- `populateMarketItems()` now uses `GameWorld.calculateSellPrice()` with regional bonuses
+- Item origin region is determined for trade bonus calculation
+- Reputation modifier still applies on top
+
+### Trade Route Profitability - FULL BIDIRECTIONAL MATRIX:
+
+**Normal World Regional Trade:**
+- Northern ↔ Southern: 1.45x bonus (opposite climates - furs vs wine/fish)
+- Eastern ↔ Western: 1.35x bonus (opposite sides - silk/spices vs timber/stone)
+- Any region → Capital: 1.30x bonus (capital values all regional goods)
+- Capital → regions: 1.10-1.15x bonus (royal goods have prestige)
+
+**The DOOM WORLD Trade Loop:**
+
+**Step 1: Normal → Doom (Survival Run)**
+- Load up on: Food (50x value!), Water (100x!), Medical supplies (60x), Weapons (15-20x)
+- Avoid bringing: Gold (0.01x), Jewelry (0.05x), Silk (0.2x) - worthless in doom!
+- Sell to desperate doom survivors for doom artifacts, blight crystals, corrupted materials
+
+**Step 2: Doom → Normal (Artifact Run)**
+- Bring back: Doom artifacts, void essence, shadow wisps, corrupted gems
+- These sell at 1.8x base PLUS 2.0-2.5x regional bonus in normal world
+- Capital pays 2.5x for doom goods!
+
+**Step 3: Normal World Trade**
+- Use doom artifact gold to buy luxury goods cheap where produced
+- Sell luxuries at capital or opposite regions for regional bonus
+- Buy more survival supplies for next doom run
+
+**Example Profit Loop:**
+1. Buy 10 bread in Greendale for ~30g each = 300g
+2. Sell in Doom World for ~1500g equivalent in doom items
+3. Return with void essence (worth ~200g each in normal)
+4. Sell at Capital for ~500g each (2.5x doom bonus)
+5. Profit: 300g → 5000g potential!
+
+### Files Modified:
+- `src/js/data/game-world.js` - Full regional economy + doom barter system (~200 lines added)
+- `src/js/core/game.js` - populateMarketItems() uses new sell pricing
+
+---
+
+## 2025-12-07 - SESSION #49: TRANSPORTATION MARKETPLACE SYSTEM
+
+**Request:** Gee wants transport animals and vehicles as items in normal trade windows based on location type.
+
+**Status:** COMPLETE
+
+### What Was Built:
+
+**Transport Items in ItemDatabase:**
+- `hand_cart` - Carrier, 35g, +150 lbs, -15% speed
+- `horse` - Animal, 200g, +100 lbs, +40% speed
+- `mule` - Animal, 90g, +180 lbs, -10% speed
+- `oxen` - Animal, 150g, +250 lbs, -40% speed
+- `cart` - Vehicle, 180g, +350 lbs, -20% speed (requires animal)
+- `wagon` - Vehicle, 400g, +600 lbs, -35% speed (requires animal)
+
+**Location Availability (via `availableAt` on each item):**
+- Farms: horse, mule, oxen
+- Villages: hand_cart
+- Towns: hand_cart, cart
+- Cities: hand_cart, cart, wagon, horse, mule
+- Capital: ALL transport at 1.75x markup
+- Ports: mule, hand_cart, cart
+
+**Validation Rules:**
+- Can't buy cart/wagon if animals <= vehicles
+- Can't sell animal if it would strand a vehicle
+- Can't sell if capacity would drop below current load
+
+**In Normal Trade Windows:**
+- Transport shows with orange border, type label (ANIMAL/VEHICLE/CARRIER)
+- Shows +capacity and +/-speed instead of weight
+- Blocked items show red with reason (Need animal first / Would strand vehicle)
+- Sells section shows "Your Transport" header with owned transport
+
+### Files Modified:
+- `src/js/core/game.js` - TransportSystem helpers, updateMarketDisplay(), populateMarketItems()
+- `src/js/data/items/item-database.js` - Transport items + helper methods
+- `src/js/systems/save/save-manager.js` - Save ownedTransport array
+- `src/css/styles.css` - Transport market item styles
+
+---
+
+## 2025-12-07 - SESSION #48: FIX TRAVEL REROUTE/CANCEL PATH POSITION + README UPDATES
+
+**Request:** Gee reported that rerouting and canceling travel doesn't correctly use the current path position - it snaps to either start or destination based on a 50% threshold instead of using the actual position on the path.
+
+**Status:** COMPLETE
+
+### Also Updated Readmes (Gee's request):
+
+**NerdReadme.md:**
+- Added `travel-panel-map.js` documentation for reroute system
+- Added `_startRerouteTravelWithDuration()` and `_travelToDestinationWithDuration()` docs
+- Added NPC Encounter Inventories section (npc-encounters.js & doom-world-npcs.js)
+- Documented 30+ tradeable NPC types and inventory templates
+- Documented Doom World inventory system
+- Updated version footer to 0.90.01
+
+**GameplayReadme.md:**
+- Added "Mid-Journey Options" section under Transportation
+- Documented Reroute and Cancel functionality
+- Explained Smart Path Position system
+- Updated Encounter Types table (30+ NPC types, new categories)
+- Updated Tradeable NPC Inventories section with all NPC types
+- Added Item Rarity Tiers info (common/uncommon/rare)
+
+### The Bug:
+- **`rerouteTravel()`** used simple `progress >= 0.5` threshold to snap player to either start or destination location
+- **`cancelTravel()`** always returned player to start location instantly regardless of how far they'd traveled
+- Travel time calculations were wrong because they used location-to-location distances, not actual position
+
+### The Fix:
+
+**1. `rerouteTravel()` now calculates actual X,Y position:**
+```javascript
+// Calculate actual current X,Y position on the path
+let currentX = startLoc.mapPosition.x + (currentDestLoc.mapPosition.x - startLoc.mapPosition.x) * progress;
+let currentY = startLoc.mapPosition.y + (currentDestLoc.mapPosition.y - startLoc.mapPosition.y) * progress;
+```
+
+**2. New `_startRerouteTravelWithDuration()` function:**
+- Accepts a specific duration and from position (X,Y)
+- Creates a "virtual start location" at the current path position
+- Stores `rerouteFromPosition` for animation system to use
+
+**3. New `_travelToDestinationWithDuration()` function:**
+- Starts travel from any X,Y position with a pre-calculated duration
+- Used by both reroute and cancel
+
+**4. `cancelTravel()` now:**
+- Calculates actual current path position
+- If < 5% progress: snaps back instantly (close to start)
+- Otherwise: starts a return journey from current position with `progress * originalDuration` time
+
+**5. `updateTravelMarker()` updated:**
+- Checks for `travelState.rerouteFromPosition` first
+- Uses that as start position instead of looking up location
+
+**6. `GameWorldRenderer.animateTravel()` updated:**
+- Checks for `TravelSystem.playerPosition._rerouteFromPosition`
+- Uses direct X,Y position instead of looking up location by ID
+- Clears the reroute position after use
+
+### Files Modified:
+- `src/js/systems/travel/travel-panel-map.js` - Lines 1215-1464, 2162-2340
+- `src/js/ui/map/game-world-renderer.js` - Lines 1720-1747
+
+### Result:
+- Rerouting now uses actual path position and calculates correct travel time to new destination
+- Canceling now animates the return journey from current path position
+- Travel marker smoothly continues from mid-path instead of snapping to locations
 
 ---
 

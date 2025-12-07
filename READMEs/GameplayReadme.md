@@ -1084,16 +1084,18 @@ As you travel the roads and visit locations, you may encounter random NPCs. The 
 
 ### Encounter Types
 
-| NPC Type | Tradeable | Description |
-|----------|-----------|-------------|
-| **Traveler** | ✅ Yes | Fellow road-walker with basic supplies |
-| **Merchant** | ✅ Yes | Wandering trader with better goods and gold |
-| **Courier** | ✅ Yes | Message carrier with travel supplies |
-| **Pilgrim** | ✅ Yes | Religious traveler with blessed items |
-| **Smuggler** | ✅ Yes | Shady dealer with rare/contraband goods |
-| **Mercenary** | ❌ No | Sellsword looking for work |
-| **Robber** | ❌ No | Hostile - might attack |
-| **Beggar** | ❌ No | May ask for gold |
+**30+ NPC types** with role-appropriate inventories:
+
+| Category | Types | Tradeable | Inventory Style |
+|----------|-------|-----------|-----------------|
+| **Travelers** | Traveler, Courier, Pilgrim | Yes | Basic supplies, travel gear |
+| **Merchants** | Merchant, Smuggler | Yes | Trade goods, rare items |
+| **Hostile** | Robber, Thief, Bandit | Yes | Stolen goods, weapons, little food |
+| **Neutral** | Mercenary, Spy, Informant | Yes | Special items, intel |
+| **Service** | Healer, Priest, Apothecary | Yes | Potions, herbs, blessed items |
+| **Authority** | Guard, Noble, Guild Master | Yes | Quality gear, official items |
+| **Civilian** | Farmer, Hunter, Blacksmith | Yes | Profession-specific goods |
+| **Creatures** | Wolf, Skeleton, etc. | No | Combat encounters only |
 
 ### How Encounters Work
 
@@ -1110,15 +1112,24 @@ As you travel the roads and visit locations, you may encounter random NPCs. The 
 
 ### Tradeable NPC Inventories
 
-Wandering traders carry items appropriate to their profession:
+Every NPC carries items befitting their role:
 
-**Travelers:** Basic supplies - bread, water, torches, rope, bandages
-**Merchants:** Trade goods - cloth, spices, leather, occasional jewelry
-**Smugglers:** Rare items - poisons, lockpicks, contraband, thieves' tools
-**Couriers:** Travel gear - stamina potions, maps, signal flares
-**Pilgrims:** Holy items - blessed water, prayer beads, healing salves
+**Travelers/Couriers:** Bread, water, torches, rope, bandages, travel gear
+**Merchants:** Cloth, spices, leather, jewelry, varied goods
+**Smugglers:** Lockpicks, poisons, contraband, thieves' tools
+**Hostile (Robbers/Thieves/Bandits):** Stolen goods, rusty weapons, gold rings - little food!
+**Healers/Priests:** Bandages, herbs, healing salves, blessed water
+**Blacksmiths:** Iron tools, horseshoes, metal ingots, repair kits
+**Hunters:** Furs, meat, bows, leather, animal parts
+**Farmers:** Grain, vegetables, seeds, livestock supplies
+**Nobles:** Fine wine, jewelry, silk, quality weapons
 
-*Tip: Smugglers often carry the rarest items... if you're willing to deal with criminals.*
+**Item Rarity Tiers:**
+- **Common** (70% chance): Basic goods for that NPC type
+- **Uncommon** (20% chance): Better quality items
+- **Rare** (10% chance): Valuable or unique items
+
+*Tip: Robbers carry stolen goods but have terrible food supplies - they're criminals, not chefs.*
 
 ---
 
@@ -1363,7 +1374,7 @@ Changes to `config.js` affect the default values when clicking "Reset to Default
 
 ---
 
-## 🗂️ TRANSPORTATION OPTIONS
+## TRANSPORTATION OPTIONS
 
 Get around the kingdom with style (or at least survive the journey):
 
@@ -1377,6 +1388,20 @@ Get around the kingdom with style (or at least survive the journey):
 | **Horse & Cart** | 380g | 550 lbs | 1.2x | Best balance |
 | **Oxen** | 120g | 220 lbs | 0.6x | Slow and steady |
 | **Oxen & Cart** | 320g | 750 lbs | 0.5x | Maximum capacity |
+
+### Mid-Journey Options
+
+Changed your mind while traveling? No problem!
+
+| Action | How | What Happens |
+|--------|-----|--------------|
+| **Reroute** | Click a different destination on the map | Calculates new route from your current path position |
+| **Cancel** | Click "Cancel Journey" button | Returns you to your starting location |
+
+**Smart Path Position:**
+- The game tracks your exact position along the travel path
+- Return journey time is proportional to distance traveled
+- Example: If you're 30% into a 60-minute journey and cancel, the return takes ~18 minutes
 
 ---
 

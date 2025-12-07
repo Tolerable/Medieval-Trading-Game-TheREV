@@ -1213,7 +1213,7 @@ const TravelPanelMap = {
     },
 
     // Reroute mid-journey to a new destination
-    // Calculates current position and starts fresh travel from there
+    // Calculates ACTUAL current position on path and starts fresh travel from there
     rerouteTravel(newDestinationId, isDiscovered = false) {
         console.log('Rerouting travel to:', newDestinationId);
 
@@ -1229,6 +1229,7 @@ const TravelPanelMap = {
         const progress = TravelSystem.playerPosition?.travelProgress || 0;
         const currentDestId = TravelSystem.playerPosition?.destination?.id;
         const startLocId = this.travelState?.startLocation?.id || TravelSystem.playerPosition?.currentLocation;
+        const originalDuration = TravelSystem.playerPosition?.travelDuration || 30;
 
         const newDestName = isDiscovered ? 'Unknown Location' : newDest.name;
 
@@ -1238,8 +1239,23 @@ const TravelPanelMap = {
             return;
         }
 
-        // Special case: clicking start location while still close to it = just cancel travel
-        // This handles "going back to start" without trying to travel to where we already are
+        // Get start and destination locations for position calculation
+        const startLoc = locations[startLocId];
+        const currentDestLoc = locations[currentDestId];
+
+        // Calculate actual current X,Y position on the path
+        let currentX = 0, currentY = 0;
+        if (startLoc?.mapPosition && currentDestLoc?.mapPosition) {
+            currentX = startLoc.mapPosition.x + (currentDestLoc.mapPosition.x - startLoc.mapPosition.x) * progress;
+            currentY = startLoc.mapPosition.y + (currentDestLoc.mapPosition.y - startLoc.mapPosition.y) * progress;
+        } else if (startLoc?.mapPosition) {
+            currentX = startLoc.mapPosition.x;
+            currentY = startLoc.mapPosition.y;
+        }
+
+        console.log(`Reroute: Current position at ${Math.round(progress * 100)}% = (${Math.round(currentX)}, ${Math.round(currentY)})`);
+
+        // Special case: clicking start location = go back to start
         const isGoingBackToStart = newDestinationId === startLocId;
 
         // Stop current travel immediately
@@ -1267,53 +1283,17 @@ const TravelPanelMap = {
             this.travelMarker.style.display = 'none';
         }
 
-        // Handle "going back to start" when progress < 50% - just cancel and stay at start
-        if (isGoingBackToStart && progress < 0.5) {
-            // Stay at start location - we're just cancelling
-            const startLocation = locations[startLocId];
-            TravelSystem.playerPosition.currentLocation = startLocId;
-            if (typeof game !== 'undefined') {
-                game.currentLocation = {
-                    id: startLocId,
-                    name: startLocation?.name || startLocId,
-                    type: startLocation?.type || 'unknown'
-                };
-            }
+        // Handle "going back to start" - calculate return time based on actual distance traveled
+        if (isGoingBackToStart) {
+            // Calculate return time = time already traveled (progress * original duration)
+            const returnDuration = Math.max(1, Math.round(originalDuration * progress));
 
-            // Reset travel state
-            this.travelState = {
-                isActive: false,
-                startLocation: null,
-                destination: null,
-                countdownInterval: null,
-                isCancelling: false
-            };
-            this.currentDestination = null;
+            addMessage(`Turning back to ${startLoc?.name || 'starting location'}... (${returnDuration} min)`);
+            console.log(`Reroute back to start: ${Math.round(progress * 100)}% traveled, return in ${returnDuration} min`);
 
-            addMessage(`Turned back to ${startLocation?.name || 'starting location'}`);
-
-            // Update displays
-            this.updateDestinationDisplay();
-            this.render();
-            if (typeof GameWorldRenderer !== 'undefined') {
-                GameWorldRenderer.updatePlayerMarker();
-            }
-            return;
-        }
-
-        // Handle "going back to start" when progress >= 50% - we're closer to destination
-        // so we need to actually travel from destination back to start
-        if (isGoingBackToStart && progress >= 0.5) {
-            // We're closer to the original destination, so travel FROM there back to start
-            const destLocation = locations[currentDestId];
-            TravelSystem.playerPosition.currentLocation = currentDestId;
-            if (typeof game !== 'undefined') {
-                game.currentLocation = {
-                    id: currentDestId,
-                    name: destLocation?.name || currentDestId,
-                    type: destLocation?.type || 'unknown'
-                };
-            }
+            // Store current path position for the return journey
+            TravelSystem.playerPosition._rerouteFromPosition = { x: currentX, y: currentY };
+            TravelSystem.playerPosition._rerouteDuration = returnDuration;
 
             // Reset travel state
             this.travelState = {
@@ -1324,33 +1304,38 @@ const TravelPanelMap = {
                 isCancelling: false
             };
 
-            addMessage(`Turning back toward ${newDestName}...`);
-
-            // Start travel back to the original start
+            // Start travel back to start with calculated duration
             setTimeout(() => {
-                this._startRerouteTravel(newDestinationId, isDiscovered);
+                this._startRerouteTravelWithDuration(newDestinationId, isDiscovered, returnDuration, currentX, currentY);
             }, 100);
             return;
         }
 
-        // Determine the closest location based on progress for the new journey
-        // If < 50% progress, we're closer to start
-        // If >= 50% progress, we're closer to original destination
-        let currentPositionId = startLocId;
-        if (progress >= 0.5 && currentDestId) {
-            currentPositionId = currentDestId;
-        }
+        // Going to a NEW destination - calculate distance from current position
+        if (newDest?.mapPosition) {
+            const distToNewDest = Math.sqrt(
+                Math.pow(newDest.mapPosition.x - currentX, 2) +
+                Math.pow(newDest.mapPosition.y - currentY, 2)
+            );
 
-        const currentPosition = locations[currentPositionId];
+            // Calculate distance from start to original destination for reference
+            let totalOriginalDist = 1;
+            if (startLoc?.mapPosition && currentDestLoc?.mapPosition) {
+                totalOriginalDist = Math.sqrt(
+                    Math.pow(currentDestLoc.mapPosition.x - startLoc.mapPosition.x, 2) +
+                    Math.pow(currentDestLoc.mapPosition.y - startLoc.mapPosition.y, 2)
+                );
+            }
 
-        // Set current location to our calculated position for the NEW travel to start from
-        TravelSystem.playerPosition.currentLocation = currentPositionId;
-        if (typeof game !== 'undefined') {
-            game.currentLocation = {
-                id: currentPositionId,
-                name: currentPosition?.name || currentPositionId,
-                type: currentPosition?.type || 'unknown'
-            };
+            // Scale duration based on distance ratio
+            const distanceRatio = distToNewDest / Math.max(totalOriginalDist, 1);
+            const newDuration = Math.max(1, Math.round(originalDuration * distanceRatio));
+
+            console.log(`Reroute to new dest: distance ratio ${distanceRatio.toFixed(2)}, duration ${newDuration} min`);
+
+            // Store current position for the new journey
+            TravelSystem.playerPosition._rerouteFromPosition = { x: currentX, y: currentY };
+            TravelSystem.playerPosition._rerouteDuration = newDuration;
         }
 
         // Reset travel state
@@ -1364,11 +1349,118 @@ const TravelPanelMap = {
 
         addMessage(`Changing course to ${newDestName}...`);
 
-        // Small delay to let state settle, then start new travel
-        // Use _startRerouteTravel which bypasses the "already at" check
+        // Small delay to let state settle, then start new travel from current position
         setTimeout(() => {
-            this._startRerouteTravel(newDestinationId, isDiscovered);
+            const rerouteDuration = TravelSystem.playerPosition._rerouteDuration;
+            if (rerouteDuration) {
+                this._startRerouteTravelWithDuration(newDestinationId, isDiscovered, rerouteDuration, currentX, currentY);
+            } else {
+                this._startRerouteTravel(newDestinationId, isDiscovered);
+            }
         }, 100);
+    },
+
+    // Start rerouted travel with a specific duration and from a specific position
+    _startRerouteTravelWithDuration(locationId, isDiscovered, duration, fromX, fromY) {
+        const locations = typeof GameWorld !== 'undefined' ? GameWorld.locations : {};
+        const location = locations[locationId];
+
+        if (!location) {
+            if (typeof addMessage === 'function') {
+                addMessage(`Unknown location`);
+            }
+            return;
+        }
+
+        // Set the destination
+        const style = this.locationStyles[location.type] || this.locationStyles.town;
+        this.currentDestination = {
+            id: locationId,
+            name: location.name,
+            type: location.type,
+            icon: style.icon,
+            region: location.region || 'Unknown',
+            description: location.description || '',
+            reached: false,
+            isNewPath: !this.hasVisitedBefore(locationId)
+        };
+
+        // Sync with GameWorldRenderer
+        if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.setDestination) {
+            GameWorldRenderer.setDestination(locationId);
+        }
+
+        // Update display before travel starts
+        this.updateDestinationDisplay();
+        this.render();
+
+        const destName = isDiscovered ? 'Unknown Location' : location.name;
+
+        // Get the time system
+        const timeSystem = typeof TimeSystem !== 'undefined' ? TimeSystem :
+                          (typeof TimeMachine !== 'undefined' ? TimeMachine : null);
+
+        // If game is paused, auto-unpause
+        if (timeSystem) {
+            const isPaused = timeSystem.isPaused || timeSystem.currentSpeed === 'PAUSED';
+            if (isPaused) {
+                const preferredSpeed = timeSystem.userPreferredSpeed || 'NORMAL';
+                timeSystem.setSpeed(preferredSpeed);
+            }
+        }
+
+        // Start travel with our calculated duration
+        this._travelToDestinationWithDuration(duration, fromX, fromY);
+    },
+
+    // Travel to destination with a specific duration, starting from a specific position
+    _travelToDestinationWithDuration(duration, fromX, fromY) {
+        if (!this.currentDestination) return;
+
+        const destId = this.currentDestination.id;
+        const locations = typeof GameWorld !== 'undefined' ? GameWorld.locations : {};
+        const destLoc = locations[destId];
+
+        if (!destLoc) return;
+
+        // Create a virtual "start location" at the reroute position
+        const virtualStartLoc = {
+            id: '_reroute_position',
+            name: 'Current Position',
+            type: 'path',
+            mapPosition: { x: fromX, y: fromY }
+        };
+
+        // Store the virtual start for travel animation
+        this.travelState = {
+            isActive: true,
+            startLocation: virtualStartLoc,
+            destination: this.currentDestination,
+            countdownInterval: null,
+            isCancelling: false,
+            rerouteFromPosition: { x: fromX, y: fromY }
+        };
+
+        // Set up TravelSystem state
+        if (typeof TravelSystem !== 'undefined') {
+            TravelSystem.playerPosition.isTraveling = true;
+            TravelSystem.playerPosition.destination = { id: destId, ...destLoc };
+            TravelSystem.playerPosition.travelProgress = 0;
+            TravelSystem.playerPosition.travelDuration = duration;
+            TravelSystem.playerPosition.travelStartTime =
+                (typeof TimeSystem !== 'undefined' ? TimeSystem.currentTime : Date.now());
+            TravelSystem.playerPosition._rerouteFromPosition = { x: fromX, y: fromY };
+        }
+
+        // Notify renderer
+        if (typeof GameWorldRenderer !== 'undefined') {
+            GameWorldRenderer.onTravelStart?.(virtualStartLoc.id, destId);
+        }
+
+        // Start countdown
+        this.startTravelCountdown(duration);
+
+        console.log(`Rerouted travel started: ${duration} min to ${destLoc.name} from (${Math.round(fromX)}, ${Math.round(fromY)})`);
     },
 
     // Internal method to start travel after reroute - bypasses "already at" check
@@ -2071,22 +2163,32 @@ const TravelPanelMap = {
         if (!this.mapElement || !this.travelState.destination) return;
 
         // Get start and end positions
-        // Use the stored start location from when travel began
-        let startLocId = this.travelState.startLocation?.id;
-        // Fallback to TravelSystem or game state
-        if (!startLocId && typeof TravelSystem !== 'undefined') {
-            startLocId = TravelSystem.playerPosition?.currentLocation;
-        }
-        if (!startLocId && typeof game !== 'undefined') {
-            startLocId = game.currentLocation?.id;
+        // Check for reroute position first (virtual start from path)
+        let startPos = null;
+        if (this.travelState.rerouteFromPosition) {
+            startPos = this.travelState.rerouteFromPosition;
+        } else if (this.travelState.startLocation?.mapPosition) {
+            startPos = this.travelState.startLocation.mapPosition;
+        } else {
+            // Fallback to looking up start location
+            let startLocId = this.travelState.startLocation?.id;
+            if (!startLocId && typeof TravelSystem !== 'undefined') {
+                startLocId = TravelSystem.playerPosition?.currentLocation;
+            }
+            if (!startLocId && typeof game !== 'undefined') {
+                startLocId = game.currentLocation?.id;
+            }
+            const startLoc = typeof GameWorld !== 'undefined' && startLocId ? GameWorld.locations[startLocId] : null;
+            if (startLoc?.mapPosition) {
+                startPos = startLoc.mapPosition;
+            }
         }
 
-        const startLoc = typeof GameWorld !== 'undefined' && startLocId ? GameWorld.locations[startLocId] : null;
         const endLoc = typeof GameWorld !== 'undefined' ? GameWorld.locations[this.travelState.destination.id] : null;
 
-        if (!startLoc?.mapPosition || !endLoc?.mapPosition) return;
+        if (!startPos || !endLoc?.mapPosition) return;
 
-        //  Check if marker exists AND is still in DOM - render() clears innerHTML 
+        // Check if marker exists AND is still in DOM - render() clears innerHTML
         // Same fix as playerMarker - reset orphaned reference before creating new one
         if (!this.travelMarker || !this.mapElement.contains(this.travelMarker)) {
             // Reset orphaned reference
@@ -2106,9 +2208,9 @@ const TravelPanelMap = {
             this.mapElement.appendChild(this.travelMarker);
         }
 
-        // Interpolate position
-        const currentX = startLoc.mapPosition.x + (endLoc.mapPosition.x - startLoc.mapPosition.x) * progress;
-        const currentY = startLoc.mapPosition.y + (endLoc.mapPosition.y - startLoc.mapPosition.y) * progress;
+        // Interpolate position from start (could be reroute position or location)
+        const currentX = startPos.x + (endLoc.mapPosition.x - startPos.x) * progress;
+        const currentY = startPos.y + (endLoc.mapPosition.y - startPos.y) * progress;
 
         this.travelMarker.style.left = currentX + 'px';
         this.travelMarker.style.top = currentY + 'px';
@@ -2116,7 +2218,7 @@ const TravelPanelMap = {
 
         // Flip direction based on travel direction
         // The walking emoji faces LEFT by default, so mirror when moving RIGHT
-        if (endLoc.mapPosition.x > startLoc.mapPosition.x) {
+        if (endLoc.mapPosition.x > startPos.x) {
             // Moving right - flip to face right
             this.travelMarker.style.transform = 'translate(-50%, -50%) scaleX(-1)';
         } else {
@@ -2125,30 +2227,33 @@ const TravelPanelMap = {
         }
     },
 
-    // Cancel ongoing travel - stop and return to origin
+    // Cancel ongoing travel - calculates actual return journey from current path position
     cancelTravel() {
-        console.log('🖤 cancelTravel called');
+        console.log('cancelTravel called');
 
         // Set cancelling flag to prevent race condition with updateTravelProgressDisplay
         this.travelState.isCancelling = true;
 
+        const locations = typeof GameWorld !== 'undefined' ? GameWorld.locations : {};
+
         // Get current travel state - try multiple sources for start location
         let startLoc = this.travelState?.startLocation;
+        const startLocId = startLoc?.id || TravelSystem.playerPosition?.currentLocation;
 
         // Fallback: try to get from TravelSystem's stored currentLocation
         if ((!startLoc || !startLoc.id) && typeof TravelSystem !== 'undefined') {
             const locId = TravelSystem.playerPosition?.currentLocation;
-            if (locId && typeof GameWorld !== 'undefined' && GameWorld.locations?.[locId]) {
-                const loc = GameWorld.locations[locId];
-                startLoc = { id: locId, name: loc.name, type: loc.type };
-                console.log('🖤 Using TravelSystem.currentLocation as start:', startLoc);
+            if (locId && locations?.[locId]) {
+                const loc = locations[locId];
+                startLoc = { id: locId, name: loc.name, type: loc.type, mapPosition: loc.mapPosition };
+                console.log('Using TravelSystem.currentLocation as start:', startLoc);
             }
         }
 
         const isTraveling = typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling;
 
         if (!isTraveling) {
-            addMessage('🛑 No journey to cancel');
+            addMessage('No journey to cancel');
             this.travelState.isCancelling = false;
             return;
         }
@@ -2159,8 +2264,27 @@ const TravelPanelMap = {
             this.travelState.countdownInterval = null;
         }
 
+        // Get current travel progress and calculate actual position
+        const currentProgress = TravelSystem.playerPosition.travelProgress || 0;
+        const originalDuration = TravelSystem.playerPosition.travelDuration || 30;
+        const currentDestId = TravelSystem.playerPosition.destination?.id;
+        const currentDestLoc = locations[currentDestId];
+
+        // Calculate actual current X,Y position on the path
+        let currentX = 0, currentY = 0;
+        const startLocData = locations[startLocId];
+        if (startLocData?.mapPosition && currentDestLoc?.mapPosition) {
+            currentX = startLocData.mapPosition.x + (currentDestLoc.mapPosition.x - startLocData.mapPosition.x) * currentProgress;
+            currentY = startLocData.mapPosition.y + (currentDestLoc.mapPosition.y - startLocData.mapPosition.y) * currentProgress;
+        } else if (startLocData?.mapPosition) {
+            currentX = startLocData.mapPosition.x;
+            currentY = startLocData.mapPosition.y;
+        }
+
+        console.log(`Cancel: Current position at ${Math.round(currentProgress * 100)}% = (${Math.round(currentX)}, ${Math.round(currentY)})`);
+
         if (!startLoc || !startLoc.id) {
-            addMessage('🛑 Journey cancelled - returning to last known location');
+            addMessage('Journey cancelled - returning to last known location');
             // Just stop everything
             if (typeof TravelSystem !== 'undefined') {
                 TravelSystem.playerPosition.isTraveling = false;
@@ -2174,14 +2298,11 @@ const TravelPanelMap = {
             return;
         }
 
-        const currentProgress = TravelSystem.playerPosition.travelProgress || 0;
-        const originalDuration = TravelSystem.playerPosition.travelDuration || 30;
-
-        // Calculate return time based on distance traveled
+        // Calculate return time based on actual distance traveled (progress * original duration)
         const returnDuration = Math.max(1, Math.round(originalDuration * currentProgress));
 
-        addMessage(`🔙 Turning back to ${startLoc.name}... (${returnDuration} min)`);
-        console.log(`🖤 Cancel: was ${Math.round(currentProgress * 100)}% complete, returning in ${returnDuration} min`);
+        addMessage(`Turning back to ${startLoc.name}... (${returnDuration} min)`);
+        console.log(`Cancel: was ${Math.round(currentProgress * 100)}% complete, returning in ${returnDuration} min`);
 
         // Stop current travel in TravelSystem
         TravelSystem.playerPosition.isTraveling = false;
@@ -2194,22 +2315,38 @@ const TravelPanelMap = {
             GameWorldRenderer.onTravelCancel();
         }
 
-        // Teleport player back to start location immediately
-        if (typeof game !== 'undefined') {
-            game.currentLocation = { ...startLoc };
-        }
-        TravelSystem.playerPosition.currentLocation = startLoc.id;
-
-        // Update the map to show player at start
-        if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.updatePlayerMarker) {
-            const loc = typeof GameWorld !== 'undefined' ? GameWorld.locations?.[startLoc.id] : null;
-            if (loc?.mapPosition) {
-                GameWorldRenderer.updatePlayerMarker(loc.mapPosition.x, loc.mapPosition.y);
+        // If very close to start (< 5% progress), just snap back immediately
+        if (currentProgress < 0.05) {
+            if (typeof game !== 'undefined') {
+                game.currentLocation = { ...startLoc };
             }
+            TravelSystem.playerPosition.currentLocation = startLoc.id;
+
+            if (typeof GameWorldRenderer !== 'undefined' && GameWorldRenderer.updatePlayerMarker) {
+                const loc = locations[startLoc.id];
+                if (loc?.mapPosition) {
+                    GameWorldRenderer.updatePlayerMarker(loc.mapPosition.x, loc.mapPosition.y);
+                }
+            }
+
+            this._cleanupCancelledTravel();
+            addMessage(`Returned to ${startLoc.name}`);
+            return;
         }
 
-        this._cleanupCancelledTravel();
-        addMessage(`📍 Returned to ${startLoc.name}`);
+        // Otherwise, start a return journey from current path position
+        this.travelState = {
+            isActive: false,
+            startLocation: null,
+            destination: null,
+            countdownInterval: null,
+            isCancelling: false
+        };
+
+        // Start travel back to origin from current position
+        setTimeout(() => {
+            this._startRerouteTravelWithDuration(startLoc.id, false, returnDuration, currentX, currentY);
+        }, 100);
     },
 
     // Helper to clean up state after cancel

@@ -286,26 +286,28 @@ const SaveManager = {
 
         return {
             version: this.saveVersion,
-            _saveFormat: this.SAVE_FORMAT,  // Ÿ–¤ Track format for migrations ğŸ’€
+            _saveFormat: this.SAVE_FORMAT,  // ï¿½ï¿½ï¿½ Track format for migrations ğŸ’€
             timestamp: Date.now(),
             gameData: {
                 state: game.state,
                 gameTick: game.gameTick,
                 player: game.player ? {
-                    characterId: game.player.characterId, // Ÿ† Unique ID for leaderboard deduplication
+                    characterId: game.player.characterId, // ï¿½ï¿½ï¿½ Unique ID for leaderboard deduplication
                     name: game.player.name,
                     class: game.player.class,
                     difficulty: game.player.difficulty,
                     gold: game.player.gold,
                     inventory: game.player.inventory,
                     equipment: game.player.equipment,
-                    stats: game.player.stats, // Ÿ–¤ Contains health, hunger, thirst, stamina, happiness + max values ğŸ’€
+                    stats: game.player.stats, // ï¿½ï¿½ï¿½ Contains health, hunger, thirst, stamina, happiness + max values ğŸ’€
                     attributes: game.player.attributes,
                     skills: game.player.skills,
                     perks: game.player.perks,
                     transportation: game.player.transportation,
                     ownedTransportation: game.player.ownedTransportation,
+                    ownedTransport: game.player.ownedTransport || ['satchel'],  // New transport system
                     currentLoad: game.player.currentLoad,
+                    carryCapacity: game.player.carryCapacity,
                     maxLoad: game.player.maxLoad,
                     ownedProperties: game.player.ownedProperties,
                     ownedEmployees: game.player.ownedEmployees,
@@ -315,7 +317,7 @@ const SaveManager = {
                     level: game.player.level,
                     experience: game.player.experience,
                     tradeRoutes: game.player.tradeRoutes,
-                    questItems: game.player.questItems || {}, // Ÿ–¤ Quest items for delivery quests ğŸ’€
+                    questItems: game.player.questItems || {}, // ï¿½ï¿½ï¿½ Quest items for delivery quests ğŸ’€
                     //  Additional player state that was missing 
                     ownedTools: game.player.ownedTools || [],
                     toolDurability: game.player.toolDurability || {},
@@ -338,7 +340,7 @@ const SaveManager = {
                 worldState: typeof GameWorld !== 'undefined' ? {
                     unlockedRegions: GameWorld.unlockedRegions || ['starter'],
                     visitedLocations: GameWorld.visitedLocations || [],
-                    doomVisitedLocations: GameWorld.doomVisitedLocations || [] // Ÿ–¤ğŸ’€ Separate doom world progress!
+                    doomVisitedLocations: GameWorld.doomVisitedLocations || [] // ï¿½ï¿½ï¿½ğŸ’€ Separate doom world progress!
                 } : null,
                 questState: typeof QuestSystem !== 'undefined' ? {
                     activeQuests: QuestSystem.activeQuests || {},
@@ -780,7 +782,7 @@ const SaveManager = {
         if (gameData.worldState && typeof GameWorld !== 'undefined') {
             GameWorld.unlockedRegions = gameData.worldState.unlockedRegions || ['starter'];
             GameWorld.visitedLocations = gameData.worldState.visitedLocations || [];
-            GameWorld.doomVisitedLocations = gameData.worldState.doomVisitedLocations || []; // Ÿ–¤ğŸ’€ Separate doom world progress!
+            GameWorld.doomVisitedLocations = gameData.worldState.doomVisitedLocations || []; // ï¿½ï¿½ï¿½ğŸ’€ Separate doom world progress!
         }
 
         if (gameData.questState && typeof QuestSystem !== 'undefined') {
@@ -1258,7 +1260,7 @@ const SaveManager = {
 
             const scoreData = {
                 playerName: player.name || 'Unknown',
-                characterId: player.characterId || null, // Ÿ† CRITICAL: Prevents duplicate leaderboard entries ğŸ’€
+                characterId: player.characterId || null, // ï¿½ï¿½ï¿½ CRITICAL: Prevents duplicate leaderboard entries ğŸ’€
                 score,
                 gold: player.gold || 0,
                 daysSurvived,

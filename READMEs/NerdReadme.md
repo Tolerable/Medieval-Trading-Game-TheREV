@@ -459,7 +459,7 @@ const DynamicMarketSystem = {
 
 ---
 
-## 🗺️ TRAVEL & WORLD
+## TRAVEL & WORLD
 
 ### travel-system.js - The Long Road
 
@@ -476,9 +476,38 @@ const TravelSystem = {
     updateTravel(),
     completeTravel(),
     calculateTravelTime(from, to),
-    setDestination(locationId)  // NEW: Set without traveling
+    setDestination(locationId),
+    cancelTravel()  // Returns to origin with animated journey back
 };
 ```
+
+### travel-panel-map.js - The Rerouting System
+
+*"Changed your mind mid-journey? We've got you covered."*
+
+```javascript
+const TravelPanelMap = {
+    // Reroute mid-journey to a new destination
+    // Calculates ACTUAL current X,Y position on path (not just snapping to locations)
+    rerouteTravel(newDestinationId, isDiscovered),
+
+    // Cancel travel - animates return journey from current path position
+    cancelTravel(),
+
+    // Internal: Start travel with specific duration from any X,Y position
+    _startRerouteTravelWithDuration(locationId, isDiscovered, duration, fromX, fromY),
+    _travelToDestinationWithDuration(duration, fromX, fromY),
+
+    // Travel marker updates now support reroute positions
+    updateTravelMarker(progress)  // Checks for rerouteFromPosition first
+};
+```
+
+**Reroute Logic:**
+- When rerouting mid-journey, the system calculates actual X,Y coordinates based on travel progress
+- Going back to start: return duration = `progress * originalDuration`
+- Going to new destination: duration scaled by distance ratio from current position
+- Player marker animates smoothly from current path position (no snapping to locations)
 
 ### game-world-renderer.js - The Pretty Map
 
@@ -1027,6 +1056,81 @@ const NPCCombatStats = {
         this.encountersToday++;
         return type;
     }
+};
+```
+
+### NPC Encounter Inventories (npc-encounters.js & doom-world-npcs.js)
+
+*"Every NPC carries items befitting their role in life - or death."*
+
+**Normal World (npc-encounters.js):**
+```javascript
+const NPCEncounters = {
+    // 30+ NPC types can trade
+    canTrade(npcType) {
+        const tradeableTypes = [
+            'traveler', 'merchant', 'smuggler', 'courier', 'pilgrim',
+            'robber', 'thief', 'bandit',  // Hostile - stolen goods
+            'mercenary', 'spy', 'informant',  // Neutral - special items
+            'healer', 'priest', 'innkeeper', 'apothecary',  // Service
+            'guard', 'noble', 'guild_master', 'scribe',  // Authority
+            'farmer', 'ferryman', 'stablemaster', 'jeweler',  // Civilian
+            'blacksmith', 'herbalist', 'hunter', 'fisherman', 'miner'
+        ];
+        return tradeableTypes.includes(npcType);
+    },
+
+    // 25+ inventory templates with tiered items
+    inventoryTemplates: {
+        robber: {
+            common: ['stolen_goods', 'rusty_dagger', 'lockpick'],
+            uncommon: ['gold_ring', 'silver_chain'],
+            rare: ['jeweled_dagger', 'noble_signet']
+        },
+        healer: {
+            common: ['bandages', 'healing_herbs', 'clean_water'],
+            uncommon: ['antidote', 'healing_salve'],
+            rare: ['elixir_of_life', 'blessed_water']
+        },
+        // ... 23+ more templates
+    },
+
+    // Gold ranges per NPC type
+    goldRanges: {
+        beggar: { min: 0, max: 5 },
+        noble: { min: 100, max: 500 },
+        loan_shark: { min: 100, max: 400 }
+        // ... 30+ types
+    }
+};
+```
+
+**Doom World (doom-world-npcs.js):**
+```javascript
+// Gold is WORTHLESS in the apocalypse - survival items are currency
+const DoomNPCs = {
+    doomInventoryTemplates: {
+        doom_survivor: {
+            common: ['moldy_bread', 'dirty_water', 'torn_rags'],
+            uncommon: ['rusty_weapon', 'makeshift_bandage'],
+            rare: ['clean_water', 'preserved_meat']
+        },
+        blight_creature: {
+            common: ['corrupted_flesh', 'dark_ichor'],
+            uncommon: ['blight_crystal', 'void_shard'],
+            rare: ['cursed_relic']
+        },
+        doom_merchant: {
+            common: ['salvaged_tools', 'hoarded_medicine'],
+            uncommon: ['pre-blight_artifact', 'survival_gear'],
+            rare: ['vault_key', 'untainted_seeds']
+        }
+        // ... 20+ doom templates
+    },
+
+    generateDoomInventory(npcType),  // Fewer items, scarcer drops
+    generateDoomGold(npcType),       // 0-10 gold (worthless)
+    canDoomTrade(npcType)            // Creatures don't trade
 };
 ```
 
@@ -1796,6 +1900,6 @@ permissions:
 
     May your builds compile and your bugs be reproducible.
 
-                                    - Unity AI Lab, v0.90.00, 2025
+                                    - Unity AI Lab, v0.90.01, 2025
 ═══════════════════════════════════════════════════════════════════════
 ```
