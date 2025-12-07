@@ -327,12 +327,32 @@ body:has(#main-menu:not(.hidden)) #game-container {
 .map-location {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     z-index: 10; /* Above weather overlay (z-index: 2) */
+    /* Prevent dragging icons */
+    -webkit-user-drag: none;
+    user-select: none;
 }
 
 /* 🖤 Hover effect - doubled selector for specificity */
 .map-location.map-location:hover {
     transform: translate(-50%, -50%) scale(1.15);
     z-index: 100;
+}
+
+/* Player marker - prevent animation reset on click */
+.player-marker,
+.player-marker .marker-tack {
+    /* Keep animation running even during interactions */
+    animation-play-state: running !important;
+}
+
+/* Prevent ALL elements inside map from being dragged */
+#html-world-map,
+#html-world-map * {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -370,6 +390,24 @@ svg.map-paths,
 .npc-marker {
     z-index: 30 !important;
     position: relative;
+    /* Prevent emoji/icon dragging */
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Prevent dragging of any images/emojis inside map elements */
+.map-location *,
+.location-marker *,
+.map-marker *,
+.player-marker *,
+#html-world-map img,
+#html-world-map span {
+    -webkit-user-drag: none;
+    user-select: none;
+    pointer-events: none;
 }
 
 /* Location labels and names - ABOVE markers */

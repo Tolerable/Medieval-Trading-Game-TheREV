@@ -1462,6 +1462,7 @@ const GameWorldRenderer = {
 
  // Show question mark for undiscovered, icon for explored
         el.innerHTML = isDiscovered ? '❓' : style.icon;
+        el.draggable = false; // Prevent browser drag behavior
 
  // add "30m" badge for dungeons during bonanza
         if (hasBonanzaEffect) {
@@ -1582,6 +1583,7 @@ const GameWorldRenderer = {
             this.playerMarker = document.createElement('div');
             this.playerMarker.id = 'player-marker';
             this.playerMarker.className = 'player-marker';
+            this.playerMarker.draggable = false; // Prevent browser drag behavior
  // using a tack/pin emoji that floats above the location
             this.playerMarker.innerHTML = `
                 <div class="marker-tack">📌</div>
