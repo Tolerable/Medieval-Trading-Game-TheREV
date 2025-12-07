@@ -4,9 +4,9 @@
 
 ---
 
-## 2025-12-06 - SESSION #42: CANCEL TRAVEL + REROUTE + PAUSE FIX
+## 2025-12-06 - SESSION #42: CANCEL TRAVEL + REROUTE + PAUSE + GATE VISIBILITY FIX
 
-**Request:** Cancel travel and reroute back to starting location and reroute anywhere is not working. Also can't pause while traveling.
+**Request:** Cancel travel and reroute back to starting location and reroute anywhere is not working. Also can't pause while traveling. Gates not visible from Royal Capital!
 
 **Status:** FIXED
 
@@ -23,10 +23,17 @@
    - `startTravelCountdown()` didn't properly handle `game.currentLocation` being a string vs object
    - Added robust validation to ensure `startLocation` always has `{id, name, type}`
 
+3. **Gates not visible from Royal Capital** (game-world-renderer.js + travel-panel-map.js):
+   - When player starts/arrives at Royal Capital, gates (Ironforge, Stonebridge, Jade Harbor) weren't showing
+   - Added "Fifth pass" in visibility calculation: Royal Capital reveals ALL connected gatehouses
+   - Capital is a hub - being there should let you see and travel to all gates to pay fees
+
 ### Files Modified:
 - `src/js/core/time-machine.js` - line 170-172: Added setupTimeControls() to isRunning guard
 - `src/js/systems/travel/travel-panel-map.js` - lines 1871-1901: Added travelStarted check
 - `src/js/systems/travel/travel-panel-map.js` - lines 1914-1950: Robust startLocation validation
+- `src/js/systems/travel/travel-panel-map.js` - lines 447-458: Capital reveals connected gates
+- `src/js/ui/map/game-world-renderer.js` - lines 904-917: Capital reveals connected gates
 
 ---
 

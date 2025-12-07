@@ -444,6 +444,19 @@ const TravelPanelMap = {
             });
         }
 
+        // Royal Capital reveals ALL connected gatehouses
+        // Capital is a hub - if you're there, you should see all gates
+        if (visited.includes('royal_capital')) {
+            const capitalLoc = locations['royal_capital'];
+            if (capitalLoc && capitalLoc.connections) {
+                capitalLoc.connections.forEach(connId => {
+                    if (this.isGatehouse(connId) && visibility[connId] !== 'visible') {
+                        visibility[connId] = 'discovered';
+                    }
+                });
+            }
+        }
+
         // All others hidden
         Object.keys(locations).forEach(locId => {
             if (!visibility[locId]) {

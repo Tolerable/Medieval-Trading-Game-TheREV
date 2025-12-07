@@ -896,8 +896,24 @@ const GameWorldRenderer = {
                 // If gatehouse exists in locations and isn't already visible
                 if (locations[gatehouseId] && visibility[gatehouseId] !== 'visible') {
                     visibility[gatehouseId] = 'discovered';
+                    console.log(`🏰 Gatehouse ${gatehouseId} forced to discovered`);
                 }
             });
+        }
+
+        // Fifth pass: Royal Capital reveals ALL connected gatehouses
+        // Capital is a hub - if you're there, you should see all gates you can travel to
+        if (visited.includes('royal_capital')) {
+            const capitalLoc = locations['royal_capital'];
+            if (capitalLoc && capitalLoc.connections) {
+                capitalLoc.connections.forEach(connId => {
+                    // If this connection is a gatehouse and not already visible, make it discovered
+                    if (this.isGatehouse(connId) && visibility[connId] !== 'visible') {
+                        visibility[connId] = 'discovered';
+                        console.log(`🏰 Capital connection ${connId} (gate) set to discovered`);
+                    }
+                });
+            }
         }
 
         // All other locations remain hidden (undefined or 'hidden')
