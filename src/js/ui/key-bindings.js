@@ -388,11 +388,21 @@ const KeyBindings = {
                 overlay.classList.remove('active');
                 overlay.style.display = 'none';
             });
+
+            // Setup for dynamic z-index stacking
+            if (typeof DraggablePanels !== 'undefined') {
+                DraggablePanels.makeDraggable(overlay);
+            }
         }
 
         this.populateCharacterSheet();
         overlay.style.display = 'flex';
         overlay.classList.add('active');
+
+        // Bring to front when opened
+        if (typeof DraggablePanels !== 'undefined') {
+            DraggablePanels.bringToFront(overlay);
+        }
     },
 
     // 📊 Populate character sheet with all player info 🗡️
@@ -776,12 +786,22 @@ const KeyBindings = {
                 overlay.classList.remove('active');
                 overlay.style.display = 'none';
             });
+
+            // Setup for dynamic z-index stacking
+            if (typeof DraggablePanels !== 'undefined') {
+                DraggablePanels.makeDraggable(overlay);
+            }
         }
 
         this.populateFinancialSheet();
         overlay.style.display = 'flex';
         overlay.classList.add('active');
         overlay.classList.remove('hidden');
+
+        // Bring to front when opened
+        if (typeof DraggablePanels !== 'undefined') {
+            DraggablePanels.bringToFront(overlay);
+        }
     },
 
     // 📊 Populate financial sheet 🌙

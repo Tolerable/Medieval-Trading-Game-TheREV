@@ -2411,8 +2411,7 @@ const QuestSystem = {
 
         tracker.innerHTML = `
             <div class="tracker-header">
-                <span class="drag-grip">⋮⋮</span>
-                <span class="tracker-title">Quest Chain 🔗</span>
+                <span class="tracker-title">Quest Chain</span>
                 <button class="tracker-close" onclick="QuestSystem.hideQuestTracker()" title="Close">×</button>
             </div>
             <div class="tracker-content">
@@ -3642,7 +3641,7 @@ const QuestSystem = {
             border: 2px solid #ffd700;
             border-radius: 12px;
             padding: 0;
-            z-index: 1500;
+            z-index: 5000;
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.3), 0 10px 40px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
             color: #fff;
@@ -3951,41 +3950,28 @@ const QuestSystem = {
     },
 
     //  Setup dragging for the quest tracker panel
+    //  Uses unified DraggablePanels system - same as all other panels
+    //  NOTE: Called multiple times as content updates - re-attaches header events each time
     setupTrackerDragging(tracker) {
+        if (!tracker) return;
+
         const header = tracker.querySelector('.tracker-header');
         if (!header) return;
 
-        //  Always re-attach listeners since innerHTML destroys them
-        header.onmousedown = (e) => {
-            // Don't drag if clicking buttons
-            if (e.target.tagName === 'BUTTON' || e.target.classList.contains('tracker-expand') || e.target.classList.contains('tracker-close')) return;
-            e.preventDefault();
-            e.stopPropagation();
-            DraggablePanels.startDrag(e, tracker);
-        };
+        // Use unified DraggablePanels system - handles z-index, dragging, position saving
+        if (typeof DraggablePanels !== 'undefined') {
+            // Setup focus and stack management ONCE on the tracker element
+            if (!tracker.dataset.draggable) {
+                tracker.dataset.draggable = 'true';
+                DraggablePanels.setupPanelFocus(tracker);
 
-        header.ontouchstart = (e) => {
-            if (e.target.tagName === 'BUTTON' || e.target.classList.contains('tracker-expand') || e.target.classList.contains('tracker-close')) return;
-            e.preventDefault();
-            e.stopPropagation();
-            DraggablePanels.startDrag(e, tracker);
-        };
-
-        //  Load saved position ONLY on first setup
-        if (!tracker.dataset.draggable) {
-            tracker.dataset.draggable = 'true';
-            const positions = DraggablePanels.getAllPositions();
-            if (positions['quest-tracker']) {
-                const pos = positions['quest-tracker'];
-                tracker.style.position = 'fixed';
-                tracker.style.left = pos.left;
-                tracker.style.top = pos.top;
-                tracker.style.right = 'auto';
-                tracker.style.bottom = 'auto';
-                //  If there's a saved position, user dragged it before - respect that 
-                tracker.dataset.userDragged = 'true';
+                // Load saved position
+                DraggablePanels.loadPositions();
+                console.log('🖤 Quest tracker using unified DraggablePanels system');
             }
-            console.log('🖤 Quest tracker drag setup complete');
+
+            // Re-attach drag events to header each time (header gets replaced by innerHTML)
+            DraggablePanels.attachDragEvents(header, tracker);
         }
     },
 

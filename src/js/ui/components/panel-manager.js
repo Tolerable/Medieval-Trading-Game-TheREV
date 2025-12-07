@@ -13,13 +13,6 @@ const PanelManager = {
     // Stack of currently open panels (most recent last)
     openPanels: [],
 
-    // 🖤 Store toolbar drag handlers for cleanup 💀
-    _toolbarDragHandlers: {
-        mousedown: null,
-        mousemove: null,
-        mouseup: null
-    },
-
     // 🖤 Safe toggle handlers registry - NO EVAL ALLOWED IN THIS REALM
     // Maps customToggle string names to actual functions
     toggleHandlers: {
@@ -153,7 +146,6 @@ const PanelManager = {
         toolbar.id = 'panel-toolbar';
         toolbar.innerHTML = `
             <div class="panel-toolbar-header">
-                <span class="toolbar-grip">⋮⋮</span>
                 <span class="toolbar-title">Panels</span>
                 <button class="toolbar-rotate" title="Toggle Horizontal/Vertical">🔄</button>
                 <button class="toolbar-collapse" title="Collapse">−</button>
@@ -168,12 +160,13 @@ const PanelManager = {
             background: rgba(20, 20, 30, 0.95);
             border: 1px solid rgba(79, 195, 247, 0.3);
             border-radius: 8px;
-            z-index: 500; /* Z-INDEX STANDARD: Game panels */
             min-width: 50px;
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             display: none;
         `;
+
+        // Z-index and dragging handled by makeToolbarDraggable which uses unified DraggablePanels system
 
         document.body.appendChild(toolbar);
 
@@ -282,8 +275,10 @@ const PanelManager = {
             }
         };
 
-        // Make toolbar draggable
-        this.makeToolbarDraggable(toolbar, header);
+        // Make toolbar draggable using unified DraggablePanels system
+        if (typeof DraggablePanels !== 'undefined') {
+            DraggablePanels.makeDraggable(toolbar);
+        }
 
         // Style buttons container
         buttonsContainer.style.cssText = `
@@ -374,36 +369,6 @@ const PanelManager = {
         });
 
         this.updateToolbarButtons();
-    },
-
-    // Make toolbar draggable
-    makeToolbarDraggable(toolbar, handle) {
-        let isDragging = false;
-        let offsetX, offsetY;
-
-        // 🖤 Store handlers for cleanup 💀
-        this._toolbarDragHandlers.mousedown = (e) => {
-            if (e.target.classList.contains('toolbar-collapse')) return;
-            isDragging = true;
-            offsetX = e.clientX - toolbar.getBoundingClientRect().left;
-            offsetY = e.clientY - toolbar.getBoundingClientRect().top;
-            e.preventDefault();
-        };
-
-        this._toolbarDragHandlers.mousemove = (e) => {
-            if (!isDragging) return;
-            toolbar.style.left = (e.clientX - offsetX) + 'px';
-            toolbar.style.top = (e.clientY - offsetY) + 'px';
-            toolbar.style.right = 'auto';
-        };
-
-        this._toolbarDragHandlers.mouseup = () => {
-            isDragging = false;
-        };
-
-        handle.addEventListener('mousedown', this._toolbarDragHandlers.mousedown);
-        document.addEventListener('mousemove', this._toolbarDragHandlers.mousemove);
-        document.addEventListener('mouseup', this._toolbarDragHandlers.mouseup);
     },
 
     // Check if panel is currently open/visible
@@ -759,15 +724,7 @@ const PanelManager = {
             this._panelObserver = null;
         }
         clearTimeout(this._updateTimeout);
-
-        // 🖤 Clean up toolbar drag handlers 💀
-        if (this._toolbarDragHandlers.mousemove) {
-            document.removeEventListener('mousemove', this._toolbarDragHandlers.mousemove);
-        }
-        if (this._toolbarDragHandlers.mouseup) {
-            document.removeEventListener('mouseup', this._toolbarDragHandlers.mouseup);
-        }
-        this._toolbarDragHandlers = { mousedown: null, mousemove: null, mouseup: null };
+        // 🖤 Toolbar drag is now handled by unified DraggablePanels system 💀
     },
 
     // Sync openPanels array with actual DOM state

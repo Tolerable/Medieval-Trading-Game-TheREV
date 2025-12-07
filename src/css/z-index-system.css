@@ -27,18 +27,18 @@
     --z-background-image: 0;
     --z-game-map: 0;
 
-    /* LAYER 1-5: Weather Effects (DIRECTLY above background, below EVERYTHING else) */
-    --z-weather-overlay: 2;
-    --z-day-night-overlay: 3;
+    /* LAYER 1: Weather Effects (DIRECTLY above background, below EVERYTHING else) */
+    --z-weather-overlay: 1;
+    --z-day-night-overlay: 1;
     --z-menu-weather: 1;
 
-    /* LAYER 10-40: Game World UI Elements (ABOVE weather) */
-    --z-map-connections: 10;      /* Path lines between locations */
-    --z-map-locations: 15;        /* Location icons */
-    --z-map-labels: 18;           /* Location names */
-    --z-player-marker: 20;        /* "You are here" marker */
-    --z-quest-wayfinder: 25;      /* Quest objective glow */
-    --z-traveling-indicator: 28;  /* Traveling... animation */
+    /* LAYER 20-50: Game World UI Elements (ABOVE weather at 1) */
+    --z-map-connections: 20;      /* Path lines between locations */
+    --z-map-locations: 30;        /* Location icons */
+    --z-map-labels: 35;           /* Location names */
+    --z-player-marker: 40;        /* "You are here" marker */
+    --z-quest-wayfinder: 42;      /* Quest objective glow */
+    --z-traveling-indicator: 45;  /* Traveling... animation */
 
     /* LAYER 50-99: Core UI Panels (ABOVE game world) */
     --z-side-panel: 50;
@@ -51,7 +51,7 @@
     --z-quest-tracker: 100;
     --z-people-panel: 110;
     --z-draggable-panel: 120;
-    --z-setup-panel: 150;
+    --z-setup-panel: 3000; /* ABOVE ALL weather effects */
 
     /* LAYER 200-499: Tooltips & Dropdowns */
     --z-tooltip: 200;
@@ -83,20 +83,24 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   WEATHER - Layer 1-5 (DIRECTLY above background, below everything else)
+   WEATHER - Layer 1 (DIRECTLY above background, below EVERYTHING else)
+   All weather effects MUST be z-index: 1 so UI elements can be above them
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Weather overlay in-game */
 .weather-overlay,
-#game-weather-overlay {
-    z-index: var(--z-weather-overlay) !important;
-    isolation: isolate;
+#game-weather-overlay,
+#weather-particles,
+.weather-particles {
+    z-index: 1 !important;
+    pointer-events: none !important;
 }
 
 /* Day/night overlay */
 .daynight-overlay,
 #daynight-overlay {
-    z-index: var(--z-day-night-overlay) !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
 }
 
 /* Menu weather (during setup) - stays at layer 1 */
@@ -107,25 +111,27 @@ body > #menu-weather-container {
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    z-index: var(--z-menu-weather) !important;
+    z-index: 1 !important;
     pointer-events: none !important;
 }
 
-/* All weather children stay in their container */
-#menu-weather-container * {
+/* All weather children stay in their container - NO z-index escalation */
+#menu-weather-container *,
+#game-weather-overlay *,
+.weather-overlay * {
     z-index: auto !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   GAME WORLD UI - Layer 10-40 (ABOVE weather)
+   GAME WORLD UI - Layer 20-50 (ABOVE weather at 1)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Map container - creates stacking context */
+/* Map container - creates stacking context ABOVE weather */
 #map-container,
 #game-world {
     isolation: isolate !important;
     position: relative;
-    z-index: 5 !important; /* Above weather (2-3), contains UI elements */
+    z-index: 10 !important; /* Above weather (1), contains UI elements */
 }
 
 /* Path connections between locations */
@@ -180,56 +186,58 @@ body > #menu-weather-container {
 
 /* ═══════════════════════════════════════════════════════════════════════════
    📦 UI PANELS - Layer 50-99 (ABOVE game world)
+   NOTE: Side panel, message log, and other draggable panels DO NOT use !important
+   so that DraggablePanels.js can dynamically control their z-index (100-199 range)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* UI Panels container */
 #ui-panels {
     position: relative;
-    z-index: var(--z-side-panel) !important;
+    z-index: 50;
 }
 
-/* Side panel */
-#side-panel {
-    z-index: var(--z-side-panel) !important;
-}
-
-/* Location panel */
-#location-panel {
-    z-index: var(--z-location-panel) !important;
-}
-
-/* Message log */
-#message-log {
-    z-index: var(--z-message-log) !important;
-}
-
-/* Top bar */
+/* Top bar - fixed, not draggable */
 #top-bar {
     z-index: var(--z-top-bar) !important;
 }
 
-/* Bottom bar */
+/* Bottom bar - fixed, not draggable */
 #bottom-action-bar {
     z-index: var(--z-bottom-bar) !important;
 }
 
+/* Location panel - fixed position, not draggable */
+#location-panel {
+    z-index: var(--z-location-panel) !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   🎛️ FLOATING PANELS - Layer 100-199
+   🎛️ FLOATING/DRAGGABLE PANELS - Layer 100-199
+   Z-index controlled DYNAMICALLY by DraggablePanels.js
+   Clicking any panel brings it to front - DO NOT use !important here!
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* All gameplay panels - z-index controlled dynamically by DraggablePanels.js */
-/* Base z-index set here, JavaScript adjusts for panel focus stacking (100-199 range) */
-/* Clicking a panel brings it to the front */
+/* All draggable gameplay panels - base z-index, JS overrides on click */
 .quest-tracker,
 .panel,
+#panel-toolbar,
+#side-panel,
+#message-log,
 #travel-panel,
 #character-panel,
+#character-sheet-overlay,
 #inventory-panel,
 #financial-panel,
+#financial-sheet-overlay,
 #achievements-panel,
+#achievement-overlay,
 #properties-panel,
-#message-log,
-#people-panel {
+#property-employee-panel,
+#people-panel,
+#party-panel,
+#quest-overlay,
+#transportation-panel,
+#market-panel {
     z-index: var(--z-draggable-panel);
 }
 
@@ -244,8 +252,14 @@ body > #menu-weather-container {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Overlay container for modals */
+/* Overlay container - NO z-index so children can participate in global stacking */
+/* Individual overlays get their z-index from DraggablePanels dynamically */
 #overlay-container {
-    z-index: var(--z-overlay-container) !important;
+    z-index: auto !important;
+    pointer-events: none; /* Let clicks through to panels below */
+}
+#overlay-container > * {
+    pointer-events: auto; /* But overlays themselves are clickable */
 }
 
 /* Loading screen */

@@ -11,10 +11,10 @@ const WeatherSystem = {
     // 
     // CONFIGURATION
     // 
-    initialized: false, // Ÿ–¤ Prevent double initialization
+    initialized: false, // ï¿½ï¿½ï¿½ Prevent double initialization
     currentWeather: 'clear',
     currentIntensity: 0.5, // 0-1 scale
-    weatherEndTime: 0, // Ÿ–¤ REAL timestamp when weather ends (prevents speed spam)
+    weatherEndTime: 0, // ï¿½ï¿½ï¿½ REAL timestamp when weather ends (prevents speed spam)
     seasonalModifier: 1,
 
     //  Weather history for NPC context (last 5 weather events)
@@ -22,8 +22,8 @@ const WeatherSystem = {
     MAX_WEATHER_HISTORY: 5,
 
     //  Minimum weather durations in REAL seconds (not affected by game speed)
-    MIN_WEATHER_DURATION_SECONDS: 60,   // Ÿ’€ At least 1 real minute per weather
-    MAX_WEATHER_DURATION_SECONDS: 300,  // Ÿ¦‡ Up to 5 real minutes per weather
+    MIN_WEATHER_DURATION_SECONDS: 60,   // ï¿½ï¿½ï¿½ At least 1 real minute per weather
+    MAX_WEATHER_DURATION_SECONDS: 300,  // ï¿½ï¿½ï¿½ Up to 5 real minutes per weather
 
     //  BAD WEATHER PROTECTION - prevents endless storms/blizzards
     // Bad weather = rain, storm, blizzard, thundersnow, heatwave
@@ -90,7 +90,7 @@ const WeatherSystem = {
             icon: 'ðŸŒ§ï¸',
             description: 'Roads turn to mud, spirits dampen.',
             effects: {
-                travelSpeed: 0.9, // Ÿ–¤ Was 0.7 - too harsh! Now only 10% slower ðŸ’€
+                travelSpeed: 0.9, // ï¿½ï¿½ï¿½ Was 0.7 - too harsh! Now only 10% slower ðŸ’€
                 priceModifier: 1.1, // Indoor goods more valuable
                 encounterChance: 0.6,
                 staminaDrain: 1.3,
@@ -107,7 +107,7 @@ const WeatherSystem = {
             icon: 'â›ˆï¸',
             description: 'Lightning cracks, thunder rolls. Dangerous to travel.',
             effects: {
-                travelSpeed: 0.75, // Ÿ–¤ Was 0.4 - way too harsh! Now 25% slower ðŸ’€
+                travelSpeed: 0.75, // ï¿½ï¿½ï¿½ Was 0.4 - way too harsh! Now 25% slower ðŸ’€
                 priceModifier: 1.25,
                 encounterChance: 0.3,
                 staminaDrain: 1.8,
@@ -125,7 +125,7 @@ const WeatherSystem = {
             icon: 'ðŸŒ«ï¸',
             description: 'Visibility near zero. Easy to get lost.',
             effects: {
-                travelSpeed: 0.85, // Ÿ–¤ Was 0.5 - too harsh! Now 15% slower ðŸ’€
+                travelSpeed: 0.85, // ï¿½ï¿½ï¿½ Was 0.5 - too harsh! Now 15% slower ðŸ’€
                 priceModifier: 1.05,
                 encounterChance: 1.5, // Easier to be ambushed
                 staminaDrain: 1.1,
@@ -141,7 +141,7 @@ const WeatherSystem = {
             icon: 'ðŸŒ¨ï¸',
             description: 'Winter descends. Cold bites deep.',
             effects: {
-                travelSpeed: 0.85, // Ÿ–¤ Was 0.6 - too harsh! Now 15% slower ðŸ’€
+                travelSpeed: 0.85, // ï¿½ï¿½ï¿½ Was 0.6 - too harsh! Now 15% slower ðŸ’€
                 priceModifier: 1.15, // Warm goods premium
                 encounterChance: 0.5,
                 staminaDrain: 1.5,
@@ -158,7 +158,7 @@ const WeatherSystem = {
             icon: 'â„ï¸',
             description: 'Deadly cold. Only fools travel in this.',
             effects: {
-                travelSpeed: 0.7, // Ÿ–¤ Was 0.25 - way too harsh! Now 30% slower ðŸ’€
+                travelSpeed: 0.7, // ï¿½ï¿½ï¿½ Was 0.25 - way too harsh! Now 30% slower ðŸ’€
                 priceModifier: 1.4,
                 encounterChance: 0.2,
                 staminaDrain: 2.5,
@@ -177,7 +177,7 @@ const WeatherSystem = {
             icon: 'â„ï¸',
             description: 'Thunder echoes through the blinding snow. A rare and terrifying phenomenon.',
             effects: {
-                travelSpeed: 0.6, // Ÿ–¤ Was 0.15 - insanely harsh! Now 40% slower (worst weather) ðŸ’€
+                travelSpeed: 0.6, // ï¿½ï¿½ï¿½ Was 0.15 - insanely harsh! Now 40% slower (worst weather) ðŸ’€
                 priceModifier: 1.6,
                 encounterChance: 0.1,
                 staminaDrain: 3.0,
@@ -242,7 +242,7 @@ const WeatherSystem = {
             probability: { spring: 0, summer: 0, autumn: 0, winter: 0 }, // Never occurs naturally
             particles: true,
             lightning: true,
-            meteors: true // Ÿ’€ Special meteor effect
+            meteors: true // ï¿½ï¿½ï¿½ Special meteor effect
         }
     },
 
@@ -887,7 +887,7 @@ const WeatherSystem = {
             icon: weather?.icon || 'â“',
             description: weather?.description || '',
             intensity: this.currentIntensity,
-            remainingSeconds: remainingSeconds, // Ÿ–¤ REAL seconds remaining
+            remainingSeconds: remainingSeconds, // ï¿½ï¿½ï¿½ REAL seconds remaining
             effects: this.getWeatherEffects(),
             season: this.getCurrentSeason()
         };
@@ -957,7 +957,7 @@ const WeatherSystem = {
         }
 
         const overlay = document.createElement('div');
-        overlay.id = 'game-weather-overlay'; // Ÿ–¤ Unique ID to avoid conflicts with VisualEffectsSystem
+        overlay.id = 'game-weather-overlay'; // ï¿½ï¿½ï¿½ Unique ID to avoid conflicts with VisualEffectsSystem
         overlay.className = 'weather-overlay';
         //  Append to map-container so particles fall over the map
         mapContainer.appendChild(overlay);
@@ -1137,7 +1137,7 @@ const WeatherSystem = {
     },
 
     lightningInterval: null,
-    meteorInterval: null, // Ÿ’€ Meteor shower interval
+    meteorInterval: null, // ï¿½ï¿½ï¿½ Meteor shower interval
 
     startLightning() {
         if (this.lightningInterval) return;
@@ -1188,7 +1188,7 @@ const WeatherSystem = {
 
         setTimeout(() => {
             flashEl.style.opacity = '0';
-        }, 150); // Ÿ–¤ Flash duration to match bolt animation
+        }, 150); // ï¿½ï¿½ï¿½ Flash duration to match bolt animation
 
         // Create lightning bolt that strikes the ground at random position
         const particles = document.getElementById('weather-particles');
@@ -1551,7 +1551,7 @@ const WeatherSystem = {
                 width: 100%;
                 height: 100%;
                 pointer-events: none;
-                z-index: var(--z-weather-overlay, 2) !important; /* ðŸ–¤ PERMANENT FIX: Weather at layer 2, BELOW map UI (10+) ðŸ’€ */
+                z-index: 1 !important; /* Weather at layer 1, BELOW map UI (20+) */
                 transition: background 2s ease, opacity 2s ease;
                 border-radius: inherit; /* Match container's border-radius */
                 isolation: isolate; /* ðŸ–¤ Prevent backdrop-filter from bleeding outside */

@@ -13,7 +13,7 @@ const DayNightCycle = {
     // 
     currentPhase: 'day',
     transitionProgress: 0,
-    _updateIntervalId: null, // Ÿ–¤ Store interval ID for cleanup ðŸ’€
+    _updateIntervalId: null, // ï¿½ï¿½ï¿½ Store interval ID for cleanup ðŸ’€
 
     // Time phases (24-hour format)
     phases: {
@@ -335,7 +335,7 @@ const DayNightCycle = {
         const stars = document.createElement('div');
         stars.id = 'stars-container';
         stars.className = 'stars-container';
-        document.body.insertBefore(stars, document.body.firstChild); // Ÿ–¤ Very back of body
+        document.body.insertBefore(stars, document.body.firstChild); // ï¿½ï¿½ï¿½ Very back of body
 
         // Time phase indicator is now created in top-bar by WeatherSystem
     },
@@ -432,7 +432,7 @@ const DayNightCycle = {
                 width: 100%;
                 height: 100%;
                 pointer-events: none;
-                z-index: var(--z-day-night-overlay, 3) !important; /* ðŸ–¤ PERMANENT FIX: Day/night at layer 3, BELOW map UI (10+) ðŸ’€ */
+                z-index: 1 !important; /* Day/night at layer 1, BELOW map UI (20+) */
                 transition: background 5s ease, opacity 5s ease;
                 border-radius: inherit;
             }

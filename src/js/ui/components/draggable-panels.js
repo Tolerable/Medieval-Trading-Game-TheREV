@@ -40,7 +40,8 @@ const DraggablePanels = {
         'inventory-panel': '.inventory-header, h2, h3',
         'side-panel': '.player-section, .player-name-gold-row',
         'message-log': 'h3',
-        'quest-tracker': '.tracker-header', // 🖤💀 Quest tracker drag handle
+        'quest-tracker': '.tracker-header',
+        'panel-toolbar': '.panel-toolbar-header',
         'character-sheet-overlay': '.character-header, h2',
         'quest-overlay': '.quest-header, h2',
         'achievement-overlay': '.achievement-header, h2',
@@ -71,6 +72,9 @@ const DraggablePanels = {
     init() {
         console.log('🖤 DraggablePanels: Initializing (drag-only mode)...');
 
+        // Inject CSS to let JS control z-index for all draggable panels
+        this.injectZIndexOverrideStyles();
+
         // Migrate message-log position if it's in the "bad zone" (overlapping action bar)
         this.migrateMessageLogPosition();
 
@@ -90,6 +94,40 @@ const DraggablePanels = {
         this.loadPositions();
 
         console.log('🖤 DraggablePanels: Ready');
+    },
+
+    // Inject CSS that removes z-index from draggable panels so JS can control them
+    injectZIndexOverrideStyles() {
+        if (document.getElementById('draggable-panels-z-override')) return;
+
+        const style = document.createElement('style');
+        style.id = 'draggable-panels-z-override';
+        style.textContent = `
+            /* DraggablePanels z-index override - JS controls these dynamically */
+            /* All draggable panels get z-index from CSS variable, JS updates it on click */
+            .quest-tracker,
+            #quest-tracker,
+            #panel-toolbar,
+            #side-panel,
+            #message-log,
+            #travel-panel,
+            #inventory-panel,
+            #market-panel,
+            #character-sheet-overlay,
+            #financial-sheet-overlay,
+            #achievement-overlay,
+            #quest-overlay,
+            #people-panel,
+            #party-panel,
+            #transportation-panel,
+            #property-employee-panel,
+            .overlay:not(.npc-chat-modal):not(.combat-modal),
+            .panel:not(#location-panel):not(#game-setup-panel) {
+                z-index: var(--dynamic-z-index, 120) !important;
+            }
+        `;
+        document.head.appendChild(style);
+        console.log('🖤 DraggablePanels: Z-index override styles injected');
     },
 
     // Setup click-outside-to-close for overlay panels
@@ -193,7 +231,7 @@ const DraggablePanels = {
     },
 
     // Update z-indices for all panels based on their stack position
-    // Uses setProperty with 'important' to override any CSS !important rules
+    // Uses CSS custom property that gets picked up by injected !important rule
     updateAllPanelZIndices() {
         const maxPanels = this.Z_INDEX_MAX - this.Z_INDEX_BASE;
 
@@ -204,12 +242,16 @@ const DraggablePanels = {
         }
 
         // Assign z-indices based on stack position
-        // Use setProperty with 'important' to override CSS !important rules
+        // Set both the CSS variable AND direct z-index for maximum compatibility
         this.panelStack.forEach((panelId, index) => {
             const panel = document.getElementById(panelId) ||
                           document.querySelector(`.${panelId}`);
             if (panel) {
-                panel.style.setProperty('z-index', String(this.Z_INDEX_BASE + index), 'important');
+                const zIndex = this.Z_INDEX_BASE + index;
+                // Set CSS variable that our injected style uses
+                panel.style.setProperty('--dynamic-z-index', String(zIndex));
+                // Also set z-index directly with !important
+                panel.style.setProperty('z-index', String(zIndex), 'important');
             }
         });
     },
@@ -239,7 +281,9 @@ const DraggablePanels = {
         // Add to stack if not present
         if (panelId && !this.panelStack.includes(panelId)) {
             this.panelStack.push(panelId);
-            element.style.setProperty('z-index', String(this.Z_INDEX_BASE + this.panelStack.length - 1), 'important');
+            const zIndex = this.Z_INDEX_BASE + this.panelStack.length - 1;
+            element.style.setProperty('--dynamic-z-index', String(zIndex));
+            element.style.setProperty('z-index', String(zIndex), 'important');
         }
     },
 
@@ -471,6 +515,7 @@ const DraggablePanels = {
         element.style.transform = 'none';
         element.style.margin = '0';
         // Use temporary high z-index during drag (within safe range, below tooltips)
+        element.style.setProperty('--dynamic-z-index', String(this.Z_INDEX_MAX));
         element.style.setProperty('z-index', String(this.Z_INDEX_MAX), 'important');
 
         // 🖤 Cache width/height here - no getBoundingClientRect() spam in onDrag()
@@ -543,7 +588,11 @@ const DraggablePanels = {
                 if (mutation.type === 'childList') {
                     mutation.addedNodes.forEach(node => {
                         if (node.nodeType === 1) {
-                            if (node.classList?.contains('panel') || node.classList?.contains('overlay')) {
+                            // Check for panels, overlays, toolbar, and quest tracker
+                            const isPanel = node.classList?.contains('panel') || node.classList?.contains('overlay');
+                            const isToolbar = node.id === 'panel-toolbar';
+                            const isQuestTracker = node.classList?.contains('quest-tracker');
+                            if (isPanel || isToolbar || isQuestTracker) {
                                 setTimeout(() => this.makeDraggable(node), 100);
                             }
                         }

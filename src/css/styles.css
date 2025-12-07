@@ -340,26 +340,14 @@ body:has(#main-menu:not(.hidden)) #game-container {
    Weather overlay is z-index: 2, UI elements are 10+
    ═══════════════════════════════════════════════════════════ */
 
-/* Location icons and markers - ABOVE weather */
-.map-location,
-.location-marker,
-.location-icon,
-.map-marker,
-.travel-marker,
-.player-marker,
-.npc-marker {
-    z-index: 10 !important;
-    position: relative;
-}
-
-/* Location labels and names - ABOVE weather */
-.location-label,
-.location-name,
-.map-label,
-.location-text,
-.marker-label {
-    z-index: 11 !important;
-    position: relative;
+/* Weather overlay - BELOW all UI elements - MUST be very low */
+#game-weather-overlay,
+.weather-overlay,
+#weather-particles,
+.weather-particles,
+#menu-weather-container {
+    z-index: 1 !important;
+    pointer-events: none !important;
 }
 
 /* Travel paths and routes - ABOVE weather but below markers */
@@ -369,31 +357,53 @@ body:has(#main-menu:not(.hidden)) #game-container {
 .connection-line,
 svg.map-paths,
 .map-svg-layer {
-    z-index: 8 !important;
+    z-index: 20 !important;
+    position: relative;
 }
 
-/* Player icon/avatar on map - TOP priority */
+/* Location icons and markers - ABOVE weather */
+.map-location,
+.location-marker,
+.location-icon,
+.map-marker,
+.travel-marker,
+.npc-marker {
+    z-index: 30 !important;
+    position: relative;
+}
+
+/* Location labels and names - ABOVE markers */
+.location-label,
+.location-name,
+.map-label,
+.location-text,
+.marker-label {
+    z-index: 35 !important;
+    position: relative;
+}
+
+/* Player icon/avatar on map - TOP priority on map */
 .player-location-marker,
 .player-icon,
 .player-avatar,
-#player-marker {
-    z-index: 15 !important;
+#player-marker,
+.player-marker {
+    z-index: 40 !important;
+    position: relative;
 }
 
-/* Hover states - ensure they pop above everything */
+/* Traveling indicator - visible above everything on map */
+.traveling-indicator,
+.travel-progress-marker {
+    z-index: 45 !important;
+    position: relative;
+}
+
+/* Hover states - ensure they pop above everything on map */
 .map-location:hover,
 .location-marker:hover,
 .player-marker:hover {
-    z-index: 100 !important;
-}
-
-/* Weather overlay - BELOW all UI elements */
-#game-weather-overlay,
-.weather-overlay,
-#weather-particles,
-.weather-particles {
-    z-index: 2 !important;
-    pointer-events: none !important;
+    z-index: 50 !important;
 }
 
 .map-controls {
@@ -409,7 +419,11 @@ svg.map-paths,
 
 .map-controls button {
     width: 40px;
+    min-width: 40px;
+    max-width: 40px;
     height: 40px;
+    min-height: 40px;
+    max-height: 40px;
     background-color: rgba(30, 30, 30, 0.9);
     border: 2px solid #4fc3f7;
     border-radius: 4px;
@@ -421,6 +435,10 @@ svg.map-paths,
     align-items: center;
     justify-content: center;
     pointer-events: auto;
+    padding: 0;
+    box-sizing: border-box;
+    line-height: 1;
+    text-align: center;
 }
 
 .map-controls button:hover {
@@ -1770,13 +1788,15 @@ svg.map-paths,
 }
 
 /* Overlay Container - wrapper for all overlays */
+/* Overlay container - NO stacking context so children can compete with other panels */
+/* DraggablePanels.js controls z-index dynamically for all panels including overlays */
 #overlay-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1999;
+    z-index: auto; /* NO z-index - let children participate in global stacking */
     pointer-events: none; /* Allow clicks to pass through to content below */
 }
 
@@ -1788,6 +1808,7 @@ svg.map-paths,
 }
 
 /* Enhanced Overlay System */
+/* z-index controlled dynamically by DraggablePanels.js (100-199 range) */
 .overlay {
     position: fixed;
     top: 0;
@@ -1795,7 +1816,7 @@ svg.map-paths,
     width: 100%;
     height: 100%;
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.75) 100%);
-    z-index: 2000;
+    /* z-index removed - DraggablePanels controls this dynamically */
     display: none;
     justify-content: center;
     align-items: center;
@@ -5571,7 +5592,7 @@ button.menu-social-link {
     overflow-y: auto;
     overflow-x: hidden;
     max-height: 95vh;
-    z-index: 100 !important; /* ABOVE weather effects (fog, snow, rain) */
+    z-index: 3000 !important; /* ABOVE ALL weather effects including menu weather */
     position: relative;
     background: rgba(30, 30, 50, 0.95);
 }
@@ -7452,7 +7473,11 @@ button.menu-social-link {
     
     .map-controls button {
         width: 35px;
+        min-width: 35px;
+        max-width: 35px;
         height: 35px;
+        min-height: 35px;
+        max-height: 35px;
         font-size: 1rem;
     }
     
