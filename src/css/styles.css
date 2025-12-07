@@ -2810,6 +2810,12 @@ svg.map-paths,
 
 .transport-owned-section {
     margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+/* Override items-grid when inside transportation options */
+#transportation-options.items-grid {
+    display: block;
 }
 
 .transport-category {
@@ -2828,6 +2834,7 @@ svg.map-paths,
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 0.5rem;
+    overflow: hidden;
 }
 
 .transport-card {
@@ -2838,6 +2845,8 @@ svg.map-paths,
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    overflow: hidden;
+    position: relative;
 }
 
 .transport-card-icon {
@@ -2869,8 +2878,12 @@ svg.map-paths,
 .transport-tip {
     text-align: center;
     color: #666;
-    padding-top: 0.5rem;
+    padding: 0.75rem;
+    margin-top: 1rem;
     border-top: 1px solid rgba(139, 90, 43, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    clear: both;
 }
 
 .no-transport {
@@ -4569,12 +4582,18 @@ button.menu-social-link {
 .item-icon {
     font-size: 1.5rem;
     margin-bottom: 0.2rem;
+    min-height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .item-name {
     font-weight: bold;
     color: #4fc3f7;
     margin-bottom: 0.2rem;
+    text-align: center;
+    width: 100%;
 }
 
 .item-quantity {
@@ -4584,24 +4603,28 @@ button.menu-social-link {
     padding: 0.2rem 0.4rem;
     border-radius: 3px;
     margin-bottom: 0.2rem;
+    text-align: center;
 }
 
 .item-weight {
     font-size: 0.75rem;
     color: #bbbbbb;
     margin-bottom: 0.3rem;
+    text-align: center;
 }
 
 .item-price {
     color: #ffd700;
     font-weight: bold;
     margin-bottom: 0.3rem;
+    text-align: center;
 }
 
 .item-stock {
     font-size: 0.75rem;
     color: #9e9e9e;
     margin-bottom: 0.3rem;
+    text-align: center;
 }
 
 .use-item-btn,

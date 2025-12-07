@@ -259,7 +259,8 @@ const GameConfig = {
             reducedMotion: false,      // reduce motion sickness triggers
             highContrast: false,       // high contrast mode
             fontSize: 'medium',        // 'small', 'medium', 'large'
-            theme: 'default'           // UI theme selection
+            theme: 'default',          // UI theme selection
+            uiScale: 1.0               // UI scale (0.75 - 1.5)
         },
 
         // 🌧️ environmental settings - weather for the soul

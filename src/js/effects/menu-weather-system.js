@@ -199,7 +199,7 @@ const MenuWeatherSystem = {
         // Start meteor shower
         this.startMeteorShower();
 
-        // Create floating embers
+        // Create floating embers (reduced frequency for CPU optimization)
         this.particleInterval = setInterval(() => {
             if (!this.isActive) return;
 
@@ -219,7 +219,7 @@ const MenuWeatherSystem = {
             this.container.appendChild(ember);
 
             setTimeout(() => ember.remove(), 7000);
-        }, 100);
+        }, 300);
 
         // Add lightning for dramatic effect
         this.startLightning();
@@ -355,10 +355,10 @@ const MenuWeatherSystem = {
         }, burnDuration);
     },
 
-    // STORM - Rain with lightning
+    // STORM - Rain with lightning (optimized)
     startStorm() {
-        // Create rain
-        this.createRain(80);
+        // Create rain - reduced from 80 to 40 for CPU optimization
+        this.createRain(40);
 
         // Create fog layers
         this.createFog(2);
@@ -508,12 +508,13 @@ const MenuWeatherSystem = {
         }, burnDuration);
     },
 
-    // THUNDERSNOW - Lightning Blizzard (rare and terrifying!)
+    // THUNDERSNOW - Lightning Blizzard (rare and terrifying!) - CPU optimized
     startThundersnow() {
         // Heavy, fast snowfall
         const snowflakes = ['❄', '❅', '❆', '✦', '✧'];
         const sizes = ['medium', 'large'];
 
+        // Reduced from 50ms to 200ms (75% less CPU!) - still looks intense
         this.particleInterval = setInterval(() => {
             if (!this.isActive) return;
 
@@ -526,7 +527,7 @@ const MenuWeatherSystem = {
             this.container.appendChild(flake);
 
             setTimeout(() => flake.remove(), 5000);
-        }, 50); // More frequent
+        }, 200);
 
         // Add intense fog
         this.createFog(3);
@@ -660,11 +661,12 @@ const MenuWeatherSystem = {
         }, burnDuration);
     },
 
-    // WINTER - Gentle snowfall
+    // WINTER - Gentle snowfall (optimized for CPU)
     startWinter() {
         const snowflakes = ['❄', '❅', '❆', '✦', '✧', '·'];
         const sizes = ['small', 'medium', 'large'];
 
+        // Reduced frequency: 400ms instead of 150ms (60% less CPU)
         this.particleInterval = setInterval(() => {
             if (!this.isActive) return;
 
@@ -677,7 +679,7 @@ const MenuWeatherSystem = {
 
             // Cleanup after animation
             setTimeout(() => flake.remove(), 12000);
-        }, 150);
+        }, 400);
 
         // Add subtle fog
         this.createFog(1);
@@ -705,8 +707,9 @@ const MenuWeatherSystem = {
         this.createFog(1);
     },
 
-    // SPRING - Cherry blossom petals
+    // SPRING - Cherry blossom petals (optimized)
     startSpring() {
+        // Reduced from 200ms to 400ms for CPU optimization
         this.particleInterval = setInterval(() => {
             if (!this.isActive) return;
 
@@ -719,7 +722,7 @@ const MenuWeatherSystem = {
             this.container.appendChild(petal);
 
             setTimeout(() => petal.remove(), 10000);
-        }, 200);
+        }, 400);
     },
 
     // SUMMER - Dust motes in warm light

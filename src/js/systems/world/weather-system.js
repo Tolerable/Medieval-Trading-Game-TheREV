@@ -1088,7 +1088,8 @@ const WeatherSystem = {
             return;
         }
 
-        const particleCount = Math.floor(60 * this.currentIntensity);
+        // Reduced from 60 to 25 max particles for CPU optimization
+        const particleCount = Math.floor(25 * this.currentIntensity);
         const isRain = weather.id === 'rain' || weather.id === 'storm';
         const isSnow = weather.id === 'snow' || weather.id === 'blizzard' || weather.id === 'thundersnow';
 

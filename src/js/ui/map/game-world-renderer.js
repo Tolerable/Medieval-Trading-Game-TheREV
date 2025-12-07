@@ -1601,17 +1601,17 @@ const GameWorldRenderer = {
                 align-items: center;
             `;
 
- // style the tack/pin - floating above with gentle bob 
+ // style the tack/pin - floating above with gentle bob (CPU optimized: slower animation)
             const tack = this.playerMarker.querySelector('.marker-tack');
             tack.style.cssText = `
                 font-size: 42px;
                 filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-                animation: tack-float 3s ease-in-out infinite;
+                animation: tack-float 5s ease-in-out infinite;
                 z-index: 152;
                 transform-origin: bottom center;
             `;
 
- // shadow below the floating tack
+ // shadow below the floating tack (CPU optimized: slower animation)
             const shadow = this.playerMarker.querySelector('.marker-shadow');
             shadow.style.cssText = `
                 position: absolute;
@@ -1620,11 +1620,11 @@ const GameWorldRenderer = {
                 height: 8px;
                 background: rgba(0, 0, 0, 0.3);
                 border-radius: 50%;
-                animation: shadow-pulse 3s ease-in-out infinite;
+                animation: shadow-pulse 5s ease-in-out infinite;
                 z-index: 99;
             `;
 
- // Style the pulse effect - ripple from the pin point
+ // Style the pulse effect - ripple from the pin point (CPU optimized: slower animation)
             const pulse = this.playerMarker.querySelector('.marker-pulse');
             pulse.style.cssText = `
                 position: absolute;
@@ -1633,7 +1633,7 @@ const GameWorldRenderer = {
                 height: 16px;
                 background: rgba(220, 20, 60, 0.5);
                 border-radius: 50%;
-                animation: marker-pulse 2s ease-out infinite;
+                animation: marker-pulse 4s ease-out infinite;
                 z-index: 100;
             `;
 
@@ -1655,28 +1655,30 @@ const GameWorldRenderer = {
                 text-transform: uppercase;
             `;
 
- // add CSS animations for floating tack effect
+ // add CSS animations for floating tack effect - CPU optimized
             if (!document.getElementById('player-marker-styles')) {
                 const styleSheet = document.createElement('style');
                 styleSheet.id = 'player-marker-styles';
                 styleSheet.textContent = `
+                    /* GPU hints for smooth animations */
+                    .marker-tack, .marker-shadow, .marker-pulse {
+                        will-change: transform, opacity;
+                    }
                     @keyframes tack-float {
-                        0%, 100% { transform: translateY(0) rotate(-2deg); }
-                        25% { transform: translateY(-12px) rotate(0deg); }
-                        50% { transform: translateY(-15px) rotate(2deg); }
-                        75% { transform: translateY(-12px) rotate(0deg); }
+                        0%, 100% { transform: translateY(0); }
+                        50% { transform: translateY(-8px); }
                     }
                     @keyframes shadow-pulse {
                         0%, 100% { transform: scale(1); opacity: 0.3; }
-                        50% { transform: scale(0.6); opacity: 0.5; }
+                        50% { transform: scale(0.7); opacity: 0.4; }
                     }
                     @keyframes marker-pulse {
-                        0% { transform: scale(1); opacity: 0.6; }
-                        100% { transform: scale(4); opacity: 0; }
+                        0% { transform: scale(1); opacity: 0.5; }
+                        100% { transform: scale(3); opacity: 0; }
                     }
                     @keyframes marker-travel {
                         0% { transform: translate(-50%, -100%) scale(1); }
-                        50% { transform: translate(-50%, -100%) scale(1.1); }
+                        50% { transform: translate(-50%, -100%) scale(1.05); }
                         100% { transform: translate(-50%, -100%) scale(1); }
                     }
                     .player-marker.traveling {
@@ -1687,11 +1689,11 @@ const GameWorldRenderer = {
                         margin-bottom: 4px !important;
                     }
                     .player-marker.traveling .marker-tack {
-                        animation: tack-walk 0.4s ease-in-out infinite;
+                        animation: tack-walk 0.6s ease-in-out infinite;
                     }
                     @keyframes tack-walk {
-                        0%, 100% { margin-top: -4px; }
-                        50% { margin-top: -8px; }
+                        0%, 100% { margin-top: -2px; }
+                        50% { margin-top: -6px; }
                     }
                     .emoji-flip-right {
                         transform: scaleX(-1) !important;

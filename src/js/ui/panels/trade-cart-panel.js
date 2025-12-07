@@ -99,14 +99,16 @@ const TradeCartPanel = {
 
                     <!-- Action Buttons -->
                     <div class="trade-cart-actions">
-                        <button class="cart-btn haggle-btn" id="cart-haggle-btn" onclick="TradeCartPanel.attemptHaggle()">
-                            <span class="btn-icon">🗣️</span>
-                            <span class="btn-text">Haggle</span>
-                        </button>
-                        <button class="cart-btn clear-btn" onclick="TradeCartPanel.clearCart()">
-                            <span class="btn-icon">🗑️</span>
-                            <span class="btn-text">Clear</span>
-                        </button>
+                        <div class="trade-cart-actions-row">
+                            <button class="cart-btn haggle-btn" id="cart-haggle-btn" onclick="TradeCartPanel.attemptHaggle()">
+                                <span class="btn-icon">🗣️</span>
+                                <span class="btn-text">Haggle</span>
+                            </button>
+                            <button class="cart-btn clear-btn" onclick="TradeCartPanel.clearCart()">
+                                <span class="btn-icon">🗑️</span>
+                                <span class="btn-text">Clear</span>
+                            </button>
+                        </div>
                         <button class="cart-btn complete-btn" id="cart-complete-btn" onclick="TradeCartPanel.completeTrade()">
                             <span class="btn-icon">✅</span>
                             <span class="btn-text">Complete Trade</span>
@@ -210,6 +212,7 @@ const TradeCartPanel = {
                 border-radius: 12px;
                 min-width: 20px;
                 text-align: center;
+                margin-left: 8px;
             }
 
             .cart-count-badge.empty {
@@ -304,11 +307,16 @@ const TradeCartPanel = {
                 display: flex;
                 flex-direction: column;
                 gap: 2px;
+                min-width: 0;
+                overflow: hidden;
             }
 
             .cart-item-name {
                 color: #e0e0e0;
                 font-weight: 500;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .cart-item-price {
@@ -357,6 +365,14 @@ const TradeCartPanel = {
                 border-radius: 4px;
                 padding: 5px;
                 font-size: 14px;
+                -moz-appearance: textfield;
+            }
+
+            /* Hide spinner arrows in all browsers */
+            .qty-input::-webkit-outer-spin-button,
+            .qty-input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
             }
 
             .cart-item-total {
@@ -393,6 +409,18 @@ const TradeCartPanel = {
                 justify-content: space-between;
                 padding: 6px 0;
                 color: #aaa;
+                overflow: hidden;
+            }
+
+            .summary-row span {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .summary-row span:last-child {
+                flex-shrink: 0;
+                margin-left: 10px;
             }
 
             .summary-row.total-row {
@@ -448,12 +476,18 @@ const TradeCartPanel = {
                 border: 1px solid rgba(74, 222, 128, 0.3);
             }
 
-            /* Actions */
+            /* Actions - two rows: small buttons, then full-width complete */
             .trade-cart-actions {
                 display: flex;
+                flex-direction: column;
                 gap: 10px;
                 padding: 15px 20px;
                 border-top: 1px solid rgba(255, 215, 0, 0.2);
+            }
+
+            .trade-cart-actions-row {
+                display: flex;
+                gap: 10px;
             }
 
             .cart-btn {
@@ -514,7 +548,10 @@ const TradeCartPanel = {
             .complete-btn {
                 background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
                 color: white;
-                flex: 1.5;
+                width: 100%;
+                padding: 14px 20px;
+                font-size: 16px;
+                font-weight: 600;
             }
 
             .complete-btn:hover {

@@ -22,7 +22,7 @@ const SettingsPanel = {
             audio: { masterVolume: 0.7, musicVolume: 0.5, sfxVolume: 0.7, voiceVolume: 70, voiceEnabled: true, isMusicMuted: false, isSfxMuted: false, audioEnabled: true },
             visual: { particlesEnabled: true, screenShakeEnabled: true, animationsEnabled: true, weatherEffectsEnabled: true, quality: 'medium', reducedMotion: false, flashWarnings: true },
             animation: { animationsEnabled: true, animationSpeed: 1.0, reducedMotion: false, quality: 'medium' },
-            ui: { animationsEnabled: true, hoverEffectsEnabled: true, transitionsEnabled: true, reducedMotion: false, highContrast: false, fontSize: 'medium', theme: 'default' },
+            ui: { animationsEnabled: true, hoverEffectsEnabled: true, transitionsEnabled: true, reducedMotion: false, highContrast: false, fontSize: 'medium', theme: 'default', uiScale: 1.0 },
             environmental: { weatherEffectsEnabled: true, lightingEnabled: true, seasonalEffectsEnabled: true, quality: 'medium', reducedEffects: false },
             accessibility: { reducedMotion: false, highContrast: false, screenReaderEnabled: false, flashWarnings: true, colorBlindMode: 'none', fontSize: 'medium', keyboardNavigation: true },
             gameplay: { showTutorialOnStart: true }
@@ -54,6 +54,12 @@ const SettingsPanel = {
         this.createPanel();
         this.setupEventListeners();
         this._initialized = true;
+
+        // Apply saved UI scale on initialization
+        if (this.currentSettings.ui?.uiScale && this.currentSettings.ui.uiScale !== 1.0) {
+            this.applyUIScale(this.currentSettings.ui.uiScale);
+        }
+
         console.log('Settings panel initialized');
     },
 
@@ -314,6 +320,11 @@ const SettingsPanel = {
                                         <option value="medium" selected>Medium</option>
                                         <option value="large">Large</option>
                                     </select>
+                                </div>
+                                <div class="setting-item">
+                                    <label for="ui-scale">UI Scale</label>
+                                    <input type="range" id="ui-scale" min="0.75" max="1.5" step="0.05" value="1">
+                                    <span class="setting-value" id="ui-scale-value">100%</span>
                                 </div>
                                 <div class="setting-item">
                                     <label>
@@ -656,7 +667,6 @@ const SettingsPanel = {
                         <button class="settings-btn settings-apply-btn">Apply</button>
                         <button class="settings-btn settings-reset-btn">Reset to Defaults</button>
                         <button class="panel-close-btn-footer settings-cancel-btn">Close</button>
-                        <button class="settings-btn settings-main-menu-btn" style="background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);">🏠 Main Menu</button>
                         <button class="settings-btn settings-clear-all-btn" onclick="SettingsPanel.clearAllData();" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); margin-left: auto;">🗑️ Clear All Data</button>
                     </div>
                 </div>
@@ -1037,11 +1047,11 @@ const SettingsPanel = {
             }
 
             .save-load-btn.danger {
-                background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+                background: linear-gradient(135deg, #f44336 0%, #c62828 100%) !important;
             }
 
             .save-load-btn.danger:hover {
-                background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%);
+                background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%) !important;
             }
 
             /* 🖤 Disabled save buttons - can't save when not in game 💀 */
@@ -1812,12 +1822,6 @@ const SettingsPanel = {
         const cancelBtn = this.panelElement.querySelector('.settings-cancel-btn');
         cancelBtn.addEventListener('click', () => this.closePanel());
 
-        // main menu button - return to the start screen
-        const mainMenuBtn = this.panelElement.querySelector('.settings-main-menu-btn');
-        if (mainMenuBtn) {
-            mainMenuBtn.addEventListener('click', () => this.returnToMainMenu());
-        }
-
         // clear all data button - the nuclear option
         const clearAllBtn = this.panelElement.querySelector('.settings-clear-all-btn');
         if (clearAllBtn) {
@@ -1880,6 +1884,7 @@ const SettingsPanel = {
         
         this.setupSelectControl('ui-theme', 'ui', 'theme');
         this.setupSelectControl('ui-font-size', 'ui', 'fontSize');
+        this.setupUIScaleControl(); // UI scale slider with real-time preview
 
         // environmental settings - control the weather like a god
         this.setupCheckboxControl('env-weather-enabled', 'environmental', 'weatherEffectsEnabled');
@@ -2187,6 +2192,63 @@ const SettingsPanel = {
         });
     },
 
+    // Setup UI scale control - resize panels and UI elements
+    setupUIScaleControl() {
+        const scaleSlider = this.panelElement.querySelector('#ui-scale');
+        const scaleValue = this.panelElement.querySelector('#ui-scale-value');
+        if (!scaleSlider) return;
+
+        // Load initial value from settings
+        const savedScale = this.currentSettings.ui?.uiScale ?? 1.0;
+        scaleSlider.value = savedScale;
+        if (scaleValue) scaleValue.textContent = `${Math.round(savedScale * 100)}%`;
+
+        // Apply initial scale
+        this.applyUIScale(savedScale);
+
+        // Handle changes
+        scaleSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            if (scaleValue) scaleValue.textContent = `${Math.round(value * 100)}%`;
+
+            // Apply scale immediately for preview
+            this.applyUIScale(value);
+
+            // Store in currentSettings
+            this.currentSettings.ui.uiScale = value;
+            this.saveSettings('ui');
+        });
+    },
+
+    // Apply UI scale to panels and UI elements
+    applyUIScale(scale) {
+        // Apply CSS custom property for scale
+        document.documentElement.style.setProperty('--ui-scale', scale);
+
+        // Apply scale to all panels (except settings panel itself)
+        const panels = document.querySelectorAll('.panel:not(.settings-panel)');
+        panels.forEach(panel => {
+            panel.style.transform = `scale(${scale})`;
+            panel.style.transformOrigin = 'top left';
+        });
+
+        // Scale the top bar and bottom bar
+        const topBar = document.getElementById('top-bar');
+        const bottomBar = document.getElementById('bottom-bar');
+        if (topBar) {
+            topBar.style.transform = `scale(${scale})`;
+            topBar.style.transformOrigin = 'top left';
+            topBar.style.width = `${100 / scale}%`;
+        }
+        if (bottomBar) {
+            bottomBar.style.transform = `scale(${scale})`;
+            bottomBar.style.transformOrigin = 'bottom left';
+            bottomBar.style.width = `${100 / scale}%`;
+        }
+
+        console.log(`🎨 UI scale set to ${Math.round(scale * 100)}%`);
+    },
+
     // Setup voice enabled checkbox
     setupVoiceEnabledControl() {
         const checkbox = this.panelElement.querySelector('#voice-enabled');
@@ -2329,8 +2391,12 @@ const SettingsPanel = {
                             break;
                     }
                 }
+                // UI scale is handled by SettingsPanel directly (not UIPolishSystem)
+                if (settingKey === 'uiScale') {
+                    this.applyUIScale(value);
+                }
                 break;
-                
+
             case 'environmental':
                 if (typeof EnvironmentalEffectsSystem !== 'undefined') {
                     switch (settingKey) {
@@ -2478,9 +2544,17 @@ const SettingsPanel = {
     // test voice preview - hear the digital demons speak
     // uses npcdialoguesystem for unified dialogue generation
     async testVoicePreview() {
+        // Prevent spam clicking - disable button while playing
+        const testBtn = this.panelElement.querySelector('#test-voice-btn');
+        if (testBtn && testBtn.disabled) return; // Already playing
+        if (testBtn) testBtn.disabled = true;
+
         // Get selected NPC personality
         const personality = this.panelElement.querySelector('#test-npc-personality')?.value || 'friendly';
-        const volume = parseFloat(this.panelElement.querySelector('#voice-volume')?.value || 70);
+        const voiceVolume = parseFloat(this.panelElement.querySelector('#voice-volume')?.value || 70);
+        // Apply master volume (0-1 range) on top of voice volume (0-100 range)
+        const masterVolume = parseFloat(this.panelElement.querySelector('#master-volume')?.value || 0.7);
+        const effectiveVolume = masterVolume * (voiceVolume / 100);
 
         this.updateVoicePreviewStatus(`Generating ${personality} NPC response...`, 'playing');
 
@@ -2532,13 +2606,17 @@ const SettingsPanel = {
 
             // Create audio element from blob
             this.previewAudio = new Audio(audioUrl);
-            this.previewAudio.volume = volume / 100;
+            this.previewAudio.volume = effectiveVolume;
+            console.log(`🎭 Volume: master=${masterVolume}, voice=${voiceVolume}, effective=${effectiveVolume}`);
 
             this.previewAudio.onended = () => {
                 console.log('🎭 Audio playback ended');
                 this.updateVoicePreviewStatus('Playback complete!', 'info');
                 URL.revokeObjectURL(audioUrl);
                 this.previewAudio = null;
+                // Re-enable test button
+                const testBtn = this.panelElement.querySelector('#test-voice-btn');
+                if (testBtn) testBtn.disabled = false;
             };
 
             this.previewAudio.onerror = (e) => {
@@ -2546,6 +2624,9 @@ const SettingsPanel = {
                 this.updateVoicePreviewStatus(`Playback error`, 'error');
                 URL.revokeObjectURL(audioUrl);
                 this.previewAudio = null;
+                // Re-enable test button
+                const testBtn = this.panelElement.querySelector('#test-voice-btn');
+                if (testBtn) testBtn.disabled = false;
             };
 
             this.updateVoicePreviewStatus(`[${personality}/${voice}]: "${phrase}"`, 'playing');
@@ -2556,7 +2637,7 @@ const SettingsPanel = {
             this.updateVoicePreviewStatus(`Text API failed - using fallback`, 'error');
 
             // Fallback to old method if NPCDialogueSystem fails
-            this.testVoicePreviewFallback(personality, volume);
+            this.testVoicePreviewFallback(personality, effectiveVolume);
         }
     },
 
@@ -2616,16 +2697,23 @@ const SettingsPanel = {
             const audioUrl = URL.createObjectURL(audioBlob);
 
             this.previewAudio = new Audio(audioUrl);
-            this.previewAudio.volume = volume / 100;
+            // volume is already effective (0-1 range) from testVoicePreview
+            this.previewAudio.volume = volume;
             this.previewAudio.onended = () => {
                 this.updateVoicePreviewStatus('Playback complete (fallback)', 'info');
                 URL.revokeObjectURL(audioUrl);
+                // Re-enable test button
+                const testBtn = this.panelElement.querySelector('#test-voice-btn');
+                if (testBtn) testBtn.disabled = false;
             };
 
             this.updateVoicePreviewStatus(`[${personality}/${voice}] (fallback): "${phrase}"`, 'playing');
             await this.previewAudio.play();
         } catch (e) {
             this.updateVoicePreviewStatus(`Fallback failed: ${e.message}`, 'error');
+            // Re-enable test button on failure
+            const testBtn = this.panelElement.querySelector('#test-voice-btn');
+            if (testBtn) testBtn.disabled = false;
         }
     },
 
@@ -2636,6 +2724,9 @@ const SettingsPanel = {
             this.previewAudio = null;
             this.updateVoicePreviewStatus('Stopped.', 'info');
         }
+        // Re-enable test button
+        const testBtn = this.panelElement?.querySelector('#test-voice-btn');
+        if (testBtn) testBtn.disabled = false;
     },
 
     // update voice preview status
@@ -3874,7 +3965,7 @@ const SettingsPanel = {
         // Audio and theme settings use SET methods, so those are safe to reapply
         const safeToReapplySettings = {
             audio: ['masterVolume', 'musicVolume', 'sfxVolume', 'ambienceVolume', 'voiceVolume'],
-            ui: ['theme', 'fontSize'],
+            ui: ['theme', 'fontSize', 'uiScale'],
             environmental: ['quality']
         };
 
