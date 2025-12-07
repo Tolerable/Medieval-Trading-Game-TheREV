@@ -240,6 +240,51 @@
     padding-right: 5px;
 }
 
+/* NPC Trade Inventory Item - horizontal row layout */
+.trade-inventory .inventory-item {
+    display: flex;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    background: var(--npc-bg-light);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85rem;
+    min-height: auto;
+}
+
+.trade-inventory .inventory-item .item-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+}
+
+.trade-inventory .inventory-item .item-name {
+    flex: 1;
+    color: var(--npc-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.trade-inventory .inventory-item .item-qty {
+    color: var(--npc-gold);
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.trade-inventory .inventory-item .item-price {
+    color: var(--npc-text-dim);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+/* General inventory-item fallback */
 .inventory-item {
     display: flex;
     align-items: center;
@@ -319,6 +364,18 @@
     background: var(--npc-danger);
 }
 
+/* Gold offer item - special styling */
+.offer-item.offer-gold-item {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.15));
+    border: 1px solid var(--npc-gold);
+    color: var(--npc-gold);
+}
+
+.offer-item.offer-gold-item:hover {
+    background: linear-gradient(135deg, rgba(255, 100, 100, 0.4), rgba(255, 100, 100, 0.2));
+    border-color: var(--npc-danger);
+}
+
 .offer-gold {
     text-align: center;
     color: var(--npc-gold);
@@ -364,7 +421,8 @@
 .gold-input-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
     margin-top: auto;
     padding-top: 10px;
     font-size: 0.85rem;
@@ -382,6 +440,23 @@
     border-radius: 4px;
     color: var(--npc-gold);
     font-size: 0.9rem;
+    /* Hide number spinners */
+    -moz-appearance: textfield;
+}
+
+.gold-input-row input::-webkit-outer-spin-button,
+.gold-input-row input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Available gold indicator */
+.player-gold-available,
+.npc-gold-available {
+    font-size: 0.75rem;
+    color: var(--npc-text-dim);
+    margin-left: 6px;
+    white-space: nowrap;
 }
 
 /* Actions */

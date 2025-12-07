@@ -430,8 +430,9 @@ const NPCTradeWindow = {
                     </div>
                     <div class="gold-input-row">
                         <label>Offer Gold:</label>
-                        <input type="number" id="player-gold-offer" min="0" value="0"
-                               onchange="NPCTradeWindow.updateTradeValue()">
+                        <input type="number" id="player-gold-offer" min="0" max="${game?.player?.gold || 0}" value="0"
+                               oninput="NPCTradeWindow.updateTradeValue()">
+                        <span class="player-gold-available">(${game?.player?.gold || 0}g available)</span>
                     </div>
                 </div>
 
@@ -465,8 +466,9 @@ const NPCTradeWindow = {
                     </div>
                     <div class="gold-input-row">
                         <label>Request Gold:</label>
-                        <input type="number" id="npc-gold-request" min="0" value="0"
-                               onchange="NPCTradeWindow.updateTradeValue()">
+                        <input type="number" id="npc-gold-request" min="0" max="${this.getNPCGold(npcData)}" value="0"
+                               oninput="NPCTradeWindow.updateTradeValue()">
+                        <span class="npc-gold-available">(${this.getNPCGold(npcData)}g available)</span>
                     </div>
                 </div>
             </div>
@@ -794,29 +796,75 @@ const NPCTradeWindow = {
         // using data attributes instead of inline onclick to prevent XSS
         const playerOfferEl = document.getElementById('player-offer-items');
         if (playerOfferEl) {
-            playerOfferEl.innerHTML = Object.entries(this.playerOffer.items).map(([itemId, qty]) => `
+            // Build items list including gold from the input
+            let playerOfferHtml = Object.entries(this.playerOffer.items).map(([itemId, qty]) => `
                 <div class="offer-item" data-item-id="${this.escapeHtml(itemId)}" data-offer-type="player">
                     ${this.getItemIcon(itemId)} ${this.formatItemName(itemId)} x${qty}
                 </div>
-            `).join('') || '<span class="empty">Nothing</span>';
-            // attach event listeners safely
-            playerOfferEl.querySelectorAll('.offer-item[data-item-id]').forEach(el => {
+            `).join('');
+
+            // Add gold to offer display if player is offering gold
+            const playerGoldOffer = this.playerOffer.gold || 0;
+            if (playerGoldOffer > 0) {
+                playerOfferHtml += `
+                    <div class="offer-item offer-gold-item" data-item-id="gold" data-offer-type="player-gold">
+                        ${this.getItemIcon('gold')} Gold x${playerGoldOffer}
+                    </div>
+                `;
+            }
+
+            playerOfferEl.innerHTML = playerOfferHtml || '<span class="empty">Nothing</span>';
+
+            // attach event listeners safely for items (not gold - gold uses input)
+            playerOfferEl.querySelectorAll('.offer-item[data-item-id]:not(.offer-gold-item)').forEach(el => {
                 el.onclick = () => this.removeFromOffer(el.dataset.itemId, el.dataset.offerType);
             });
+            // Gold item click clears the gold input
+            const goldOfferItem = playerOfferEl.querySelector('.offer-gold-item');
+            if (goldOfferItem) {
+                goldOfferItem.onclick = () => {
+                    const goldInput = document.getElementById('player-gold-offer');
+                    if (goldInput) goldInput.value = 0;
+                    this.updateTradeValue();
+                };
+            }
         }
 
         // what are they willing to give? display their counter-offer
         const npcOfferEl = document.getElementById('npc-offer-items');
         if (npcOfferEl) {
-            npcOfferEl.innerHTML = Object.entries(this.npcOffer.items).map(([itemId, qty]) => `
+            // Build items list including gold from the input
+            let npcOfferHtml = Object.entries(this.npcOffer.items).map(([itemId, qty]) => `
                 <div class="offer-item" data-item-id="${this.escapeHtml(itemId)}" data-offer-type="npc">
                     ${this.getItemIcon(itemId)} ${this.formatItemName(itemId)} x${qty}
                 </div>
-            `).join('') || '<span class="empty">Nothing</span>';
-            // attach event listeners safely
-            npcOfferEl.querySelectorAll('.offer-item[data-item-id]').forEach(el => {
+            `).join('');
+
+            // Add gold to offer display if requesting gold from NPC
+            const npcGoldRequest = this.npcOffer.gold || 0;
+            if (npcGoldRequest > 0) {
+                npcOfferHtml += `
+                    <div class="offer-item offer-gold-item" data-item-id="gold" data-offer-type="npc-gold">
+                        ${this.getItemIcon('gold')} Gold x${npcGoldRequest}
+                    </div>
+                `;
+            }
+
+            npcOfferEl.innerHTML = npcOfferHtml || '<span class="empty">Nothing</span>';
+
+            // attach event listeners safely for items (not gold - gold uses input)
+            npcOfferEl.querySelectorAll('.offer-item[data-item-id]:not(.offer-gold-item)').forEach(el => {
                 el.onclick = () => this.removeFromOffer(el.dataset.itemId, el.dataset.offerType);
             });
+            // Gold item click clears the gold input
+            const goldRequestItem = npcOfferEl.querySelector('.offer-gold-item');
+            if (goldRequestItem) {
+                goldRequestItem.onclick = () => {
+                    const goldInput = document.getElementById('npc-gold-request');
+                    if (goldInput) goldInput.value = 0;
+                    this.updateTradeValue();
+                };
+            }
         }
     },
 
@@ -836,6 +884,9 @@ const NPCTradeWindow = {
 
         this.playerOffer.gold = playerGoldOffer;
         this.npcOffer.gold = npcGoldRequest;
+
+        // Update the offer display to show gold in the offer items area
+        this.updateOfferDisplay();
 
         // add up the value of your offerings - every item has a price
         let playerItemValue = 0;
