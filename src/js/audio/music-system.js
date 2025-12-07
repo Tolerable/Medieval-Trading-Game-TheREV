@@ -51,9 +51,18 @@ const MusicSystem = {
         return defaults[cat] || 1.0;
     },
 
-    // Get effective volume (master volume * category multiplier)
+    // Get effective volume (master volume * music volume * category multiplier)
     getEffectiveVolume(category = null) {
-        return this.settings.volume * this.getCategoryVolumeMult(category);
+        return this.settings.masterVolume * this.settings.volume * this.getCategoryVolumeMult(category);
+    },
+
+    // Set master volume (called from settings panel)
+    setMasterVolume(volume) {
+        this.settings.masterVolume = Math.max(0, Math.min(1, volume));
+        if (this.currentAudio) {
+            this.currentAudio.volume = this.getEffectiveVolume();
+        }
+        console.log(`🎵 MusicSystem: Master volume set to ${Math.round(this.settings.masterVolume * 100)}% (effective: ${Math.round(this.getEffectiveVolume() * 100)}%)`);
     },
 
     // Current state
@@ -69,6 +78,7 @@ const MusicSystem = {
     settings: {
         enabled: true,
         volume: 0.3,  // Will be overwritten by GameConfig on init
+        masterVolume: 1.0,  // Master volume multiplier (0.0 to 1.0)
         gapBetweenTracks: 15000,
         fadeOutDuration: 1000,
         fadeInDuration: 500

@@ -1947,6 +1947,14 @@ const SettingsPanel = {
                 switch (settingKey) {
                     case 'masterVolume':
                         AudioSystem.setMasterVolume(value);
+                        // Also update MusicSystem master volume
+                        if (typeof MusicSystem !== 'undefined' && MusicSystem.setMasterVolume) {
+                            MusicSystem.setMasterVolume(value);
+                        }
+                        // Also update NPCVoiceChatSystem master volume
+                        if (typeof NPCVoiceChatSystem !== 'undefined' && NPCVoiceChatSystem.setMasterVolume) {
+                            NPCVoiceChatSystem.setMasterVolume(value);
+                        }
                         break;
                     case 'musicVolume':
                         AudioSystem.setMusicVolume(value);

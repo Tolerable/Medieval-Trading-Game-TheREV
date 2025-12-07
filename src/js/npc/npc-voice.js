@@ -80,6 +80,7 @@ const NPCVoiceChatSystem = {
         voice: 'nova',
         voiceEnabled: true,
         voiceVolume: 70,
+        masterVolume: 100, // Master volume (0-100), applied on top of voiceVolume
         temperature: 0.8
     },
 
@@ -201,10 +202,22 @@ const NPCVoiceChatSystem = {
             console.log(`🎙️ Setting updated: ${key} = ${value}`);
 
             // special handling for volume changes during playback
-            if (key === 'voiceVolume' && this.currentAudio) {
-                this.currentAudio.volume = value / 100;
+            if ((key === 'voiceVolume' || key === 'masterVolume') && this.currentAudio) {
+                const effectiveVolume = (this.settings.masterVolume / 100) * (this.settings.voiceVolume / 100);
+                this.currentAudio.volume = effectiveVolume;
             }
         }
+    },
+
+    // Set master volume (called from settings panel)
+    setMasterVolume(volume) {
+        // volume comes in as 0.0-1.0, convert to 0-100 for internal use
+        this.settings.masterVolume = Math.round(Math.max(0, Math.min(1, volume)) * 100);
+        if (this.currentAudio) {
+            const effectiveVolume = (this.settings.masterVolume / 100) * (this.settings.voiceVolume / 100);
+            this.currentAudio.volume = effectiveVolume;
+        }
+        console.log(`🎙️ Master volume set to ${this.settings.masterVolume}%`);
     },
 
     // ═══════════════════════════════════════════════════════════
@@ -992,7 +1005,9 @@ RELATIONSHIP MEMORY:
 
             // create and play audio
             this.currentAudio = new Audio(url);
-            this.currentAudio.volume = this.settings.voiceVolume / 100;
+            // Apply both master volume and voice volume
+            const effectiveVolume = (this.settings.masterVolume / 100) * (this.settings.voiceVolume / 100);
+            this.currentAudio.volume = effectiveVolume;
 
             // mobile compatibility
             this.currentAudio.setAttribute('playsinline', '');
