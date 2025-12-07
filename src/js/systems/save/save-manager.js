@@ -407,13 +407,17 @@ const SaveManager = {
                     isTraveling: TravelSystem.isTraveling || false,
                     currentTravelRoute: TravelSystem.currentTravelRoute || null
                 } : null,
-                //  NPC Merchant economy state - per-slot isolation (no more exploit!) 
+                //  NPC Merchant economy state - per-slot isolation (no more exploit!)
                 merchantEconomyState: typeof NPCMerchantSystem !== 'undefined' && NPCMerchantSystem.getSaveData
                     ? NPCMerchantSystem.getSaveData()
                     : null,
-                //  NPC Schedule state - registered NPC schedules persist 
+                //  NPC Schedule state - registered NPC schedules persist
                 npcScheduleState: typeof NPCScheduleSystem !== 'undefined' && NPCScheduleSystem.getSaveData
                     ? NPCScheduleSystem.getSaveData()
+                    : null,
+                //  Dungeon exploration state - boss progress and defeated bosses
+                explorationState: typeof DungeonExplorationSystem !== 'undefined' && DungeonExplorationSystem.getSaveData
+                    ? DungeonExplorationSystem.getSaveData()
                     : null
             }
         };
@@ -1046,13 +1050,23 @@ const SaveManager = {
             }
         }
 
-        //  NPC Schedule state - registered NPC schedules persist 
+        //  NPC Schedule state - registered NPC schedules persist
         if (gameData.npcScheduleState && typeof NPCScheduleSystem !== 'undefined' && NPCScheduleSystem.loadSaveData) {
             try {
                 NPCScheduleSystem.loadSaveData(gameData.npcScheduleState);
                 console.log('🖤 NPC schedule state restored');
             } catch (e) {
                 console.warn('🖤 Failed to restore NPC schedule state:', e.message);
+            }
+        }
+
+        //  Dungeon exploration state - boss progress and defeated bosses
+        if (gameData.explorationState && typeof DungeonExplorationSystem !== 'undefined' && DungeonExplorationSystem.loadSaveData) {
+            try {
+                DungeonExplorationSystem.loadSaveData(gameData.explorationState);
+                console.log('🖤 Dungeon exploration state restored');
+            } catch (e) {
+                console.warn('🖤 Failed to restore dungeon exploration state:', e.message);
             }
         }
     },

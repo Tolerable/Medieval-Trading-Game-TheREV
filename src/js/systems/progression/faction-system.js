@@ -1201,18 +1201,22 @@ const FactionSystem = {
         document.head.appendChild(style);
     },
 
-    // 
+    //
     // SAVE/LOAD
-    // 
+    //
     getState() {
         return {
-            playerFactionRep: { ...this.playerFactionRep }
+            playerFactionRep: { ...this.playerFactionRep },
+            discoveredFactions: Array.from(this.discoveredFactions || [])
         };
     },
 
     loadState(state) {
         if (state?.playerFactionRep) {
             this.playerFactionRep = { ...state.playerFactionRep };
+        }
+        if (state?.discoveredFactions) {
+            this.discoveredFactions = new Set(state.discoveredFactions);
         }
     },
 
