@@ -3719,8 +3719,9 @@ Speak cryptically and briefly. You offer passage to the ${inDoom ? 'normal world
             panel.style.right = 'auto';
             panel.style.bottom = 'auto';
 
-            // Bring to front
-            if (typeof DraggablePanels !== 'undefined' && DraggablePanels.bringToFront) {
+            // Ensure panel is draggable and bring to front
+            if (typeof DraggablePanels !== 'undefined') {
+                DraggablePanels.makeDraggable(panel);
                 DraggablePanels.bringToFront(panel);
             }
         }
