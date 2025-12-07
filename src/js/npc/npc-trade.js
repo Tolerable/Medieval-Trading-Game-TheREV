@@ -500,12 +500,15 @@ const NPCTradeWindow = {
 
             // Gold/currency is always worth 1g per unit - actual money!
             const isCurrency = itemId === 'gold' || (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem(itemId)?.category === 'currency');
-            // Player sells at 50% (min 1g), NPC sells at full price minus discount
+            // Player sells at 75% (min 1g), NPC sells at full price minus discount
+            // This allows profit margins when buying low (small towns) and selling high (big cities)
             // Currency (gold) is ALWAYS 1g regardless of side
+            const locationSellBonus = this.getLocationSellBonus(itemId);
+            const sellMultiplier = Math.min(0.95, 0.75 + locationSellBonus); // 75% base, up to 95% with bonuses
             const displayPrice = isCurrency ? 1 :
                 (side === 'npc' ?
                     Math.ceil(price * (1 - this.currentDiscount / 100)) :
-                    Math.max(1, Math.floor(price * 0.5)));
+                    Math.max(1, Math.floor(price * sellMultiplier)));
 
             // Debug: Log gold pricing
             if (itemId === 'gold') {
@@ -893,8 +896,10 @@ const NPCTradeWindow = {
         for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
             // Gold/currency is always 1:1
             const isCurrency = itemId === 'gold' || (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem(itemId)?.category === 'currency');
-            const itemValue = isCurrency ? 1 : Math.max(1, Math.floor(this.getItemPrice(itemId) * 0.5));
-            playerItemValue += itemValue * qty; // Sell at half (min 1g)
+            const locationSellBonus = this.getLocationSellBonus(itemId);
+            const sellMultiplier = Math.min(0.95, 0.75 + locationSellBonus);
+            const itemValue = isCurrency ? 1 : Math.max(1, Math.floor(this.getItemPrice(itemId) * sellMultiplier));
+            playerItemValue += itemValue * qty;
         }
 
         let npcItemValue = 0;
@@ -951,7 +956,9 @@ const NPCTradeWindow = {
         for (const [itemId, qty] of Object.entries(this.playerOffer.items)) {
             // Gold/currency is always 1:1
             const isCurrency = itemId === 'gold' || (typeof ItemDatabase !== 'undefined' && ItemDatabase.getItem(itemId)?.category === 'currency');
-            const itemValue = isCurrency ? 1 : Math.max(1, Math.floor(this.getItemPrice(itemId) * 0.5));
+            const locationSellBonus = this.getLocationSellBonus(itemId);
+            const sellMultiplier = Math.min(0.95, 0.75 + locationSellBonus);
+            const itemValue = isCurrency ? 1 : Math.max(1, Math.floor(this.getItemPrice(itemId) * sellMultiplier));
             playerTotalValue += itemValue * qty;
         }
 
@@ -2492,6 +2499,41 @@ const NPCTradeWindow = {
             silk: 100, cloth: 15, trinket: 20
         };
         return fallbackPrices[itemId] || 10;
+    },
+
+    // Get bonus to sell price based on location demand
+    // Items on location's "buys" list get better prices (they WANT these goods)
+    getLocationSellBonus(itemId) {
+        if (typeof game === 'undefined' || !game.currentLocation) return 0;
+
+        const locationId = game.currentLocation.id;
+        const location = typeof GameWorld !== 'undefined'
+            ? GameWorld.locations?.[locationId]
+            : game.locations?.[locationId];
+
+        if (!location) return 0;
+
+        // If location actively BUYS this item, give a sell bonus
+        if (location.buys && location.buys.includes(itemId)) {
+            // +15% bonus for items the location wants to buy
+            return 0.15;
+        }
+
+        // If location SELLS this item, small penalty (oversupply)
+        if (location.sells && location.sells.includes(itemId)) {
+            // -5% penalty for items they already have plenty of
+            return -0.05;
+        }
+
+        // Larger markets give slightly better prices overall
+        const marketBonus = {
+            'tiny': -0.05,
+            'small': 0,
+            'medium': 0.03,
+            'large': 0.05,
+            'grand': 0.08
+        };
+        return marketBonus[location.marketSize] || 0;
     },
 
     getItemIcon(itemId) {
