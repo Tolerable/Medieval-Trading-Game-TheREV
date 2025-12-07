@@ -1644,18 +1644,11 @@ const GameWorldRenderer = {
                         100% { transform: translate(-50%, -100%) scale(1); }
                     }
                     .player-marker.traveling .marker-tack {
-                        animation: tack-walk-left 0.4s ease-in-out infinite;
+                        animation: tack-walk 0.4s ease-in-out infinite;
                     }
-                    .player-marker.traveling.moving-right .marker-tack {
-                        animation: tack-walk-right 0.4s ease-in-out infinite;
-                    }
-                    @keyframes tack-walk-left {
-                        0%, 100% { transform: translateY(-8px) rotate(-5deg) scaleX(-1); }
-                        50% { transform: translateY(-12px) rotate(5deg) scaleX(-1); }
-                    }
-                    @keyframes tack-walk-right {
-                        0%, 100% { transform: translateY(-8px) rotate(-5deg) scaleX(1); }
-                        50% { transform: translateY(-12px) rotate(5deg) scaleX(1); }
+                    @keyframes tack-walk {
+                        0%, 100% { transform: translateY(-8px) rotate(-5deg); }
+                        50% { transform: translateY(-12px) rotate(5deg); }
                     }
                     /* 💀 July 18th Dungeon Bonanza pulse effect */
                     @keyframes bonanza-pulse {
@@ -1769,15 +1762,11 @@ const GameWorldRenderer = {
             // Switch to walking animation (defined in CSS above)
             const tack = this.playerMarker.querySelector('.marker-tack');
             if (tack) {
-                tack.textContent = '🚶'; // Walking person while traveling
-            }
-            // Set initial direction via CSS class - emoji faces LEFT by default
-            if (this.currentTravel.movingRight) {
-                this.playerMarker.classList.add('moving-right');
-                console.log('🚶 MOVING RIGHT - added moving-right class, startX:', this.currentTravel.startX, 'endX:', this.currentTravel.endX);
-            } else {
-                this.playerMarker.classList.remove('moving-right');
-                console.log('🚶 MOVING LEFT - removed moving-right class, startX:', this.currentTravel.startX, 'endX:', this.currentTravel.endX);
+                // Wrap emoji in span for mirroring (animation affects outer, mirror affects inner)
+                const movingRight = this.currentTravel.movingRight;
+                const mirrorStyle = movingRight ? '' : 'display:inline-block;transform:scaleX(-1);';
+                tack.innerHTML = `<span style="${mirrorStyle}">🚶</span>`;
+                console.log(movingRight ? '🚶 MOVING RIGHT' : '🚶 MOVING LEFT (mirrored)');
             }
             // Update label to show "TRAVELING..."
             const label = this.playerMarker.querySelector('.marker-label');
@@ -1918,17 +1907,16 @@ const GameWorldRenderer = {
         this.updatePlayerMarker(currentX, currentY, true);
 
         // Mirror the walking emoji based on travel direction
-        // Emoji faces LEFT by default, so add moving-right class when moving RIGHT
         if (this.playerMarker) {
             // Update direction if it changes (e.g. via waypoints or cancel)
             const currentMovingRight = currentX > travel.lastX;
             if (travel.lastX !== undefined && currentMovingRight !== travel.movingRight) {
                 travel.movingRight = currentMovingRight;
-                // Update CSS class for animation direction
-                if (travel.movingRight) {
-                    this.playerMarker.classList.add('moving-right');
-                } else {
-                    this.playerMarker.classList.remove('moving-right');
+                // Update the emoji mirror by recreating the inner span
+                const tack = this.playerMarker.querySelector('.marker-tack');
+                if (tack) {
+                    const mirrorStyle = travel.movingRight ? '' : 'display:inline-block;transform:scaleX(-1);';
+                    tack.innerHTML = `<span style="${mirrorStyle}">🚶</span>`;
                 }
             }
             travel.lastX = currentX;
