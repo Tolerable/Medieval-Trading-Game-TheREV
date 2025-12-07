@@ -703,12 +703,15 @@ const MusicSystem = {
 
 // Auto-initialize when script loads
 if (typeof window !== 'undefined') {
-    // START PRELOADING IMMEDIATELY when script loads (before DOMContentLoaded)
-    // This allows audio to buffer during the loading screen
-    MusicSystem.preloadAllTracks();
-
+    // DELAY audio preload - don't compete with game system initialization
+    // Start preloading 3 seconds after DOM ready (loading screen should be done)
     window.addEventListener('DOMContentLoaded', () => {
         MusicSystem.init();
+
+        // Defer heavy audio preloading to avoid traffic jam with other systems
+        setTimeout(() => {
+            MusicSystem.preloadAllTracks();
+        }, 3000);
     });
 
     // Cleanup on page unload
@@ -717,4 +720,4 @@ if (typeof window !== 'undefined') {
     });
 }
 
-console.log('MusicSystem loaded - preloading audio for the abyss...');
+console.log('MusicSystem loaded - audio will preload after game systems ready...');
