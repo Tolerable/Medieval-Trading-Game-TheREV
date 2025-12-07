@@ -100,7 +100,18 @@ const QuestSystem = {
 
         // main story quest items (Act 1: The Shadow Rising)
         shipping_manifest: { name: 'Shipping Manifest', description: 'Coded manifest revealing suspicious cargo shipments', quest: 'act1_quest5', icon: '📋' },
-        traders_journal: { name: "Trader's Journal", description: 'Final entries mention the Shadow Tower and The Black Ledger', quest: 'act1_quest6', icon: '📖' }
+        traders_journal: { name: "Trader's Journal", description: 'Final entries mention the Shadow Tower and The Black Ledger', quest: 'act1_quest6', icon: '📖' },
+
+        // main story quest items (Act 2: Whispers of Conspiracy)
+        decoded_documents: { name: 'Decoded Documents', description: 'Shipping documents revealing Black Ledger operations', quest: 'act2_quest3', icon: '📜' },
+        smuggler_token: { name: 'Smuggler Token', description: 'Token of trust from the smuggler network', quest: 'act2_quest5', icon: '🪙' },
+
+        // main story quest items (Act 3: The Dark Connection)
+        broken_seal_shard: { name: 'Broken Seal Shard', description: 'Fragment of the seal that held Malachar', quest: 'act3_quest4', icon: '💔' },
+        rare_artifact: { name: 'Rare Artifact', description: 'Ancient artifact containing information about Malachar', quest: 'act3_quest2', icon: '🏺' },
+
+        // main story quest items (Acts 4-5)
+        malachar_phylactery: { name: 'Malachar\'s Phylactery', description: 'The vessel containing the wizard\'s soul', quest: 'act5_quest6', icon: '💀' }
     },
 
     // 
@@ -1038,6 +1049,11 @@ const QuestSystem = {
 
     hasQuestItem(itemId) {
         return this.questItems[itemId] && this.getQuestItemInventory()[itemId];
+    },
+
+    // Check if a specific quest is currently active
+    hasActiveQuest(questId) {
+        return !!this.activeQuests[questId];
     },
 
     isQuestItem(itemId) {

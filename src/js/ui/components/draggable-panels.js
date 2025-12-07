@@ -50,7 +50,8 @@ const DraggablePanels = {
         'people-panel': '.people-header, .npc-name-header, h2, h3',
         'transportation-panel': '.transportation-header, h2',
         'settings-panel': '.settings-header, h2',
-        'quest-info-panel': '.quest-info-header, .quest-new-header, h3'
+        'quest-info-panel': '.quest-info-header, .quest-new-header, h3',
+        'faction-panel': '.faction-panel-header, h3'
     },
 
     // Overlays that can be closed by clicking outside (non-essential popups)

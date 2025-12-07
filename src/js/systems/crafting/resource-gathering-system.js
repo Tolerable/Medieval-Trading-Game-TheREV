@@ -1219,9 +1219,12 @@ const ResourceGatheringSystem = {
             baseYield: action.baseYield || { min: 1, max: 3 }
         };
 
-        // Auto-start time if paused
-        if (typeof TimeMachine !== 'undefined' && TimeMachine.isPaused) {
-            TimeMachine.setSpeed('normal');
+        // Auto-start time if paused - use TimeSystem for consistency
+        if (typeof TimeSystem !== 'undefined' && (TimeSystem.isPaused || TimeSystem.currentSpeed === 'PAUSED')) {
+            TimeSystem.setSpeed('NORMAL');
+            if (typeof GameEngine !== 'undefined' && !GameEngine.isRunning) {
+                GameEngine.start();
+            }
         }
 
         addMessage(`Gathering ${this.getResourceName(resourceId)}... ~${gatheringTime} min`, 'info');

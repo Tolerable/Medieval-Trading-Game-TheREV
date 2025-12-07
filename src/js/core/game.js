@@ -5155,7 +5155,12 @@ function startNewGame() {
         DungeonExplorationSystem.resetForNewGame();
     }
 
-    // 🖤 Reset stat decay tracker for new game - so decay happens correctly from minute 0 💀
+    // Reset faction system (discovered factions, reputation)
+    if (typeof FactionSystem !== 'undefined' && FactionSystem.resetForNewGame) {
+        FactionSystem.resetForNewGame();
+    }
+
+    // Reset stat decay tracker for new game - so decay happens correctly from minute 0 💀
     game._lastProcessedMinute = -1;
 
     // 🖤 Hide main menu content but keep weather effects visible behind setup

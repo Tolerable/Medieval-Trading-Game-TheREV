@@ -8,10 +8,11 @@
 // 
 
 const FactionSystem = {
-    // 
+    //
     // CONFIGURATION
-    // 
+    //
     playerFactionRep: {},
+    discoveredFactions: new Set(), // Only show factions player has encountered
 
     //  Reputation thresholds - scaled to -100 to +100 for sanity
     // -100 to +100 - simple math for complex hatred and fragile devotion 
@@ -342,19 +343,23 @@ const FactionSystem = {
     // INITIALIZATION
     //
     init() {
-        console.log('🏛️ FactionSystem: Establishing allegiances... choose your enemies wisely 🗡️');
+        console.log('FactionSystem: Establishing allegiances...');
+
+        // Load discovered factions from save
+        this.loadDiscoveredFactions();
 
         // Everyone starts neutral - innocence dies fast in this world
         for (const factionId of Object.keys(this.factions)) {
             if (this.playerFactionRep[factionId] === undefined) {
-                this.playerFactionRep[factionId] = 0; // Zero. Neutral. Temporary peace before the inevitable betrayal
+                this.playerFactionRep[factionId] = 0;
             }
         }
 
         this.setupEventListeners();
         this.injectStyles();
+        this.createFactionPanel();
 
-        console.log('🏛️ FactionSystem: Ready to track who loves you and who wants you dead 🖤');
+        console.log('FactionSystem: Ready');
     },
 
     setupEventListeners() {
@@ -389,9 +394,54 @@ const FactionSystem = {
         return { id: 'neutral', ...this.repLevels.neutral, currentRep: rep };
     },
 
+    // Discover a faction (adds to visible list)
+    discoverFaction(factionId) {
+        if (!this.factions[factionId] && !this.enemyFactions[factionId]) return;
+        if (!this.discoveredFactions.has(factionId)) {
+            this.discoveredFactions.add(factionId);
+            console.log(`Discovered faction: ${factionId}`);
+            this.saveDiscoveredFactions();
+        }
+    },
+
+    // Get all discovered factions (ones player has interacted with)
+    getDiscoveredFactions() {
+        return Array.from(this.discoveredFactions);
+    },
+
+    // Save discovered factions to localStorage
+    saveDiscoveredFactions() {
+        try {
+            localStorage.setItem('discoveredFactions', JSON.stringify(Array.from(this.discoveredFactions)));
+        } catch (e) { /* silent */ }
+    },
+
+    // Load discovered factions from localStorage
+    loadDiscoveredFactions() {
+        try {
+            const saved = localStorage.getItem('discoveredFactions');
+            if (saved) {
+                this.discoveredFactions = new Set(JSON.parse(saved));
+            }
+        } catch (e) { /* silent */ }
+    },
+
+    // Reset for new game
+    resetForNewGame() {
+        this.playerFactionRep = {};
+        this.discoveredFactions = new Set();
+        try {
+            localStorage.removeItem('discoveredFactions');
+        } catch (e) { /* silent */ }
+        console.log('FactionSystem reset for new game');
+    },
+
     modifyReputation(factionId, amount, reason = '') {
         const faction = this.factions[factionId];
         if (!faction) return;
+
+        // Auto-discover faction when rep changes
+        this.discoverFaction(factionId);
 
         const oldRep = this.playerFactionRep[factionId] || 0;
         const oldLevel = this.getReputationLevel(factionId);
@@ -766,10 +816,204 @@ const FactionSystem = {
         }
     },
 
-    // 
-    // UI
-    // 
+    //
+    // UI - Draggable Panel
+    //
+    createFactionPanel() {
+        // Don't create if already exists
+        if (document.getElementById('faction-panel')) return;
+
+        const panel = document.createElement('div');
+        panel.id = 'faction-panel';
+        panel.className = 'panel faction-panel-container';
+        panel.style.cssText = `
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            max-width: 90vw;
+            max-height: 70vh;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid rgba(79, 195, 247, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+        `;
+
+        panel.innerHTML = `
+            <div class="faction-panel-header" style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px 16px;
+                background: rgba(0, 0, 0, 0.3);
+                border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+                cursor: move;
+                user-select: none;
+            ">
+                <h3 style="margin: 0; color: #4fc3f7; font-size: 16px;">Faction Reputation</h3>
+                <button class="faction-panel-close" style="
+                    background: rgba(244, 67, 54, 0.3);
+                    border: 1px solid #f44336;
+                    color: #f44336;
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    font-size: 14px;
+                    line-height: 1;
+                ">X</button>
+            </div>
+            <div class="faction-panel-content" style="
+                overflow-y: auto;
+                padding: 12px;
+                flex: 1;
+            ">
+                <div class="faction-list-empty" style="
+                    text-align: center;
+                    color: #888;
+                    padding: 20px;
+                    font-style: italic;
+                ">You haven't encountered any factions yet. Explore the world and interact with NPCs to discover factions.</div>
+            </div>
+        `;
+
+        document.body.appendChild(panel);
+
+        // Close button handler
+        panel.querySelector('.faction-panel-close').onclick = () => {
+            this.hideFactionPanel();
+        };
+
+        // Make draggable after centering calculation
+        setTimeout(() => {
+            const rect = panel.getBoundingClientRect();
+            panel.style.left = ((window.innerWidth - rect.width) / 2) + 'px';
+            panel.style.transform = 'none';
+
+            if (typeof DraggablePanels !== 'undefined') {
+                DraggablePanels.makeDraggable(panel);
+            }
+        }, 10);
+
+        console.log('FactionSystem: Panel created');
+    },
+
+    // Show the faction panel with current discovered factions
     showFactionPanel() {
+        let panel = document.getElementById('faction-panel');
+        if (!panel) {
+            this.createFactionPanel();
+            panel = document.getElementById('faction-panel');
+        }
+
+        // Update content with discovered factions
+        this.updateFactionPanelContent();
+
+        // Show panel
+        panel.style.display = 'flex';
+
+        // Bring to front
+        if (typeof DraggablePanels !== 'undefined') {
+            DraggablePanels.bringToFront(panel);
+        }
+    },
+
+    // Hide the faction panel
+    hideFactionPanel() {
+        const panel = document.getElementById('faction-panel');
+        if (panel) {
+            panel.style.display = 'none';
+        }
+    },
+
+    // Toggle faction panel visibility
+    toggleFactionPanel() {
+        const panel = document.getElementById('faction-panel');
+        if (panel && panel.style.display !== 'none') {
+            this.hideFactionPanel();
+        } else {
+            this.showFactionPanel();
+        }
+    },
+
+    // Update the faction panel content with current discovered factions
+    updateFactionPanelContent() {
+        const panel = document.getElementById('faction-panel');
+        if (!panel) return;
+
+        const content = panel.querySelector('.faction-panel-content');
+        if (!content) return;
+
+        const discovered = this.getDiscoveredFactions();
+
+        if (discovered.length === 0) {
+            content.innerHTML = `
+                <div class="faction-list-empty" style="
+                    text-align: center;
+                    color: #888;
+                    padding: 20px;
+                    font-style: italic;
+                ">You haven't encountered any factions yet. Explore the world and interact with NPCs to discover factions.</div>
+            `;
+            return;
+        }
+
+        let factionsHTML = '';
+        for (const factionId of discovered) {
+            const faction = this.factions[factionId] || this.enemyFactions[factionId];
+            if (!faction) continue;
+
+            const level = this.getReputationLevel(factionId);
+            const rep = this.getReputation(factionId);
+            const benefits = this.getFactionBenefits(factionId);
+            const penalties = this.getFactionPenalties(factionId);
+
+            // Calculate progress to next level
+            const nextLevel = this.getNextLevel(level.id);
+            const progress = nextLevel ?
+                ((rep - level.min) / (nextLevel.min - level.min)) * 100 : 100;
+
+            factionsHTML += `
+                <div class="faction-card" style="
+                    background: rgba(40, 40, 70, 0.4);
+                    border: 1px solid rgba(79, 195, 247, 0.2);
+                    border-radius: 8px;
+                    padding: 12px;
+                    margin-bottom: 10px;
+                ">
+                    <div class="faction-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span class="faction-icon" style="font-size: 20px;">${faction.icon}</span>
+                        <span class="faction-name" style="color: #fff; font-weight: bold; font-size: 14px;">${faction.name}</span>
+                    </div>
+                    <div class="faction-description" style="color: #888; font-size: 11px; margin-bottom: 8px;">${faction.description}</div>
+                    <div class="faction-standing" style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                        <span class="standing-icon" style="font-size: 16px;">${level.icon}</span>
+                        <span class="standing-name" style="font-weight: bold; color: ${level.color};">${level.name}</span>
+                        <span class="standing-rep" style="color: #666; font-size: 11px;">(${rep})</span>
+                    </div>
+                    <div class="faction-progress-bar" style="
+                        height: 5px;
+                        background: rgba(0, 0, 0, 0.4);
+                        border-radius: 3px;
+                        overflow: hidden;
+                        margin-bottom: 6px;
+                    ">
+                        <div class="faction-progress-fill" style="width: ${Math.max(0, Math.min(100, progress))}%; height: 100%; background: ${level.color};"></div>
+                    </div>
+                    ${benefits ? `<div class="faction-benefit" style="color: #4caf50; font-size: 11px;">${benefits.description}</div>` : ''}
+                    ${penalties ? `<div class="faction-penalty" style="color: #f44336; font-size: 11px;">Warning: ${penalties.description}</div>` : ''}
+                </div>
+            `;
+        }
+
+        content.innerHTML = factionsHTML;
+    },
+
+    // Legacy overlay method - still available for quick view
+    showFactionOverlay() {
         const existing = document.getElementById('faction-panel-overlay');
         if (existing) {
             existing.remove();
@@ -809,7 +1053,7 @@ const FactionSystem = {
                         <div class="faction-progress-fill" style="width: ${Math.max(0, Math.min(100, progress))}%; background: ${level.color}"></div>
                     </div>
                     ${benefits ? `<div class="faction-benefit">${benefits.description}</div>` : ''}
-                    ${penalties ? `<div class="faction-penalty">⚠️ ${penalties.description}</div>` : ''}
+                    ${penalties ? `<div class="faction-penalty">Warning: ${penalties.description}</div>` : ''}
                 </div>
             `;
         }
@@ -817,8 +1061,8 @@ const FactionSystem = {
         overlay.innerHTML = `
             <div class="faction-panel">
                 <div class="faction-panel-header">
-                    <h2>🏛️ Faction Standings</h2>
-                    <button class="faction-close" onclick="this.closest('.faction-overlay').remove()">✕</button>
+                    <h2>Faction Standings</h2>
+                    <button class="faction-close" onclick="this.closest('.faction-overlay').remove()">X</button>
                 </div>
                 <div class="faction-list">
                     ${factionsHTML}

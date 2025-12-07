@@ -29,7 +29,8 @@ const PanelManager = {
         'KeyBindings.openAchievements()': () => typeof KeyBindings !== 'undefined' && KeyBindings.openAchievements?.(),
         'QuestSystem.toggleQuestTracker()': () => typeof QuestSystem !== 'undefined' && QuestSystem.toggleQuestTracker?.(),
         'PartyPanel.togglePanel()': () => typeof PartyPanel !== 'undefined' && PartyPanel.togglePanel?.(),
-        'toggleMarket()': () => typeof toggleMarket === 'function' ? toggleMarket() : (typeof KeyBindings !== 'undefined' && KeyBindings.openMarket?.())
+        'toggleMarket()': () => typeof toggleMarket === 'function' ? toggleMarket() : (typeof KeyBindings !== 'undefined' && KeyBindings.openMarket?.()),
+        'FactionSystem.toggleFactionPanel()': () => typeof FactionSystem !== 'undefined' && FactionSystem.toggleFactionPanel?.()
     },
 
     // All managed panel IDs and their info
@@ -54,7 +55,8 @@ const PanelManager = {
         'side-panel': { name: 'Player Info', icon: '👤', shortcut: '' },
         'message-log': { name: 'Messages', icon: '💬', shortcut: '' },
         'help-overlay': { name: 'Help', icon: '❓', shortcut: '', useActiveClass: true },
-        'quest-tracker': { name: 'Quest Tracker', icon: '📋', shortcut: '', customToggle: 'QuestSystem.toggleQuestTracker()' }
+        'quest-tracker': { name: 'Quest Tracker', icon: '📋', shortcut: '', customToggle: 'QuestSystem.toggleQuestTracker()' },
+        'faction-panel': { name: 'Factions', icon: '🏛️', shortcut: 'R', customToggle: 'FactionSystem.toggleFactionPanel()' }
     },
 
     // panels that should NOT get close buttons (they have their own or are special)
@@ -313,6 +315,7 @@ const PanelManager = {
             'financial-sheet-overlay', // 💰 Finances [F]
             'quest-overlay',          // 📜 Quests [Q]
             'achievement-overlay',    // 🏆 Achievements [A]
+            'faction-panel',          // 🏛️ Factions [R]
             'message-log',            // 💬 Messages
             'quest-tracker'           // 📋 Quest Tracker widget
         ];

@@ -19,7 +19,7 @@ const KeyBindings = {
             quickSave: 'F5', quickLoad: 'F9', mapUp: 'w', mapDown: 's',
             mapLeft: 'a', mapRight: 'd', zoomIn: '=', zoomOut: '-',
             properties: 'p', achievements: 'h', settings: ',', quests: 'q',
-            people: 'o',
+            people: 'o', factions: 'r',
         };
     },
 
@@ -40,7 +40,7 @@ const KeyBindings = {
             mapRight: 'Pan Map Right', zoomIn: 'Zoom In', zoomOut: 'Zoom Out',
             properties: 'Open Properties', achievements: 'Open Achievements',
             settings: 'Open Settings', quests: 'Open Quest Log',
-            people: 'Open People Panel',
+            people: 'Open People Panel', factions: 'Open Factions Panel',
         };
     },
 
@@ -270,6 +270,12 @@ const KeyBindings = {
             event.preventDefault();
             if (typeof QuestSystem !== 'undefined') QuestSystem.toggleQuestLog();
             if (typeof addMessage === 'function') addMessage('📜 Quest log opened [Q]');
+            return;
+        }
+        if (this.matches(event, 'factions')) {
+            event.preventDefault();
+            if (typeof FactionSystem !== 'undefined') FactionSystem.toggleFactionPanel();
+            if (typeof addMessage === 'function') addMessage('🏛️ Factions panel opened [R]');
             return;
         }
 

@@ -193,6 +193,8 @@ const MainQuests = {
             },
 
             // 1.5 - Strange Cargo
+            // The player must explore Sunhaven (harbor_warehouse exploration) to find the shipping_manifest
+            // The manifest drops from the exploration loot, not given when accepting quest
             act1_quest5: {
                 id: 'act1_quest5',
                 name: 'Strange Cargo',
@@ -209,22 +211,23 @@ const MainQuests = {
                 chain: 'shadow_rising',
                 difficulty: 'easy',
                 objectives: [
-                    { type: 'explore', dungeon: 'sunhaven', rooms: 1, current: 0, description: 'Search the harbor warehouse' },
-                    { type: 'collect', item: 'shipping_manifest', count: 1, current: 0, description: 'Find evidence of suspicious cargo' },
+                    { type: 'explore', dungeon: 'sunhaven', rooms: 1, current: 0, description: 'Search the harbor warehouse (press E to explore)' },
+                    { type: 'collect', item: 'shipping_manifest', count: 1, current: 0, description: 'Find the shipping manifest' },
                     { type: 'talk', npc: 'harbormaster', location: 'sunhaven', completed: false, description: 'Return to Harbormaster Elena' }
                 ],
                 rewards: { gold: 100, reputation: 25, experience: 50 },
-                givesQuestItem: 'shipping_manifest',
+                // NO givesQuestItem - player must FIND the manifest from exploration
                 prerequisite: 'act1_quest4',
                 nextQuest: 'act1_quest6',
                 dialogue: {
-                    offer: "Sealed crates arrive monthly, always at night, always paid for in advance. The manifest says 'agricultural supplies' but they're too heavy. I can't investigate - my position is too visible. But you could slip in...",
-                    progress: "Be careful in that warehouse. The night guards don't ask questions.",
+                    offer: "Sealed crates arrive monthly, always at night, always paid for in advance. The manifest says 'agricultural supplies' but they're too heavy. I can't investigate - my position is too visible. But you could slip in... Press E when in Sunhaven to explore the warehouse.",
+                    progress: "Search the warehouse crates! The manifest has to be there somewhere. Press E to open the exploration panel.",
                     complete: "A manifest with coded entries! And look here - payments to something called 'The Black Ledger'. What is that? You should show this to Elder Morin."
                 }
             },
 
             // 1.6 - The Missing Trader
+            // Talk to innkeeper who will give you the trader's journal (left behind)
             act1_quest6: {
                 id: 'act1_quest6',
                 name: 'The Missing Trader',
@@ -245,7 +248,7 @@ const MainQuests = {
                     { type: 'talk', npc: 'guard', location: 'sunhaven', completed: false, description: 'Return to Guard Captain Theron' }
                 ],
                 rewards: { gold: 80, reputation: 20, experience: 45 },
-                givesQuestItem: 'traders_journal',
+                // NO givesQuestItem - journal is given via the talk objective's givesItem
                 prerequisite: 'act1_quest5',
                 nextQuest: 'act1_quest7',
                 dialogue: {
@@ -365,6 +368,7 @@ const MainQuests = {
             },
 
             // 2.3 - Paper Trail
+            // Explore ironforge to find cipher_key in archive exploration, then talk to scholar
             act2_quest3: {
                 id: 'act2_quest3',
                 name: 'Paper Trail',
@@ -381,16 +385,16 @@ const MainQuests = {
                 chain: 'shadow_rising',
                 difficulty: 'medium',
                 objectives: [
-                    { type: 'collect', item: 'cipher_key', count: 1, current: 0, description: 'Find the cipher key in the old archive' },
-                    { type: 'talk', npc: 'scholar', completed: false, description: 'Help Aldwin decode the documents' }
+                    { type: 'explore', dungeon: 'ironforge_city', rooms: 1, current: 0, description: 'Search the old archive (press E to explore)' },
+                    { type: 'talk', npc: 'scholar', completed: false, description: 'Help Aldwin decode the documents', givesItem: 'decoded_documents' }
                 ],
                 rewards: { gold: 300, reputation: 45, experience: 150 },
-                givesQuestItem: 'decoded_documents',
+                // NO givesQuestItem - documents given by talk objective after decoding
                 prerequisite: 'act2_quest2',
                 nextQuest: 'act2_quest4',
                 dialogue: {
-                    offer: "These documents use an old merchant cipher, but it's been modified. The original key is in the city archive - dusty scrolls no one has touched in decades. Find it, and we can read their secrets.",
-                    progress: "The archive is in the old quarter. Watch for those who might follow you.",
+                    offer: "These documents use an old merchant cipher, but it's been modified. The original key is in the city archive - dusty scrolls no one has touched in decades. Search the old quarter archives (press E) and we can read their secrets.",
+                    progress: "The archive is in the old quarter. Press E to explore and search for the cipher.",
                     complete: "The cipher breaks! Listen to this: 'The Ledger approves continued investment in Project Shadow. Ensure eastern supply lines remain secure.' The Black Ledger is real, and they're funding something called Project Shadow. The eastern supply lines... that means Jade Harbor."
                 }
             },
@@ -427,6 +431,7 @@ const MainQuests = {
             },
 
             // 2.5 - Smuggler's Debt
+            // Visit smugglers_cove, explore to prove yourself, get token from talk objective
             act2_quest5: {
                 id: 'act2_quest5',
                 name: 'Smuggler\'s Debt',
@@ -444,20 +449,22 @@ const MainQuests = {
                 difficulty: 'medium',
                 objectives: [
                     { type: 'visit', location: 'smugglers_cove', completed: false, description: 'Find Smuggler\'s Cove' },
-                    { type: 'collect', item: 'smuggler_token', count: 1, current: 0, description: 'Earn a smuggler\'s token of trust' }
+                    { type: 'explore', dungeon: 'smugglers_cove', rooms: 1, current: 0, description: 'Prove your worth (explore the cove)' },
+                    { type: 'talk', npc: 'merchant', location: 'smugglers_cove', completed: false, description: 'Earn the smuggler boss\'s trust', givesItem: 'smuggler_token' }
                 ],
                 rewards: { gold: 400, reputation: 55, experience: 200, items: { exotic_goods: 3 } },
-                givesQuestItem: 'smuggler_token',
+                // NO givesQuestItem - token is earned via talk objective after proving yourself
                 prerequisite: 'act2_quest4',
                 nextQuest: 'act2_quest6',
                 dialogue: {
-                    offer: "Smuggler's Cove is hidden behind the coastal caves. The smugglers won't trust an outsider... unless you prove useful. I know they need someone to move rare goods. Do this, and they'll give you a token. With that, you can ask questions.",
-                    progress: "The caves are treacherous. Watch for pirates and worse.",
+                    offer: "Smuggler's Cove is hidden behind the coastal caves. The smugglers won't trust an outsider... unless you prove useful. Explore the cove, help them with a job, and they'll give you a token. With that, you can ask questions.",
+                    progress: "The caves are treacherous. Explore (press E) and prove yourself useful.",
                     complete: "You have a smuggler's token! You're one of them now - at least on the surface. Time to find out where the gold flows."
                 }
             },
 
             // 2.6 - Following the Gold
+            // Explore the vault at smugglers_cove to find the records
             act2_quest6: {
                 id: 'act2_quest6',
                 name: 'Following the Gold',
@@ -474,16 +481,16 @@ const MainQuests = {
                 chain: 'shadow_rising',
                 difficulty: 'medium',
                 objectives: [
-                    { type: 'collect', item: 'gold_shipment_records', count: 1, current: 0, description: 'Steal shipment records from the vault' },
+                    { type: 'explore', dungeon: 'smugglers_cove', rooms: 2, current: 0, description: 'Search the vault for shipment records (press E)' },
                     { type: 'visit', location: 'jade_harbor', completed: false, description: 'Escape with the evidence' }
                 ],
                 rewards: { gold: 500, reputation: 60, experience: 250 },
-                givesQuestItem: 'gold_shipment_records',
+                // Records found from exploration - no givesQuestItem
                 prerequisite: 'act2_quest5',
                 nextQuest: 'act2_quest7',
                 dialogue: {
-                    offer: "You want to know where the big money goes? There's a vault here - records of every major shipment. I owe the boss money, and that vault has my debts recorded too. Get me those records, and I'll tell you everything.",
-                    progress: "The vault is guarded, but during the nightly card game, security is light.",
+                    offer: "You want to know where the big money goes? There's a vault here - records of every major shipment. I owe the boss money, and that vault has my debts recorded too. Explore the cove (press E) and find those records.",
+                    progress: "The vault is guarded, but during the nightly card game, security is light. Press E to explore.",
                     complete: "Perfect! My debts are gone, and look at these records! Gold flows west - massive amounts - to something called 'Project Shadow' near the western outpost. And here's a name: Malachar. The Black Ledger is funding a wizard's return!"
                 }
             },
@@ -645,11 +652,11 @@ const MainQuests = {
                 difficulty: 'hard',
                 objectives: [
                     { type: 'visit', location: 'frozen_cave', completed: false, description: 'Enter the Frozen Cave' },
-                    { type: 'explore', dungeon: 'frozen_cave', rooms: 6, completed: false, description: 'Navigate to the seal chamber' },
-                    { type: 'collect', item: 'broken_seal_shard', count: 1, current: 0, description: 'Find evidence of the broken seal' }
+                    { type: 'explore', dungeon: 'frozen_cave', rooms: 6, current: 0, description: 'Navigate to the seal chamber (press E)' }
+                    // broken_seal_shard is found from the exploration loot, not a separate collect objective
                 ],
                 rewards: { gold: 1000, reputation: 100, experience: 500, items: { frozen_tear: 1 } },
-                givesQuestItem: 'broken_seal_shard',
+                // NO givesQuestItem - seal shard found from exploration
                 prerequisite: 'act3_quest3',
                 nextQuest: 'act3_quest5',
                 dialogue: {
@@ -660,6 +667,7 @@ const MainQuests = {
             },
 
             // 3.5 - Breaking the Chain
+            // Explore frostholm to intercept the convoy (exploration-based, not random combat)
             act3_quest5: {
                 id: 'act3_quest5',
                 name: 'Breaking the Chain',
@@ -676,16 +684,15 @@ const MainQuests = {
                 chain: 'shadow_rising',
                 difficulty: 'hard',
                 objectives: [
-                    { type: 'defeat', enemy: 'black_ledger_guard', count: 5, current: 0, description: 'Defeat the convoy guards' },
-                    { type: 'collect', item: 'supply_manifest', count: 1, current: 0, description: 'Capture the supply manifest' }
+                    { type: 'explore', dungeon: 'frostholm', rooms: 3, current: 0, description: 'Search the frozen passes for the convoy (press E)' },
+                    { type: 'talk', npc: 'huntmaster', location: 'frostholm', completed: false, description: 'Report the convoy\'s route to Huntmaster Erik' }
                 ],
                 rewards: { gold: 1200, reputation: 110, experience: 550 },
-                givesQuestItem: 'supply_manifest',
                 prerequisite: 'act3_quest4',
                 nextQuest: 'act3_quest6',
                 dialogue: {
-                    offer: "My hunters spotted a convoy heading west - heavily guarded, flying no flags. That's Black Ledger, trying to stay hidden. Intercept them and we might learn where the final seal is.",
-                    progress: "The convoy passes through hunter's territory. We know these woods.",
+                    offer: "My hunters spotted a convoy heading west - heavily guarded, flying no flags. That's Black Ledger, trying to stay hidden. Search the frozen passes (press E to explore) and we might learn where the final seal is.",
+                    progress: "The convoy passes through hunter's territory. Press E to explore and track them.",
                     complete: "The manifest reveals everything! Supplies, gold, and workers - all heading to the Shadow Tower in the west. That's the final seal. They're close to freeing Malachar completely. But look here - a list of Black Ledger members. Names we recognize..."
                 }
             },
@@ -858,11 +865,11 @@ const MainQuests = {
                 chain: 'shadow_rising',
                 difficulty: 'hard',
                 objectives: [
-                    { type: 'collect', item: 'military_supplies', count: 50, current: 0, description: 'Gather 50 units of military supplies' },
-                    { type: 'talk', npc: 'sergeant', completed: false, description: 'Secure military alliance' }
+                    { type: 'trade', count: 5, current: 0, minValue: 200, description: 'Trade supplies worth 200g each (5 trades)' },
+                    { type: 'talk', npc: 'sergeant', completed: false, description: 'Secure military alliance', givesItem: 'military_insignia' }
                 ],
-                rewards: { gold: 3000, reputation: 220, experience: 900, items: { military_insignia: 1 } },
-                givesQuestItem: 'military_insignia',
+                rewards: { gold: 3000, reputation: 220, experience: 900 },
+                // military_insignia given by talk objective
                 prerequisite: 'act4_quest2',
                 nextQuest: 'act4_quest4',
                 dialogue: {
@@ -890,11 +897,11 @@ const MainQuests = {
                 difficulty: 'hard',
                 objectives: [
                     { type: 'visit', location: 'forest_dungeon', completed: false, description: 'Enter the Overgrown Crypt' },
-                    { type: 'explore', dungeon: 'forest_dungeon', rooms: 8, completed: false, description: 'Navigate to the heart of the crypt' },
-                    { type: 'collect', item: 'shadow_key', count: 1, current: 0, description: 'Retrieve the Shadow Key' }
+                    { type: 'explore', dungeon: 'forest_dungeon', rooms: 8, current: 0, description: 'Navigate to the heart of the crypt (press E)' }
+                    // Shadow Key is found from exploration loot
                 ],
                 rewards: { gold: 4000, reputation: 250, experience: 1000, items: { shadow_key: 1 } },
-                givesQuestItem: 'shadow_key',
+                // Shadow key found in dungeon exploration
                 prerequisite: 'act4_quest3',
                 nextQuest: 'act4_quest5',
                 dialogue: {
@@ -922,8 +929,8 @@ const MainQuests = {
                 difficulty: 'hard',
                 objectives: [
                     { type: 'visit', location: 'royal_capital', completed: false, description: 'Meet with the Spy Master' },
-                    { type: 'collect', item: 'vault_key', count: 1, current: 0, description: 'Obtain the vault key through subterfuge' },
-                    { type: 'collect', item: 'war_chest_gold', count: 1, current: 0, description: 'Steal the war chest' }
+                    { type: 'explore', dungeon: 'royal_capital', rooms: 2, current: 0, description: 'Infiltrate the Black Ledger vault (press E)' },
+                    { type: 'talk', npc: 'merchant', location: 'royal_capital', completed: false, description: 'Deliver the war chest to Spy Master' }
                 ],
                 rewards: { gold: 10000, reputation: 275, experience: 1100 },
                 prerequisite: 'act4_quest4',
@@ -952,11 +959,12 @@ const MainQuests = {
                 chain: 'shadow_rising',
                 difficulty: 'hard',
                 objectives: [
-                    { type: 'collect', item: 'ancient_map', count: 1, current: 0, description: 'Piece together the ancient map fragments' },
+                    { type: 'explore', dungeon: 'ironforge_city', rooms: 2, current: 0, description: 'Search the archive for map fragments (press E)' },
+                    { type: 'talk', npc: 'scholar', location: 'ironforge_city', completed: false, description: 'Have Scholar Aldwin assemble the map', givesItem: 'ancient_map' },
                     { type: 'visit', location: 'forest_dungeon', completed: false, description: 'Discover the Ruins of Malachar location' }
                 ],
-                rewards: { gold: 5000, reputation: 300, experience: 1200, items: { ancient_map: 1 } },
-                givesQuestItem: 'ancient_map',
+                rewards: { gold: 5000, reputation: 300, experience: 1200 },
+                // ancient_map given by scholar talk objective
                 prerequisite: 'act4_quest5',
                 nextQuest: 'act4_quest7',
                 unlocks: { location: 'forest_dungeon' },
@@ -1039,7 +1047,7 @@ const MainQuests = {
                 objectives: [
                     { type: 'gold', amount: 500000, description: 'Demonstrate wealth of 500,000 gold' },
                     { type: 'visit', location: 'shadow_dungeon', completed: false, description: 'Breach the first stronghold' },
-                    { type: 'explore', dungeon: 'shadow_dungeon', rooms: 5, completed: false, description: 'Clear the outer defenses' }
+                    { type: 'explore', dungeon: 'shadow_dungeon', rooms: 5, current: 0, description: 'Clear the outer defenses (press E)' }
                 ],
                 rewards: { gold: 5000, reputation: 400, experience: 2000 },
                 prerequisite: 'act4_quest7',
@@ -1101,7 +1109,7 @@ const MainQuests = {
                 isOptional: true, // Can be skipped
                 objectives: [
                     { type: 'visit', location: 'doom_shadow_dungeon', completed: false, description: 'Step through the portal (optional)' },
-                    { type: 'explore', dungeon: 'doom_world', rooms: 1, completed: false, description: 'Witness the Doom World' }
+                    { type: 'explore', dungeon: 'doom_world', rooms: 1, current: 0, description: 'Witness the Doom World (press E)' }
                 ],
                 rewards: { gold: 2500, reputation: 250, experience: 1500 },
                 unlocks: { knowledge: 'doom_world_lore' },
@@ -1132,7 +1140,7 @@ const MainQuests = {
                 difficulty: 'legendary',
                 objectives: [
                     { type: 'visit', location: 'forest_dungeon', completed: false, description: 'Assault the second stronghold' },
-                    { type: 'explore', dungeon: 'forest_dungeon', rooms: 6, completed: false, description: 'Navigate the ancient ruins' }
+                    { type: 'explore', dungeon: 'forest_dungeon', rooms: 6, current: 0, description: 'Navigate the ancient ruins (press E)' }
                 ],
                 rewards: { gold: 7500, reputation: 450, experience: 2500 },
                 prerequisite: 'act5_quest3',
@@ -1193,8 +1201,8 @@ const MainQuests = {
                 difficulty: 'legendary',
                 objectives: [
                     { type: 'visit', location: 'royal_capital', completed: false, description: 'Return to the Royal Capital' },
-                    { type: 'talk', npc: 'noble', completed: false, description: 'Present evidence to the King' },
-                    { type: 'collect', item: 'black_ledger_seized', count: 1, current: 0, description: 'Witness the arrests' }
+                    { type: 'talk', npc: 'noble', completed: false, description: 'Present evidence to the King' }
+                    // Arrests happen automatically on quest completion
                 ],
                 rewards: { gold: 20000, reputation: 700, experience: 5000 },
                 prerequisite: 'act5_quest5',
@@ -1226,7 +1234,7 @@ const MainQuests = {
                 isFinalBoss: true,
                 objectives: [
                     { type: 'visit', location: 'shadow_dungeon', completed: false, description: 'Enter Malachar\'s sanctum' },
-                    { type: 'explore', dungeon: 'shadow_dungeon', rooms: 10, completed: false, description: 'Reach the heart of darkness' },
+                    { type: 'explore', dungeon: 'shadow_dungeon', rooms: 10, current: 0, description: 'Reach the heart of darkness (press E)' },
                     { type: 'defeat', enemy: 'malachar', count: 1, current: 0, description: 'Defeat Malachar' }
                 ],
                 rewards: {
