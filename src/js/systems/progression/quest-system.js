@@ -298,7 +298,7 @@ const QuestSystem = {
             objectives: [
                 { type: 'carry', item: 'greendale_package', count: 1, current: 0, description: 'Carry the package' },
                 { type: 'visit', location: 'ironforge_city', completed: false, description: 'Travel to Ironforge City' },
-                { type: 'talk', npc: 'blacksmith', completed: false, description: 'Deliver to blacksmith' }
+                { type: 'talk', npc: 'blacksmith', location: 'ironforge_city', completed: false, description: 'Deliver to blacksmith in Ironforge' }
             ],
             rewards: { gold: 80, reputation: 15, experience: 40 },
             givesQuestItem: 'greendale_package',
@@ -428,7 +428,7 @@ const QuestSystem = {
             objectives: [
                 { type: 'carry', item: 'silk_shipment', count: 1, current: 0, description: 'Carry silk shipment' },
                 { type: 'visit', location: 'royal_capital', completed: false, description: 'Travel to Royal Capital' },
-                { type: 'talk', npc: 'merchant', completed: false, description: 'Deliver to noble merchant' }
+                { type: 'talk', npc: 'merchant', location: 'royal_capital', completed: false, description: 'Deliver to noble merchant in Royal Capital' }
             ],
             rewards: { gold: 150, items: { silk: 2 }, reputation: 20, experience: 60 },
             givesQuestItem: 'silk_shipment',
@@ -507,7 +507,7 @@ const QuestSystem = {
             objectives: [
                 { type: 'carry', item: 'royal_decree', count: 1, current: 0, description: 'Carry the decree' },
                 { type: 'visit', location: 'greendale', completed: false, description: 'Return to Greendale' },
-                { type: 'talk', npc: 'elder', completed: false, description: 'Deliver to Elder Morin' }
+                { type: 'talk', npc: 'elder', location: 'greendale', completed: false, description: 'Deliver to Elder Morin in Greendale' }
             ],
             rewards: { gold: 100, reputation: 25, experience: 50 },
             givesQuestItem: 'royal_decree',
@@ -533,7 +533,7 @@ const QuestSystem = {
             objectives: [
                 { type: 'visit', location: 'sunhaven', completed: false, description: 'Travel to Sunhaven' },
                 { type: 'collect', item: 'wine', count: 5, current: 0, description: 'Acquire 5 bottles of wine' },
-                { type: 'talk', npc: 'merchant', completed: false, description: 'Return to the Steward' }
+                { type: 'talk', npc: 'merchant', location: 'royal_capital', completed: false, description: 'Return to the Steward in Royal Capital' }
             ],
             rewards: { gold: 180, reputation: 20, experience: 70 },
             timeLimit: null, // No time limits - complete at your own pace
@@ -1292,7 +1292,14 @@ const QuestSystem = {
                         break;
 
                     case 'talk':
-                        if (data.npc === objective.npc || data.npcType === objective.npc) {
+                        // Check NPC type matches
+                        const npcMatches = data.npc === objective.npc || data.npcType === objective.npc;
+                        // If objective has location requirement, check player is in that location
+                        const locationMatches = !objective.location ||
+                            data.location === objective.location ||
+                            (typeof game !== 'undefined' && game.currentLocation?.id === objective.location);
+
+                        if (npcMatches && locationMatches) {
                             objective.completed = true;
                             updated = true;
                             //  If this talk objective gives an item, add it to correct inventory 

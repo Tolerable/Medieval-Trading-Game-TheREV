@@ -89,7 +89,7 @@ const MainQuests = {
                 difficulty: 'easy',
                 objectives: [
                     { type: 'buy', count: 1, current: 0, description: 'Make your first purchase from any merchant' },
-                    { type: 'talk', npc: 'elder', completed: false, description: 'Speak to the Village Elder in Greendale' }
+                    { type: 'talk', npc: 'elder', location: 'greendale', completed: false, description: 'Speak to the Village Elder in Greendale' }
                 ],
                 rewards: { gold: 25, reputation: 10, experience: 20 },
                 prerequisite: null,
@@ -276,7 +276,7 @@ const MainQuests = {
                 difficulty: 'easy',
                 objectives: [
                     { type: 'visit', location: 'greendale', completed: false, description: 'Return to Greendale' },
-                    { type: 'talk', npc: 'elder', completed: false, description: 'Present evidence to Elder Morin' }
+                    { type: 'talk', npc: 'elder', location: 'greendale', completed: false, description: 'Present evidence to Elder Morin' }
                 ],
                 rewards: { gold: 150, reputation: 30, experience: 75 },
                 prerequisite: 'act1_quest6',
@@ -355,7 +355,7 @@ const MainQuests = {
                 objectives: [
                     { type: 'collect', item: 'iron_ore', count: 20, current: 0, description: 'Gather 20 iron ore' },
                     { type: 'collect', item: 'coal', count: 15, current: 0, description: 'Gather 15 coal' },
-                    { type: 'talk', npc: 'blacksmith', completed: false, description: 'Deliver materials to Forgemaster' }
+                    { type: 'talk', npc: 'blacksmith', location: 'ironforge_city', completed: false, description: 'Deliver materials to Forgemaster in Ironforge' }
                 ],
                 rewards: { gold: 250, reputation: 40, experience: 120, items: { iron_sword: 1 } },
                 prerequisite: 'act2_quest1',
@@ -386,7 +386,7 @@ const MainQuests = {
                 difficulty: 'medium',
                 objectives: [
                     { type: 'explore', dungeon: 'ironforge_city', rooms: 1, current: 0, description: 'Search the old archive (press E to explore)' },
-                    { type: 'talk', npc: 'scholar', completed: false, description: 'Help Aldwin decode the documents', givesItem: 'decoded_documents' }
+                    { type: 'talk', npc: 'scholar', location: 'ironforge_city', completed: false, description: 'Help Aldwin decode the documents', givesItem: 'decoded_documents' }
                 ],
                 rewards: { gold: 300, reputation: 45, experience: 150 },
                 // NO givesQuestItem - documents given by talk objective after decoding
@@ -418,7 +418,7 @@ const MainQuests = {
                 objectives: [
                     { type: 'visit', location: 'jade_harbor', completed: false, description: 'Travel to Jade Harbor' },
                     { type: 'trade', count: 2, current: 0, minValue: 100, description: 'Establish yourself as a silk trader (2 trades)' },
-                    { type: 'talk', npc: 'merchant', completed: false, description: 'Gain the trust of local merchants' }
+                    { type: 'talk', npc: 'merchant', location: 'jade_harbor', completed: false, description: 'Gain the trust of local merchants in Jade Harbor' }
                 ],
                 rewards: { gold: 350, reputation: 50, experience: 175 },
                 prerequisite: 'act2_quest3',
@@ -513,8 +513,8 @@ const MainQuests = {
                 difficulty: 'medium',
                 objectives: [
                     { type: 'visit', location: 'ironforge_city', completed: false, description: 'Return to Ironforge City' },
-                    { type: 'talk', npc: 'guard', completed: false, description: 'Present evidence to Captain Aldric' },
-                    { type: 'talk', npc: 'scholar', completed: false, description: 'Confirm findings with Scholar Aldwin' }
+                    { type: 'talk', npc: 'guard', location: 'ironforge_city', completed: false, description: 'Present evidence to Captain Aldric' },
+                    { type: 'talk', npc: 'scholar', location: 'ironforge_city', completed: false, description: 'Confirm findings with Scholar Aldwin' }
                 ],
                 rewards: { gold: 750, reputation: 75, experience: 350 },
                 prerequisite: 'act2_quest6',
@@ -562,7 +562,7 @@ const MainQuests = {
                 objectives: [
                     { type: 'gold', amount: 50000, description: 'Demonstrate wealth of 50,000 gold' },
                     { type: 'visit', location: 'royal_capital', completed: false, description: 'Travel to the Royal Capital' },
-                    { type: 'talk', npc: 'noble', completed: false, description: 'Present evidence to the Royal Court' }
+                    { type: 'talk', npc: 'noble', location: 'royal_capital', completed: false, description: 'Present evidence to the Royal Court' }
                 ],
                 rewards: { gold: 600, reputation: 80, experience: 400 },
                 prerequisite: 'act2_quest7',
@@ -592,7 +592,7 @@ const MainQuests = {
                 difficulty: 'medium',
                 objectives: [
                     { type: 'gold', amount: 10000, spendable: true, description: 'Prepare 10,000 gold for auction' },
-                    { type: 'talk', npc: 'merchant', completed: false, description: 'Win the auction against Lord Vance' }
+                    { type: 'talk', npc: 'merchant', location: 'royal_capital', completed: false, description: 'Win the auction against Lord Vance' }
                 ],
                 rewards: { gold: 800, reputation: 90, experience: 450, items: { rare_artifact: 1 } },
                 prerequisite: 'act3_quest1',
@@ -622,7 +622,7 @@ const MainQuests = {
                 difficulty: 'hard',
                 objectives: [
                     { type: 'visit', location: 'frostholm', completed: false, description: 'Travel to Frostholm' },
-                    { type: 'talk', npc: 'elder', completed: false, description: 'Consult the northern sages' }
+                    { type: 'talk', npc: 'elder', location: 'frostholm', completed: false, description: 'Consult the northern sages' }
                 ],
                 rewards: { gold: 700, reputation: 85, experience: 425 },
                 prerequisite: 'act3_quest2',
@@ -756,9 +756,9 @@ const MainQuests = {
                 difficulty: 'hard',
                 objectives: [
                     { type: 'visit', location: 'greendale', completed: false, description: 'Return to Greendale for the council' },
-                    { type: 'talk', npc: 'elder', completed: false, description: 'Present findings to Elder Morin' },
-                    { type: 'talk', npc: 'guard', completed: false, description: 'Coordinate with military leaders' },
-                    { type: 'talk', npc: 'scholar', completed: false, description: 'Confirm magical assessments' }
+                    { type: 'talk', npc: 'elder', location: 'greendale', completed: false, description: 'Present findings to Elder Morin' },
+                    { type: 'talk', npc: 'guard', location: 'greendale', completed: false, description: 'Coordinate with military leaders' },
+                    { type: 'talk', npc: 'scholar', location: 'greendale', completed: false, description: 'Confirm magical assessments' }
                 ],
                 rewards: { gold: 2000, reputation: 175, experience: 750 },
                 prerequisite: 'act3_quest6',
@@ -806,7 +806,7 @@ const MainQuests = {
                 objectives: [
                     { type: 'gold', amount: 150000, description: 'Demonstrate wealth of 150,000 gold' },
                     { type: 'trade', count: 10, current: 0, minValue: 500, description: 'Execute 10 large trades to manipulate markets' },
-                    { type: 'talk', npc: 'merchant', completed: false, description: 'Confirm market disruption' }
+                    { type: 'talk', npc: 'merchant', location: 'royal_capital', completed: false, description: 'Confirm market disruption in Royal Capital' }
                 ],
                 rewards: { gold: 2500, reputation: 200, experience: 800 },
                 prerequisite: 'act3_quest7',
@@ -866,7 +866,7 @@ const MainQuests = {
                 difficulty: 'hard',
                 objectives: [
                     { type: 'trade', count: 5, current: 0, minValue: 200, description: 'Trade supplies worth 200g each (5 trades)' },
-                    { type: 'talk', npc: 'sergeant', completed: false, description: 'Secure military alliance', givesItem: 'military_insignia' }
+                    { type: 'talk', npc: 'sergeant', location: 'stonebridge', completed: false, description: 'Secure military alliance', givesItem: 'military_insignia' }
                 ],
                 rewards: { gold: 3000, reputation: 220, experience: 900 },
                 // military_insignia given by talk objective
@@ -993,8 +993,8 @@ const MainQuests = {
                 difficulty: 'hard',
                 isChoiceQuest: true,
                 objectives: [
-                    { type: 'talk', npc: 'elder', completed: false, description: 'Receive final briefing' },
-                    { type: 'talk', npc: 'guard', completed: false, description: 'Confirm military readiness' },
+                    { type: 'talk', npc: 'elder', location: 'greendale', completed: false, description: 'Receive final briefing' },
+                    { type: 'talk', npc: 'guard', location: 'greendale', completed: false, description: 'Confirm military readiness' },
                     { type: 'decision', choices: ['assault_shadow_tower', 'assault_ruins'], completed: false, description: 'Choose which stronghold to assault first' }
                 ],
                 rewards: { gold: 7500, reputation: 350, experience: 1500 },
@@ -1201,7 +1201,7 @@ const MainQuests = {
                 difficulty: 'legendary',
                 objectives: [
                     { type: 'visit', location: 'royal_capital', completed: false, description: 'Return to the Royal Capital' },
-                    { type: 'talk', npc: 'noble', completed: false, description: 'Present evidence to the King' }
+                    { type: 'talk', npc: 'noble', location: 'royal_capital', completed: false, description: 'Present evidence to the King' }
                     // Arrests happen automatically on quest completion
                 ],
                 rewards: { gold: 20000, reputation: 700, experience: 5000 },
