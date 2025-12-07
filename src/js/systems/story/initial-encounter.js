@@ -10,10 +10,11 @@
 const InitialEncounterSystem = {
     //  CONFIG
     hasShownEncounter: false,
-    hasShownTutorialChoice: false, // Ÿ–¤ Track if we've shown the tutorial Yes/No popup
-    hasAcceptedInitialQuest: false, // Ÿ–¤ðŸ’€ Track if player accepted the initial quest
-    strangerSpawnedAtLocation: null, // Ÿ–¤ Track where we spawned the stranger as fallback NPC
-    encounterDelay: 500, // Ÿ–¤ðŸ’€ FAST - show encounter quickly after game start!
+    hasShownTutorialChoice: false, // Track if we've shown the tutorial Yes/No popup
+    hasCompletedIntro: false, // Track when intro sequence fully complete (blocks city events until done)
+    hasAcceptedInitialQuest: false, // Track if player accepted the initial quest
+    strangerSpawnedAtLocation: null, // Track where we spawned the stranger as fallback NPC
+    encounterDelay: 500, // FAST - show encounter quickly after game start!
 
     //  THE MYSTERIOUS STRANGER - your first encounter in this world
     mysteriousStranger: {
@@ -116,7 +117,7 @@ const InitialEncounterSystem = {
                         </p>
                     </div>
                 `,
-                closeable: false, // Ÿ–¤ Must choose - no escape from this decision
+                closeable: false, // ï¿½ï¿½ï¿½ Must choose - no escape from this decision
                 buttons: [
                     {
                         text: 'No, Just Start',
@@ -306,15 +307,15 @@ const InitialEncounterSystem = {
             PeoplePanel.showSpecialEncounter(stranger, {
                 introText: introNarrative,
                 greeting: strangerDialogue,
-                disableChat: true,  // Ÿ–¤ No freeform chat during intro
-                disableBack: true,  // Ÿ–¤ No escape from destiny
+                disableChat: true,  // ï¿½ï¿½ï¿½ No freeform chat during intro
+                disableBack: true,  // ï¿½ï¿½ï¿½ No escape from destiny
                 playVoice: true,
                 customActions: [
                     {
                         label: 'Accept Quest: First Steps',
                         action: () => {
                             console.log('ðŸŽ­ Player accepted quest from Hooded Stranger');
-                            this.hasAcceptedInitialQuest = true; // Ÿ–¤ðŸ’€ Mark quest accepted!
+                            this.hasAcceptedInitialQuest = true; // ï¿½ï¿½ï¿½ðŸ’€ Mark quest accepted!
                             this.showQuestAcceptedThenTutorialOption(playerName);
                         },
                         primary: true,
@@ -454,7 +455,7 @@ const InitialEncounterSystem = {
                         <p style="color: #a0a0c0; font-style: italic; font-size: 0.9em;">Tip: Look for the Elder in the village. NPCs with quests have a ðŸ“œ icon. Press 'Q' to open your Quest Log.</p>
                     </div>
                 `,
-                closeable: true, // Ÿ–¤ Quest already accepted, can close anytime
+                closeable: true, // ï¿½ï¿½ï¿½ Quest already accepted, can close anytime
                 buttons: [
                     {
                         text: 'ðŸŽ® Begin Adventure',
@@ -480,7 +481,7 @@ const InitialEncounterSystem = {
                     <p style="font-style: italic; color: #c0a0ff; font-size: 1.1em; margin-bottom: 1rem;">"Perhaps when you have proven yourself worthy, we shall meet again. Until then... trade well, ${playerName}. Build your fortune. You will need it for what is to come."</p>
                     <p style="color: #a0a0c0; font-style: italic;">Before you can respond, the stranger melts back into the shadows as if they were never there.</p>
                 `,
-                closeable: false, // Ÿ–¤ Must accept quest - no escape
+                closeable: false, // ï¿½ï¿½ï¿½ Must accept quest - no escape
                 buttons: [
                     {
                         text: 'Accept Quest',
@@ -531,7 +532,10 @@ const InitialEncounterSystem = {
 
     // COMPLETE ENCOUNTER - unlock the main quest and resume game
     completeEncounter(talkedToStranger) {
-        console.log('ðŸŒŸ Initial encounter complete - you chose your path, stranger talk:', talkedToStranger, 'ðŸ’€');
+        console.log('Initial encounter complete - you chose your path, stranger talk:', talkedToStranger);
+
+        // Mark intro as complete - allows city events to start
+        this.hasCompletedIntro = true;
 
         //  Unlock the main quest
         this.unlockMainQuest();
@@ -600,7 +604,7 @@ const InitialEncounterSystem = {
 
     //  Internal: Actually unlock the main quest 
     _doUnlockMainQuest() {
-        if (this._mainQuestUnlocked) return; // Ÿ¦‡ Prevent double-unlock
+        if (this._mainQuestUnlocked) return; // ï¿½ï¿½ï¿½ Prevent double-unlock
         this._mainQuestUnlocked = true;
 
         if (typeof QuestSystem !== 'undefined') {
@@ -649,6 +653,8 @@ const InitialEncounterSystem = {
     //  FOR TESTING - manually trigger the encounter
     testEncounter(playerName = 'Test Trader') {
         this.hasShownEncounter = false;
+        this.hasCompletedIntro = false;
+        this.hasShownTutorialChoice = false;
         this.triggerInitialEncounter(playerName, 'greendale');
     },
 

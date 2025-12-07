@@ -166,6 +166,11 @@ const CityEventSystem = {
         const targetCityId = cityId || (game.currentLocation && game.currentLocation.id);
         if (!targetCityId) return;
 
+        // Block events during tutorial/intro dialogs
+        if (typeof InitialEncounterSystem !== 'undefined' && !InitialEncounterSystem.hasCompletedIntro) {
+            return; // Wait until tutorial choice and intro are complete
+        }
+
         // Don't trigger events if there's already an active event
         if (this.activeEvents[targetCityId]) return;
 
@@ -180,6 +185,11 @@ const CityEventSystem = {
 
     // Trigger an event
     triggerEvent(cityId, eventType) {
+        // Block events during tutorial/intro dialogs
+        if (typeof InitialEncounterSystem !== 'undefined' && !InitialEncounterSystem.hasCompletedIntro) {
+            return; // Wait until tutorial choice and intro are complete
+        }
+
         const template = this.eventTemplates[eventType];
         if (!template) return;
 
