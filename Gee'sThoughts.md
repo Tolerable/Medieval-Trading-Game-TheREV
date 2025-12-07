@@ -4,6 +4,44 @@
 
 ---
 
+## 2025-12-06 - SESSION #46: FIX GREENDALE BIDIRECTIONAL CONNECTIONS
+
+**Request:** Gee reported that connectors from Southern Gate (Sunhaven) and Riverwood weren't showing as available to travel to from explored Greendale.
+
+**Status:** COMPLETE
+
+### Root Cause:
+- **Broken bidirectional connections** - Sunhaven and Riverwood both had `greendale` in their connections arrays, but Greendale did NOT have them in its connections array
+- This meant you could travel FROM those locations TO Greendale, but not the reverse
+
+### The Bug:
+```javascript
+// Greendale BEFORE (broken):
+connections: ['royal_capital', 'vineyard_village', 'wheat_farm', 'riverside_inn']
+
+// Sunhaven had:
+connections: ['greendale', 'sunny_farm', 'coastal_cave', 'lighthouse_inn']  // One-way!
+
+// Riverwood had:
+connections: ['greendale', 'river_cave']  // One-way!
+```
+
+### The Fix:
+```javascript
+// Greendale AFTER (fixed):
+connections: ['royal_capital', 'vineyard_village', 'wheat_farm', 'riverside_inn', 'sunhaven', 'riverwood']
+```
+
+### Files Modified:
+- `src/js/data/game-world.js` - Line 126: Added `sunhaven` and `riverwood` to Greendale's connections
+- `src/js/core/game.js` - Line 2017: Updated fallback location data with same fix
+
+### Verification:
+- Audited ALL location connections in the game
+- All other connections are properly bidirectional (no other broken links found)
+
+---
+
 ## 2025-12-06 - SESSION #45: GIT PUSH TO MAIN
 
 **Request:** Gee said "go workflow go, push to git main" - run the workflow and push current changes to GitHub.

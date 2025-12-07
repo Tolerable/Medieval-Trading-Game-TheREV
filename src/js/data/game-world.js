@@ -123,7 +123,7 @@ const GameWorld = {
             population: 2500,
             marketSize: 'large',
             travelCost: { base: 8 },
-            connections: ['royal_capital', 'vineyard_village', 'wheat_farm', 'riverside_inn'],
+            connections: ['royal_capital', 'vineyard_village', 'wheat_farm', 'riverside_inn', 'sunhaven', 'riverwood'],
             mapPosition: { x: 400, y: 440 },
             sells: ['bread', 'ale', 'flour', 'cheese', 'butter', 'eggs', 'meat', 'vegetables', 'livestock'],
             buys: ['wheat', 'grain', 'milk', 'honey', 'salt', 'herbs', 'wool'],
