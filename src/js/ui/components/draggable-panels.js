@@ -96,38 +96,11 @@ const DraggablePanels = {
         console.log('🖤 DraggablePanels: Ready');
     },
 
-    // Inject CSS that removes z-index from draggable panels so JS can control them
+    // Inject CSS - base z-index for panels, JS overrides with inline styles
     injectZIndexOverrideStyles() {
-        if (document.getElementById('draggable-panels-z-override')) return;
-
-        const style = document.createElement('style');
-        style.id = 'draggable-panels-z-override';
-        style.textContent = `
-            /* DraggablePanels z-index override - JS controls these dynamically */
-            /* All draggable panels get z-index from CSS variable, JS updates it on click */
-            .quest-tracker,
-            #quest-tracker,
-            #panel-toolbar,
-            #side-panel,
-            #message-log,
-            #travel-panel,
-            #inventory-panel,
-            #market-panel,
-            #character-sheet-overlay,
-            #financial-sheet-overlay,
-            #achievement-overlay,
-            #quest-overlay,
-            #people-panel,
-            #party-panel,
-            #transportation-panel,
-            #property-employee-panel,
-            .overlay:not(.npc-chat-modal):not(.combat-modal),
-            .panel:not(#location-panel):not(#game-setup-panel) {
-                z-index: var(--dynamic-z-index, 120) !important;
-            }
-        `;
-        document.head.appendChild(style);
-        console.log('🖤 DraggablePanels: Z-index override styles injected');
+        // No injected CSS needed - we set z-index directly on elements with !important
+        // This avoids CSS specificity wars
+        console.log('🖤 DraggablePanels: Using inline z-index (no CSS injection)');
     },
 
     // Setup click-outside-to-close for overlay panels
@@ -226,32 +199,38 @@ const DraggablePanels = {
         // Add to top of stack
         this.panelStack.push(panelId);
 
+        console.log('🖤 bringToFront:', panelId, '| Stack:', this.panelStack.join(' -> '));
+
         // Reassign z-indices to all tracked panels
         this.updateAllPanelZIndices();
     },
 
     // Update z-indices for all panels based on their stack position
-    // Uses CSS custom property that gets picked up by injected !important rule
+    // Lower index = lower z-index (buried), higher index = higher z-index (on top)
     updateAllPanelZIndices() {
         const maxPanels = this.Z_INDEX_MAX - this.Z_INDEX_BASE;
 
         // If we have more panels than our range allows, compress the stack
         if (this.panelStack.length > maxPanels) {
-            // Keep only the most recent panels
             this.panelStack = this.panelStack.slice(-maxPanels);
         }
 
         // Assign z-indices based on stack position
-        // Set both the CSS variable AND direct z-index for maximum compatibility
+        // Index 0 = bottom (lowest z-index), last index = top (highest z-index)
         this.panelStack.forEach((panelId, index) => {
-            const panel = document.getElementById(panelId) ||
-                          document.querySelector(`.${panelId}`);
+            // Try multiple ways to find the element
+            let panel = document.getElementById(panelId);
+            if (!panel) panel = document.querySelector(`.${panelId}`);
+            if (!panel) panel = document.querySelector(`[class*="${panelId}"]`);
+
             if (panel) {
                 const zIndex = this.Z_INDEX_BASE + index;
-                // Set CSS variable that our injected style uses
+                // Force the z-index with both methods
                 panel.style.setProperty('--dynamic-z-index', String(zIndex));
-                // Also set z-index directly with !important
                 panel.style.setProperty('z-index', String(zIndex), 'important');
+                console.log(`  ${panelId}: z-index ${zIndex}`);
+            } else {
+                console.log(`  ${panelId}: NOT FOUND!`);
             }
         });
     },
