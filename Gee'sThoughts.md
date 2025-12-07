@@ -4,6 +4,74 @@
 
 ---
 
+## 2025-12-06 - SESSION #36: GATEHOUSE + CANCEL TRAVEL FIXES 🖤💀🏰
+
+**Request:** Gee reported 4 critical issues:
+1. Cancel travel button not working
+2. Gates (North, East, West) not blocking player from walking past them
+3. Charging fee when starting AT a gate to leave (should only charge when crossing INTO locked zone)
+4. No way to pay the one-time fee - need NPC guard at each gatehouse
+
+**Status:** COMPLETE
+
+### Fixes Implemented:
+
+**1. Cancel Travel Button (travel-panel-map.js)**
+- Added `isCancelling` flag to prevent race condition between cancel button and updateTravelProgressDisplay interval
+- Fixed fallback to get startLocation from TravelSystem if travelState doesn't have it
+- Clear interval immediately when cancel is clicked
+- Added `_cleanupCancelledTravel()` helper for consistent state cleanup
+- Hide travel marker and properly reset all state
+
+**2. Gate Blocking Logic (gatehouse-system.js - canAccessLocation)**
+- Completely rewrote the function to be clearer and more correct
+- Gatehouses are ALWAYS accessible (so players can reach them to pay)
+- When AT a gatehouse trying to enter locked zone → shows guard NPC encounter
+- When NOT at gatehouse trying to enter locked zone → told to go to gatehouse first
+- When AT gatehouse going BACK (not into locked zone) → allowed free passage
+- When in same zone → can move freely within zone
+
+**3. Gate Fee Direction Logic**
+- Fixed: When at a gatehouse, only blocks travel INTO the zone it controls
+- Leaving a gatehouse to go back is FREE (no fee charged)
+- Fee is only required when passing THROUGH the gate into the locked territory
+
+**4. NPC Guard Encounters (gatehouse-system.js)**
+- Updated `showGatehouseArrivalPrompt()` to use PeoplePanel.showSpecialEncounter correctly
+- Uses `action` callback (not `onClick`) per PeoplePanel API
+- Shows random guard greeting from predefined list
+- Two actions: Pay fee (primary if can afford) or Leave
+- Proper panel closing with fallback methods
+
+### Key Files Changed:
+- `src/js/systems/travel/travel-panel-map.js` - Cancel travel race condition fix
+- `src/js/systems/travel/gatehouse-system.js` - Complete rewrite of canAccessLocation + guard encounter fixes
+
+---
+
+## 2025-12-06 - SESSION #36b: MID-JOURNEY REROUTING 🖤💀🔄
+
+**Request:** Gee wants to click a new location while traveling and have the player instantly reroute to that location instead of waiting to arrive first.
+
+**Status:** COMPLETE
+
+### Implementation:
+
+**New `rerouteTravel()` function in TravelPanelMap:**
+- Calculates current position based on travel progress (< 50% = still at start, >= 50% = closer to destination)
+- Stops current travel animation and resets state
+- Updates player position to calculated location
+- Immediately starts new travel to clicked destination
+- Shows message: "Changing course from X to Y..."
+
+**Updated click handlers:**
+- `TravelPanelMap.onLocationClick()` - calls `rerouteTravel()` if already traveling
+- `GameWorldRenderer.onLocationClick()` - delegates to TravelPanelMap.rerouteTravel()
+
+Now clicking any location while traveling will instantly change your course!
+
+---
+
 ## 2025-12-06 - SESSION #35: FULL CODE REVIEW + TODO CLEANUP 🖤💀✅
 
 **Request:** Gee wanted verification that all past 24hr items in finished.md and todo.md were ACTUALLY completed in full - not just claimed as done.

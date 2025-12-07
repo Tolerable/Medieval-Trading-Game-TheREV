@@ -344,99 +344,92 @@ const GatehouseSystem = {
     },
 
     // Check if a location is accessible
-    // Gates only block travel INTO locked zones, not OUT of them
+    // Gates BLOCK travel INTO locked zones - you must pay at the gatehouse to enter
+    // Once unlocked, you can travel freely within the zone
     canAccessLocation(locationId, fromLocationId = null) {
-        // Get location zone using our mapping first
-        const zone = this.LOCATION_ZONES[locationId] || this.getLocationZone(locationId);
-
-        // Capital is ALWAYS accessible
-        if (zone === 'capital') {
-            return { accessible: true, reason: null };
-        }
-
-        // Your starting zone is ALWAYS accessible
-        if (zone === this.startingZone) {
-            return { accessible: true, reason: null };
-        }
-
-        // Southern zone is ALWAYS FREE - no gatehouse!
-        if (zone === 'southern') {
-            return { accessible: true, reason: null };
-        }
-
-        // Check if destination is a gatehouse (always accessible for interaction)
-        const destIsGatehouse = Object.values(this.GATEHOUSES).find(g => g.id === locationId);
-        if (destIsGatehouse) {
-            return { accessible: true, reason: null, isGatehouse: true };
-        }
+        // Get destination zone
+        const destZone = this.LOCATION_ZONES[locationId] || this.getLocationZone(locationId);
 
         // Get where we're coming from
         const fromId = fromLocationId || (typeof game !== 'undefined' ? game.currentLocation?.id : null);
         const fromZone = fromId ? (this.LOCATION_ZONES[fromId] || this.getLocationZone(fromId)) : null;
 
-        // Check if we're AT a gatehouse trying to go BACK (opposite direction from locked zone)
+        console.log(`🏰 canAccessLocation check: ${locationId} (zone: ${destZone}) from ${fromId} (zone: ${fromZone})`);
+
+        // ALWAYS ACCESSIBLE ZONES - no gates needed
+        if (destZone === 'capital') {
+            return { accessible: true, reason: null, zoneType: 'capital' };
+        }
+        if (destZone === this.startingZone) {
+            return { accessible: true, reason: null, zoneType: 'starting' };
+        }
+        if (destZone === 'southern') {
+            return { accessible: true, reason: null, zoneType: 'free' };
+        }
+
+        // Check if destination IS a gatehouse/outpost - always accessible so you can interact
+        // But the locked zone BEYOND the gatehouse requires payment
+        const destIsGatehouse = Object.values(this.GATEHOUSES).find(g => g.id === locationId);
+        if (destIsGatehouse) {
+            return { accessible: true, reason: null, isGatehouse: true };
+        }
+
+        // Check if zone is already unlocked (paid at gatehouse)
+        const gatehouseId = this.ZONE_GATEHOUSES[destZone];
+        if (gatehouseId && this.unlockedGates.has(gatehouseId)) {
+            return { accessible: true, reason: null, zoneType: 'unlocked' };
+        }
+
+        // Check zone info
+        const zoneInfo = this.ZONES[destZone];
+        if (!zoneInfo) {
+            return { accessible: true, reason: null, zoneType: 'unknown' };
+        }
+        if (zoneInfo.accessible) {
+            return { accessible: true, reason: null, zoneType: 'accessible' };
+        }
+
+        // ALREADY IN ZONE - can move freely within the locked zone once you're in
+        // (This only matters if you snuck in via back path or were placed there)
+        if (fromZone === destZone) {
+            return { accessible: true, reason: null, zoneType: 'sameZone' };
+        }
+
+        // AT A GATEHOUSE - Check if we're at the gatehouse that controls this zone
+        // If so, allow travel INTO the locked zone ONLY if we've paid
         const fromIsGatehouse = fromId ? Object.values(this.GATEHOUSES).find(g => g.id === fromId) : null;
         if (fromIsGatehouse) {
-            // We're at a gatehouse - check if destination is in the direction we came from (not locked zone)
-            const gateUnlocksZone = fromIsGatehouse.unlocksZone;
-            // If destination is NOT in the zone this gate unlocks, allow travel (going back)
-            if (zone !== gateUnlocksZone) {
-                console.log(`🦇 Leaving gate ${fromIsGatehouse.name} - going back to ${zone}, allowed`);
+            // We're at a gatehouse
+            if (fromIsGatehouse.unlocksZone === destZone) {
+                // Trying to go INTO the locked zone from its controlling gatehouse
+                // This requires payment!
+                if (!this.unlockedGates.has(fromIsGatehouse.id)) {
+                    console.log(`🏰 BLOCKED: At ${fromIsGatehouse.name}, trying to enter ${destZone} without paying`);
+                    return {
+                        accessible: false,
+                        reason: `You must pay the ${fromIsGatehouse.fee} gold passage fee to the guard before entering the ${zoneInfo.name}.`,
+                        gatehouse: fromIsGatehouse.id,
+                        fee: fromIsGatehouse.fee,
+                        atGatehouse: true
+                    };
+                }
+            } else {
+                // Going back/away from the gatehouse to a non-locked direction
+                console.log(`🏰 Leaving ${fromIsGatehouse.name} - going back, allowed`);
                 return { accessible: true, reason: null, leavingGate: true };
             }
         }
 
-        // Check zone access
-        const zoneInfo = this.ZONES[zone];
-        if (!zoneInfo) {
-            return { accessible: true, reason: null }; // Unknown zone, allow access
-        }
-
-        // Check if zone is accessible (either starting zone or unlocked)
-        if (zoneInfo.accessible) {
-            return { accessible: true, reason: null };
-        }
-
-        // Check if gatehouse is unlocked
-        const gatehouseId = this.ZONE_GATEHOUSES[zone];
-        if (gatehouseId && this.unlockedGates.has(gatehouseId)) {
-            return { accessible: true, reason: null };
-        }
-
-        // BACK PATH CHECK: If traveling from a connected accessible location, allow it!
-        // This enables: starter -> south (free) -> coastal_cave -> smugglers_cove (eastern)
-        if (fromId) {
-            const fromZoneInfo = this.ZONES[fromZone];
-
-            // If coming from an accessible zone and locations are connected, allow passage
-            if (fromZoneInfo?.accessible || fromZone === this.startingZone || fromZone === 'capital' || fromZone === 'southern') {
-                // Check if locations are actually connected in GameWorld
-                if (typeof GameWorld !== 'undefined' && GameWorld.locations) {
-                    const fromLoc = GameWorld.locations[fromId];
-                    if (fromLoc?.connections?.includes(locationId)) {
-                        console.log(`🦇 Back path access granted: ${fromId} → ${locationId}`);
-                        return { accessible: true, reason: null, backPath: true };
-                    }
-                }
-            }
-        }
-
-        // Also check if player is currently IN the zone (already inside via back path)
-        if (typeof game !== 'undefined' && game.currentLocation) {
-            const currentZone = this.LOCATION_ZONES[game.currentLocation.id] || this.getLocationZone(game.currentLocation.id);
-            if (currentZone === zone) {
-                // Already in this zone - can move freely within it
-                return { accessible: true, reason: null, alreadyInZone: true };
-            }
-        }
-
-        // Zone is locked - need to pay at gatehouse
+        // TRYING TO BYPASS GATEHOUSE - traveling to a locked zone from a non-gatehouse location
+        // Must go through the gatehouse first!
         const gateInfo = this.GATEHOUSES[gatehouseId];
+        console.log(`🏰 BLOCKED: Trying to enter ${destZone} from ${fromZone} - must go through ${gateInfo?.name || 'gatehouse'}`);
         return {
             accessible: false,
-            reason: `You must pay the passage fee at ${gateInfo?.name || 'the gatehouse'} to access the ${zoneInfo.name}.`,
+            reason: `You cannot enter the ${zoneInfo.name} from here. You must travel to ${gateInfo?.name || 'the gatehouse'} and pay the passage fee first.`,
             gatehouse: gatehouseId,
-            fee: gateInfo?.fee || zoneInfo.fee
+            fee: gateInfo?.fee || zoneInfo.fee,
+            needsGatehouse: true
         };
     },
 
@@ -531,22 +524,30 @@ const GatehouseSystem = {
 
         if (originalStartTravel) {
             TravelSystem.startTravel = function(destinationId) {
-                //  Get current location for back path check
+                // Get current location for zone check
                 const fromLocationId = game?.currentLocation?.id || null;
 
-                // Check zone access (with back path support)
+                // Check zone access
                 const access = self.canAccessLocation(destinationId, fromLocationId);
 
                 if (!access.accessible) {
-                    // Show gatehouse prompt
-                    self.showGatehousePrompt(access.gatehouse, destinationId);
+                    console.log('🏰 Travel blocked:', access);
+
+                    if (access.atGatehouse) {
+                        // Player is AT the gatehouse trying to pass through
+                        // Show the guard NPC interaction prompt
+                        self.showGatehouseArrivalPrompt(access.gatehouse);
+                    } else {
+                        // Player is trying to enter from elsewhere - tell them to go to gatehouse
+                        self.showGatehousePrompt(access.gatehouse, destinationId);
+                    }
                     return;
                 }
 
                 // Proceed with travel
                 originalStartTravel(destinationId);
             };
-            console.log('🏰 Patched TravelSystem.startTravel for zone checking (with back path support)');
+            console.log('🏰 Patched TravelSystem.startTravel for zone checking');
         }
     },
 
@@ -672,13 +673,89 @@ const GatehouseSystem = {
         };
     },
 
-    // Show prompt when player arrives at a gatehouse
+    // Show NPC guard encounter when player arrives at a gatehouse
     showGatehouseArrivalPrompt(gatehouseId) {
         const gatehouse = this.GATEHOUSES[gatehouseId];
         if (!gatehouse) return;
 
         // Don't show if already unlocked
         if (this.unlockedGates.has(gatehouseId)) return;
+
+        const playerGold = game?.player?.gold || 0;
+        const canAfford = playerGold >= gatehouse.fee;
+        const zoneName = this.ZONES[gatehouse.unlocksZone]?.name || 'the region beyond';
+        const self = this;
+
+        // Create a guard NPC for this gatehouse
+        const guardNPC = {
+            id: `gate_guard_${gatehouseId}`,
+            name: gatehouse.guards || 'Gate Guard',
+            type: 'guard',
+            icon: '🛡️',
+            description: `A stern guard watching over ${gatehouse.name}.`,
+            personality: 'stern',
+            speakingStyle: 'formal, authoritative',
+            background: `Stationed at ${gatehouse.name} to collect passage fees and maintain order.`,
+            traits: ['dutiful', 'stern', 'incorruptible'],
+            greetings: [
+                `Halt, traveler. This is ${gatehouse.name}. Passage to ${zoneName} requires a fee of ${gatehouse.fee} gold.`,
+                `You wish to pass through to ${zoneName}? The toll is ${gatehouse.fee} gold. Pay up or turn back.`,
+                `Welcome to ${gatehouse.name}. None pass without paying the ${gatehouse.fee} gold toll.`
+            ],
+            gatehouseId: gatehouseId,
+            fee: gatehouse.fee,
+            zoneName: zoneName
+        };
+
+        // Use PeoplePanel for the encounter if available
+        if (typeof PeoplePanel !== 'undefined' && PeoplePanel.showSpecialEncounter) {
+            // Pick a random greeting from the guard
+            const greeting = guardNPC.greetings[Math.floor(Math.random() * guardNPC.greetings.length)];
+
+            PeoplePanel.showSpecialEncounter(guardNPC, {
+                greeting: greeting,
+                disableChat: true, // No chat needed, just pay or leave
+                customActions: [
+                    {
+                        label: `💰 Pay ${gatehouse.fee} Gold`,
+                        primary: canAfford,
+                        action: () => {
+                            if (!canAfford) {
+                                addMessage(`💸 You don't have enough gold. The guard needs ${gatehouse.fee} gold.`);
+                                return;
+                            }
+                            if (self.payPassageFee(gatehouseId)) {
+                                PeoplePanel.closeSpecialEncounter ? PeoplePanel.closeSpecialEncounter() : PeoplePanel.hide();
+                                addMessage(`🎉 ${gatehouse.name} passage unlocked! You can now freely travel to ${zoneName}.`);
+                            }
+                        }
+                    },
+                    {
+                        label: '🚶 Leave',
+                        action: () => {
+                            PeoplePanel.closeSpecialEncounter ? PeoplePanel.closeSpecialEncounter() : PeoplePanel.hide();
+                            addMessage(`The guard watches you leave. "Come back when you have the coin."`);
+                        },
+                        closeAfter: true
+                    }
+                ],
+                onClose: () => {
+                    // Resume time if it was paused
+                    if (typeof TimeSystem !== 'undefined' && TimeSystem.resume) {
+                        TimeSystem.resume();
+                    }
+                }
+            });
+        } else {
+            // Fallback to modal if PeoplePanel not available
+            this.showGatehouseModal(gatehouseId);
+        }
+    },
+
+    // Fallback modal for gatehouse (used if PeoplePanel unavailable)
+    showGatehouseModal(gatehouseId) {
+        const gatehouse = this.GATEHOUSES[gatehouseId];
+        if (!gatehouse) return;
 
         const playerGold = game?.player?.gold || 0;
         const canAfford = playerGold >= gatehouse.fee;
@@ -709,9 +786,10 @@ const GatehouseSystem = {
                 text-align: center;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
             ">
-                <h2 style="color: #ffb700; margin-bottom: 16px;">🏰 Welcome to ${gatehouse.name}</h2>
-                <p style="color: #e0e0e0; margin-bottom: 12px; line-height: 1.5;">${gatehouse.description}</p>
-                <p style="color: #aaa; margin-bottom: 20px; font-style: italic;">Guarded by: ${gatehouse.guards}</p>
+                <h2 style="color: #ffb700; margin-bottom: 16px;">🛡️ ${gatehouse.guards || 'Gate Guard'}</h2>
+                <p style="color: #e0e0e0; margin-bottom: 16px; line-height: 1.5; font-style: italic;">
+                    "Halt, traveler. This is ${gatehouse.name}. Passage to ${zoneName} requires a fee of ${gatehouse.fee} gold."
+                </p>
 
                 <div style="
                     background: rgba(0, 0, 0, 0.4);
@@ -720,9 +798,6 @@ const GatehouseSystem = {
                     margin-bottom: 20px;
                     border: 1px solid rgba(255, 180, 0, 0.3);
                 ">
-                    <p style="color: #4fc3f7; font-size: 1.1em; margin-bottom: 8px;">
-                        🚧 This gatehouse controls access to <strong style="color: #ffb700;">${zoneName}</strong>
-                    </p>
                     <p style="color: #ffd700; font-size: 1.2em; margin-bottom: 8px;">
                         Passage Fee: <strong>${gatehouse.fee} gold</strong>
                     </p>
@@ -730,10 +805,6 @@ const GatehouseSystem = {
                         Your Gold: ${playerGold} gold ${canAfford ? '✓' : '(insufficient)'}
                     </p>
                 </div>
-
-                <p style="color: #888; font-size: 0.9em; margin-bottom: 24px;">
-                    Pay once to unlock permanent access through this passage.
-                </p>
 
                 <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                     <button id="gate-arrival-pay-btn" style="
@@ -758,7 +829,7 @@ const GatehouseSystem = {
                         font-size: 1em;
                         cursor: pointer;
                     ">
-                        Maybe Later
+                        🚶 Leave
                     </button>
                 </div>
             </div>
@@ -777,7 +848,7 @@ const GatehouseSystem = {
 
         document.getElementById('gate-arrival-later-btn').onclick = () => {
             modal.remove();
-            addMessage(`You can pay the fee later when you're ready to pass through.`);
+            addMessage(`The guard watches you leave. "Come back when you have the coin."`);
         };
 
         modal.onclick = (e) => {

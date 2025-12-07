@@ -2645,14 +2645,18 @@ const GameWorldRenderer = {
             return;
         }
 
-        // 🖤 Check if already traveling - can't change destination mid-journey
+        // If already traveling - reroute to new destination via TravelPanelMap
         if (typeof TravelSystem !== 'undefined' && TravelSystem.playerPosition?.isTraveling) {
-            addMessage(`⚠️ Already traveling! Arrive first or cancel your current journey, impatient one.`);
+            if (typeof TravelPanelMap !== 'undefined' && TravelPanelMap.rerouteTravel) {
+                TravelPanelMap.rerouteTravel(location.id, isDiscovered);
+            } else {
+                addMessage(`⚠️ Already traveling! Arrive first or cancel your current journey.`);
+            }
             return;
         }
 
-        // 🎯 Set destination AND start travel immediately via TravelPanelMap
-        // This handles all the complexity - we just delegate to the expert 💀
+        // Set destination AND start travel immediately via TravelPanelMap
+        // This handles all the complexity - we just delegate to the expert
         if (typeof TravelPanelMap !== 'undefined' && TravelPanelMap.setDestinationAndTravel) {
             TravelPanelMap.setDestinationAndTravel(location.id, isDiscovered);
         } else {
