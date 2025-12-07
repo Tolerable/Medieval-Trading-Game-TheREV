@@ -2220,21 +2220,9 @@ const PeoplePanel = {
         const repRequired = this.getTradeRepRequirement(npcType);
         const currentRep = this.getNPCReputation(npcType);
 
-        // always show trade section for potential traders, but indicate locked status
-        // also include npcs with cantrade flag from encounters
-        // MUST match npcCanTrade() list - merchant, innkeeper, elder, sailor, guard, etc.
-        const potentialTrader = npcData.canTrade || repRequired > 0 || [
-            // always tradeable (from npcCanTrade)
-            'merchant', 'innkeeper', 'general_store', 'baker', 'farmer',
-            'fisherman', 'ferryman', 'traveler', 'elder', 'healer', 'guard',
-            'priest', 'hunter', 'woodcutter', 'barkeep', 'sailor', 'explorer',
-            'adventurer', 'druid', 'royal_advisor', 'chieftain', 'stablemaster', 'courier',
-            // rep-gated traders
-            'blacksmith', 'apothecary', 'tailor', 'herbalist', 'miner',
-            'jeweler', 'banker', 'guild_master', 'scholar', 'noble'
-        ].includes(npcType);
-
-        if (potentialTrader) {
+        // ALWAYS show trade section for ALL NPCs - everyone can potentially trade
+        // Shows rep requirement notice if trade is locked, or trade preview if unlocked
+        {
             container.classList.remove('hidden');
 
             if (canTrade) {
@@ -2285,8 +2273,6 @@ const PeoplePanel = {
                     btn.style.opacity = '0.5';
                 }
             }
-        } else {
-            container.classList.add('hidden');
         }
     },
 
