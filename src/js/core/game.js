@@ -7183,7 +7183,7 @@ const LocationPanelStack = {
         const onCooldown = des?.isOnCooldown?.(locationId) || false;
         const availableEvents = des?.getAvailableEventsForLocation?.(desLocation) || [];
         const difficulty = des?.getLocationDifficulty?.(desLocation) || 'unknown';
-        const survival = des?.calculateSurvivalAssessment?.(desLocation, game.player) || { tier: 'Unknown', tierColor: '#888', chance: 50 };
+        const survival = des?.calculateSurvivalAssessment?.(desLocation, game.player) || { tier: 'Unknown', tierColor: '#888', chance: 50, canSurvive: true };
 
         // Build content based on state
         let mainContent = '';
@@ -7305,24 +7305,47 @@ const LocationPanelStack = {
 
         // Attach event listeners after HTML is in DOM - more reliable than inline onclick
         const canSurviveNow = survival.canSurvive || false;
+        const capturedLocationId = locationId; // Capture for closure
+
+        console.log('🏚️ Attaching exploration listeners - locationId:', capturedLocationId, 'canSurvive:', canSurviveNow);
 
         // Attach listeners to exploration encounter items
-        content.querySelectorAll('.exploration-encounter-item').forEach(item => {
+        const encounterItems = content.querySelectorAll('.exploration-encounter-item');
+        console.log('🏚️ Found', encounterItems.length, 'encounter items');
+
+        encounterItems.forEach(item => {
             item.addEventListener('click', () => {
-                if (!canSurviveNow) return;
+                console.log('🏚️ Encounter clicked! eventId:', item.dataset.eventId, 'locationId:', capturedLocationId, 'canSurvive:', canSurviveNow);
+                if (!canSurviveNow) {
+                    console.log('🏚️ Cannot survive - click blocked');
+                    return;
+                }
                 const eventId = item.dataset.eventId;
                 if (eventId && typeof DungeonExplorationSystem !== 'undefined') {
-                    DungeonExplorationSystem.showSpecificExplorationPanel(locationId, eventId);
+                    console.log('🏚️ Calling showSpecificExplorationPanel');
+                    DungeonExplorationSystem.showSpecificExplorationPanel(capturedLocationId, eventId);
+                } else {
+                    console.error('🏚️ Missing eventId or DungeonExplorationSystem');
                 }
             });
         });
 
         // Attach listener to random exploration button
         const randomBtn = content.querySelector('.explore-random-btn');
-        if (randomBtn && canSurviveNow) {
+        console.log('🏚️ Random button found:', !!randomBtn);
+
+        if (randomBtn) {
             randomBtn.addEventListener('click', () => {
+                console.log('🏚️ Random exploration clicked! locationId:', capturedLocationId, 'canSurvive:', canSurviveNow);
+                if (!canSurviveNow) {
+                    console.log('🏚️ Cannot survive - click blocked');
+                    return;
+                }
                 if (typeof DungeonExplorationSystem !== 'undefined') {
-                    DungeonExplorationSystem.showExplorationPanel(locationId);
+                    console.log('🏚️ Calling showExplorationPanel');
+                    DungeonExplorationSystem.showExplorationPanel(capturedLocationId);
+                } else {
+                    console.error('🏚️ DungeonExplorationSystem not found');
                 }
             });
         }
