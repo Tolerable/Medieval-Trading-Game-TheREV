@@ -4127,20 +4127,34 @@ const DungeonExplorationSystem = {
     // Show exploration panel for a specific event
     // isQuestExploration flag bypasses cooldown for quest-related explorations
     showSpecificExplorationPanel(locationId, eventId, isQuestExploration = false) {
+        console.log('🏚️ showSpecificExplorationPanel called:', locationId, eventId);
+
         const location = this.getLocation(locationId);
-        if (!location) return;
+        if (!location) {
+            console.error('🏚️ Location not found for specific exploration:', locationId);
+            if (typeof ToastSystem !== 'undefined') {
+                ToastSystem.showToast('Location not found!', 'error');
+            }
+            return;
+        }
+        console.log('🏚️ Location found:', location.name, 'type:', location.type);
 
         const event = this.EXPLORATION_EVENTS[eventId];
         if (!event) {
             console.error('🏚️ Event not found:', eventId);
+            if (typeof ToastSystem !== 'undefined') {
+                ToastSystem.showToast('Exploration event not found!', 'error');
+            }
             return;
         }
+        console.log('🏚️ Event found:', event.name, 'locationType:', event.locationType);
 
         // Check if this event is quest-related (has questRequired or is in QUEST_EXPLORATIONS)
         const isQuestEvent = isQuestExploration || event.questRequired || event.isQuestExploration;
 
         // Check cooldown (quest explorations bypass)
         if (this.isOnCooldown(locationId, isQuestEvent)) {
+            console.log('🏚️ Location on cooldown');
             const remaining = this.getCooldownRemaining(locationId);
             const hours = Math.floor(remaining);
             const minutes = Math.round((remaining - hours) * 60);
@@ -4149,11 +4163,15 @@ const DungeonExplorationSystem = {
         }
 
         // Verify event is valid for this location type
-        if (!event.locationType.includes(location.type)) {
-            console.error('🏚️ Event not valid for location type:', location.type);
+        if (!event.locationType || !event.locationType.includes(location.type)) {
+            console.error('🏚️ Event not valid for location type:', location.type, 'event expects:', event.locationType);
+            if (typeof ToastSystem !== 'undefined') {
+                ToastSystem.showToast('This event is not available here.', 'warning');
+            }
             return;
         }
 
+        console.log('🏚️ All checks passed, rendering exploration UI');
         const difficulty = this.getLocationDifficulty(location);
         this.renderExplorationUI(location, event, difficulty);
     },
