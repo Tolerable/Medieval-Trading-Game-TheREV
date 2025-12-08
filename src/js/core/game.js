@@ -7180,46 +7180,26 @@ const LocationPanelStack = {
         // Get exploration data
         const des = typeof DungeonExplorationSystem !== 'undefined' ? DungeonExplorationSystem : null;
         const desLocation = des?.getLocation?.(locationId);
-        const onCooldown = des?.isOnCooldown?.(locationId) || false;
         const availableEvents = des?.getAvailableEventsForLocation?.(desLocation) || [];
         const difficulty = des?.getLocationDifficulty?.(desLocation) || 'unknown';
         const survival = des?.calculateSurvivalAssessment?.(desLocation, game.player) || { tier: 'Unknown', tierColor: '#888', chance: 50, canSurvive: true };
 
-        // Build content based on state
+        // Build content - simplified: just survival assessment + explore button
         let mainContent = '';
 
-        if (onCooldown) {
-            const remaining = des?.getCooldownRemaining?.(locationId) || 0;
-            const hours = Math.floor(remaining);
-            const minutes = Math.round((remaining - hours) * 60);
-            mainContent = `
-                <div style="background: #333; border-left: 4px solid #ff9800; padding: 16px; margin: 10px 0; border-radius: 4px;">
-                    <p style="margin: 0; color: #ff9800; font-size: 1.1em;">⏰ Location on cooldown</p>
-                    <p style="margin: 8px 0 0 0; font-size: 0.95em; color: #e0e0e0;">
-                        This area needs time to respawn treasures and threats.
-                    </p>
-                    <p style="margin: 8px 0 0 0; font-weight: bold; color: #ffd700;">
-                        Available in: ${hours}h ${minutes}m
-                    </p>
-                    <p style="margin: 10px 0 0 0; font-size: 0.85em; color: #888; font-style: italic;">
-                        "Even the darkness needs a nap between victims."
-                    </p>
-                </div>
-            `;
-        } else if (availableEvents.length === 0) {
+        if (availableEvents.length === 0) {
             mainContent = `
                 <div style="padding: 20px; text-align: center; color: #888;">
-                    <p style="margin: 0; font-size: 1.1em;">🔍 Nothing to explore here right now.</p>
+                    <p style="margin: 0; font-size: 1.1em;">🔍 Nothing to explore here.</p>
                     <p style="margin: 10px 0 0 0; font-size: 0.9em; font-style: italic;">
                         Try dungeons, caves, ruins, or mines for adventure!
                     </p>
                 </div>
             `;
         } else {
-            // Full exploration panel with manual encounter selection + random option
             const diffColors = { easy: '#4caf50', medium: '#ff9800', hard: '#f44336', deadly: '#9c27b0', unknown: '#888' };
             const diffColor = diffColors[difficulty] || '#888';
-            const canSurvive = survival.canSurvive || false;
+            const canSurvive = survival.canSurvive !== false;
 
             mainContent = `
                 <div style="margin-bottom: 15px;">
@@ -7242,52 +7222,19 @@ const LocationPanelStack = {
                             <div style="background: ${survival.tierColor}; height: 100%; width: ${survival.chance || 50}%; transition: width 0.3s;"></div>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.85em; margin-top: 8px;">
-                            <span>❤️ ${game?.player?.health || 0}/${survival.requirements?.minHealth || 50}</span>
-                            <span>⚡ ${game?.player?.stamina || 0}/${survival.requirements?.minStamina || 50}</span>
-                            <span>🛡️ ${game?.player?.armor || 0}/${survival.requirements?.recommendedArmor || 0}</span>
-                            <span>⚔️ ${game?.player?.weapon || 0}/${survival.requirements?.recommendedWeapon || 0}</span>
+                            <span>❤️ ${game?.player?.stats?.health || 0}/${survival.requirements?.minHealth || 50}</span>
+                            <span>⚡ ${game?.player?.stats?.stamina || 0}/${survival.requirements?.minStamina || 50}</span>
                         </div>
                     </div>
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <div style="color: #4fc3f7; font-size: 0.95em; font-weight: bold; margin-bottom: 8px;">📍 Choose Encounter or Random Explore:</div>
-                    <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(79, 195, 247, 0.2); border-radius: 6px;">
-                        ${availableEvents.map((event, idx) => {
-                            const eventDiffColors = { easy: '#4caf50', medium: '#ff9800', hard: '#f44336', deadly: '#9c27b0' };
-                            const eventDiffColor = eventDiffColors[event.difficulty] || '#888';
-                            return `
-                                <div class="exploration-encounter-item" data-event-id="${event.id}" data-location-id="${locationId}"
-                                     style="padding: 10px 12px; border-bottom: ${idx < availableEvents.length - 1 ? '1px solid rgba(79, 195, 247, 0.1)' : 'none'};
-                                            display: flex; justify-content: space-between; align-items: center;
-                                            cursor: ${canSurvive ? 'pointer' : 'not-allowed'}; opacity: ${canSurvive ? '1' : '0.5'};
-                                            transition: background 0.2s ease;"
-                                     onmouseenter="if(${canSurvive}) this.style.background='rgba(79, 195, 247, 0.1)'"
-                                     onmouseleave="this.style.background='transparent'">
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <span style="font-size: 1.3em;">${event.icon}</span>
-                                        <div>
-                                            <div style="font-weight: bold; color: #e0e0e0;">${event.name}</div>
-                                            <div style="font-size: 0.8em; color: #888; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                ${event.description.substring(0, 50)}...
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span style="padding: 2px 8px; border-radius: 4px; font-size: 0.75em; background: ${eventDiffColor}30; color: ${eventDiffColor}; border: 1px solid ${eventDiffColor}50;">
-                                        ${(event.difficulty || 'easy').toUpperCase()}
-                                    </span>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-                <button class="explore-random-btn" data-location-id="${locationId}"
+                <button class="explore-btn" data-location-id="${locationId}"
                     style="width: 100%; padding: 15px; background: ${canSurvive ? 'linear-gradient(135deg, #ff8c00 0%, #cc5500 100%)' : '#333'};
                            border: 1px solid ${canSurvive ? '#ff8c00' : '#555'}; border-radius: 8px;
                            color: ${canSurvive ? 'white' : '#666'}; font-size: 1.1em;
                            font-weight: bold; cursor: ${canSurvive ? 'pointer' : 'not-allowed'};
                            display: flex; align-items: center; justify-content: center; gap: 8px;"
                     ${canSurvive ? '' : 'disabled'}>
-                    ${canSurvive ? '🎲 Random Exploration' : '💀 Too Weak to Explore'}
+                    ${canSurvive ? '🏚️ Explore Area' : '💀 Too Weak to Explore'}
                 </button>
             `;
         }
@@ -7303,51 +7250,16 @@ const LocationPanelStack = {
             ${mainContent}
         `;
 
-        // Attach event listeners after HTML is in DOM - more reliable than inline onclick
-        // Default to TRUE if canSurvive is undefined - let the exploration system handle validation
-        const canSurviveNow = survival.canSurvive !== false; // Only false if explicitly false
-        const capturedLocationId = locationId; // Capture for closure
+        // Attach listener to explore button
+        const canSurviveNow = survival.canSurvive !== false;
+        const capturedLocationId = locationId;
+        const exploreBtn = content.querySelector('.explore-btn');
 
-        console.log('🏚️ Attaching exploration listeners - locationId:', capturedLocationId, 'canSurvive:', canSurviveNow);
-
-        // Attach listeners to exploration encounter items
-        const encounterItems = content.querySelectorAll('.exploration-encounter-item');
-        console.log('🏚️ Found', encounterItems.length, 'encounter items');
-
-        encounterItems.forEach(item => {
-            item.addEventListener('click', () => {
-                console.log('🏚️ Encounter clicked! locationId:', capturedLocationId, 'canSurvive:', canSurviveNow);
-                if (!canSurviveNow) {
-                    console.log('🏚️ Cannot survive - click blocked');
-                    return;
-                }
-                // Open the ExplorationPanel
+        if (exploreBtn) {
+            exploreBtn.addEventListener('click', () => {
+                if (!canSurviveNow) return;
                 if (typeof ExplorationPanel !== 'undefined' && ExplorationPanel.open) {
-                    console.log('🏚️ Opening ExplorationPanel');
                     ExplorationPanel.open(capturedLocationId);
-                } else {
-                    console.error('🏚️ ExplorationPanel not available!');
-                }
-            });
-        });
-
-        // Attach listener to random exploration button
-        const randomBtn = content.querySelector('.explore-random-btn');
-        console.log('🏚️ Random button found:', !!randomBtn);
-
-        if (randomBtn) {
-            randomBtn.addEventListener('click', () => {
-                console.log('🏚️ Random exploration clicked! locationId:', capturedLocationId, 'canSurvive:', canSurviveNow);
-                if (!canSurviveNow) {
-                    console.log('🏚️ Cannot survive - click blocked');
-                    return;
-                }
-                // Open the ExplorationPanel
-                if (typeof ExplorationPanel !== 'undefined' && ExplorationPanel.open) {
-                    console.log('🏚️ Opening ExplorationPanel');
-                    ExplorationPanel.open(capturedLocationId);
-                } else {
-                    console.error('🏚️ ExplorationPanel not available!');
                 }
             });
         }

@@ -2200,6 +2200,583 @@ const DungeonExplorationSystem = {
         },
 
         //
+        // CAPITAL EVENTS - royal opportunities and intrigue
+        //
+
+        capital_royal_audience: {
+            id: 'capital_royal_audience',
+            name: 'Royal Audience Chamber',
+            description: 'The throne room doors stand open. Nobles mill about seeking favor. Perhaps you could petition the crown.',
+            icon: '👑',
+            locationType: ['capital'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'petition_crown',
+                    text: '📜 Present a petition',
+                    preview: 'Risk: Low. Costs gold but could gain favor.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    goldCost: 50,
+                    outcomes: [
+                        { weight: 35, type: 'favor', message: 'The crown looks favorably upon you! A small grant is awarded.', goldReward: 200, loot: ['ancient_seal'] },
+                        { weight: 40, type: 'noted', message: 'Your petition is noted. Perhaps something will come of it.', loot: ['dusty_tome'] },
+                        { weight: 25, type: 'dismissed', message: 'Dismissed! The court has no time for commoners today.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'observe_nobles',
+                    text: '👀 Observe the nobility',
+                    preview: 'Risk: None. Watch and learn.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 40, type: 'gossip', message: 'You overhear valuable gossip about trade routes!', loot: ['dusty_tome', 'ancient_coin'] },
+                        { weight: 35, type: 'contact', message: 'A minor noble notices you. A potential business contact!', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 25, type: 'nothing', message: 'Boring political discussions. Nothing useful.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'leave_quietly',
+                    text: '🚪 Leave quietly',
+                    preview: 'Risk: None. Not your scene.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 0, max: 5 },
+                    outcomes: [
+                        { weight: 100, type: 'safe', message: 'You slip away. The court games are not for you today.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        capital_grand_market: {
+            id: 'capital_grand_market',
+            name: 'The Grand Market',
+            description: 'The capitals legendary marketplace. Merchants from across the realm hawk exotic wares. Deals await the cunning.',
+            icon: '🏪',
+            locationType: ['capital'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'hunt_bargains',
+                    text: '🔍 Hunt for bargains',
+                    preview: 'Risk: Low. Spend time, maybe find deals.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 15, max: 25 },
+                    outcomes: [
+                        { weight: 30, type: 'great_deal', message: 'Incredible find! A merchant is desperate to sell!', loot: ['silver_candelabra', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 40, type: 'good_deal', message: 'Some decent finds at fair prices.', loot: ['ancient_coin', 'ancient_coin', 'dusty_tome'] },
+                        { weight: 30, type: 'nothing', message: 'Prices are high today. Nothing worth buying.', loot: ['ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'exotic_imports',
+                    text: '🌍 Browse exotic imports',
+                    preview: 'Risk: Low. Foreign goods from distant lands.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 25, type: 'rare_find', message: 'A rare artifact from the eastern kingdoms!', loot: ['ancient_seal', 'enchanted_quill'] },
+                        { weight: 45, type: 'interesting', message: 'Interesting wares, though pricey.', loot: ['ancient_coin', 'dusty_tome'] },
+                        { weight: 30, type: 'junk', message: 'Mostly tourist trinkets. Not worth it.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'quick_browse',
+                    text: '👁️ Quick look around',
+                    preview: 'Risk: None. Just passing through.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 5 },
+                    outcomes: [
+                        { weight: 70, type: 'nothing', message: 'A brief tour. Nothing catches your eye.', loot: [] },
+                        { weight: 30, type: 'luck', message: 'You spot a coin on the ground!', loot: ['ancient_coin'] }
+                    ]
+                }
+            ]
+        },
+
+        capital_banking_district: {
+            id: 'capital_banking_district',
+            name: 'Banking District',
+            description: 'Massive stone buildings house the realms wealth. Money changers and investment opportunities abound.',
+            icon: '🏦',
+            locationType: ['capital'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'investment_opportunity',
+                    text: '📈 Seek investment opportunities',
+                    preview: 'Risk: Medium. Could gain or lose gold.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    goldCost: 100,
+                    outcomes: [
+                        { weight: 30, type: 'profit', message: 'Excellent investment! Your gold multiplies!', goldReward: 250, loot: [] },
+                        { weight: 40, type: 'modest', message: 'A modest return on your investment.', goldReward: 130, loot: [] },
+                        { weight: 30, type: 'loss', message: 'The venture failed. Your investment is lost.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'money_changer',
+                    text: '💱 Visit money changers',
+                    preview: 'Risk: Low. Exchange foreign currency.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 40, type: 'good_rate', message: 'Favorable exchange rates today!', goldReward: 25, loot: ['ancient_coin'] },
+                        { weight: 40, type: 'normal', message: 'Standard rates. Nothing special.', loot: ['ancient_coin'] },
+                        { weight: 20, type: 'scam', message: 'The money changer tried to shortchange you! You caught them.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'observe_wealthy',
+                    text: '👀 Observe the wealthy',
+                    preview: 'Risk: None. See how the other half lives.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 5 },
+                    outcomes: [
+                        { weight: 50, type: 'inspiration', message: 'You learn some business tactics from watching.', loot: ['dusty_tome'] },
+                        { weight: 50, type: 'nothing', message: 'Rich people doing rich people things. Boring.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // TOWN/CITY EVENTS - urban exploration
+        //
+
+        town_noble_district: {
+            id: 'town_noble_district',
+            name: 'Noble District',
+            description: 'Grand manors line the streets. Guards patrol but opportunities exist for the clever.',
+            icon: '🏰',
+            locationType: ['city', 'capital', 'town'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'seek_employment',
+                    text: '💼 Seek noble employment',
+                    preview: 'Risk: Low. Nobles always need help.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 15, max: 20 },
+                    outcomes: [
+                        { weight: 35, type: 'hired', message: 'A noble hires you for a task! Good pay!', goldReward: 75, loot: ['ancient_coin'] },
+                        { weight: 40, type: 'maybe', message: 'Leave your name. They might call on you.', loot: ['ancient_coin'] },
+                        { weight: 25, type: 'dismissed', message: 'The nobles have no need for your services.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'explore_gardens',
+                    text: '🌹 Explore the gardens',
+                    preview: 'Risk: Low. Public gardens are beautiful.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 30, type: 'find', message: 'Someone dropped something valuable in the hedges!', loot: ['ancient_coin', 'ancient_coin', 'rusted_medallion'] },
+                        { weight: 40, type: 'peaceful', message: 'A peaceful stroll. You feel refreshed.', healthBonus: 5, loot: [] },
+                        { weight: 30, type: 'nothing', message: 'Just flowers and fountains. Pretty though.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'case_the_area',
+                    text: '🔍 Case the area',
+                    preview: 'Risk: Medium. Guards might notice.',
+                    healthCost: { min: 0, max: 10 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 30, type: 'intel', message: 'You note patrol patterns and entry points.', loot: ['dusty_tome'] },
+                        { weight: 40, type: 'nothing', message: 'Too many guards. Not worth the risk.', loot: [] },
+                        { weight: 30, type: 'caught', message: 'A guard questions you! You talk your way out.', healthPenalty: 5, loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        town_tavern_rumors: {
+            id: 'town_tavern_rumors',
+            name: 'Tavern Rumors',
+            description: 'The tavern buzzes with gossip. Locals share stories over ale. Information is currency here.',
+            icon: '🍺',
+            locationType: ['town', 'village', 'city', 'capital'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'buy_rounds',
+                    text: '🍻 Buy a round of drinks',
+                    preview: 'Risk: Low. Costs gold, loosens tongues.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    goldCost: 15,
+                    outcomes: [
+                        { weight: 40, type: 'great_info', message: 'Drunk locals spill valuable secrets!', loot: ['dusty_tome', 'ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'some_info', message: 'You hear some useful gossip.', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 25, type: 'nothing', message: 'Just drunken rambling. Waste of gold.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'listen_quietly',
+                    text: '👂 Listen quietly',
+                    preview: 'Risk: None. Free information.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 30, type: 'overheard', message: 'You overhear a merchant discussing a shipment!', loot: ['ancient_coin', 'dusty_tome'] },
+                        { weight: 45, type: 'gossip', message: 'Local gossip. Interesting but not valuable.', loot: ['ancient_coin'] },
+                        { weight: 25, type: 'nothing', message: 'Too noisy to hear anything useful.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'ask_barkeep',
+                    text: '🗣️ Ask the barkeep',
+                    preview: 'Risk: Low. They know everyone.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 35, type: 'helpful', message: 'The barkeep shares valuable local knowledge!', loot: ['dusty_tome', 'ancient_coin'] },
+                        { weight: 40, type: 'directions', message: 'They point you to someone who might help.', loot: ['ancient_coin'] },
+                        { weight: 25, type: 'busy', message: 'Too busy to chat. Try later.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // INN EVENTS - rest and opportunity
+        //
+
+        inn_back_room_deals: {
+            id: 'inn_back_room_deals',
+            name: 'Back Room Dealings',
+            description: 'Shady characters gather in the back room. Deals are made here that never see daylight.',
+            icon: '🤫',
+            locationType: ['inn'],
+            difficulty: 'hard',
+            choices: [
+                {
+                    id: 'join_game',
+                    text: '🎲 Join the game',
+                    preview: 'Risk: High. Gambling with dangerous folk.',
+                    healthCost: { min: 0, max: 20 },
+                    staminaCost: { min: 10, max: 15 },
+                    goldCost: 50,
+                    outcomes: [
+                        { weight: 30, type: 'big_win', message: 'Lady luck smiles! You clean them out!', goldReward: 200, loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'small_win', message: 'You win some, you lose some. Net positive.', goldReward: 75, loot: [] },
+                        { weight: 25, type: 'lose', message: 'Bad luck. You lose your stake.', loot: [] },
+                        { weight: 10, type: 'cheater', message: 'You catch someone cheating! A fight breaks out!', healthPenalty: 15, loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'seek_info',
+                    text: '🔍 Seek black market info',
+                    preview: 'Risk: Medium. These folk dont trust easy.',
+                    healthCost: { min: 0, max: 10 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 35, type: 'contact', message: 'A fence offers to buy questionable goods.', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 35, type: 'tip', message: 'Someone mentions a vulnerable merchant.', loot: ['dusty_tome'] },
+                        { weight: 30, type: 'suspicious', message: 'They dont trust you. No information shared.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'leave_alone',
+                    text: '🚪 Leave them alone',
+                    preview: 'Risk: None. Smart move.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 0, max: 5 },
+                    outcomes: [
+                        { weight: 100, type: 'safe', message: 'You walk away. Some doors are best left closed.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // PORT EVENTS - maritime adventures
+        //
+
+        port_dock_work: {
+            id: 'port_dock_work',
+            name: 'Dock Work',
+            description: 'Ships load and unload constantly. Strong backs are always needed on the docks.',
+            icon: '📦',
+            locationType: ['port'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'load_cargo',
+                    text: '💪 Help load cargo',
+                    preview: 'Risk: Low. Honest work, honest pay.',
+                    healthCost: { min: 5, max: 15 },
+                    staminaCost: { min: 25, max: 35 },
+                    outcomes: [
+                        { weight: 50, type: 'good_pay', message: 'Hard work but good pay!', goldReward: 40, loot: ['ancient_coin'] },
+                        { weight: 30, type: 'tip', message: 'The captain tips you extra for good work!', goldReward: 60, loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 20, type: 'find', message: 'You find something interesting in a crate!', loot: ['ancient_coin', 'ancient_coin', 'rusted_medallion'] }
+                    ]
+                },
+                {
+                    id: 'inspect_cargo',
+                    text: '🔍 Inspect arriving cargo',
+                    preview: 'Risk: Low. See whats coming in.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 35, type: 'opportunity', message: 'You spot valuable goods being unloaded!', loot: ['dusty_tome', 'ancient_coin'] },
+                        { weight: 40, type: 'nothing_special', message: 'Standard trade goods. Nothing exciting.', loot: ['ancient_coin'] },
+                        { weight: 25, type: 'suspicious', message: 'Smuggled goods! You know who to tell...', loot: ['ancient_coin', 'ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'rest_by_docks',
+                    text: '🌊 Rest by the water',
+                    preview: 'Risk: None. Watch the ships.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 0, max: 5 },
+                    outcomes: [
+                        { weight: 60, type: 'peaceful', message: 'A peaceful moment watching the sea.', healthBonus: 5, loot: [] },
+                        { weight: 40, type: 'find', message: 'You spot something washed up on the dock!', loot: ['ancient_coin'] }
+                    ]
+                }
+            ]
+        },
+
+        port_ship_cargo_check: {
+            id: 'port_ship_cargo_check',
+            name: 'Ship Cargo Inspection',
+            description: 'A merchant ship has docked. The captain is looking for someone to verify the cargo manifest.',
+            icon: '📋',
+            locationType: ['port'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'official_check',
+                    text: '📝 Official cargo check',
+                    preview: 'Risk: Low. Legitimate work.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 15, max: 20 },
+                    outcomes: [
+                        { weight: 40, type: 'bonus', message: 'Everything checks out! The captain is pleased!', goldReward: 50, loot: ['ancient_coin'] },
+                        { weight: 35, type: 'standard', message: 'Boring but pays well.', goldReward: 30, loot: [] },
+                        { weight: 25, type: 'discrepancy', message: 'You find missing items! The captain rewards your honesty!', goldReward: 75, loot: ['ancient_coin', 'ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'skim_goods',
+                    text: '🤫 Skim some goods',
+                    preview: 'Risk: High. Theft is risky.',
+                    healthCost: { min: 0, max: 25 },
+                    staminaCost: { min: 15, max: 20 },
+                    outcomes: [
+                        { weight: 35, type: 'success', message: 'You pocket some valuable items!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin', 'rusted_medallion'] },
+                        { weight: 35, type: 'caught', message: 'Almost caught! You drop everything and run!', healthPenalty: 10, loot: [] },
+                        { weight: 30, type: 'clean', message: 'Too many eyes watching. Not worth the risk.', loot: ['ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'decline',
+                    text: '🚫 Decline the job',
+                    preview: 'Risk: None. Not interested.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 0, max: 5 },
+                    outcomes: [
+                        { weight: 100, type: 'pass', message: 'You have better things to do.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        port_sailor_recruitment: {
+            id: 'port_sailor_recruitment',
+            name: 'Sailor Recruitment',
+            description: 'Ships are always looking for crew. A voyage could mean adventure and profit.',
+            icon: '⛵',
+            locationType: ['port'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'sign_up',
+                    text: '✍️ Sign up for a voyage',
+                    preview: 'Risk: Medium. Sea voyages are dangerous.',
+                    healthCost: { min: 10, max: 30 },
+                    staminaCost: { min: 30, max: 45 },
+                    outcomes: [
+                        { weight: 30, type: 'profitable', message: 'Excellent voyage! You return with good pay and spoils!', goldReward: 100, loot: ['ancient_coin', 'ancient_coin', 'rusted_medallion'] },
+                        { weight: 40, type: 'normal', message: 'Standard voyage. Hard work but decent pay.', goldReward: 50, loot: ['ancient_coin'] },
+                        { weight: 20, type: 'rough', message: 'Storms and hardship. You barely make it back.', healthPenalty: 15, goldReward: 30, loot: [] },
+                        { weight: 10, type: 'treasure', message: 'You discover hidden cargo! Bonus payment!', goldReward: 150, loot: ['ancient_coin', 'ancient_coin', 'ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'ask_destinations',
+                    text: '🗺️ Ask about destinations',
+                    preview: 'Risk: None. Information gathering.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 50, type: 'useful', message: 'You learn about profitable trade routes!', loot: ['dusty_tome'] },
+                        { weight: 50, type: 'vague', message: 'Sailors are secretive about their routes.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'stay_on_land',
+                    text: '🚶 Stay on dry land',
+                    preview: 'Risk: None. The sea is not for everyone.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 0, max: 0 },
+                    outcomes: [
+                        { weight: 100, type: 'safe', message: 'You prefer solid ground under your feet.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // OUTPOST EVENTS - military frontier
+        //
+
+        outpost_scout_report: {
+            id: 'outpost_scout_report',
+            name: 'Scout Report Duty',
+            description: 'The commander needs scouts to survey the surrounding area and report back.',
+            icon: '🔭',
+            locationType: ['outpost'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'volunteer',
+                    text: '🏃 Volunteer for scouting',
+                    preview: 'Risk: Medium. Enemies lurk beyond walls.',
+                    healthCost: { min: 5, max: 25 },
+                    staminaCost: { min: 25, max: 35 },
+                    outcomes: [
+                        { weight: 35, type: 'success', message: 'Successful reconnaissance! The commander rewards you!', goldReward: 60, loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 30, type: 'discovery', message: 'You discover an enemy camp! Valuable intel!', goldReward: 80, loot: ['dusty_tome', 'ancient_coin'] },
+                        { weight: 25, type: 'ambush', message: 'Ambushed! You fight your way back!', healthPenalty: 15, loot: ['bone_fragment', 'ancient_coin'] },
+                        { weight: 10, type: 'treasure', message: 'You find an abandoned cache in the wilderness!', loot: ['ancient_coin', 'ancient_coin', 'ancient_coin', 'rusted_medallion'] }
+                    ]
+                },
+                {
+                    id: 'study_maps',
+                    text: '🗺️ Study the maps instead',
+                    preview: 'Risk: None. Indoor work.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 50, type: 'insight', message: 'You notice something others missed on the maps!', goldReward: 25, loot: ['dusty_tome'] },
+                        { weight: 50, type: 'nothing', message: 'Standard cartography. Nothing special.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'decline_duty',
+                    text: '🚫 Decline the duty',
+                    preview: 'Risk: None. Not your job.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 0, max: 0 },
+                    outcomes: [
+                        { weight: 100, type: 'pass', message: 'You have other priorities.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        outpost_supply_run: {
+            id: 'outpost_supply_run',
+            name: 'Supply Run',
+            description: 'The outpost needs supplies from a nearby settlement. A delivery escort is needed.',
+            icon: '🛒',
+            locationType: ['outpost'],
+            difficulty: 'medium',
+            choices: [
+                {
+                    id: 'escort_supplies',
+                    text: '🛡️ Escort the supplies',
+                    preview: 'Risk: Medium. Bandits target supply wagons.',
+                    healthCost: { min: 5, max: 20 },
+                    staminaCost: { min: 20, max: 30 },
+                    outcomes: [
+                        { weight: 40, type: 'smooth', message: 'Uneventful journey. The garrison is grateful!', goldReward: 45, loot: ['ancient_coin'] },
+                        { weight: 30, type: 'bandits', message: 'Bandits attack! You fight them off!', healthPenalty: 10, goldReward: 70, loot: ['ancient_coin', 'ancient_coin', 'bone_fragment'] },
+                        { weight: 20, type: 'bonus', message: 'You find a merchant along the way with good deals!', goldReward: 40, loot: ['ancient_coin', 'ancient_coin', 'rusted_medallion'] },
+                        { weight: 10, type: 'ambush', message: 'Heavy ambush! Supplies lost!', healthPenalty: 20, loot: ['bone_fragment'] }
+                    ]
+                },
+                {
+                    id: 'help_load',
+                    text: '📦 Help load at the outpost',
+                    preview: 'Risk: Low. Manual labor.',
+                    healthCost: { min: 0, max: 5 },
+                    staminaCost: { min: 15, max: 25 },
+                    outcomes: [
+                        { weight: 60, type: 'paid', message: 'Honest work for honest pay.', goldReward: 25, loot: [] },
+                        { weight: 40, type: 'tip', message: 'The quartermaster tips you for good work!', goldReward: 40, loot: ['ancient_coin'] }
+                    ]
+                },
+                {
+                    id: 'pass',
+                    text: '🚶 Not interested',
+                    preview: 'Risk: None. Skip this one.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 0, max: 0 },
+                    outcomes: [
+                        { weight: 100, type: 'skip', message: 'You move on to other opportunities.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        //
+        // VILLAGE EVENTS - rural life
+        //
+
+        village_rumor_mill: {
+            id: 'village_rumor_mill',
+            name: 'Village Rumor Mill',
+            description: 'The village well is where everyone gathers to gossip. The old women know everything.',
+            icon: '🗣️',
+            locationType: ['village'],
+            difficulty: 'easy',
+            choices: [
+                {
+                    id: 'chat_elders',
+                    text: '👵 Chat with the elders',
+                    preview: 'Risk: None. Old folks love to talk.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 35, type: 'treasure_rumor', message: 'They speak of hidden treasure in the old ruins!', loot: ['dusty_tome', 'ancient_coin'] },
+                        { weight: 35, type: 'local_news', message: 'You learn about local events and opportunities.', loot: ['ancient_coin'] },
+                        { weight: 30, type: 'rambling', message: 'Just complaints about the youth. Nothing useful.', loot: [] }
+                    ]
+                },
+                {
+                    id: 'help_fetch',
+                    text: '🪣 Help fetch water',
+                    preview: 'Risk: None. Earn goodwill.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 10, max: 15 },
+                    outcomes: [
+                        { weight: 50, type: 'grateful', message: 'The villagers are grateful! One shares a secret!', loot: ['ancient_coin', 'ancient_coin'] },
+                        { weight: 50, type: 'thanks', message: 'Simple thanks. Good karma at least.', healthBonus: 5, loot: [] }
+                    ]
+                },
+                {
+                    id: 'listen_quietly',
+                    text: '👂 Eavesdrop',
+                    preview: 'Risk: Low. Quiet observation.',
+                    healthCost: { min: 0, max: 0 },
+                    staminaCost: { min: 5, max: 10 },
+                    outcomes: [
+                        { weight: 40, type: 'useful', message: 'You overhear something valuable!', loot: ['dusty_tome'] },
+                        { weight: 40, type: 'gossip', message: 'Just village drama. Entertaining though.', loot: [] },
+                        { weight: 20, type: 'caught', message: 'They notice you listening. Awkward.', loot: [] }
+                    ]
+                }
+            ]
+        },
+
+        //
         // BOSS ENCOUNTER EVENTS - the ultimate test of exploration
         // These trigger boss fights after sufficient exploration progress
         //

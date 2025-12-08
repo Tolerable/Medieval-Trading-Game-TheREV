@@ -61,63 +61,15 @@ const ExplorationPanel = {
                         <span id="exploration-location-type" class="location-type-badge">unknown</span>
                     </div>
 
-                    <!-- Exploration Progress Bar -->
-                    <div class="exploration-progress-container" id="exploration-progress-container">
-                        <div class="exploration-progress-header">
-                            <span class="exploration-progress-label">Location Explored</span>
-                            <span class="exploration-progress-percent" id="exploration-progress-percent">0%</span>
-                        </div>
-                        <div class="exploration-progress-bar">
-                            <div class="exploration-progress-fill" id="exploration-progress-fill" style="width: 0%"></div>
-                        </div>
+                    <!-- Survival Assessment -->
+                    <div class="exploration-survival-container" id="exploration-survival-container">
+                        <!-- Populated dynamically -->
                     </div>
 
-                    <!-- Available Explorations List -->
-                    <div class="exploration-options-container" id="exploration-options-container">
-                        <h3 class="exploration-section-title">Available Explorations</h3>
-                        <div class="exploration-options-list" id="exploration-options-list">
-                            <!-- Populated dynamically -->
-                            <div class="exploration-loading">Loading explorations...</div>
-                        </div>
-                    </div>
-
-                    <!-- Quest Explorations (if any) -->
-                    <div class="exploration-quest-container hidden" id="exploration-quest-container">
-                        <h3 class="exploration-section-title">Quest Explorations</h3>
-                        <div class="exploration-quest-list" id="exploration-quest-list">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- NPC Explorations (if any) -->
-                    <div class="exploration-npc-container hidden" id="exploration-npc-container">
-                        <h3 class="exploration-section-title">NPC Opportunities</h3>
-                        <div class="exploration-npc-list" id="exploration-npc-list">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- Exploration History -->
-                    <div class="exploration-history-container" id="exploration-history-container">
-                        <h3 class="exploration-section-title" onclick="ExplorationPanel.toggleHistory()">
-                            Recent History <span class="history-toggle">[+]</span>
-                        </h3>
-                        <div class="exploration-history-list hidden" id="exploration-history-list">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- Selected Exploration Preview -->
-                    <div class="exploration-preview hidden" id="exploration-preview">
-                        <h3 class="exploration-section-title">Selected: <span id="preview-name">None</span></h3>
-                        <p id="preview-description">Select an exploration to see details...</p>
-                        <div class="exploration-preview-stats" id="preview-stats">
-                            <!-- Stats populated here -->
-                        </div>
-                        <button class="exploration-btn primary" id="start-exploration-btn">
-                            Begin Exploration
-                        </button>
-                    </div>
+                    <!-- Random Exploration Button -->
+                    <button class="exploration-btn primary" id="random-exploration-btn" style="margin-top: 12px;">
+                        🎲 Random Exploration
+                    </button>
                 </div>
             </div>
         `;
@@ -133,14 +85,14 @@ const ExplorationPanel = {
     },
 
     attachEventListeners() {
-        // Start exploration button
-        const startBtn = document.getElementById('start-exploration-btn');
-        if (startBtn) {
-            startBtn.addEventListener('click', () => {
-                console.log('🔍 Begin Exploration button clicked!');
-                this.startExploration();
+        // Random exploration button
+        const randomBtn = document.getElementById('random-exploration-btn');
+        if (randomBtn) {
+            randomBtn.addEventListener('click', () => {
+                console.log('🎲 Random Exploration button clicked!');
+                this.startRandomExploration();
             });
-            console.log('🔍 Start button listener attached');
+            console.log('🎲 Random exploration button listener attached');
         }
 
         // Close button
@@ -820,76 +772,118 @@ const ExplorationPanel = {
 
         document.getElementById('exploration-location-icon').textContent = icon;
         document.getElementById('exploration-title').textContent = 'Explore ' + (location.name || locationId);
-        document.getElementById('exploration-subtitle').textContent = typeConfig?.description || 'Choose your adventure...';
+        document.getElementById('exploration-subtitle').textContent = 'Test your survival...';
         document.getElementById('exploration-location-name').textContent = location.name || locationId;
         document.getElementById('exploration-location-type').textContent = typeName;
 
-        // Update progress bar
-        const completionPercent = this.getLocationCompletionPercent(locationId, location.type);
-        document.getElementById('exploration-progress-percent').textContent = `${completionPercent}%`;
-        document.getElementById('exploration-progress-fill').style.width = `${completionPercent}%`;
-
-        // get available explorations
-        this.populateExplorations(locationId, location.type);
+        // Populate survival assessment
+        this.populateSurvivalAssessment(locationId);
     },
 
+    populateSurvivalAssessment(locationId) {
+        const container = document.getElementById('exploration-survival-container');
+        if (!container) return;
+
+        // Get survival data from DungeonExplorationSystem
+        const des = typeof DungeonExplorationSystem !== 'undefined' ? DungeonExplorationSystem : null;
+        const desLocation = des?.getLocation?.(locationId);
+        const difficulty = des?.getLocationDifficulty?.(desLocation) || 'unknown';
+        const survival = des?.calculateSurvivalAssessment?.(desLocation, game?.player) || {
+            tier: 'Unknown',
+            tierColor: '#888',
+            chance: 50,
+            canSurvive: true,
+            requirements: { minHealth: 50, minStamina: 50 }
+        };
+
+        const diffColors = { easy: '#4caf50', medium: '#ff9800', hard: '#f44336', deadly: '#9c27b0', unknown: '#888' };
+        const diffColor = diffColors[difficulty] || '#888';
+        const canSurvive = survival.canSurvive !== false;
+
+        container.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="color: rgba(255,255,255,0.7); font-size: 0.9em;">Difficulty:</span>
+                <span style="background: ${diffColor}; color: #fff; padding: 3px 12px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">
+                    ${difficulty.toUpperCase()}
+                </span>
+            </div>
+            <div style="background: ${survival.tierColor}15; border: 1px solid ${survival.tierColor}40; border-radius: 8px; padding: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-weight: bold; color: ${survival.tierColor};">
+                        ${survival.tier || 'Survival Assessment'}
+                    </span>
+                    <span style="color: ${survival.tierColor}; font-size: 1.2em; font-weight: bold;">
+                        ${Math.round(survival.chance || 50)}%
+                    </span>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); height: 10px; border-radius: 5px; overflow: hidden;">
+                    <div style="background: ${survival.tierColor}; height: 100%; width: ${survival.chance || 50}%; transition: width 0.3s;"></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.9em; margin-top: 10px;">
+                    <div style="background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px;">
+                        <span style="color: #ef5350;">❤️ ${game?.player?.stats?.health || 0}</span>
+                        <span style="color: rgba(255,255,255,0.5);"> / ${survival.requirements?.minHealth || 50}</span>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px;">
+                        <span style="color: #ffc107;">⚡ ${game?.player?.stats?.stamina || 0}</span>
+                        <span style="color: rgba(255,255,255,0.5);"> / ${survival.requirements?.minStamina || 50}</span>
+                    </div>
+                </div>
+                ${!canSurvive ? `
+                    <div style="margin-top: 10px; padding: 8px; background: rgba(239,68,68,0.2); border-radius: 6px; text-align: center; color: #f87171; font-size: 0.85em;">
+                        ⚠️ You are too weak to explore safely!
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        // Update button state based on survival
+        const randomBtn = document.getElementById('random-exploration-btn');
+        if (randomBtn) {
+            if (canSurvive) {
+                randomBtn.disabled = false;
+                randomBtn.style.opacity = '1';
+                randomBtn.style.cursor = 'pointer';
+                randomBtn.textContent = '🎲 Random Exploration';
+            } else {
+                randomBtn.disabled = true;
+                randomBtn.style.opacity = '0.5';
+                randomBtn.style.cursor = 'not-allowed';
+                randomBtn.textContent = '💀 Too Weak to Explore';
+            }
+        }
+    },
+
+    // Start a random exploration - opens the encounter selection/event screen
+    startRandomExploration() {
+        if (!this.currentLocation) {
+            console.warn('No location set for exploration');
+            return;
+        }
+
+        console.log('🎲 Starting random exploration at:', this.currentLocation);
+
+        // Save location before closing
+        const locationId = this.currentLocation;
+
+        // Close this panel
+        this.close();
+
+        // Call DungeonExplorationSystem to show the exploration (picks random event and shows choices)
+        if (typeof DungeonExplorationSystem !== 'undefined') {
+            DungeonExplorationSystem.showExplorationPanel(locationId);
+        } else {
+            console.error('DungeonExplorationSystem not available');
+            if (typeof game !== 'undefined' && game.addMessage) {
+                game.addMessage('Exploration system not available.', 'error');
+            }
+        }
+    },
+
+    // Keep old populateExplorations for compatibility but simplified
     populateExplorations(locationId, locationType) {
-        const listContainer = document.getElementById('exploration-options-list');
-        const questContainer = document.getElementById('exploration-quest-container');
-        const questList = document.getElementById('exploration-quest-list');
-        const npcContainer = document.getElementById('exploration-npc-container');
-        const npcList = document.getElementById('exploration-npc-list');
-
-        if (!listContainer) return;
-
-        // get explorations from config
-        let explorations = [];
-        if (typeof ExplorationConfig !== 'undefined') {
-            explorations = ExplorationConfig.getExplorationsForLocation(locationId, locationType);
-        }
-
-        // get quest explorations
-        let questExplorations = [];
-        if (typeof ExplorationConfig !== 'undefined' && typeof QuestSystem !== 'undefined') {
-            const activeQuestIds = Object.keys(QuestSystem.activeQuests || {});
-            questExplorations = ExplorationConfig.getQuestExplorations(activeQuestIds);
-        }
-
-        // get NPC-unlocked explorations
-        let npcExplorations = [];
-        if (typeof ExplorationConfig !== 'undefined') {
-            npcExplorations = ExplorationConfig.getNPCExplorations(locationId);
-        }
-
-        // build HTML for regular explorations
-        if (explorations.length === 0) {
-            listContainer.innerHTML = `<div class="exploration-loading">No explorations available at this location.</div>`;
-        } else {
-            listContainer.innerHTML = explorations.map(expId => this.renderExplorationOption(expId, false)).join('');
-        }
-
-        // build HTML for quest explorations
-        if (questExplorations.length > 0) {
-            questContainer.classList.remove('hidden');
-            questList.innerHTML = questExplorations.map(expId => this.renderExplorationOption(expId, true)).join('');
-        } else {
-            questContainer.classList.add('hidden');
-        }
-
-        // build HTML for NPC explorations
-        if (npcExplorations.length > 0 && npcContainer && npcList) {
-            npcContainer.classList.remove('hidden');
-            npcList.innerHTML = npcExplorations.map(npcExp =>
-                this.renderExplorationOption(npcExp.id, false, 'npc', npcExp.npcId)
-            ).join('');
-        } else if (npcContainer) {
-            npcContainer.classList.add('hidden');
-        }
-
-        // populate history
-        this.populateHistory();
-
-        // hide preview until selection
+        // This function is now mostly unused since we simplified the panel
+        // but keep it for any external calls
         document.getElementById('exploration-preview')?.classList.add('hidden');
     },
 
