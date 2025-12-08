@@ -3393,20 +3393,27 @@ const DungeonExplorationSystem = {
 
     // Render the exploration UI
     renderExplorationUI(location, event, difficulty) {
+        console.log('🏚️ renderExplorationUI called:', location?.name, event?.name, difficulty);
+
         const playerStats = typeof game !== 'undefined' ? game.player : {};
         const diffMult = this.DIFFICULTY_MULTIPLIERS[difficulty];
 
         // Calculate survival assessment
         const survival = this.calculateSurvivalAssessment(location, playerStats);
+        console.log('🏚️ Survival calculated:', survival?.survivalTier);
 
         // Create or get overlay
         let overlay = document.getElementById('exploration-overlay');
+        const wasNew = !overlay;
         if (!overlay) {
             overlay = document.createElement('div');
             overlay.id = 'exploration-overlay';
             overlay.className = 'overlay';
-            document.getElementById('overlay-container')?.appendChild(overlay);
+            const container = document.getElementById('overlay-container');
+            console.log('🏚️ Creating new overlay, container exists:', !!container);
+            container?.appendChild(overlay);
         }
+        console.log('🏚️ Overlay element:', overlay ? 'exists' : 'MISSING', 'wasNew:', wasNew);
 
         // Build survival assessment HTML
         const survivalHTML = `
@@ -3537,13 +3544,18 @@ const DungeonExplorationSystem = {
         `;
 
         overlay.classList.add('active');
+        console.log('🏚️ Overlay innerHTML length:', overlay.innerHTML.length);
+        console.log('🏚️ Overlay has .active class:', overlay.classList.contains('active'));
+        console.log('🏚️ Overlay computed display:', window.getComputedStyle(overlay).display);
 
         // Bring overlay to front so it appears above location-panel
         if (typeof DraggablePanels !== 'undefined' && DraggablePanels.bringToFront) {
             DraggablePanels.bringToFront(overlay);
+            console.log('🏚️ Called DraggablePanels.bringToFront');
         }
         // Also set high z-index directly as fallback
         overlay.style.zIndex = '10000';
+        console.log('🏚️ Overlay z-index set to 10000, actual:', overlay.style.zIndex);
 
         // Add click handlers
         overlay.querySelectorAll('.exploration-choice:not(.disabled)').forEach(el => {
