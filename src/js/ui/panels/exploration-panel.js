@@ -66,10 +66,26 @@ const ExplorationPanel = {
                         <!-- Populated dynamically -->
                     </div>
 
-                    <!-- Random Exploration Button -->
-                    <button class="exploration-btn primary" id="random-exploration-btn" style="margin-top: 12px;">
-                        🎲 Random Exploration
-                    </button>
+                    <!-- Available Explorations List -->
+                    <div class="exploration-options-container" id="exploration-options-container">
+                        <h3 class="exploration-section-title">Available Explorations</h3>
+                        <div class="exploration-options-list" id="exploration-options-list">
+                            <!-- Populated dynamically -->
+                            <div class="exploration-loading">Loading explorations...</div>
+                        </div>
+                    </div>
+
+                    <!-- Selected Exploration Preview -->
+                    <div class="exploration-preview hidden" id="exploration-preview">
+                        <h3 class="exploration-section-title">Selected: <span id="preview-name">None</span></h3>
+                        <p id="preview-description">Select an exploration to see details...</p>
+                        <div class="exploration-preview-stats" id="preview-stats">
+                            <!-- Stats populated here -->
+                        </div>
+                        <button class="exploration-btn primary" id="start-exploration-btn">
+                            Begin Exploration
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -85,14 +101,14 @@ const ExplorationPanel = {
     },
 
     attachEventListeners() {
-        // Random exploration button
-        const randomBtn = document.getElementById('random-exploration-btn');
-        if (randomBtn) {
-            randomBtn.addEventListener('click', () => {
-                console.log('🎲 Random Exploration button clicked!');
-                this.startRandomExploration();
+        // Start exploration button
+        const startBtn = document.getElementById('start-exploration-btn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                console.log('🔍 Begin Exploration button clicked!');
+                this.startExploration();
             });
-            console.log('🎲 Random exploration button listener attached');
+            console.log('🔍 Start button listener attached');
         }
 
         // Close button
@@ -772,12 +788,15 @@ const ExplorationPanel = {
 
         document.getElementById('exploration-location-icon').textContent = icon;
         document.getElementById('exploration-title').textContent = 'Explore ' + (location.name || locationId);
-        document.getElementById('exploration-subtitle').textContent = 'Test your survival...';
+        document.getElementById('exploration-subtitle').textContent = 'Choose your adventure...';
         document.getElementById('exploration-location-name').textContent = location.name || locationId;
         document.getElementById('exploration-location-type').textContent = typeName;
 
         // Populate survival assessment
         this.populateSurvivalAssessment(locationId);
+
+        // Populate the exploration options list
+        this.populateExplorations(locationId, location.type);
     },
 
     populateSurvivalAssessment(locationId) {
@@ -798,7 +817,6 @@ const ExplorationPanel = {
 
         const diffColors = { easy: '#4caf50', medium: '#ff9800', hard: '#f44336', deadly: '#9c27b0', unknown: '#888' };
         const diffColor = diffColors[difficulty] || '#888';
-        const canSurvive = survival.canSurvive !== false;
 
         container.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -829,61 +847,32 @@ const ExplorationPanel = {
                         <span style="color: rgba(255,255,255,0.5);"> / ${survival.requirements?.minStamina || 50}</span>
                     </div>
                 </div>
-                ${!canSurvive ? `
-                    <div style="margin-top: 10px; padding: 8px; background: rgba(239,68,68,0.2); border-radius: 6px; text-align: center; color: #f87171; font-size: 0.85em;">
-                        ⚠️ You are too weak to explore safely!
-                    </div>
-                ` : ''}
             </div>
         `;
-
-        // Update button state based on survival
-        const randomBtn = document.getElementById('random-exploration-btn');
-        if (randomBtn) {
-            if (canSurvive) {
-                randomBtn.disabled = false;
-                randomBtn.style.opacity = '1';
-                randomBtn.style.cursor = 'pointer';
-                randomBtn.textContent = '🎲 Random Exploration';
-            } else {
-                randomBtn.disabled = true;
-                randomBtn.style.opacity = '0.5';
-                randomBtn.style.cursor = 'not-allowed';
-                randomBtn.textContent = '💀 Too Weak to Explore';
-            }
-        }
     },
 
-    // Start a random exploration - opens the encounter selection/event screen
-    startRandomExploration() {
-        if (!this.currentLocation) {
-            console.warn('No location set for exploration');
-            return;
-        }
-
-        console.log('🎲 Starting random exploration at:', this.currentLocation);
-
-        // Save location before closing
-        const locationId = this.currentLocation;
-
-        // Close this panel
-        this.close();
-
-        // Call DungeonExplorationSystem to show the exploration (picks random event and shows choices)
-        if (typeof DungeonExplorationSystem !== 'undefined') {
-            DungeonExplorationSystem.showExplorationPanel(locationId);
-        } else {
-            console.error('DungeonExplorationSystem not available');
-            if (typeof game !== 'undefined' && game.addMessage) {
-                game.addMessage('Exploration system not available.', 'error');
-            }
-        }
-    },
-
-    // Keep old populateExplorations for compatibility but simplified
     populateExplorations(locationId, locationType) {
-        // This function is now mostly unused since we simplified the panel
-        // but keep it for any external calls
+        const listContainer = document.getElementById('exploration-options-list');
+        if (!listContainer) return;
+
+        // Get available events from DungeonExplorationSystem (only defined ones)
+        let explorations = [];
+        if (typeof DungeonExplorationSystem !== 'undefined') {
+            const location = DungeonExplorationSystem.getLocation(locationId);
+            if (location) {
+                const events = DungeonExplorationSystem.getEventsForLocation(location.type);
+                explorations = events.map(e => e.id);
+            }
+        }
+
+        // build HTML for explorations
+        if (explorations.length === 0) {
+            listContainer.innerHTML = `<div class="exploration-loading">No explorations available at this location.</div>`;
+        } else {
+            listContainer.innerHTML = explorations.map(expId => this.renderExplorationOption(expId, false)).join('');
+        }
+
+        // hide preview until selection
         document.getElementById('exploration-preview')?.classList.add('hidden');
     },
 
