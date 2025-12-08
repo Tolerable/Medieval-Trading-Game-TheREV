@@ -3328,14 +3328,22 @@ const DungeonExplorationSystem = {
 
     // Show exploration panel for a location
     showExplorationPanel(locationId) {
+        console.log('🏚️ showExplorationPanel called with locationId:', locationId);
+
         const location = this.getLocation(locationId);
         if (!location) {
             console.error('🏚️ Location not found:', locationId);
+            if (typeof ToastSystem !== 'undefined') {
+                ToastSystem.showToast('Location not found!', 'error');
+            }
             return;
         }
 
         if (!this.isExplorableLocation(location)) {
             console.log('🏚️ Location is not explorable:', location.type);
+            if (typeof ToastSystem !== 'undefined') {
+                ToastSystem.showToast('This location cannot be explored.', 'warning');
+            }
             return;
         }
 
@@ -3352,8 +3360,13 @@ const DungeonExplorationSystem = {
         const events = this.getEventsForLocation(location.type);
         if (events.length === 0) {
             console.log('🏚️ No events for location type:', location.type);
+            if (typeof ToastSystem !== 'undefined') {
+                ToastSystem.showToast('No exploration events available here.', 'info');
+            }
             return;
         }
+
+        console.log('🏚️ Rendering exploration UI for', location.name, 'with', events.length, 'events');
 
         //  FIXED: Play dungeon music AFTER all validation passes 
         if (typeof MusicSystem !== 'undefined') {

@@ -7304,7 +7304,8 @@ const LocationPanelStack = {
         `;
 
         // Attach event listeners after HTML is in DOM - more reliable than inline onclick
-        const canSurviveNow = survival.canSurvive || false;
+        // Default to TRUE if canSurvive is undefined - let the exploration system handle validation
+        const canSurviveNow = survival.canSurvive !== false; // Only false if explicitly false
         const capturedLocationId = locationId; // Capture for closure
 
         console.log('🏚️ Attaching exploration listeners - locationId:', capturedLocationId, 'canSurvive:', canSurviveNow);
