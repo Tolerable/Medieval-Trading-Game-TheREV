@@ -3538,6 +3538,13 @@ const DungeonExplorationSystem = {
 
         overlay.classList.add('active');
 
+        // Bring overlay to front so it appears above location-panel
+        if (typeof DraggablePanels !== 'undefined' && DraggablePanels.bringToFront) {
+            DraggablePanels.bringToFront(overlay);
+        }
+        // Also set high z-index directly as fallback
+        overlay.style.zIndex = '10000';
+
         // Add click handlers
         overlay.querySelectorAll('.exploration-choice:not(.disabled)').forEach(el => {
             el.addEventListener('click', () => {
