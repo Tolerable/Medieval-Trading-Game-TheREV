@@ -694,9 +694,10 @@ const TimeMachine = {
     STAT_DECAY_INTERVAL: 30, // legacy - kept for compatibility
 
     processStatDecay() {
-        // do nothing - stat decay is handled by game.js processPlayerStatsOverTime()
-        // this function was causing DOUBLE decay when combined with game.js
-        // keeping empty function to avoid breaking any calls to it
+        // Call game's stat decay function when time advances
+        if (typeof game !== 'undefined' && game.processPlayerStatsOverTime) {
+            game.processPlayerStatsOverTime();
+        }
     },
 
     // daily events at midnight

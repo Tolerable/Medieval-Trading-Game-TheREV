@@ -4,6 +4,113 @@
 
 ---
 
+## 2025-12-07 - SESSION #72: EXPLORATION OVERLAY VISIBILITY FIX + DRAGGABLE INTEGRATION
+
+**Request:** Gee reports exploration panel shows but greys out and disappears immediately after clicking. Also z-index might be wrong and needs to be part of draggable buildables system.
+
+**Status:** FIXED
+
+### Root Cause Analysis:
+The exploration flow was:
+1. Click exploration in ExplorationPanel -> `startExploration()` called
+2. `this.close()` hides ExplorationPanel and its backdrop
+3. `DungeonExplorationSystem.triggerExplorationEvent()` called
+4. `renderExplorationUI()` removes `hidden` class from `#exploration-overlay`
+5. BUT: CSS has `.exploration-modal.hidden { display: none !important; }`
+6. Simply removing `hidden` class wasn't enough - no explicit `display: flex` was being set
+
+The overlay was being shown momentarily then the CSS `hidden` class rule was taking precedence.
+
+### Fixes Applied:
+
+**1. dungeon-exploration-system.js - renderExplorationUI() (line 3554-3571):**
+- Now forces visibility with inline `cssText` containing all necessary styles with `!important`
+- Adds both `active` class AND explicit display/visibility/opacity styles
+- z-index: 100000 (for encounter overlay - should be TOP of everything)
+
+**2. dungeon-exploration-system.js - closeExploration() (line 3828):**
+- Changed from clearing just `display` to clearing entire `cssText`
+- This properly resets the overlay when closing
+
+**3. exploration-panel.js - z-index adjustments:**
+- Changed panel z-index from 100000 to 10000 (above gameplay panels but below encounter overlay)
+- Changed backdrop z-index from 99999 to 9999
+- Added `cursor: move` for drag hint
+
+**4. exploration-panel.js - createPanelHTML():**
+- Added `exploration-drag-handle` class to header for draggable system
+- Updated z-index comment to explain the layering
+
+**5. draggable-panels.js - Integration:**
+- Added 'exploration-panel' to `panelDragHandles` config with `.exploration-header, .exploration-drag-handle`
+- Added 'exploration-panel' and 'exploration-overlay' to `excludeFromZIndexStack` (they keep their fixed z-index)
+
+### Z-Index Hierarchy Now:
+- Gameplay panels (DraggablePanels): 100-199
+- ExplorationPanel (selection): 10000 (backdrop: 9999)
+- Exploration Overlay (encounter): 100000
+
+### Files Modified:
+- `src/js/systems/combat/dungeon-exploration-system.js` - Force overlay visibility
+- `src/js/ui/panels/exploration-panel.js` - z-index fix, drag handle
+- `src/js/ui/components/draggable-panels.js` - Added exploration-panel config
+
+---
+
+## 2025-12-07 - SESSION #71: EXPLORATION PANEL STILL NOT WORKING
+
+**Request:** Gee reports exploration panel STILL not appearing when clicking encounters. Session #70 was marked as fixed but it's NOT FUCKING WORKING.
+
+**Status:** SUPERSEDED BY SESSION #72
+
+### Issue:
+- Clicking "Random Exploration" or specific encounter items in the location panel's exploration view
+- Console shows clicks registering: "Encounter clicked!" and "renderExplorationUI called"
+- But the `#exploration-overlay` never appears on screen
+- The overlay element exists in index.html (line 103)
+- CSS has proper z-index (10000) and display rules
+
+### Investigation:
+1. Flow traces correctly: click -> showExplorationPanel -> renderExplorationUI
+2. Overlay element found, innerHTML set, .active class added
+3. But overlay never becomes visible on screen
+
+### Root Cause Found (Session #72):
+CSS `.exploration-modal.hidden { display: none !important; }` was overriding the class removal. Fixed by using inline cssText with !important.
+
+---
+
+## 2025-12-07 - SESSION #70: EXPLORATION SYSTEM UNIFICATION
+
+**Request:** Gee reported exploration buttons not working - clicking on encounter selection wasn't opening the encounter panels. Investigation revealed TWO CONFLICTING exploration systems:
+1. `ExplorationPanel` (exploration-panel.js) - The proper unified panel opened with 'E' key
+2. `LocationPanelStack.renderExplorationView` (game.js) - An inline view that tried to use DungeonExplorationSystem directly
+
+**Status:** FIXED - Systems unified
+
+### Root Cause:
+The location panel's "Explore Area" button called `LocationPanelStack.pushView('exploration')` which rendered an inline exploration view. When clicking encounters in that view, it called `DungeonExplorationSystem.showSpecificExplorationPanel()` which tried to render to `#exploration-overlay` - a third UI element! This created confusion and the overlay wasn't appearing properly.
+
+### Fix Applied:
+Changed location panel's "Explore Area" button to open the unified `ExplorationPanel` instead:
+
+**game.js changes:**
+1. Line 7524: Changed `onclick="LocationPanelStack.pushView('exploration')"` to `onclick="if(typeof ExplorationPanel !== 'undefined') ExplorationPanel.open(); else LocationPanelStack.pushView('exploration');"`
+2. Lines 7101-7109: Updated `renderCurrentView()` to call `ExplorationPanel.open()` and pop the view when exploration is selected
+
+### The Correct Flow Now:
+1. Player clicks "Explore Area" button OR presses 'E' key
+2. `ExplorationPanel.open()` is called
+3. ExplorationPanel shows location-specific explorations
+4. Player selects an exploration and clicks "Begin Exploration"
+5. `ExplorationPanel.startExploration()` calls `DungeonExplorationSystem.triggerExplorationEvent()`
+6. `triggerExplorationEvent()` calls `renderExplorationUI()` which shows the encounter overlay with choices
+
+### Files Modified:
+- `src/js/core/game.js` - Updated exploration button and view routing
+
+---
+
 ## 2025-12-07 - SESSION #59: EXPLORATION SYSTEM OVERHAUL
 
 **Request:** Gee wants exploration options to be location-type specific. Currently all locations share the same generic explorations - this is an error. Quest explorations need appropriate explore options tied to location types and NPCs.

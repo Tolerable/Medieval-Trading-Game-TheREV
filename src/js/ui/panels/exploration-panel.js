@@ -35,20 +35,18 @@ const ExplorationPanel = {
             return;
         }
 
-        const overlayContainer = document.getElementById('overlay-container');
-        if (!overlayContainer) {
-            console.warn('ExplorationPanel: overlay-container not found');
-            return;
-        }
-
+        // APPEND TO BODY - NOT overlay-container (which has visibility issues)
         const panel = document.createElement('section');
         panel.id = this.panelId;
         panel.className = 'panel overlay-panel hidden';
+        // z-index 10000 - above gameplay panels (100-199) but below critical modals
+        // This is a modal panel, not a regular gameplay panel
+        panel.style.zIndex = '10000';
         panel.innerHTML = `
             <button class="panel-close-x" data-close-overlay="${this.panelId}" title="Close">×</button>
 
             <div class="exploration-display">
-                <div class="panel-header exploration-header">
+                <div class="panel-header exploration-header exploration-drag-handle">
                     <span id="exploration-location-icon" class="exploration-icon-large">🔍</span>
                     <div class="exploration-header-text">
                         <h2 id="exploration-title">Explore Location</h2>
@@ -116,7 +114,7 @@ const ExplorationPanel = {
                         <div class="exploration-preview-stats" id="preview-stats">
                             <!-- Stats populated here -->
                         </div>
-                        <button class="exploration-btn primary" id="start-exploration-btn" onclick="ExplorationPanel.startExploration()">
+                        <button class="exploration-btn primary" id="start-exploration-btn">
                             Begin Exploration
                         </button>
                     </div>
@@ -124,9 +122,34 @@ const ExplorationPanel = {
             </div>
         `;
 
-        overlayContainer.appendChild(panel);
+        // APPEND TO BODY for guaranteed visibility (not overlay-container)
+        document.body.appendChild(panel);
         this.addStyles();
-        console.log('ExplorationPanel: Panel created');
+
+        // Attach event listeners (onclick attributes can fail with CSP)
+        this.attachEventListeners();
+
+        console.log('ExplorationPanel: Panel created and appended to BODY');
+    },
+
+    attachEventListeners() {
+        // Start exploration button
+        const startBtn = document.getElementById('start-exploration-btn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                console.log('🔍 Begin Exploration button clicked!');
+                this.startExploration();
+            });
+            console.log('🔍 Start button listener attached');
+        }
+
+        // Close button
+        const closeBtn = document.querySelector(`#${this.panelId} .panel-close-x`);
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.close();
+            });
+        }
     },
 
     addStyles() {
@@ -576,14 +599,23 @@ const ExplorationPanel = {
         });
     },
 
+    // Get current game time in minutes (uses TimeMachine for in-game time)
+    getGameTimeMinutes() {
+        if (typeof TimeMachine !== 'undefined' && TimeMachine.getTotalMinutes) {
+            return TimeMachine.getTotalMinutes();
+        }
+        // Fallback to real time if TimeMachine not available
+        return Math.floor(Date.now() / 60000);
+    },
+
     loadCooldowns() {
         // load from localStorage
         try {
             const saved = localStorage.getItem('explorationCooldowns');
             if (saved) {
                 this.explorationCooldowns = JSON.parse(saved);
-                // clean up expired cooldowns
-                const now = Date.now();
+                // clean up expired cooldowns (using game time)
+                const now = this.getGameTimeMinutes();
                 for (const [key, expiry] of Object.entries(this.explorationCooldowns)) {
                     if (expiry < now) {
                         delete this.explorationCooldowns[key];
@@ -661,37 +693,102 @@ const ExplorationPanel = {
     },
 
     open(locationId = null) {
+        console.log('🔍 ExplorationPanel.open() called with locationId:', locationId);
+
         const panel = document.getElementById(this.panelId);
+        console.log('🔍 Panel element exists:', !!panel);
         if (!panel) {
+            console.log('🔍 Panel not found, calling init()');
             this.init();
         }
 
         // get current location if not provided
         if (!locationId && typeof game !== 'undefined') {
             locationId = typeof game.currentLocation === 'string' ? game.currentLocation : game.currentLocation?.id;
+            console.log('🔍 Got locationId from game.currentLocation:', locationId);
         }
 
         if (!locationId) {
-            console.warn('ExplorationPanel: No location to explore');
+            console.warn('🔍 ExplorationPanel: No location to explore - ABORTING');
             return;
         }
 
         this.currentLocation = locationId;
+        console.log('🔍 Calling updateForLocation...');
         this.updateForLocation(locationId);
 
         const panelEl = document.getElementById(this.panelId);
+        console.log('🔍 Panel element after update:', !!panelEl, 'classList:', panelEl?.classList?.toString());
         if (panelEl) {
+            // Remove ALL classes that could hide it
             panelEl.classList.remove('hidden');
+            panelEl.className = 'exploration-panel-visible'; // Replace ALL classes
             this.isOpen = true;
+
+            // Create backdrop if not exists
+            let backdrop = document.getElementById('exploration-panel-backdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.id = 'exploration-panel-backdrop';
+                backdrop.onclick = () => this.close();
+                document.body.appendChild(backdrop);
+            }
+            backdrop.style.cssText = `
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                background: rgba(0, 0, 0, 0.85) !important;
+                z-index: 9999 !important;
+                display: block !important;
+            `;
+
+            // FORCE ALL styles to guarantee visibility - CENTERED - NOTHING CAN OVERRIDE
+            // z-index 10000 puts this above gameplay panels (100-199) but below critical modals
+            panelEl.style.cssText = `
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                margin: auto !important;
+                width: 480px !important;
+                height: fit-content !important;
+                max-height: 80vh !important;
+                z-index: 10000 !important;
+                display: flex !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                background: rgba(30, 30, 50, 0.98) !important;
+                border: 2px solid rgba(79, 195, 247, 0.5) !important;
+                border-radius: 12px !important;
+                flex-direction: column !important;
+                box-shadow: 0 0 60px rgba(0,0,0,0.9), 0 0 100px rgba(79, 195, 247, 0.3) !important;
+                animation: none !important;
+                overflow: hidden !important;
+                pointer-events: auto !important;
+                cursor: move !important;
+            `;
+            console.log('🔍 Panel FORCED VISIBLE with backdrop');
+
             // Start live cooldown timer updates
             this.startCooldownTimer();
+        } else {
+            console.error('🔍 Panel element NOT FOUND after init!');
         }
     },
 
     close() {
         const panel = document.getElementById(this.panelId);
         if (panel) {
+            panel.style.display = 'none';
             panel.classList.add('hidden');
+        }
+        // Hide backdrop
+        const backdrop = document.getElementById('exploration-panel-backdrop');
+        if (backdrop) {
+            backdrop.style.display = 'none';
         }
         this.isOpen = false;
         this.selectedExploration = null;
@@ -823,13 +920,16 @@ const ExplorationPanel = {
             };
         }
 
-        // check cooldown
+        // check cooldown (using in-game time)
         const cooldownKey = `${this.currentLocation}_${explorationId}`;
         const cooldownExpiry = this.explorationCooldowns[cooldownKey];
-        const isOnCooldown = cooldownExpiry && cooldownExpiry > Date.now();
+        const currentGameTime = this.getGameTimeMinutes();
+        const isOnCooldown = cooldownExpiry && cooldownExpiry > currentGameTime;
         let cooldownText = '';
         if (isOnCooldown) {
-            cooldownText = this.formatCooldownTime(cooldownExpiry - Date.now());
+            // Show remaining time in game hours/minutes
+            const remainingMinutes = cooldownExpiry - currentGameTime;
+            cooldownText = this.formatGameCooldownTime(remainingMinutes);
         }
 
         // check requirements (pass locationId for NPC guide checks)
@@ -895,12 +995,24 @@ const ExplorationPanel = {
         }
     },
 
+    // Format in-game cooldown time (minutes remaining -> hours:minutes display)
+    formatGameCooldownTime(gameMinutesRemaining) {
+        const hours = Math.floor(gameMinutesRemaining / 60);
+        const minutes = Math.round(gameMinutesRemaining % 60);
+
+        if (hours > 0) {
+            return `${hours}h ${minutes}m`;
+        } else {
+            return `${minutes}m`;
+        }
+    },
+
     // Start cooldown timer updates when panel is open
     startCooldownTimer() {
         // Clear any existing timer
         this.stopCooldownTimer();
 
-        // Update every second
+        // Update every second (checks game time, not real time)
         this.cooldownTimerInterval = setInterval(() => {
             if (!this.isOpen) {
                 this.stopCooldownTimer();
@@ -909,6 +1021,8 @@ const ExplorationPanel = {
 
             // Update all cooldown displays
             const cooldownElements = document.querySelectorAll('.exploration-option-status.cooldown');
+            const currentGameTime = this.getGameTimeMinutes();
+
             cooldownElements.forEach(el => {
                 const option = el.closest('.exploration-option');
                 if (!option) return;
@@ -917,8 +1031,9 @@ const ExplorationPanel = {
                 const cooldownKey = `${this.currentLocation}_${expId}`;
                 const cooldownExpiry = this.explorationCooldowns[cooldownKey];
 
-                if (cooldownExpiry && cooldownExpiry > Date.now()) {
-                    el.textContent = this.formatCooldownTime(cooldownExpiry - Date.now());
+                if (cooldownExpiry && cooldownExpiry > currentGameTime) {
+                    const remainingMinutes = cooldownExpiry - currentGameTime;
+                    el.textContent = this.formatGameCooldownTime(remainingMinutes);
                 } else {
                     // Cooldown expired - refresh the list
                     this.updateForLocation(this.currentLocation);
@@ -937,9 +1052,9 @@ const ExplorationPanel = {
     selectExploration(explorationId) {
         // check if selectable
         const cooldownKey = `${this.currentLocation}_${explorationId}`;
-        const isOnCooldown = this.explorationCooldowns[cooldownKey] && this.explorationCooldowns[cooldownKey] > Date.now();
+        const currentGameTime = this.getGameTimeMinutes();
+        const isOnCooldown = this.explorationCooldowns[cooldownKey] && this.explorationCooldowns[cooldownKey] > currentGameTime;
         if (isOnCooldown) {
-            console.log('Exploration on cooldown');
             return;
         }
 
@@ -1013,7 +1128,12 @@ const ExplorationPanel = {
             return;
         }
 
-        console.log('Starting exploration:', this.selectedExploration);
+        console.log('🔍 Starting exploration:', this.selectedExploration, 'at location:', this.currentLocation);
+
+        // Save location BEFORE closing (close() might clear state)
+        const locationId = this.currentLocation;
+        const explorationId = this.selectedExploration;
+        const locationType = this.currentLocationType;
 
         // close this panel
         this.close();
@@ -1021,31 +1141,35 @@ const ExplorationPanel = {
         // trigger the exploration event through DungeonExplorationSystem
         if (typeof DungeonExplorationSystem !== 'undefined') {
             // check if the event exists
-            const eventData = DungeonExplorationSystem.EXPLORATION_EVENTS?.[this.selectedExploration];
+            const eventData = DungeonExplorationSystem.EXPLORATION_EVENTS?.[explorationId];
+            console.log('🔍 Event data found:', !!eventData, 'for explorationId:', explorationId);
             if (eventData) {
+                console.log('🔍 Calling triggerExplorationEvent with:', explorationId, locationId);
                 // trigger the exploration event
-                DungeonExplorationSystem.triggerExplorationEvent(this.selectedExploration, this.currentLocation);
+                const result = DungeonExplorationSystem.triggerExplorationEvent(explorationId, locationId);
+                console.log('🔍 triggerExplorationEvent returned:', result);
 
                 // mark exploration as completed for progress tracking
-                this.markExplorationCompleted(this.currentLocation, this.selectedExploration);
+                // Use saved local vars since close() clears this.selectedExploration
+                this.markExplorationCompleted(locationId, explorationId);
 
                 // add to history
-                this.addToHistory(this.selectedExploration, this.currentLocation, this.currentLocationType, eventData);
+                this.addToHistory(explorationId, locationId, locationType, eventData);
 
-                // set cooldown
-                const cooldownMinutes = ExplorationConfig?.getCooldown(this.currentLocationType) || 60;
-                const cooldownKey = `${this.currentLocation}_${this.selectedExploration}`;
-                this.explorationCooldowns[cooldownKey] = Date.now() + (cooldownMinutes * 60 * 1000);
+                // set cooldown (12 in-game hours = 720 minutes)
+                const cooldownHours = 12;
+                const cooldownMinutes = cooldownHours * 60; // 720 minutes
+                const cooldownKey = `${locationId}_${explorationId}`;
+                this.explorationCooldowns[cooldownKey] = this.getGameTimeMinutes() + cooldownMinutes;
                 this.saveCooldowns();
             } else {
                 // event not implemented yet
                 if (typeof game !== 'undefined' && game.addMessage) {
-                    game.addMessage(`This exploration (${this.formatExplorationName(this.selectedExploration)}) is not yet available.`, 'info');
+                    game.addMessage(`This exploration (${this.formatExplorationName(explorationId)}) is not yet available.`, 'info');
                 }
             }
         }
-
-        this.selectedExploration = null;
+        // Don't null out here - close() already does it
     },
 
     // History management

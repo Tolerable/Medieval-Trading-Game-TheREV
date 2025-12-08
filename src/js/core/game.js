@@ -186,7 +186,7 @@ const LeaderboardFeatures = {
         if (!game || !game.player) return null;
 
         const player = game.player;
-        const daysSurvived = typeof TimeSystem !== 'undefined' ? TimeSystem.currentDay : 1;
+        const daysSurvived = typeof TimeMachine !== 'undefined' ? TimeMachine.currentDay : 1;
 
         // add up all the crap in your pockets
         let inventoryValue = 0;
@@ -895,7 +895,7 @@ const EventSystem = {
         this.lastEventCheck = now;
 
         // check daily limit - reset counter on new day
-        const currentDay = typeof TimeSystem !== 'undefined' ? TimeSystem.currentDay : 0;
+        const currentDay = typeof TimeMachine !== 'undefined' ? TimeMachine.currentDay : 0;
         if (currentDay !== this.lastEventDay) {
             this.lastEventDay = currentDay;
             this.eventsToday = 0;
@@ -928,7 +928,7 @@ const EventSystem = {
             name: eventType.name,
             description: eventType.description,
             effects: { ...eventType.effects, ...data },
-            startTime: TimeSystem.getTotalMinutes(),
+            startTime: TimeMachine.getTotalMinutes(),
             duration: eventType.duration || 60,
             active: true
         };
@@ -1068,7 +1068,7 @@ const EventSystem = {
     
     // Update events (remove expired ones)
     update() {
-        const currentTime = TimeSystem.getTotalMinutes();
+        const currentTime = TimeMachine.getTotalMinutes();
         
         // Check scheduled events
         this.scheduledEvents.forEach(event => {
@@ -1337,7 +1337,7 @@ const game = {
         // fix: use total minutes to properly handle FAST speeds
         // At fast speeds, time might jump from minute 3 to minute 7, SKIPPING minute 5
         // So we calculate how many 5-minute intervals have PASSED and apply decay for ALL of them
-        const totalMinutes = TimeSystem.getTotalMinutes();
+        const totalMinutes = TimeMachine.getTotalMinutes();
 
         // Initialize on first run
         if (this._lastProcessedTotalMinutes < 0) {
@@ -1357,12 +1357,12 @@ const game = {
         this._lastProcessedTotalMinutes = totalMinutes;
 
         // pull survival config from GameConfig (or use defaults if config isn't loaded)
-        // fix: fallback values now match config.js exactly - 5 day hunger, 3 day thirst
+        // Hunger: 5 days (100% to 0%), Thirst: 3 days (100% to 0%), Health drain: 1 day at 0% vitals
         const survivalConfig = (typeof GameConfig !== 'undefined' && GameConfig.survival) ? GameConfig.survival : {
             hunger: { decayPerUpdate: 0.0694, criticalThreshold: 20 },  // 5 days: 100/(5*1440/5) = 0.0694
             thirst: { decayPerUpdate: 0.1157, criticalThreshold: 20 },  // 3 days: 100/(3*1440/5) = 0.1157
             stamina: { regenPerUpdate: 1.667 },
-            starvationDeath: { healthDrainPercent: 0.00694 },
+            starvationDeath: { healthDrainPercent: 0.00347 },  // 1 day (24h): 100/(24*60/5) = 0.00347
             healthRegen: { baseRegenPerUpdate: 0.5, wellFedBonus: 1.0, wellFedThreshold: 70, enduranceBonusMultiplier: 0.05 }
         };
 
@@ -1537,7 +1537,7 @@ const game = {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Get time info for dynamic rendering
-        const timeInfo = TimeSystem.getTimeInfo();
+        const timeInfo = TimeMachine.getTimeInfo();
         
         // Draw background based on time of day
         if (timeInfo.isNight) {
@@ -1555,7 +1555,7 @@ const game = {
         ctx.fillStyle = timeInfo.isNight ? '#ffffff' : '#000000';
         ctx.font = '16px Arial';
         ctx.textAlign = 'left';
-        ctx.fillText(TimeSystem.getFormattedTime(), 10, 30);
+        ctx.fillText(TimeMachine.getFormattedTime(), 10, 30);
         
         // Draw location info
         if (this.currentLocation) {
@@ -1593,7 +1593,7 @@ const game = {
     
     // Update market prices based on time and events
     updateMarketPrices() {
-        const timeInfo = TimeSystem.getTimeInfo();
+        const timeInfo = TimeMachine.getTimeInfo();
         
         // Base price fluctuations
         Object.keys(this.marketPrices).forEach(itemId => {
@@ -1621,7 +1621,7 @@ const game = {
     
     // Check for scheduled time-based events
     checkScheduledEvents() {
-        const timeInfo = TimeSystem.getTimeInfo();
+        const timeInfo = TimeMachine.getTimeInfo();
         
         // Daily market reset
         if (timeInfo.hour === 6 && timeInfo.minute === 0) {
@@ -1648,7 +1648,7 @@ const game = {
     
     // Apply day/night visual effects - fixed CSS filter syntax
     applyDayNightEffects() {
-        const timeInfo = TimeSystem.getTimeInfo();
+        const timeInfo = TimeMachine.getTimeInfo();
         const canvas = elements.gameCanvas;
 
         if (!canvas) return;
@@ -1675,7 +1675,7 @@ const game = {
         // Update time display
         const timeDisplay = document.getElementById('game-time');
         if (timeDisplay) {
-            timeDisplay.textContent = TimeSystem.getFormattedTime();
+            timeDisplay.textContent = TimeMachine.getFormattedTime();
         }
 
         // Update time control buttons
@@ -1704,10 +1704,10 @@ const game = {
     // Update time control button states
     updateTimeControls() {
         const buttons = {
-            'pause-btn': TimeSystem.isPaused,
-            'normal-speed-btn': TimeSystem.currentSpeed === 'NORMAL',
-            'fast-speed-btn': TimeSystem.currentSpeed === 'FAST',
-            'very-fast-speed-btn': TimeSystem.currentSpeed === 'VERY_FAST'
+            'pause-btn': TimeMachine.isPaused,
+            'normal-speed-btn': TimeMachine.currentSpeed === 'NORMAL',
+            'fast-speed-btn': TimeMachine.currentSpeed === 'FAST',
+            'very-fast-speed-btn': TimeMachine.currentSpeed === 'VERY_FAST'
         };
         
         Object.entries(buttons).forEach(([id, isActive]) => {
@@ -1727,8 +1727,8 @@ const game = {
             items: this.items,
             marketPrices: this.marketPrices,
             settings: this.settings,
-            timeState: typeof TimeSystem !== 'undefined' ? TimeSystem.currentTime : null,
-            timeSpeed: typeof TimeSystem !== 'undefined' ? TimeSystem.currentSpeed : 'NORMAL',
+            timeState: typeof TimeMachine !== 'undefined' ? TimeMachine.currentTime : null,
+            timeSpeed: typeof TimeMachine !== 'undefined' ? TimeMachine.currentSpeed : 'NORMAL',
             activeEvents: typeof EventSystem !== 'undefined' && EventSystem.getActiveEvents ? EventSystem.getActiveEvents() : [],
             gameTick: this.gameTick,
             properties: typeof PropertySystem !== 'undefined' && PropertySystem.getProperties ? PropertySystem.getProperties() : [],
@@ -1773,10 +1773,10 @@ const game = {
         
         // Restore time system
         if (saveData.timeState) {
-            TimeSystem.currentTime = saveData.timeState;
+            TimeMachine.currentTime = saveData.timeState;
         }
         if (saveData.timeSpeed) {
-            TimeSystem.setSpeed(saveData.timeSpeed);
+            TimeMachine.setSpeed(saveData.timeSpeed);
         }
         
         // Restore active events
@@ -3254,7 +3254,7 @@ const GameWorld = {
         game.player.gold -= travelCost;
         
         // Schedule arrival event
-        const arrivalTime = TimeSystem.getTotalMinutes() + travelTime;
+        const arrivalTime = TimeMachine.getTotalMinutes() + travelTime;
         EventSystem.scheduleEvent('travel_complete', arrivalTime, {
             destination: locationId,
             cost: travelCost
@@ -7316,17 +7316,17 @@ const LocationPanelStack = {
 
         encounterItems.forEach(item => {
             item.addEventListener('click', () => {
-                console.log('🏚️ Encounter clicked! eventId:', item.dataset.eventId, 'locationId:', capturedLocationId, 'canSurvive:', canSurviveNow);
+                console.log('🏚️ Encounter clicked! locationId:', capturedLocationId, 'canSurvive:', canSurviveNow);
                 if (!canSurviveNow) {
                     console.log('🏚️ Cannot survive - click blocked');
                     return;
                 }
-                const eventId = item.dataset.eventId;
-                if (eventId && typeof DungeonExplorationSystem !== 'undefined') {
-                    console.log('🏚️ Calling showSpecificExplorationPanel');
-                    DungeonExplorationSystem.showSpecificExplorationPanel(capturedLocationId, eventId);
+                // Open the ExplorationPanel
+                if (typeof ExplorationPanel !== 'undefined' && ExplorationPanel.open) {
+                    console.log('🏚️ Opening ExplorationPanel');
+                    ExplorationPanel.open(capturedLocationId);
                 } else {
-                    console.error('🏚️ Missing eventId or DungeonExplorationSystem');
+                    console.error('🏚️ ExplorationPanel not available!');
                 }
             });
         });
@@ -7342,11 +7342,12 @@ const LocationPanelStack = {
                     console.log('🏚️ Cannot survive - click blocked');
                     return;
                 }
-                if (typeof DungeonExplorationSystem !== 'undefined') {
-                    console.log('🏚️ Calling showExplorationPanel');
-                    DungeonExplorationSystem.showExplorationPanel(capturedLocationId);
+                // Open the ExplorationPanel
+                if (typeof ExplorationPanel !== 'undefined' && ExplorationPanel.open) {
+                    console.log('🏚️ Opening ExplorationPanel');
+                    ExplorationPanel.open(capturedLocationId);
                 } else {
-                    console.error('🏚️ DungeonExplorationSystem not found');
+                    console.error('🏚️ ExplorationPanel not available!');
                 }
             });
         }
@@ -8039,7 +8040,7 @@ function updateMarketNews() {
         // 🖤 Escape news content - fake news is bad enough without XSS
         return `
             <div class="${newsClass}">
-                <div class="news-time">${escapeHtml(TimeSystem.getFormattedTime() || '')}</div>
+                <div class="news-time">${escapeHtml(TimeMachine.getFormattedTime() || '')}</div>
                 <div class="news-content">${escapeHtml(newsItem || '')}</div>
             </div>
         `;
@@ -9050,7 +9051,7 @@ function handlePlayerDeath(deathCause = 'Unknown causes') {
 function restAtInn() {
     // 🖤 Inn rest costs 10 gold, takes 6 hours, restores ALL vitals to 100% 💀
     const innCost = 10;
-    const currentHour = TimeSystem.currentTime.hour;
+    const currentHour = TimeMachine.currentTime.hour;
 
     // Check if inn is open (2pm to 8am)
     if (currentHour >= 8 && currentHour < 14) {
@@ -9086,7 +9087,7 @@ function restAtInn() {
     game.player.stats.happiness = Math.min(100, game.player.stats.happiness + 30);
 
     // Advance time by 6 hours
-    TimeSystem.addMinutes(6 * 60);
+    TimeMachine.addMinutes(6 * 60);
 
     addMessage(`💤 You rested at the inn for 6 hours. (-${innCost} gold)`);
     addMessage(`✨ All vitals fully restored!`);
@@ -9112,7 +9113,7 @@ function restInHouse() {
     game.player.stats.happiness = Math.min(100, game.player.stats.happiness + 30);
     
     // Advance time by 8 hours
-    TimeSystem.addMinutes(8 * 60);
+    TimeMachine.addMinutes(8 * 60);
     
     addMessage("🏠 You rested comfortably in your house. All stats restored!");
     addMessage(`⏰ 8 hours have passed.`);

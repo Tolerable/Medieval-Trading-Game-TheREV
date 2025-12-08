@@ -28,7 +28,9 @@ const DraggablePanels = {
         'main-menu',
         'loading-screen',
         'game-setup-panel',
-        'debooger-console'
+        'debooger-console',
+        'exploration-panel',
+        'exploration-overlay'
     ],
 
     // Map of panel IDs/classes to their drag handle selectors
@@ -51,7 +53,8 @@ const DraggablePanels = {
         'transportation-panel': '.transportation-header, h2',
         'settings-panel': '.settings-header, h2',
         'quest-info-panel': '.quest-info-header, .quest-new-header, h3',
-        'faction-panel': '.faction-panel-header, h3'
+        'faction-panel': '.faction-panel-header, h3',
+        'exploration-panel': '.exploration-header, .exploration-drag-handle'
     },
 
     // Overlays that can be closed by clicking outside (non-essential popups)

@@ -3207,14 +3207,12 @@ const DungeonExplorationSystem = {
     // Apply results to player
     applyResults(results) {
         if (typeof game === 'undefined' || !game.player) {
-            console.error('🏚️ Cannot apply results - game/player not found');
             return false;
         }
 
         // Apply health changes
         if (results.healthLost > 0) {
             game.player.stats.health = Math.max(1, game.player.stats.health - results.healthLost);
-            // Track dungeon damage for death cause
             if (typeof DeathCauseSystem !== 'undefined') {
                 const eventType = results.eventType || 'generic';
                 DeathCauseSystem.recordDungeonEvent(eventType, {
@@ -3236,36 +3234,53 @@ const DungeonExplorationSystem = {
         }
 
         // Apply gold change
-        if (results.goldChange !== 0) {
-            game.player.gold = Math.max(0, game.player.gold + results.goldChange);
-        }
+        if (results.goldChange && results.goldChange !== 0) {
+            game.player.gold = Math.max(0, (game.player.gold || 0) + results.goldChange);
 
-        // Add loot to inventory (check if quest item vs regular item)
-        results.loot.forEach(item => {
-            //  Check if this is a quest item
-            const isQuestItem = typeof QuestSystem !== 'undefined' && QuestSystem.isQuestItem?.(item.id);
-
-            if (isQuestItem) {
-                //  Quest items go into questItems inventory
-                if (!game.player.questItems) game.player.questItems = {};
-                game.player.questItems[item.id] = (game.player.questItems[item.id] || 0) + item.quantity;
-                console.log(`📦 Quest item found in loot: ${item.id} x${item.quantity}`);
-            } else {
-                //  Regular items go into normal inventory
-                if (!game.player.inventory) game.player.inventory = {};
-                game.player.inventory[item.id] = (game.player.inventory[item.id] || 0) + item.quantity;
+            // Update gold display through GoldManager if available
+            if (typeof GoldManager !== 'undefined') {
+                GoldManager.setGold(game.player.gold);
             }
 
-            //  Emit item-received for quest progress tracking 
-            document.dispatchEvent(new CustomEvent('item-received', {
-                detail: { item: item.id, quantity: item.quantity, source: 'dungeon_loot', isQuestItem }
-            }));
-        });
+            // Direct DOM update as fallback
+            const goldEl = document.getElementById('player-gold');
+            if (goldEl) {
+                goldEl.textContent = game.player.gold;
+            }
+        }
 
-        // Update displays
+        // Add loot to inventory
+        if (results.loot && results.loot.length > 0) {
+            results.loot.forEach(item => {
+                const isQuestItem = typeof QuestSystem !== 'undefined' && QuestSystem.isQuestItem?.(item.id);
+
+                if (isQuestItem) {
+                    if (!game.player.questItems) game.player.questItems = {};
+                    game.player.questItems[item.id] = (game.player.questItems[item.id] || 0) + item.quantity;
+                } else {
+                    if (!game.player.inventory) game.player.inventory = {};
+                    game.player.inventory[item.id] = (game.player.inventory[item.id] || 0) + item.quantity;
+                }
+
+                // Emit item-received for quest progress tracking
+                document.dispatchEvent(new CustomEvent('item-received', {
+                    detail: { item: item.id, quantity: item.quantity, source: 'dungeon_loot', isQuestItem }
+                }));
+            });
+        }
+
+        // Update all displays
         if (typeof updatePlayerStats === 'function') updatePlayerStats();
         if (typeof updatePlayerInfo === 'function') updatePlayerInfo();
-        if (typeof InventorySystem !== 'undefined') InventorySystem.updateInventoryDisplay?.();
+        if (typeof updateStatsDisplay === 'function') updateStatsDisplay();
+        if (typeof InventorySystem !== 'undefined' && InventorySystem.updateInventoryDisplay) {
+            InventorySystem.updateInventoryDisplay();
+        }
+
+        // Also trigger a full UI refresh
+        if (typeof game !== 'undefined' && game.updateUI) {
+            game.updateUI();
+        }
 
         // Check for NPC encounter spawn from exploration outcome
         if (results.outcome?.spawnNPC) {
@@ -3402,18 +3417,13 @@ const DungeonExplorationSystem = {
         const survival = this.calculateSurvivalAssessment(location, playerStats);
         console.log('🏚️ Survival calculated:', survival?.survivalTier);
 
-        // Create or get overlay
+        // Get the exploration overlay from HTML (it MUST exist in index.html)
         let overlay = document.getElementById('exploration-overlay');
-        const wasNew = !overlay;
         if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'exploration-overlay';
-            overlay.className = 'overlay';
-            const container = document.getElementById('overlay-container');
-            console.log('🏚️ Creating new overlay, container exists:', !!container);
-            container?.appendChild(overlay);
+            console.error('🏚️ CRITICAL: #exploration-overlay not found in HTML! Check index.html');
+            return;
         }
-        console.log('🏚️ Overlay element:', overlay ? 'exists' : 'MISSING', 'wasNew:', wasNew);
+        console.log('🏚️ Overlay element found in DOM');
 
         // Build survival assessment HTML
         const survivalHTML = `
@@ -3503,69 +3513,113 @@ const DungeonExplorationSystem = {
             `;
         }).join('');
 
-        overlay.innerHTML = `
-            <div class="overlay-content exploration-content">
-                <button class="overlay-close" onclick="DungeonExplorationSystem.closeExploration()">×</button>
+        // Get content container inside the overlay
+        const contentContainer = overlay.querySelector('#exploration-overlay-content') || overlay.querySelector('.exploration-modal-content');
 
-                <div class="exploration-header">
-                    <span class="exploration-icon">${event.icon}</span>
-                    <div class="exploration-title-section">
-                        <h2>${event.name}</h2>
-                        <div class="exploration-location">
-                            📍 ${location.name}
-                            <span class="difficulty-badge difficulty-${difficulty}">${difficulty.toUpperCase()}</span>
-                        </div>
+        // Build the exploration UI content
+        const explorationHTML = `
+            <div class="exploration-header">
+                <span class="exploration-icon">${event.icon}</span>
+                <div class="exploration-title-section">
+                    <h2>${event.name}</h2>
+                    <div class="exploration-location">
+                        📍 ${location.name}
+                        <span class="difficulty-badge difficulty-${difficulty}">${difficulty.toUpperCase()}</span>
                     </div>
                 </div>
+            </div>
 
-                <div class="exploration-description">
-                    <p>${event.description}</p>
-                </div>
+            <div class="exploration-description">
+                <p>${event.description}</p>
+            </div>
 
-                ${survivalHTML}
+            ${survivalHTML}
 
-                <div class="player-status-bar">
-                    <span class="status-item">❤️ ${playerStats.stats?.health || 100}/${playerStats.stats?.maxHealth || 100}</span>
-                    <span class="status-item">${playerStats.stats?.stamina || 100}/${playerStats.stats?.maxStamina || 100}</span>
-                    <span class="status-item">💰 ${playerStats.gold || 0}</span>
-                </div>
+            <div class="player-status-bar">
+                <span class="status-item">❤️ ${playerStats.stats?.health || 100}/${playerStats.stats?.maxHealth || 100}</span>
+                <span class="status-item">⚡ ${playerStats.stats?.stamina || 100}/${playerStats.stats?.maxStamina || 100}</span>
+                <span class="status-item">💰 ${playerStats.gold || 0}</span>
+            </div>
 
-                <div class="exploration-choices">
-                    <h3>What do you do?</h3>
-                    ${choicesHTML}
-                </div>
+            <div class="exploration-choices">
+                <h3>What do you do?</h3>
+                ${choicesHTML}
+            </div>
 
-                <div class="exploration-footer">
-                    <button class="btn-secondary" onclick="DungeonExplorationSystem.closeExploration()">
-                        🚪 Leave (Coward's way out)
-                    </button>
-                </div>
+            <div class="exploration-footer">
+                <button class="btn-secondary" onclick="DungeonExplorationSystem.closeExploration()">
+                    🚪 Leave (Coward's way out)
+                </button>
             </div>
         `;
 
-        overlay.classList.add('active');
-        console.log('🏚️ Overlay innerHTML length:', overlay.innerHTML.length);
-        console.log('🏚️ Overlay has .active class:', overlay.classList.contains('active'));
-        console.log('🏚️ Overlay computed display:', window.getComputedStyle(overlay).display);
-
-        // Bring overlay to front so it appears above location-panel
-        if (typeof DraggablePanels !== 'undefined' && DraggablePanels.bringToFront) {
-            DraggablePanels.bringToFront(overlay);
-            console.log('🏚️ Called DraggablePanels.bringToFront');
+        // Set content
+        if (contentContainer) {
+            contentContainer.innerHTML = explorationHTML;
+        } else {
+            // Fallback - set on overlay directly with wrapper
+            overlay.innerHTML = `
+                <div class="exploration-modal-content">
+                    <button class="exploration-close-btn" onclick="DungeonExplorationSystem.closeExploration()">&times;</button>
+                    ${explorationHTML}
+                </div>
+            `;
         }
-        // Also set high z-index directly as fallback
-        overlay.style.zIndex = '10000';
-        console.log('🏚️ Overlay z-index set to 10000, actual:', overlay.style.zIndex);
 
-        // Add click handlers
-        overlay.querySelectorAll('.exploration-choice:not(.disabled)').forEach(el => {
-            el.addEventListener('click', () => {
-                const choiceId = el.dataset.choiceId;
-                const choice = event.choices.find(c => c.id === choiceId);
+        // SHOW THE OVERLAY - force visibility with inline styles to override any CSS
+        overlay.classList.remove('hidden');
+        overlay.classList.add('active');
+        overlay.style.cssText = `
+            display: flex !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 100000 !important;
+            background: rgba(0, 0, 0, 0.9) !important;
+            justify-content: center !important;
+            align-items: center !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+        `;
+
+        console.log('🏚️ Exploration overlay opened:', event.name, 'at', location.name);
+
+        // Store event data for click handler
+        this._currentEvent = event;
+        this._currentLocation = location;
+        this._currentDifficulty = difficulty;
+
+        // Use event delegation - single handler on overlay catches all choice clicks
+        // Remove old handler first to prevent duplicates
+        overlay.onclick = null;
+        overlay.onclick = (e) => {
+            console.log('🏚️ Overlay clicked, target:', e.target.className);
+
+            // Find if we clicked on a choice or inside one
+            const choiceEl = e.target.closest('.exploration-choice:not(.disabled)');
+            if (choiceEl) {
+                const choiceId = choiceEl.dataset.choiceId;
+                console.log('🏚️ Choice clicked via delegation!', choiceId);
+
+                const choice = this._currentEvent?.choices?.find(c => c.id === choiceId);
+                console.log('🏚️ Choice data found:', !!choice);
+
                 if (choice) {
-                    this.handleChoiceSelection(location, event, choice, difficulty);
+                    e.stopPropagation();
+                    this.handleChoiceSelection(this._currentLocation, this._currentEvent, choice, this._currentDifficulty);
                 }
-            });
+            }
+        };
+
+        // Also set pointer-events on all choices
+        const choiceElements = overlay.querySelectorAll('.exploration-choice:not(.disabled)');
+        console.log('🏚️ Found', choiceElements.length, 'clickable choices');
+        choiceElements.forEach((el) => {
+            el.style.pointerEvents = 'auto';
+            el.style.cursor = 'pointer';
         });
     },
 
@@ -3735,7 +3789,14 @@ const DungeonExplorationSystem = {
             }).join('')
             : '<p class="no-loot">No loot found... the void gives nothing today.</p>';
 
-        overlay.querySelector('.overlay-content').innerHTML = `
+        // Find the content container - try multiple selectors
+        const contentContainer = overlay.querySelector('#exploration-overlay-content')
+            || overlay.querySelector('.exploration-modal-content')
+            || overlay.querySelector('.overlay-content');
+
+        if (!contentContainer) return;
+
+        contentContainer.innerHTML = `
             <div class="exploration-results">
                 <h2>${results.outcome.type === 'disaster' ? '💀 Disaster!' :
                       results.outcome.type === 'legendary' ? '🌟 Legendary Find!' :
@@ -3809,6 +3870,8 @@ const DungeonExplorationSystem = {
         const overlay = document.getElementById('exploration-overlay');
         if (overlay) {
             overlay.classList.remove('active');
+            overlay.classList.add('hidden');
+            overlay.style.cssText = ''; // Clear ALL inline styles so CSS takes over
         }
 
         //  Return to normal world music when leaving exploration
@@ -4798,33 +4861,38 @@ const DungeonExplorationSystem = {
     // TRIGGER SPECIFIC EXPLORATION EVENT - called by ExplorationPanel
     //
     triggerExplorationEvent(explorationId, locationId) {
-        console.log(`Triggering exploration: ${explorationId} at ${locationId}`);
+        console.log(`🏚️ triggerExplorationEvent called: ${explorationId} at ${locationId}`);
 
         // get the event data
         const event = this.EXPLORATION_EVENTS[explorationId];
         if (!event) {
-            console.warn(`Exploration event not found: ${explorationId}`);
+            console.warn(`🏚️ Exploration event not found: ${explorationId}`);
+            console.log('🏚️ Available events:', Object.keys(this.EXPLORATION_EVENTS).slice(0, 10));
             if (typeof game !== 'undefined' && game.addMessage) {
                 game.addMessage(`This exploration (${explorationId}) is not yet implemented.`, 'info');
             }
             return false;
         }
+        console.log(`🏚️ Event found:`, event.name, 'locationType:', event.locationType);
 
         // get the location
         const location = this.getLocation(locationId);
         if (!location) {
-            console.warn(`Location not found: ${locationId}`);
+            console.warn(`🏚️ Location not found: ${locationId}`);
             return false;
         }
+        console.log(`🏚️ Location found:`, location.name, 'type:', location.type);
 
         // check if location type matches event's allowed types
         if (event.locationType && !event.locationType.includes(location.type)) {
-            console.warn(`Event ${explorationId} not valid for location type ${location.type}`);
+            console.warn(`🏚️ Event ${explorationId} not valid for location type ${location.type}`);
+            console.log(`🏚️ Event allows:`, event.locationType, 'but location is:', location.type);
             if (typeof game !== 'undefined' && game.addMessage) {
                 game.addMessage(`This exploration is not available at ${location.name}.`, 'warning');
             }
             return false;
         }
+        console.log(`🏚️ Location type check passed`);
 
         // play dungeon music
         if (typeof MusicSystem !== 'undefined') {
@@ -4833,7 +4901,9 @@ const DungeonExplorationSystem = {
 
         // get difficulty and render UI
         const difficulty = this.getLocationDifficulty(location);
+        console.log(`🏚️ About to call renderExplorationUI with difficulty:`, difficulty);
         this.renderExplorationUI(location, event, difficulty);
+        console.log(`🏚️ renderExplorationUI completed`);
 
         return true;
     },

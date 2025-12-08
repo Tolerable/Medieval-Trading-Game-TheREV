@@ -383,9 +383,9 @@ const GameConfig = {
 
         // 💀 DEATH BY NEGLECT - the consequence of ignoring your needs
         starvationDeath: {
-            hoursToKill: 12,           // hours at 0% hunger/thirst until death
-            // calculated: 100% / (12 * 60 / 5) = 0.694% of maxHealth per update
-            healthDrainPercent: 0.00694  // percentage of maxHealth lost per tick
+            hoursToKill: 24,           // hours at 0% hunger/thirst until death (1 day)
+            // calculated: 100% / (24 * 60 / 5) = 0.347% of maxHealth per update
+            healthDrainPercent: 0.00347  // percentage of maxHealth lost per tick
             // this ensures a 500hp player and 30hp player die in same time
         },
 

@@ -99,6 +99,8 @@
             </div>
         </div>
 
+        <!-- Exploration Overlay REMOVED - moved outside overlay-container for visibility -->
+
         <!-- Inventory Overlay -->
         <div id="inventory-overlay" class="overlay">
             <div class="overlay-content">
@@ -204,6 +206,16 @@
                     <button class="game-over-btn" onclick="closeGameOverToMenu()" title="Return to main menu">🏠 Main Menu</button>
                     <button class="game-over-btn" onclick="showLeaderboardFromGameOver()" title="View the Hall of Champions">🏆 View Leaderboard</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏚️ Exploration Panel - OUTSIDE overlay-container for guaranteed visibility -->
+    <div id="exploration-overlay" class="exploration-modal hidden">
+        <div class="exploration-modal-content">
+            <button class="exploration-close-btn" onclick="DungeonExplorationSystem.closeExploration()">&times;</button>
+            <div id="exploration-overlay-content">
+                <!-- Populated by DungeonExplorationSystem.renderExplorationUI() -->
             </div>
         </div>
     </div>
